@@ -1,0 +1,47 @@
+i(
+    num(hug=0t1971/01/01.00:00:00)
+    all3l[(swt NUM4L[23,45,56], str09=str1 str45['eins','zwei','drei','vier'] BIN32=a'0123456789ABCDEF'
+           numtypes(num08=123 num16=NUM0 num32=243 num64=NUM1) flttypes(flt32=0.33,flt64=flt1)
+           bin8L[a'1' a'2' a'3' a'4' a'5' a'6' a'7' a'8'])
+          (NUM4L[333,444,555], str09=str2 str45['fein','weil','reih','iera'] BIN32=a'340123456789ABCDEF'
+           numtypes(num08=255 num16=NUM0 num32=4243 num64=NUM1) flttypes(flt32=0.33e-37,flt64=pi)
+           bin8L[a'11' a'22' a'33' a'44' a'55' a'66' a'77' a'88'])
+          (NUM4L[333,444,555], str09=str3 str45['fein','weil','reih','iera'] BIN32=a'340123456789ABCDEF'
+           numtypes(num08=250 num16=NUM0 num32=4243 num64=NUM1) flttypes(flt32=0.33e-37,flt64=pi)
+           bin8L[a'111' a'222' a'333' a'444' a'555' a'666' a'777' a'888'])
+         ]
+    ovl4l[str='falk reichbott'
+          swt
+          ALL(swt
+              BIN32=x'1234567890ABCDEF1234567890abcdef'
+              STR09=str1
+              BIN8L[a'1234567890ABCDEF' e'1234567890ABCDEF' x'1234567890ABCDEF' s'1234567890ABCDEF' c'123' a'6' a'7' a'8']
+              STR45['hugo','adbe','1234','&?!']
+             )
+          num(num08=48 num16=NUM3 num64=NUM2 num32=411)
+         ]
+    )
+OUT(
+    num(num08=8 num16=NUM3 num64=NUM2 num32=4711)
+    all3l[(swt NUM4L[23,45,56], str09=str3 str45['eins','zwei','drei','vier'] BIN32=a'0123456789ABCDEF'
+           numtypes(num08=123 num16=NUM0 num32=243 num64=NUM1) flttypes(flt32=0.33,flt64=flt1)
+           bin8L[a'1' a'2' a'3' a'4' a'5' a'6' a'7' a'8'])
+          (NUM4L[333,444,555], str09=str2 str45['fein','weil','reih','iera'] BIN32=a'340123456789ABCDEF'
+           numtypes(num08=255 num16=NUM0 num32=4243 num64=NUM1) flttypes(flt32=0.33e-37,flt64=pi)
+           bin8L[a'11' a'22' a'33' a'44' a'55' a'66' a'77' a'88'])
+          (NUM4L[333,444,555], str09=str1 str45['fein','weil','reih','iera'] BIN32=a'340123456789ABCDEF'
+           numtypes(num08=200 num16=NUM0 num32=4243 num64=NUM1) flttypes(flt32=0.33e-37,flt64=pi)
+           bin8L[a'111' a'222' a'333' a'444' a'555' a'666' a'777' a'888'])
+         ]
+    ovl4l[str='falk reichbott'
+          swt
+          ALL(swt
+              BIN32=x'1234567890ABCDEF1234567890abcdef'
+              STR09=str2
+              BIN8L[a'1234567890ABCDEF' e'1234567890ABCDEF' x'1234567890ABCDEF' s'1234567890ABCDEF' c'123' a'6' a'7' a'8']
+              STR45['hugo','adbe','1234','&?!']
+             )
+          flt(flt32=0.1)
+         ]
+   )
+LOG(dummy=86)

@@ -1,0 +1,30 @@
+Commands are used to run powerful subprograms. The command line
+processor compiles a table defined syntax in a corresponding
+preinitialized data structure. This structure will be mapped to the
+parameter structure of the corresponding subprogram.
+The subprogram can be executed with the defined arguments/parameters.
+
+To support these variable commands several built-in functions are
+available and described in the next section.
+
+Each supported command is explained in a separate section in this
+document. Each section contains a synopsis including the help
+message, the path, the type and the syntax followed by a detailed
+description.
+
+If an argument of this command is an object or overlay or, if a detailed
+description or constant definition is available for this argument, a
+separate section with synopsis (help, path, type, syntax) and
+description is written, otherwise a bullet list is printed which
+contains the keyword, the syntax and the help message.
+
+For the syntax of an overlay braces '{}' are used to keep all possible
+arguments of an overlay logically together. These braces are not part
+of the real syntax. The braces are only written to demonstrate
+clearly that one of these arguments must be selected with the
+DOT operator for defining the overlay.
+
+Commands can be declared in deep hierarchical depth. In order to
+simplify their handling the path is a powerful instrument for managing
+only relevant parts of it. Because of that the path is printed for each
+synopsis.

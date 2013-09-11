@@ -1,0 +1,14 @@
+The regular expression used for the tokens of the command syntax will
+be shown. This could be helpful in understanding how the commands and
+property files are interpreted by the command line processor. Moreover
+it will be shown how to define a number, a string, a keyword and other
+values inside a command.
+
+See <<appendix-lexem>> for an explanation and the output of this
+command.
+
+.EXAMPLES
+
+-----------------------------------------------------------------------
+   $ program LEXEM
+-----------------------------------------------------------------------

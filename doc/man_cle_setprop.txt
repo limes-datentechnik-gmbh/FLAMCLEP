@@ -1,0 +1,17 @@
+The file name is set as current global property file when no command is
+specified. The file name is set as current local property file when a
+command is given. The property file can be generated with GENPROP and
+will be activated for the current owner.
+
+After generation you can activate the property file, but there will be
+no effect until you change the settings inside the property file,
+because the current default settings are written.
+
+See <<appendix-properties>> for the current property file content.
+
+.EXAMPLES
+
+-----------------------------------------------------------------------
+   $ program SETPROP general.properties
+   $ program SETPROP command=command.properties
+-----------------------------------------------------------------------

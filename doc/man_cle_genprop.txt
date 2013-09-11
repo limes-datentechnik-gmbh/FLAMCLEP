@@ -1,0 +1,22 @@
+A property file is generated for all commands when only a filename
+is given. If a command is specified a property file for this command
+will be made. Property files can be used to define default settings for
+commands. For each parameter a property entry is written to a text
+file. At the beginning of the text file are elucidations to help in
+editing the setting of properties. A property file can be activated
+with the built-in function SETPROP.
+Property files will be activated by their owner. A specific property
+file overrules the general property file. At time of generation all
+current default settings are written to the property file.
+
+To optimize the program performance one can remove all unnecessary
+properties.
+
+See <<appendix-properties>> for the current property file content. 
+
+.EXAMPLES
+
+-----------------------------------------------------------------------
+   $ program GENPROP owner.general.properties
+   $ program GENPROP command=owner.command.properties
+-----------------------------------------------------------------------

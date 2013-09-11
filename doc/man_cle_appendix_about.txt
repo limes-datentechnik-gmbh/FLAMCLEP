@@ -1,0 +1,2 @@
+This is the about information for the program. Its content
+is printed on the screen if the built-in function 'ABOUT' is used.

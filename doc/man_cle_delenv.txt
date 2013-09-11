@@ -1,0 +1,8 @@
+This function will delete environment variables from the config file for
+a certain owner.
+
+.EXAMPLES
+
+-----------------------------------------------------------------------
+   $ program DELENV LANG
+-----------------------------------------------------------------------

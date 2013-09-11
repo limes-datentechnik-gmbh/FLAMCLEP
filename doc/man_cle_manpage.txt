@@ -1,0 +1,23 @@
+Shows the manual pages of the program, all commands and built-in
+functions and if available for each argument up to selections/constant
+definitions.
+
+This function prints the corresponding section from the user manual on
+the screen (doctype: *book*). If a filename is given then the doctype
+*manpage* of ASCIIDOC is written to the file.
+
+The files in ASCIIDOC format can be used to generate manpages with the
+tool http://www.methods.co.nz/asciidoc/[ASCIIDOC].
+
+.EXAMPLES
+
+-----------------------------------------------------------------------
+   $ program MANPAGE
+   $ program MANPAGE filename
+   $ program MANPAGE command
+   $ program MANPAGE command=filename
+   $ program MANPAGE function
+   $ program MANPAGE function=filename
+   $ program MANPAGE command.para
+   $ program MANPAGE command.para=filename
+-----------------------------------------------------------------------

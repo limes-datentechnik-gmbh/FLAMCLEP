@@ -1,0 +1,24 @@
+This command line parser provides a list of commands and some
+built-in functions, please use 'MANPAGE', 'HELP' and 'SYNTAX' to get
+extensive information about these capabilities.
+
+Additional You can use the build-in function'GENDOCU' to generate a
+complete or parts of the user manual.
+
+To read the parameter for a special command, a compiler is applied.
+To see the regular expressions (lexems) and the corresponding
+grammar, please use the build in functions 'LEXEM' and 'GRAMMAR'.
+
+The command line parser uses an owner management in order to separate
+the settings for different clients and a property management for each
+command. If problems occur, you can activate a trace and manage all
+configuration settings.
+
+For each command execution You can define environment variables which
+are managed over the config file.
+
+The default trace file is 'stdout'. If you activate the trace befor a
+trace file is defined, the trace will be printed on the screen.
+
+Last but not least you can determine license, version and other
+information about the program.

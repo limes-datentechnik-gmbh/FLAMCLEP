@@ -1,0 +1,9 @@
+The current owner id (prefix for separation) will be shown. The owner
+concept allows to manage different configurations as a logical
+separation of what is done with this id.
+
+.EXAMPLES
+
+-----------------------------------------------------------------------
+   $ program GETOWNER
+-----------------------------------------------------------------------

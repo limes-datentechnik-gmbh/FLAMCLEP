@@ -1,0 +1,7 @@
+Numerous built-in functions are available to obtain extensive help
+about syntax, commands and functions of a program with help messages,
+manual pages and documentation.
+
+Other built-in functions can be used for owner, property, environment
+and trace management. All built-in functions have the purpose to
+simplify handling of powerful and sometimes complex commands.

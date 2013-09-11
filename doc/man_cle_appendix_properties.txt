@@ -1,0 +1,31 @@
+Below you can see the properties. This content can be written to
+the global property file with the built-in function 'GENPROP'.
+
+The first comment shows the valid root path for the property file. A
+property file can contain properties for more than one root path. The
+property file parser will only interpret properties where the root
+matches, i.e. if the property file is assigned to a certain owner and 
+possibly to a certain command, then only properties for this owner, the
+program itself and possibly the command will be accepted, all other
+properties are ignored.
+
+The second long comment gives some help for handling a property
+file. Thereafter the generated properties for this root are listed
+for all supported commands. The format is:
+
+   path = SUPPLEMENT # Type: tttttt Help: hhh...hhh #  
+
+The path denotes the unique dotted keyword list for one argument. The
+'SUPPLEMENT' is a string in double quotation marks containing the value
+list for this argument in accordance with the syntax of the command
+line parser. This means for example that a string must be included in
+apostrophes. The supplement string is returned by the corresponding
+command line parser if no value for this argument is entered on the
+command line or is included in the parameter file.
+
+Behind the property definition the type and help message are printed as
+comment to help in editing the generated property file. The property
+values can be related to the current default settings at time of
+generation, what means that if hard coded default values or another
+property file is already in use, then these values are taken over
+into the new property file.

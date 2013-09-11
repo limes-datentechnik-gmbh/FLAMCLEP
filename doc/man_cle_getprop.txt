@@ -1,0 +1,31 @@
+All or certain properties can be shown for a dedicated path. The *path*
+is a dotted keyword list according to the syntax of the corresponding
+command.
+
+   command.para1.para2.para3
+
+A help message for a certain parameter will also show the assigned
+property value.
+
+See <<appendix-properties>> for the current property file content.
+
+.OPTIONS
+
+   DEPTH1 | DEPTH2 | ... | DEPTH9
+
+Specifies the depth of the output. Default is DEPTH1.
+
+   ALL
+
+Shows all properties to the specified path, not just DEPTH1.
+
+.EXAMPLES
+
+-----------------------------------------------------------------------
+   $ program GETPROP
+   $ program GETPROP ALL
+   $ program GETPROP command
+   $ program GETPROP command ALL
+   $ program GETPROP command.para
+   $ program GETPROP command.para ALL
+-----------------------------------------------------------------------

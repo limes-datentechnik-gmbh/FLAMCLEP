@@ -1,0 +1,11 @@
+The current owner id (prefix or separation) can be changed. The owner
+concept is very powerful to separate different property settings. You
+can run the same command with different properties simply by switching
+the owner. The owner is a general solution to separate all settings and
+can be used for environment, client and other purposes.
+
+.EXAMPLES
+
+-----------------------------------------------------------------------
+   $ program SETOWNER com.company
+-----------------------------------------------------------------------

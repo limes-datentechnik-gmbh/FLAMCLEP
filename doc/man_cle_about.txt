@@ -1,0 +1,10 @@
+Shows information about the software product like version, copyright,
+external libraries, license and other attributes.
+
+See <<appendix-about>> for the output of this command.
+
+.EXAMPLES
+
+-----------------------------------------------------------------------
+   $ program ABOUT
+-----------------------------------------------------------------------

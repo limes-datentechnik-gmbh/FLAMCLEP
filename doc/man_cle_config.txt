@@ -1,0 +1,8 @@
+The actual configuration list with owner id, property file names trace
+setting and more are shown.
+
+.EXAMPLES
+
+-----------------------------------------------------------------------
+   $ program CONFIG
+-----------------------------------------------------------------------
