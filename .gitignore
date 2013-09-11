@@ -1,0 +1,6 @@
+*.o
+*.so
+bin/*
+build/*
+text2cman
+include/CLEMAN.h
