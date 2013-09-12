@@ -763,8 +763,8 @@ INPUT_ENCODING         = UTF-8
 # *.md, *.mm, *.dox, *.py, *.f90, *.f, *.for, *.tcl, *.vhd, *.vhdl, *.ucf,
 # *.qsf, *.as and *.js.
 
-FILE_PATTERNS          = CLP.h \
-                         CLE.h \
+FILE_PATTERNS          = FLAMCLP.h \
+                         FLAMCLE.h \
                          CLPMAC.h \
                          CLEMSG.h
 
