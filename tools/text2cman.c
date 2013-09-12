@@ -142,19 +142,28 @@ int main(int argc, char* argv[])
                 while (1) {
                         pageName[0] = '"';
                         for (i=0, k=1 ; i < n ; i++) {
-                                if (linebuf[i] == '\n') {
+                                if (linebuf[i] == '\n') { /* escape literal newline */
                                    pageName[k++] = '\\';
                                    pageName[k++] = 'n';
                                    pageName[k++] = '"';
                                    pageName[k++] = '\n';
-                                } else if (linebuf[i] == '"') {
+                                } else if (linebuf[i] == '"') { /* escape quotation mark */
                                    pageName[k++] = '\\';
                                    pageName[k++] = '"';
+                                } else if (linebuf[i] == '$' && linebuf[i+1] == '{') { /* skip variables */
+                                    pageName[k++] = '"';
+                                    for (i+=2 ; i < n ; i++) {
+                                        if (linebuf[i] == '}') {
+                                            pageName[k++] = '"';
+                                            break;
+                                        }
+                                        pageName[k++] = linebuf[i];
+                                    }
                                 } else {
                                    pageName[k++] = linebuf[i];
                                 }
                         }
-                        if (pageName[k-1] != '\n') {
+                        if (pageName[k-1] != '\n') { /* add newline if it is missing at end of line */
                            pageName[k++] = '\\';
                            pageName[k++] = 'n';
                            pageName[k++] = '"';

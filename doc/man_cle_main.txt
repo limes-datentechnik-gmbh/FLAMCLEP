@@ -22,3 +22,5 @@ trace file is defined, the trace will be printed on the screen.
 
 Last but not least you can determine license, version and other
 information about the program.
+
+This is the ${__BUILD__} build version of the FLAMCLEP.

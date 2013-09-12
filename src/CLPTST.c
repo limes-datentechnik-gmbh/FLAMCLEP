@@ -186,133 +186,6 @@ TsClpArgument asMainArgTab[] = {
 
 static void printNumTypes(
    const char*    pcPfx,
-   TsNumTypes*    psDat);
-
-static void printFltTypes(
-   const char*    pcPfx,
-   TsFltTypes*    psDat);
-
-static void printAllTypes(
-   const char*    pcPfx,
-   TsAllTypes*    psDat);
-
-static void printOverlay(
-   const char*    pcPfx,
-   TuOverlay*     psDat,
-   const int      siOid);
-
-static void printTst(
-   const char*    pcPfx,
-   TsTst*         psDat);
-
-static void printMain(
-   TsMain*         psDat);
-
-/******************************************************************************/
-
-
-int main(int argc, char * argv[])
-{
-   int               siCnt,l,i;
-   void*             pvHdl;
-   char              acBuf[65536];
-   char*             pcPos;
-   char*             pcLst;
-   FILE*             pfPar=fopen("clptst.txt","r");
-
-
-   TsMain            stMain;
-
-   memset(&stMain,0,sizeof(stMain));
-
-   if (pfPar!=NULL) {
-      l=fread(acBuf,1,sizeof(acBuf),pfPar);
-      acBuf[l]=EOS;
-      pvHdl=pvClpOpen(FALSE,1,"de.limes","CLPTST","MAIN","man-page","help-msg",FALSE,asMainArgTab,&stMain,stderr,stderr,NULL,NULL,NULL,NULL,"-->","/",",");
-      if (pvHdl!=NULL) {
-         fprintf(stderr,"SYNTAX required:\n"); siClpSyntax(pvHdl,FALSE,FALSE,10,NULL); fprintf(stderr,"\n");
-         fprintf(stderr,"SYNTAX optional:\n"); siClpSyntax(pvHdl,TRUE,TRUE,10,NULL); fprintf(stderr,"\n");
-         siClpHelp(pvHdl,10,NULL);
-         fprintf(stderr,"*** PROPERTY FILE PARSER ***\n");
-         siCnt=siClpParseCmd(pvHdl,acBuf,TRUE,NULL,&pcPos,&pcLst);
-         if (siCnt<0) {
-            switch (siCnt) {
-               case CLPERR_LEX:fprintf(stderr,"LEXICAL-ERROR\n");break;
-               case CLPERR_SYN:fprintf(stderr,"SYNTAX-ERROR\n");break;
-               case CLPERR_SEM:fprintf(stderr,"SEMANTIC-ERROR\n");break;
-               case CLPERR_TYP:fprintf(stderr,"TYPE-ERROR\n");break;
-               case CLPERR_TAB:fprintf(stderr,"TABLE-ERROR\n");break;
-               case CLPERR_SIZ:fprintf(stderr,"SIZE-ERROR\n");break;
-               case CLPERR_SYS:fprintf(stderr,"SYSTEM-ERROR\n");break;
-               default        :fprintf(stderr,"UNKOWN-ERROR(%d)\n",siCnt);break;
-            }
-            fprintf(stderr,"*** PARSING FAILED ***\n");
-         } else {
-            fprintf(stderr,"*** PARSING SUCCESSFULL ***\n");
-         }
-         acBuf[0] = 0;
-         for (i=1 ; i < argc ; i++) {
-            strcat(acBuf, argv[i]);
-            strcat(acBuf, " ");
-         }
-         fprintf(stderr,"*** COMMAND LINE PARSER ***\n");
-         fprintf(stderr,"line: %s\n", acBuf);
-         siCnt=siClpParseCmd(pvHdl,acBuf,TRUE,NULL,&pcPos,&pcLst);
-         if (siCnt<0) {
-            switch (siCnt) {
-               case CLPERR_LEX:fprintf(stderr,"LEXICAL-ERROR\n");break;
-               case CLPERR_SYN:fprintf(stderr,"SYNTAX-ERROR\n");break;
-               case CLPERR_SEM:fprintf(stderr,"SEMANTIC-ERROR\n");break;
-               case CLPERR_TYP:fprintf(stderr,"TYPE-ERROR\n");break;
-               case CLPERR_TAB:fprintf(stderr,"TABLE-ERROR\n");break;
-               case CLPERR_SIZ:fprintf(stderr,"SIZE-ERROR\n");break;
-               case CLPERR_SYS:fprintf(stderr,"SYSTEM-ERROR\n");break;
-               default        :fprintf(stderr,"UNKOWN-ERROR(%d)\n",siCnt);break;
-            }
-            fprintf(stderr,"*** LIST OF PARSED ARGUMENTS ***\n");
-            fprintf(stderr,"%s",pcLst);
-            fprintf(stderr,"*** PARSING FAILED ***\n");
-         } else {
-            fprintf(stderr,"*** PARSING SUCCESSFULL ***\n");
-         }
-         fflush(stdout);
-         fflush(stderr);
-         vdClpClose(pvHdl);
-#ifdef __GEN__
-         {
-            FILE     *f=fopen("clptst.bin","w");
-            fwrite(&stMain,sizeof(stMain),1,f);
-            fclose(f);
-         }
-#else
-         {
-            TsMain   stHelp;
-            FILE     *f=fopen("clptst.bin","r");
-            int      i;
-            memset(&stHelp,0,sizeof(stHelp));
-            fread(&stHelp,sizeof(stMain),1,f);
-            fclose(f);
-            if (memcmp(&stMain,&stHelp,sizeof(stMain))) {
-               for (i=0;i<sizeof(stMain) && ((char*)&stMain)[i]==((char*)&stHelp)[i];i++);
-               printf("\n!!! Verification not successfull !!! Position: %d(%u)\n",i,(U32)sizeof(stMain));
-               printf(  "                 ^^^                \n");
-            } else {
-               printf("\n*** Verification successfull ***\n");
-            }
-         }
-
-#endif
-
-         printf("\n*** Output ***\n");
-         printMain(&stMain);
-         printf("*** Output ***\n");
-      } else fprintf(stderr,"*** Open CLP failed ***\n");
-   } else fprintf(stderr,"*** Open clptst.txt failed ***\n");
-   return(0);
-}
-
-static void printNumTypes(
-   const char*    pcPfx,
    TsNumTypes*    psDat)
 {
    printf("%s.uiNum08=%d\n",pcPfx,(int)psDat->uiNum08);
@@ -419,3 +292,103 @@ static void printMain(
 }
 
 /******************************************************************************/
+
+int main(int argc, char * argv[])
+{
+   int               siCnt,l,i;
+   void*             pvHdl;
+   char              acBuf[65536];
+   char*             pcPos;
+   char*             pcLst;
+   FILE*             pfPar=fopen("clptst.txt","r");
+
+
+   TsMain            stMain;
+
+   memset(&stMain,0,sizeof(stMain));
+
+   if (pfPar!=NULL) {
+      l=fread(acBuf,1,sizeof(acBuf),pfPar);
+      acBuf[l]=EOS;
+      pvHdl=pvClpOpen(FALSE,1,"de.limes","CLPTST","MAIN","man-page","help-msg",FALSE,asMainArgTab,&stMain,stderr,stderr,NULL,NULL,NULL,NULL,"-->","/",",");
+      if (pvHdl!=NULL) {
+         fprintf(stderr,"SYNTAX required:\n"); siClpSyntax(pvHdl,FALSE,FALSE,10,NULL); fprintf(stderr,"\n");
+         fprintf(stderr,"SYNTAX optional:\n"); siClpSyntax(pvHdl,TRUE,TRUE,10,NULL); fprintf(stderr,"\n");
+         siClpHelp(pvHdl,10,NULL);
+         fprintf(stderr,"*** PROPERTY FILE PARSER ***\n");
+         siCnt=siClpParseCmd(pvHdl,acBuf,TRUE,NULL,&pcPos,&pcLst);
+         if (siCnt<0) {
+            switch (siCnt) {
+               case CLPERR_LEX:fprintf(stderr,"LEXICAL-ERROR\n");break;
+               case CLPERR_SYN:fprintf(stderr,"SYNTAX-ERROR\n");break;
+               case CLPERR_SEM:fprintf(stderr,"SEMANTIC-ERROR\n");break;
+               case CLPERR_TYP:fprintf(stderr,"TYPE-ERROR\n");break;
+               case CLPERR_TAB:fprintf(stderr,"TABLE-ERROR\n");break;
+               case CLPERR_SIZ:fprintf(stderr,"SIZE-ERROR\n");break;
+               case CLPERR_SYS:fprintf(stderr,"SYSTEM-ERROR\n");break;
+               default        :fprintf(stderr,"UNKOWN-ERROR(%d)\n",siCnt);break;
+            }
+            fprintf(stderr,"*** PARSING FAILED ***\n");
+         } else {
+            fprintf(stderr,"*** PARSING SUCCESSFULL ***\n");
+         }
+         acBuf[0] = 0;
+         for (i=1 ; i < argc ; i++) {
+            strcat(acBuf, argv[i]);
+            strcat(acBuf, " ");
+         }
+         fprintf(stderr,"*** COMMAND LINE PARSER ***\n");
+         fprintf(stderr,"line: %s\n", acBuf);
+         siCnt=siClpParseCmd(pvHdl,acBuf,TRUE,NULL,&pcPos,&pcLst);
+         if (siCnt<0) {
+            switch (siCnt) {
+               case CLPERR_LEX:fprintf(stderr,"LEXICAL-ERROR\n");break;
+               case CLPERR_SYN:fprintf(stderr,"SYNTAX-ERROR\n");break;
+               case CLPERR_SEM:fprintf(stderr,"SEMANTIC-ERROR\n");break;
+               case CLPERR_TYP:fprintf(stderr,"TYPE-ERROR\n");break;
+               case CLPERR_TAB:fprintf(stderr,"TABLE-ERROR\n");break;
+               case CLPERR_SIZ:fprintf(stderr,"SIZE-ERROR\n");break;
+               case CLPERR_SYS:fprintf(stderr,"SYSTEM-ERROR\n");break;
+               default        :fprintf(stderr,"UNKOWN-ERROR(%d)\n",siCnt);break;
+            }
+            fprintf(stderr,"*** LIST OF PARSED ARGUMENTS ***\n");
+            fprintf(stderr,"%s",pcLst);
+            fprintf(stderr,"*** PARSING FAILED ***\n");
+         } else {
+            fprintf(stderr,"*** PARSING SUCCESSFULL ***\n");
+         }
+         fflush(stdout);
+         fflush(stderr);
+         vdClpClose(pvHdl);
+#ifdef __GEN__
+         {
+            FILE     *f=fopen("clptst.bin","w");
+            fwrite(&stMain,sizeof(stMain),1,f);
+            fclose(f);
+         }
+#else
+         {
+            TsMain   stHelp;
+            FILE     *f=fopen("clptst.bin","r");
+            int      i;
+            memset(&stHelp,0,sizeof(stHelp));
+            fread(&stHelp,sizeof(stMain),1,f);
+            fclose(f);
+            if (memcmp(&stMain,&stHelp,sizeof(stMain))) {
+               for (i=0;i<sizeof(stMain) && ((char*)&stMain)[i]==((char*)&stHelp)[i];i++);
+               printf("\n!!! Verification not successfull !!! Position: %d(%u)\n",i,(U32)sizeof(stMain));
+               printf(  "                 ^^^                \n");
+            } else {
+               printf("\n*** Verification successfull ***\n");
+            }
+         }
+
+#endif
+
+         printf("\n*** Output ***\n");
+         printMain(&stMain);
+         printf("*** Output ***\n");
+      } else fprintf(stderr,"*** Open CLP failed ***\n");
+   } else fprintf(stderr,"*** Open clptst.txt failed ***\n");
+   return(0);
+}
