@@ -22,7 +22,7 @@ $(BLDDIR_REL)/%.o : %.c
 	@echo build $@
 	@$(CC) -c $(REL_OPT) -o $@ $<
 
-.PHONY: all release debug tools
+.PHONY: all release debug tools doc
 
 all: debug release
 
@@ -69,6 +69,9 @@ $(BINDIR_REL)/clptst$(BIN_EXT): $(CLPTST_REL_OBJS)
 	@echo linking $@
 	$(LD) $(REL_LDF) -o $@ $(CLPTST_REL_OBJS) $(LIBS)
 	@$(STRIP) $@
+
+doc:
+	+make -C doc
 
 
 .PHONY: cleandep
