@@ -29,101 +29,103 @@
 Description
 -----------
 
-With the command line executer (FLAMCLE) You can simply realize a complex
-command line over the definition of some tables. No programming is
+With the command line executor (FLAMCLE), you can simply realize a complex
+command line through the definition of some tables. No programming is
 required to get the values parsed and stored in a free defined data
 structure.
 
-For this a compiler with it's own language was implemented, to provide
-the same command line interface on each available platform. This command
-line parser (FLAMCLP) is used by FLAMCLE and both components provides extensive
-help for each command and a lot of other support functions.
+For this to work, a compiler with its own language was implemented, to
+provide the same command line interface on each available platform. This
+command line parser (FLAMCLP) is used by the FLAMCLE. Both components
+provide extensive help for each command and many other support functions.
 
-The FLAMCLE use for a provided list of commands in each case a dedicated
-command line processor (FLAMCLP) to make all these commands together with
-several built-in function available.
+For a provided list of commands, the FLAMCLE uses a dedicated command
+line processor (CLP) to make all these commands available, together with
+several built-in functions.
 
-For this a table must be defined where each row describes one command
-and over the execution function the command line interpretation is done.
-Means the whole library consist only of one function and a structure to
-define the command table.
+To achieve this, a table must be defined where each row describes one
+command. This table provides the input for the execution function doing
+the command line interpretation. The whole library consists of only one
+function and a structure to define the command table.
 
-Beside the specified user defined commands the FLAMCLE provides several
-powerful built-in function listed below. All built-in functions have a
-manual page implemented to get more information.
+Beside the specified user-defined commands, the FLAMCLE provides several
+powerful built-in functions (listed below). All built-in functions have
+a manual page, implemented to display more information at runtime.
 
-Based on the keyword, the short help message and the detailed description
-the built-in function GENDOCU can be used to generate a complete user
-manual. Based on this capability the FLAMCLE completely describe itself.
+Based on the keyword, the short help message and the detailed
+description, the built-in function GENDOCU can be used to generate a
+complete user manual. Based on this capability the FLAMCLE completely
+describes itself.
 
-The self explanation of the whole program was one of the main target of
-this general command line interface. To understand this interface
-specification it would be helpful to read also the FLAMCLP documentation.
+The self-documenting style of the whole program was one of the main
+targets of this general command line interface. To understand the
+interface specification, it is recommended to also read the FLAMCLP
+documentation.
 
-Feature
--------
+Features
+--------
 
-Below you can find a possible incomplete list of the FLAMCLE feature.
+Below, you can find a possibly incomplete list of FLAMCLE feature:
 
  * * Support of an unlimited amount of commands
  * * Support of hidden commands (not documented)
  * * Includes a lot of useful built-in functions
  * * Simple owner management to differentiate configurations
- * * The logical program name can be free defined
+ * * The logical program name can be freely defined
  * * Case sensitive or in-sensitive command line interpretation
  * * Output file can be defined (stdout, stderr, or a real file)
  * * Complete trace file management for FLAMCLP and commands
- * * The look and feel can be free defined
+ * * The look and feel can be defined freely
  * * Syntax, help and manpage support for program, commands and arguments
- * * Extensive documentation generation in ASCIIDOC format up to the user manual
+ * * Extensive documentation generation in ASCIIDOC format for the user manual
  * * Powerful property file management (generation, activation, ...)
  * * Simple configuration data management (own environment variables)
- * * Automatic key word shortening for arguments
- * * Support of a lot of data types like
- *   * Number (decimal, hexa decimal, octal, binary and time)
+ * * Automatic keyword shortening for arguments
+ * * Support for many data types, like:
+ *   * Number (decimal, hexadecimal, octal, binary and time)
  *   * Float (decimal in all variants)
  *   * String (binary text/ASCII/EBCDIC/HEX or zero terminated)
  *   * Object (Structure)
  *   * Overlay (Union)
  *   * Array (List (realized as simplified notation))
  * * Support of constant definitions used as selection of values over keywords
- * * Internal calculated values are available as link (amount of values in a array, length of a string, object identifier in overlays, ...)
+ * * Internal calculated values are available as link (amount of values in an array, length of a string, object identifier in overlays, ...)
  * * The main table for a command can be defined as object or overlay
- * * Keyword, help message and detailed description can be free defined for the program, each command, argument or constant definition
+ * * Keyword, help message and detailed description can be freely defined for the program, each command, argument or constant definition
  * * Aliases for each argument can also be defined and are handled as options for the same value.
  * * Available and usable on each platform including WIN, UNIX, MAC, ZOS, VSE, ...
 
 Built-in Functions
 ------------------
 
-All these build in function are available of one's own accord
+All these built-in functions are available:
 
  * * SYNTAX   - Provides the syntax for each command
  * * HELP     - Provides quick help for arguments
  * * MANPAGE  - Provides manual pages (detailed help)
  * * GENDOCU  - Generates auxiliary documentation
  * * GENPROP  - Generates a property file
- * * SETPROP  - Activate a property file
- * * DELPROP  - Remove a property file from configuration
- * * GETPROP  - Show current properties
+ * * SETPROP  - Activates a property file
+ * * DELPROP  - Removes a property file from configuration
+ * * GETPROP  - Displays current properties
  * * SETOWNER - Defines the current owner
- * * GETOWNER - Show current owner setting
- * * SETENV   - Defines environments variables over the config file
- * * GETENV   - Show the environments variables set over the config file
- * * DELENV   - Delete environments variables in the config file
- * * TRACE    - Manage trace capabilities
- * * CONFIG   - Shows the current configuration settings
- * * GRAMMAR  - Shows the grammar for commands and properties
- * * LEXEM    - Shows the regular expressions accepted in a command
- * * LICENSE  - Shows the license text for the program
- * * VERSION  - List version information for the program
- * * ABOUT    - Show information about the program
+ * * GETOWNER - Displays current owner setting
+ * * SETENV   - Defines environment variables in the config file
+ * * GETENV   - Displays the environment variables set in the config file
+ * * DELENV   - Deletes environment variables in the config file
+ * * TRACE    - Manages trace capabilities
+ * * CONFIG   - Displays the current configuration settings
+ * * GRAMMAR  - Displays the grammar for commands and properties
+ * * LEXEM    - Displays the regular expressions accepted in a command
+ * * LICENSE  - Displays the license text for the program
+ * * VERSION  - Lists version information for the program
+ * * ABOUT    - Displays information about the program
 
-To read the manual page please use:
+To read the manual page, please use:
 
    program MANPAGE function
 
-Below you can find the syntax for each built-in function:
+Below, you can find the syntax for each built-in function:
 
  * * SYNTAX [command[.path] [DEPTH1 | ... | DEPTH9 | ALL]]
  * * HELP [command[.path] [DEPTH1 | ... | DEPTH9 | ALL]] [MAN]
@@ -187,10 +189,10 @@ Sample program
                            MAN_FLCL_MAIN,MAN_FLCL_COV,MAN_FLCL_GLS,MAN_FLCL_FIN));
     }
 
-Lexeme
-------
+Lexemes
+-------
 
-Lexems (regular expressions) for argument list or parameter file:
+Lexemes (regular expressions) for argument list or parameter file:
 
     --| COMMENT   '#' [:print:]* '#'                              (will be ignored)
     --| SEPARATOR [:space: | :cntr: | ',']*                  (abbreviated with SEP)
