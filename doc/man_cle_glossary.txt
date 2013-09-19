@@ -1,164 +1,90 @@
 ASCIIDOC::
-   With this text document format you can write notes, documentation,
-   articles, books, ebooks, slideshows, web pages, man pages and blogs.
-   The ASCIIDOC files can be converted into HTML, PDF, EPUB or
-   man pages. ASCIIDOC is highly configurable, as the syntax and the
+   A text document format to write notes, documentation, articles,
+   books, ebooks, slideshows, web pages, man pages and blogs.
+   ASCIIDOC files can be converted into HTML, PDF, EPUB or man
+   pages. ASCIIDOC is highly configurable, as the syntax and the
    backend output markups can be customized and extended by the user.
    It is licensed under the terms of the GNU General Public License
    version 2. The complete manual or parts of it can be built from
    the ASCIIDOC files and translated to current formats like HTML
    or PDF. The CLP uses the command GENDOCU to generate ASCIIDOC files.
-   You just have to state the file name.
+   You just have to specify the file name.
    For ASCIIDOC see: http://www.methods.co.nz/asciidoc/[ASCIIDOC]
 BATCH::
-   In DOS, OS/2(R), and also Microsoft Windows(R), batch file is the
-   name for a script file, i.e. an unformatted text file containing the
-   commands to be executed by the command interpreter.
-BATCH COMMANDS::
-   You can make use of any command in a batch file. Certain commands,
-   such as for, goto, and if, enables the conditional processing of the
-   commands in the batch file. For instance, the if command is based on
-   the results of a condition. Other commands allow you to control
-   input and output and call further batch files.
+   Batch processing is execution of a series of programs ("jobs") on a
+   computer without manual intervention.
 BUILT-IN FUNCTIONS::
-   The C programming language has several different types of functions.
-   There are for instance built-in C functions like printf() and
-   scanf() which are part of the C programming language. On the other
-   hand a user-defined function is a function which the programmer
-   creates and uses in a C program. The command line processor CLP
-   has a number of functions built into it that are always available
-   to obtain extensive syntax information, help messages, manual pages
-   and documentation. There are additional built-in functions that can
-   be used for the owner, property and trace management. The purpose of
-   using built-in functions is just simplification of the complexity
-   of commands.
-CLP::
-   Command line processor
-CLP-ABOUT::
-   Important information about the software product like version
-   number, dependence of external libraries and other features can be
-   displayed.
-CLP-COMMANDS::
-   With the help of commands you are able to process your main program
-   and/or subprograms in a manner how arguments are set per
-   default or specifically in the command line. The command line
-   processor CLP compiles a table defined syntax in a preinitialized
+...The command line processor CLP provides a number of functions built-
+   in that are available to obtain extensive syntax information, help
+   messages, manual pages and documentation. There are additional built-
+   in functions that can be used for owner, property and trace manage-
+   ment.
+CLEP::
+   Command line executor and parser
+CLEP-ABOUT::
+   Built-in command to show information about the software product:
+   version number, dependence of external libraries and more.
+CLEP-COMMANDS::
+   The top level arguments of a program using CLEP to implement its
+   command line interface.
+   With CLEP the commands a program supports are defined within a tree
+   of tables whoose values are automatically stored in a preinitialized
    data structure, which is mapped to the parameter structure of the
-   subprogram.This can be called with the defined arguments/parameters.
-   The commands can be chosen freely and are supported by several
-   built-in functions. If an argument of this command is an object or
-   overlay or if a detailed description or constant definition is
-   available for this argument, a separate passage with synopsis
-   (help, path, type, syntax) and description is written, apart from
-   that a bullet list is printed with keyword, syntax and help message.
-   The syntax of an overlay uses braces in order to build a logical
-   unit for all arguments of the overlay. However these braces are not
-   part of the real syntax. The braces are required, because one of
-   these arguments must be selected with the DOT operator just to
-   define the overlay. Commands can be used in different hierarchical
-   depth. You can use the path as a powerful instrument for managing
-   only relevant parts of it. It is printed for the particular
-   synopsis.
-CLP-CONFIGURATION::
-   The current configuration list shows the owner id, the property
-   file names, the trace and some other information.
-CLP-TRACE::
-   You can switch on tracing in a problem situation by defining a
-   file name for the trace and then enabling the tracing. When no file
-   name is stated, the logging is redirected to stdin/stdout. Tracing
-   is useful to support the debugging of common software problems.
-COMMAND::
-   In general a command is a directive to a kind of command line
-   interface (e.g. a shell). In the narrow sense of the word,
-   the term command is used in imperative computer languages.
-   You can compare a statement in an imperative language with a
-   sentence and a command with a verb in a natural language. The
-   specially formatted arguments in a computer language (flags) alter
-   the default behavior of the command, while further arguments specify
-   what the command acts on. These flags are adverbs in a natural
-   language, whilst the other arguments are objects.
+   subprogram, which provides the actual functionality.
+CLEP-CONFIGURATION::
+   Built-in command to show the current configuration: owner, property
+   file names, trace options and more.
+CLEP-TRACE::
+   Build-in command to set the tracing options of CLEP: switch tracing
+   ON or OFF and set a file name where trace output will be written to.
+   When no file name is set, the trace is redirected to stdin/stdout.
 COMMAND LINE ARGUMENTS::
    Format and meaning of the parameters depend upon the command
-   issued. Parameters may be either arguments or options. In
-   principle a program can be controlled by more than one
-   command-line argument. The program is typically invoked by
-   entering its name followed by the command-line arguments.
-COMMAND LINE FTP::
-   You can start a FTP session using Microsoft's FTP client. When you
-   have successfully logged onto a remote system via command prompt,
-   you will be able to use ftp commands to view a listing of files on
-   the remote system and transfer files between the two systems.
+   issued. Parameters may be either arguments or options. The program
+   is typically invoked by entering its name followed by the
+   command-line arguments.
 COMMAND-LINE INTERFACE (CLI)::
-   The command line is an interface for processing a computer program
-   mainly in the text modus or in another modus. The interface can be
-   a console or a terminal. The command line can be interpreted by a
-   shell or command line interpreter. This depends upon the operation
-   system.
+   A command-line interface (CLI), also known as command-line user
+   interface, console user interface, and character user interface (CUI),
+   is a means of interacting with a computer program where the user
+   (or client) issues commands to the program in the form of successive
+   lines of text (command lines).
 COMMAND LINE INTERPRETER::
-   Principally a command line interpreter is bash, csh, zsh, Windows(R)
+   The program interpreting the commands typed by a user. On Unix this
+   is called a shell (bash, csh, ksh, or zsh). On Windows(R)
    PowerShell, cmd.exe or COMMAND.COM.
 COMMAND LINE PARAMETERS::
-   Command line parameters (also called flags) are additional
-   parameters to the command in a command line. They are separated
-   from the command or another parameter mostly by space and they
-   follow directly the command. Parameters can be distinguished
-   between options and arguments.
+   Command line parameters (also called flags) are parameters to a
+   command entered behind the command name. They are separated from the
+   command and further parameter by at least one space character.
+   Parameters can be distinguished between options and arguments.
 COMMAND LINE PARSER::
    With a command line parser you easily define strongly typed command
    line arguments, allow automatic parsing of command line arguments
    and mapping of the values to the properties of your objects.
 COMMAND LINE PARSER LIBRARY::
-   A Command Line Parser Library can offer to many console applications
+   The Command Line Parser Library can offer to many console applications
    a clean and concise API for manipulating command line arguments and
    related tasks. You can use a help screen with a high degree of
    customization and report the syntax errors of the command to the
    user.
-COMMAND LINE PROCESSOR::
-   A typical command line processor works, in typing the CLP command
-   at the command prompt. The command is then sent to the command
-   shell by pressing the ENTER key. The Output of the command is
-   automatically directed to the standard output device.
-   The data can be piped or redirected. The user is informed of
-   successful and unsuccessful completion. After execution of the
-   command, control returns to the operating system command prompt,
-   and the user can enter further commands.
 COMMAND-LINE REFERENCE::
-   The Command-Line Reference allows you to detect the documentation
+   The Command-Line Reference allows you to explore the documentation
    resources and other technical information that is necessary to learn
    about the command shell, and to automate command-line tasks by using
    scripts or scripting tools.
-COMMAND LINE TOOLS::
-   These can be small command-line utilities that allow you to do some
-   useful tasks without displaying any user interface. With these
-   tools you can e.g. write and delete values and keys in the Registry,
-   write values into the INI file, dial to your internet account or
-   connect to a VPN network, restart Windows(R) or shut down the
-   computer.
 COMMAND PROMPT::
-   Command Prompt (executable name cmd.exe) is the Microsoft-supplied
-   command-line interpreter on OS/2, Windows CE and on Windows NT-based
-   operating systems (including Windows 2000, XP, Vista, 7, 8,
-   Server 2003, Server 2008, Server 2008 R2 and Server 2012). It is
-   analog to COMMAND.COM in MS-DOS and Windows 9x systems (where
-   it is called MS-DOS Prompt), or to the Unix shells used on Unix-like
-   systems.
+   A command prompt (or just prompt) is a sequence of (one or more)
+   characters used in a command-line interface to indicate readiness to
+   accept commands.
 CONFIGURATION FILE::
-   Configuration files configure the initial settings for some computer
-   programs. User applications, server processes and operating system
-   settings make use of it. The structure of the files obey to some
-   rules (usually written in ASCII, rarely UTF-8 and line-oriented,
-   with lines terminated by a newline or carriage return/line feed
-   pair). The entries in a configuration file are organized like a
-   simple database. The syntax of the configuration files can be
-   created, modified or verified with help of graphical interfaces
-   or administrators doing this by hand with a text editor.
+   Configuration files contain the settings for a computer
+   program. Usually this are plain text files. The structure of the
+   files is application specific.
 CONSOLE APPLICATION::
-   A console application is a computer program which runs via a
-   text-only computer interface (text terminal), the command
-   line interface of any operating system or the text-based
-   interface included with most Graphical User Interface
-   (GUI) operating systems. This can be the Win32 console in
-   Microsoft Windows, the Terminal in Mac OS X, and xterm in Unix.
+   A console application is a computer program which is usually executed
+   via a text-only computer interface (text terminal), the command
+   line interface.
 DEL::
    Delete
 DELETING OF PROPERTY FILE::
@@ -172,7 +98,7 @@ GEN::
    Generate
 GENERATION OF PROPERTY FILE::
    With the help of command GENPROP you can generate a property file
-   for the CLP processor, which enables you to specify default
+   for the CLEP, which enables you to specify default
    properties of the processed command line. The actual owner is able
    to activate the property file. For each parameter a property entry
    is written to a text file. The definition of properties can be
@@ -196,58 +122,44 @@ HELP::
    letter. The *path* is a dotted keyword list as per syntax of the
    command (command.para1.para2.para3). A detailed description of
    the manual pages can be printed with keyword *MAN*.
-KILL-PROCESS VIA COMMAND LINE::
-   The Windows command-line has the command tasklist, with
-   which all running processes of local or remote computers
-   can be listed. As soon as you know the PID of your program, the
-   process can be stopped with the following command:
-   taskkill /pid process number
-   Under Linux you use the command "kill -9 3265". 3265 is the PID.
-   The -9 will ensure "execution".
-LEMMA:
-   In lexicography, a lemma is the canonical form, dictionary form,
-   or citation form of a set of words. In English, for example, run,
-   runs, ran and running are forms of the same lexeme, with run as the
-   lemma.
 LEXEM::
-   The abstract unit of vocabulary, roughly corresponding to the set of
-   words that are different forms of the same lemma (citation form or
-   root). The CLP-Lexem shows how a number, a string, a keyword and
+   Built-in function to show how a number, a string, a keyword and
    other values are defined in their correct command syntax. It uses
    regular expressions for the tokens of the command.
-LINUX COMMAND LINE::
-   A GUI cannot replace the command line under Linux. There are several
-   different shells available on Linux or UNIX to interpret your
-   commands. The structure of a command is command name, options and
-   parameters. However some commands have neither options nor
-   parameters, and some have one but not the other. A # character may
-   indicate a comment as well as a root prompt. This depends upon the
-   context.
 MAN::
    Manual
 MANPAGE::
-   A manual page is a form of online software documentation usually
-   found on a Unix or Unix-like operating system. It refers to
-   libraries and system calls, formal standards and conventions, and
-   even abstract concepts. With the man command you may display a man
-   page. The CLP-manpage function invokes the manual pages, all
-   commands and built-in functions and if available for each argument
-   up to selections/constant definitions. It writes the relating
-   section from the user manual to the screen (doctype: *book*). If a
-   filename is provided then the doctype *manpage* of ASCIIDOC is
-   written to the file. Manpages can be created with the tool found
-   under http://www.methods.co.nz/asciidoc/[ASCIIDOC].
+   A manual page is the local software documentation usually
+   found on Unix operating systems. The CLP-manpage function shows the
+   manual pages, all commands and built-in functions and if available
+   for each argument up to selections/constant definitions.
+   It writes the relating section from the user manual to the screen
+   (doctype: *book*). If a filename is provided then the doctype
+   *manpage* of ASCIIDOC is written to the file. Manpages can be
+   created with the tool found under
+   http://www.methods.co.nz/asciidoc/[ASCIIDOC].
+OBJECT::
+   An object argument has one or more members. Each of them can be an
+   object or an overlay or a simple value. It is implemented by CLEP as
+   a C struct.
 OWNER::
    The owner of a file in UNIX/LUNIX or WINDOWS controls how
    permissions are set on the file and to whom permissions are granted.
-   If you generate a property file for the CLP, you will be able to
-   change the owner id with command SETOWNER. Thus you can run your own
+   If you generate a property file for the CLEP, you will be able to
+   change the owner with the command SETOWNER. Thus you can run your own
    management of automated commands. This is a powerful concept when
    working in different or separated environments.
+OVERLAY::
+   An overlay argument may only have one out of several values at a time.
+   It is implemented by CLEP as a C union.
+PATH::
+   Each argument of a CLEP program has a position in the command tree
+   structure. This position is specified by the path: a DOT separated
+   list of argument names, very similar to a file system path.
 PROP::
    Property
-PROPERTIES FILES::
-   Properties files are useful for configuring applications. The
+PROPERTY FILES::
+   Property files are used to configure applications. The
    project configuration data or settings are stored in a property
    file which is activated by the owner of the file.
 SETTING OF PROPERTY FILE::
@@ -262,45 +174,20 @@ SETTING OF PROPERTY FILE::
 SHELL SCRIPT::
    Commands can be stored in a text file called shell script. The Shell
    Script is itself a command and can be called like a system command
-   also with parameters. It makes your work much easier (but you must
-   guarantee for sufficient tests) and increases the reliability, as a
-   frequently used series of commands is used.
+   also with parameters.
 SYNTAX::
-   In general this follows the rules that govern the ways words combine
-   to form phrases, clauses, and sentences or simply the arrangement of
-   words in a sentence. The main syntax of the CLP can be displayed on
-   the screen by using the built-in-function *SYNTAX*. Each built
+   Built-in function of CLEP to show the syntax of a program. Each built
    command string must follow special rules and refers to an argument
    list which is interpreted by a shell or command-line interpreter
    when running the program. Commands can be from type object or
    overlay. In dependence from command depth the syntax is printed in
    one line or in a structured form.
-TASK::
-   A task is an execution path through address space. A set of program
-   instructions has to be loaded in memory. The address registers have
-   been loaded with the initial address of the program. The CPU will
-   start execution of the program at the next cycle.
 TRACING::
-   Tracing is a kind of logging to record information about a program's
-   execution. It is used primarily by programmers for debugging
-   purposes, and additionally, for diagnosing your critical software
-   problems what is mainly done by system administrators or with the
-   help of monitoring tools.
+   If switched ON CLEP tracing shows verbose information while the
+   command line is evaluated.
 UTF8 TO MSDOS COMMAND LINE ENCODING::
    Windows cmd line by default does not support UTF8 but understands
    it. If you want to output multibyte characters in your cmd line,
    you will have to open a command prompt window, change the properties
    of the window to the Lucida Console True Type font. Then you must
-   run "chcp 65001" from the command prompt and should be able to
-   output UTF8.
-UTILITY::
-   This is a computer program, which performs for the user or system
-   administrator common or system related tasks. Utilities are mostly
-   part of the operation system - in opposite to application programs.
-VERSION::
-   When distributing commercial computer software it is a common
-   process to assign either unique version names or unique version
-   numbers to unique states of the software. The version number depends
-   on the level of delivery.
-
-
+   run "chcp 65001" on the command prompt to be able to output UTF8.
