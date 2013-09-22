@@ -37,7 +37,7 @@
 #include <stdarg.h>
 #include <errno.h>
 #ifdef __WIN__
-extern int putenv(const char*);
+#define putenv(s) _putenv((s))
 #endif
 
 /* Include eigener Bibliotheken  **********************************************/
@@ -51,11 +51,12 @@ extern int putenv(const char*);
 #include "CLEMSG.h"
 
 /* Definition der Version von FL-CLE ******************************************/
-#define CLE_VSN_STR       "1.0.1.0"
+#define CLE_VSN_STR       "1.0.1.1"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        0
 #define CLE_VSN_REVISION       1
-#define CLE_VSN_SUBREVIS         0
+#define CLE_VSN_SUBREVIS         1     /*Fix of the envar bug (ISSUE: 0000182)*/
+
 
 /* Definition der Konstanten **************************************************/
 #define CLEMAX_CNFLEN            1023
@@ -76,6 +77,7 @@ typedef struct CnfEnt {
    struct CnfEnt*                psBak;
    char                          acKyw[CLEMAX_CNFSIZ];
    char                          acVal[CLEMAX_CNFSIZ];
+   char                          acEnv[2*CLEMAX_CNFSIZ];
 }TsCnfEnt;
 
 typedef struct CnfHdl {
@@ -262,9 +264,6 @@ static int siCnfPrn(
 static void vdCnfCls(
    TsCnfHdl*                     psHdl);
 
-static char* getxenv(
-   const char*                   pcEnv);
-
 /* Implementierung der externen Funktionen ***********************************/
 
 extern char* pcCleVersion(void)
@@ -328,11 +327,11 @@ extern int siCleExecute(
    if (psTab==NULL || argc==0 || argv==NULL || pcPgm==NULL || pcHlp==NULL || pfOut==NULL || pcDep==NULL || pcOpt==NULL || pcEnt==NULL ||
        strlen(pcPgm)==0 || strlen(pcHlp)==0 || strlen(pcPgm)>64) return(24);
 
-   sprintf(acCnf,"%s.default.owner.id",pcPgm);
-   pcCnf=getxenv(acCnf);
+   sprintf(acCnf,"%s_DEFAULT_OWNER_ID",pcPgm);
+   pcCnf=getenv(acCnf);
    if (pcCnf!=NULL && strlen(pcCnf) && strlen(pcCnf)<sizeof(acOwn)) strcpy(acOwn,pcCnf); else strcpy(acOwn,pcOwn);
-   sprintf(acCnf,"%s.config.file",pcPgm);
-   pcCnf=getxenv(acCnf);
+   sprintf(acCnf,"%s_CONFIG_FILE",pcPgm);
+   pcCnf=getenv(acCnf);
    if (pcCnf==NULL) {
 #ifdef __HOST__
       sprintf(acCnf,"%s.config",pcPgm);
@@ -2207,12 +2206,18 @@ static int siCnfPutEnv(
       if (strstr(psEnt->acKyw,pcOwn)!=NULL &&
           strstr(psEnt->acKyw,pcPgm)!=NULL &&
           strstr(psEnt->acKyw,".envar.")!=NULL) {
-         char                    acEnv[1024];
          const char* pcKyw=strstr(psEnt->acKyw,".envar.")+7;
-         if (strlen(pcKyw)+strlen(psEnt->acVal)+2<sizeof(acEnv)) {
-            sprintf(acEnv,"%s=%s",pcKyw,psEnt->acVal);
-            r=putenv(acEnv);
-            if (r==0) j++;
+         if (strlen(pcKyw)+strlen(psEnt->acVal)+2<sizeof(psEnt->acEnv)) {
+            sprintf(psEnt->acEnv,"%s=%s",pcKyw,psEnt->acVal);
+            r=putenv(psEnt->acEnv);
+            if (r==0) {
+               const char* pcHlp=getenv(pcKyw);
+               if (pcHlp!=NULL) {
+                  if (strcmp(pcHlp,psEnt->acVal)==0) {
+                     j++;
+                  }
+               }
+            }
          }
       }
    }
@@ -2228,14 +2233,22 @@ static int siCnfPrnEnv(
 {
    int                           i;
    TsCnfEnt*                     psEnt;
+   const char*                   pcAdd="not verified";
    for (i=0,psEnt=psHdl->psFst;psEnt!=NULL;psEnt=psEnt->psNxt,i++) {
       if (strstr(psEnt->acKyw,pcOwn)!=NULL &&
           strstr(psEnt->acKyw,pcPgm)!=NULL &&
           strstr(psEnt->acKyw,".envar.")!=NULL) {
+         const char* pcKyw=strstr(psEnt->acKyw,".envar.")+7;
+         const char* pcHlp=getenv(pcKyw);
+         if (pcHlp!=NULL) {
+            if (strcmp(pcHlp,psEnt->acVal)==0) {
+               pcAdd="was verified";
+            }
+         }
          if (pcPre!=NULL && strlen(pcPre)) {
-            fprintf(pfOut,"%s %s=%s\n",pcPre,strstr(psEnt->acKyw,".envar.")+7,psEnt->acVal);
+            fprintf(pfOut,"%s %s=%s #%s\n",pcPre,pcKyw,psEnt->acVal,pcAdd);
          } else {
-            fprintf(pfOut,"%s %s=%s\n",pcPre,strstr(psEnt->acKyw,".envar.")+7,psEnt->acVal);
+            fprintf(pfOut,"%s=%s #%s\n",pcKyw,psEnt->acVal,pcAdd);
          }
       }
    }
@@ -2278,20 +2291,6 @@ static void vdCnfCls(
       if (pfFil!=NULL) fclose(pfFil);
       free(psHdl);
    }
-}
-
-/*****************************************************************************/
-
-static char* getxenv(
-   const char*          pcEnv)
-{
-   char           acEnv[129];
-   int            i;
-   for (i=0;pcEnv[i] && i<sizeof(acEnv)-1;i++) {
-      if (pcEnv[i]=='.') acEnv[i]='_'; else acEnv[i]=toupper(pcEnv[i]);
-   }
-   acEnv[i]=0;
-   return(getenv(acEnv));
 }
 
 /*****************************************************************************/
