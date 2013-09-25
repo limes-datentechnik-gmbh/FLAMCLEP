@@ -1,0 +1,68 @@
+Description
+-----------
+
+With the command line executor (FLAMCLE), you can simply realize a complex
+command line through the definition of some tables. No programming is
+required to get the values parsed and stored in a free defined data
+structure.
+
+For this to work, a compiler with its own language was implemented, to
+provide the same command line interface on each available platform. This
+command line parser (FLAMCLP) is used by the FLAMCLE. Both components
+provide extensive help for each command and many other support functions.
+
+For a provided list of commands, the FLAMCLE uses a dedicated command
+line processor (CLP) to make all these commands available, together with
+several built-in functions.
+
+To achieve this, a table must be defined where each row describes one
+command. This table provides the input for the execution function doing
+the command line interpretation. The whole library consists of only one
+function and a structure to define the command table.
+
+Beside the specified user-defined commands, the FLAMCLE provides several
+powerful built-in functions (listed below). All built-in functions have
+a manual page, implemented to display more information at runtime.
+
+Based on the keyword, the short help message and the detailed
+description, the built-in function GENDOCU can be used to generate a
+complete user manual. Based on this capability the FLAMCLE completely
+describes itself.
+
+The self-documenting style of the whole program was one of the main
+targets of this general command line interface. To understand the
+interface specification, it is recommended to also read the FLAMCLP
+documentation.
+
+Features
+--------
+
+Below, you can find a possibly incomplete list of FLAMCLE feature:
+
+ * * Support of an unlimited amount of commands
+ * * Support of hidden commands (not documented)
+ * * Includes a lot of useful built-in functions
+ * * Simple owner management to differentiate configurations
+ * * The logical program name can be freely defined
+ * * Case sensitive or in-sensitive command line interpretation
+ * * Output file can be defined (stdout, stderr, or a real file)
+ * * Complete trace file management for FLAMCLP and commands
+ * * The look and feel can be defined freely
+ * * Syntax, help and manpage support for program, commands and arguments
+ * * Extensive documentation generation in ASCIIDOC format for the user manual
+ * * Powerful property file management (generation, activation, ...)
+ * * Simple configuration data management (own environment variables)
+ * * Automatic keyword shortening for arguments
+ * * Support for many data types, like:
+ *   * Number (decimal, hexadecimal, octal, binary and time)
+ *   * Float (decimal in all variants)
+ *   * String (binary text/ASCII/EBCDIC/HEX or zero terminated)
+ *   * Object (Structure)
+ *   * Overlay (Union)
+ *   * Array (List (realized as simplified notation))
+ * * Support of constant definitions used as selection of values over keywords
+ * * Internal calculated values are available as link (amount of values in an array, length of a string, object identifier in overlays, ...)
+ * * The main table for a command can be defined as object or overlay
+ * * Keyword, help message and detailed description can be freely defined for the program, each command, argument or constant definition
+ * * Aliases for each argument can also be defined and are handled as options for the same value.
+ * * Available and usable on each platform including WIN, UNIX, MAC, ZOS, VSE, ...

@@ -1,7 +1,7 @@
 /**
  * @file text2cman.c
  *
- * LIMES Command Line Parser (FLAMCLP) in ANSI-C
+ * LIMES Command Line Parser (FLAMCLEP) in ANSI-C
  * @author Ulrich Schwab
  * @date 27.02.2013\n
  * @copyright (c) 2013 limes datentechnik gmbh
