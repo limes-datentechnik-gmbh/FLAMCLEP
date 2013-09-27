@@ -270,6 +270,10 @@ extern char* pcCleVersion(void)
 {
    static char                   acVsn[512];
    sprintf(acVsn,"FL-CLE VERSION: %s BUILD: %s %s %s\n%s",CLE_VSN_STR,__BUILD__,__DATE__,__TIME__,pcClpVersion());
+   if (strlen(acVsn)>=sizeof(acVsn)) {
+      fprintf(stderr,"\n*** Static area (%d) for version string (%d) to small ***\n\n%s\n\n",(int)sizeof(acVsn),(int)strlen(acVsn),acVsn);
+      exit(-1);
+   }
    return(acVsn);
 }
 
@@ -283,6 +287,10 @@ extern char* pcCleAbout(void)
    "   All rights reserved\n"
    "This library uses the internal library below:\n%s"
    ,CLE_VSN_STR,__BUILD__,__DATE__,__TIME__,pcClpAbout());
+   if (strlen(acAbo)>=sizeof(acAbo)) {
+      fprintf(stderr,"\n*** Static area (%d) for about message (%d) to small ***\n\n%s\n\n",(int)sizeof(acAbo),(int)strlen(acAbo),acAbo);
+      exit(-1);
+   }
    return(acAbo);
 }
 
@@ -2246,9 +2254,9 @@ static int siCnfPrnEnv(
             }
          }
          if (pcPre!=NULL && strlen(pcPre)) {
-            fprintf(pfOut,"%s %s=%s #%s\n",pcPre,pcKyw,psEnt->acVal,pcAdd);
+            fprintf(pfOut,"%s %s=%s # %s\n",pcPre,pcKyw,psEnt->acVal,pcAdd);
          } else {
-            fprintf(pfOut,"%s=%s #%s\n",pcKyw,psEnt->acVal,pcAdd);
+            fprintf(pfOut,"%s=%s # %s\n",pcKyw,psEnt->acVal,pcAdd);
          }
       }
    }

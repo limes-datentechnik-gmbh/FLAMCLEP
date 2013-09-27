@@ -535,6 +535,10 @@ extern char* pcClpVersion(void)
 {
    static C08                 acVsn[256];
    sprintf(acVsn,"FL-CLP VERSION: %s BUILD: %s %s %s\n",CLP_VSN_STR,__BUILD__,__DATE__,__TIME__);
+   if (strlen(acVsn)>=sizeof(acVsn)) {
+      fprintf(stderr,"\n*** Static area (%d) for version string (%d) to small ***\n\n%s\n\n",(int)sizeof(acVsn),(int)strlen(acVsn),acVsn);
+      exit(-1);
+   }
    return(acVsn);
 }
 
@@ -546,6 +550,10 @@ extern char* pcClpAbout(void)
    "   Version: %s Build: %s %s %s\n"
    "   Copyright (C) limes datentechnik (R) gmbh\n"
    "   All rights reserved\n",CLP_VSN_STR,__BUILD__,__DATE__,__TIME__);
+   if (strlen(acAbo)>=sizeof(acAbo)) {
+      fprintf(stderr,"\n*** Static area (%d) for about message (%d) to small ***\n\n%s\n\n",(int)sizeof(acAbo),(int)strlen(acAbo),acAbo);
+      exit(-1);
+   }
    return(acAbo);
 }
 
