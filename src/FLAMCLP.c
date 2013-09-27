@@ -530,13 +530,17 @@ static char* fpcPat(
    const int                     siLev);
 
 /* Implementierung der externen Funktionen ***********************************/
+#define VSNLENGTHMAX   256
+#define VSNLENGTHMIN   192    // (3/4 MAX)
+#define ABOLENGTHMAX   512
+#define ABOLENGTHMIN   384    // (3/4 MAX)
 
 extern char* pcClpVersion(void)
 {
-   static C08                 acVsn[256];
+   static C08                 acVsn[VSNLENGTHMAX];
    sprintf(acVsn,"FL-CLP VERSION: %s BUILD: %s %s %s\n",CLP_VSN_STR,__BUILD__,__DATE__,__TIME__);
-   if (strlen(acVsn)>=sizeof(acVsn)) {
-      fprintf(stderr,"\n*** Static area (%d) for version string (%d) to small ***\n\n%s\n\n",(int)sizeof(acVsn),(int)strlen(acVsn),acVsn);
+   if (strlen(acVsn)>=VSNLENGTHMAX || strlen(acVsn)<VSNLENGTHMIN) {
+      fprintf(stderr,"\n*** Static area (%d) for version string (%d) to small or to big ***\n\n%s\n\n",(int)sizeof(acVsn),(int)strlen(acVsn),acVsn);
       exit(-1);
    }
    return(acVsn);
@@ -544,14 +548,14 @@ extern char* pcClpVersion(void)
 
 extern char* pcClpAbout(void)
 {
-   static char                acAbo[512];
+   static char                acAbo[ABOLENGTHMAX];
    sprintf(acAbo,
    "Frankenstein Limes Command Line Parser (FL-CLP)\n"
    "   Version: %s Build: %s %s %s\n"
    "   Copyright (C) limes datentechnik (R) gmbh\n"
    "   All rights reserved\n",CLP_VSN_STR,__BUILD__,__DATE__,__TIME__);
-   if (strlen(acAbo)>=sizeof(acAbo)) {
-      fprintf(stderr,"\n*** Static area (%d) for about message (%d) to small ***\n\n%s\n\n",(int)sizeof(acAbo),(int)strlen(acAbo),acAbo);
+   if (strlen(acAbo)>=ABOLENGTHMAX || strlen(acAbo)<ABOLENGTHMIN) {
+      fprintf(stderr,"\n*** Static area (%d) for about message (%d) to small or to big ***\n\n%s\n\n",(int)sizeof(acAbo),(int)strlen(acAbo),acAbo);
       exit(-1);
    }
    return(acAbo);

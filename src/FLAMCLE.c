@@ -265,13 +265,17 @@ static void vdCnfCls(
    TsCnfHdl*                     psHdl);
 
 /* Implementierung der externen Funktionen ***********************************/
+#define VSNLENGTHMAX   512
+#define VSNLENGTHMIN   384    // (3/4 MAX)
+#define ABOLENGTHMAX   1024
+#define ABOLENGTHMIN   768    // (3/4 MAX)
 
 extern char* pcCleVersion(void)
 {
-   static char                   acVsn[512];
+   static char                   acVsn[VSNLENGTHMAX];
    sprintf(acVsn,"FL-CLE VERSION: %s BUILD: %s %s %s\n%s",CLE_VSN_STR,__BUILD__,__DATE__,__TIME__,pcClpVersion());
-   if (strlen(acVsn)>=sizeof(acVsn)) {
-      fprintf(stderr,"\n*** Static area (%d) for version string (%d) to small ***\n\n%s\n\n",(int)sizeof(acVsn),(int)strlen(acVsn),acVsn);
+   if (strlen(acVsn)>=VSNLENGTHMAX || strlen(acVsn)<VSNLENGTHMIN) {
+      fprintf(stderr,"\n*** Static area (%d) for version string (%d) to small or to big ***\n\n%s\n\n",(int)sizeof(acVsn),(int)strlen(acVsn),acVsn);
       exit(-1);
    }
    return(acVsn);
@@ -279,7 +283,7 @@ extern char* pcCleVersion(void)
 
 extern char* pcCleAbout(void)
 {
-   static char                acAbo[1024];
+   static char                acAbo[ABOLENGTHMAX];
    sprintf(acAbo,
    "Frankenstein Limes Command Line Execution (FL-CLE)\n"
    "   Version: %s Build: %s %s %s\n"
@@ -287,8 +291,8 @@ extern char* pcCleAbout(void)
    "   All rights reserved\n"
    "This library uses the internal library below:\n%s"
    ,CLE_VSN_STR,__BUILD__,__DATE__,__TIME__,pcClpAbout());
-   if (strlen(acAbo)>=sizeof(acAbo)) {
-      fprintf(stderr,"\n*** Static area (%d) for about message (%d) to small ***\n\n%s\n\n",(int)sizeof(acAbo),(int)strlen(acAbo),acAbo);
+   if (strlen(acAbo)>=ABOLENGTHMAX || strlen(acAbo)<ABOLENGTHMIN) {
+      fprintf(stderr,"\n*** Static area (%d) for about message (%d) to small or to big ***\n\n%s\n\n",(int)sizeof(acAbo),(int)strlen(acAbo),acAbo);
       exit(-1);
    }
    return(acAbo);
