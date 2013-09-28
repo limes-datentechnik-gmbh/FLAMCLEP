@@ -6,7 +6,7 @@
  *
  * LIMES Command Line Parser (FLAMCLP) in ANSI-C
  * @author Falk Reichbott
- * @date 27.02.2013\n
+ * @date 27.09.2013\n
  * @copyright (c) 2013 limes datentechnik gmbh
  * www.flam.de
  * This software is provided 'as-is', without any express or implied
@@ -284,7 +284,7 @@ Grammar for property file
  *
  * @return pointer to a zero terminated string with a new line at the end
  */
-extern char* pcClpVersion(void);
+extern const char* pcClpVersion(const int l);
 
 /**
  * Get about information
@@ -293,7 +293,7 @@ extern char* pcClpVersion(void);
  *
  * @return pointer to a zero terminated string with a new line at the end
  */
-extern char* pcClpAbout(void);
+extern const char* pcClpAbout(const int l);
 
 /**
  * Return code for a successful parsing

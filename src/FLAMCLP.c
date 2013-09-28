@@ -4,7 +4,7 @@
  *
  * LIMES Command Line Executer (CLE) in ANSI-C
  * @author FALK REICHBOTT
- * @date  05.09.2013
+ * @date  27.09.2013
  * @copyright (c) 2013 limes datentechnik gmbh
  * www.flam.de
  * This software is provided 'as-is', without any express or implied
@@ -44,11 +44,11 @@
 
 /* Definition der Version von FL-CLP ******************************************/
 
-#define CLP_VSN_STR       "1.0.1.0"
+#define CLP_VSN_STR       "1.0.1.1"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        0
 #define CLP_VSN_REVISION       1
-#define CLP_VSN_SUBREVIS         0
+#define CLP_VSN_SUBREVIS         1 /*Adjust version and about*/
 
 
 /* Definition der Flag-Makros *************************************************/
@@ -530,15 +530,15 @@ static char* fpcPat(
    const int                     siLev);
 
 /* Implementierung der externen Funktionen ***********************************/
-#define VSNLENGTHMAX   256
-#define VSNLENGTHMIN   192    // (3/4 MAX)
-#define ABOLENGTHMAX   512
-#define ABOLENGTHMIN   384    // (3/4 MAX)
+#define VSNLENGTHMAX   96
+#define VSNLENGTHMIN   VSNLENGTHMAX-32
+#define ABOLENGTHMAX   384
+#define ABOLENGTHMIN   ABOLENGTHMAX-128
 
-extern char* pcClpVersion(void)
+extern const char* pcClpVersion(const int l)
 {
    static C08                 acVsn[VSNLENGTHMAX];
-   sprintf(acVsn,"FL-CLP VERSION: %s BUILD: %s %s %s\n",CLP_VSN_STR,__BUILD__,__DATE__,__TIME__);
+   sprintf(acVsn,"%2.2d FLAM-CLP VERSION: %s BUILD: %s %s %s\n",l,CLP_VSN_STR,__BUILD__,__DATE__,__TIME__);
    if (strlen(acVsn)>=VSNLENGTHMAX || strlen(acVsn)<VSNLENGTHMIN) {
       fprintf(stderr,"\n*** Static area (%d) for version string (%d) to small or to big ***\n\n%s\n\n",(int)sizeof(acVsn),(int)strlen(acVsn),acVsn);
       exit(-1);
@@ -546,14 +546,16 @@ extern char* pcClpVersion(void)
    return(acVsn);
 }
 
-extern char* pcClpAbout(void)
+extern const char* pcClpAbout(const int l)
 {
    static char                acAbo[ABOLENGTHMAX];
    sprintf(acAbo,
-   "Frankenstein Limes Command Line Parser (FL-CLP)\n"
+   "%2.2d Frankenstein Limes Command Line Parser (FLAM-CLP)\n"
    "   Version: %s Build: %s %s %s\n"
    "   Copyright (C) limes datentechnik (R) gmbh\n"
-   "   All rights reserved\n",CLP_VSN_STR,__BUILD__,__DATE__,__TIME__);
+   "   This library is open source from the FLAM(R) project: http://www.flam.de\n"
+   "   for license see: https://github.com/limes-datentechnik-gmbh/flamclep\n"
+   ,l,CLP_VSN_STR,__BUILD__,__DATE__,__TIME__);
    if (strlen(acAbo)>=ABOLENGTHMAX || strlen(acAbo)<ABOLENGTHMIN) {
       fprintf(stderr,"\n*** Static area (%d) for about message (%d) to small or to big ***\n\n%s\n\n",(int)sizeof(acAbo),(int)strlen(acAbo),acAbo);
       exit(-1);

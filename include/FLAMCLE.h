@@ -6,7 +6,7 @@
  *
  * LIMES Command Line Executer (FLAMCLE) in ANSI-C
  * @author Falk Reichbott
- * @date 05.09.2013\n
+ * @date 27.09.2013\n
  * @copyright (c) 2013 limes datentechnik gmbh
  * www.flam.de
  * This software is provided 'as-is', without any express or implied
@@ -271,18 +271,22 @@ Grammar for argument list, parameter file or property file
  *
  * The function returns the version information for this library
  *
+ * @param l level to visible hierarchy in the first 2 numbers of the string
+ *
  * @return pointer to a zero terminated string with a new line at the end
  */
-extern char* pcCleVersion(void);
+extern const char* pcCleVersion(const int l);
 
 /**
  * Get about information
  *
  * The function returns the about information for this library
  *
+ * @param l level to visible hierarchy in the first 2 numbers of the string
+ *
  * @return pointer to a zero terminated string with a new line at the end
  */
-extern char* pcCleAbout(void);
+extern const char* pcCleAbout(const int l);
 
 /**
  * Type definition for initialization function

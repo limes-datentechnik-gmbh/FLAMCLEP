@@ -4,7 +4,7 @@
  *
  * LIMES Command Line Executer (CLE) in ANSI-C
  * @author FALK REICHBOTT
- * @date  05.09.2013
+ * @date  27.09.2013
  * @copyright (c) 2013 limes datentechnik gmbh
  * www.flam.de
  * This software is provided 'as-is', without any express or implied
@@ -51,12 +51,12 @@
 #include "CLEMSG.h"
 
 /* Definition der Version von FL-CLE ******************************************/
-#define CLE_VSN_STR       "1.0.1.1"
+#define CLE_VSN_STR       "1.0.1.2"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        0
 #define CLE_VSN_REVISION       1
-#define CLE_VSN_SUBREVIS         1     /*Fix of the envar bug (ISSUE: 0000182)*/
-
+//#define CLE_VSN_SUBREVIS       1 /*Fix of the envar bug (ISSUE: 0000182)*/
+#define CLE_VSN_SUBREVIS         2 /*Adjust version and about*/
 
 /* Definition der Konstanten **************************************************/
 #define CLEMAX_CNFLEN            1023
@@ -265,15 +265,15 @@ static void vdCnfCls(
    TsCnfHdl*                     psHdl);
 
 /* Implementierung der externen Funktionen ***********************************/
-#define VSNLENGTHMAX   512
-#define VSNLENGTHMIN   384    // (3/4 MAX)
-#define ABOLENGTHMAX   1024
-#define ABOLENGTHMIN   768    // (3/4 MAX)
+#define VSNLENGTHMAX   256
+#define VSNLENGTHMIN   VSNLENGTHMAX-32
+#define ABOLENGTHMAX   768
+#define ABOLENGTHMIN   ABOLENGTHMAX-128
 
-extern char* pcCleVersion(void)
+extern const char* pcCleVersion(const int l)
 {
    static char                   acVsn[VSNLENGTHMAX];
-   sprintf(acVsn,"FL-CLE VERSION: %s BUILD: %s %s %s\n%s",CLE_VSN_STR,__BUILD__,__DATE__,__TIME__,pcClpVersion());
+   sprintf(acVsn,"%2.2d FLAM-CLE VERSION: %s BUILD: %s %s %s\n%s",l,CLE_VSN_STR,__BUILD__,__DATE__,__TIME__,pcClpVersion(l+1));
    if (strlen(acVsn)>=VSNLENGTHMAX || strlen(acVsn)<VSNLENGTHMIN) {
       fprintf(stderr,"\n*** Static area (%d) for version string (%d) to small or to big ***\n\n%s\n\n",(int)sizeof(acVsn),(int)strlen(acVsn),acVsn);
       exit(-1);
@@ -281,16 +281,17 @@ extern char* pcCleVersion(void)
    return(acVsn);
 }
 
-extern char* pcCleAbout(void)
+extern const char* pcCleAbout(const int l)
 {
    static char                acAbo[ABOLENGTHMAX];
    sprintf(acAbo,
-   "Frankenstein Limes Command Line Execution (FL-CLE)\n"
+   "%2.2d Frankenstein Limes Command Line Execution (FLAM-CLE)\n"
    "   Version: %s Build: %s %s %s\n"
    "   Copyright (C) limes datentechnik (R) gmbh\n"
-   "   All rights reserved\n"
+   "   This library is open source from the FLAM(R) project: http://www.flam.de\n"
+   "   for license see: https://github.com/limes-datentechnik-gmbh/flamclep\n"
    "This library uses the internal library below:\n%s"
-   ,CLE_VSN_STR,__BUILD__,__DATE__,__TIME__,pcClpAbout());
+   ,l,CLE_VSN_STR,__BUILD__,__DATE__,__TIME__,pcClpAbout(l+1));
    if (strlen(acAbo)>=ABOLENGTHMAX || strlen(acAbo)<ABOLENGTHMIN) {
       fprintf(stderr,"\n*** Static area (%d) for about message (%d) to small or to big ***\n\n%s\n\n",(int)sizeof(acAbo),(int)strlen(acAbo),acAbo);
       exit(-1);
