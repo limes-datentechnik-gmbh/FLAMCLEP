@@ -282,8 +282,8 @@ Grammar for property file
  *
  * The function returns the version information for this library
  *
- * @param l level to visible hierarchy in the first 2 numbers of the string
- *          the number can later be used to visualized better the hierarchy
+ * @param l level of visible hierarchy in the first 2 numbers of the string
+ *          the number can later be used to better visualize the hierarchy
  *
  * @return pointer to a zero terminated string with a new line at the end
  */
@@ -294,8 +294,8 @@ extern const char* pcClpVersion(const int l);
  *
  * The function returns the about information for this library
  *
- * @param l level to visible hierarchy in the first 2 numbers of the string
- *          the number can later be used to visualized better the hierarchy
+ * @param l level of visible hierarchy in the first 2 numbers of the string
+ *          the number can later be used to better visualize the hierarchy
  *
  * @return pointer to a zero terminated string with a new line at the end
  */
