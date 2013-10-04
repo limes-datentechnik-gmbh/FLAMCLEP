@@ -106,7 +106,7 @@ You can make also use of the supported grammar and regular expressions
 (lexems).
 
 The implementation of the FLAMCLP is finished with the Command Line
-Executer (FLAMCLE) with which you can define your list of commands by
+Executor (FLAMCLE) with which you can define your list of commands by
 using an additional table. You can make use only of one new function
 that is executed eventually. The FLAMCLE offers an extensive built-in
 functionality and will be the optimal access to the FLAMCLP capabilities.

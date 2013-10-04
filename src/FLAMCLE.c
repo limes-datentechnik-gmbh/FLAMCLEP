@@ -2,7 +2,7 @@
  * @file   CLE.c
  * @brief  LIMES Command Line Execution in ANSI-C
  *
- * LIMES Command Line Executer (CLE) in ANSI-C
+ * LIMES Command Line Executor (CLE) in ANSI-C
  * @author FALK REICHBOTT
  * @date  27.09.2013
  * @copyright (c) 2013 limes datentechnik gmbh

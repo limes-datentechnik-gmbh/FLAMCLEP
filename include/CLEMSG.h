@@ -3,7 +3,7 @@
  * @file CLEMSG.h
  * @brief messages for <b>C</b>ommand <b>L</b>ine <b>E</b>xecution
  *
- * LIMES Command Line Executer (CLE) in ANSI-C
+ * LIMES Command Line Executor (CLE) in ANSI-C
  * @author Falk Reichbott
  * @date 05.09.2013\n
  * @copyright (c) 2013 limes datentechnik gmbh

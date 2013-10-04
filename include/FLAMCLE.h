@@ -4,7 +4,7 @@
  * @file FLAMCLE.h
  * @brief definitions for <b>C</b>ommand <b>L</b>ine <b>E</b>xecution
  *
- * LIMES Command Line Executer (FLAMCLE) in ANSI-C
+ * LIMES Command Line Executor (FLAMCLE) in ANSI-C
  * @author Falk Reichbott
  * @date 27.09.2013\n
  * @copyright (c) 2013 limes datentechnik gmbh
