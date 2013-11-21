@@ -130,13 +130,13 @@ CLPCONTAB_OPN(asSelect) = {
    CLPCONTAB_NUMBER("NUM1",1        ,NULL, "Defines one")
    CLPCONTAB_NUMBER("NUM2",2        ,NULL, "Defines two")
    CLPCONTAB_NUMBER("NUM3",3        ,NULL, "Defines tree")
-   CLPCONTAB_FLOATN("FLT1",123.45   ,NULL, "Test f�r Float")
+   CLPCONTAB_FLOATN("FLT1",123.45   ,NULL, "Test fuer Float")
    CLPCONTAB_FLOATN("PI"  ,3.41     ,NULL, "Float PI 3.41")
-   CLPCONTAB_STRING("STR1","String1",NULL, "Hilfe f�r den Teststring 1 ")
-   CLPCONTAB_STRING("STR2","String2",NULL, "Hilfe f�r den Teststring 2")
-   CLPCONTAB_STRING("STR3","String3",NULL, "Hilfe f�r den Teststring 3")
-   CLPCONTAB_BINARY("BIN0","\x00",1 ,NULL, "Bin�re Null 1 Byte")
-   CLPCONTAB_BINARY("BIN1","\x00\x88\xFF",3,NULL, "Bin�re 0088FF 3 Byte")
+   CLPCONTAB_STRING("STR1","String1",NULL, "Hilfe fuer den Teststring 1 ")
+   CLPCONTAB_STRING("STR2","String2",NULL, "Hilfe fuer den Teststring 2")
+   CLPCONTAB_STRING("STR3","String3",NULL, "Hilfe fuer den Teststring 3")
+   CLPCONTAB_BINARY("BIN0","\x00",1 ,NULL, "Binaere Null 1 Byte")
+   CLPCONTAB_BINARY("BIN1","\x00\x88\xFF",3,NULL, "Binaere 0088FF 3 Byte")
    CLPCONTAB_CLS
 };
 

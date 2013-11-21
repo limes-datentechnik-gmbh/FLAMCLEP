@@ -1,4 +1,4 @@
-i(
+inp(
     num(hug=0t1971/01/01.00:00:00)
     all3l[(swt NUM4L[23,45,56], str09=str1 str45['eins','zwei','drei','vier'] BIN32=a'0123456789ABCDEF'
            numtypes(num08=123 num16=NUM0 num32=243 num64=NUM1) flttypes(flt32=0.33,flt64=flt1)
