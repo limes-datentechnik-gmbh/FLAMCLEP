@@ -56,7 +56,8 @@
 #define CLE_VSN_MINOR        0
 #define CLE_VSN_REVISION       1
 //#define CLE_VSN_SUBREVIS       1 /*Fix of the envar bug (ISSUE: 0000182)*/
-#define CLE_VSN_SUBREVIS         2 /*Adjust version and about*/
+//#define CLE_VSN_SUBREVIS       2 /*Adjust version and about*/
+#define CLE_VSN_SUBREVIS         3 /*Add clear of config*/
 
 /* Definition der Konstanten **************************************************/
 #define CLEMAX_CNFLEN            1023
@@ -82,6 +83,7 @@ typedef struct CnfEnt {
 
 typedef struct CnfHdl {
    int                           isChg;
+   int                           isClr;
    int                           isCas;
    char                          acFil[CLEMAX_CNFSIZ];
    char                          acPgm[CLEMAX_CNFSIZ];
@@ -257,6 +259,11 @@ static int siCnfPrnEnv(
    const char*                   pcPgm);
 
 static int siCnfPrn(
+   TsCnfHdl*                     psHdl,
+   FILE*                         pfOut,
+   const char*                   pcPre);
+
+static int siCnfClr(
    TsCnfHdl*                     psHdl,
    FILE*                         pfOut,
    const char*                   pcPre);
@@ -1402,9 +1409,18 @@ extern int siCleExecute(
             fprintf(pfOut,"No configuration data defined for file \'%s\'\n",psCnf->acFil);
          }
          ERROR(0);
+      } else if (argc==3 && strxcmp(isCas,argv[2],"CLEAR",0,0)==0) {
+         siCnt=siCnfClr(psCnf,pfOut,pcDep);
+         if (siCnt) {
+            fprintf(pfOut,"Delete %d elements from file \'%s\'\n",siCnt,psCnf->acFil);
+         } else {
+            fprintf(pfOut,"No configuration data defined for file \'%s\'\n",psCnf->acFil);
+         }
+         ERROR(0);
       }
       fprintf(pfOut,"Syntax for built-in function \'CONFIG\' not valid\n");
       fprintf(pfOut,"%s %s CONFIG\n",pcDep,argv[0]);
+      fprintf(pfOut,"%s %s CONFIG CLEAR\n",pcDep,argv[0]);
       ERROR(8);
    } else {
       for (i=0;psTab[i].pcKyw!=NULL;i++) {
@@ -2047,6 +2063,7 @@ static TsCnfHdl* psCnfOpn(
       return(NULL);
    }
    psHdl->isChg=FALSE;
+   psHdl->isClr=FALSE;
    psHdl->isCas=isCas;
    psHdl->psFst=NULL;
    psHdl->psLst=NULL;
@@ -2285,6 +2302,25 @@ static int siCnfPrn(
    return(i);
 }
 
+static int siCnfClr(
+   TsCnfHdl*                     psHdl,
+   FILE*                         pfOut,
+   const char*                   pcPre)
+{
+   int                           i;
+   TsCnfEnt*                     psEnt;
+   TsCnfEnt*                     psHlp;
+   for (i=0,psEnt=psHdl->psFst;psEnt!=NULL;psEnt=psHlp,i++) {
+      psHlp=psEnt->psNxt;
+      memset(psEnt,0,sizeof(TsCnfEnt));
+      free(psEnt);
+   }
+   psHdl->psFst=NULL;
+   psHdl->psLst=NULL;
+   psHdl->isClr=TRUE;
+   return(i);
+}
+
 static void vdCnfCls(
    TsCnfHdl*                     psHdl)
 {
@@ -2292,17 +2328,23 @@ static void vdCnfCls(
    TsCnfEnt*                     psHlp;
    FILE*                         pfFil=NULL;
    if (psHdl!=NULL) {
-      psEnt=psHdl->psFst;
-      if (psHdl->isChg && strlen(psHdl->acFil)) pfFil=fopen(psHdl->acFil,"w");
-      if (pfFil!=NULL) {
-         fprintf(pfFil,"# Config file for program \'%s\'\n",psHdl->acPgm);
+      if (psHdl->isClr) {
+         pfFil=fopen(psHdl->acFil,"w");
+         if (pfFil!=NULL) fclose(pfFil);
+         remove(psHdl->acFil);
+      } else {
+         psEnt=psHdl->psFst;
+         if (psHdl->isChg && strlen(psHdl->acFil)) pfFil=fopen(psHdl->acFil,"w");
+         if (pfFil!=NULL) {
+            fprintf(pfFil,"# Config file for program \'%s\'\n",psHdl->acPgm);
+         }
+         while(psEnt!=NULL) {
+            if (pfFil!=NULL) fprintf(pfFil,"%s=%s\n",psEnt->acKyw,psEnt->acVal);
+            psHlp=psEnt->psNxt; free(psEnt); psEnt=psHlp;
+         }
+         if (pfFil!=NULL) fclose(pfFil);
+         free(psHdl);
       }
-      while(psEnt!=NULL) {
-         if (pfFil!=NULL) fprintf(pfFil,"%s=%s\n",psEnt->acKyw,psEnt->acVal);
-         psHlp=psEnt->psNxt; free(psEnt); psEnt=psHlp;
-      }
-      if (pfFil!=NULL) fclose(pfFil);
-      free(psHdl);
    }
 }
 

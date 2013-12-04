@@ -114,7 +114,7 @@ All these built-in functions are available:
  * * GETENV   - Displays the environment variables set in the config file
  * * DELENV   - Deletes environment variables in the config file
  * * TRACE    - Manages trace capabilities
- * * CONFIG   - Displays the current configuration settings
+ * * CONFIG   - Displays or clears the current configuration settings
  * * GRAMMAR  - Displays the grammar for commands and properties
  * * LEXEM    - Displays the regular expressions accepted in a command
  * * LICENSE  - Displays the license text for the program
@@ -141,7 +141,7 @@ Below, you can find the syntax for each built-in function:
  * * GETENV
  * * DELENV variable
  * * TRACE ON | OFF | FILE=filename
- * * CONFIG
+ * * CONFIG [CLEAR]
  * * GRAMMAR
  * * LICENSE
  * * LEXEM
@@ -483,7 +483,7 @@ typedef struct CleCommand {
  * - GETENV
  * - DELENV variable
  * - TRACE ON | OFF | FILE=filename
- * - CONFIG
+ * - CONFIG [CLEAR]
  * - GRAMMAR
  * - LICENSE
  * - LEXEM

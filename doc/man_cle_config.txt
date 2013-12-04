@@ -1,8 +1,9 @@
 The actual configuration list with owner id, property file names trace
-setting and more are shown.
+setting and more are shown or can be deleted (CLEAN).
 
 .EXAMPLES
 
 -----------------------------------------------------------------------
    $ program CONFIG
+   $ program CONFIG CLEAN
 -----------------------------------------------------------------------
