@@ -1,9 +1,11 @@
 The actual configuration list with owner id, property file names trace
-setting and more are shown or can be deleted (CLEAN).
+setting and more are shown. With the option CLEAR the configuration
+data including the corresponding file will be deleted.
+
 
 .EXAMPLES
 
 -----------------------------------------------------------------------
    $ program CONFIG
-   $ program CONFIG CLEAN
+   $ program CONFIG CLEAR
 -----------------------------------------------------------------------
