@@ -44,11 +44,12 @@
 
 /* Definition der Version von FL-CLP ******************************************/
 
-#define CLP_VSN_STR       "1.0.1.1"
+#define CLP_VSN_STR       "1.0.1.2"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        0
 #define CLP_VSN_REVISION       1
-#define CLP_VSN_SUBREVIS         1 /*Adjust version and about*/
+//#define CLP_VSN_SUBREVIS       1 /*Adjust version and about*/
+#define CLP_VSN_SUBREVIS         2 /*Change escape sequence for strings and supplements to two times the same character (''/"")*/
 
 
 /* Definition der Flag-Makros *************************************************/
