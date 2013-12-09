@@ -1925,8 +1925,9 @@ extern int siClpLexem(
    fprintf(pfOut,"%s str       [a|A]''' [:print:]* ''' |                (binary string in ASCII)\n",fpcPre(pvHdl,0));
    fprintf(pfOut,"%s str       [e|E]''' [:print:]* ''' |               (binary string in EBCDIC)\n",fpcPre(pvHdl,0));
    fprintf(pfOut,"%s str       [x|X]''' [:print:]* ''' |         (binary string in hex notation)\n",fpcPre(pvHdl,0));
-   fprintf(pfOut,"%s           Strings can contain '/'' for ''' or '//' for '/' as one character\n",fpcPre(pvHdl,0));
+   fprintf(pfOut,"%s           Strings can contain two '' to represent one '                    \n",fpcPre(pvHdl,0));
    fprintf(pfOut,"%s SUPPLEMENT     '\"' [:print:]* '\"' |   (zero terminated string (properties))\n",fpcPre(pvHdl,0));
+   fprintf(pfOut,"%s           Supplements can contain two \"\" to represent one \"                \n",fpcPre(pvHdl,0));
    return(CLP_OK);
 }
 
@@ -1965,9 +1966,9 @@ static int siClpScnNat(
          pcCur++;
       } else if (pcCur[0]==SPMCHR) {/*supplement*/
          pcCur+=1;
-         while (*pcCur!=SPMCHR && *pcCur!=EOS && pcLex<pcEnd) {
-            *pcLex=*pcCur;
-            pcCur++; pcLex++;
+         while (pcCur[0]!=EOS && (pcCur[0]!=SPMCHR || (pcCur[0]==SPMCHR && pcCur[1]==SPMCHR))  && pcLex<pcEnd) {
+            *pcLex=*pcCur; pcLex++;
+            pcCur+=(pcCur[0]==SPMCHR)?2:1;
          }
          *pcLex=EOS;
          if (*pcCur!=SPMCHR) {
@@ -1992,17 +1993,9 @@ static int siClpScnNat(
             *pcLex='\''; pcLex++;
             pcCur+=2;
          }
-         while (pcCur[0]!=STRCHR && pcCur[0]!=EOS && pcLex<pcEnd) {
-            if (pcCur[0]=='/' && pcCur[1]==STRCHR) {
-               *pcLex=STRCHR;
-               pcCur+=2; pcLex++;
-            } else if (pcCur[0]=='/' && pcCur[1]=='/') {
-               *pcLex='/';
-               pcCur+=2; pcLex++;
-            } else {
-               *pcLex=*pcCur;
-               pcCur++; pcLex++;
-            }
+         while (pcCur[0]!=EOS && (pcCur[0]!=STRCHR || (pcCur[0]==STRCHR && pcCur[1]==STRCHR)) &&  pcLex<pcEnd) {
+            *pcLex=*pcCur; pcLex++;
+            pcCur+=(pcCur[0]==STRCHR)?2:1;
          }
          *pcLex=EOS;
          if (*pcCur!=STRCHR) {
