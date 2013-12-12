@@ -51,13 +51,14 @@
 #include "CLEMSG.h"
 
 /* Definition der Version von FL-CLE ******************************************/
-#define CLE_VSN_STR       "1.0.1.2"
+#define CLE_VSN_STR       "1.0.1.4"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        0
 #define CLE_VSN_REVISION       1
 //#define CLE_VSN_SUBREVIS       1 /*Fix of the envar bug (ISSUE: 0000182)*/
 //#define CLE_VSN_SUBREVIS       2 /*Adjust version and about*/
-#define CLE_VSN_SUBREVIS         3 /*Add clear of config*/
+//#define CLE_VSN_SUBREVIS       3 /*Add clear of config*/
+#define CLE_VSN_SUBREVIS         4 /*Call FIN if RUN failed*/
 
 /* Definition der Konstanten **************************************************/
 #define CLEMAX_CNFLEN            1023
@@ -1437,7 +1438,10 @@ extern int siCleExecute(
             siErr=psTab[i].pfMap(pfOut,pfTrc,psTab[i].pvClp,psTab[i].pvPar);
             if (siErr)  ERROR(4);
             siErr=psTab[i].pfRun(pfOut,pfTrc,acOwn,pcPgm,pcVsn,pcAbo,psTab[i].pcKyw,acCmd,pcLst,psTab[i].pvPar);
-            if (siErr)  ERROR(2);
+            if (siErr)  {
+               siErr=psTab[i].pfFin(pfOut,pfTrc,psTab[i].pvPar);
+               ERROR(2);
+            }
             siErr=psTab[i].pfFin(pfOut,pfTrc,psTab[i].pvPar);
             if (siErr)  ERROR(1);
             ERROR(0);
