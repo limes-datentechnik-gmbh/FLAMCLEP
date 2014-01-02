@@ -84,6 +84,14 @@ the hard coded or property default value. The property management
 can make use of a function that extracts a property list for the
 argument table tree.
 
+With the CLP flag CMD (for command) and PRO (property) you can define if
+this parameter only visible in the command line or property file. These
+flags have no influence of property or command line parsing. It only
+reflects the online help/syntax and docu/property generation. Means you
+can still use such a parameter in the property file or in the command
+line, but it is not direct visible to the user.
+
+
 The FLAMCLP calculates automatically the minimum amount of letters
 required to make the meaning of a keyword unique. Depending on the case
 mode the required letters are highlighted in the interactively used help
@@ -353,11 +361,16 @@ extern const char* pcClpAbout(const int l);
 /**
 * Flags for command line parsing
 */
+/** CLPFLG_NON To define no special flags */
 #define CLPFLG_NON               0x00000000UL
 /** CLPFLG_ALI This parameter is an alias for another argument (set by macros) */
 #define CLPFLG_ALI               0x00000001UL
 /** CLPFLG_CON This parameter is a constant definition (no argument, no link, no alias (set by macros)) */
 #define CLPFLG_CON               0x00000002UL
+/** CLPFLG_CMD If set the parameter are only used within the command line (command line only) */
+#define CLPFLG_CMD               0x00000004UL
+/** CLPFLG_PRO If set the parameter are only used within the property file (property file only) */
+#define CLPFLG_PRO               0x00000008UL
 /** CLPFLG_SEL If set only the predefined constants over the corresponding key words can be selected (useful to define selections) */
 #define CLPFLG_SEL               0x00000010UL
 /** CLPFLG_FIX This argument has a fixed length (only useful for strings if a typedef defines a fixed length per element, else set internally) */

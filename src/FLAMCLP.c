@@ -44,18 +44,22 @@
 
 /* Definition der Version von FL-CLP ******************************************/
 
-#define CLP_VSN_STR       "1.0.1.2"
+#define CLP_VSN_STR       "1.0.1.3"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        0
 #define CLP_VSN_REVISION       1
 //#define CLP_VSN_SUBREVIS       1 /*Adjust version and about*/
-#define CLP_VSN_SUBREVIS         2 /*Change escape sequence for strings and supplements to two times the same character (''/"")*/
+//#define CLP_VSN_SUBREVIS       2 /*Change escape sequence for strings and supplements to two times the same character (''/"")*/
+#define CLP_VSN_SUBREVIS         3 /*Support of command line or property file only parameter*/
+
 
 
 /* Definition der Flag-Makros *************************************************/
 
 #define CLPISS_ALI(flg)          ((flg)&CLPFLG_ALI)
 #define CLPISS_CON(flg)          ((flg)&CLPFLG_CON)
+#define CLPISS_CMD(flg)          ((flg)&CLPFLG_CMD)
+#define CLPISS_PRO(flg)          ((flg)&CLPFLG_PRO)
 #define CLPISS_SEL(flg)          ((flg)&CLPFLG_SEL)
 #define CLPISS_FIX(flg)          ((flg)&CLPFLG_FIX)
 #define CLPISS_BIN(flg)          ((flg)&CLPFLG_BIN)
@@ -1484,6 +1488,11 @@ static TsSym* psClpSymIns(
          fprintf(psHdl->pfErr,"%s Kind (ALI/ARG/LNK/CON) of argument \'%s.%s\' not determinably\n",fpcPre(pvHdl,0),fpcPat(pvHdl,siLev),psSym->psStd->pcKyw);
       }
       ERROR(psSym);
+   }
+
+   if (!CLPISS_CMD(psSym->psStd->uiFlg) && !CLPISS_PRO(psSym->psStd->uiFlg)) {
+      psSym->psStd->uiFlg|=CLPFLG_CMD;
+      psSym->psStd->uiFlg|=CLPFLG_PRO;
    }
 
    if (psCur!=NULL) {
@@ -4445,7 +4454,7 @@ static int siClpPrnCmd(
    if (psTab->psBak!=NULL) {
       if (psHdl->pfErr!=NULL) {
          fprintf(psHdl->pfErr,"INTERNAL-ERROR\n");
-         fprintf(psHdl->pfErr,"%s Entry \'%s.%s\' not at begining of a table\n",fpcPre(pvHdl,0),fpcPat(pvHdl,siLev),psTab->psStd->pcKyw);
+         fprintf(psHdl->pfErr,"%s Entry \'%s.%s\' not at beginning of a table\n",fpcPre(pvHdl,0),fpcPat(pvHdl,siLev),psTab->psStd->pcKyw);
       }
       return(CLPERR_INT);
    }
@@ -4482,7 +4491,7 @@ static int siClpPrnCmd(
          }
       }
       for (psHlp=psTab;psHlp!=NULL;psHlp=psHlp->psNxt) {
-         if (!CLPISS_LNK(psHlp->psStd->uiFlg) && !CLPISS_ALI(psHlp->psStd->uiFlg)) {
+         if (CLPISS_CMD(psHlp->psStd->uiFlg) && !CLPISS_LNK(psHlp->psStd->uiFlg) && !CLPISS_ALI(psHlp->psStd->uiFlg)) {
             if (isSkr) {
                if (k) fprintf(pfOut,"\n%s ",fpcPre(pvHdl,siLev));
                  else fprintf(pfOut,"%s "  ,fpcPre(pvHdl,siLev));
@@ -4730,7 +4739,7 @@ static int siClpPrnHlp(
 
    if (siLev<siDep || siDep>9) {
       for (psHlp=psTab;psHlp!=NULL;psHlp=psHlp->psNxt) {
-         if ((psHlp->psFix->siTyp==siTyp || siTyp<0) && !CLPISS_LNK(psHlp->psStd->uiFlg)) {
+         if ((psHlp->psFix->siTyp==siTyp || siTyp<0) && CLPISS_CMD(psHlp->psStd->uiFlg) && !CLPISS_LNK(psHlp->psStd->uiFlg)) {
             vdClpPrnArg(pvHdl,pfOut,siLev,psHlp->psStd->pcKyw,psHlp->psStd->pcAli,psHlp->psStd->siKwl,psHlp->psFix->siTyp,psHlp->psFix->pcHlp,psHlp->psFix->pcDft);
             if (psHlp->psDep!=NULL) {
                if (psHlp->psFix->siTyp==CLPTYP_OBJECT || psHlp->psFix->siTyp==CLPTYP_OVRLAY) {
@@ -5036,7 +5045,7 @@ static int siClpPrnDoc(
                   fprintf(pfDoc,"No detailed description available for this argument.\n\n");
                }
                fprintf(pfDoc,"indexterm:[Argument %s]\n\n\n",apMan[m]->psStd->pcKyw);
-               if (apMan[m]->psDep!=NULL) {
+               if (CLPISS_CMD(apMan[m]->psStd->uiFlg) && apMan[m]->psDep!=NULL) {
                   siErr=siClpPrnDoc(pvHdl,pfDoc,siLev+1,isNbr,acNum,apMan[m],apMan[m]->psDep);
                   if (siErr<0) return(siErr);
                }
@@ -5077,7 +5086,7 @@ static int siClpPrnPro(
 
    if (siLev<siDep || siDep>9) {
       for (psHlp=psTab;psHlp!=NULL;psHlp=psHlp->psNxt) {
-         if (CLPISS_ARG(psHlp->psStd->uiFlg)) {
+         if (CLPISS_ARG(psHlp->psStd->uiFlg) && CLPISS_PRO(psHlp->psStd->uiFlg)) {
             if (psHlp->psFix->pcDft!=NULL) {
                fprintf(pfOut,"%s.%s.%s.%s=\"%s\" ",psHdl->pcOwn,psHdl->pcPgm,fpcPat(pvHdl,siLev),psHlp->psStd->pcKyw,psHlp->psFix->pcDft);
             } else {
