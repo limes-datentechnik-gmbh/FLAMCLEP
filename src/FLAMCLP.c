@@ -4943,7 +4943,7 @@ static int siClpPrnDoc(
          return(CLPERR_INT);
       }
       for (isCon=FALSE,psHlp=psTab;psHlp!=NULL;psHlp=psHlp->psNxt) {
-         if (CLPISS_ARG(psHlp->psStd->uiFlg)) {
+         if (CLPISS_ARG(psHlp->psStd->uiFlg) && CLPISS_CMD(psHlp->psStd->uiFlg)) {
             if (psHlp->psFix->siTyp==CLPTYP_OBJECT || psHlp->psFix->siTyp==CLPTYP_OVRLAY || (psHlp->psFix->pcMan!=NULL && strlen(psHlp->psFix->pcMan))) {
                apMan[siMan]=psHlp; siMan++;
             } else {
@@ -5045,7 +5045,7 @@ static int siClpPrnDoc(
                   fprintf(pfDoc,"No detailed description available for this argument.\n\n");
                }
                fprintf(pfDoc,"indexterm:[Argument %s]\n\n\n",apMan[m]->psStd->pcKyw);
-               if (CLPISS_CMD(apMan[m]->psStd->uiFlg) && apMan[m]->psDep!=NULL) {
+               if (apMan[m]->psDep!=NULL) {
                   siErr=siClpPrnDoc(pvHdl,pfDoc,siLev+1,isNbr,acNum,apMan[m],apMan[m]->psDep);
                   if (siErr<0) return(siErr);
                }
