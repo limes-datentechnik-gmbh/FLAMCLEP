@@ -44,7 +44,7 @@
 
 /* Definition der Version von FL-CLP ******************************************/
 
-#define CLP_VSN_STR       "1.0.1.3"
+#define CLP_VSN_STR       "1.0.1.5"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        0
 #define CLP_VSN_REVISION       1
@@ -526,6 +526,7 @@ static int siClpPrnDoc(
 static int siClpPrnPro(
    void*                         pvHdl,
    FILE*                         pfOut,
+   int                           isMan,
    const int                     siLev,
    const int                     siDep,
    const TsSym*                  psTab);
@@ -1177,7 +1178,7 @@ extern int siClpProperties(
             psTab=psArg->psDep;
          }
          if (psTab!=NULL) {
-            siErr=siClpPrnPro(pvHdl,pfOut,siLev,siLev+siDep,psTab);
+            siErr=siClpPrnPro(pvHdl,pfOut,FALSE,siLev,siLev+siDep,psTab);
             if (siErr<0) return(siErr);
          } else {
             if (psHdl->pfErr!=NULL) {
@@ -1194,7 +1195,7 @@ extern int siClpProperties(
          return(CLPERR_SEM);
       }
    } else {
-      siErr=siClpPrnPro(pvHdl,pfOut,0,siDep,psTab);
+      siErr=siClpPrnPro(pvHdl,pfOut,FALSE,0,siDep,psTab);
       if (siErr<0) return(siErr);
    }
    return(CLP_OK);
@@ -5076,6 +5077,7 @@ static int siClpPrnDoc(
 static int siClpPrnPro(
    void*                         pvHdl,
    FILE*                         pfOut,
+   int                           isMan,
    const int                     siLev,
    const int                     siDep,
    const TsSym*                  psTab)
@@ -5103,16 +5105,24 @@ static int siClpPrnPro(
    if (siLev<siDep || siDep>9) {
       for (psHlp=psTab;psHlp!=NULL;psHlp=psHlp->psNxt) {
          if (CLPISS_ARG(psHlp->psStd->uiFlg) && CLPISS_PRO(psHlp->psStd->uiFlg)) {
+            if ((isMan || (!CLPISS_CMD(psHlp->psStd->uiFlg))) && psHlp->psFix->pcMan!=NULL && strlen(psHlp->psFix->pcMan)) {
+               fprintf(pfOut,"\n# DESCRIPTION for %s.%s.%s.%s:\n %s #\n",psHdl->pcOwn,psHdl->pcPgm,fpcPat(pvHdl,siLev),psHlp->psStd->pcKyw,psHlp->psFix->pcMan);
+               isMan=TRUE;
+            } else {
+               if (isMan) fprintf(pfOut,"\n");
+               isMan=FALSE;
+            }
             if (psHlp->psFix->pcDft!=NULL) {
                fprintf(pfOut,"%s.%s.%s.%s=\"%s\" ",psHdl->pcOwn,psHdl->pcPgm,fpcPat(pvHdl,siLev),psHlp->psStd->pcKyw,psHlp->psFix->pcDft);
             } else {
                fprintf(pfOut,"%s.%s.%s.%s=\"\" ",psHdl->pcOwn,psHdl->pcPgm,fpcPat(pvHdl,siLev),psHlp->psStd->pcKyw);
             }
             fprintf(pfOut,"# TYPE: %s HELP: %s #\n",apClpTyp[psHlp->psFix->siTyp],psHlp->psFix->pcHlp);
+
             if (psHlp->psDep!=NULL) {
                if (psHlp->psFix->siTyp==CLPTYP_OBJECT || psHlp->psFix->siTyp==CLPTYP_OVRLAY) {
                   psHdl->apPat[siLev]=psHlp;
-                  siErr=siClpPrnPro(pvHdl,pfOut,siLev+1,siDep,psHlp->psDep);
+                  siErr=siClpPrnPro(pvHdl,pfOut,isMan,siLev+1,siDep,psHlp->psDep);
                   if (siErr<0) return(siErr);
                }
             }

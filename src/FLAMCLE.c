@@ -51,7 +51,7 @@
 #include "CLEMSG.h"
 
 /* Definition der Version von FL-CLE ******************************************/
-#define CLE_VSN_STR       "1.0.1.4"
+#define CLE_VSN_STR       "1.0.1.5"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        0
 #define CLE_VSN_REVISION       1

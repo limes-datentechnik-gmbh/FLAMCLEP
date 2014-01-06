@@ -4,7 +4,7 @@ the global property file with the built-in function 'GENPROP'.
 The first comment shows the valid root path for the property file. A
 property file can contain properties for more than one root path. The
 property file parser will only interpret properties where the root
-matches, i.e. if the property file is assigned to a certain owner and 
+matches, i.e. if the property file is assigned to a certain owner and
 possibly to a certain command, then only properties for this owner, the
 program itself and possibly the command will be accepted, all other
 properties are ignored.
@@ -13,7 +13,7 @@ The second long comment gives some help for handling a property
 file. Thereafter the generated properties for this root are listed
 for all supported commands. The format is:
 
-   path = SUPPLEMENT # Type: tttttt Help: hhh...hhh #  
+   path = SUPPLEMENT # Type: tttttt Help: hhh...hhh #
 
 The path denotes the unique dotted keyword list for one argument. The
 'SUPPLEMENT' is a string in double quotation marks containing the value
@@ -29,3 +29,12 @@ values can be related to the current default settings at time of
 generation, what means that if hard coded default values or another
 property file is already in use, then these values are taken over
 into the new property file.
+
+The property file can contain parameter which are not available on the
+command line. Such parameter are only doucumented inside of the
+property file. On the other side not all command line parameter are
+available as property.
+
+If is a description for a property argument available which is not a
+part of the user manual this description is also written as comment in
+front of the corresponding property definition.
