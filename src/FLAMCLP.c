@@ -50,7 +50,8 @@
 #define CLP_VSN_REVISION       1
 //#define CLP_VSN_SUBREVIS       1 /*Adjust version and about*/
 //#define CLP_VSN_SUBREVIS       2 /*Change escape sequence for strings and supplements to two times the same character (''/"")*/
-#define CLP_VSN_SUBREVIS         3 /*Support of command line or property file only parameter*/
+//#define CLP_VSN_SUBREVIS       3 /*Support of command line or property file only parameter*/
+#define CLP_VSN_SUBREVIS         4 /*Support of dummy (DMY) flag for parameter which are not visible on command line and property file*/
 
 
 
@@ -60,6 +61,7 @@
 #define CLPISS_CON(flg)          ((flg)&CLPFLG_CON)
 #define CLPISS_CMD(flg)          ((flg)&CLPFLG_CMD)
 #define CLPISS_PRO(flg)          ((flg)&CLPFLG_PRO)
+#define CLPISS_DMY(flg)          ((flg)&CLPFLG_DMY)
 #define CLPISS_SEL(flg)          ((flg)&CLPFLG_SEL)
 #define CLPISS_FIX(flg)          ((flg)&CLPFLG_FIX)
 #define CLPISS_BIN(flg)          ((flg)&CLPFLG_BIN)
@@ -1490,7 +1492,7 @@ static TsSym* psClpSymIns(
       ERROR(psSym);
    }
 
-   if (!CLPISS_CMD(psSym->psStd->uiFlg) && !CLPISS_PRO(psSym->psStd->uiFlg)) {
+   if (!CLPISS_CMD(psSym->psStd->uiFlg) && !CLPISS_PRO(psSym->psStd->uiFlg) && !CLPISS_DMY(psSym->psStd->uiFlg)) {
       psSym->psStd->uiFlg|=CLPFLG_CMD;
       psSym->psStd->uiFlg|=CLPFLG_PRO;
    }

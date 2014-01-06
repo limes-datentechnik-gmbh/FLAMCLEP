@@ -89,8 +89,11 @@ this parameter only visible in the command line or property file. These
 flags have no influence of property or command line parsing. It only
 reflects the online help/syntax and docu/property generation. Means you
 can still use such a parameter in the property file or in the command
-line, but it is not direct visible to the user.
-
+line, but it is not direct visible to the user. If flag CMD and PRO not
+set then the parameter will be visible in both areas. with the flag DMY
+(for dummy) you can enforce that this parameter are not visible in a
+generated property file and on the command line help, syntax and
+documentation.
 
 The FLAMCLP calculates automatically the minimum amount of letters
 required to make the meaning of a keyword unique. Depending on the case
@@ -377,6 +380,8 @@ extern const char* pcClpAbout(const int l);
 #define CLPFLG_FIX               0x00000020UL
 /** CLPFLG_BIN This argument can contain binary data without zero termination (length must be known or determined with a link) */
 #define CLPFLG_BIN               0x00000040UL
+/** CLPFLG_DMY If set the parameter are not visible, means it will be a dummy */
+#define CLPFLG_DMY               0x00000080UL
 /** CLPFLG_CNT This link will be filled by the calculated amount of elements (useful for arrays) */
 #define CLPFLG_CNT               0x00000100UL
 /** CLPFLG_OID This link will be filled by the object identifier (OID) of the chosen argument (useful for overlays) */
