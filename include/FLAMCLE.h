@@ -6,8 +6,8 @@
  *
  * LIMES Command Line Executor (FLAMCLE) in ANSI-C
  * @author Falk Reichbott
- * @date 27.09.2013\n
- * @copyright (c) 2013 limes datentechnik gmbh
+ * @date 06.01.2014\n
+ * @copyright (c) 2014 limes datentechnik gmbh
  * www.flam.de
  * This software is provided 'as-is', without any express or implied
  * warranty. In no event will the authors be held liable for any damages
@@ -72,6 +72,7 @@ Below, you can find a possibly incomplete list of FLAMCLE feature:
  * * Includes a lot of useful built-in functions
  * * Simple owner management to differentiate configurations
  * * The logical program name can be freely defined
+ * * Different syntax (symbol tables) for property and command line parsing
  * * Case sensitive or in-sensitive command line interpretation
  * * Output file can be defined (stdout, stderr, or a real file)
  * * Complete trace file management for FLAMCLP and commands
@@ -183,7 +184,7 @@ Sample program
           CLETAB_CLS
        };
 
-       return(siCleExecute(asCmdTab,argc,argv,"de.limes","flcl",FALSE,stderr,stdout,
+       return(siCleExecute(asCmdTab,argc,argv,"de.limes","flcl",FALSE,TRUE,0,stderr,stdout,
                            "--|","/",pcFlclVersion(),pcFlclAbout(),"TEST-LICENSE",
                            "Frankenstein Limes(R) Command Line for FLUC, FLAM and FLIES",
                            MAN_FLCL_MAIN,MAN_FLCL_COV,MAN_FLCL_GLS,MAN_FLCL_FIN));
@@ -496,6 +497,7 @@ typedef struct CleCommand {
  * @param[in]  pcOwn Default owner id (owner ids are used to identify properties and other things "com.company")
  * @param[in]  pcPgm Logical program name (can be different from argv[0] and will be used in the root "com.company.program")
  * @param[in]  isCas Switch to enable case sensitive interpretation of the command line
+ * @param[in]  isFlg Flag to enable property or command line specific symbol tables (dedicated parsing dependent of the parameter flags)
  * @param[in]  siMkl Integer defining the minimal key word length (siMkl<=0 --> full length, no auto abbreviation)
  * @param[in]  pfOut File pointer for help and error messages (if not defined stderr will be used)
  * @param[in]  pfTrc Default trace file if no trace file is defined with the configuration data management (recommended: NULL, stdout or stderr)
@@ -533,6 +535,7 @@ extern int siCleExecute(
    const char*                   pcOwn,
    const char*                   pcPgm,
    const int                     isCas,
+   const int                     isFlg,
    const int                     siMkl,
    FILE*                         pfOut,
    FILE*                         pfTrc,

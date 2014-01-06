@@ -4,8 +4,8 @@
  *
  * LIMES Command Line Executor (CLE) in ANSI-C
  * @author FALK REICHBOTT
- * @date  27.09.2013
- * @copyright (c) 2013 limes datentechnik gmbh
+ * @date  06.01.2014
+ * @copyright (c) 2014 limes datentechnik gmbh
  * www.flam.de
  * This software is provided 'as-is', without any express or implied
  * warranty. In no event will the authors be held liable for any damages
@@ -51,7 +51,8 @@
 //#define CLP_VSN_SUBREVIS       1 /*Adjust version and about*/
 //#define CLP_VSN_SUBREVIS       2 /*Change escape sequence for strings and supplements to two times the same character (''/"")*/
 //#define CLP_VSN_SUBREVIS       3 /*Support of command line or property file only parameter*/
-#define CLP_VSN_SUBREVIS         4 /*Support of dummy (DMY) flag for parameter which are not visible on command line and property file*/
+//#define CLP_VSN_SUBREVIS       4 /*Support of dummy (DMY) flag for parameter which are not visible on command line and property file*/
+#define CLP_VSN_SUBREVIS         5 /*Enforce the use if different symbol tables for property and command line parsing*/
 
 
 
@@ -187,6 +188,7 @@ typedef struct Hdl {
    const char*                   pcDep;
    const char*                   pcOpt;
    const char*                   pcEnt;
+   unsigned int                  uiFlg;
    int                           siMkl;
    int                           isOvl;
    int                           isChk;
@@ -579,6 +581,7 @@ extern void* pvClpOpen(
    const char*                   pcMan,
    const char*                   pcHlp,
    const int                     isOvl,
+   const unsigned int            uiFlg,
    const TsClpArgument*          psTab,
    void*                         pvDat,
    FILE*                         pfHlp,
@@ -604,6 +607,7 @@ extern void* pvClpOpen(
          psHdl->pcMan=pcMan;
          psHdl->pcHlp=pcHlp;
          psHdl->isOvl=isOvl;
+         psHdl->uiFlg=uiFlg;
          psHdl->pcSrc=NULL;
          psHdl->pcCur=NULL;
          psHdl->pcOld=NULL;
@@ -1528,7 +1532,7 @@ static int siClpSymIni(
    int                           siErr;
    TsSym*                        psCur=NULL;
    TsSym*                        psFst=NULL;
-   int                           i;
+   int                           i,j,isIns;
 
    if (psTab==NULL) {
       fprintf(psHdl->pfErr,"TABLE-ERROR\n");
@@ -1540,7 +1544,7 @@ static int siClpSymIni(
       return(CLPERR_TAB);
    }
 
-   for (i=0;psTab[i].siTyp;i++) {
+   for (j=i=0;psTab[i].siTyp;i++) {
       if (i>=CLPMAX_TABCNT) {
          fprintf(psHdl->pfErr,"TABLE-ERROR\n");
          if (psArg==NULL) {
@@ -1561,48 +1565,58 @@ static int siClpSymIni(
          return(CLPERR_TAB);
       }
 
-      psCur=psClpSymIns(pvHdl,siLev,i,&psTab[i],psHih,psCur);
-      if (psCur==NULL) return(CLPERR_MEM);
-      if (i==0) *ppFst=psCur;
+      isIns=TRUE;
+      if (psHdl->uiFlg && (CLPISS_PRO(psTab[i].uiFlg) || CLPISS_CMD(psTab[i].uiFlg) || CLPISS_DMY(psTab[i].uiFlg))) {
+         isIns=FALSE;
+         if (CLPISS_PRO(psHdl->uiFlg) && CLPISS_PRO(psTab[i].uiFlg)) isIns=TRUE;
+         if (CLPISS_CMD(psHdl->uiFlg) && CLPISS_CMD(psTab[i].uiFlg)) isIns=TRUE;
+      }
 
-      switch (psTab[i].siTyp) {
-      case CLPTYP_SWITCH:
-         if (psTab[i].psTab!=NULL) {
-            if (psHdl->pfErr!=NULL) {
-               fprintf(psHdl->pfErr,"TABLE-ERROR\n");
-               fprintf(psHdl->pfErr,"%s Parameter table of argument \'%s.%s\' is defined (NULL for psTab required)\n",fpcPre(pvHdl,0),fpcPat(pvHdl,siLev),psTab[i].pcKyw);
-            }
-            return(CLPERR_TAB);
-         }
-         break;
-      case CLPTYP_NUMBER:
-      case CLPTYP_FLOATN:
-      case CLPTYP_STRING:
-         if (CLPISS_SEL(psTab[i].uiFlg)) {
-            psHdl->apPat[siLev]=psCur;
-            siErr=siClpSymIni(pvHdl,siLev+1,psTab+i,psTab[i].psTab,psCur,&psFst);
-            if (siErr<0) return(siErr);
-         } else {
+      if (isIns) {
+         psCur=psClpSymIns(pvHdl,siLev,i,&psTab[i],psHih,psCur);
+         if (psCur==NULL) return(CLPERR_MEM);
+         if (j==0) *ppFst=psCur;
+
+         switch (psTab[i].siTyp) {
+         case CLPTYP_SWITCH:
             if (psTab[i].psTab!=NULL) {
+               if (psHdl->pfErr!=NULL) {
+                  fprintf(psHdl->pfErr,"TABLE-ERROR\n");
+                  fprintf(psHdl->pfErr,"%s Parameter table of argument \'%s.%s\' is defined (NULL for psTab required)\n",fpcPre(pvHdl,0),fpcPat(pvHdl,siLev),psTab[i].pcKyw);
+               }
+               return(CLPERR_TAB);
+            }
+            break;
+         case CLPTYP_NUMBER:
+         case CLPTYP_FLOATN:
+         case CLPTYP_STRING:
+            if (CLPISS_SEL(psTab[i].uiFlg)) {
                psHdl->apPat[siLev]=psCur;
                siErr=siClpSymIni(pvHdl,siLev+1,psTab+i,psTab[i].psTab,psCur,&psFst);
                if (siErr<0) return(siErr);
+            } else {
+               if (psTab[i].psTab!=NULL) {
+                  psHdl->apPat[siLev]=psCur;
+                  siErr=siClpSymIni(pvHdl,siLev+1,psTab+i,psTab[i].psTab,psCur,&psFst);
+                  if (siErr<0) return(siErr);
+               }
             }
+            break;
+         case CLPTYP_OBJECT:
+         case CLPTYP_OVRLAY:
+            psHdl->apPat[siLev]=psCur;
+            siErr=siClpSymIni(pvHdl,siLev+1,psTab+i,psTab[i].psTab,psCur,&psFst);
+            if (siErr<0) return(siErr);
+            break;
+         case CLPTYP_XALIAS: break;
+         default:
+            if (psHdl->pfErr!=NULL) {
+               fprintf(psHdl->pfErr,"TYPE-ERROR\n");
+               fprintf(psHdl->pfErr,"%s Type (%d) of parameter \'%s.%s\' not supported\n",fpcPre(pvHdl,0),psTab[i].siTyp,fpcPat(pvHdl,siLev),psTab[i].pcKyw);
+            }
+            return(CLPERR_TYP);
          }
-         break;
-      case CLPTYP_OBJECT:
-      case CLPTYP_OVRLAY:
-         psHdl->apPat[siLev]=psCur;
-         siErr=siClpSymIni(pvHdl,siLev+1,psTab+i,psTab[i].psTab,psCur,&psFst);
-         if (siErr<0) return(siErr);
-         break;
-      case CLPTYP_XALIAS: break;
-      default:
-         if (psHdl->pfErr!=NULL) {
-            fprintf(psHdl->pfErr,"TYPE-ERROR\n");
-            fprintf(psHdl->pfErr,"%s Type (%d) of parameter \'%s.%s\' not supported\n",fpcPre(pvHdl,0),psTab[i].siTyp,fpcPat(pvHdl,siLev),psTab[i].pcKyw);
-         }
-         return(CLPERR_TYP);
+         j++;
       }
    }
    return(CLP_OK);
@@ -1623,7 +1637,7 @@ static int siClpSymCal(
    int                           siErr,siPos,k,h;
 
    for (siPos=0,psSym=psTab;psSym!=NULL;psSym=psSym->psNxt,siPos++) {
-      if (psSym->psStd->siLev!=siLev || psSym->psStd->siPos!=siPos) {
+      if (psSym->psStd->siLev!=siLev) {
          if (psHdl->pfErr!=NULL) {
             fprintf(psHdl->pfErr,"INTERNAL-ERROR\n");
             if (psArg==NULL) {

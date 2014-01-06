@@ -6,8 +6,8 @@
  *
  * LIMES Command Line Parser (FLAMCLP) in ANSI-C
  * @author Falk Reichbott
- * @date 27.09.2013\n
- * @copyright (c) 2013 limes datentechnik gmbh
+ * @date 06.01.2014\n
+ * @copyright (c) 2014 limes datentechnik gmbh
  * www.flam.de
  * This software is provided 'as-is', without any express or implied
  * warranty. In no event will the authors be held liable for any damages
@@ -106,6 +106,15 @@ Then you are able to parse a property list before doing this with the
 command line. Both property list and command line are provided as zero
 terminated strings. This means that the FLAMCLP does not know whether the
 command line results from a file or argc/argv.
+
+Over the flag values CLPFLG_PRO or CLPFLG_CMDyou can enforced the build
+of a property or command line specific symbol table. Means the property
+only parameter are only valid for property files and command line only
+parameter are only valid for on the command line. If the flag value 0
+then the parameter flags are only used for visibility, but not for
+parsing. If the flag value used then the CLP must be open for property
+parsing, closed and then open again for command line parsing.
+
 After parsing the command line the corresponding FLAMCLP structure is
 filled with the entered values and the FLAMCLP can be closed or another
 command line parsed.
@@ -522,6 +531,7 @@ typedef struct ClpArgument {
  * @param[in]  pcMan String constant containing the manual page for this command
  * @param[in]  pcHlp String constant containing the help message for this command
  * @param[in]  isOvl Boolean if TRUE the main table (psTab) is a overlay else it will be interpreted as object
+ * @param[in]  uiFlg Integer constant containing CLPFLG_PRO or CLPFLG_CMD to ensure property or command line specific symbol tables
  * @param[in]  psTab Pointer to the parameter table defining the semantic of the command line
  * @param[out] pvDat Pointer to the structure where the parsed values are stored
  * @param[in]  pfHlp Pointer to the file used for help messages (if not set then stderr)
@@ -545,6 +555,7 @@ extern void* pvClpOpen(
    const char*                   pcMan,
    const char*                   pcHlp,
    const int                     isOvl,
+   const unsigned int            uiFlg,
    const TsClpArgument*          psTab,
    void*                         pvDat,
    FILE*                         pfHlp,
