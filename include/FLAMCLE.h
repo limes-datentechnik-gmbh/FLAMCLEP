@@ -497,7 +497,7 @@ typedef struct CleCommand {
  * @param[in]  pcOwn Default owner id (owner ids are used to identify properties and other things "com.company")
  * @param[in]  pcPgm Logical program name (can be different from argv[0] and will be used in the root "com.company.program")
  * @param[in]  isCas Switch to enable case sensitive interpretation of the command line
- * @param[in]  isFlg Flag to enable property or command line specific symbol tables (dedicated parsing dependent of the parameter flags)
+ * @param[in]  isFlg Flag to enable property or command line specific symbol tables (dedicated parsing dependent on the parameter flags)
  * @param[in]  siMkl Integer defining the minimal key word length (siMkl<=0 --> full length, no auto abbreviation)
  * @param[in]  pfOut File pointer for help and error messages (if not defined stderr will be used)
  * @param[in]  pfTrc Default trace file if no trace file is defined with the configuration data management (recommended: NULL, stdout or stderr)

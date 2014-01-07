@@ -5,7 +5,7 @@ extensive information about these capabilities.
 Additional You can use the build-in function'GENDOCU' to generate a
 complete or parts of the user manual.
 
-To read the parameter for a special command, a compiler is applied.
+To read the parameter of a command, a compiler is applied.
 To see the regular expressions (lexems) and the corresponding
 grammar, please use the build in functions 'LEXEM' and 'GRAMMAR'.
 

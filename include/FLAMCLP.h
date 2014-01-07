@@ -84,16 +84,16 @@ the hard coded or property default value. The property management
 can make use of a function that extracts a property list for the
 argument table tree.
 
-With the CLP flag CMD (for command) and PRO (property) you can define if
-this parameter only visible in the command line or property file. These
+With the CLP flags CMD (for command) and PRO (property) you can define if
+a parameter is only visible in the command line or property file. These
 flags have no influence of property or command line parsing. It only
-reflects the online help/syntax and docu/property generation. Means you
-can still use such a parameter in the property file or in the command
-line, but it is not direct visible to the user. If flag CMD and PRO not
-set then the parameter will be visible in both areas. with the flag DMY
-(for dummy) you can enforce that this parameter are not visible in a
-generated property file and on the command line help, syntax and
-documentation.
+reflects the online help/syntax and docu/property generation. This means
+you can still use such a parameter in the property file or in the command
+line, but it is not directly visible to the user. If the flags CMD and
+PRO are not set then the parameter will be visible in both areas. With
+the flag DMY (for dummy) you can enforce that this parameter is not
+visible in a generated property file and on the command line help, syntax
+and documentation.
 
 The FLAMCLP calculates automatically the minimum amount of letters
 required to make the meaning of a keyword unique. Depending on the case
@@ -107,13 +107,13 @@ command line. Both property list and command line are provided as zero
 terminated strings. This means that the FLAMCLP does not know whether the
 command line results from a file or argc/argv.
 
-Over the flag values CLPFLG_PRO or CLPFLG_CMDyou can enforced the build
-of a property or command line specific symbol table. Means the property
-only parameter are only valid for property files and command line only
-parameter are only valid for on the command line. If the flag value 0
+The flags CLPFLG_PRO or CLPFLG_CMD allow to enforce the build
+of a property or command line specific symbol table. This means a property
+only parameter is only valid within property files and a command line only
+parameter is only valid on the command line. If the flag value is 0
 then the parameter flags are only used for visibility, but not for
-parsing. If the flag value used then the CLP must be open for property
-parsing, closed and then open again for command line parsing.
+parsing. If the flag value is used then the CLP must be opened for property
+parsing, closed and then opened again for command line parsing.
 
 After parsing the command line the corresponding FLAMCLP structure is
 filled with the entered values and the FLAMCLP can be closed or another
@@ -379,9 +379,9 @@ extern const char* pcClpAbout(const int l);
 #define CLPFLG_ALI               0x00000001UL
 /** CLPFLG_CON This parameter is a constant definition (no argument, no link, no alias (set by macros)) */
 #define CLPFLG_CON               0x00000002UL
-/** CLPFLG_CMD If set the parameter are only used within the command line (command line only) */
+/** CLPFLG_CMD If set the parameter is only used within the command line (command line only) */
 #define CLPFLG_CMD               0x00000004UL
-/** CLPFLG_PRO If set the parameter are only used within the property file (property file only) */
+/** CLPFLG_PRO If set the parameter is only used within the property file (property file only) */
 #define CLPFLG_PRO               0x00000008UL
 /** CLPFLG_SEL If set only the predefined constants over the corresponding key words can be selected (useful to define selections) */
 #define CLPFLG_SEL               0x00000010UL
@@ -389,7 +389,7 @@ extern const char* pcClpAbout(const int l);
 #define CLPFLG_FIX               0x00000020UL
 /** CLPFLG_BIN This argument can contain binary data without zero termination (length must be known or determined with a link) */
 #define CLPFLG_BIN               0x00000040UL
-/** CLPFLG_DMY If set the parameter are not visible, means it will be a dummy */
+/** CLPFLG_DMY If set the parameter is not visible, means it will be a dummy */
 #define CLPFLG_DMY               0x00000080UL
 /** CLPFLG_CNT This link will be filled by the calculated amount of elements (useful for arrays) */
 #define CLPFLG_CNT               0x00000100UL
@@ -531,7 +531,7 @@ typedef struct ClpArgument {
  * @param[in]  pcMan String constant containing the manual page for this command
  * @param[in]  pcHlp String constant containing the help message for this command
  * @param[in]  isOvl Boolean if TRUE the main table (psTab) is a overlay else it will be interpreted as object
- * @param[in]  uiFlg Integer constant containing CLPFLG_PRO or CLPFLG_CMD to ensure property or command line specific symbol tables
+ * @param[in]  uiFlg Integer constant containing either CLPFLG_PRO or CLPFLG_CMD to ensure property or command line specific symbol tables
  * @param[in]  psTab Pointer to the parameter table defining the semantic of the command line
  * @param[out] pvDat Pointer to the structure where the parsed values are stored
  * @param[in]  pfHlp Pointer to the file used for help messages (if not set then stderr)

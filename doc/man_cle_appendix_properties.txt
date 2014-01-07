@@ -31,10 +31,9 @@ property file is already in use, then these values are taken over
 into the new property file.
 
 The property file can contain parameter which are not available on the
-command line. Such parameter are only doucumented inside of the
-property file. On the other side not all command line parameter are
-available as property.
+command line. Such parameter are only doucumented in the property file.
+On the other side not all command line parameter are available as property.
 
-If is a description for a property argument available which is not a
-part of the user manual this description is also written as comment in
+If a description for a property argument is available which is not a
+part of the user manual this description is written as comment in
 front of the corresponding property definition.

@@ -52,7 +52,7 @@
 //#define CLP_VSN_SUBREVIS       2 /*Change escape sequence for strings and supplements to two times the same character (''/"")*/
 //#define CLP_VSN_SUBREVIS       3 /*Support of command line or property file only parameter*/
 //#define CLP_VSN_SUBREVIS       4 /*Support of dummy (DMY) flag for parameter which are not visible on command line and property file*/
-#define CLP_VSN_SUBREVIS         5 /*Enforce the use if different symbol tables for property and command line parsing*/
+#define CLP_VSN_SUBREVIS         5 /*Support the use of different symbol tables for property and command line parsing*/
 
 
 
