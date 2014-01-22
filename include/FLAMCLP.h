@@ -6,7 +6,7 @@
  *
  * LIMES Command Line Parser (FLAMCLP) in ANSI-C
  * @author Falk Reichbott
- * @date 06.01.2014\n
+ * @date 22.01.2014\n
  * @copyright (c) 2014 limes datentechnik gmbh
  * www.flam.de
  * This software is provided 'as-is', without any express or implied
@@ -239,6 +239,7 @@ Grammar for property file
    #define siClpLexem            flclplex
    #define siClpGrammar          flclpgrm
    #define vdClpClose            flclpcls
+   #define pcClpError            flclperr
 #endif
 
 #include <inttypes.h>
@@ -752,6 +753,16 @@ extern int siClpGrammar(
  */
 extern void vdClpClose(
    void*             pvHdl);
+
+/**
+ * Provides error message
+ *
+ * The function provides a error message for the corresponding error code
+ *
+ * @param[in]  siErr Error code from parser
+ */
+extern char* pcClpError(
+   int               siErr);
 
 /**
  * Compare of two string

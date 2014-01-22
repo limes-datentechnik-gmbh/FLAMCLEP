@@ -4,7 +4,7 @@
  *
  * LIMES Command Line Executor (CLE) in ANSI-C
  * @author FALK REICHBOTT
- * @date  06.01.2014
+ * @date  22.01.2014
  * @copyright (c) 2014 limes datentechnik gmbh
  * www.flam.de
  * This software is provided 'as-is', without any express or implied
@@ -44,7 +44,7 @@
 
 /* Definition der Version von FL-CLP ******************************************/
 
-#define CLP_VSN_STR       "1.0.1.5"
+#define CLP_VSN_STR       "1.0.1.6"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        0
 #define CLP_VSN_REVISION       1
@@ -52,7 +52,8 @@
 //#define CLP_VSN_SUBREVIS       2 /*Change escape sequence for strings and supplements to two times the same character (''/"")*/
 //#define CLP_VSN_SUBREVIS       3 /*Support of command line or property file only parameter*/
 //#define CLP_VSN_SUBREVIS       4 /*Support of dummy (DMY) flag for parameter which are not visible on command line and property file*/
-#define CLP_VSN_SUBREVIS         5 /*Support the use of different symbol tables for property and command line parsing*/
+//#define CLP_VSN_SUBREVIS       5 /*Support the use of different symbol tables for property and command line parsing*/
+#define CLP_VSN_SUBREVIS         6 /*Add pcClpError to provide a error message for an error code*/
 
 
 
@@ -571,6 +572,25 @@ extern const char* pcClpAbout(const int l)
       exit(-1);
    }
    return(acAbo);
+}
+
+extern char* pcClpError(
+   int               siErr)
+{
+   switch(siErr) {
+   case CLP_OK    :return("No error, everything O.K.");
+   case CLPERR_LEX:return("Lexical error (determined by scanner)");
+   case CLPERR_SYN:return("Syntax error (determined by parser)");
+   case CLPERR_SEM:return("Semantic error (determined by builder)");
+   case CLPERR_TYP:return("Type error (internal error with argument types)");
+   case CLPERR_TAB:return("Table error (internal error with argument tables)");
+   case CLPERR_SIZ:return("Size error (internal error with argument tables and data structures)");
+   case CLPERR_PAR:return("Parameter error (internal error with argument tables and data structures)");
+   case CLPERR_MEM:return("Memory error (internal error with argument tables and data structures)");
+   case CLPERR_INT:return("Internal error (internal error with argument tables and data structures)");
+   case CLPERR_SYS:return("System error (internal error with argument tables and data structures)");
+   default:        return("Unknown error (not expected)");
+   }
 }
 
 extern void* pvClpOpen(
