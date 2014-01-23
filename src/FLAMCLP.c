@@ -541,10 +541,10 @@ static char* fpcPat(
    const int                     siLev);
 
 /* Implementierung der externen Funktionen ***********************************/
-#define VSNLENGTHMAX   96
-#define VSNLENGTHMIN   VSNLENGTHMAX-32
-#define ABOLENGTHMAX   384
-#define ABOLENGTHMIN   ABOLENGTHMAX-128
+#define VSNLENGTHMAX   128
+#define VSNLENGTHMIN   0
+#define ABOLENGTHMAX   512
+#define ABOLENGTHMIN   0
 
 extern const char* pcClpVersion(const int l)
 {

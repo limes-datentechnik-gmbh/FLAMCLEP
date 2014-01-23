@@ -297,9 +297,9 @@ static void vdCnfCls(
 
 /* Implementierung der externen Funktionen ***********************************/
 #define VSNLENGTHMAX   256
-#define VSNLENGTHMIN   VSNLENGTHMAX-32
-#define ABOLENGTHMAX   768
-#define ABOLENGTHMIN   ABOLENGTHMAX-128
+#define VSNLENGTHMIN   0
+#define ABOLENGTHMAX   1024
+#define ABOLENGTHMIN   0
 
 extern const char* pcCleVersion(const int l)
 {
