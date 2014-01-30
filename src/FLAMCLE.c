@@ -306,7 +306,7 @@ extern const char* pcCleVersion(const int l)
    static char                   acVsn[VSNLENGTHMAX];
    sprintf(acVsn,"%2.2d FLAM-CLE VERSION: %s BUILD: %s %s %s\n%s",l,CLE_VSN_STR,__BUILD__,__DATE__,__TIME__,pcClpVersion(l+1));
    if (strlen(acVsn)>=VSNLENGTHMAX || strlen(acVsn)<VSNLENGTHMIN) {
-      fprintf(stderr,"\n*** Static area (%d) for version string (%d) to small or to big ***\n\n%s\n\n",(int)sizeof(acVsn),(int)strlen(acVsn),acVsn);
+      fprintf(stderr,"\n*** Static area (%d) for version string (%d) too small or too big ***\n\n%s\n\n",(int)sizeof(acVsn),(int)strlen(acVsn),acVsn);
       exit(-1);
    }
    return(acVsn);
@@ -324,7 +324,7 @@ extern const char* pcCleAbout(const int l)
    "This library uses the internal library below:\n%s"
    ,l,CLE_VSN_STR,__BUILD__,__DATE__,__TIME__,pcClpAbout(l+1));
    if (strlen(acAbo)>=ABOLENGTHMAX || strlen(acAbo)<ABOLENGTHMIN) {
-      fprintf(stderr,"\n*** Static area (%d) for about message (%d) to small or to big ***\n\n%s\n\n",(int)sizeof(acAbo),(int)strlen(acAbo),acAbo);
+      fprintf(stderr,"\n*** Static area (%d) for about message (%d) too small or too big ***\n\n%s\n\n",(int)sizeof(acAbo),(int)strlen(acAbo),acAbo);
       exit(-1);
    }
    return(acAbo);
@@ -478,7 +478,7 @@ extern int siCleExecute(
       if (argc==2) {
          siErr=siCleSimpleInit(pfOut,pcDep,pcOpt,pcEnt,&pvHdl);
          if (siErr) ERROR(siErr);
-         fprintf(pfOut,"Lexems (regular expressions) for argument list or parameter file:\n");
+         fprintf(pfOut,"Lexemes (regular expressions) for argument list or parameter file:\n");
          siErr=siClpLexem(pvHdl,pfOut);
          ERROR(0);
       }
@@ -882,9 +882,9 @@ extern int siCleExecute(
                      ERROR(2);
                   } else {
                      if (strlen(argv[2])==strlen(psTab[i].pcKyw)) {
-                        fprintf(pfOut,"Documentation for command \'%s\' successful created\n",argv[2]);
+                        fprintf(pfOut,"Documentation for command \'%s\' successfully created\n",argv[2]);
                      } else {
-                        fprintf(pfOut,"Documentation for argument \'%s\' successful created\n",argv[2]);
+                        fprintf(pfOut,"Documentation for argument \'%s\' successfully created\n",argv[2]);
                      }
                      ERROR(0);
                   }
@@ -975,7 +975,7 @@ extern int siCleExecute(
             fprintf(pfDoc,"-----\n\n");
             fprintf(pfDoc,"%s\n",MAN_CLE_APPENDIX_LEXEM);
             fprintf(pfDoc,"------------------------------------------------------------------------\n");
-            fprintf(pfDoc,"Lexems (regular expressions) for argument list or parameter file\n");
+            fprintf(pfDoc,"Lexemes (regular expressions) for argument list or parameter file\n");
             siErr=siClpLexem(pvHdl,pfDoc); s++;
             fprintf(pfDoc,"------------------------------------------------------------------------\n\n");
             fprintf(pfDoc,"indexterm:[Appendix Lexem]\n\n\n");
@@ -1069,7 +1069,7 @@ extern int siCleExecute(
                fprintf(pfDoc,"Program: %s\n",pcPgm);
                fprintf(pfDoc,"\n\n");
             }
-            fprintf(pfOut,"Documentation for program \'%s\' successful created\n",pcPgm);
+            fprintf(pfOut,"Documentation for program \'%s\' successfully created\n",pcPgm);
             ERROR(0);
          }
       }
@@ -1180,12 +1180,12 @@ extern int siCleExecute(
                   fprintf(pfOut,"%s %s SETPROP %s=filename\n",pcDep,argv[0],psTab[i].pcKyw);
                }
             }
-            fprintf(pfOut,"File name was not specified. To delete a property file from the list, please use function DELPROP [command]\n");
+            fprintf(pfOut,"File name was not specified. To delete a property file from the list, please use the function DELPROP [command]\n");
             ERROR(8);
          }
          siErr=siCnfSet(psCnf,pfOut,acCnf,pcFil,TRUE);
          if (siErr) ERROR(2); else {
-            fprintf(pfOut,"Set configuration keyword '%s' to value '%s' was successful\n",acCnf,pcFil);
+            fprintf(pfOut,"Setting configuration keyword '%s' to value '%s' was successful\n",acCnf,pcFil);
             ERROR(0);
          }
       }
@@ -1314,7 +1314,7 @@ extern int siCleExecute(
          sprintf(acCnf,"%s.owner.id",pcPgm);
          siErr=siCnfSet(psCnf,pfOut,acCnf,argv[2],TRUE);
          if (siErr) ERROR(2); else {
-            fprintf(pfOut,"Set configuration key word '%s' to value '%s' was successful\n",acCnf,argv[2]);
+            fprintf(pfOut,"Setting configuration key word '%s' to value '%s' was successful\n",acCnf,argv[2]);
             ERROR(0);
          }
       }
@@ -1348,7 +1348,7 @@ extern int siCleExecute(
          sprintf(acCnf,"%s.%s.envar.%s",acOwn,pcPgm,pcEnv);
          siErr=siCnfSet(psCnf,pfOut,acCnf,pcVal,TRUE);
          if (siErr) ERROR(2); else {
-            fprintf(pfOut,"Set environment variable '%s' to value '%s' was successful\n",acCnf,pcVal);
+            fprintf(pfOut,"Setting environment variable '%s' to value '%s' was successful\n",acCnf,pcVal);
             ERROR(0);
          }
       }
@@ -1378,7 +1378,7 @@ extern int siCleExecute(
          sprintf(acCnf,"%s.%s.envar.%s",acOwn,pcPgm,argv[2]);
          siErr=siCnfSet(psCnf,pfOut,acCnf,"",TRUE);
          if (siErr) ERROR(2); else {
-            fprintf(pfOut,"Delete environment variable '%s' was successful\n",acCnf);
+            fprintf(pfOut,"Deleting the environment variable '%s' was successful\n",acCnf);
             ERROR(0);
          }
       }
@@ -1391,14 +1391,14 @@ extern int siCleExecute(
             sprintf(acCnf,"%s.%s.trace",acOwn,pcPgm);
             siErr=siCnfSet(psCnf,pfOut,acCnf,"ON",TRUE);
             if (siErr) ERROR(2); else {
-               fprintf(pfOut,"Set configuration key word '%s' to value 'ON' was successful\n",acCnf);
+               fprintf(pfOut,"Setting configuration keyword '%s' to value 'ON' was successful\n",acCnf);
                ERROR(0);
             }
          } else if (strxcmp(isCas,argv[2],"OFF",0,0)==0) {
             sprintf(acCnf,"%s.%s.trace",acOwn,pcPgm);
             siErr=siCnfSet(psCnf,pfOut,acCnf,"OFF",TRUE);
             if (siErr) ERROR(2); else {
-               fprintf(pfOut,"Set configuration key word '%s' to value 'OFF' was successful\n",acCnf);
+               fprintf(pfOut,"Setting configuration keyword '%s' to value 'OFF' was successful\n",acCnf);
                ERROR(0);
             }
          } else {
@@ -1412,9 +1412,9 @@ extern int siCleExecute(
                   siErr=siCnfSet(psCnf,pfOut,acCnf,pcFil,TRUE);
                   if (siErr) ERROR(2); else {
                      if (strlen(pcFil)) {
-                        fprintf(pfOut,"Set configuration key word '%s' to value '%s' was successful\n",acCnf,pcFil);
+                        fprintf(pfOut,"Setting configuration keyword '%s' to value '%s' was successful\n",acCnf,pcFil);
                      } else {
-                        fprintf(pfOut,"Delete value from configuration key word '%s' was successful\n",acCnf);
+                        fprintf(pfOut,"Deleting value from configuration keyword '%s' was successful\n",acCnf);
                      }
                      ERROR(0);
                   }
@@ -1516,7 +1516,7 @@ static int siClePropertyInit(
 
    siErr=pfIni(pfOut,pfTrc,pcOwn,pcPgm,pvClp);
    if (siErr) {
-      fprintf(pfOut,"Initialisation of CLP structure for command \'%s\' failed!\n",pcCmd);
+      fprintf(pfOut,"Initialization of CLP structure for command \'%s\' failed!\n",pcCmd);
       return(10);
    }
    uiFlg=(isFlg)?CLPFLG_PRO:0;
@@ -1574,7 +1574,7 @@ static int siCleCommandInit(
 
    siErr=pfIni(pfOut,pfTrc,pcOwn,pcPgm,pvClp);
    if (siErr) {
-      fprintf(pfOut,"Initialisation of CLP structure for command \'%s\' failed!\n",pcCmd);
+      fprintf(pfOut,"Initialization of CLP structure for command \'%s\' failed!\n",pcCmd);
       return(10);
    }
    uiFlg=(isFlg)?CLPFLG_PRO:0;
@@ -1619,7 +1619,7 @@ static int siCleSimpleInit(
    };
    *ppHdl=pvClpOpen(FALSE,0,"","","","","",FALSE,0,asTab,"",pfOut,pfOut,NULL,NULL,NULL,NULL,pcDep,pcOpt,pcEnt);
    if (*ppHdl==NULL) {
-      fprintf(pfOut,"Open of command line parser for grammar and lexem print out failed!\n");
+      fprintf(pfOut,"Open of command line parser for grammar and lexeme print out failed!\n");
       return(12);
    }
    return(0);
@@ -1972,14 +1972,14 @@ static void vdPrnPropertyError(
       l=strlen(pcLst);
       if (l>1) {
          l--;
-         fprintf(pfOut,"%s after successfull parsing of properties below:\n",pcDep);
+         fprintf(pfOut,"%s after successful parsing of properties below:\n",pcDep);
          fprintf(pfOut,"%s%s ",pcDep,pcDep);
          for (i=0;i<l;i++) {
             if (pcLst[i]=='\n') {
                fprintf(pfOut,"\n%s%s ",pcDep,pcDep);
             } else fprintf(pfOut,"%c",pcLst[i]);
          }
-      } else fprintf(pfOut,"%s Something with the first property is wrong\n",pcDep);
+      } else fprintf(pfOut,"%s Something is wrong with the first property\n",pcDep);
    }
 }
 
@@ -2098,7 +2098,7 @@ static int siCleGetCommand(
       }
    } else if (argv[1][l]=='=') {
       if (argc!=2) {
-         fprintf(pfOut,"The expected parameter file name for \'%s\' is split in more then one parameter\n",pcFct);
+         fprintf(pfOut,"The expected parameter file name for \'%s\' is split into more then one parameter\n",pcFct);
          fprintf(pfOut,"The parameter file name must start with \" and end with \" to join anything into one parameter\n");
          fprintf(pfOut,"Syntax for command \'%s\' not valid\n",pcFct);
          fprintf(pfOut,"%s %s %s=\" parameter file name \"\n",pcDep,argv[0],pcFct);
@@ -2113,7 +2113,7 @@ static int siCleGetCommand(
       errno=0;
       pfCmd=fopen(pcCmd,"r");
       if (pfCmd==NULL) {
-          fprintf(pfOut,"Can\'t open the parameter file \'%s\' (%d-%s)\n",pcCmd,errno,strerror(errno));
+          fprintf(pfOut,"Cannot open the parameter file \'%s\' (%d-%s)\n",pcCmd,errno,strerror(errno));
          return(8);
       }
       errno=0;
@@ -2137,7 +2137,7 @@ static int siCleGetCommand(
       }
    } else {
       fprintf(pfOut,"No blank space ' ', equal sign '=', dot '.' or bracket '(' behind \'%s\'\n",pcFct);
-      fprintf(pfOut,"Please use a blank space to define a argument list or a equal sign for a parameter file\n");
+      fprintf(pfOut,"Please use a blank space to define an argument list or an equal sign for a parameter file\n");
       fprintf(pfOut,"Syntax for command \'%s\' not valid\n",pcFct);
       fprintf(pfOut,"%s %s %s \"... argument list ...\"\n",pcDep,argv[0],pcFct);
       fprintf(pfOut,"%s %s %s=\" parameter file name \"\n",pcDep,argv[0],pcFct);
@@ -2190,7 +2190,7 @@ static TsCnfHdl* psCnfOpn(
    pfFil=fopen(psHdl->acFil,"r");
    if (pfFil==NULL && (errno==2 || errno==49 || errno==129)) return(psHdl);
    if (pfFil==NULL) {
-      if (pfOut!=NULL) fprintf(pfOut,"Can\'t open the configuration file \'%s\'  (%d - %s)\n",psHdl->acFil,errno,strerror(errno));
+      if (pfOut!=NULL) fprintf(pfOut,"Cannot open the configuration file \'%s\'  (%d - %s)\n",psHdl->acFil,errno,strerror(errno));
       return(NULL);
    }
 
@@ -2274,7 +2274,7 @@ static int siCnfSet(
                strcpy(psEnt->acVal,pcVal);
             }else {
                if (pfOut!=NULL)
-                  fprintf(pfOut,"Configuration value (%s) for key word \'%s\' already exists\n",psEnt->acVal,psEnt->acKyw);
+                  fprintf(pfOut,"Configuration value (%s) for keyword \'%s\' already exists\n",psEnt->acVal,psEnt->acKyw);
                return(1);
             }
          }
