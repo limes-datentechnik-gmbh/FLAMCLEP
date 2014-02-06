@@ -4,7 +4,7 @@
  *
  * LIMES Command Line Executor (CLE) in ANSI-C
  * @author FALK REICHBOTT
- * @date  22.01.2014
+ * @date  06.02.2014
  * @copyright (c) 2014 limes datentechnik gmbh
  * www.flam.de
  * This software is provided 'as-is', without any express or implied
@@ -31,11 +31,12 @@
 /* Standard-Includes **********************************************************/
 
 #include <time.h>
+#include <errno.h>
 #include <ctype.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <errno.h>
+#include <stdarg.h>
 #include <inttypes.h>
 
 /* Include der Schnittstelle **************************************************/
@@ -53,7 +54,8 @@
 //#define CLP_VSN_SUBREVIS       3 /*Support of command line or property file only parameter*/
 //#define CLP_VSN_SUBREVIS       4 /*Support of dummy (DMY) flag for parameter which are not visible on command line and property file*/
 //#define CLP_VSN_SUBREVIS       5 /*Support the use of different symbol tables for property and command line parsing*/
-#define CLP_VSN_SUBREVIS         6 /*Add pcClpError to provide a error message for an error code*/
+//#define CLP_VSN_SUBREVIS       6 /*Add pcClpError to provide a error message for an error code*/
+#define CLP_VSN_SUBREVIS         7 /*Add possibility to use getenv to overrule hard coded default values*/
 
 
 
@@ -1233,6 +1235,19 @@ extern void vdClpClose(
 
 /* Interne Funktionen *********************************************************/
 
+static char* get_env(const char* fmtstr, ...)
+{
+   int                  i;
+   char                 var[CLPMAX_PATSIZ]={0};
+   va_list              argv;
+   va_start(argv,fmtstr); vsnprintf(var,CLPMAX_PATLEN,fmtstr,argv); va_end(argv);
+   for (i=0;var[i];i++) {
+      var[i]=toupper(var[i]);
+      if (var[i]=='.') var[i]='_';
+   }
+   return(getenv(var));
+}
+
 #undef  ERROR
 #define ERROR(s) if (s!=NULL) {\
       if (s->psStd!=NULL) { free(s->psStd); s->psStd=NULL; }\
@@ -1251,6 +1266,7 @@ static TsSym* psClpSymIns(
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    TsSym*                        psSym=NULL;
    TsSym*                        psHlp=NULL;
+   char*                         pcEnv=NULL;
    int                           k;
 
    psSym=(TsSym*)calloc(1,sizeof(TsSym));
@@ -1281,7 +1297,19 @@ static TsSym* psClpSymIns(
    psSym->psStd->siPos=siPos;
    psSym->psFix->pcMan=psArg->pcMan;
    psSym->psFix->pcHlp=psArg->pcHlp;
-   psSym->psFix->pcDft=psArg->pcDft;
+   pcEnv=get_env("%s.%s.%s",psHdl->pcOwn,psHdl->pcPgm,fpcPat(pvHdl,siLev));
+   if (pcEnv==NULL) {
+      pcEnv=get_env("%s.%s",psHdl->pcPgm,fpcPat(pvHdl,siLev));
+      if (pcEnv==NULL) {
+         pcEnv=get_env("%s",fpcPat(pvHdl,siLev));
+      }
+   }
+   if (pcEnv!=NULL && strlen(pcEnv)) {
+      strcpy(psSym->psFix->acPro,pcEnv);
+      psSym->psFix->pcDft=psSym->psFix->acPro;
+   } else {
+      psSym->psFix->pcDft=psArg->pcDft;
+   }
    psSym->psFix->siTyp=psArg->siTyp;
    psSym->psFix->siMin=psArg->siMin;
    psSym->psFix->siMax=psArg->siMax;

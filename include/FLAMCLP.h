@@ -6,7 +6,7 @@
  *
  * LIMES Command Line Parser (FLAMCLP) in ANSI-C
  * @author Falk Reichbott
- * @date 22.01.2014\n
+ * @date 06.02.2014\n
  * @copyright (c) 2014 limes datentechnik gmbh
  * www.flam.de
  * This software is provided 'as-is', without any express or implied
@@ -76,13 +76,21 @@ this argument gets an own chapter in the generative documentation, a
 manual page will be available and extensive help is displayed.
 
 For each argument you can define a default value and use the property
-parser to overwrite it again. The default value replaces the entered
-value. This means that if a default value or property
-is defined, then this will have the same effect as the entry of
-the value in the command line. With the latter you can still override
-the hard coded or property default value. The property management
-can make use of a function that extracts a property list for the
-argument table tree.
+parser or environment variables to overwrite it again. The default value
+replaces the entered value. This means that if a default value, environment
+variable or property is defined, then this will have the same effect as the
+entry of the value in the command line. With the latter you can still override
+the hard coded or property default value. The property management can make use
+of a function that extracts a property list for the argument table tree.
+
+For each path you can also define the default value as environment variable.
+The path are prefixed with the owner ID and the program name first, then
+only the the program name and at the last the path only starting with the
+command name will be use to determine a environment variable. For this the
+path is converted to upper case and all '.' are replaced by '_'. The value
+of the environment variable must contain the same supplement string which
+are required for the property definition. All possible path values can be
+determine with the property generation function.
 
 With the CLP flags CMD (for command) and PRO (property) you can define if
 a parameter is only visible in the command line or property file. These
@@ -437,6 +445,7 @@ extern const char* pcClpAbout(const int l);
  *            - for overlays the keyword of the assigning object must be defined to initialize the overlay\n
  *            For arrays of these types a list of the corresponding values (literals or key words) can be defined
  *            The default values will be displayed in context sensitive help messages (PROPERTY: [value_list])\n
+ *            This value can be overruled by corresponding environment variable or property definition\n
  * \b pcMan  Pointer to a zero terminated string for a detailed description of this argument
  *           (in ASCIIDOC format, content behind .DESCRIPTION, mainly simply some paragraphs)
  *           Can be a NULL pointer or empty string for constant definition or simple arguments.
