@@ -2175,6 +2175,7 @@ static TsCnfHdl* psCnfOpn(
    if (pcPgm!=NULL) {
       if (strlen(pcFil)>=sizeof(psHdl->acFil)-1) {
          if (pfOut!=NULL) fprintf(pfOut,"Program name (%s) too long (>=%u)\n",pcPgm,(unsigned)sizeof(psHdl->acPgm)-1);
+         free(psHdl);
          return(NULL);
       }
       strcpy(psHdl->acPgm,pcPgm);
@@ -2182,6 +2183,7 @@ static TsCnfHdl* psCnfOpn(
    if (pcFil==NULL || strlen(pcFil)==0) return(psHdl);
    if (strlen(pcFil)>=sizeof(psHdl->acFil)-1) {
       if (pfOut!=NULL) fprintf(pfOut,"Configuration file name (%s) too long (>=%u)\n",pcFil,(unsigned)sizeof(psHdl->acFil)-1);
+      free(psHdl);
       return(NULL);
    }
    strcpy(psHdl->acFil,pcFil);
@@ -2191,6 +2193,7 @@ static TsCnfHdl* psCnfOpn(
    if (pfFil==NULL && (errno==2 || errno==49 || errno==129)) return(psHdl);
    if (pfFil==NULL) {
       if (pfOut!=NULL) fprintf(pfOut,"Cannot open the configuration file \'%s\'  (%d - %s)\n",psHdl->acFil,errno,strerror(errno));
+      free(psHdl);
       return(NULL);
    }
 
@@ -2208,19 +2211,27 @@ static TsCnfHdl* psCnfOpn(
          psEnt=(TsCnfEnt*)calloc(1,sizeof(TsCnfEnt));
          if (psEnt==NULL) {
             if (pfOut!=NULL) fprintf(pfOut,"Memory allocation for configuration data element failed\n");
-            fclose(pfFil); return(NULL);
+            fclose(pfFil);
+            free(psHdl);
+            return(NULL);
          }
          siKyw=strlen(pcKyw); siVal=strlen(pcVal);
          if (siKyw && siVal) {
             if (siKyw>=sizeof(psEnt->acKyw)-1) {
                if (pfOut!=NULL)
                   fprintf(pfOut,"Keyword (%s) in configuration file (%s) too long (>=%u)\n",pcKyw,pcFil,(unsigned)sizeof(psEnt->acKyw)-1);
-               free(psEnt); fclose(pfFil); return(NULL);
+               free(psEnt);
+               fclose(pfFil);
+               free(psHdl);
+               return(NULL);
             }
             if (siVal>=sizeof(psEnt->acVal)-1) {
                if (pfOut!=NULL)
                   fprintf(pfOut,"Value (%s) in configuration file (%s) too long (>=%u)\n",pcVal,pcFil,(unsigned)sizeof(psEnt->acVal)-1);
-               free(psEnt); fclose(pfFil); return(NULL);
+               free(psEnt);
+               fclose(pfFil);
+               free(psHdl);
+               return(NULL);
             }
             strcpy(psEnt->acKyw,pcKyw); strcpy(psEnt->acVal,pcVal);
             if (psHdl->psLst!=NULL) {
