@@ -95,6 +95,7 @@ Below, you can find a possibly incomplete list of FLAMCLE feature:
  * * Keyword, help message and detailed description can be freely defined for the program, each command, argument or constant definition
  * * Aliases for each argument can also be defined and are handled as options for the same value.
  * * Available and usable on each platform including WIN, UNIX, MAC, ZOS, VSE, ...
+ * * Support of STDENV as DD name for environment variables on mainframes
 
 Built-in Functions
 ------------------
