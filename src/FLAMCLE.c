@@ -373,8 +373,6 @@ extern int siCleExecute(
    if (psTab==NULL || argc==0 || argv==NULL || pcPgm==NULL || pcHlp==NULL || pfOut==NULL || pcDep==NULL || pcOpt==NULL || pcEnt==NULL ||
        strlen(pcPgm)==0 || strlen(pcHlp)==0 || strlen(pcPgm)>64) return(24);
 
-#ifdef __HOST__ /*Read environment on mainframes*/
-   errno=0;
    pfHlp=fopen("DD:STDENV","r");
    if (pfHlp!=NULL) {
       memset(acCnf,0,sizeof(acCnf));
@@ -383,12 +381,17 @@ extern int siCleExecute(
          while (isspace(*(pcCnf-1))) {
             pcCnf--; *pcCnf=EOS;
          }
-         putenv(acCnf);
+         if (putenv(acCnf)) {
+            fprintf(pfOut,"Put variable (%s) to environment failed\n",acCnf);
+            return(16);
+         } else {
+            fprintf(pfOut,"Put variable (%s) to environment successful\n",acCnf);
+         }
       }
       fclose(pfHlp);
    }
-#endif
 
+   errno=0;
    sprintf(acCnf,"%s_DEFAULT_OWNER_ID",pcPgm);
    pcCnf=getenv(acCnf);
    if (pcCnf!=NULL && strlen(pcCnf) && strlen(pcCnf)<sizeof(acOwn)) strcpy(acOwn,pcCnf); else strcpy(acOwn,pcOwn);
