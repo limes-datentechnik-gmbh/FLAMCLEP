@@ -1540,7 +1540,7 @@ static TsSym* psClpSymIns(
    } else {
       if (psHdl->pfErr!=NULL) {
          fprintf(psHdl->pfErr,"TABLE-ERROR\n");
-         fprintf(psHdl->pfErr,"%s Kind (ALI/ARG/LNK/CON) of argument \'%s.%s\' not determinably\n",fpcPre(pvHdl,0),fpcPat(pvHdl,siLev),psSym->psStd->pcKyw);
+         fprintf(psHdl->pfErr,"%s Kind (ALI/ARG/LNK/CON) of argument \'%s.%s\' not determinable\n",fpcPre(pvHdl,0),fpcPat(pvHdl,siLev),psSym->psStd->pcKyw);
       }
       ERROR(psSym);
    }
