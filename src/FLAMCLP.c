@@ -3731,7 +3731,7 @@ static int siClpBldCon(
                fprintf(psHdl->pfBld,"%s BUILD-CONSTANT-STR(PTR=%p CNT=%d LEN=%d RST=%d)%s='",
                        fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw);
                for (k=0;k<siEln;k++) {
-                  if (isprint(pcArg[k])) fprintf(psHdl->pfBld,"%c",pcArg[k]); else fprintf(psHdl->pfBld,"\\x%2.2X",pcArg[k]);
+                  if (isprint(pcArg[k])) fprintf(psHdl->pfBld,"%c",pcArg[k]); else fprintf(psHdl->pfBld,"\\x%2.2X",(unsigned int)pcArg[k]);
                }
                fprintf(psHdl->pfBld,"\'(%"PRId64")\n",siEln);
             }
@@ -3768,7 +3768,7 @@ static int siClpBldCon(
                fprintf(psHdl->pfBld,"%s BUILD-CONSTANT-STR(PTR=%p CNT=%d LEN=%d RST=%d)%s='",
                        fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw);
                for (k=0;k<siEln;k++) {
-                  if (isprint(pcArg[k])) fprintf(psHdl->pfBld,"%c",pcArg[k]); else fprintf(psHdl->pfBld,"\\x%2.2X",pcArg[k]);
+                  if (isprint(pcArg[k])) fprintf(psHdl->pfBld,"%c",pcArg[k]); else fprintf(psHdl->pfBld,"\\x%2.2X",(unsigned int)pcArg[k]);
                }
                fprintf(psHdl->pfBld,"\'(%"PRId64")\n",siEln);
             }
@@ -3796,7 +3796,7 @@ static int siClpBldCon(
                   fprintf(psHdl->pfBld,"%s BUILD-CONSTANT-STR(PTR=%p CNT=%d LEN=%d RST=%d)%s='",
                           fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw);
                   for (k=0;k<siEln;k++) {
-                     if (isprint(pcArg[k])) fprintf(psHdl->pfBld,"%c",pcArg[k]); else fprintf(psHdl->pfBld,"\\x%2.2X",pcArg[k]);
+                     if (isprint(pcArg[k])) fprintf(psHdl->pfBld,"%c",pcArg[k]); else fprintf(psHdl->pfBld,"\\x%2.2X",(unsigned int)pcArg[k]);
                   }
                   fprintf(psHdl->pfBld,"\'(%"PRId64")\n",siEln);
                }
