@@ -50,6 +50,7 @@ int main(int argc, char* argv[])
         char pageName[512];
         char stringName[512];
         char* prefix = "";
+        int isCommentBlock = 0;
 
         while ((n = getopt(argc, argv, "o:p:q")) != -1) {
                 switch (n) {
@@ -139,38 +140,44 @@ int main(int argc, char* argv[])
                     if (n > 2 && linebuf[0] != '\n' && linebuf[0] != '\r')
                         break;
                 }
+                isCommentBlock=0;
                 while (1) {
-                        pageName[0] = '"';
-                        for (i=0, k=1 ; i < n ; i++) {
-                                if (linebuf[i] == '\n') { /* escape literal newline */
-                                   pageName[k++] = '\\';
-                                   pageName[k++] = 'n';
-                                   pageName[k++] = '"';
-                                   pageName[k++] = '\n';
-                                } else if (linebuf[i] == '"') { /* escape quotation mark */
-                                   pageName[k++] = '\\';
-                                   pageName[k++] = '"';
-                                } else if (linebuf[i] == '$' && linebuf[i+1] == '{') { /* skip variables */
-                                    pageName[k++] = '"';
-                                    for (i+=2 ; i < n ; i++) {
-                                        if (linebuf[i] == '}') {
-                                            pageName[k++] = '"';
-                                            break;
-                                        }
-                                        pageName[k++] = linebuf[i];
-                                    }
-                                } else {
-                                   pageName[k++] = linebuf[i];
-                                }
+                        if (n>=4 && strncmp(linebuf,"////", 4)==0) {
+                           isCommentBlock=isCommentBlock?0:1;
                         }
-                        if (pageName[k-1] != '\n') { /* add newline if it is missing at end of line */
-                           pageName[k++] = '\\';
-                           pageName[k++] = 'n';
-                           pageName[k++] = '"';
-                           pageName[k++] = '\n';
+                        if (!isCommentBlock && !(n>=2 && strncmp(linebuf,"//", 2)==0)) {
+                           pageName[0] = '"';
+                           for (i=0, k=1 ; i < n ; i++) {
+                                   if (linebuf[i] == '\n') { /* escape literal newline */
+                                      pageName[k++] = '\\';
+                                      pageName[k++] = 'n';
+                                      pageName[k++] = '"';
+                                      pageName[k++] = '\n';
+                                   } else if (linebuf[i] == '"') { /* escape quotation mark */
+                                      pageName[k++] = '\\';
+                                      pageName[k++] = '"';
+                                   } else if (linebuf[i] == '$' && linebuf[i+1] == '{') { /* skip variables */
+                                       pageName[k++] = '"';
+                                       for (i+=2 ; i < n ; i++) {
+                                           if (linebuf[i] == '}') {
+                                               pageName[k++] = '"';
+                                               break;
+                                           }
+                                           pageName[k++] = linebuf[i];
+                                       }
+                                   } else {
+                                      pageName[k++] = linebuf[i];
+                                   }
+                           }
+                           if (pageName[k-1] != '\n') { /* add newline if it is missing at end of line */
+                              pageName[k++] = '\\';
+                              pageName[k++] = 'n';
+                              pageName[k++] = '"';
+                              pageName[k++] = '\n';
+                           }
+                           pageName[k++] = 0;
+                           fputs(pageName, outFile);
                         }
-                        pageName[k++] = 0;
-                        fputs(pageName, outFile);
                         if (NULL == fgets(linebuf, sizeof(linebuf), inFile))
                                 break;
                         n = strlen(linebuf);
