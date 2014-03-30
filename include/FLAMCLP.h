@@ -241,9 +241,12 @@ Grammar for property file
    #define pcClpVersion          flclpvsn
    #define pcClpAbout            flclpabo
    #define pvClpOpen             flclpopn
-   #define siClpParse            flclpprs
+   #define siClpParsePro         flclprsp
+   #define siClpParseCmd         flclprsc
+   #define  siClpProperties      flclppro
    #define siClpSyntax           flclpsyn
    #define siClpHelp             flclphlp
+   #define siClpDocu             flclpdoc
    #define siClpLexem            flclplex
    #define siClpGrammar          flclpgrm
    #define vdClpClose            flclpcls
