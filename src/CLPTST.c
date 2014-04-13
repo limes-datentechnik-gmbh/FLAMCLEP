@@ -309,6 +309,7 @@ int main(int argc, char * argv[])
 
    if (pfPar!=NULL) {
       l=fread(acBuf,1,sizeof(acBuf),pfPar);
+      fclose(pfPar);
       acBuf[l]=EOS;
       pvHdl=pvClpOpen(FALSE,1,"de.limes","CLPTST","MAIN","man-page","help-msg",FALSE,0,asMainArgTab,&stMain,stderr,stderr,NULL,NULL,NULL,NULL,"-->","/",",");
       if (pvHdl!=NULL) {
@@ -334,8 +335,10 @@ int main(int argc, char * argv[])
          }
          acBuf[0] = 0;
          for (i=1 ; i < argc ; i++) {
-            strcat(acBuf, argv[i]);
-            strcat(acBuf, " ");
+            if (strlen(acBuf)+strlen(argv[i])<sizeof(acBuf)-2) {
+               strcat(acBuf, argv[i]);
+               strcat(acBuf, " ");
+            }
          }
          fprintf(stderr,"*** COMMAND LINE PARSER ***\n");
          fprintf(stderr,"line: %s\n", acBuf);
