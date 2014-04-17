@@ -4,7 +4,7 @@
  *
  * LIMES Command Line Executor (CLE) in ANSI-C
  * @author FALK REICHBOTT
- * @date  26.02.2014
+ * @date  17.04.2014
  * @copyright (c) 2014 limes datentechnik gmbh
  * www.flam.de
  * This software is provided 'as-is', without any express or implied
@@ -45,7 +45,7 @@
 
 /* Definition der Version von FL-CLP ******************************************/
 
-#define CLP_VSN_STR       "1.0.1.6"
+#define CLP_VSN_STR       "1.0.1.8"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        0
 #define CLP_VSN_REVISION       1
@@ -55,7 +55,8 @@
 //#define CLP_VSN_SUBREVIS       4 /*Support of dummy (DMY) flag for parameter which are not visible on command line and property file*/
 //#define CLP_VSN_SUBREVIS       5 /*Support the use of different symbol tables for property and command line parsing*/
 //#define CLP_VSN_SUBREVIS       6 /*Add pcClpError to provide a error message for an error code*/
-#define CLP_VSN_SUBREVIS         7 /*Add possibility to use getenv to overrule hard coded default values*/
+//#define CLP_VSN_SUBREVIS       7 /*Add possibility to use getenv to overrule hard coded default values*/
+#define CLP_VSN_SUBREVIS         8 /*An empty path "" are handled like NULL pointer path*/
 
 
 
@@ -796,7 +797,7 @@ extern int siClpSyntax(
    char                          acKyw[CLPMAX_LEXSIZ];
    int                           siErr,siLev,i;
    int                           l=strlen(psHdl->pcCmd);
-   if (pcPat!=NULL) {
+   if (pcPat!=NULL && strlen(pcPat)) {
       if (strxcmp(psHdl->isCas,psHdl->pcCmd,pcPat,l,0)==0) {
          if (strlen(pcPat)>l && pcPat[l]!='.') {
             if (psHdl->pfErr!=NULL) {
@@ -852,7 +853,7 @@ extern int siClpHelp(
    int                           siErr,siLev,i;
    int                           l=strlen(psHdl->pcCmd);
 
-   if (pcPat!=NULL) {
+   if (pcPat!=NULL && strlen(pcPat)) {
       if (strxcmp(psHdl->isCas,psHdl->pcCmd,pcPat,l,0)==0) {
          if (strlen(pcPat)>l && pcPat[l]!='.') {
             if (psHdl->pfErr!=NULL) {
@@ -939,7 +940,7 @@ extern int siClpDocu(
    char                          acArg[20];
 
    if (pcNum!=NULL && strlen(pcNum)<100) {
-      if (pcPat!=NULL) {
+      if (pcPat!=NULL && strlen(pcPat)) {
          if (strxcmp(psHdl->isCas,psHdl->pcCmd,pcPat,l,0)==0) {
             if (strlen(pcPat)>l && pcPat[l]!='.') {
                if (psHdl->pfErr!=NULL) {
@@ -1182,7 +1183,7 @@ extern int siClpProperties(
 
    if (pfOut==NULL) pfOut=psHdl->pfHlp;
 
-   if (pcPat!=NULL) {
+   if (pcPat!=NULL && strlen(pcPat)) {
       if (strxcmp(psHdl->isCas,psHdl->pcCmd,pcPat,l,0)==0) {
          if (strlen(pcPat)>l && pcPat[l]!='.') {
             if (psHdl->pfErr!=NULL) {
