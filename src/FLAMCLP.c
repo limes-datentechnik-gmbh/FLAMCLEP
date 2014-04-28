@@ -43,20 +43,24 @@
 
 #include "FLAMCLP.h"
 
-/* Definition der Version von FL-CLP ******************************************/
+/* Definition der Version von FL-CLP ******************************************
+ *
+ * Changelog:
+ * 1.0.0.1: Adjust version and about
+ * 1.0.0.2: Change escape sequence for strings and supplements to two times the same character (''/"")
+ * 1.0.0.3: Support of command line or property file only parameter
+ * 1.0.0.4: Support of dummy (DMY) flag for parameter which are not visible on command line and property file
+ * 1.0.0.5: Support the use of different symbol tables for property and command line parsing
+ * 1.0.0.6: Add pcClpError to provide a error message for an error code
+ * 1.0.0.7: Add possibility to use getenv to overrule hard coded default values
+ * 1.0.0.8: An empty path "" are handled like NULL pointer path
+ */
 
 #define CLP_VSN_STR       "1.0.1.8"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        0
 #define CLP_VSN_REVISION       1
-//#define CLP_VSN_SUBREVIS       1 /*Adjust version and about*/
-//#define CLP_VSN_SUBREVIS       2 /*Change escape sequence for strings and supplements to two times the same character (''/"")*/
-//#define CLP_VSN_SUBREVIS       3 /*Support of command line or property file only parameter*/
-//#define CLP_VSN_SUBREVIS       4 /*Support of dummy (DMY) flag for parameter which are not visible on command line and property file*/
-//#define CLP_VSN_SUBREVIS       5 /*Support the use of different symbol tables for property and command line parsing*/
-//#define CLP_VSN_SUBREVIS       6 /*Add pcClpError to provide a error message for an error code*/
-//#define CLP_VSN_SUBREVIS       7 /*Add possibility to use getenv to overrule hard coded default values*/
-#define CLP_VSN_SUBREVIS         8 /*An empty path "" are handled like NULL pointer path*/
+#define CLP_VSN_SUBREVIS         8
 
 
 

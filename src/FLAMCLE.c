@@ -50,17 +50,21 @@
 #include "CLEMAN.h"
 #include "CLEMSG.h"
 
-/* Definition der Version von FL-CLE ******************************************/
+/* Definition der Version von FL-CLE ******************************************
+ *
+ * Changelog:
+ * 1.0.0.1: Fix of the envar bug (ISSUE: 0000182)
+ * 1.0.0.2: Adjust version and about
+ * 1.0.0.3: Add clear of config
+ * 1.0.0.4: Call FIN if RUN failed
+ * 1.0.0.5: Property and command line specific parsing
+ * 1.0.0.6: Add support for DD:STDENV on mainframes
+ */
 #define CLE_VSN_STR       "1.0.1.6"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        0
 #define CLE_VSN_REVISION       1
-//#define CLE_VSN_SUBREVIS       1 /*Fix of the envar bug (ISSUE: 0000182)*/
-//#define CLE_VSN_SUBREVIS       2 /*Adjust version and about*/
-//#define CLE_VSN_SUBREVIS       3 /*Add clear of config*/
-//#define CLE_VSN_SUBREVIS       4 /*Call FIN if RUN failed*/
-//#define CLE_VSN_SUBREVIS       5 /*Property and command line specific parsing*/
-#define CLE_VSN_SUBREVIS         6 /*Add support for DD:STDENV on mainframes*/
+#define CLE_VSN_SUBREVIS         6
 
 /* Definition der Konstanten **************************************************/
 #define CLEMAX_CNFLEN            1023
