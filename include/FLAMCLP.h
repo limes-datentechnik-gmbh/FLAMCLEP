@@ -237,6 +237,10 @@ Grammar for property file
 #ifndef INC_CLP_H
 #define INC_CLP_H
 
+#ifndef __BUILDNR__
+#define __BUILDNR__ 0
+#endif
+
 #ifdef __HOST__
    #define pcClpVersion          flclpvsn
    #define pcClpAbout            flclpabo

@@ -46,23 +46,20 @@
 /* Definition der Version von FL-CLP ******************************************
  *
  * Changelog:
- * 1.0.0.1: Adjust version and about
- * 1.0.0.2: Change escape sequence for strings and supplements to two times the same character (''/"")
- * 1.0.0.3: Support of command line or property file only parameter
- * 1.0.0.4: Support of dummy (DMY) flag for parameter which are not visible on command line and property file
- * 1.0.0.5: Support the use of different symbol tables for property and command line parsing
- * 1.0.0.6: Add pcClpError to provide a error message for an error code
- * 1.0.0.7: Add possibility to use getenv to overrule hard coded default values
- * 1.0.0.8: An empty path "" are handled like NULL pointer path
+ * 1.1.1: Adjust version and about
+ * 1.1.2: Change escape sequence for strings and supplements to two times the same character (''/"")
+ * 1.1.3: Support of command line or property file only parameter
+ * 1.1.4: Support of dummy (DMY) flag for parameter which are not visible on command line and property file
+ * 1.1.5: Support the use of different symbol tables for property and command line parsing
+ * 1.1.6: Add pcClpError to provide a error message for an error code
+ * 1.1.7: Add possibility to use getenv to overrule hard coded default values
+ * 1.1.8: An empty path "" are handled like NULL pointer path
  */
 
-#define CLP_VSN_STR       "1.0.1.8"
+#define CLP_VSN_STR       "1.1.8"
 #define CLP_VSN_MAJOR      1
-#define CLP_VSN_MINOR        0
-#define CLP_VSN_REVISION       1
-#define CLP_VSN_SUBREVIS         8
-
-
+#define CLP_VSN_MINOR        1
+#define CLP_VSN_REVISION       8
 
 /* Definition der Flag-Makros *************************************************/
 
@@ -556,7 +553,7 @@ static char* fpcPat(
 extern const char* pcClpVersion(const int l)
 {
    static C08                 acVsn[VSNLENGTHMAX];
-   sprintf(acVsn,"%2.2d FLAM-CLP VERSION: %s BUILD: %s %s %s\n",l,CLP_VSN_STR,__BUILD__,__DATE__,__TIME__);
+   sprintf(acVsn,"%2.2d FLAM-CLP VERSION: %s.%u BUILD: %s %s %s\n",l,CLP_VSN_STR,__BUILDNR__,__BUILD__,__DATE__,__TIME__);
    if (strlen(acVsn)>=VSNLENGTHMAX || strlen(acVsn)<VSNLENGTHMIN) {
       fprintf(stderr,"\n*** Static area (%d) for version string (%d) to small or to big ***\n\n%s\n\n",(int)sizeof(acVsn),(int)strlen(acVsn),acVsn);
       exit(-1);
@@ -569,11 +566,11 @@ extern const char* pcClpAbout(const int l)
    static char                acAbo[ABOLENGTHMAX];
    sprintf(acAbo,
    "%2.2d Frankenstein Limes Command Line Parser (FLAM-CLP)\n"
-   "   Version: %s Build: %s %s %s\n"
+   "   Version: %s.%u Build: %s %s %s\n"
    "   Copyright (C) limes datentechnik (R) gmbh\n"
    "   This library is open source from the FLAM(R) project: http://www.flam.de\n"
    "   for license see: https://github.com/limes-datentechnik-gmbh/flamclep\n"
-   ,l,CLP_VSN_STR,__BUILD__,__DATE__,__TIME__);
+   ,l,CLP_VSN_STR,__BUILDNR__,__BUILD__,__DATE__,__TIME__);
    if (strlen(acAbo)>=ABOLENGTHMAX || strlen(acAbo)<ABOLENGTHMIN) {
       fprintf(stderr,"\n*** Static area (%d) for about message (%d) to small or to big ***\n\n%s\n\n",(int)sizeof(acAbo),(int)strlen(acAbo),acAbo);
       exit(-1);

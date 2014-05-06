@@ -53,18 +53,17 @@
 /* Definition der Version von FL-CLE ******************************************
  *
  * Changelog:
- * 1.0.0.1: Fix of the envar bug (ISSUE: 0000182)
- * 1.0.0.2: Adjust version and about
- * 1.0.0.3: Add clear of config
- * 1.0.0.4: Call FIN if RUN failed
- * 1.0.0.5: Property and command line specific parsing
- * 1.0.0.6: Add support for DD:STDENV on mainframes
+ * 1.1.1: Fix of the envar bug (ISSUE: 0000182)
+ * 1.1.2: Adjust version and about
+ * 1.1.3: Add clear of config
+ * 1.1.4: Call FIN if RUN failed
+ * 1.1.5: Property and command line specific parsing
+ * 1.1.6: Add support for DD:STDENV on mainframes
  */
-#define CLE_VSN_STR       "1.0.1.6"
+#define CLE_VSN_STR       "1.1.6"
 #define CLE_VSN_MAJOR      1
-#define CLE_VSN_MINOR        0
-#define CLE_VSN_REVISION       1
-#define CLE_VSN_SUBREVIS         6
+#define CLE_VSN_MINOR        1
+#define CLE_VSN_REVISION       6
 
 /* Definition der Konstanten **************************************************/
 #define CLEMAX_CNFLEN            1023
@@ -309,7 +308,7 @@ static void vdCnfCls(
 extern const char* pcCleVersion(const int l)
 {
    static char                   acVsn[VSNLENGTHMAX];
-   sprintf(acVsn,"%2.2d FLAM-CLE VERSION: %s BUILD: %s %s %s\n%s",l,CLE_VSN_STR,__BUILD__,__DATE__,__TIME__,pcClpVersion(l+1));
+   sprintf(acVsn,"%2.2d FLAM-CLE VERSION: %s.%u BUILD: %s %s %s\n%s",l,CLE_VSN_STR,__BUILDNR__,__BUILD__,__DATE__,__TIME__,pcClpVersion(l+1));
    if (strlen(acVsn)>=VSNLENGTHMAX || strlen(acVsn)<VSNLENGTHMIN) {
       fprintf(stderr,"\n*** Static area (%d) for version string (%d) too small or too big ***\n\n%s\n\n",(int)sizeof(acVsn),(int)strlen(acVsn),acVsn);
       exit(-1);
@@ -322,12 +321,12 @@ extern const char* pcCleAbout(const int l)
    static char                acAbo[ABOLENGTHMAX];
    sprintf(acAbo,
    "%2.2d Frankenstein Limes Command Line Execution (FLAM-CLE)\n"
-   "   Version: %s Build: %s %s %s\n"
+   "   Version: %s.%u Build: %s %s %s\n"
    "   Copyright (C) limes datentechnik (R) gmbh\n"
    "   This library is open source from the FLAM(R) project: http://www.flam.de\n"
    "   for license see: https://github.com/limes-datentechnik-gmbh/flamclep\n"
    "This library uses the internal library below:\n%s"
-   ,l,CLE_VSN_STR,__BUILD__,__DATE__,__TIME__,pcClpAbout(l+1));
+   ,l,CLE_VSN_STR,__BUILDNR__,__BUILD__,__DATE__,__TIME__,pcClpAbout(l+1));
    if (strlen(acAbo)>=ABOLENGTHMAX || strlen(acAbo)<ABOLENGTHMIN) {
       fprintf(stderr,"\n*** Static area (%d) for about message (%d) too small or too big ***\n\n%s\n\n",(int)sizeof(acAbo),(int)strlen(acAbo),acAbo);
       exit(-1);
