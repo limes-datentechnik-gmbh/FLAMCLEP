@@ -59,7 +59,7 @@
  * 1.1.4: Call FIN if RUN failed
  * 1.1.5: Property and command line specific parsing
  * 1.1.6: Add support for DD:STDENV on mainframes
- * 1.1.7: Remove message for envar's set
+ * 1.1.7: Remove message for envar's set on release build
  */
 #define CLE_VSN_STR       "1.1.7"
 #define CLE_VSN_MAJOR      1
