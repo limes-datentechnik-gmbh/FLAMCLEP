@@ -4,7 +4,7 @@
  *
  * LIMES Command Line Executor (CLE) in ANSI-C
  * @author FALK REICHBOTT
- * @date  06.01.2014
+ * @date  29.05.2014
  * @copyright (c) 2014 limes datentechnik gmbh
  * www.flam.de
  * This software is provided 'as-is', without any express or implied
@@ -59,11 +59,12 @@
  * 1.1.4: Call FIN if RUN failed
  * 1.1.5: Property and command line specific parsing
  * 1.1.6: Add support for DD:STDENV on mainframes
+ * 1.1.7: Remove message for envar's set
  */
-#define CLE_VSN_STR       "1.1.6"
+#define CLE_VSN_STR       "1.1.7"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        1
-#define CLE_VSN_REVISION       6
+#define CLE_VSN_REVISION       7
 
 /* Definition der Konstanten **************************************************/
 #define CLEMAX_CNFLEN            1023
@@ -416,6 +417,7 @@ extern int siCleExecute(
    if (pcCnf!=NULL && strlen(pcCnf) && strlen(pcCnf)<sizeof(acOwn)) strcpy(acOwn,pcCnf);
 
 
+#ifdef __DEBUG__
    i=siCnfPutEnv(psCnf,acOwn,pcPgm);
    if (i) {
       if (i==1) {
@@ -424,6 +426,10 @@ extern int siCleExecute(
          fprintf(pfOut,"%d environment variables set\n",i);
       }
    }
+#else
+   siCnfPutEnv(psCnf,acOwn,pcPgm);
+#endif
+
 
    sprintf(acCnf,"%s.%s.trace",acOwn,pcPgm);
    pcCnf=pcCnfGet(psCnf,acCnf);
