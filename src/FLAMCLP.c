@@ -555,7 +555,7 @@ extern const char* pcClpVersion(const int l)
    static C08                 acVsn[VSNLENGTHMAX];
    sprintf(acVsn,"%2.2d FLAM-CLP VERSION: %s.%u BUILD: %s %s %s\n",l,CLP_VSN_STR,__BUILDNR__,__BUILD__,__DATE__,__TIME__);
    if (strlen(acVsn)>=VSNLENGTHMAX || strlen(acVsn)<VSNLENGTHMIN) {
-      fprintf(stderr,"\n*** Static area (%d) for version string (%d) to small or to big ***\n\n%s\n\n",(int)sizeof(acVsn),(int)strlen(acVsn),acVsn);
+      fprintf(stderr,"\n*** Static area (%d) for version string (%d) too small or too big ***\n\n%s\n\n",(int)sizeof(acVsn),(int)strlen(acVsn),acVsn);
       exit(-1);
    }
    return(acVsn);
@@ -572,7 +572,7 @@ extern const char* pcClpAbout(const int l)
    "   for license see: https://github.com/limes-datentechnik-gmbh/flamclep\n"
    ,l,CLP_VSN_STR,__BUILDNR__,__BUILD__,__DATE__,__TIME__);
    if (strlen(acAbo)>=ABOLENGTHMAX || strlen(acAbo)<ABOLENGTHMIN) {
-      fprintf(stderr,"\n*** Static area (%d) for about message (%d) to small or to big ***\n\n%s\n\n",(int)sizeof(acAbo),(int)strlen(acAbo),acAbo);
+      fprintf(stderr,"\n*** Static area (%d) for about message (%d) too small or too big ***\n\n%s\n\n",(int)sizeof(acAbo),(int)strlen(acAbo),acAbo);
       exit(-1);
    }
    return(acAbo);
@@ -3709,7 +3709,7 @@ static int siClpBldCon(
          if (psVal->psFix->siSiz>psArg->psFix->siSiz) {
             if (psHdl->pfErr!=NULL) {
                fprintf(psHdl->pfErr,"SIZE-ERROR\n");
-               fprintf(psHdl->pfErr,"%s Size of constant value \'%s\' (%d) is bigger then sizeof argument \'%s.%s\' (%d) with type \'%s\'\n",
+               fprintf(psHdl->pfErr,"%s Size of constant value \'%s\' (%d) is bigger than size of argument \'%s.%s\' (%d) with type \'%s\'\n",
             		   fpcPre(pvHdl,0),psVal->psStd->pcKyw, psVal->psFix->siSiz,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,psArg->psFix->siSiz,apClpTyp[psArg->psFix->siTyp]);
             }
             return(CLPERR_SIZ);
