@@ -54,12 +54,13 @@
  * 1.1.6: Add pcClpError to provide a error message for an error code
  * 1.1.7: Add possibility to use getenv to overrule hard coded default values
  * 1.1.8: An empty path "" are handled like NULL pointer path
+ * 1.1.9: Allow strings without ' like keyword=...SPACE/SEP
  */
 
-#define CLP_VSN_STR       "1.1.8"
+#define CLP_VSN_STR       "1.1.9"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        1
-#define CLP_VSN_REVISION       8
+#define CLP_VSN_REVISION       9
 
 /* Definition der Flag-Makros *************************************************/
 
@@ -278,10 +279,12 @@ static int siClpScnNat(
    FILE*                         pfErr,
    FILE*                         pfTrc,
    const char**                  ppCur,
-   char*                         pcLex);
+   char*                         pcLex,
+   const int                     uiTok);
 
 static int siClpScnSrc(
-   void*                         pvHdl);
+   void*                         pvHdl,
+   const int                     uiTok);
 
 static int siClpPrsMain(
    void*                         pvHdl,
@@ -680,7 +683,7 @@ extern int siClpParsePro(
    psHdl->acLex[0]=EOS;
    if (psHdl->siTok==CLPTOK_INI) {
       if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"PROPERTY-PARSER-BEGIN\n");
-      psHdl->siTok=siClpScnSrc(pvHdl);
+      psHdl->siTok=siClpScnSrc(pvHdl,0);
       if (psHdl->siTok<0) {
          if (ppPos!=NULL) *ppPos=(char*)psHdl->pcOld;
          if (ppLst!=NULL) *ppLst=(char*)psHdl->acLst;
@@ -742,7 +745,7 @@ extern int siClpParseCmd(
    psHdl->acLex[0]=EOS;
    if (psHdl->siTok==CLPTOK_INI) {
       if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"COMMAND-PARSER-BEGIN\n");
-      psHdl->siTok=siClpScnSrc(pvHdl);
+      psHdl->siTok=siClpScnSrc(pvHdl,0);
       if (psHdl->siTok<0) {
          if (ppPos!=NULL) *ppPos=(char*)psHdl->pcOld;
          if (ppLst!=NULL) *ppLst=(char*)psHdl->acLst;
@@ -1971,7 +1974,7 @@ static void vdClpSymDel(
 
 /* Scanner ********************************************************************/
 
-/*now differenz between host and open world anymore */
+/*now difference between host and open world anymore */
 #ifdef __HOST__
    #define STRCHR '\''
    #define SPMCHR '\"'
@@ -2003,8 +2006,11 @@ extern int siClpLexem(
    fprintf(pfOut,"%s str       [e|E]''' [:print:]* ''' |               (binary string in EBCDIC)\n",fpcPre(pvHdl,0));
    fprintf(pfOut,"%s str       [x|X]''' [:print:]* ''' |         (binary string in hex notation)\n",fpcPre(pvHdl,0));
    fprintf(pfOut,"%s           Strings can contain two '' to represent one '                    \n",fpcPre(pvHdl,0));
+// fprintf(pfOut,"%s           Strings can build with \" instead of '                            \n",fpcPre(pvHdl,0));
+   fprintf(pfOut,"%s           Strings of type S can direct start behind = and end with a space \n",fpcPre(pvHdl,0));
    fprintf(pfOut,"%s SUPPLEMENT     '\"' [:print:]* '\"' |   (zero terminated string (properties))\n",fpcPre(pvHdl,0));
    fprintf(pfOut,"%s           Supplements can contain two \"\" to represent one \"                \n",fpcPre(pvHdl,0));
+// fprintf(pfOut,"%s           Supplements can build with ' instead of \"                          \n",fpcPre(pvHdl,0));
    return(CLP_OK);
 }
 
@@ -2013,7 +2019,8 @@ static int siClpScnNat(
    FILE*                         pfErr,
    FILE*                         pfTrc,
    const char**                  ppCur,
-   char*                         pcLex)
+   char*                         pcLex,
+   const int                     uiTok)
 {
    char*                         pcEnd=pcLex+CLPMAX_LEXLEN;
    char*                         pcHlp=pcLex;
@@ -2083,6 +2090,16 @@ static int siClpScnNat(
             return(CLPERR_LEX);
          }
          pcCur++;
+         if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(STR)-LEXEM(%s)\n",pcHlp);
+         *ppCur=pcCur;
+         return(CLPTOK_STR);
+      } else if (uiTok==CLPTOK_STR) {/*string*/
+         *pcLex='d'; pcLex++;
+         *pcLex='\''; pcLex++;
+         while (pcCur[0]!=EOS && isprint(pcCur[0]) && pcCur[0]!=' ' && pcCur[0]!=',' && pcCur[0]!='(' && pcCur[0]!=')' && pcCur[0]!='[' && pcCur[0]!=']' && pcCur[0]!='#' &&  pcLex<pcEnd) {
+            *pcLex=*pcCur; pcLex++; pcCur++;
+         }
+         *pcLex=EOS;
          if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(STR)-LEXEM(%s)\n",pcHlp);
          *ppCur=pcCur;
          return(CLPTOK_STR);
@@ -2368,11 +2385,12 @@ static int siClpScnNat(
 }
 
 static int siClpScnSrc(
-   void*                         pvHdl)
+   void*                         pvHdl,
+   const int                     uiTok)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    psHdl->pcOld=psHdl->pcCur;
-   return(siClpScnNat(pvHdl,psHdl->pfErr,psHdl->pfScn,&psHdl->pcCur,psHdl->acLex));
+   return(siClpScnNat(pvHdl,psHdl->pfErr,psHdl->pfScn,&psHdl->pcCur,psHdl->acLex,uiTok));
 }
 
 /*****************************************************************************/
@@ -2445,14 +2463,14 @@ static int siClpPrsPar(
       siInd=siClpSymFnd(pvHdl,siLev,siPos,acKyw,psTab,&psArg,NULL);
       if (siInd<0) return(siInd);
       if (piOid!=NULL) *piOid=psArg->psFix->siOid;
-      psHdl->siTok=siClpScnSrc(pvHdl);
+      psHdl->siTok=siClpScnSrc(pvHdl,0);
       if (psHdl->siTok<0) return(psHdl->siTok);
       if (psHdl->siTok==CLPTOK_SGN) {
          return(siClpPrsSgn(pvHdl,siLev,siPos,psArg));
       } else if (psHdl->siTok==CLPTOK_RBO) {
          return(siClpPrsObj(pvHdl,siLev,siPos,psArg));
       } else if (psHdl->siTok==CLPTOK_DOT) {
-         psHdl->siTok=siClpScnSrc(pvHdl);
+         psHdl->siTok=siClpScnSrc(pvHdl,0);
          if (psHdl->siTok<0) return(psHdl->siTok);
          return(siClpPrsOvl(pvHdl,siLev,siPos,psArg));
       } else if (psHdl->siTok==CLPTOK_SBO) {
@@ -2490,7 +2508,7 @@ static int siClpPrsSgn(
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d SGN(%s=val)\n",fpcPre(pvHdl,siLev),siLev,siPos,psArg->psStd->pcKyw);
-   psHdl->siTok=siClpScnSrc(pvHdl);
+   psHdl->siTok=(psArg->psFix->siTyp==CLPTYP_STRING)?siClpScnSrc(pvHdl,CLPTOK_STR):siClpScnSrc(pvHdl,0);
    if (psHdl->siTok<0) return(psHdl->siTok);
    switch (psHdl->siTok) {
    case CLPTOK_NUM: return(siClpPrsVal(pvHdl,siLev,siPos,CLPTYP_NUMBER,psArg));
@@ -2518,7 +2536,7 @@ static int siClpPrsObj(
    TsVar                         asSav[CLPMAX_TABCNT];
 
    if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d OBJ(%s(parlst))-OPN)\n",fpcPre(pvHdl,siLev),siLev,siPos,psArg->psStd->pcKyw);
-   psHdl->siTok=siClpScnSrc(pvHdl);
+   psHdl->siTok=siClpScnSrc(pvHdl,0);
    if (psHdl->siTok<0) return(psHdl->siTok);
    siErr=siClpIniObj(pvHdl,siLev,siPos,psArg,&psDep,asSav);
    if (siErr<0) return(siErr);
@@ -2527,7 +2545,7 @@ static int siClpPrsObj(
    siErr=siClpFinObj(pvHdl,siLev,siPos,psArg,psDep,asSav);
    if (siErr<0) return(siErr);
    if (psHdl->siTok==CLPTOK_RBC) {
-      psHdl->siTok=siClpScnSrc(pvHdl);
+      psHdl->siTok=siClpScnSrc(pvHdl,0);
       if (psHdl->siTok<0) return(psHdl->siTok);
       if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d CNT=%d OBJ(%s(parlst))-CLS)\n",fpcPre(pvHdl,siLev),siLev,siPos,siCnt,psArg->psStd->pcKyw);
    } else {
@@ -2571,7 +2589,7 @@ static int siClpPrsMain(
    if (psHdl->isOvl) {
       if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(OVL(MAIN.par)\n",fpcPre(pvHdl,0));
       if (psHdl->siTok==CLPTOK_DOT) {
-         psHdl->siTok=siClpScnSrc(pvHdl);
+         psHdl->siTok=siClpScnSrc(pvHdl,0);
          if (psHdl->siTok<0) return(psHdl->siTok);
       }
       siErr=siClpIniMainOvl(pvHdl,psTab,asSav);
@@ -2587,12 +2605,12 @@ static int siClpPrsMain(
       siErr=siClpIniMainObj(pvHdl,psTab,asSav);
       if (siErr<0) return(siErr);
       if (psHdl->siTok==CLPTOK_RBO) {
-         psHdl->siTok=siClpScnSrc(pvHdl);
+         psHdl->siTok=siClpScnSrc(pvHdl,0);
          if (psHdl->siTok<0) return(psHdl->siTok);
          siCnt=siClpPrsParLst(pvHdl,0,NULL,psTab);
          if (siCnt<0) return(siCnt);
          if (psHdl->siTok==CLPTOK_RBC) {
-            psHdl->siTok=siClpScnSrc(pvHdl);
+            psHdl->siTok=siClpScnSrc(pvHdl,0);
             if (psHdl->siTok<0) return(psHdl->siTok);
          } else {
             if (psHdl->pfErr!=NULL) {
@@ -2621,7 +2639,7 @@ static int siClpPrsAry(
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    int                           siCnt;
    if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d ARY(%s[typlst])-OPN)\n",fpcPre(pvHdl,siLev),siLev,siPos,psArg->psStd->pcKyw);
-   psHdl->siTok=siClpScnSrc(pvHdl);
+   psHdl->siTok=siClpScnSrc(pvHdl,0);
    if (psHdl->siTok<0) return(psHdl->siTok);
    switch (psArg->psFix->siTyp) {
    case CLPTYP_NUMBER: siCnt=siClpPrsValLst(pvHdl,siLev,CLPTOK_NUM,psArg->psFix->siTyp,psArg); break;
@@ -2638,7 +2656,7 @@ static int siClpPrsAry(
    }
    if (siCnt<0) return(siCnt);
    if (psHdl->siTok==CLPTOK_SBC) {
-      psHdl->siTok=siClpScnSrc(pvHdl);
+      psHdl->siTok=siClpScnSrc(pvHdl,0);
       if (psHdl->siTok<0) return(psHdl->siTok);
       if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d CNT=%d ARY(%s[typlst])-CLS)\n",fpcPre(pvHdl,siLev),siLev,siPos,siCnt,psArg->psStd->pcKyw);
       return(CLP_OK);
@@ -2711,7 +2729,7 @@ static int siClpPrsVal(
    char                          acVal[CLPMAX_LEXSIZ];
    strcpy(acVal,psHdl->acLex);
    if (psHdl->siTok==CLPTOK_KYW) {
-      psHdl->siTok=siClpScnSrc(pvHdl);
+      psHdl->siTok=siClpScnSrc(pvHdl,0);
       if (psHdl->siTok<0) return(psHdl->siTok);
       psHdl->apPat[siLev]=psArg;
       siInd=siClpSymFnd(pvHdl,siLev+1,siPos,acVal,psArg->psDep,&psVal,NULL);
@@ -2719,7 +2737,7 @@ static int siClpPrsVal(
       if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d KYW(%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,acVal);
       return(siClpBldCon(pvHdl,siLev,siPos,psArg,psVal));
    } else {
-      psHdl->siTok=siClpScnSrc(pvHdl);
+      psHdl->siTok=siClpScnSrc(pvHdl,0);
       if (psHdl->siTok<0) return(psHdl->siTok);
       if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d LIT(%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,acVal);
       return(siClpBldLit(pvHdl,siLev,siPos,siTyp,psArg,acVal));
@@ -2755,11 +2773,11 @@ static int siClpPrsPro(
    siLev=siClpPrsKywLst(pvHdl,siPos,acPat);
    if (siLev<0) return(siLev);
    if (psHdl->siTok==CLPTOK_SGN) {
-      psHdl->siTok=siClpScnSrc(pvHdl);
+      psHdl->siTok=siClpScnSrc(pvHdl,0);
       if (psHdl->siTok<0) return(psHdl->siTok);
       if (psHdl->siTok==CLPTOK_SUP) {
          strcpy(acSup,psHdl->acLex);
-         psHdl->siTok=siClpScnSrc(pvHdl);
+         psHdl->siTok=siClpScnSrc(pvHdl,0);
          if (psHdl->siTok<0) return(psHdl->siTok);
          return(siClpBldPro(pvHdl,acPat,acSup));
       } else {
@@ -2796,11 +2814,11 @@ static int siClpPrsKywLst(
          return(CLPERR_INT);
       }
       strcat(pcPat,psHdl->acLex);
-      psHdl->siTok=siClpScnSrc(pvHdl);
+      psHdl->siTok=siClpScnSrc(pvHdl,0);
       if (psHdl->siTok<0) return(psHdl->siTok);
       if (psHdl->siTok==CLPTOK_DOT) {
          strcat(pcPat,".");
-         psHdl->siTok=siClpScnSrc(pvHdl);
+         psHdl->siTok=siClpScnSrc(pvHdl,0);
          if (psHdl->siTok<0) return(psHdl->siTok);
       }
       siLev++;
@@ -4321,8 +4339,8 @@ static int siClpSetDefault(
 
    if (CLPISS_ARG(psArg->psStd->uiFlg) && psArg->psVar->siCnt==0 && psArg->psFix->pcDft!=NULL && strlen(psArg->psFix->pcDft)) {
       pcCur=psArg->psFix->pcDft;
-      for (siTok=siClpScnNat(pvHdl,psHdl->pfErr,psHdl->pfScn,&pcCur,acLex);siTok!=CLPTOK_END;
-           siTok=siClpScnNat(pvHdl,psHdl->pfErr,psHdl->pfScn,&pcCur,acLex)) {
+      for (siTok=siClpScnNat(pvHdl,psHdl->pfErr,psHdl->pfScn,&pcCur,acLex,0);siTok!=CLPTOK_END;
+           siTok=siClpScnNat(pvHdl,psHdl->pfErr,psHdl->pfScn,&pcCur,acLex,0)) {
          switch(siTok) {
          case CLPTOK_NUM:
             if (psArg->psFix->siTyp==CLPTYP_SWITCH) {
