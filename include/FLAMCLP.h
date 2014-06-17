@@ -35,8 +35,8 @@ is intended by 4 spaces to be rendered as code block in doxygenerated html.
 Description
 -----------
 
-The command line parser (FLAMCLP) is a complier which reads a command string
-using the lexems and grammar below to fill a structure with the
+The command line parser (FLAMCLP) is a complier which reads a command
+string using the lexems and grammar below to fill a structure with the
 corresponding values given in this line. The FLAMCLP works only in memory
 and the syntax and semantic will be defined by a tree of tables. Such a
 table can represent an object (struct) or an overlay (union). Each
@@ -170,7 +170,12 @@ Lexeme
          [x|X]''' [:print:]* ''' |     binary hexadecimal\n
          [a|A]''' [:print:]* ''' |     binary ascii (no zero termination)\n
          [e|E]''' [:print:]* ''' |     binary ebcdic (no zero termination)\n
+         Strings can contain two '' to represent one '\n
+         Strings can also be enclosed in " instead of '\n"
+         Strings can directly start behind a '=' without enclosing '/"\n
     SUP       '"' [:print:]* '"' |     string with zero termination (local character set) for supplement syntax (properties)\n
+         Supplements can contain two "" to represent one "\n
+         Supplements can also be enclosed in ' instead of "\n"
 
 
 Grammar for command line
