@@ -55,12 +55,13 @@
  * 1.1.7: Add possibility to use getenv to overrule hard coded default values
  * 1.1.8: An empty path "" are handled like NULL pointer path
  * 1.1.9: Allow strings without ' like keyword=...SPACE/SEP and switch between " and '
+ * 1.1.10: Add new flag to prevent print outs in clear form for passwords or other critical informations
  */
 
-#define CLP_VSN_STR       "1.1.9"
+#define CLP_VSN_STR       "1.1.10"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        1
-#define CLP_VSN_REVISION       9
+#define CLP_VSN_REVISION       10
 
 /* Definition der Flag-Makros *************************************************/
 
@@ -77,6 +78,7 @@
 #define CLPISS_ELN(flg)          ((flg)&CLPFLG_ELN)
 #define CLPISS_SLN(flg)          ((flg)&CLPFLG_SLN)
 #define CLPISS_TLN(flg)          ((flg)&CLPFLG_TLN)
+#define CLPISS_PWD(flg)          ((flg)&CLPFLG_PWD)
 #define CLPISS_LNK(flg)          (CLPISS_CNT(flg) ||  CLPISS_OID(flg) ||  CLPISS_ELN(flg) || CLPISS_SLN(flg) ||  CLPISS_TLN(flg))
 #define CLPISS_ARG(flg)          ((!CLPISS_LNK(flg)) && (!CLPISS_CON(flg)) && (!CLPISS_ALI(flg)))
 
@@ -1876,7 +1878,7 @@ static int siClpSymFnd(
    if (psTab->psBak!=NULL) {
       if (psHdl->pfErr!=NULL) {
          fprintf(psHdl->pfErr,"INTERNAL-ERROR\n");
-         fprintf(psHdl->pfErr,"%s Entry \'%s.%s\' not at begining of a table\n",fpcPre(pvHdl,0),fpcPat(pvHdl,siLev),psTab->psStd->pcKyw);
+         fprintf(psHdl->pfErr,"%s Entry \'%s.%s\' not at beginning of a table\n",fpcPre(pvHdl,0),fpcPat(pvHdl,siLev),psTab->psStd->pcKyw);
          fprintf(psHdl->pfErr,"%s Try to find keyword \'%s\' in this table\n",fpcPre(pvHdl,0),pcKyw);
       }
       return(CLPERR_INT);
@@ -2017,6 +2019,9 @@ extern int siClpLexem(
    return(CLP_OK);
 }
 
+#define isPrintF(p)   (((p)!=NULL)?(CLPISS_PWD((p)->psStd->uiFlg)==FALSE):(TRUE))
+#define isPrnLex(p,l) (isPrintF(p)?(l):("###SECRET###"))
+
 static int siClpScnNat(
    void*                         pvHdl,
    FILE*                         pfErr,
@@ -2037,7 +2042,7 @@ static int siClpScnNat(
    while (1) {
       if (*pcCur==EOS) { /*end*/
          pcLex[0]=EOS;
-         if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(END)-LEXEM(%s)\n",pcHlp);
+         if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(END)-LEXEM(%s)\n",isPrnLex(psArg,pcHlp));
          *ppCur=pcCur;
          return(CLPTOK_END);
       } else if (isspace(*pcCur) || iscntrl(*pcCur) || (*pcCur)==',') { /*separation*/
@@ -2079,10 +2084,10 @@ static int siClpScnNat(
                *p1++=*p2++;
             }
             *p1=EOS;
-            if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(SUP)-LEXEM(%s)\n",pcHlp);
+            if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(SUP)-LEXEM(%s)\n",isPrnLex(psArg,pcHlp));
             return(CLPTOK_SUP);
          } else {
-            if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(STR)-LEXEM(%s)\n",pcHlp);
+            if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(STR)-LEXEM(%s)\n",isPrnLex(psArg,pcHlp));
             return(CLPTOK_STR);
          }
       } else if (pcCur[0]==STRCHR) {/*simple string || supplement*/
@@ -2111,10 +2116,10 @@ static int siClpScnNat(
                *p1++=*p2++;
             }
             *p1=EOS;
-            if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(SUP)-LEXEM(%s)\n",pcHlp);
+            if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(SUP)-LEXEM(%s)\n",isPrnLex(psArg,pcHlp));
             return(CLPTOK_SUP);
          } else {
-            if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(STR)-LEXEM(%s)\n",pcHlp);
+            if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(STR)-LEXEM(%s)\n",isPrnLex(psArg,pcHlp));
             return(CLPTOK_STR);
          }
       } else if ((tolower(pcCur[0])=='x' || tolower(pcCur[0])=='a' ||tolower(pcCur[0])=='e' ||
@@ -2135,7 +2140,7 @@ static int siClpScnNat(
             return(CLPERR_LEX);
          }
          pcCur++;
-         if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(STR)-LEXEM(%s)\n",pcHlp);
+         if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(STR)-LEXEM(%s)\n",isPrnLex(psArg,pcHlp));
          *ppCur=pcCur;
          return(CLPTOK_STR);
       } else if (uiTok==CLPTOK_STR && isprint(pcCur[0]) && pcCur[0]!='(' && pcCur[0]!=')' && pcCur[0]!='[' && pcCur[0]!=']') {/*required string*/
@@ -2188,7 +2193,7 @@ static int siClpScnNat(
             *pcLex=*pcCur; pcLex++; pcCur++;
          }
          *pcLex=EOS;
-         if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(STR)-LEXEM(%s)\n",pcHlp);
+         if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(STR)-LEXEM(%s)\n",isPrnLex(psArg,pcHlp));
          *ppCur=pcCur;
          return(CLPTOK_STR);
       } else if (isalpha(*pcCur)) { /*keyword*/
@@ -2335,7 +2340,7 @@ static int siClpScnNat(
                            }
                            pcHlp[1]=' ';
                            sprintf(pcHlp+2,"%"PRIu64"",t);
-                           if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(NUM)-LEXEM(%s)\n",pcHlp);
+                           if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(NUM)-LEXEM(%s)\n",isPrnLex(psArg,pcHlp));
                            *ppCur=pcCur;
                            return(CLPTOK_NUM);
                         } else {
@@ -2400,12 +2405,12 @@ static int siClpScnNat(
                   pcCur++; pcLex++;
                }
                *pcLex=EOS;
-               if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(FLT)-LEXEM(%s)\n",pcHlp);
+               if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(FLT)-LEXEM(%s)\n",isPrnLex(psArg,pcHlp));
                *ppCur=pcCur;
                return(CLPTOK_FLT);
             }
             *pcLex=EOS;
-            if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(FLT)-LEXEM(%s)\n",pcHlp);
+            if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(FLT)-LEXEM(%s)\n",isPrnLex(psArg,pcHlp));
             *ppCur=pcCur;
             return(CLPTOK_FLT);
          } else if ((tolower(pcCur[0])=='e') && (isdigit(pcCur[1]) ||
@@ -2422,12 +2427,12 @@ static int siClpScnNat(
                pcCur++; pcLex++;
             }
             *pcLex=EOS;
-            if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(FLT)-LEXEM(%s)\n",pcHlp);
+            if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(FLT)-LEXEM(%s)\n",isPrnLex(psArg,pcHlp));
             *ppCur=pcCur;
             return(CLPTOK_FLT);
          } else {
             *pcLex=EOS;
-            if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(NUM)-LEXEM(%s)\n",pcHlp);
+            if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(NUM)-LEXEM(%s)\n",isPrnLex(psArg,pcHlp));
             *ppCur=pcCur;
             return(CLPTOK_NUM);
          }
@@ -2552,14 +2557,14 @@ static int siClpPrsPar(
       siInd=siClpSymFnd(pvHdl,siLev,siPos,acKyw,psTab,&psArg,NULL);
       if (siInd<0) return(siInd);
       if (piOid!=NULL) *piOid=psArg->psFix->siOid;
-      psHdl->siTok=siClpScnSrc(pvHdl,0,NULL);
+      psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
       if (psHdl->siTok<0) return(psHdl->siTok);
       if (psHdl->siTok==CLPTOK_SGN) {
          return(siClpPrsSgn(pvHdl,siLev,siPos,psArg));
       } else if (psHdl->siTok==CLPTOK_RBO) {
          return(siClpPrsObj(pvHdl,siLev,siPos,psArg));
       } else if (psHdl->siTok==CLPTOK_DOT) {
-         psHdl->siTok=siClpScnSrc(pvHdl,0,NULL);
+         psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
          if (psHdl->siTok<0) return(psHdl->siTok);
          return(siClpPrsOvl(pvHdl,siLev,siPos,psArg));
       } else if (psHdl->siTok==CLPTOK_SBO) {
@@ -2597,7 +2602,7 @@ static int siClpPrsSgn(
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d SGN(%s=val)\n",fpcPre(pvHdl,siLev),siLev,siPos,psArg->psStd->pcKyw);
-   psHdl->siTok=(psArg->psFix->siTyp==CLPTYP_STRING)?siClpScnSrc(pvHdl,CLPTOK_STR,psArg):siClpScnSrc(pvHdl,0,NULL);
+   psHdl->siTok=(psArg->psFix->siTyp==CLPTYP_STRING)?siClpScnSrc(pvHdl,CLPTOK_STR,psArg):siClpScnSrc(pvHdl,0,psArg);
    if (psHdl->siTok<0) return(psHdl->siTok);
    switch (psHdl->siTok) {
    case CLPTOK_NUM: return(siClpPrsVal(pvHdl,siLev,siPos,0,CLPTYP_NUMBER,psArg));
@@ -2625,7 +2630,7 @@ static int siClpPrsObj(
    TsVar                         asSav[CLPMAX_TABCNT];
 
    if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d OBJ(%s(parlst))-OPN)\n",fpcPre(pvHdl,siLev),siLev,siPos,psArg->psStd->pcKyw);
-   psHdl->siTok=siClpScnSrc(pvHdl,0,NULL);
+   psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
    if (psHdl->siTok<0) return(psHdl->siTok);
    siErr=siClpIniObj(pvHdl,siLev,siPos,psArg,&psDep,asSav);
    if (siErr<0) return(siErr);
@@ -2634,7 +2639,7 @@ static int siClpPrsObj(
    siErr=siClpFinObj(pvHdl,siLev,siPos,psArg,psDep,asSav);
    if (siErr<0) return(siErr);
    if (psHdl->siTok==CLPTOK_RBC) {
-      psHdl->siTok=siClpScnSrc(pvHdl,0,NULL);
+      psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
       if (psHdl->siTok<0) return(psHdl->siTok);
       if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d CNT=%d OBJ(%s(parlst))-CLS)\n",fpcPre(pvHdl,siLev),siLev,siPos,siCnt,psArg->psStd->pcKyw);
    } else {
@@ -2728,7 +2733,7 @@ static int siClpPrsAry(
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    int                           siCnt;
    if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d ARY(%s[typlst])-OPN)\n",fpcPre(pvHdl,siLev),siLev,siPos,psArg->psStd->pcKyw);
-   psHdl->siTok=(psArg->psFix->siTyp==CLPTYP_STRING)?siClpScnSrc(pvHdl,CLPTOK_STR,psArg):siClpScnSrc(pvHdl,0,NULL);
+   psHdl->siTok=(psArg->psFix->siTyp==CLPTYP_STRING)?siClpScnSrc(pvHdl,CLPTOK_STR,psArg):siClpScnSrc(pvHdl,0,psArg);
    if (psHdl->siTok<0) return(psHdl->siTok);
    switch (psArg->psFix->siTyp) {
    case CLPTYP_NUMBER: siCnt=siClpPrsValLst(pvHdl,siLev,CLPTOK_NUM,psArg->psFix->siTyp,psArg); break;
@@ -2745,7 +2750,7 @@ static int siClpPrsAry(
    }
    if (siCnt<0) return(siCnt);
    if (psHdl->siTok==CLPTOK_SBC) {
-      psHdl->siTok=siClpScnSrc(pvHdl,0,NULL);
+      psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
       if (psHdl->siTok<0) return(psHdl->siTok);
       if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d CNT=%d ARY(%s[typlst])-CLS)\n",fpcPre(pvHdl,siLev),siLev,siPos,siCnt,psArg->psStd->pcKyw);
       return(CLP_OK);
@@ -2829,7 +2834,7 @@ static int siClpPrsVal(
    } else {
       psHdl->siTok=siClpScnSrc(pvHdl,siTok,psArg);
       if (psHdl->siTok<0) return(psHdl->siTok);
-      if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d LIT(%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,acVal);
+      if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d LIT(%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,isPrnLex(psArg,acVal));
       return(siClpBldLit(pvHdl,siLev,siPos,siTyp,psArg,acVal));
    }
 }
@@ -2863,11 +2868,11 @@ static int siClpPrsPro(
    siLev=siClpPrsKywLst(pvHdl,siPos,acPat);
    if (siLev<0) return(siLev);
    if (psHdl->siTok==CLPTOK_SGN) {
-      psHdl->siTok=siClpScnSrc(pvHdl,CLPTOK_SUP,NULL);
+      psHdl->siTok=siClpScnSrc(pvHdl,CLPTOK_SUP,psTab);
       if (psHdl->siTok<0) return(psHdl->siTok);
       if (psHdl->siTok==CLPTOK_SUP) {
          strcpy(acSup,psHdl->acLex);
-         psHdl->siTok=siClpScnSrc(pvHdl,0,NULL);
+         psHdl->siTok=siClpScnSrc(pvHdl,0,psTab);
          if (psHdl->siTok<0) return(psHdl->siTok);
          return(siClpBldPro(pvHdl,acPat,acSup));
       } else {
@@ -2918,6 +2923,11 @@ static int siClpPrsKywLst(
 
 /*****************************************************************************/
 
+#define isPrnInt(p,v) (CLPISS_PWD(p->psStd->uiFlg)?((I64)0):(v))
+#define isPrnFlt(p,v) (CLPISS_PWD(p->psStd->uiFlg)?((F64)0.0):(v))
+#define isPrnStr(p,v) (CLPISS_PWD(p->psStd->uiFlg)?("###SECRET###"):(v))
+#define isPrnLen(p,v) (CLPISS_PWD(p->psStd->uiFlg)?((int)0):(v))
+
 static int siClpBldPro(
    void*                         pvHdl,
    const char*                   pcPat,
@@ -2963,20 +2973,20 @@ static int siClpBldPro(
             strcpy(psArg->psFix->acPro,pcPro);
             psArg->psFix->pcDft=psArg->psFix->acPro;
             if (strlen(psHdl->acLst) + strlen(pcPat) + strlen(pcPro) + 8 < CLPMAX_LSTLEN) {
-               sprintf(&psHdl->acLst[strlen(psHdl->acLst)],"%s=\"%s\"\n",pcPat,pcPro);
+               sprintf(&psHdl->acLst[strlen(psHdl->acLst)],"%s=\"%s\"\n",pcPat,isPrnLex(psArg,pcPro));
             }
-            if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"BUILD-PROPERTY %s=\"%s\"\n",pcPat,pcPro);
+            if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"BUILD-PROPERTY %s=\"%s\"\n",pcPat,isPrnStr(psArg,pcPro));
          } else {
             if (psHdl->pfErr!=NULL) {
                fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
-               fprintf(psHdl->pfErr,"%s Path '%s' for property \"%s\" is not an argument or alias\n",fpcPre(pvHdl,0),pcPat,pcPro);
+               fprintf(psHdl->pfErr,"%s Path '%s' for property \"%s\" is not an argument or alias\n",fpcPre(pvHdl,0),pcPat,isPrnStr(psArg,pcPro));
             }
             return(CLPERR_SEM);
          }
       } else {
          if (psHdl->pfErr!=NULL) {
             fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
-            fprintf(psHdl->pfErr,"%s Path '%s' for property \"%s\" not found\n",fpcPre(pvHdl,0),pcPat,pcPro);
+            fprintf(psHdl->pfErr,"%s Path '%s' for property \"%s\" not found\n",fpcPre(pvHdl,0),pcPat,isPrnStr(psArg,pcPro));
          }
          return(CLPERR_SEM);
       }
@@ -3016,7 +3026,7 @@ static int siClpBldLnk(
       if (psArg->psFix->siTyp!=siTyp) {
          if (psHdl->pfErr!=NULL) {
             fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
-            fprintf(psHdl->pfErr,"%s The type (%s) of link \'%s.%s\' dont match the expected type (%s)\n",fpcPre(pvHdl,0),apClpTyp[siTyp],fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
+            fprintf(psHdl->pfErr,"%s The type (%s) of link \'%s.%s\' don't match the expected type (%s)\n",fpcPre(pvHdl,0),apClpTyp[siTyp],fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
          }
          return(CLPERR_SEM);
       }
@@ -3047,47 +3057,47 @@ static int siClpBldLnk(
          if (siVal<(-128) || siVal>65535) {
             if (psHdl->pfErr!=NULL) {
                fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
-               fprintf(psHdl->pfErr,"%s Internal number (%"PRId64") for link \'%s.%s\' need more than 8 Bit\n",fpcPre(pvHdl,0),siVal,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+               fprintf(psHdl->pfErr,"%s Internal number (%"PRId64") for link \'%s.%s\' need more than 8 Bit\n",fpcPre(pvHdl,0),isPrnInt(psArg,siVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
             }
             return(CLPERR_SEM);
          }
          *((I08*)psArg->psVar->pvPtr)=(I08)siVal;
          if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-LINK-I08(PTR=%p CNT=%d LEN=%d RST=%d)%s=%"PRId64"\n",
-                                 fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,siVal);
+                                 fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnInt(psArg,siVal));
          break;
       case 2:
          if (siVal<(-32768) || siVal>65535) {
             if (psHdl->pfErr!=NULL) {
                fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
-               fprintf(psHdl->pfErr,"%s Internal number (%"PRId64") for link \'%s.%s\' need more than 16 Bit\n",fpcPre(pvHdl,0),siVal,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+               fprintf(psHdl->pfErr,"%s Internal number (%"PRId64") for link \'%s.%s\' need more than 16 Bit\n",fpcPre(pvHdl,0),isPrnInt(psArg,siVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
             }
             return(CLPERR_SEM);
          }
          *((I16*)psArg->psVar->pvPtr)=(I16)siVal;
          if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-LINK-I16(PTR=%p CNT=%d LEN=%d RST=%d)%s=%"PRId64"\n",
-                                 fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,siVal);
+                                 fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnInt(psArg,siVal));
          break;
       case 4:
          if (siVal<(-2147483648LL) || siVal>4294967295LL) {
             if (psHdl->pfErr!=NULL) {
                fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
-               fprintf(psHdl->pfErr,"%s Internal number (%"PRId64") for link \'%s.%s\' need more than 32 Bit\n",fpcPre(pvHdl,0),siVal,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+               fprintf(psHdl->pfErr,"%s Internal number (%"PRId64") for link \'%s.%s\' need more than 32 Bit\n",fpcPre(pvHdl,0),isPrnInt(psArg,siVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
             }
             return(CLPERR_SEM);
          }
          *((I32*)psArg->psVar->pvPtr)=(I32)siVal;
          if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-LINK-I32(PTR=%p CNT=%d LEN=%d RST=%d)%s=%"PRId64"\n",
-                                 fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,siVal);
+                                 fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnInt(psArg,siVal));
          break;
       case 8:
          *((I64*)psArg->psVar->pvPtr)=(I64)siVal;
          if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-LINK-I64(PTR=%p CNT=%d LEN=%d RST=%d)%s=%"PRId64"\n",
-                                 fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,siVal);
+                                 fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnInt(psArg,siVal));
          break;
       default:
          if (psHdl->pfErr!=NULL) {
             fprintf(psHdl->pfErr,"SIZE-ERROR\n");
-            fprintf(psHdl->pfErr,"%s Size (%d) for the value (%"PRId64") of link \'%s.%s\' is not 1, 2, 4 or 8)\n",fpcPre(pvHdl,0),psArg->psFix->siSiz,siVal,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+            fprintf(psHdl->pfErr,"%s Size (%d) for the value (%"PRId64") of link \'%s.%s\' is not 1, 2, 4 or 8)\n",fpcPre(pvHdl,0),psArg->psFix->siSiz,isPrnInt(psArg,siVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
          }
          return(CLPERR_SIZ);
       }
@@ -3144,47 +3154,47 @@ static int siClpBldSwt(
       if (siVal<(-128) || siVal>65535) {
          if (psHdl->pfErr!=NULL) {
             fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
-            fprintf(psHdl->pfErr,"%s Object identifier (%"PRId64") of \'%s.%s\' need more than 8 Bit\n",fpcPre(pvHdl,0),siVal,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+            fprintf(psHdl->pfErr,"%s Object identifier (%"PRId64") of \'%s.%s\' need more than 8 Bit\n",fpcPre(pvHdl,0),isPrnInt(psArg,siVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
          }
          return(CLPERR_SEM);
       }
       *((I08*)psArg->psVar->pvPtr)=(I08)siVal;
       if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-SWITCH-I08(PTR=%p CNT=%d LEN=%d RST=%d)%s=%"PRId64"\n",
-                              fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,siVal);
+                              fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnInt(psArg,siVal));
       break;
    case 2:
       if (siVal<(-32768) || siVal>65535) {
          if (psHdl->pfErr!=NULL) {
             fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
-            fprintf(psHdl->pfErr,"%s Object identifier (%"PRId64") of \'%s.%s\' need more than 16 Bit\n",fpcPre(pvHdl,0),siVal,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+            fprintf(psHdl->pfErr,"%s Object identifier (%"PRId64") of \'%s.%s\' need more than 16 Bit\n",fpcPre(pvHdl,0),isPrnInt(psArg,siVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
          }
          return(CLPERR_SEM);
       }
       *((I16*)psArg->psVar->pvPtr)=(I16)siVal;
       if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-SWITCH-I16(PTR=%p CNT=%d LEN=%d RST=%d)%s=%"PRId64"\n",
-                              fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,siVal);
+                              fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnInt(psArg,siVal));
       break;
    case 4:
       if (siVal<(-2147483648LL) || siVal>4294967295LL) {
          if (psHdl->pfErr!=NULL) {
             fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
-            fprintf(psHdl->pfErr,"%s Object identifier (%"PRId64") of \'%s.%s\' need more than 32 Bit\n",fpcPre(pvHdl,0),siVal,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+            fprintf(psHdl->pfErr,"%s Object identifier (%"PRId64") of \'%s.%s\' need more than 32 Bit\n",fpcPre(pvHdl,0),isPrnInt(psArg,siVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
          }
          return(CLPERR_SEM);
       }
       *((I32*)psArg->psVar->pvPtr)=(I32)siVal;
       if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-SWITCH-I32(PTR=%p CNT=%d LEN=%d RST=%d)%s=%"PRId64"\n",
-                              fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,siVal);
+                              fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnInt(psArg,siVal));
       break;
    case 8:
       *((I64*)psArg->psVar->pvPtr)=(I64)siVal;
       if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-SWITCH-64(PTR=%p CNT=%d LEN=%d RST=%d)%s=%"PRId64"\n",
-                              fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,siVal);
+                              fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnInt(psArg,siVal));
       break;
    default:
       if (psHdl->pfErr!=NULL) {
          fprintf(psHdl->pfErr,"SIZE-ERROR\n");
-         fprintf(psHdl->pfErr,"%s Size (%d) for the value (%"PRId64") of \'%s.%s\' is not 1, 2, 4 or 8)\n",fpcPre(pvHdl,0),psArg->psFix->siSiz,siVal,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+         fprintf(psHdl->pfErr,"%s Size (%d) for the value (%"PRId64") of \'%s.%s\' is not 1, 2, 4 or 8)\n",fpcPre(pvHdl,0),psArg->psFix->siSiz,isPrnInt(psArg,siVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
       }
       return(CLPERR_SIZ);
    }
@@ -3239,7 +3249,7 @@ static int siClpBldLit(
    if (CLPISS_SEL(psArg->psStd->uiFlg)) {
       if (psHdl->pfErr!=NULL) {
          fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
-         fprintf(psHdl->pfErr,"%s The argument \'%s.%s\' accept only a keyword representing a constant defintion for type \'%s\'\n",fpcPre(pvHdl,0),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
+         fprintf(psHdl->pfErr,"%s The argument \'%s.%s\' accept only a keyword representing a constant definition for type \'%s\'\n",fpcPre(pvHdl,0),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
          fprintf(psHdl->pfErr,"%s Valid values:\n",fpcPre(pvHdl,0));
          vdClpPrnArgTab(pvHdl,psHdl->pfErr,1,psArg->psFix->siTyp,psArg->psDep);
       }
@@ -3273,14 +3283,14 @@ static int siClpBldLit(
       default:
          if (psHdl->pfErr!=NULL) {
             fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
-            fprintf(psHdl->pfErr,"%s Base (%c) of number literal (%s.%s=%s) not supported\n",fpcPre(pvHdl,0),pcVal[0],fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,pcVal+1);
+            fprintf(psHdl->pfErr,"%s Base (%c) of number literal (%s.%s=%s) not supported\n",fpcPre(pvHdl,0),pcVal[0],fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,isPrnStr(psArg,pcVal+1));
          }
          return(CLPERR_SEM);
       }
       if (errno || strlen(pcHlp)) {
          if (psHdl->pfErr!=NULL) {
             fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
-            fprintf(psHdl->pfErr,"%s Number (%s) of \'%s.%s\' can\'t be converted to a 64 bit value (rest: %s)\n",fpcPre(pvHdl,0),pcVal,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,pcHlp);
+            fprintf(psHdl->pfErr,"%s Number (%s) of \'%s.%s\' can\'t be converted to a 64 bit value (rest: %s)\n",fpcPre(pvHdl,0),isPrnStr(psArg,pcVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,isPrnStr(psArg,pcHlp));
          }
          return(CLPERR_SEM);
       }
@@ -3289,47 +3299,47 @@ static int siClpBldLit(
          if (siVal<(-128) || siVal>255) {
             if (psHdl->pfErr!=NULL) {
                fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
-               fprintf(psHdl->pfErr,"%s Literal number (%s) of \'%s.%s\' need more than 8 Bit\n",fpcPre(pvHdl,0),pcVal,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+               fprintf(psHdl->pfErr,"%s Literal number (%s) of \'%s.%s\' need more than 8 Bit\n",fpcPre(pvHdl,0),isPrnStr(psArg,pcVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
             }
             return(CLPERR_SEM);
          }
          *((I08*)psArg->psVar->pvPtr)=(I08)siVal;
          if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-LITERAL-I08(PTR=%p CNT=%d LEN=%d RST=%d)%s=%"PRId64"\n",
-                                 fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,siVal);
+                                 fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnInt(psArg,siVal));
          break;
       case 2:
          if (siVal<(-32768) || siVal>65535) {
             if (psHdl->pfErr!=NULL) {
                fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
-               fprintf(psHdl->pfErr,"%s Literal number (%s) of \'%s.%s\' need more than 16 Bit\n",fpcPre(pvHdl,0),pcVal,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+               fprintf(psHdl->pfErr,"%s Literal number (%s) of \'%s.%s\' need more than 16 Bit\n",fpcPre(pvHdl,0),isPrnStr(psArg,pcVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
             }
             return(CLPERR_SEM);
          }
          *((I16*)psArg->psVar->pvPtr)=(I16)siVal;
          if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-LITERAL-I16(PTR=%p CNT=%d LEN=%d RST=%d)%s=%"PRId64"\n",
-                                 fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,siVal);
+                                 fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnInt(psArg,siVal));
          break;
       case 4:
          if (siVal<(-2147483648LL) || siVal>4294967295LL) {
             if (psHdl->pfErr!=NULL) {
                fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
-               fprintf(psHdl->pfErr,"%s Literal number (%s) of \'%s.%s\' need more than 32 Bit\n",fpcPre(pvHdl,0),pcVal,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+               fprintf(psHdl->pfErr,"%s Literal number (%s) of \'%s.%s\' need more than 32 Bit\n",fpcPre(pvHdl,0),isPrnStr(psArg,pcVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
             }
             return(CLPERR_SEM);
          }
          *((I32*)psArg->psVar->pvPtr)=(I32)siVal;
          if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-LITERAL-I32(PTR=%p CNT=%d LEN=%d RST=%d)%s=%"PRId64"\n",
-                                 fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,siVal);
+                                 fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnInt(psArg,siVal));
          break;
       case 8:
          *((I64*)psArg->psVar->pvPtr)=(I64)siVal;
          if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-LITERAL-I64(PTR=%p CNT=%d LEN=%d RST=%d)%s=%"PRId64"\n",
-                                 fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,siVal);
+                                 fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnInt(psArg,siVal));
          break;
       default:
          if (psHdl->pfErr!=NULL) {
             fprintf(psHdl->pfErr,"SIZE-ERROR\n");
-            fprintf(psHdl->pfErr,"%s Size (%d) for the value (%s) of \'%s.%s\' is not 1, 2, 4 or 8)\n",fpcPre(pvHdl,0),psArg->psFix->siSiz,pcVal,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+            fprintf(psHdl->pfErr,"%s Size (%d) for the value (%s) of \'%s.%s\' is not 1, 2, 4 or 8)\n",fpcPre(pvHdl,0),psArg->psFix->siSiz,isPrnStr(psArg,pcVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
          }
          return(CLPERR_SIZ);
       }
@@ -3353,14 +3363,14 @@ static int siClpBldLit(
       default:
          if (psHdl->pfErr!=NULL) {
             fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
-            fprintf(psHdl->pfErr,"%s Base (%c) of floating point literal (%s.%s=%s) not supported\n",fpcPre(pvHdl,0),pcVal[0],fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,pcVal+1);
+            fprintf(psHdl->pfErr,"%s Base (%c) of floating point literal (%s.%s=%s) not supported\n",fpcPre(pvHdl,0),pcVal[0],fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,isPrnStr(psArg,pcVal+1));
          }
          return(CLPERR_SEM);
       }
       if (errno || strlen(pcHlp)) {
          if (psHdl->pfErr!=NULL) {
             fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
-            fprintf(psHdl->pfErr,"%s Floating number (%s) of \'%s.%s\' can\'t be converted to a valid 64 bit value (rest: %s)\n",fpcPre(pvHdl,0),pcVal,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,pcHlp);
+            fprintf(psHdl->pfErr,"%s Floating number (%s) of \'%s.%s\' can\'t be converted to a valid 64 bit value (rest: %s)\n",fpcPre(pvHdl,0),isPrnStr(psArg,pcVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,pcHlp);
          }
          return(CLPERR_SEM);
       }
@@ -3368,17 +3378,17 @@ static int siClpBldLit(
       case 4:
          *((F32*)psArg->psVar->pvPtr)=flVal;
          if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-LITERAL-F32(PTR=%p CNT=%d LEN=%d RST=%d)%s=%f\n",
-                                 fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,flVal);
+                                 fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnFlt(psArg,flVal));
          break;
       case 8:
          *((F64*)psArg->psVar->pvPtr)=flVal;
          if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-LITERAL-F64(PTR=%p CNT=%d LEN=%d RST=%d)%s=%f\n",
-                                 fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,flVal);
+                                 fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnFlt(psArg,flVal));
          break;
       default:
          if (psHdl->pfErr!=NULL) {
             fprintf(psHdl->pfErr,"SIZE-ERROR\n");
-            fprintf(psHdl->pfErr,"%s Size (%d) for the value (%s) of \'%s.%s\' is not 4 (float) or 8 (double))\n",fpcPre(pvHdl,0),psArg->psFix->siSiz,pcVal,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+            fprintf(psHdl->pfErr,"%s Size (%d) for the value (%s) of \'%s.%s\' is not 4 (float) or 8 (double))\n",fpcPre(pvHdl,0),psArg->psFix->siSiz,isPrnStr(psArg,pcVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
          }
          return(CLPERR_SIZ);
       }
@@ -3397,14 +3407,14 @@ static int siClpBldLit(
             if (l1%2) {
                if (psHdl->pfErr!=NULL) {
                   fprintf(psHdl->pfErr,"LEXICAL-ERROR\n");
-                  fprintf(psHdl->pfErr,"%s Length of hexadecimal string (%c(%s)) for \'%s.%s\' is not a multiple of 2\n",fpcPre(pvHdl,0),pcVal[0],pcVal+2,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+                  fprintf(psHdl->pfErr,"%s Length of hexadecimal string (%c(%s)) for \'%s.%s\' is not a multiple of 2\n",fpcPre(pvHdl,0),pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
                }
                return(CLPERR_LEX);
             }
             if ((l1/2)>l0) {
                if (psHdl->pfErr!=NULL) {
                   fprintf(psHdl->pfErr,"LEXICAL-ERROR\n");
-                  fprintf(psHdl->pfErr,"%s Hexadecimal string (%c(%s)) of \'%s.%s\' is longer than %d\n",fpcPre(pvHdl,0),pcVal[0],pcVal+2,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,l0);
+                  fprintf(psHdl->pfErr,"%s Hexadecimal string (%c(%s)) of \'%s.%s\' is longer than %d\n",fpcPre(pvHdl,0),pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,l0);
                }
                return(CLPERR_LEX);
             }
@@ -3412,17 +3422,17 @@ static int siClpBldLit(
             if (l2!=l1/2) {
                if (psHdl->pfErr!=NULL) {
                   fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
-                  fprintf(psHdl->pfErr,"%s Hexadecimal string (%c(%s)) of \'%s.%s\' can\'t be converted from hex to bin\n",fpcPre(pvHdl,0),pcVal[0],pcVal+2,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+                  fprintf(psHdl->pfErr,"%s Hexadecimal string (%c(%s)) of \'%s.%s\' can\'t be converted from hex to bin\n",fpcPre(pvHdl,0),pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
                }
                return(CLPERR_SEM);
             }
             siSln=l2;
             if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-LITERAL-HEX(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
-                                    fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,pcVal,l2);
+                                    fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),isPrnLen(psArg,l2));
          } else {
             if (psHdl->pfErr!=NULL) {
                fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
-               fprintf(psHdl->pfErr,"%s String literal (%c(%s)) for \'%s.%s\' is a binary (only zero terminated character string permitted)\n",fpcPre(pvHdl,0),pcVal[0],pcVal+2,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+               fprintf(psHdl->pfErr,"%s String literal (%c(%s)) for \'%s.%s\' is a binary (only zero terminated character string permitted)\n",fpcPre(pvHdl,0),pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
             }
             return(CLPERR_SEM);
          }
@@ -3432,7 +3442,7 @@ static int siClpBldLit(
             if (l1>l0) {
                if (psHdl->pfErr!=NULL) {
                   fprintf(psHdl->pfErr,"LEXICAL-ERROR\n");
-                  fprintf(psHdl->pfErr,"%s ASCII string (%c(%s)) of \'%s.%s\' is longer than %d\n",fpcPre(pvHdl,0),pcVal[0],pcVal+2,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,l0);
+                  fprintf(psHdl->pfErr,"%s ASCII string (%c(%s)) of \'%s.%s\' is longer than %d\n",fpcPre(pvHdl,0),pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,l0);
                }
                return(CLPERR_LEX);
             }
@@ -3440,17 +3450,17 @@ static int siClpBldLit(
             if (l2!=l1) {
                if (psHdl->pfErr!=NULL) {
                   fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
-                  fprintf(psHdl->pfErr,"%s ASCII string (%c(%s)) of \'%s.%s\' can\'t be converted to ASCII\n",fpcPre(pvHdl,0),pcVal[0],pcVal+2,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+                  fprintf(psHdl->pfErr,"%s ASCII string (%c(%s)) of \'%s.%s\' can\'t be converted to ASCII\n",fpcPre(pvHdl,0),pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
                }
                return(CLPERR_SEM);
             }
             siSln=l1;
             if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-LITERAL-ASC(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
-                                    fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,pcVal,l2);
+                                    fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),isPrnLen(psArg,l2));
          } else {
             if (psHdl->pfErr!=NULL) {
                fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
-               fprintf(psHdl->pfErr,"%s String literal (%c(%s)) for \'%s.%s\' is a binary (only zero terminated character string permitted)\n",fpcPre(pvHdl,0),pcVal[0],pcVal+2,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+               fprintf(psHdl->pfErr,"%s String literal (%c(%s)) for \'%s.%s\' is a binary (only zero terminated character string permitted)\n",fpcPre(pvHdl,0),pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
             }
             return(CLPERR_SEM);
          }
@@ -3460,7 +3470,7 @@ static int siClpBldLit(
             if (l1>l0) {
                if (psHdl->pfErr!=NULL) {
                   fprintf(psHdl->pfErr,"LEXICAL-ERROR\n");
-                  fprintf(psHdl->pfErr,"%s EBCDIC string (%c(%s)) of \'%s.%s\' is longer than %d\n",fpcPre(pvHdl,0),pcVal[0],pcVal+2,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,l0);
+                  fprintf(psHdl->pfErr,"%s EBCDIC string (%c(%s)) of \'%s.%s\' is longer than %d\n",fpcPre(pvHdl,0),pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,l0);
                }
                return(CLPERR_LEX);
             }
@@ -3468,17 +3478,17 @@ static int siClpBldLit(
             if (l2!=l1) {
                if (psHdl->pfErr!=NULL) {
                   fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
-                  fprintf(psHdl->pfErr,"%s EBCDIC string (%c(%s)) of \'%s.%s\' can\'t be converted to EBCDIC\n",fpcPre(pvHdl,0),pcVal[0],pcVal+2,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+                  fprintf(psHdl->pfErr,"%s EBCDIC string (%c(%s)) of \'%s.%s\' can\'t be converted to EBCDIC\n",fpcPre(pvHdl,0),pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
                }
                return(CLPERR_SEM);
             }
             siSln=l1;
             if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-LITERAL-EBC(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
-                                    fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,pcVal,l2);
+                                    fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),isPrnLen(psArg,l2));
          } else {
             if (psHdl->pfErr!=NULL) {
                fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
-               fprintf(psHdl->pfErr,"%s String literal (%c(%s)) for \'%s.%s\' is a binary (only zero terminated character string permitted)\n",fpcPre(pvHdl,0),pcVal[0],pcVal+2,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+               fprintf(psHdl->pfErr,"%s String literal (%c(%s)) for \'%s.%s\' is a binary (only zero terminated character string permitted)\n",fpcPre(pvHdl,0),pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
             }
             return(CLPERR_SEM);
          }
@@ -3488,18 +3498,18 @@ static int siClpBldLit(
             if (l1>l0) {
                if (psHdl->pfErr!=NULL) {
                   fprintf(psHdl->pfErr,"LEXICAL-ERROR\n");
-                  fprintf(psHdl->pfErr,"%s Character string (%c(%s)) of \'%s.%s\' is longer than %d\n",fpcPre(pvHdl,0),pcVal[0],pcVal+2,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,l0);
+                  fprintf(psHdl->pfErr,"%s Character string (%c(%s)) of \'%s.%s\' is longer than %d\n",fpcPre(pvHdl,0),pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,l0);
                }
                return(CLPERR_LEX);
             }
             memcpy(psArg->psVar->pvPtr,pcVal+2,l1); l2=l1;
             siSln=l1;
             if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-LITERAL-CHR(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
-                                    fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,pcVal,l2);
+                                    fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),isPrnLen(psArg,l2));
          } else {
             if (psHdl->pfErr!=NULL) {
                fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
-               fprintf(psHdl->pfErr,"%s String literal (%c(%s)) for \'%s.%s\' is a binary (only zero terminated character string permitted)\n",fpcPre(pvHdl,0),pcVal[0],pcVal+2,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+               fprintf(psHdl->pfErr,"%s String literal (%c(%s)) for \'%s.%s\' is a binary (only zero terminated character string permitted)\n",fpcPre(pvHdl,0),pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
             }
             return(CLPERR_SEM);
          }
@@ -3508,7 +3518,7 @@ static int siClpBldLit(
          if (l1+1>l0) {
             if (psHdl->pfErr!=NULL) {
                fprintf(psHdl->pfErr,"LEXICAL-ERROR\n");
-               fprintf(psHdl->pfErr,"%s Character string (%c(%s)) of \'%s.%s\' is longer than %d\n",fpcPre(pvHdl,0),pcVal[0],pcVal+2,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,l0);
+               fprintf(psHdl->pfErr,"%s Character string (%c(%s)) of \'%s.%s\' is longer than %d\n",fpcPre(pvHdl,0),pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,l0);
             }
             return(CLPERR_LEX);
          }
@@ -3516,26 +3526,26 @@ static int siClpBldLit(
          ((char*)psArg->psVar->pvPtr)[l1]=EOS;
          l2=l1+1; siSln=l1;
          if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-LITERAL-STR(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
-                                 fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,pcVal,l2);
+                                 fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),isPrnLen(psArg,l2));
          break;
       case 'd':
          if (CLPISS_BIN(psArg->psStd->uiFlg)) {
             if (l1>l0) {
                if (psHdl->pfErr!=NULL) {
                   fprintf(psHdl->pfErr,"LEXICAL-ERROR\n");
-                  fprintf(psHdl->pfErr,"%s Character string (%c(%s)) of \'%s.%s\' is longer than %d\n",fpcPre(pvHdl,0),pcVal[0],pcVal+2,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,l0);
+                  fprintf(psHdl->pfErr,"%s Character string (%c(%s)) of \'%s.%s\' is longer than %d\n",fpcPre(pvHdl,0),pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,l0);
                }
                return(CLPERR_LEX);
             }
             memcpy(psArg->psVar->pvPtr,pcVal+2,l1); l2=l1;
             siSln=l1;
             if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-LITERAL-CHR(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
-                                    fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,pcVal,l2);
+                                    fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),isPrnLen(psArg,l2));
          } else {
             if (l1+1>l0) {
                if (psHdl->pfErr!=NULL) {
                   fprintf(psHdl->pfErr,"LEXICAL-ERROR\n");
-                  fprintf(psHdl->pfErr,"%s Character string (%c(%s)) of \'%s.%s\' is longer than %d\n",fpcPre(pvHdl,0),pcVal[0],pcVal+2,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,l0);
+                  fprintf(psHdl->pfErr,"%s Character string (%c(%s)) of \'%s.%s\' is longer than %d\n",fpcPre(pvHdl,0),pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,l0);
                }
                return(CLPERR_LEX);
             }
@@ -3543,7 +3553,7 @@ static int siClpBldLit(
             ((char*)psArg->psVar->pvPtr)[l1]=EOS;
             l2=l1+1; siSln=l1;
             if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-LITERAL-STR(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
-                                    fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,pcVal,l2);
+                                    fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),isPrnLen(psArg,l2));
          }
          break;
       default:
@@ -3595,7 +3605,7 @@ static int siClpBldLit(
 
    pcHlp=fpcPat(pvHdl,siLev);
    if (strlen(psHdl->acLst) + strlen(pcHlp) + strlen(psArg->psStd->pcKyw) + strlen(pcVal) + 4 < CLPMAX_LSTLEN) {
-      sprintf(&psHdl->acLst[strlen(psHdl->acLst)],"%s.%s=%s\n",pcHlp,psArg->psStd->pcKyw,pcVal);
+      sprintf(&psHdl->acLst[strlen(psHdl->acLst)],"%s.%s=%s\n",pcHlp,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal));
    }
 
    siErr=siClpBldLnk(pvHdl,siLev,siPos,psArg->psVar->siCnt,psArg->psFix->psCnt,FALSE);
@@ -3632,7 +3642,7 @@ static int siClpBldCon(
    if (CLPISS_SEL(psArg->psStd->uiFlg) && psVal->psVar->pvPtr!=NULL) {
       if (psHdl->pfErr!=NULL) {
          fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
-         fprintf(psHdl->pfErr,"%s The argument \'%s.%s\' accept only a key word representing a constant defintion for type \'%s\'\n",
+         fprintf(psHdl->pfErr,"%s The argument \'%s.%s\' accept only a key word representing a constant definition for type \'%s\'\n",
              fpcPre(pvHdl,0),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
          fprintf(psHdl->pfErr,"%s Valid values:\n",fpcPre(pvHdl,0));
          vdClpPrnArgTab(pvHdl,psHdl->pfErr,1,psArg->psFix->siTyp,psArg->psDep);
@@ -3701,44 +3711,44 @@ static int siClpBldCon(
                if (psHdl->pfErr!=NULL) {
                   fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
                   fprintf(psHdl->pfErr,"%s Constant number (%s=%"PRId64") of \'%s.%s\' needs more than 8 Bit\n",
-                       fpcPre(pvHdl,0),psVal->psStd->pcKyw,siVal,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+                       fpcPre(pvHdl,0),psVal->psStd->pcKyw,isPrnInt(psArg,siVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
                }
                return(CLPERR_SEM);
             }
             *((I08*)psArg->psVar->pvPtr)=(I08)siVal;
             if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-CONSTANT-I08(PTR=%p CNT=%d LEN=%d RST=%d)%s=%"PRId64"\n",
-                                    fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,siVal);
+                                    fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnInt(psArg,siVal));
             break;
          case 2:
             if (siVal<(-32768) || siVal>65535) {
                if (psHdl->pfErr!=NULL) {
                   fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
                   fprintf(psHdl->pfErr,"%s Constant number (%s=%"PRId64") of \'%s.%s\' needs more than 16 Bit\n",
-                       fpcPre(pvHdl,0),psVal->psStd->pcKyw,siVal,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+                       fpcPre(pvHdl,0),psVal->psStd->pcKyw,isPrnInt(psArg,siVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
                }
                return(CLPERR_SEM);
             }
             *((I16*)psArg->psVar->pvPtr)=(I16)siVal;
             if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-CONSTANT-I16(PTR=%p CNT=%d LEN=%d RST=%d)%s=%"PRId64"\n",
-                                    fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,siVal);
+                                    fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnInt(psArg,siVal));
             break;
          case 4:
             if (siVal<(-2147483648LL) || siVal>4294967295LL) {
                if (psHdl->pfErr!=NULL) {
                   fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
                   fprintf(psHdl->pfErr,"%s Constant number (%s=%"PRId64") of \'%s.%s\' needs more than 32 Bit\n",
-                       fpcPre(pvHdl,0),psVal->psStd->pcKyw,siVal,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+                       fpcPre(pvHdl,0),psVal->psStd->pcKyw,isPrnInt(psArg,siVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
                }
                return(CLPERR_SEM);
             }
             *((I32*)psArg->psVar->pvPtr)=(I32)siVal;
             if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-CONSTANT-I32(PTR=%p CNT=%d LEN=%d RST=%d)%s=%"PRId64"\n",
-                                    fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,siVal);
+                                    fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnInt(psArg,siVal));
             break;
          case 8:
             *((I64*)psArg->psVar->pvPtr)=(I64)siVal;
             if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-CONSTANT-I64(PTR=%p CNT=%d LEN=%d RST=%d)%s=%"PRId64"\n",
-                                    fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,siVal);
+                                    fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnInt(psArg,siVal));
             break;
          default:
             if (psHdl->pfErr!=NULL) {
@@ -3780,12 +3790,12 @@ static int siClpBldCon(
          case 4:
             *((F32*)psArg->psVar->pvPtr)=(F32)flVal;
             if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-CONSTANT-F32(PTR=%p CNT=%d LEN=%d RST=%d)%s=%f\n",
-                                    fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,flVal);
+                                    fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnFlt(psArg,flVal));
             break;
          case 8:
             *((F64*)psArg->psVar->pvPtr)=(F64)flVal;
             if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-CONSTANT-F64(PTR=%p CNT=%d LEN=%d RST=%d)%s=%f\n",
-                                    fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,flVal);
+                                    fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnFlt(psArg,flVal));
             break;
          default:
             if (psHdl->pfErr!=NULL) {
@@ -3840,10 +3850,14 @@ static int siClpBldCon(
             if (psHdl->pfBld!=NULL) {
                fprintf(psHdl->pfBld,"%s BUILD-CONSTANT-STR(PTR=%p CNT=%d LEN=%d RST=%d)%s='",
                        fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw);
-               for (k=0;k<siEln;k++) {
-                  if (isprint(pcArg[k])) fprintf(psHdl->pfBld,"%c",pcArg[k]); else fprintf(psHdl->pfBld,"\\x%2.2X",(unsigned int)pcArg[k]);
+               if (CLPISS_PWD(psArg->psStd->uiFlg)) {
+                  fprintf(psHdl->pfBld,"###SECRET###");
+               } else {
+                  for (k=0;k<siEln;k++) {
+                     if (isprint(pcArg[k])) fprintf(psHdl->pfBld,"%c",pcArg[k]); else fprintf(psHdl->pfBld,"\\x%2.2X",(unsigned int)pcArg[k]);
+                  }
                }
-               fprintf(psHdl->pfBld,"\'(%"PRId64")\n",siEln);
+               fprintf(psHdl->pfBld,"\'(%"PRId64")\n",isPrnInt(psArg,siEln));
             }
             siErr=siClpBldLnk(pvHdl,siLev,siPos,siSln,psArg->psFix->psSln,TRUE);
             if (siErr<0) return(siErr);
@@ -3877,10 +3891,14 @@ static int siClpBldCon(
             if (psHdl->pfBld!=NULL) {
                fprintf(psHdl->pfBld,"%s BUILD-CONSTANT-STR(PTR=%p CNT=%d LEN=%d RST=%d)%s='",
                        fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw);
-               for (k=0;k<siEln;k++) {
-                  if (isprint(pcArg[k])) fprintf(psHdl->pfBld,"%c",pcArg[k]); else fprintf(psHdl->pfBld,"\\x%2.2X",(unsigned int)pcArg[k]);
+               if (CLPISS_PWD(psArg->psStd->uiFlg)) {
+                  fprintf(psHdl->pfBld,"###SECRET###");
+               } else {
+                  for (k=0;k<siEln;k++) {
+                     if (isprint(pcArg[k])) fprintf(psHdl->pfBld,"%c",pcArg[k]); else fprintf(psHdl->pfBld,"\\x%2.2X",(unsigned int)pcArg[k]);
+                  }
                }
-               fprintf(psHdl->pfBld,"\'(%"PRId64")\n",siEln);
+               fprintf(psHdl->pfBld,"\'(%"PRId64")\n",isPrnInt(psArg,siEln));
             }
             siErr=siClpBldLnk(pvHdl,siLev,siPos,siSln,psArg->psFix->psSln,TRUE);
             if (siErr<0) return(siErr);
@@ -3905,10 +3923,14 @@ static int siClpBldCon(
                if (psHdl->pfBld!=NULL) {
                   fprintf(psHdl->pfBld,"%s BUILD-CONSTANT-STR(PTR=%p CNT=%d LEN=%d RST=%d)%s='",
                           fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw);
-                  for (k=0;k<siEln;k++) {
-                     if (isprint(pcArg[k])) fprintf(psHdl->pfBld,"%c",pcArg[k]); else fprintf(psHdl->pfBld,"\\x%2.2X",(unsigned int)pcArg[k]);
+                  if (CLPISS_PWD(psArg->psStd->uiFlg)) {
+                     fprintf(psHdl->pfBld,"###SECRET###");
+                  } else {
+                     for (k=0;k<siEln;k++) {
+                        if (isprint(pcArg[k])) fprintf(psHdl->pfBld,"%c",pcArg[k]); else fprintf(psHdl->pfBld,"\\x%2.2X",(unsigned int)pcArg[k]);
+                     }
                   }
-                  fprintf(psHdl->pfBld,"\'(%"PRId64")\n",siEln);
+                  fprintf(psHdl->pfBld,"\'(%"PRId64")\n",isPrnInt(psArg,siEln));
                }
                siErr=siClpBldLnk(pvHdl,siLev,siPos,siSln,psArg->psFix->psSln,TRUE);
                if (siErr<0) return(siErr);
@@ -3965,7 +3987,7 @@ static int siClpIniMainObj(
    if (psTab->psBak!=NULL) {
       if (psHdl->pfErr!=NULL) {
          fprintf(psHdl->pfErr,"INTERNAL-ERROR\n");
-         fprintf(psHdl->pfErr,"%s Entry \'%s.%s\' not at begining of a table\n",fpcPre(pvHdl,0),fpcPat(pvHdl,0),psTab->psStd->pcKyw);
+         fprintf(psHdl->pfErr,"%s Entry \'%s.%s\' not at beginning of a table\n",fpcPre(pvHdl,0),fpcPat(pvHdl,0),psTab->psStd->pcKyw);
       }
       return(CLPERR_INT);
    }
@@ -3996,7 +4018,7 @@ static int siClpFinMainObj(
    if (psTab->psBak!=NULL) {
       if (psHdl->pfErr!=NULL) {
          fprintf(psHdl->pfErr,"INTERNAL-ERROR\n");
-         fprintf(psHdl->pfErr,"%s Entry \'%s.%s\' not at begining of a table\n",fpcPre(pvHdl,0),fpcPat(pvHdl,0),psTab->psStd->pcKyw);
+         fprintf(psHdl->pfErr,"%s Entry \'%s.%s\' not at beginning of a table\n",fpcPre(pvHdl,0),fpcPat(pvHdl,0),psTab->psStd->pcKyw);
       }
       return(CLPERR_INT);
    }
@@ -4050,7 +4072,7 @@ static int siClpIniMainOvl(
    if (psTab->psBak!=NULL) {
       if (psHdl->pfErr!=NULL) {
          fprintf(psHdl->pfErr,"INTERNAL-ERROR\n");
-         fprintf(psHdl->pfErr,"%s Entry \'%s.%s\' not at begining of a table\n",fpcPre(pvHdl,0),fpcPat(pvHdl,0),psTab->psStd->pcKyw);
+         fprintf(psHdl->pfErr,"%s Entry \'%s.%s\' not at beginning of a table\n",fpcPre(pvHdl,0),fpcPat(pvHdl,0),psTab->psStd->pcKyw);
       }
       return(CLPERR_INT);
    }
@@ -4082,7 +4104,7 @@ static int siClpFinMainOvl(
    if (psTab->psBak!=NULL) {
       if (psHdl->pfErr!=NULL) {
          fprintf(psHdl->pfErr,"INTERNAL-ERROR\n");
-         fprintf(psHdl->pfErr,"%s Entry \'%s.%s\' not at begining of a table\n",fpcPre(pvHdl,0),fpcPat(pvHdl,0),psTab->psStd->pcKyw);
+         fprintf(psHdl->pfErr,"%s Entry \'%s.%s\' not at beginning of a table\n",fpcPre(pvHdl,0),fpcPat(pvHdl,0),psTab->psStd->pcKyw);
       }
       return(CLPERR_INT);
    }
@@ -4144,7 +4166,7 @@ static int siClpIniObj(
    if (psArg->psFix->siTyp!=siTyp) {
       if (psHdl->pfErr!=NULL) {
          fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
-         fprintf(psHdl->pfErr,"%s The type (%s) of argument \'%s.%s\' dont match the expected type (%s)\n",fpcPre(pvHdl,0),apClpTyp[siTyp],fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
+         fprintf(psHdl->pfErr,"%s The type (%s) of argument \'%s.%s\' don't match the expected type (%s)\n",fpcPre(pvHdl,0),apClpTyp[siTyp],fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
       }
       return(CLPERR_SEM);
    }
@@ -4158,7 +4180,7 @@ static int siClpIniObj(
    if (psArg->psVar->siRst<psArg->psFix->siSiz) {
       if (psHdl->pfErr!=NULL) {
          fprintf(psHdl->pfErr,"SIZE-ERROR\n");
-         fprintf(psHdl->pfErr,"%s Rest of space (%d) is not big enought for argument \'%s.%s\' with type \'%s\'\n",fpcPre(pvHdl,0),psArg->psVar->siRst,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[siTyp]);
+         fprintf(psHdl->pfErr,"%s Rest of space (%d) is not big enough for argument \'%s.%s\' with type \'%s\'\n",fpcPre(pvHdl,0),psArg->psVar->siRst,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[siTyp]);
       }
       return(CLPERR_SIZ);
    }
@@ -4429,8 +4451,8 @@ static int siClpSetDefault(
 
    if (CLPISS_ARG(psArg->psStd->uiFlg) && psArg->psVar->siCnt==0 && psArg->psFix->pcDft!=NULL && strlen(psArg->psFix->pcDft)) {
       pcCur=psArg->psFix->pcDft;
-      for (siTok=siClpScnNat(pvHdl,psHdl->pfErr,psHdl->pfScn,&pcCur,acLex,0,NULL);siTok!=CLPTOK_END;
-           siTok=siClpScnNat(pvHdl,psHdl->pfErr,psHdl->pfScn,&pcCur,acLex,0,NULL)) {
+      for (siTok=siClpScnNat(pvHdl,psHdl->pfErr,psHdl->pfScn,&pcCur,acLex,0,psArg);siTok!=CLPTOK_END;
+           siTok=siClpScnNat(pvHdl,psHdl->pfErr,psHdl->pfScn,&pcCur,acLex,0,psArg)) {
          switch(siTok) {
          case CLPTOK_NUM:
             if (psArg->psFix->siTyp==CLPTYP_SWITCH) {
@@ -4495,7 +4517,7 @@ static int siClpSetDefault(
             if (psHdl->pfErr!=NULL) {
                fprintf(psHdl->pfErr,"SYNTAX-ERROR\n");
                fprintf(psHdl->pfErr,"%s Token (%s) not allowed in default / property definition (%s) for argument \'%s.%s'\n",
-                                    fpcPre(pvHdl,0),apClpTok[siTok],psArg->psFix->pcDft,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+                                    fpcPre(pvHdl,0),apClpTok[siTok],isPrnStr(psArg,psArg->psFix->pcDft),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
             }
             return(CLPERR_SYN);
          }
@@ -4907,7 +4929,7 @@ static int siClpPrnHlp(
    if (psTab->psBak!=NULL) {
       if (psHdl->pfErr!=NULL) {
          fprintf(psHdl->pfErr,"INTERNAL-ERROR\n");
-         fprintf(psHdl->pfErr,"%s Entry \'%s.%s\' not at begining of a table\n",fpcPre(pvHdl,0),fpcPat(pvHdl,siLev),psTab->psStd->pcKyw);
+         fprintf(psHdl->pfErr,"%s Entry \'%s.%s\' not at beginning of a table\n",fpcPre(pvHdl,0),fpcPat(pvHdl,siLev),psTab->psStd->pcKyw);
       }
       return(CLPERR_INT);
    }
@@ -5113,7 +5135,7 @@ static int siClpPrnDoc(
       if (psTab->psBak!=NULL) {
          if (psHdl->pfErr!=NULL) {
             fprintf(psHdl->pfErr,"INTERNAL-ERROR\n");
-            fprintf(psHdl->pfErr,"%s Entry \'%s.%s\' not at begining of a table\n",fpcPre(pvHdl,0),fpcPat(pvHdl,siLev),psTab->psStd->pcKyw);
+            fprintf(psHdl->pfErr,"%s Entry \'%s.%s\' not at beginning of a table\n",fpcPre(pvHdl,0),fpcPat(pvHdl,siLev),psTab->psStd->pcKyw);
          }
          return(CLPERR_INT);
       }
@@ -5255,7 +5277,7 @@ static int siClpPrnPro(
    if (psTab->psBak!=NULL) {
       if (psHdl->pfErr!=NULL) {
          fprintf(psHdl->pfErr,"INTERNAL-ERROR\n");
-         fprintf(psHdl->pfErr,"%s Entry \'%s.%s\' not at begining of a table\n",fpcPre(pvHdl,0),fpcPat(pvHdl,siLev),psTab->psStd->pcKyw);
+         fprintf(psHdl->pfErr,"%s Entry \'%s.%s\' not at beginning of a table\n",fpcPre(pvHdl,0),fpcPat(pvHdl,siLev),psTab->psStd->pcKyw);
       }
       return(CLPERR_INT);
    }

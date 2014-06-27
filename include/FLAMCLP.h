@@ -40,7 +40,7 @@ string using the lexems and grammar below to fill a structure with the
 corresponding values given in this line. The FLAMCLP works only in memory
 and the syntax and semantic will be defined by a tree of tables. Such a
 table can represent an object (struct) or an overlay (union). Each
-argument in such a table can be a struct or overlay again in using
+argument in such a table can be a object or overlay again in using
 another table for this type. Basic types are switches, numbers, floats
 or strings. With each argument you can define the required minimum and
 possible maximum amount of occurrences. This means that each argument
@@ -60,10 +60,14 @@ argument. For example, if you define an array of numbers then you can
 define a link to determine the amount of entered numbers or for an
 overlay you can link the corresponding object identifier to determine
 which of the arguments are chosen by the user. You can also get the
-string length and other features.
+string length and other features. The kind of link is defined over the
+flags field. There are a lot of other flags supported beside links, for
+example  the PWD flag, which tells CLP that this value are only clear in
+the data structure but always obfuscated in logs, traces and other
+printouts to keep the value secret.
 
-The FLAMCLP supports also aliases. An alias points to another argument and
-is only an additional keyword that can be used.
+The FLAMCLP supports also aliases. An alias points to another argument
+and is only an additional keyword that can be used.
 
 Besides arguments you can also have a constant definition for
 selections. A feature is useful in order to define keywords for values
@@ -85,7 +89,7 @@ of a function that extracts a property list for the argument table tree.
 
 For each path you can also define the default value as environment variable.
 The path are prefixed with the owner ID and the program name first, then
-only the the program name and at the last the path only starting with the
+only the program name and at the last the path only starting with the
 command name will be use to determine a environment variable. For this the
 path is converted to upper case and all '.' are replaced by '_'. The value
 of the environment variable must contain the same supplement string which
@@ -122,6 +126,9 @@ parameter is only valid on the command line. If the flag value is 0
 then the parameter flags are only used for visibility, but not for
 parsing. If the flag value is used then the CLP must be opened for property
 parsing, closed and then opened again for command line parsing.
+
+If the flag CLPFLG_PWD used, string outputs will be result in
+"###SECRECT###' and float or number outputs in a value of 0.
 
 After parsing the command line the corresponding FLAMCLP structure is
 filled with the entered values and the FLAMCLP can be closed or another
@@ -422,6 +429,8 @@ extern const char* pcClpAbout(const int l);
 #define CLPFLG_SLN               0x00002000UL
 /** CLPFLG_TLN This link will be filled by the calculated total length for the argument (sum of all element lengths) */
 #define CLPFLG_TLN               0x00004000UL
+/** CLPFLG_PWD This flag will ensure that the clear value only put to the data structure but not traced, logged or given away elsewhere */
+#define CLPFLG_PWD               0x01000000UL
 
 /**
  * \struct TsClpArgument
