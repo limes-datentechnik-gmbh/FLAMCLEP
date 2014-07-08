@@ -57,12 +57,13 @@
  * 1.1.9: Allow strings without ' like keyword=...SPACE/SEP and switch between " and '
  * 1.1.10: Add new flag to prevent print outs in clear form for passwords or other critical informations
  * 1.1.11: Add overlays and objects to parsed parameter list
+ * 1.1.12: Correct generation of manpages
  */
 
-#define CLP_VSN_STR       "1.1.11"
+#define CLP_VSN_STR       "1.1.12"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        1
-#define CLP_VSN_REVISION       11
+#define CLP_VSN_REVISION       12
 
 /* Definition der Flag-Makros *************************************************/
 
@@ -948,6 +949,7 @@ extern int siClpDocu(
    char                          acNum[CLPMAX_PRESIZ];
    char                          acHlp[CLPMAX_PRESIZ];
    char                          acArg[20];
+   const char*                   p;
 
    if (pcNum!=NULL && strlen(pcNum)<100) {
       if (pcPat!=NULL && strlen(pcPat)) {
@@ -974,13 +976,27 @@ extern int siClpDocu(
                if (psArg!=NULL) {
                   if (CLPISS_ARG(psArg->psStd->uiFlg)) {
                      if (isMan) {
-                        fprintf(pfDoc,"%s(3)\n",fpcPat(pvHdl,siLev));
-                        l=strlen(fpcPat(pvHdl,siLev))+3;
+                        if (psHdl->pcPgm!=NULL && strlen(psHdl->pcPgm)) {
+                           for (p=psHdl->pcPgm;*p;p++) fprintf(pfDoc,"%c",tolower(*p));
+                           fprintf(pfDoc,".");
+                           l=strlen(psHdl->pcPgm)+strlen(fpcPat(pvHdl,siLev))+4;
+                        } else {
+                           l=strlen(fpcPat(pvHdl,siLev))+3;
+                        }
+                        for (p=fpcPat(pvHdl,siLev);*p;p++) fprintf(pfDoc,"%c",tolower(*p));
+                        fprintf(pfDoc,"(3)\n");
                         for (i=0;i<l;i++) fprintf(pfDoc,"="); fprintf(pfDoc,"\n");
                         fprintf(pfDoc,":doctype: manpage\n\n");
                         fprintf(pfDoc,"NAME\n");
                         fprintf(pfDoc,"----\n\n");
-                        vdClpPrnAli(pfDoc,", ",psArg); fprintf(pfDoc," - `%s`\n\n",psArg->psFix->pcHlp);
+                        if (psHdl->pcPgm!=NULL && strlen(psHdl->pcPgm)) {
+                           for (p=psHdl->pcPgm;*p;p++) fprintf(pfDoc,"%c",tolower(*p));
+                           fprintf(pfDoc,".");
+                           for (p=fpcPat(pvHdl,siLev);*p;p++) fprintf(pfDoc,"%c",tolower(*p));
+                        } else {
+                            vdClpPrnAli(pfDoc,", ",psArg);
+                        }
+                        fprintf(pfDoc," - `%s`\n\n",psArg->psFix->pcHlp);
                         fprintf(pfDoc,"SYNOPSIS\n");
                         fprintf(pfDoc,"--------\n\n");
                         fprintf(pfDoc,"-----------------------------------------------------------------------\n");
@@ -1033,13 +1049,27 @@ extern int siClpDocu(
                      }
                   } else if (CLPISS_CON(psArg->psStd->uiFlg)) {
                      if (isMan) {
-                        fprintf(pfDoc,"%s(3)\n",fpcPat(pvHdl,siLev));
-                        l=strlen(fpcPat(pvHdl,siLev))+3;
+                        if (psHdl->pcPgm!=NULL && strlen(psHdl->pcPgm)) {
+                           for (p=psHdl->pcPgm;*p;p++) fprintf(pfDoc,"%c",tolower(*p));
+                           fprintf(pfDoc,".");
+                           l=strlen(psHdl->pcPgm)+strlen(fpcPat(pvHdl,siLev))+4;
+                        } else {
+                           l=strlen(fpcPat(pvHdl,siLev))+3;
+                        }
+                        for(p=fpcPat(pvHdl,siLev);*p;p++) fprintf(pfDoc,"%c",tolower(*p));
+                        fprintf(pfDoc,"(3)\n");
                         for (i=0;i<l;i++) fprintf(pfDoc,"="); fprintf(pfDoc,"\n");
                         fprintf(pfDoc,":doctype: manpage\n\n");
                         fprintf(pfDoc,"NAME\n");
                         fprintf(pfDoc,"----\n\n");
-                        fprintf(pfDoc,"%s - `%s`\n\n",psArg->psStd->pcKyw,psArg->psFix->pcHlp);
+                        if (psHdl->pcPgm!=NULL && strlen(psHdl->pcPgm)) {
+                           for (p=psHdl->pcPgm;*p;p++) fprintf(pfDoc,"%c",tolower(*p));
+                           fprintf(pfDoc,".");
+                           for (p=fpcPat(pvHdl,siLev);*p;p++) fprintf(pfDoc,"%c",tolower(*p));
+                        } else {
+                           for (p=psArg->psStd->pcKyw;*p;p++) fprintf(pfDoc,"%c",tolower(*p));
+                        }
+                        fprintf(pfDoc," - `%s`\n\n",psArg->psFix->pcHlp);
                         fprintf(pfDoc,"SYNOPSIS\n");
                         fprintf(pfDoc,"--------\n\n");
                         fprintf(pfDoc,"-----------------------------------------------------------------------\n");
@@ -1106,13 +1136,25 @@ extern int siClpDocu(
          }
       }
       if (isMan) {
-         fprintf(pfDoc,   "%s.%s(1)\n",psHdl->pcPgm,psHdl->pcCmd);
-         l=strlen(psHdl->pcPgm)+strlen(psHdl->pcCmd)+4;
+         if (psHdl->pcPgm!=NULL && strlen(psHdl->pcPgm)) {
+             for (p=psHdl->pcPgm;*p;p++) fprintf(pfDoc,"%c",tolower(*p));
+             fprintf(pfDoc,".");
+             l=strlen(psHdl->pcPgm)+strlen(psHdl->pcCmd)+4;
+         } else {
+             l=strlen(psHdl->pcCmd)+3;
+         }
+         for (p=psHdl->pcCmd;*p;p++) fprintf(pfDoc,"%c",tolower(*p));
+         fprintf(pfDoc,   "(1)\n");
          for (i=0;i<l;i++) fprintf(pfDoc,"="); fprintf(pfDoc,"\n");
          fprintf(pfDoc,   ":doctype: manpage\n\n");
          fprintf(pfDoc,   "NAME\n");
          fprintf(pfDoc,   "----\n\n");
-         fprintf(pfDoc,   "%s - `%s`\n\n",psHdl->pcCmd,psHdl->pcHlp);
+         if (psHdl->pcPgm!=NULL && strlen(psHdl->pcPgm)) {
+             for (p=psHdl->pcPgm;*p;p++) fprintf(pfDoc,"%c",tolower(*p));
+             fprintf(pfDoc,".");
+         }
+         for (p=psHdl->pcCmd;*p;p++) fprintf(pfDoc,"%c",tolower(*p));
+         fprintf(pfDoc,   " - `%s`\n\n",psHdl->pcHlp);
          fprintf(pfDoc,   "SYNOPSIS\n");
          fprintf(pfDoc,   "--------\n\n");
          fprintf(pfDoc,   "-----------------------------------------------------------------------\n");
