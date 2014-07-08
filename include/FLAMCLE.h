@@ -343,7 +343,7 @@ typedef int (*tpfIni)(
 typedef int (*tpfMap)(
    FILE*                         pfOut,
    FILE*                         pfTrc,
-   const void*                   pvClp,
+   void*                         pvClp,
    void*                         pvPar);
 
 /**

@@ -56,12 +56,13 @@
  * 1.1.8: An empty path "" are handled like NULL pointer path
  * 1.1.9: Allow strings without ' like keyword=...SPACE/SEP and switch between " and '
  * 1.1.10: Add new flag to prevent print outs in clear form for passwords or other critical informations
+ * 1.1.11: Add overlays and objects to parsed parameter list
  */
 
-#define CLP_VSN_STR       "1.1.10"
+#define CLP_VSN_STR       "1.1.11"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        1
-#define CLP_VSN_REVISION       10
+#define CLP_VSN_REVISION       11
 
 /* Definition der Flag-Makros *************************************************/
 
@@ -4162,6 +4163,7 @@ static int siClpIniObj(
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    const int                     siTyp=CLPTYP_OBJECT;
    TsSym*                        psHlp;
+   char*                         pcHlp;
 
    if (psArg->psFix->siTyp!=siTyp) {
       if (psHdl->pfErr!=NULL) {
@@ -4204,6 +4206,11 @@ static int siClpIniObj(
    if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-BEGIN-OBJECT-%s(PTR=%p CNT=%d LEN=%d RST=%d)\n",
                            fpcPre(pvHdl,siLev),psArg->psStd->pcKyw,psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst);
 
+   pcHlp=fpcPat(pvHdl,siLev);
+   if (strlen(psHdl->acLst) + strlen(pcHlp) + strlen(psArg->psStd->pcKyw) + 8 < CLPMAX_LSTLEN) {
+      sprintf(&psHdl->acLst[strlen(psHdl->acLst)],"%s.%s(\n",pcHlp,psArg->psStd->pcKyw);
+   }
+
    psHdl->apPat[siLev]=psArg;
    *ppDep=psArg->psDep;
    return(psArg->psFix->siTyp);
@@ -4220,6 +4227,7 @@ static int siClpFinObj(
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    const int                     siTyp=CLPTYP_OBJECT;
    TsSym*                        psHlp;
+   char*                         pcHlp;
    int                           siErr,i;
 
    if (psArg->psFix->siTyp!=siTyp) {
@@ -4279,6 +4287,11 @@ static int siClpFinObj(
    if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-END-OBJECT-%s(PTR=%p CNT=%d LEN=%d RST=%d)\n",
                            fpcPre(pvHdl,siLev),psArg->psStd->pcKyw,psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst);
 
+   pcHlp=fpcPat(pvHdl,siLev);
+   if (strlen(psHdl->acLst) + strlen(pcHlp) + strlen(psArg->psStd->pcKyw) + 8 < CLPMAX_LSTLEN) {
+      sprintf(&psHdl->acLst[strlen(psHdl->acLst)],"%s.%s)\n",pcHlp,psArg->psStd->pcKyw);
+   }
+
    siErr=siClpBldLnk(pvHdl,siLev,siPos,psArg->psVar->siCnt,psArg->psFix->psCnt,FALSE);
    if (siErr<0) return(siErr);
    siErr=siClpBldLnk(pvHdl,siLev,siPos,psArg->psFix->siSiz,psArg->psFix->psEln,TRUE);
@@ -4301,6 +4314,7 @@ static int siClpIniOvl(
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    const int                     siTyp=CLPTYP_OVRLAY;
    TsSym*                        psHlp;
+
    if (psArg->psFix->siTyp!=siTyp) {
       if (psHdl->pfErr!=NULL) {
          fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
@@ -4342,6 +4356,7 @@ static int siClpIniOvl(
 
    if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-BEGIN-OVERLAY-%s(PTR=%p CNT=%d LEN=%d RST=%d)\n",
                            fpcPre(pvHdl,siLev),psArg->psStd->pcKyw,psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst);
+
    psHdl->apPat[siLev]=psArg;
    *ppDep=psArg->psDep;
    return(psArg->psFix->siTyp);

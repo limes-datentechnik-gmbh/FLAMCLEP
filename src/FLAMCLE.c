@@ -4,7 +4,7 @@
  *
  * LIMES Command Line Executor (CLE) in ANSI-C
  * @author FALK REICHBOTT
- * @date  29.05.2014
+ * @date  07.07.2014
  * @copyright (c) 2014 limes datentechnik gmbh
  * www.flam.de
  * This software is provided 'as-is', without any express or implied
@@ -60,11 +60,12 @@
  * 1.1.5: Property and command line specific parsing
  * 1.1.6: Add support for DD:STDENV on mainframes
  * 1.1.7: Remove message for envar's set on release build
+ * 1.1.8: Add arguments if flcl help path man used
  */
-#define CLE_VSN_STR       "1.1.7"
+#define CLE_VSN_STR       "1.1.8"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        1
-#define CLE_VSN_REVISION       7
+#define CLE_VSN_REVISION       8
 
 /* Definition der Konstanten **************************************************/
 #define CLEMAX_CNFLEN            1023
@@ -609,23 +610,23 @@ extern int siCleExecute(
             if (strxcmp(isCas,argv[3],"MAN",0,0)==0) {
                siDep=0;
             } else if (strxcmp(isCas,argv[3],"DEPTH1",0,0)==0) {
-                  siDep=1;
+               siDep=1;
             } else if (strxcmp(isCas,argv[3],"DEPTH2",0,0)==0) {
-                  siDep=2;
+               siDep=2;
             } else if (strxcmp(isCas,argv[3],"DEPTH3",0,0)==0) {
-                  siDep=3;
+               siDep=3;
             } else if (strxcmp(isCas,argv[3],"DEPTH4",0,0)==0) {
-                  siDep=4;
+               siDep=4;
             } else if (strxcmp(isCas,argv[3],"DEPTH5",0,0)==0) {
-                  siDep=5;
+               siDep=5;
             } else if (strxcmp(isCas,argv[3],"DEPTH6",0,0)==0) {
-                  siDep=6;
+               siDep=6;
             } else if (strxcmp(isCas,argv[3],"DEPTH7",0,0)==0) {
-                  siDep=7;
+               siDep=7;
             } else if (strxcmp(isCas,argv[3],"DEPTH8",0,0)==0) {
-                  siDep=8;
+               siDep=8;
             } else if (strxcmp(isCas,argv[3],"DEPTH9",0,0)==0) {
-                  siDep=9;
+               siDep=9;
             } else if (strxcmp(isCas,argv[3],"ALL",0,0)==0) {
                siDep=10;
             } else {
@@ -656,6 +657,10 @@ extern int siCleExecute(
                   fprintf(pfOut,"Help for argument \'%s\':\n",argv[2]);
                }
                vdPrnCommandHelp(pvHdl,argv[2],siDep);
+               if (siDep==0) {
+                  fprintf(pfOut,"ARGUMENTS\n");
+                  vdPrnCommandHelp(pvHdl,argv[2],1);
+               }
                ERROR(0);
             }
          }
