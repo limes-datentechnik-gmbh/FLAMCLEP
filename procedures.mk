@@ -26,9 +26,9 @@ $(BLDDIR_REL)/%.o : %.c
 
 all: debug release
 
-release: $(REL_TARGETS)
+release: tools $(REL_TARGETS)
 
-debug: $(DEB_TARGETS)
+debug: tools $(DEB_TARGETS)
 
 
 $(DEB_TARGETS) : | $(BINDIR_DEB)
@@ -53,8 +53,6 @@ $(BLDDIR_REL):
 
 tools:
 	+make -C tools
-
-include/CLEMAN.h: tools
 
 # ----- DEBUG TARGETS ----------------------------------------------
 

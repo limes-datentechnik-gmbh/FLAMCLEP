@@ -1715,6 +1715,9 @@ static void vdCleManProgram(
       } else {
          fprintf(pfOut,"No detailed description available for this program.\n\n");
       }
+      fprintf(pfOut,"AUTHOR\n");
+      fprintf(pfOut,"------\n\n");
+      fprintf(pfOut,"limes datentechnik(r) gmbh (www.flam.de)\n\n");
       fprintf(pfOut,"SEE ALSO\n");
       fprintf(pfOut,"--------\n\n");
       for (i=0;psTab[i].pcKyw!=NULL;i++) {
@@ -1833,6 +1836,8 @@ static void vdCleManFunction(
       fprintf(pfOut,"DESCRIPTION\n");
       fprintf(pfOut,"-----------\n\n");
       fprintf(pfOut,"%s\n\n",pcMan);
+      fprintf(pfOut,"AUTHOR\n------\n\n");
+      fprintf(pfOut,"limes datentechnik(r) gmbh (www.flam.de)\n\n");
    } else {
       if (isNbr) {
          fprintf(pfOut,"%s FUNCTION \'%s\'\n",pcNum,pcFct);

@@ -1012,6 +1012,9 @@ extern int siClpDocu(
                         } else {
                            fprintf(pfDoc,"No detailed description available for this argument.\n\n");
                         }
+                        fprintf(pfDoc,"AUTHOR\n");
+                        fprintf(pfDoc,"------\n\n");
+                        fprintf(pfDoc,"limes datentechnik(r) gmbh (www.flam.de)\n\n");
                      } else {
                         switch (psArg->psFix->siTyp){
                         case CLPTYP_OBJECT:strcpy(acArg,"OBJECT");break;
@@ -1085,6 +1088,9 @@ extern int siClpDocu(
                         } else {
                            fprintf(pfDoc,"No detailed description available for this constant.\n\n");
                         }
+                        fprintf(pfDoc,"AUTHOR\n");
+                        fprintf(pfDoc,"------\n\n");
+                        fprintf(pfDoc,"limes datentechnik(r) gmbh (www.flam.de)\n\n");
                      } else {
                         if (isNbr) {
                            fprintf(pfDoc,"%s CONSTANT \'%s\'\n",acNum,psArg->psStd->pcKyw);
@@ -1174,6 +1180,9 @@ extern int siClpDocu(
          } else {
             fprintf(pfDoc,"No detailed description available for this command.\n\n");
          }
+         fprintf(pfDoc,"AUTHOR\n");
+         fprintf(pfDoc,"------\n\n");
+         fprintf(pfDoc,"limes datentechnik(r) gmbh (www.flam.de)\n\n");
       } else {
          if (isNbr) {
             fprintf(pfDoc,   "%s COMMAND \'%s\'\n",pcNum,psHdl->pcCmd);
