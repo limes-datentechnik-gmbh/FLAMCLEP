@@ -3432,7 +3432,7 @@ static int siClpBldLit(
          } else {
             if (psHdl->pfErr!=NULL) {
                fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
-               fprintf(psHdl->pfErr,"%s String literal (%c(%s)) for \'%s.%s\' is a binary (only zero terminated character string permitted)\n",fpcPre(pvHdl,0),pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+               fprintf(psHdl->pfErr,"%s String literal (%c(%s)) for \'%s.%s\' is binary (only zero terminated character string permitted)\n",fpcPre(pvHdl,0),pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
             }
             return(CLPERR_SEM);
          }
@@ -3460,7 +3460,7 @@ static int siClpBldLit(
          } else {
             if (psHdl->pfErr!=NULL) {
                fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
-               fprintf(psHdl->pfErr,"%s String literal (%c(%s)) for \'%s.%s\' is a binary (only zero terminated character string permitted)\n",fpcPre(pvHdl,0),pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+               fprintf(psHdl->pfErr,"%s String literal (%c(%s)) for \'%s.%s\' is binary (only zero terminated character string permitted)\n",fpcPre(pvHdl,0),pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
             }
             return(CLPERR_SEM);
          }
@@ -3488,7 +3488,7 @@ static int siClpBldLit(
          } else {
             if (psHdl->pfErr!=NULL) {
                fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
-               fprintf(psHdl->pfErr,"%s String literal (%c(%s)) for \'%s.%s\' is a binary (only zero terminated character string permitted)\n",fpcPre(pvHdl,0),pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+               fprintf(psHdl->pfErr,"%s String literal (%c(%s)) for \'%s.%s\' is binary (only zero terminated character string permitted)\n",fpcPre(pvHdl,0),pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
             }
             return(CLPERR_SEM);
          }
@@ -3509,7 +3509,7 @@ static int siClpBldLit(
          } else {
             if (psHdl->pfErr!=NULL) {
                fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
-               fprintf(psHdl->pfErr,"%s String literal (%c(%s)) for \'%s.%s\' is a binary (only zero terminated character string permitted)\n",fpcPre(pvHdl,0),pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+               fprintf(psHdl->pfErr,"%s String literal (%c(%s)) for \'%s.%s\' is binary (only zero terminated character string permitted)\n",fpcPre(pvHdl,0),pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
             }
             return(CLPERR_SEM);
          }
@@ -3817,7 +3817,7 @@ static int siClpBldCon(
          if (CLPISS_BIN(psVal->psStd->uiFlg)) {
             if (psHdl->pfErr!=NULL) {
                fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
-               fprintf(psHdl->pfErr,"%s String constant \'%s\' for \'%s.%s\' is a binary (only zero terminated character string permitted)\n",
+               fprintf(psHdl->pfErr,"%s String constant \'%s\' for \'%s.%s\' is binary (only zero terminated character string permitted)\n",
                      fpcPre(pvHdl,0),psVal->psStd->pcKyw,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
             }
             return(CLPERR_SEM);
