@@ -61,11 +61,12 @@
  * 1.1.6: Add support for DD:STDENV on mainframes
  * 1.1.7: Remove message for envar's set on release build
  * 1.1.8: Add arguments if flcl help path man used
+ * 1.1.9: Correct generation of manpages
  */
-#define CLE_VSN_STR       "1.1.8"
+#define CLE_VSN_STR       "1.1.9"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        1
-#define CLE_VSN_REVISION       8
+#define CLE_VSN_REVISION       9
 
 /* Definition der Konstanten **************************************************/
 #define CLEMAX_CNFLEN            1023
@@ -1688,14 +1689,18 @@ static void vdCleManProgram(
    const int                     isNbr)
 {
    int                           i,l;
+   const char*                   p;
    if (isMan) {
-      fprintf(pfOut,"%s(1)\n",pcPgm);
+      for(p=pcPgm;*p;p++) fprintf(pfOut,"%c",tolower(*p));
+      fprintf(pfOut,"(1)\n");
       l=strlen(pcPgm)+3;
-      for (i=0;i<l;i++) fprintf(pfOut,"="); fprintf(pfOut,"\n");
+      for (i=0;i<l;i++) fprintf(pfOut,"=");
+      fprintf(pfOut,"\n");
       fprintf(pfOut,":doctype: manpage\n\n");
       fprintf(pfOut,"NAME\n");
       fprintf(pfOut,"----\n\n");
-      fprintf(pfOut,"%s - `%s`\n\n",pcPgm,pcHlp);
+      for(p=pcPgm;*p;p++) fprintf(pfOut,"%c",tolower(*p));
+      fprintf(pfOut," - `%s`\n\n",pcHlp);
       fprintf(pfOut,"SYNOPSIS\n");
       fprintf(pfOut,"--------\n\n");
       fprintf(pfOut,"-----------------------------------------------------------------------\n");
@@ -1710,11 +1715,17 @@ static void vdCleManProgram(
       } else {
          fprintf(pfOut,"No detailed description available for this program.\n\n");
       }
+      fprintf(pfOut,"AUTHOR\n");
+      fprintf(pfOut,"------\n\n");
+      fprintf(pfOut,"limes datentechnik(r) gmbh (www.flam.de)\n\n");
       fprintf(pfOut,"SEE ALSO\n");
       fprintf(pfOut,"--------\n\n");
       for (i=0;psTab[i].pcKyw!=NULL;i++) {
          if (psTab[i].siFlg) {
-            fprintf(pfOut,"%s.%s(1)\n",pcPgm,psTab[i].pcKyw);
+            for(p=pcPgm;*p;p++) fprintf(pfOut,"%c",tolower(*p));
+            fprintf(pfOut,".");
+            for(p=psTab[i].pcKyw;*p;p++) fprintf(pfOut,"%c",tolower(*p));
+            fprintf(pfOut,"(1)\n");
          }
       }
       fprintf(pfOut,"\n");
@@ -1799,14 +1810,22 @@ static void vdCleManFunction(
    const int                     isNbr)
 {
    int                           i,l;
+   const char*                   p;
    if (isMan) {
-      fprintf(pfOut,"%s.%s(1)\n",pcPgm,pcFct);
+      for(p=pcPgm;*p;p++) fprintf(pfOut,"%c",tolower(*p));
+      fprintf(pfOut,".");
+      for(p=pcFct;*p;p++) fprintf(pfOut,"%c",tolower(*p));
+      fprintf(pfOut,"(1)\n");
       l=strlen(pcPgm)+strlen(pcFct)+4;
-      for (i=0;i<l;i++) fprintf(pfOut,"="); fprintf(pfOut,"\n");
+      for (i=0;i<l;i++) fprintf(pfOut,"=");
+      fprintf(pfOut,"\n");
       fprintf(pfOut,":doctype: manpage\n\n");
       fprintf(pfOut,"NAME\n");
       fprintf(pfOut,"----\n\n");
-      fprintf(pfOut,"%s - `%s`\n\n",pcFct,pcHlp);
+      for(p=pcPgm;*p;p++) fprintf(pfOut,"%c",tolower(*p));
+      fprintf(pfOut,".");
+      for(p=pcFct;*p;p++) fprintf(pfOut,"%c",tolower(*p));
+      fprintf(pfOut," - `%s`\n\n",pcHlp);
       fprintf(pfOut,"SYNOPSIS\n");
       fprintf(pfOut,"--------\n\n");
       fprintf(pfOut,"-----------------------------------------------------------------------\n");
@@ -1817,6 +1836,8 @@ static void vdCleManFunction(
       fprintf(pfOut,"DESCRIPTION\n");
       fprintf(pfOut,"-----------\n\n");
       fprintf(pfOut,"%s\n\n",pcMan);
+      fprintf(pfOut,"AUTHOR\n------\n\n");
+      fprintf(pfOut,"limes datentechnik(r) gmbh (www.flam.de)\n\n");
    } else {
       if (isNbr) {
          fprintf(pfOut,"%s FUNCTION \'%s\'\n",pcNum,pcFct);
