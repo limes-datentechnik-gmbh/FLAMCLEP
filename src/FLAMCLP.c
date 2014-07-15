@@ -58,12 +58,13 @@
  * 1.1.10: Add new flag to prevent print outs in clear form for passwords or other critical informations
  * 1.1.11: Add overlays and objects to parsed parameter list
  * 1.1.12: Correct generation of manpages
+ * 1.1.13: Keywords can now be preceded by '-' or '--'
  */
 
-#define CLP_VSN_STR       "1.1.12"
+#define CLP_VSN_STR       "1.1.13"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        1
-#define CLP_VSN_REVISION       12
+#define CLP_VSN_REVISION       13
 
 /* Definition der Flag-Makros *************************************************/
 
@@ -2047,7 +2048,7 @@ extern int siClpLexem(
    fprintf(pfOut,"%s COMMENT   '#' [:print:]* '#'                              (will be ignored)\n",fpcPre(pvHdl,0));
    fprintf(pfOut,"%s SEPARATOR [:space: | :cntr: | ',']*                  (abbreviated with SEP)\n",fpcPre(pvHdl,0));
    fprintf(pfOut,"%s OPERATOR  '=' | '.' | '(' | ')' | '[' | ']'  (SGN, DOT, RBO, RBC, SBO, SBC)\n",fpcPre(pvHdl,0));
-   fprintf(pfOut,"%s KEYWORD   [:alpha:]+[:alnum: | '_' | '-']*              (always predefined)\n",fpcPre(pvHdl,0));
+   fprintf(pfOut,"%s KEYWORD   ['-'['-']][:alpha:]+[:alnum: | '_' | '-']*    (always predefined)\n",fpcPre(pvHdl,0));
    fprintf(pfOut,"%s NUMBER    ([+|-]  [ :digit:]+)  |                       (decimal (default))\n",fpcPre(pvHdl,0));
    fprintf(pfOut,"%s num       ([+|-]0b[ :digit:]+)  |                                  (binary)\n",fpcPre(pvHdl,0));
    fprintf(pfOut,"%s num       ([+|-]0o[ :digit:]+)  |                                   (octal)\n",fpcPre(pvHdl,0));
@@ -2065,6 +2066,9 @@ extern int siClpLexem(
    fprintf(pfOut,"%s           Strings can contain two '' to represent one '                    \n",fpcPre(pvHdl,0));
    fprintf(pfOut,"%s           Strings can also be enclosed in \" instead of '                   \n",fpcPre(pvHdl,0));
    fprintf(pfOut,"%s           Strings can directly start behind a '=' without enclosing '/\"    \n",fpcPre(pvHdl,0));
+   fprintf(pfOut,"%s              In this case the string ends at the next separator or operator\n",fpcPre(pvHdl,0));
+   fprintf(pfOut,"%s              and keywords are preferred. To use keywords, separators or    \n",fpcPre(pvHdl,0));
+   fprintf(pfOut,"%s              operators in strings, enclosing quotes are required.          \n",fpcPre(pvHdl,0));
    fprintf(pfOut,"%s SUPPLEMENT     '\"' [:print:]* '\"' |   (zero terminated string (properties))\n",fpcPre(pvHdl,0));
    fprintf(pfOut,"%s           Supplements can contain two \"\" to represent one \"                \n",fpcPre(pvHdl,0));
    fprintf(pfOut,"%s           Supplements can also be enclosed in ' instead of \"               \n",fpcPre(pvHdl,0));
@@ -2195,6 +2199,18 @@ static int siClpScnNat(
          if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(STR)-LEXEM(%s)\n",isPrnLex(psArg,pcHlp));
          *ppCur=pcCur;
          return(CLPTOK_STR);
+      } else if ((pcCur[0]=='-' && isalpha(pcCur[1])) || (pcCur[0]=='-' && pcCur[1]=='-' && isalpha(pcCur[2]))) { /*defined keyword*/
+         while (pcCur[0]=='-') pcCur++;
+         *pcLex=*pcCur;
+         pcCur++; pcLex++;
+         while ((isalnum(*pcCur) || *pcCur=='_' || *pcCur=='-') && pcLex<pcEnd) {
+            *pcLex=*pcCur;
+            pcCur++; pcLex++;
+         }
+         *pcLex=EOS;
+         if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(KYW)-LEXEM(%s)\n",pcHlp);
+         *ppCur=pcCur;
+         return(CLPTOK_KYW);
       } else if (uiTok==CLPTOK_STR && isprint(pcCur[0]) && pcCur[0]!='(' && pcCur[0]!=')' && pcCur[0]!='[' && pcCur[0]!=']') {/*required string*/
          char*             pcKyw;
          *pcLex='d'; pcLex++;
@@ -2248,7 +2264,7 @@ static int siClpScnNat(
          if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(STR)-LEXEM(%s)\n",isPrnLex(psArg,pcHlp));
          *ppCur=pcCur;
          return(CLPTOK_STR);
-      } else if (isalpha(*pcCur)) { /*keyword*/
+      } else if (isalpha(pcCur[0])) { /*simple keyword*/
          *pcLex=*pcCur;
          pcCur++; pcLex++;
          while ((isalnum(*pcCur) || *pcCur=='_' || *pcCur=='-') && pcLex<pcEnd) {

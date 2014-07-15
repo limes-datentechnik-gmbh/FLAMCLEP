@@ -6,9 +6,10 @@
  *
  * LIMES Command Line Parser (FLAMCLP) in ANSI-C
  * @author Falk Reichbott
- * @date 06.02.2014\n
+ * @date 15.07.2014\n
  * @copyright (c) 2014 limes datentechnik gmbh
  * www.flam.de
+ *
  * This software is provided 'as-is', without any express or implied
  * warranty. In no event will the authors be held liable for any damages
  * arising from the use of this software.
@@ -66,8 +67,13 @@ example  the PWD flag, which tells CLP that this value are only clear in
 the data structure but always obfuscated in logs, traces and other
 printouts to keep the value secret.
 
-The FLAMCLP supports also aliases. An alias points to another argument
-and is only an additional keyword that can be used.
+The FLAMCLP also supports aliases. An alias points to another argument
+and is only an additional keyword that can be used. To be compatible with
+certain shells the features below are implemented.
+
+ * Strings can be enclosed with '' or ""
+ * Strings can also defined without quotes
+ * Keywords can also start with "-" or "--" in front of the qualifier
 
 Besides arguments you can also have a constant definition for
 selections. A feature is useful in order to define keywords for values
@@ -104,8 +110,9 @@ you can still use such a parameter in the property file or in the command
 line, but it is not directly visible to the user. If the flags CMD and
 PRO are not set then the parameter will be visible in both areas. With
 the flag DMY (for dummy) you can enforce that this parameter is not
-visible in a generated property file and on the command line help, syntax
-and documentation.
+visible in a generated property file, on the command line help, syntax
+and documentation. In this case, the parameter is no part of the symbol
+table. It is only part of the CLP structure.
 
 The FLAMCLP calculates automatically the minimum amount of letters
 required to make the meaning of a keyword unique. Depending on the case
@@ -162,7 +169,7 @@ Lexeme
     RBC  ')'\n
     SBO  '['\n
     SBC  ']'\n
-    KYW  [:alpha:]+[:alnum: | '_' | '-']*\n
+    KYW  [-[-]][:alpha:]+[:alnum: | '_' | '-']*\n
     NUM  ([+|-]  [ :digit:]+) |                           decimal (default)\n
          ([+|-]0b[ :digit:]+) |                           binary\n
          ([+|-]0o[ :digit:]+) |                           octal\n
@@ -180,6 +187,9 @@ Lexeme
          Strings can contain two '' to represent one '\n
          Strings can also be enclosed in " instead of '\n"
          Strings can directly start behind a '=' without enclosing '/"\n
+            In this case the string ends at the next separator or operator\n
+            and keywords are preferred. To use keywords, separators or\n
+            operators in strings, enclosing quotes are required\n
     SUP       '"' [:print:]* '"' |     string with zero termination (local character set) for supplement syntax (properties)\n
          Supplements can contain two "" to represent one "\n
          Supplements can also be enclosed in ' instead of "\n"
@@ -259,7 +269,7 @@ Grammar for property file
    #define pvClpOpen             flclpopn
    #define siClpParsePro         flclprsp
    #define siClpParseCmd         flclprsc
-   #define  siClpProperties      flclppro
+   #define siClpProperties       flclppro
    #define siClpSyntax           flclpsyn
    #define siClpHelp             flclphlp
    #define siClpDocu             flclpdoc
