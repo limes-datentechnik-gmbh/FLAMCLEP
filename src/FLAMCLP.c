@@ -60,12 +60,13 @@
  * 1.1.12: Correct generation of manpages
  * 1.1.13: Keywords can now be preceded by '-' or '--'
  * 1.1.14: Don't print manpage twice at end of path anymore
- */
+ * 1.1.15: Support of new flags to define default interpretation of binary strings (CHR/ASC/EBC/HEX)
+ **/
 
-#define CLP_VSN_STR       "1.1.14"
+#define CLP_VSN_STR       "1.1.15"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        1
-#define CLP_VSN_REVISION       14
+#define CLP_VSN_REVISION       15
 
 /* Definition der Flag-Makros *************************************************/
 
@@ -83,6 +84,10 @@
 #define CLPISS_SLN(flg)          ((flg)&CLPFLG_SLN)
 #define CLPISS_TLN(flg)          ((flg)&CLPFLG_TLN)
 #define CLPISS_PWD(flg)          ((flg)&CLPFLG_PWD)
+#define CLPISS_CHR(flg)          ((flg)&CLPFLG_CHR)
+#define CLPISS_ASC(flg)          ((flg)&CLPFLG_ASC)
+#define CLPISS_EBC(flg)          ((flg)&CLPFLG_EBC)
+#define CLPISS_HEX(flg)          ((flg)&CLPFLG_HEX)
 #define CLPISS_LNK(flg)          (CLPISS_CNT(flg) ||  CLPISS_OID(flg) ||  CLPISS_ELN(flg) || CLPISS_SLN(flg) ||  CLPISS_TLN(flg))
 #define CLPISS_ARG(flg)          ((!CLPISS_LNK(flg)) && (!CLPISS_CON(flg)) && (!CLPISS_ALI(flg)))
 
@@ -3604,17 +3609,83 @@ static int siClpBldLit(
          break;
       case 'd':
          if (CLPISS_BIN(psArg->psStd->uiFlg)) {
-            if (l1>l0) {
-               if (psHdl->pfErr!=NULL) {
-                  fprintf(psHdl->pfErr,"LEXICAL-ERROR\n");
-                  fprintf(psHdl->pfErr,"%s Character string (%c(%s)) of \'%s.%s\' is longer than %d\n",fpcPre(pvHdl,0),pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,l0);
+            if (CLPISS_HEX(psArg->psStd->uiFlg)) {
+               if (l1%2) {
+                  if (psHdl->pfErr!=NULL) {
+                     fprintf(psHdl->pfErr,"LEXICAL-ERROR\n");
+                     fprintf(psHdl->pfErr,"%s Length of hexadecimal string (%c(%s)) for \'%s.%s\' is not a multiple of 2\n",fpcPre(pvHdl,0),pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+                  }
+                  return(CLPERR_LEX);
                }
-               return(CLPERR_LEX);
+               if ((l1/2)>l0) {
+                  if (psHdl->pfErr!=NULL) {
+                     fprintf(psHdl->pfErr,"LEXICAL-ERROR\n");
+                     fprintf(psHdl->pfErr,"%s Hexadecimal string (%c(%s)) of \'%s.%s\' is longer than %d\n",fpcPre(pvHdl,0),pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,l0);
+                  }
+                  return(CLPERR_LEX);
+               }
+               l2=hex2bin(pcVal+2,(U08*)psArg->psVar->pvPtr,l1);
+               if (l2!=l1/2) {
+                  if (psHdl->pfErr!=NULL) {
+                     fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
+                     fprintf(psHdl->pfErr,"%s Hexadecimal string (%c(%s)) of \'%s.%s\' can\'t be converted from hex to bin\n",fpcPre(pvHdl,0),pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+                  }
+                  return(CLPERR_SEM);
+               }
+               siSln=l2;
+               if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-LITERAL-HEX(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
+                                       fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),isPrnLen(psArg,l2));
+            } else if (CLPISS_ASC(psArg->psStd->uiFlg)) {
+               if (l1>l0) {
+                  if (psHdl->pfErr!=NULL) {
+                     fprintf(psHdl->pfErr,"LEXICAL-ERROR\n");
+                     fprintf(psHdl->pfErr,"%s ASCII string (%c(%s)) of \'%s.%s\' is longer than %d\n",fpcPre(pvHdl,0),pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,l0);
+                  }
+                  return(CLPERR_LEX);
+               }
+               l2=chr2asc(pcVal+2,(C08*)psArg->psVar->pvPtr,l1);
+               if (l2!=l1) {
+                  if (psHdl->pfErr!=NULL) {
+                     fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
+                     fprintf(psHdl->pfErr,"%s ASCII string (%c(%s)) of \'%s.%s\' can\'t be converted to ASCII\n",fpcPre(pvHdl,0),pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+                  }
+                  return(CLPERR_SEM);
+               }
+               siSln=l1;
+               if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-LITERAL-ASC(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
+                                       fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),isPrnLen(psArg,l2));
+            } else if (CLPISS_EBC(psArg->psStd->uiFlg)) {
+               if (l1>l0) {
+                  if (psHdl->pfErr!=NULL) {
+                     fprintf(psHdl->pfErr,"LEXICAL-ERROR\n");
+                     fprintf(psHdl->pfErr,"%s EBCDIC string (%c(%s)) of \'%s.%s\' is longer than %d\n",fpcPre(pvHdl,0),pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,l0);
+                  }
+                  return(CLPERR_LEX);
+               }
+               l2=chr2ebc(pcVal+2,(C08*)psArg->psVar->pvPtr,l1);
+               if (l2!=l1) {
+                  if (psHdl->pfErr!=NULL) {
+                     fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
+                     fprintf(psHdl->pfErr,"%s EBCDIC string (%c(%s)) of \'%s.%s\' can\'t be converted to EBCDIC\n",fpcPre(pvHdl,0),pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+                  }
+                  return(CLPERR_SEM);
+               }
+               siSln=l1;
+               if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-LITERAL-EBC(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
+                                       fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),isPrnLen(psArg,l2));
+            } else {
+               if (l1>l0) {
+                  if (psHdl->pfErr!=NULL) {
+                     fprintf(psHdl->pfErr,"LEXICAL-ERROR\n");
+                     fprintf(psHdl->pfErr,"%s Character string (%c(%s)) of \'%s.%s\' is longer than %d\n",fpcPre(pvHdl,0),pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,l0);
+                  }
+                  return(CLPERR_LEX);
+               }
+               memcpy(psArg->psVar->pvPtr,pcVal+2,l1); l2=l1;
+               siSln=l1;
+               if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-LITERAL-CHR(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
+                                       fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),isPrnLen(psArg,l2));
             }
-            memcpy(psArg->psVar->pvPtr,pcVal+2,l1); l2=l1;
-            siSln=l1;
-            if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-LITERAL-CHR(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
-                                    fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),isPrnLen(psArg,l2));
          } else {
             if (l1+1>l0) {
                if (psHdl->pfErr!=NULL) {
@@ -4873,7 +4944,19 @@ static int siClpPrnCmd(
                }
                break;
             case CLPTYP_STRING:
-               if (CLPISS_BIN(psHlp->psStd->uiFlg)) pcHlp="bin"; else pcHlp="str";
+               if (CLPISS_BIN(psHlp->psStd->uiFlg)) {
+                  if (CLPISS_HEX(psHlp->psStd->uiFlg)) {
+                     pcHlp="bin-hex";
+                  } else if (CLPISS_ASC(psHlp->psStd->uiFlg)) {
+                     pcHlp="bin-ascii";
+                  } else if (CLPISS_EBC(psHlp->psStd->uiFlg)) {
+                     pcHlp="bin-ebcdic";
+                  } else if (CLPISS_CHR(psHlp->psStd->uiFlg)) {
+                     pcHlp="bin-char";
+                  } else {
+                     pcHlp="bin";
+                  }
+               } else pcHlp="str";
                if (psHlp->psFix->siMax==1) {
                   if (CLPISS_SEL(psHlp->psStd->uiFlg)) {
                      vdClpPrnAli(pfOut,psHdl->pcOpt,psHlp);fprintf(pfOut,CLP_ASSIGNMENT);
@@ -5129,7 +5212,19 @@ static int siClpPrnSyn(
       }
       break;
    case CLPTYP_STRING:
-      if (CLPISS_BIN(psArg->psStd->uiFlg)) pcHlp="bin"; else pcHlp="str";
+      if (CLPISS_BIN(psArg->psStd->uiFlg)) {
+         if (CLPISS_HEX(psArg->psStd->uiFlg)) {
+            pcHlp="bin-hex";
+         } else if (CLPISS_ASC(psArg->psStd->uiFlg)) {
+            pcHlp="bin-ascii";
+         } else if (CLPISS_EBC(psArg->psStd->uiFlg)) {
+            pcHlp="bin-ebcdic";
+         } else if (CLPISS_CHR(psArg->psStd->uiFlg)) {
+            pcHlp="bin-char";
+         } else {
+            pcHlp="bin";
+         }
+      } else pcHlp="str";
       if (psArg->psFix->siMax==1) {
          if (CLPISS_SEL(psArg->psStd->uiFlg)) {
             vdClpPrnAli(pfOut,psHdl->pcOpt,psArg);fprintf(pfOut,CLP_ASSIGNMENT);
