@@ -439,6 +439,14 @@ extern const char* pcClpAbout(const int l);
 #define CLPFLG_SLN               0x00002000UL
 /** CLPFLG_TLN This link will be filled by the calculated total length for the argument (sum of all element lengths) */
 #define CLPFLG_TLN               0x00004000UL
+/** CLPFLG_CHR This flag will ensure that a binary string are interpreted by default as local character string (DEFAULT) */
+#define CLPFLG_CHR               0x00010000UL
+/** CLPFLG_ASC This flag will ensure that a binary string are interpreted by default as ASCII character string*/
+#define CLPFLG_ASC               0x00020000UL
+/** CLPFLG_EBC This flag will ensure that a binary string are interpreted by default as EBCDIC character string*/
+#define CLPFLG_EBC               0x00040000UL
+/** CLPFLG_HEX This flag will ensure that a binary string are interpreted by default as hexadecimal character string*/
+#define CLPFLG_HEX               0x00080000UL
 /** CLPFLG_PWD This flag will ensure that the clear value only put to the data structure but not traced, logged or given away elsewhere */
 #define CLPFLG_PWD               0x01000000UL
 
