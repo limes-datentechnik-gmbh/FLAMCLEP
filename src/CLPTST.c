@@ -315,7 +315,7 @@ int main(int argc, char * argv[])
       if (pvHdl!=NULL) {
          fprintf(stderr,"SYNTAX required:\n"); siClpSyntax(pvHdl,FALSE,FALSE,10,NULL); fprintf(stderr,"\n");
          fprintf(stderr,"SYNTAX optional:\n"); siClpSyntax(pvHdl,TRUE,TRUE,10,NULL); fprintf(stderr,"\n");
-         siClpHelp(pvHdl,10,NULL);
+         siClpHelp(pvHdl,10,NULL,TRUE);
          fprintf(stderr,"*** PROPERTY FILE PARSER ***\n");
          siCnt=siClpParseCmd(pvHdl,acBuf,TRUE,NULL,&pcPos,&pcLst);
          if (siCnt<0) {

@@ -680,13 +680,15 @@ extern int siClpSyntax(
  * @param[in]  pvHdl Pointer to the corresponding handle created with \a pvClpOpen
  * @param[in]  pcPat Path (root.input...) to limit help to a certain level
  * @param[in]  siDep Depth of next levels to display (0-Manpage, 1-One Level, 2-Two Level, ..., <9-All)
+ * @param[in]  isMan Print manpage if no farther arguments available
  *
  * @return signed integer with CLP_OK(0) or an error code (CLPERR_xxxxxx)
  */
 extern int siClpHelp(
    void*                         pvHdl,
    const int                     siDep,
-   const char*                   pcPat);
+   const char*                   pcPat,
+   const int                     isMan);
 
 /**
  * Generate documentation for command line syntax

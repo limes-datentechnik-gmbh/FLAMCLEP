@@ -59,12 +59,13 @@
  * 1.1.11: Add overlays and objects to parsed parameter list
  * 1.1.12: Correct generation of manpages
  * 1.1.13: Keywords can now be preceded by '-' or '--'
+ * 1.1.14: Don't print manpage twice at end of path anymore
  */
 
-#define CLP_VSN_STR       "1.1.13"
+#define CLP_VSN_STR       "1.1.14"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        1
-#define CLP_VSN_REVISION       13
+#define CLP_VSN_REVISION       14
 
 /* Definition der Flag-Makros *************************************************/
 
@@ -854,7 +855,8 @@ extern int siClpSyntax(
 extern int siClpHelp(
    void*                         pvHdl,
    const int                     siDep,
-   const char*                   pcPat)
+   const char*                   pcPat,
+   const int                     isMan)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    TsSym*                        psTab=psHdl->psSym;
@@ -902,10 +904,14 @@ extern int siClpHelp(
                if (siErr<0) return(siErr);
             }
          } else {
-            if (psArg->psFix->pcMan!=NULL && strlen(psArg->psFix->pcMan)) {
-               fprintf(psHdl->pfHlp,"%s\n",psArg->psFix->pcMan);
+            if (isMan) {
+               if (psArg->psFix->pcMan!=NULL && strlen(psArg->psFix->pcMan)) {
+                  fprintf(psHdl->pfHlp,"%s\n",psArg->psFix->pcMan);
+               } else {
+                  fprintf(psHdl->pfHlp,"No detailed description available for this argument.\n");
+               }
             } else {
-               fprintf(psHdl->pfHlp,"No detailed description available for this argument.\n");
+               fprintf(psHdl->pfHlp,"No farther arguments available.\n");
             }
          }
       } else {

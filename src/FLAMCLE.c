@@ -62,11 +62,12 @@
  * 1.1.7: Remove message for envar's set on release build
  * 1.1.8: Add arguments if flcl help path man used
  * 1.1.9: Correct generation of manpages
+ * 1.1.10: Don't print manpage twice at end of path anymore
  */
-#define CLE_VSN_STR       "1.1.9"
+#define CLE_VSN_STR       "1.1.10"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        1
-#define CLE_VSN_REVISION       9
+#define CLE_VSN_REVISION       10
 
 /* Definition der Konstanten **************************************************/
 #define CLEMAX_CNFLEN            1023
@@ -209,7 +210,8 @@ static void vdPrnCommandSyntax(
 static void vdPrnCommandHelp(
    void*                         pvHdl,
    const char*                   pcCmd,
-   const int                     siDep);
+   const int                     siDep,
+   const int                     isMan);
 
 static void vdPrnCommandManpage(
    void*                         pvHdl,
@@ -657,10 +659,10 @@ extern int siCleExecute(
                } else {
                   fprintf(pfOut,"Help for argument \'%s\':\n",argv[2]);
                }
-               vdPrnCommandHelp(pvHdl,argv[2],siDep);
+               vdPrnCommandHelp(pvHdl,argv[2],siDep,TRUE);
                if (siDep==0) {
                   fprintf(pfOut,"ARGUMENTS\n");
-                  vdPrnCommandHelp(pvHdl,argv[2],1);
+                  vdPrnCommandHelp(pvHdl,argv[2],1,FALSE);
                }
                ERROR(0);
             }
@@ -1960,9 +1962,10 @@ static void vdPrnCommandSyntax(
 static void vdPrnCommandHelp(
    void*                   pvHdl,
    const char*             pcCmd,
-   const int               siDep)
+   const int               siDep,
+   const int               isMan)
 {
-   siClpHelp(pvHdl,siDep,pcCmd);
+   siClpHelp(pvHdl,siDep,pcCmd,isMan);
 }
 
 static void vdPrnCommandManpage(
