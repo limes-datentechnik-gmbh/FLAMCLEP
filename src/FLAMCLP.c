@@ -25,7 +25,7 @@
  ******************************************************************************/
 /*
  * TASK:0000086 Centralized error messages
- * TASK:0000086 Multilanguage support
+ * TASK:0000086 Multi-language support
  */
 
 /* Standard-Includes **********************************************************/
@@ -51,7 +51,7 @@
  * 1.1.3: Support of command line or property file only parameter
  * 1.1.4: Support of dummy (DMY) flag for parameter which are not visible on command line and property file
  * 1.1.5: Support the use of different symbol tables for property and command line parsing
- * 1.1.6: Add pcClpError to provide a error message for an error code
+ * 1.1.6: Add pcClpError to provide an error message for an error code
  * 1.1.7: Add possibility to use getenv to overrule hard coded default values
  * 1.1.8: An empty path "" are handled like NULL pointer path
  * 1.1.9: Allow strings without ' like keyword=...SPACE/SEP and switch between " and '
@@ -61,12 +61,13 @@
  * 1.1.13: Keywords can now be preceded by '-' or '--'
  * 1.1.14: Don't print manpage twice at end of path anymore
  * 1.1.15: Support of new flags to define default interpretation of binary strings (CHR/ASC/EBC/HEX)
+ * 1.1.16: Get selections, object and overlays for aliases up and running
  **/
 
-#define CLP_VSN_STR       "1.1.15"
+#define CLP_VSN_STR       "1.1.16"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        1
-#define CLP_VSN_REVISION       15
+#define CLP_VSN_REVISION       16
 
 /* Definition der Flag-Makros *************************************************/
 
@@ -1867,7 +1868,6 @@ static int siClpSymCal(
             }
          }
       }
-
       if (psSym->psDep!=NULL) {
          psHdl->apPat[siLev]=psSym;
          siErr=siClpSymCal(pvHdl,siLev+1,psSym,psSym->psDep);
@@ -1912,6 +1912,10 @@ static int siClpSymCal(
             }
             return(CLPERR_TAB);
          }
+      }
+      if (CLPISS_ALI(psSym->psStd->uiFlg)) {
+         psSym->psDep=psSym->psStd->psAli->psDep;
+         psSym->psHih=psSym->psStd->psAli->psHih;
       }
    }
    return(CLP_OK);
@@ -2016,7 +2020,7 @@ static void vdClpSymDel(
    TsSym*                        psHlp=psSym;
    TsSym*                        psOld;
    while (psHlp!=NULL) {
-      if (psHlp->psDep!=NULL) {
+      if (!CLPISS_ALI(psHlp->psStd->uiFlg) && psHlp->psDep!=NULL) {
          vdClpSymDel(psHlp->psDep);
       }
       if (!CLPISS_ALI(psHlp->psStd->uiFlg) && psHlp->psVar!=NULL) {
