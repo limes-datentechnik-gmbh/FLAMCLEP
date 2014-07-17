@@ -444,9 +444,8 @@ extern int siCleExecute(
          pfHlp=fopen(pcCnf,"w");
          if (pfHlp==NULL) {
             fprintf(pfOut,"Open of trace file (%s) failed\n",pcCnf);
-                   pfTrc=pfTrc;
          } else pfTrc=pfHlp;
-      } else pfTrc=pfTrc;
+      }
    } else pfTrc=NULL;
 
    for (i=0; psTab[i].pcKyw!=NULL; i++) {
