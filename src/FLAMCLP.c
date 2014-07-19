@@ -62,12 +62,13 @@
  * 1.1.14: Don't print manpage twice at end of path anymore
  * 1.1.15: Support of new flags to define default interpretation of binary strings (CHR/ASC/EBC/HEX)
  * 1.1.16: Get selections, object and overlays for aliases up and running
+ * 1.1.17: Support line comment (initiated with ';' up to '\n')
  **/
 
-#define CLP_VSN_STR       "1.1.16"
+#define CLP_VSN_STR       "1.1.17"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        1
-#define CLP_VSN_REVISION       16
+#define CLP_VSN_REVISION       17
 
 /* Definition der Flag-Makros *************************************************/
 
@@ -2061,6 +2062,7 @@ extern int siClpLexem(
    FILE*                         pfOut)
 {
    fprintf(pfOut,"%s COMMENT   '#' [:print:]* '#'                              (will be ignored)\n",fpcPre(pvHdl,0));
+   fprintf(pfOut,"%s           ';' [:print:]* '\\n'                             (will be ignored)\n",fpcPre(pvHdl,0));
    fprintf(pfOut,"%s SEPARATOR [:space: | :cntr: | ',']*                  (abbreviated with SEP)\n",fpcPre(pvHdl,0));
    fprintf(pfOut,"%s OPERATOR  '=' | '.' | '(' | ')' | '[' | ']'  (SGN, DOT, RBO, RBC, SBO, SBC)\n",fpcPre(pvHdl,0));
    fprintf(pfOut,"%s KEYWORD   ['-'['-']][:alpha:]+[:alnum: | '_' | '-']*    (always predefined)\n",fpcPre(pvHdl,0));
@@ -2129,6 +2131,10 @@ static int siClpScnNat(
             return(CLPERR_LEX);
          }
          pcCur++;
+      } else if (*pcCur==';') { /*line comment*/
+         pcCur++;
+         while (*pcCur!='\n' && *pcCur!=EOS) pcCur++;
+         if (*pcCur=='\n') pcCur++;
       } else if (pcCur[0]==SPMCHR) {/*supplement || simple string*/
          char* pcSup;
          *pcLex='d'; pcLex++;
