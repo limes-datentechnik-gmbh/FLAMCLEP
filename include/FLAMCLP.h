@@ -162,6 +162,7 @@ Lexeme
 
     END  0x00\n
     CMT  '#' [:print:]* '#'\n
+    LCT  ';' [:print:]* 'nl'\n
     SEP  [:SPACE: | :CNTR: | ',']*\n
     SGN  '='\n
     DOT  '.'\n

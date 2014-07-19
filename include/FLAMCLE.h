@@ -197,6 +197,7 @@ Lexemes
 Lexemes (regular expressions) for argument list or parameter file:
 
     --| COMMENT   '#' [:print:]* '#'                              (will be ignored)
+    --| LCOMMENT  ';' [:print:]* 'nl'                             (will be ignored)
     --| SEPARATOR [:space: | :cntr: | ',']*                  (abbreviated with SEP)
     --| OPERATOR  '=' | '.' | '(' | ')' | '[' | ']'  (SGN, DOT, RBO, RBC, SBO, SBC)
     --| KEYWORD   [:alpha:]+[:alnum: | '_' | '-']*              (always predefined)

@@ -2062,7 +2062,7 @@ extern int siClpLexem(
    FILE*                         pfOut)
 {
    fprintf(pfOut,"%s COMMENT   '#' [:print:]* '#'                              (will be ignored)\n",fpcPre(pvHdl,0));
-   fprintf(pfOut,"%s           ';' [:print:]* '\\n'                             (will be ignored)\n",fpcPre(pvHdl,0));
+   fprintf(pfOut,"%s LCOMMENT  ';' [:print:]* 'nl'                             (will be ignored)\n",fpcPre(pvHdl,0));
    fprintf(pfOut,"%s SEPARATOR [:space: | :cntr: | ',']*                  (abbreviated with SEP)\n",fpcPre(pvHdl,0));
    fprintf(pfOut,"%s OPERATOR  '=' | '.' | '(' | ')' | '[' | ']'  (SGN, DOT, RBO, RBC, SBO, SBC)\n",fpcPre(pvHdl,0));
    fprintf(pfOut,"%s KEYWORD   ['-'['-']][:alpha:]+[:alnum: | '_' | '-']*    (always predefined)\n",fpcPre(pvHdl,0));
