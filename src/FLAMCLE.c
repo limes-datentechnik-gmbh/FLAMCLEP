@@ -1998,7 +1998,7 @@ static void vdPrnCommandError(
       l=strlen(pcLst);
       if (l>1) {
          l--;
-         fprintf(pfOut,"%s after successfull parsing of arguments below:\n",pcDep);
+         fprintf(pfOut,"%s after successful parsing of arguments below:\n",pcDep);
          fprintf(pfOut,"%s%s ",pcDep,pcDep);
          for (i=0;i<l;i++) {
             if (pcLst[i]=='\n') {
