@@ -17,7 +17,7 @@ configuration settings.
 For each command execution You can define environment variables which
 are managed over the config file.
 
-The default trace file is 'stdout'. If you activate the trace befor a
+The default trace file is 'stdout'. If you activate the trace before a
 trace file is defined, the trace will be printed on the screen.
 
 Last but not least you can determine license, version and other
@@ -27,13 +27,13 @@ This is the ${__BUILD__} build version of the FLAMCLEP.
 
 .USED RETURN CODES
 * 0  - command line, command syntax, mapping, execution and finish of
-       the command was successfull
-* 1  - command line, command syntax, mapping, execution was ok but
+       the command was successful
+* 1  - command line, command syntax, mapping, execution was OK but
        finish of the command command failed (normally not expected)
-* 2  - command line, command syntax and mapping was ok but execution
+* 2  - command line, command syntax and mapping was OK but execution
        of the command failed (most frequent case)
-* 4  - command line and command syntax was ok but mapping failed
-* 6  - command line was ok but command syntax was wrong
+* 4  - command line and command syntax was OK but mapping failed
+* 6  - command line was OK but command syntax was wrong
 * 8  - command line was wrong (user error)
 * 10 - initialization is wrong (user error)
 * 11 - configuration is wrong (user error)

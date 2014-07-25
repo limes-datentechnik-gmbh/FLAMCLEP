@@ -14,11 +14,11 @@ If an argument list is used all parameters (argv[]) are concatenated
 to one long string and this string is passed to the parser, to allow
 usage of all features of the shell to build the command line input. To
 make sure that anything you enter is passed one by one to the parser
-please use double (WINDOWS(R), UNIX) or single (z/OS(R)) quotation marks at the
-beginning and end of the argument list. If the dot '.' or parenthesis
-'(' ')' is used the complete command can be included in double
-quotation marks. The examples below show all possible command entries
-for the type object:
+please use double (WINDOWS(R), UNIX) or single (z/OS(R)) quotation marks
+at the beginning and end of the argument list. If the dot '.' or
+parenthesis '(' ')' is used the complete command can be included in
+double quotation marks. The examples below show all possible command
+entries for the type object:
 
 -----------------------------------------------------------------------
 program command temp() dummy='str'

@@ -18,8 +18,8 @@ with the token to the parser. This means the separators (SEP)
 are used in the grammar but will never be part of or own tokens.
 
 If a binary entry for a string is possible and no classification is
-done it is taken as a binary string in local character set represen-
-tation (c) without zero termination. For binary strings it
+done it is taken as a binary string in local character set 
+representation (c) without zero termination. For binary strings it
 is still possible to enter a zero terminated string, but then the
 prefix *s* must be used. If no binary entry is feasible, only a
 zero terminated string in local character representation (s) can be

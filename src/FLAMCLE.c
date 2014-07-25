@@ -63,15 +63,18 @@
  * 1.1.8: Add arguments if flcl help path man used
  * 1.1.9: Correct generation of manpages
  * 1.1.10: Don't print manpage twice at end of path anymore
+ * 1.1.11: Correct PGM handling and support "-KYW" or "--KYW"
  */
-#define CLE_VSN_STR       "1.1.10"
+#define CLE_VSN_STR       "1.1.11"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        1
-#define CLE_VSN_REVISION       10
+#define CLE_VSN_REVISION       11
 
 /* Definition der Konstanten **************************************************/
 #define CLEMAX_CNFLEN            1023
 #define CLEMAX_CNFSIZ            1024
+#define CLEMAX_PGMLEN            63
+#define CLEMAX_PGMSIZ            64
 #define CLEMAX_CMDLEN            65535
 #define CLEMAX_CMDSIZ            65536
 #define CLEMAX_PROLEN            262143
@@ -372,6 +375,7 @@ extern int siCleExecute(
    char*                         pcCnf;
    char                          acCnf[CLEMAX_CNFSIZ];
    char                          acOwn[CLEMAX_CNFSIZ];
+   char                          acPgm[CLEMAX_PGMSIZ];
    FILE*                         pfHlp=NULL;
    void*                         pvHdl=NULL;
    char                          acNum[CLEMAX_NUMSIZ];
@@ -379,7 +383,9 @@ extern int siCleExecute(
    FILE*                         pfPro=NULL;
 
    if (psTab==NULL || argc==0 || argv==NULL || pcPgm==NULL || pcHlp==NULL || pfOut==NULL || pcDep==NULL || pcOpt==NULL || pcEnt==NULL ||
-       strlen(pcPgm)==0 || strlen(pcHlp)==0 || strlen(pcPgm)>64) return(24);
+       strlen(pcPgm)==0 || strlen(pcHlp)==0 || strlen(pcPgm)>CLEMAX_PGMLEN) return(24);
+
+   for (i=0;pcPgm[i];i++) acPgm[i]=toupper(pcPgm[i]);
 
    pfHlp=fopen("DD:STDENV","r");
    if (pfHlp!=NULL) {
@@ -400,10 +406,10 @@ extern int siCleExecute(
    }
 
    errno=0;
-   sprintf(acCnf,"%s_DEFAULT_OWNER_ID",pcPgm);
+   sprintf(acCnf,"%s_DEFAULT_OWNER_ID",acPgm);
    pcCnf=getenv(acCnf);
    if (pcCnf!=NULL && strlen(pcCnf) && strlen(pcCnf)<sizeof(acOwn)) strcpy(acOwn,pcCnf); else strcpy(acOwn,pcOwn);
-   sprintf(acCnf,"%s_CONFIG_FILE",pcPgm);
+   sprintf(acCnf,"%s_CONFIG_FILE",acPgm);
    pcCnf=getenv(acCnf);
    if (pcCnf==NULL) {
 #ifdef __HOST__
@@ -420,7 +426,6 @@ extern int siCleExecute(
    pcCnf=pcCnfGet(psCnf,acCnf);
    if (pcCnf!=NULL && strlen(pcCnf) && strlen(pcCnf)<sizeof(acOwn)) strcpy(acOwn,pcCnf);
 
-
 #ifdef __DEBUG__
    i=siCnfPutEnv(psCnf,acOwn,pcPgm);
    if (i) {
@@ -433,7 +438,6 @@ extern int siCleExecute(
 #else
    siCnfPutEnv(psCnf,acOwn,pcPgm);
 #endif
-
 
    sprintf(acCnf,"%s.%s.trace",acOwn,pcPgm);
    pcCnf=pcCnfGet(psCnf,acCnf);
@@ -466,6 +470,9 @@ extern int siCleExecute(
       vdPrnStaticSyntax(pfOut,psTab,argv[0],pcDep,pcOpt);
       ERROR(8);
    }
+
+   if (argv[1][0]=='-') argv[1]++;
+   if (argv[1][0]=='-') argv[1]++;
 
    if (strxcmp(isCas,argv[1],"LICENSE",0,0)==0) {
       if (argc==2) {
@@ -537,6 +544,8 @@ extern int siCleExecute(
          if (argc==3) {
             siDep=1;
          } else if (argc==4) {
+            if (argv[3][0]=='-') argv[3]++;
+            if (argv[3][0]=='-') argv[3]++;
             if (strxcmp(isCas,argv[3],"ALL",0,0)==0) {
                siDep=10;
             } else if (strxcmp(isCas,argv[3],"DEPTH1",0,0)==0) {
@@ -603,12 +612,14 @@ extern int siCleExecute(
          ERROR(0);
       } else if (argc>=3) {
          if (argc==3) {
-            if (strxcmp(isCas,argv[2],"MAN",0,0)==0) {
+            if (strxcmp(isCas,argv[2],"MAN",0,0)==0 || strxcmp(isCas,argv[2],"-MAN",0,0)==0 || strxcmp(isCas,argv[2],"--MAN",0,0)==0) {
                fprintf(pfOut,"Help for program \'%s\':\n",pcPgm);
                fprintf(pfOut,"%s\n",pcMan);
                ERROR(0);
             } else siDep=1;
          } else if (argc==4) {
+            if (argv[3][0]=='-') argv[3]++;
+            if (argv[3][0]=='-') argv[3]++;
             if (strxcmp(isCas,argv[3],"MAN",0,0)==0) {
                siDep=0;
             } else if (strxcmp(isCas,argv[3],"DEPTH1",0,0)==0) {
@@ -697,7 +708,7 @@ extern int siCleExecute(
             isMan=FALSE;
             pfDoc=pfOut;
          }
-         if (strxcmp(isCas,pcCmd,"ALL",0,0)==0) {
+         if (strxcmp(isCas,pcCmd,"ALL",0,0)==0 || strxcmp(isCas,pcCmd,"-ALL",0,0)==0 || strxcmp(isCas,pcCmd,"--ALL",0,0)==0) {
             isAll=TRUE;
             if (isMan==FALSE) fprintf(pfOut,"Manual page for program \'%s\':\n\n",pcPgm);
             vdCleManProgram(pfDoc,psTab,acOwn,pcPgm,pcHlp,pcMan,pcDep,pcOpt,isMan,TRUE);
@@ -880,6 +891,8 @@ extern int siCleExecute(
       int                        isNbr=TRUE;
       if (argc==3 || argc==4) {
          if (argc==4) {
+            if (argv[3][0]=='-') argv[3]++;
+            if (argv[3][0]=='-') argv[3]++;
             if (strxcmp(isCas,argv[3],"NONBR",0,0)==0) {
                isNbr=FALSE;
             } else {
@@ -931,7 +944,7 @@ extern int siCleExecute(
             if (pcCov!=NULL && strlen(pcCov)) {
                fprintf(pfDoc,"%s\n\n",pcCov);
             } else {
-               sprintf(acNum,"\'%s\' - User Manual",pcPgm); l=strlen(acNum); fprintf(pfDoc,"%s\n",acNum);
+               sprintf(acNum,"\'%s\' - User Manual",acPgm); l=strlen(acNum); fprintf(pfDoc,"%s\n",acNum);
                for (i=0;i<l;i++) fprintf(pfDoc,"="); fprintf(pfDoc,"\n");
                fprintf(pfDoc,":doctype: book\n\n");
             }
@@ -1285,6 +1298,8 @@ extern int siCleExecute(
          if (argc==3) {
             siDep=1;
          } else if (argc==4) {
+            if (argv[3][0]=='-') argv[3]++;
+            if (argv[3][0]=='-') argv[3]++;
             if (strxcmp(isCas,argv[3],"ALL",0,0)==0) {
                siDep=10;
             } else if (strxcmp(isCas,argv[3],"DEPTH1",0,0)==0) {
@@ -1423,14 +1438,14 @@ extern int siCleExecute(
       ERROR(8);
    } else if (strxcmp(isCas,argv[1],"TRACE",0,0)==0) {
       if (argc==3) {
-         if (strxcmp(isCas,argv[2],"ON",0,0)==0) {
+         if (strxcmp(isCas,argv[2],"ON",0,0)==0 || strxcmp(isCas,argv[2],"-ON",0,0)==0 || strxcmp(isCas,argv[2],"--ON",0,0)==0) {
             sprintf(acCnf,"%s.%s.trace",acOwn,pcPgm);
             siErr=siCnfSet(psCnf,pfOut,acCnf,"ON",TRUE);
             if (siErr) ERROR(2); else {
                fprintf(pfOut,"Setting configuration keyword '%s' to value 'ON' was successful\n",acCnf);
                ERROR(0);
             }
-         } else if (strxcmp(isCas,argv[2],"OFF",0,0)==0) {
+         } else if (strxcmp(isCas,argv[2],"OFF",0,0)==0 || strxcmp(isCas,argv[2],"-OFF",0,0)==0 || strxcmp(isCas,argv[2],"--OFF",0,0)==0) {
             sprintf(acCnf,"%s.%s.trace",acOwn,pcPgm);
             siErr=siCnfSet(psCnf,pfOut,acCnf,"OFF",TRUE);
             if (siErr) ERROR(2); else {
@@ -1471,14 +1486,18 @@ extern int siCleExecute(
             fprintf(pfOut,"No configuration data defined for file \'%s\'\n",psCnf->acFil);
          }
          ERROR(0);
-      } else if (argc==3 && strxcmp(isCas,argv[2],"CLEAR",0,0)==0) {
-         siCnt=siCnfClr(psCnf,pfOut,pcDep);
-         if (siCnt) {
-            fprintf(pfOut,"Delete %d elements from file \'%s\'\n",siCnt,psCnf->acFil);
-         } else {
-            fprintf(pfOut,"No configuration data defined for file \'%s\'\n",psCnf->acFil);
+      } else if (argc==3) {
+         if (argv[2][0]=='-') argv[2]++;
+         if (argv[2][0]=='-') argv[2]++;
+         if (strxcmp(isCas,argv[2],"CLEAR",0,0)==0) {
+            siCnt=siCnfClr(psCnf,pfOut,pcDep);
+            if (siCnt) {
+               fprintf(pfOut,"Delete %d elements from file \'%s\'\n",siCnt,psCnf->acFil);
+            } else {
+               fprintf(pfOut,"No configuration data defined for file \'%s\'\n",psCnf->acFil);
+            }
+            ERROR(0);
          }
-         ERROR(0);
       }
       fprintf(pfOut,"Syntax for built-in function \'CONFIG\' not valid\n");
       fprintf(pfOut,"%s %s CONFIG\n",pcDep,argv[0]);
