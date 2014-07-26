@@ -1512,18 +1512,26 @@ extern int siCleExecute(
             if (siErr) ERROR(siErr);
             siErr=siClpParseCmd(pvHdl,acCmd,TRUE,psTab[i].piOid,&pcPos,&pcLst);
             if (siErr<0) {
+               fprintf(pfOut,"Command line parser for command '%s' failed!\n",psTab[i].pcKyw);
                vdPrnCommandError(pvHdl,pfOut,acCmd,pcPos,pcLst,pcDep);
                ERROR(6);
             }
             siErr=psTab[i].pfMap(pfOut,pfTrc,psTab[i].pvClp,psTab[i].pvPar);
-            if (siErr)  ERROR(4);
+            if (siErr) {
+               fprintf(pfOut,"Mapping of CLP structure for command '%s' failed!\n",psTab[i].pcKyw);
+               ERROR(4);
+            }
             siErr=psTab[i].pfRun(pfOut,pfTrc,acOwn,pcPgm,pcVsn,pcAbo,psTab[i].pcKyw,acCmd,pcLst,psTab[i].pvPar);
             if (siErr)  {
+               fprintf(pfOut,"Run of command '%s' failed!\n",psTab[i].pcKyw);
                siErr=psTab[i].pfFin(pfOut,pfTrc,psTab[i].pvPar);
                ERROR(2);
             }
             siErr=psTab[i].pfFin(pfOut,pfTrc,psTab[i].pvPar);
-            if (siErr)  ERROR(1);
+            if (siErr) {
+               fprintf(pfOut,"Finish/cleanup for command '%s' failed!\n",psTab[i].pcKyw);
+               ERROR(1);
+            }
             ERROR(0);
          }
       }
@@ -1587,6 +1595,7 @@ static int siClePropertyInit(
    }
    siErr=siClpParsePro(*ppHdl,acPro,FALSE,&pcPos,&pcLst);
    if (siErr<0) {
+      fprintf(pfOut,"Property parser for command \'%s\' failed!\n",pcCmd);
       vdPrnPropertyError(*ppHdl,pfOut,acFil,acPro,pcPos,pcLst,pcDep);
       vdClpClose(*ppHdl);*ppHdl=NULL;
       return(6);
@@ -1645,6 +1654,7 @@ static int siCleCommandInit(
    }
    siErr=siClpParsePro(*ppHdl,acPro,FALSE,&pcPos,&pcLst);
    if (siErr<0) {
+      fprintf(pfOut,"Property parser for command \'%s\' failed!\n",pcCmd);
       vdPrnPropertyError(*ppHdl,pfOut,acFil,acPro,pcPos,pcLst,pcDep);
       vdClpClose(*ppHdl);*ppHdl=NULL;
       return(6);
