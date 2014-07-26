@@ -6,9 +6,10 @@
  *
  * LIMES Command Line Executor (FLAMCLE) in ANSI-C
  * @author Falk Reichbott
- * @date 06.01.2014\n
+ * @date 26.07.2014\n
  * @copyright (c) 2014 limes datentechnik gmbh
  * www.flam.de
+ *
  * This software is provided 'as-is', without any express or implied
  * warranty. In no event will the authors be held liable for any damages
  * arising from the use of this software.
@@ -96,6 +97,7 @@ Below, you can find a possibly incomplete list of FLAMCLE feature:
  * * Aliases for each argument can also be defined and are handled as options for the same value.
  * * Available and usable on each platform including WIN, UNIX, MAC, ZOS, VSE, ...
  * * Support of STDENV as DD name for environment variables on mainframes
+ * * Keywords (commands, built-in functions, ON, OFF, ALL, DEPTH1, ...) can start optional with "-" or "--"
 
 Built-in Functions
 ------------------

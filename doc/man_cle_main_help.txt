@@ -1,2 +1,3 @@
 Here you can see the static main help for this program. This content
-is printed on the screen if the built-in function 'HELP' is used.
+is printed on the screen if the built-in function 'HELP' is used
+without any further arguments.

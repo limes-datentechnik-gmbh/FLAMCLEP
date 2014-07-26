@@ -6,7 +6,7 @@
  *
  * LIMES Command Line Parser (FLAMCLP) in ANSI-C
  * @author Falk Reichbott
- * @date 15.07.2014\n
+ * @date 26.07.2014\n
  * @copyright (c) 2014 limes datentechnik gmbh
  * www.flam.de
  *
@@ -113,6 +113,10 @@ the flag DMY (for dummy) you can enforce that this parameter is not
 visible in a generated property file, on the command line help, syntax
 and documentation. In this case, the parameter is no part of the symbol
 table. It is only part of the CLP structure.
+
+For binary strings the default interpretation can be free defined over a
+additional set of flags (CLPFLG_HEX/CHR/ASC/EBC). This is useful for hex
+strings or passwords.
 
 The FLAMCLP calculates automatically the minimum amount of letters
 required to make the meaning of a keyword unique. Depending on the case

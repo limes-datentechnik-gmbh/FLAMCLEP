@@ -2,6 +2,18 @@ The actual configuration list with owner id, property file names trace
 setting and more are shown. With the option CLEAR the configuration
 data including the corresponding file will be deleted.
 
+The configuration file can be defined by the environment variable:
+
+   program_CONFIG_FILE=config.file.name
+   
+If this location not defined, then the configuration file are stored on
+distributed systems in the current working directory under the file
+name:
+
+   .program.config   
+
+On mainframes as default the data set name 'user.program.CONFIG' is
+used.
 
 .EXAMPLES
 

@@ -16,9 +16,11 @@ for all supported commands. The format is:
    path = SUPPLEMENT # Type: tttttt Help: hhh...hhh #
 
 The path denotes the unique dotted keyword list for one argument. The
-'SUPPLEMENT' is a string in double quotation marks containing the value
-list for this argument in accordance with the syntax of the command
-line parser. This means for example that a string must be included in
+'SUPPLEMENT' is a string normally in double quotation marks containing
+the value list for this argument in accordance with the syntax of the
+command line parser (strings then normally in single quotation marks,
+a opposite usage of the quotation marks is possible but not
+recommended). This means for example that a string must be included in
 apostrophes. The supplement string is returned by the corresponding
 command line parser if no value for this argument is entered on the
 command line or is included in the parameter file.
@@ -32,7 +34,8 @@ into the new property file.
 
 The property file can contain parameter which are not available on the
 command line. Such parameter are only documented in the property file.
-On the other side not all command line parameter are available as property.
+On the other side not all command line parameter are available as
+property.
 
 If a description for a property argument is available which is not a
 part of the user manual this description is written as comment in

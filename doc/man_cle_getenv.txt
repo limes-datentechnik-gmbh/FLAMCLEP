@@ -1,6 +1,6 @@
 This function lists all environment variables which are set within the
-config file for a certain owner. All shown environment variables are 
-placed in the environment table of the process.
+configuration file for a certain owner. All shown environment variables
+are placed in the environment table of the process.
 
 Attention: *The environment variables will be temporary overwritten*
 

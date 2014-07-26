@@ -32,7 +32,8 @@ Shows complete help below specified path, not just DEPTH1.
 
    MAN
 
-Shows the detailed description for this program, command or parameter.
+Shows additionally the detailed description for this program, command
+or parameter.
 
 .EXAMPLES
 
