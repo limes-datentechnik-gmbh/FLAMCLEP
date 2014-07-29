@@ -64,11 +64,12 @@
  * 1.1.9: Correct generation of manpages
  * 1.1.10: Don't print manpage twice at end of path anymore
  * 1.1.11: Correct PGM handling and support "-KYW" or "--KYW"
+ * 1.1.12: Support default command or built-in function
  */
-#define CLE_VSN_STR       "1.1.11"
+#define CLE_VSN_STR       "1.1.12"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        1
-#define CLE_VSN_REVISION       11
+#define CLE_VSN_REVISION       12
 
 /* Definition der Konstanten **************************************************/
 #define CLEMAX_CNFLEN            1023
@@ -261,8 +262,8 @@ static int siCleGetCommand(
    FILE*                         pfOut,
    const char*                   pcDep,
    const char*                   pcFct,
-   const int                     argc,
-   const char*                   argv[],
+   int                           argc,
+   char*                         argv[],
    char*                         pcCmd);
 
 static TsCnfHdl* psCnfOpn(
@@ -343,11 +344,11 @@ extern const char* pcCleAbout(const int l)
 }
 
 #undef  ERROR
-#define ERROR(x) return(siCleEndExecution(x,psCnf,pfHlp,pfDoc,pfPro,pvHdl))
+#define ERROR(x) return(siCleEndExecution((x),psCnf,pfHlp,pfDoc,pfPro,pvHdl))
 extern int siCleExecute(
    const TsCleCommand*           psTab,
-   const int                     argc,
-   const char*                   argv[],
+   int                           argc,
+   char*                         argv[],
    const char*                   pcOwn,
    const char*                   pcPgm,
    const int                     isCas,
@@ -365,7 +366,8 @@ extern int siCleExecute(
    const char*                   pcMan,
    const char*                   pcCov,
    const char*                   pcGls,
-   const char*                   pcFin)
+   const char*                   pcFin,
+   const char*                   pcDef)
 {
    int                           i,l,s,siErr,siDep,siCnt;
    char*                         pcPos=NULL;
@@ -381,6 +383,7 @@ extern int siCleExecute(
    char                          acNum[CLEMAX_NUMSIZ];
    FILE*                         pfDoc=NULL;
    FILE*                         pfPro=NULL;
+   char**                        ppArg=NULL;
 
    if (psTab==NULL || argc==0 || argv==NULL || pcPgm==NULL || pcHlp==NULL || pfOut==NULL || pcDep==NULL || pcOpt==NULL || pcEnt==NULL ||
        strlen(pcPgm)==0 || strlen(pcHlp)==0 || strlen(pcPgm)>CLEMAX_PGMLEN) return(24);
@@ -466,14 +469,24 @@ extern int siCleExecute(
    }
 
    if (argc<2) {
-      fprintf(pfOut,"Command or built-in function required!\n");
-      vdPrnStaticSyntax(pfOut,psTab,argv[0],pcDep,pcOpt);
-      ERROR(8);
+      if (pcDef!=NULL && strlen(pcDef)) {
+         ppArg=malloc((argc+1)*sizeof(*ppArg));
+         if (ppArg == NULL) {
+            fprintf(pfOut,"Memory allocation for argument list to run the default command '%s' failed!\n",pcDef);
+            ERROR(16);
+         }
+         ppArg[0]=argv[0]; ppArg[1]=(char*)pcDef; argc=2; argv=ppArg;
+      } else {
+         fprintf(pfOut,"Command or built-in function required!\n");
+         vdPrnStaticSyntax(pfOut,psTab,argv[0],pcDep,pcOpt);
+         ERROR(8);
+      }
    }
 
    if (argv[1][0]=='-') argv[1]++;
    if (argv[1][0]=='-') argv[1]++;
 
+EVALUATE:
    if (strxcmp(isCas,argv[1],"LICENSE",0,0)==0) {
       if (argc==2) {
          fprintf(pfOut,"License of program \'%s\':\n",pcPgm);
@@ -1535,6 +1548,17 @@ extern int siCleExecute(
             ERROR(0);
          }
       }
+      if (pcDef!=NULL && strlen(pcDef) && ppArg==NULL) {
+         ppArg=malloc((argc+1)*sizeof(*ppArg));
+         if (ppArg == NULL) {
+            fprintf(pfOut,"Memory allocation for argument list to run the default command '%s' failed!\n",pcDef);
+            ERROR(16);
+         }
+         for (i=argc;i>1;i--) ppArg[i]=argv[i-1];
+         ppArg[0]=argv[0]; ppArg[1]=(char*)pcDef; argc++; argv=ppArg;
+         goto EVALUATE;
+      }
+      if (ppArg!=NULL) free(ppArg);
       fprintf(pfOut,"Command or built-in function \'%s\' not supported\n",argv[1]);
       vdPrnStaticSyntax(pfOut,psTab,argv[0],pcDep,pcOpt);
       ERROR(8);
@@ -2147,8 +2171,8 @@ static int siCleGetCommand(
    FILE*                   pfOut,
    const char*             pcDep,
    const char*             pcFct,
-   const int               argc,
-   const char*             argv[],
+   int                     argc,
+   char*                   argv[],
    char*                   pcCmd)
 {
    int                     i,siCmd,siRst,l=strlen(pcFct);

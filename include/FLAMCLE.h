@@ -47,7 +47,12 @@ several built-in functions.
 To achieve this, a table must be defined where each row describes one
 command. This table provides the input for the execution function doing
 the command line interpretation. The whole library consists of only one
-function and a structure to define the command table.
+function and a structure to define the command table. One of these
+commands or a built-in function can be defined as default, which will be
+executed if the first keyword (argv[1]) don't fit one of the user-
+defined commands or built-in functions. If no command or built-in
+function defined and no default set the built-in function syntax will be
+executed to show the capabilities of the command line program.
 
 Beside the specified user-defined commands, the FLAMCLE provides several
 powerful built-in functions (listed below). All built-in functions have
@@ -70,6 +75,7 @@ Below, you can find a possibly incomplete list of FLAMCLE feature:
 
  * * Support of an unlimited amount of commands
  * * Support of hidden commands (not documented)
+ * * Support of a default command (optional)
  * * Includes a lot of useful built-in functions
  * * Simple owner management to differentiate configurations
  * * The logical program name can be freely defined
@@ -190,7 +196,7 @@ Sample program
        return(siCleExecute(asCmdTab,argc,argv,"de.limes","flcl",FALSE,TRUE,0,stderr,stdout,
                            "--|","/",pcFlclVersion(),pcFlclAbout(),"TEST-LICENSE",
                            "Frankenstein Limes(R) Command Line for FLUC, FLAM and FLIES",
-                           MAN_FLCL_MAIN,MAN_FLCL_COV,MAN_FLCL_GLS,MAN_FLCL_FIN));
+                           MAN_FLCL_MAIN,MAN_FLCL_COV,MAN_FLCL_GLS,MAN_FLCL_FIN,"CONV"));
     }
 
 Lexemes
@@ -517,6 +523,7 @@ typedef struct CleCommand {
  * @param[in]  pcGls Glossary for documentation generation (in ASCIIDOC format (term:: explanation)),
  *             if NULL then no glossary are generated, if "" then only the FLAMCLP glossary is added)
  * @param[in]  pcFin Final pages for documentation generation (colophon, copyright, closing aso. in ASCIIDOC format)
+ * @param[in]  pcDef Default command or built-in function, which is executed if the first keyword (argv[1]) don't match
  *
  * @return signed integer with values below:\n
  * 0  - command line, command syntax, mapping, execution and finish of the command was successfull\n
@@ -534,8 +541,8 @@ typedef struct CleCommand {
  */
 extern int siCleExecute(
    const TsCleCommand*           psTab,
-   const int                     argc,
-   const char*                   argv[],
+   int                           argc,
+   char*                         argv[],
    const char*                   pcOwn,
    const char*                   pcPgm,
    const int                     isCas,
@@ -553,7 +560,8 @@ extern int siCleExecute(
    const char*                   pcMan,
    const char*                   pcCov,
    const char*                   pcGls,
-   const char*                   pcFin);
+   const char*                   pcFin,
+   const char*                   pcDef);
 
 #endif /*INC_CLE_H*/
 
