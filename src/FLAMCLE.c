@@ -162,6 +162,7 @@ static int siCleEndExecution(
    FILE*                         pfTrc,
    FILE*                         pfDoc,
    FILE*                         pfPro,
+   char**                        ppArg,
    void*                         pvHdl);
 
 static void vdCleManProgram(
@@ -344,7 +345,7 @@ extern const char* pcCleAbout(const int l)
 }
 
 #undef  ERROR
-#define ERROR(x) return(siCleEndExecution((x),psCnf,pfHlp,pfDoc,pfPro,pvHdl))
+#define ERROR(x) return(siCleEndExecution((x),psCnf,pfHlp,pfDoc,pfPro,ppArg,pvHdl))
 extern int siCleExecute(
    const TsCleCommand*           psTab,
    int                           argc,
@@ -1720,12 +1721,14 @@ static int siCleEndExecution(
    FILE*                         pfTrc,
    FILE*                         pfDoc,
    FILE*                         pfPro,
+   char**                        ppArg,
    void*                         pvHdl)
 {
    if (psCnf!=NULL) vdCnfCls(psCnf);
    if (pfTrc!=NULL) fclose(pfTrc);
    if (pfDoc!=NULL) fclose(pfDoc);
    if (pfPro!=NULL) fclose(pfPro);
+   if (ppArg!=NULL) free(ppArg);
    if (pvHdl!=NULL) vdClpClose(pvHdl);
    return(siErr);
 }
