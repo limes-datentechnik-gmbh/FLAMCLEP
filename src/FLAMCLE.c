@@ -1559,7 +1559,6 @@ EVALUATE:
          ppArg[0]=argv[0]; ppArg[1]=(char*)pcDef; argc++; argv=ppArg;
          goto EVALUATE;
       }
-      if (ppArg!=NULL) free(ppArg);
       fprintf(pfOut,"Command or built-in function \'%s\' not supported\n",argv[1]);
       vdPrnStaticSyntax(pfOut,psTab,argv[0],pcDep,pcOpt);
       ERROR(8);
