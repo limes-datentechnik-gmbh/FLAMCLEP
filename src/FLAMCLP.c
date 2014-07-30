@@ -66,10 +66,10 @@
  * 1.1.18: Support object without parenthesis and overlays without dot
  **/
 
-#define CLP_VSN_STR       "1.1.17"
+#define CLP_VSN_STR       "1.1.18"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        1
-#define CLP_VSN_REVISION       17
+#define CLP_VSN_REVISION       18
 
 /* Definition der Flag-Makros *************************************************/
 
@@ -2608,8 +2608,7 @@ extern int siClpGrammar(
    fprintf(pfOut,"%s overlay_list   -> overlay SEP overlay_list                       \n",fpcPre(pvHdl,1));
    fprintf(pfOut,"%s                |  EMPTY                                          \n",fpcPre(pvHdl,1));
    fprintf(pfOut,"%s value          -> NUMBER | FLOAT | STRING | KEYWORD              \n",fpcPre(pvHdl,1));
-   fprintf(pfOut,"%s A object list requires parenthesis                               \n",fpcPre(pvHdl,1));
-   fprintf(pfOut,"%s Don't use dots in overlay lists                                  \n",fpcPre(pvHdl,1));
+   fprintf(pfOut,"%s A list of objects requires parenthesis to enclose the arguments  \n",fpcPre(pvHdl,1));
    fprintf(pfOut,"%s                                                                  \n",fpcPre(pvHdl,1));
    fprintf(pfOut,"%s Property File Parser                                             \n",fpcPre(pvHdl,0));
    fprintf(pfOut,"%s properties     -> property_list                                  \n",fpcPre(pvHdl,1));

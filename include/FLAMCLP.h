@@ -74,6 +74,7 @@ certain shells the features below are implemented.
  * Strings can be enclosed with '' or ""
  * Strings can also defined without quotes
  * Keywords can also start with "-" or "--" in front of the qualifier
+ * If it unique then parenthesis and the dot can be omit for object and overlays
 
 Besides arguments you can also have a constant definition for
 selections. A feature is useful in order to define keywords for values
@@ -218,9 +219,9 @@ Grammar for command line
 
     sgn      -> KEYWRD '=' val
 
-    obj      -> KEYWRD '(' parlst ')'
+    obj      -> KEYWRD ['('] parlst [')']
 
-    ovl      -> KEYWRD '.' par
+    ovl      -> KEYWRD ['.'] par
 
     ary      -> KEYWRD '[' vallst ']'\n
              |  KEYWRD '[' objlst ']'\n
@@ -240,6 +241,10 @@ Grammar for command line
              |  STR                             * string literal\n
              |  KYW                             * constant definition
 
+A list of objects requires parenthesis to enclose the arguments. Only
+for one object of a certain level you can omit the round brackets. If
+you want define more then one object of a certain level you must use
+parenthesis to separate the objects from each other.
 
 Grammar for property file
 -------------------------
