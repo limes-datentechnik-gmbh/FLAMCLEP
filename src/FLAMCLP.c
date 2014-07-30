@@ -64,12 +64,13 @@
  * 1.1.16: Get selections, object and overlays for aliases up and running
  * 1.1.17: Support line comment (initiated with ';' up to '\n')
  * 1.1.18: Support object without parenthesis and overlays without dot
+ * 1.1.19: Extent strxcmp() to support keyword compare and stop flag
  **/
 
-#define CLP_VSN_STR       "1.1.18"
+#define CLP_VSN_STR       "1.1.19"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        1
-#define CLP_VSN_REVISION       18
+#define CLP_VSN_REVISION       19
 
 /* Definition der Flag-Makros *************************************************/
 
@@ -824,7 +825,7 @@ extern int siClpSyntax(
    int                           siErr,siLev,i;
    int                           l=strlen(psHdl->pcCmd);
    if (pcPat!=NULL && strlen(pcPat)) {
-      if (strxcmp(psHdl->isCas,psHdl->pcCmd,pcPat,l,0)==0) {
+      if (strxcmp(psHdl->isCas,psHdl->pcCmd,pcPat,l,0,FALSE)==0) {
          if (strlen(pcPat)>l && pcPat[l]!='.') {
             if (psHdl->pfErr!=NULL) {
                fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
@@ -881,7 +882,7 @@ extern int siClpHelp(
    int                           l=strlen(psHdl->pcCmd);
 
    if (pcPat!=NULL && strlen(pcPat)) {
-      if (strxcmp(psHdl->isCas,psHdl->pcCmd,pcPat,l,0)==0) {
+      if (strxcmp(psHdl->isCas,psHdl->pcCmd,pcPat,l,0,FALSE)==0) {
          if (strlen(pcPat)>l && pcPat[l]!='.') {
             if (psHdl->pfErr!=NULL) {
                fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
@@ -973,7 +974,7 @@ extern int siClpDocu(
 
    if (pcNum!=NULL && strlen(pcNum)<100) {
       if (pcPat!=NULL && strlen(pcPat)) {
-         if (strxcmp(psHdl->isCas,psHdl->pcCmd,pcPat,l,0)==0) {
+         if (strxcmp(psHdl->isCas,psHdl->pcCmd,pcPat,l,0,FALSE)==0) {
             if (strlen(pcPat)>l && pcPat[l]!='.') {
                if (psHdl->pfErr!=NULL) {
                   fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
@@ -1265,7 +1266,7 @@ extern int siClpProperties(
    if (pfOut==NULL) pfOut=psHdl->pfHlp;
 
    if (pcPat!=NULL && strlen(pcPat)) {
-      if (strxcmp(psHdl->isCas,psHdl->pcCmd,pcPat,l,0)==0) {
+      if (strxcmp(psHdl->isCas,psHdl->pcCmd,pcPat,l,0,FALSE)==0) {
          if (strlen(pcPat)>l && pcPat[l]!='.') {
             if (psHdl->pfErr!=NULL) {
                fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
@@ -1429,7 +1430,7 @@ static TsSym* psClpSymIns(
          }
          ERROR(psSym);
       }
-      if (strxcmp(psHdl->isCas,psSym->psStd->pcKyw,psSym->psStd->pcAli,0,0)==0) {
+      if (strxcmp(psHdl->isCas,psSym->psStd->pcKyw,psSym->psStd->pcAli,0,0,FALSE)==0) {
          if (psHdl->pfErr!=NULL) {
             fprintf(psHdl->pfErr,"TABLE-ERROR\n");
             fprintf(psHdl->pfErr,"%s Keyword and alias (%s.%s) are equal\n",fpcPre(pvHdl,0),fpcPat(pvHdl,siLev),psSym->psStd->pcAli);
@@ -1437,7 +1438,7 @@ static TsSym* psClpSymIns(
          ERROR(psSym);
       }
       for (k=0,psHlp=psCur;psHlp!=NULL;psHlp=psHlp->psBak) {
-         if (CLPISS_ARG(psHlp->psStd->uiFlg) && strxcmp(psHdl->isCas,psSym->psStd->pcAli,psHlp->psStd->pcKyw,0,0)==0) {
+         if (CLPISS_ARG(psHlp->psStd->uiFlg) && strxcmp(psHdl->isCas,psSym->psStd->pcAli,psHlp->psStd->pcKyw,0,0,FALSE)==0) {
             if (k==0) {
                psSym->psStd->psAli=psHlp;
                psSym->psStd->uiFlg=psHlp->psStd->uiFlg|CLPFLG_ALI;
@@ -1787,7 +1788,7 @@ static int siClpSymCal(
       } else if (CLPISS_LNK(psSym->psStd->uiFlg)) {
          isPar=TRUE;
          for (h=k=0,psHlp=psTab;psHlp!=NULL;psHlp=psHlp->psNxt) {
-            if (CLPISS_ARG(psHlp->psStd->uiFlg) && strxcmp(psHdl->isCas,psSym->psStd->pcKyw,psHlp->psStd->pcKyw,0,0)==0) {
+            if (CLPISS_ARG(psHlp->psStd->uiFlg) && strxcmp(psHdl->isCas,psSym->psStd->pcKyw,psHlp->psStd->pcKyw,0,0,FALSE)==0) {
                psSym->psFix->psLnk=psHlp; h++;
                if (CLPISS_CNT(psSym->psStd->uiFlg)) {
                   psHlp->psFix->psCnt=psSym; k++;
@@ -2063,6 +2064,8 @@ static void vdClpSymDel(
    #define SPMCHR '\"'
 #endif
 
+#define isKyw(c) (isalnum(c) || (c)=='_' || (c)=='-')
+
 extern int siClpLexem(
    void*                         pvHdl,
    FILE*                         pfOut)
@@ -2230,7 +2233,7 @@ static int siClpScnNat(
          while (pcCur[0]=='-') pcCur++;
          *pcLex=*pcCur;
          pcCur++; pcLex++;
-         while ((isalnum(*pcCur) || *pcCur=='_' || *pcCur=='-') && pcLex<pcEnd) {
+         while (isKyw(*pcCur) && pcLex<pcEnd) {
             *pcLex=*pcCur;
             pcCur++; pcLex++;
          }
@@ -2249,7 +2252,7 @@ static int siClpScnNat(
 
             *pcLex=*pcCur;
             pcCur++; pcLex++;
-            while ((isalnum(*pcCur) || *pcCur=='_' || *pcCur=='-') && pcLex<pcEnd) {
+            while (isKyw(*pcCur) && pcLex<pcEnd) {
                *pcLex=*pcCur;
                pcCur++; pcLex++;
             }
@@ -2294,7 +2297,7 @@ static int siClpScnNat(
       } else if (isalpha(pcCur[0])) { /*simple keyword*/
          *pcLex=*pcCur;
          pcCur++; pcLex++;
-         while ((isalnum(*pcCur) || *pcCur=='_' || *pcCur=='-') && pcLex<pcEnd) {
+         while ((isKyw(*pcCur)) && pcLex<pcEnd) {
             *pcLex=*pcCur;
             pcCur++; pcLex++;
          }
@@ -3070,7 +3073,7 @@ static int siClpBldPro(
    sprintf(acRot,"%s.%s.%s",psHdl->pcOwn,psHdl->pcPgm,psHdl->pcCmd);
    l=strlen(acRot);
 
-   if (strxcmp(psHdl->isCas,acRot,pcPat,l,0)==0) {
+   if (strxcmp(psHdl->isCas,acRot,pcPat,l,0,FALSE)==0) {
       if (pcPat[l]!='.') {
          if (psHdl->pfErr!=NULL) {
             fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
@@ -4671,7 +4674,7 @@ static int siClpSetDefault(
             break;
          case CLPTOK_KYW:
             if (psArg->psFix->siTyp==CLPTYP_OBJECT) {
-               if (strxcmp(psHdl->isCas,acLex,"INIT",0,0)!=0) {
+               if (strxcmp(psHdl->isCas,acLex,"INIT",0,0,FALSE)!=0) {
                   if (psHdl->pfErr!=NULL) {
                      fprintf(psHdl->pfErr,"TABLE-ERROR\n");
                      fprintf(psHdl->pfErr,"%s Keyword (%s) in default / property definition for object \'%s.%s\' is not \'INIT\'\n",
@@ -4691,7 +4694,7 @@ static int siClpSetDefault(
                siErr=siClpFinOvl(pvHdl,siLev,siPos,psArg,psDep,asSav,psVal->psFix->siOid);
                if (siErr<0) return(siErr);
             } else if (psArg->psFix->siTyp==CLPTYP_SWITCH) {
-                  if (strxcmp(psHdl->isCas,acLex,"ON",0,0)!=0 && strxcmp(psHdl->isCas,acLex,"OFF",0,0)!=0) {
+                  if (strxcmp(psHdl->isCas,acLex,"ON",0,0,FALSE)!=0 && strxcmp(psHdl->isCas,acLex,"OFF",0,0,FALSE)!=0) {
                      if (psHdl->pfErr!=NULL) {
                         fprintf(psHdl->pfErr,"TABLE-ERROR\n");
                         fprintf(psHdl->pfErr,"%s Keyword (%s) in default / property definition for switch \'%s.%s\' is not \'ON\' or \'OFF\'\n",
@@ -4699,7 +4702,7 @@ static int siClpSetDefault(
                      }
                      return(CLPERR_TAB);
                   }
-                  if (strxcmp(psHdl->isCas,acLex,"ON",0,0)==0) {
+                  if (strxcmp(psHdl->isCas,acLex,"ON",0,0,FALSE)==0) {
                      siErr=siClpBldSwt(pvHdl,siLev,siPos,psArg);
                      if (siErr<0) return(siErr);
                   }
@@ -5860,43 +5863,78 @@ static U32 hex2bin(
 /******************************************************************************/
 
 extern int strxcmp(
-   const int            f,
+   const int            ca,
    const char*          s1,
    const char*          s2,
    const int            n,
-   const int            c)
+   const int            c,
+   const int            f)
 {
-   if (f) {
+   if (ca) {
+      int d=*s1-*s2;
       if (n) {
          int i=1;
-         int d=*s1-*s2;
-         while (d==0 && *s1!=0 && *s2!=0 && i<n && *s1!=c && *s2!=c) {
-            s1++; s2++; i++;
-            d=*s1-*s2;
+         if (c==-1) {
+            while (d==0 && *s1!=0 && *s2!=0 && i<n && isKyw(*s1) && isKyw(*s2)) {
+               s1++; s2++; i++;
+               d=*s1-*s2;
+            }
+            if (f && (!isKyw(*s1) || !isKyw(*s2))) return(0);
+         } else {
+            while (d==0 && *s1!=0 && *s2!=0 && i<n && *s1!=c && *s2!=c) {
+               s1++; s2++; i++;
+               d=*s1-*s2;
+            }
+            if (f && (*s1==c || *s2==c)) return(0);
          }
          return(d);
       } else {
-         int d=*s1-*s2;
-         while (d==0 && *s1!=0 && *s2!=0 && *s1!=c && *s2!=c) {
-            s1++; s2++;
-            d=*s1-*s2;
+         if (c==-1) {
+            while (d==0 && *s1!=0 && *s2!=0 && isKyw(*s1) && isKyw(*s2)) {
+               s1++; s2++;
+               d=*s1-*s2;
+            }
+            if (f && (!isKyw(*s1) || !isKyw(*s2))) return(0);
+         } else {
+            while (d==0 && *s1!=0 && *s2!=0 && *s1!=c && *s2!=c) {
+               s1++; s2++;
+               d=*s1-*s2;
+            }
+            if (f && (*s1==c || *s2==c)) return(0);
          }
          return(d);
       }
    } else {
+      int d=tolower(*s1)-tolower(*s2);
       if (n) {
          int i=1;
-         int d=tolower(*s1)-tolower(*s2);
-         while (d==0 && *s1!=0 && *s2!=0 && i<n && *s1!=c && *s2!=c) {
-            s1++; s2++; i++;
-            d=tolower(*s1)-tolower(*s2);
+         if (c==-1) {
+            while (d==0 && *s1!=0 && *s2!=0 && i<n && isKyw(*s1) && isKyw(*s2)) {
+               s1++; s2++; i++;
+               d=tolower(*s1)-tolower(*s2);
+            }
+            if (f && (!isKyw(*s1) || !isKyw(*s2))) return(0);
+         } else {
+            while (d==0 && *s1!=0 && *s2!=0 && i<n && tolower(*s1)!=tolower(c) && tolower(*s2)!=tolower(c)) {
+               s1++; s2++; i++;
+               d=tolower(*s1)-tolower(*s2);
+            }
+            if (f && (tolower(*s1)==tolower(c) || tolower(*s2)==tolower(c))) return(0);
          }
          return(d);
       } else {
-         int d=tolower(*s1)-tolower(*s2);
-         while (d==0 && *s1!=0 && *s2!=0 && *s1!=c && *s2!=c) {
-            s1++; s2++;
-            d=tolower(*s1)-tolower(*s2);
+         if (c==-1) {
+            while (d==0 && *s1!=0 && *s2!=0 && isKyw(*s1) && isKyw(*s2)) {
+               s1++; s2++;
+               d=tolower(*s1)-tolower(*s2);
+            }
+            if (f && (!isKyw(*s1) || !isKyw(*s2))) return(0);
+         } else {
+            while (d==0 && *s1!=0 && *s2!=0 && tolower(*s1)!=tolower(c) && *s2!=tolower(c)) {
+               s1++; s2++;
+               d=tolower(*s1)-tolower(*s2);
+            }
+            if (f && (tolower(*s1)==tolower(c) || tolower(*s2)==tolower(c))) return(0);
          }
          return(d);
       }
