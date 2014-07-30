@@ -63,6 +63,7 @@
  * 1.1.15: Support of new flags to define default interpretation of binary strings (CHR/ASC/EBC/HEX)
  * 1.1.16: Get selections, object and overlays for aliases up and running
  * 1.1.17: Support line comment (initiated with ';' up to '\n')
+ * 1.1.18: Support object without parenthesis and overlays without dot
  **/
 
 #define CLP_VSN_STR       "1.1.17"
@@ -331,6 +332,11 @@ static int siClpPrsSgn(
    const int                     siPos,
    TsSym*                        psArg);
 
+static int siClpPrsObjWob(
+   void*                         pvHdl,
+   const int                     siLev,
+   const int                     siPos,
+   TsSym*                        psArg);
 
 static int siClpPrsObj(
    void*                         pvHdl,
@@ -2590,8 +2596,8 @@ extern int siClpGrammar(
    fprintf(pfOut,"%s parameter      -> switch | assignment | object | overlay | array \n",fpcPre(pvHdl,1));
    fprintf(pfOut,"%s switch         -> KEYWORD                                        \n",fpcPre(pvHdl,1));
    fprintf(pfOut,"%s assignment     -> KEYWORD '=' value                              \n",fpcPre(pvHdl,1));
-   fprintf(pfOut,"%s object         -> KEYWORD '(' parameter_list ')'                 \n",fpcPre(pvHdl,1));
-   fprintf(pfOut,"%s overlay        -> KEYWORD '.' parameter                          \n",fpcPre(pvHdl,1));
+   fprintf(pfOut,"%s object         -> KEYWORD ['('] parameter_list [')']             \n",fpcPre(pvHdl,1));
+   fprintf(pfOut,"%s overlay        -> KEYWORD ['.'] parameter                        \n",fpcPre(pvHdl,1));
    fprintf(pfOut,"%s array          -> KEYWORD '[' value_list   ']'                   \n",fpcPre(pvHdl,1));
    fprintf(pfOut,"%s                |  KEYWORD '[' object_list  ']'                   \n",fpcPre(pvHdl,1));
    fprintf(pfOut,"%s                |  KEYWORD '[' overlay_list ']'                   \n",fpcPre(pvHdl,1));
@@ -2602,6 +2608,9 @@ extern int siClpGrammar(
    fprintf(pfOut,"%s overlay_list   -> overlay SEP overlay_list                       \n",fpcPre(pvHdl,1));
    fprintf(pfOut,"%s                |  EMPTY                                          \n",fpcPre(pvHdl,1));
    fprintf(pfOut,"%s value          -> NUMBER | FLOAT | STRING | KEYWORD              \n",fpcPre(pvHdl,1));
+   fprintf(pfOut,"%s A object list requires parenthesis                               \n",fpcPre(pvHdl,1));
+   fprintf(pfOut,"%s Don't use dots in overlay lists                                  \n",fpcPre(pvHdl,1));
+   fprintf(pfOut,"%s                                                                  \n",fpcPre(pvHdl,1));
    fprintf(pfOut,"%s Property File Parser                                             \n",fpcPre(pvHdl,0));
    fprintf(pfOut,"%s properties     -> property_list                                  \n",fpcPre(pvHdl,1));
    fprintf(pfOut,"%s property_list  -> property SEP property_list                     \n",fpcPre(pvHdl,1));
@@ -2609,7 +2618,7 @@ extern int siClpGrammar(
    fprintf(pfOut,"%s property       -> keyword_list '=' SUPPLEMENT                    \n",fpcPre(pvHdl,1));
    fprintf(pfOut,"%s keyword_list   -> KEYWORD '.' keyword_list                       \n",fpcPre(pvHdl,1));
    fprintf(pfOut,"%s                |  KEYWORD                                        \n",fpcPre(pvHdl,1));
-   fprintf(pfOut,"%s SUPPLEMENT is a string in double quotation marks (\"property\")  \n",fpcPre(pvHdl,1));
+   fprintf(pfOut,"%s SUPPLEMENT is a string in double quotation marks (\"property\")    \n",fpcPre(pvHdl,1));
    return(CLP_OK);
 }
 
@@ -2659,7 +2668,13 @@ static int siClpPrsPar(
       } else if (psHdl->siTok==CLPTOK_SBO) {
          return(siClpPrsAry(pvHdl,siLev,siPos,psArg));
       } else {
-         return(siClpPrsSwt(pvHdl,siLev,siPos,psArg));
+         if (psArg->psFix->siTyp==CLPTYP_OBJECT) {
+            return(siClpPrsObjWob(pvHdl,siLev,siPos,psArg));
+         } else if (psArg->psFix->siTyp==CLPTYP_OVRLAY) {
+            return(siClpPrsOvl(pvHdl,siLev,siPos,psArg));
+         } else {
+            return(siClpPrsSwt(pvHdl,siLev,siPos,psArg));
+         }
       }
    } else {
       if (psHdl->pfErr!=NULL) {
@@ -2707,7 +2722,7 @@ static int siClpPrsSgn(
    }
 }
 
-static int siClpPrsObj(
+static int siClpPrsObjWob(
    void*                         pvHdl,
    const int                     siLev,
    const int                     siPos,
@@ -2719,14 +2734,29 @@ static int siClpPrsObj(
    TsVar                         asSav[CLPMAX_TABCNT];
 
    if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d OBJ(%s(parlst))-OPN)\n",fpcPre(pvHdl,siLev),siLev,siPos,psArg->psStd->pcKyw);
-   psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
-   if (psHdl->siTok<0) return(psHdl->siTok);
    siErr=siClpIniObj(pvHdl,siLev,siPos,psArg,&psDep,asSav);
    if (siErr<0) return(siErr);
    siCnt=siClpPrsParLst(pvHdl,siLev+1,psArg,psDep);
    if (siCnt<0) return(siCnt);
    siErr=siClpFinObj(pvHdl,siLev,siPos,psArg,psDep,asSav);
    if (siErr<0) return(siErr);
+   return(siCnt);
+}
+
+static int siClpPrsObj(
+   void*                         pvHdl,
+   const int                     siLev,
+   const int                     siPos,
+   TsSym*                        psArg)
+{
+   TsHdl*                        psHdl=(TsHdl*)pvHdl;
+   int                           siCnt;
+
+   if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d OBJ(%s(parlst))-OPN)\n",fpcPre(pvHdl,siLev),siLev,siPos,psArg->psStd->pcKyw);
+   psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
+   if (psHdl->siTok<0) return(psHdl->siTok);
+   siCnt=siClpPrsObjWob(pvHdl,siLev,siPos,psArg);
+   if (siCnt<0) return(siCnt);
    if (psHdl->siTok==CLPTOK_RBC) {
       psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
       if (psHdl->siTok<0) return(psHdl->siTok);
