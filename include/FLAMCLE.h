@@ -342,8 +342,15 @@ typedef int (*tpfIni)(
  * are realized over a real mapping between the parsed values and the
  * needed arguments.
  *
+ * For overlay based commands the pointer to the object identifier is
+ * provided (taken from siCleExecute). This integer can then be used to
+ * choose the correct data structure from the corresponding CLP union
+ * for mapping. The piOid can also used to give a integer back to the
+ * caller of siCleExecute() from mapping if this pointer not NULL.
+ *
  * @param[in]  pfOut File pointer for outputs (mainly error messages, given over CleExecute)
  * @param[in]  pfTrc File pointer for tracing (mainly for complex stuff, given over CleExecute)
+ * @param[in]  piOid Pointer to the object identifier for overlay commands, if the pointer set at siCleExecute()
  * @param[in]  pvClp Pointer to the filled FLAMCLP structure (output from the the command line parser)
  * @param[out] pvPar Pointer to the parameter structure, which will be filled based on the FLAMCLP structure with this function
 
@@ -352,6 +359,7 @@ typedef int (*tpfIni)(
 typedef int (*tpfMap)(
    FILE*                         pfOut,
    FILE*                         pfTrc,
+   int*                          piOid,
    void*                         pvClp,
    void*                         pvPar);
 
@@ -368,6 +376,7 @@ typedef int (*tpfMap)(
  * @param[in]  pcPgm Current program name (given over CleExecute)
  * @param[in]  pcVsn Current version information (given from CleExecute)
  * @param[in]  pcAbo Current about information (given from CleExecute)
+ * @param[in]  pcLic Current license text (given from CleExecute)
  * @param[in]  pcFkt Current function name (key word of the command)
  * @param[in]  pcCmd Current command (complete entered line of user)
  * @param[in]  pcLst Current list of parsed arguments (given from FLAMCLP)
@@ -382,6 +391,7 @@ typedef int (*tpfRun)(
    const char*                   pcPgm,
    const char*                   pcVsn,
    const char*                   pcAbo,
+   const char*                   pcLic,
    const char*                   pcFkt,
    const char*                   pcCmd,
    const char*                   pcLst,

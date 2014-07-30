@@ -65,11 +65,12 @@
  * 1.1.10: Don't print manpage twice at end of path anymore
  * 1.1.11: Correct PGM handling and support "-KYW" or "--KYW"
  * 1.1.12: Support default command or built-in function
+ * 1.1.13: Provide license text at run and oid for the mapping function
  */
-#define CLE_VSN_STR       "1.1.12"
+#define CLE_VSN_STR       "1.1.13"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        1
-#define CLE_VSN_REVISION       12
+#define CLE_VSN_REVISION       13
 
 /* Definition der Konstanten **************************************************/
 #define CLEMAX_CNFLEN            1023
@@ -1530,12 +1531,12 @@ EVALUATE:
                vdPrnCommandError(pvHdl,pfOut,acCmd,pcPos,pcLst,pcDep);
                ERROR(6);
             }
-            siErr=psTab[i].pfMap(pfOut,pfTrc,psTab[i].pvClp,psTab[i].pvPar);
+            siErr=psTab[i].pfMap(pfOut,pfTrc,psTab[i].piOid,psTab[i].pvClp,psTab[i].pvPar);
             if (siErr) {
                fprintf(pfOut,"Mapping of CLP structure for command '%s' failed!\n",psTab[i].pcKyw);
                ERROR(4);
             }
-            siErr=psTab[i].pfRun(pfOut,pfTrc,acOwn,pcPgm,pcVsn,pcAbo,psTab[i].pcKyw,acCmd,pcLst,psTab[i].pvPar);
+            siErr=psTab[i].pfRun(pfOut,pfTrc,acOwn,pcPgm,pcVsn,pcAbo,pcLic,psTab[i].pcKyw,acCmd,pcLst,psTab[i].pvPar);
             if (siErr)  {
                fprintf(pfOut,"Run of command '%s' failed!\n",psTab[i].pcKyw);
                siErr=psTab[i].pfFin(pfOut,pfTrc,psTab[i].pvPar);
