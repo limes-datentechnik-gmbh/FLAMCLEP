@@ -533,7 +533,7 @@ typedef struct CleCommand {
  * @param[in]  pcGls Glossary for documentation generation (in ASCIIDOC format (term:: explanation)),
  *             if NULL then no glossary are generated, if "" then only the FLAMCLP glossary is added)
  * @param[in]  pcFin Final pages for documentation generation (colophon, copyright, closing aso. in ASCIIDOC format)
- * @param[in]  pcDef Default command or built-in function, which is executed if the first keyword (argv[1]) don't match
+ * @param[in]  pcDef Default command or built-in function, which is executed if the first keyword (argv[1]) don't match (if NULL then no default)
  *
  * @return signed integer with values below:\n
  * 0  - command line, command syntax, mapping, execution and finish of the command was successfull\n

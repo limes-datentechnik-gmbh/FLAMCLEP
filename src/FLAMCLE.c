@@ -613,23 +613,25 @@ EVALUATE:
                ERROR(0);
             }
          }
-         for (i=0;psTab[i].pcKyw!=NULL;i++) {
-            if (strxcmp(isCas,pcDef,psTab[i].pcKyw,0,0,FALSE)==0) {
-               char* pcPat=(char*)malloc(strlen(pcDef)+strlen(argv[2]+2));
-               if (pcPat==NULL) {
-                  fprintf(pfOut,"Memory allocation for path '%s.%s' failed!\n",pcDef,argv[2]);
-                  ERROR(16);
-               }
-               siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isFlg,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl);
-               if (siErr) {
+         if (pcDef!=NULL && strlen(pcDef)) {
+            for (i=0;psTab[i].pcKyw!=NULL;i++) {
+               if (strxcmp(isCas,pcDef,psTab[i].pcKyw,0,0,FALSE)==0) {
+                  char* pcPat=(char*)malloc(strlen(pcDef)+strlen(argv[2]+2));
+                  if (pcPat==NULL) {
+                     fprintf(pfOut,"Memory allocation for path '%s.%s' failed!\n",pcDef,argv[2]);
+                     ERROR(16);
+                  }
+                  siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isFlg,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl);
+                  if (siErr) {
+                     free(pcPat);
+                     ERROR(siErr);
+                  }
+                  sprintf(pcPat,"%s.%s",pcDef,argv[2]);
+                  fprintf(pfOut,"Syntax for argument \'%s\':\n",pcPat);
+                  vdPrnCommandSyntax(pvHdl,pfOut,argv[0],pcPat,pcDep,siDep);
                   free(pcPat);
-                  ERROR(siErr);
+                  ERROR(0);
                }
-               sprintf(pcPat,"%s.%s",pcDef,argv[2]);
-               fprintf(pfOut,"Syntax for argument \'%s\':\n",pcPat);
-               vdPrnCommandSyntax(pvHdl,pfOut,argv[0],pcPat,pcDep,siDep);
-               free(pcPat);
-               ERROR(0);
             }
          }
       }
@@ -712,27 +714,29 @@ EVALUATE:
                ERROR(0);
             }
          }
-         for (i=0;psTab[i].pcKyw!=NULL;i++) {
-            if (strxcmp(isCas,pcDef,psTab[i].pcKyw,0,0,FALSE)==0) {
-               char* pcPat=(char*)malloc(strlen(psTab[i].pcKyw)+strlen(argv[2]+2));
-               if (pcPat==NULL) {
-                  fprintf(pfOut,"Memory allocation for path '%s.%s' failed!\n",psTab[i].pcKyw,argv[2]);
-                  ERROR(16);
-               }
-               siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isFlg,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl);
-               if (siErr) {
+         if (pcDef!=NULL && strlen(pcDef)) {
+            for (i=0;psTab[i].pcKyw!=NULL;i++) {
+               if (strxcmp(isCas,pcDef,psTab[i].pcKyw,0,0,FALSE)==0) {
+                  char* pcPat=(char*)malloc(strlen(psTab[i].pcKyw)+strlen(argv[2]+2));
+                  if (pcPat==NULL) {
+                     fprintf(pfOut,"Memory allocation for path '%s.%s' failed!\n",psTab[i].pcKyw,argv[2]);
+                     ERROR(16);
+                  }
+                  siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isFlg,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl);
+                  if (siErr) {
+                     free(pcPat);
+                     ERROR(siErr);
+                  }
+                  sprintf(pcPat,"%s.%s",psTab[i].pcKyw,argv[2]);
+                  fprintf(pfOut,"Help for argument \'%s\':-%s-\n",pcPat,psTab[i].pcKyw);
+                  vdPrnCommandHelp(pvHdl,pcPat,siDep,TRUE);
+                  if (siDep==0) {
+                     fprintf(pfOut,"ARGUMENTS\n");
+                     vdPrnCommandHelp(pvHdl,pcPat,1,FALSE);
+                  }
                   free(pcPat);
-                  ERROR(siErr);
+                  ERROR(0);
                }
-               sprintf(pcPat,"%s.%s",psTab[i].pcKyw,argv[2]);
-               fprintf(pfOut,"Help for argument \'%s\':-%s-\n",pcPat,psTab[i].pcKyw);
-               vdPrnCommandHelp(pvHdl,pcPat,siDep,TRUE);
-               if (siDep==0) {
-                  fprintf(pfOut,"ARGUMENTS\n");
-                  vdPrnCommandHelp(pvHdl,pcPat,1,FALSE);
-               }
-               free(pcPat);
-               ERROR(0);
             }
          }
       }
@@ -924,26 +928,28 @@ EVALUATE:
          }
          if (isAll==TRUE) ERROR(0);
 
-         for (i=0;psTab[i].pcKyw!=NULL;i++) {
-            if (strxcmp(isCas,pcDef,psTab[i].pcKyw,0,0,FALSE)==0) {
-               char* pcPat=(char*)malloc(strlen(pcDef)+strlen(pcCmd+2));
-               if (pcPat==NULL) {
-                  fprintf(pfOut,"Memory allocation for path '%s.%s' failed!\n",pcDef,argv[2]);
-                  ERROR(16);
-               }
-               siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isFlg,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl);
-               if (siErr) {
+         if (pcDef!=NULL && strlen(pcDef)) {
+            for (i=0;psTab[i].pcKyw!=NULL;i++) {
+               if (strxcmp(isCas,pcDef,psTab[i].pcKyw,0,0,FALSE)==0) {
+                  char* pcPat=(char*)malloc(strlen(pcDef)+strlen(pcCmd+2));
+                  if (pcPat==NULL) {
+                     fprintf(pfOut,"Memory allocation for path '%s.%s' failed!\n",pcDef,argv[2]);
+                     ERROR(16);
+                  }
+                  siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isFlg,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl);
+                  if (siErr) {
+                     free(pcPat);
+                     ERROR(siErr);
+                  }
+                  sprintf(pcPat,"%s.%s",pcDef,pcCmd);
+                  fprintf(pfOut,"Manual page for argument \'%s\':\n\n",pcPat);
+                  vdPrnCommandManpage(pvHdl,pfDoc,pcPat,i,isMan,TRUE);
+                  if (isMan==TRUE) {
+                     fprintf(pfOut,"Manual page for argument \'%s\' successfully written to \'%s\'\n",pcPat,pcFil);
+                  }
                   free(pcPat);
-                  ERROR(siErr);
+                  ERROR(0);
                }
-               sprintf(pcPat,"%s.%s",pcDef,pcCmd);
-               fprintf(pfOut,"Manual page for argument \'%s\':\n\n",pcPat);
-               vdPrnCommandManpage(pvHdl,pfDoc,pcPat,i,isMan,TRUE);
-               if (isMan==TRUE) {
-                  fprintf(pfOut,"Manual page for argument \'%s\' successfully written to \'%s\'\n",pcPat,pcFil);
-               }
-               free(pcPat);
-               ERROR(0);
             }
          }
 
@@ -1020,30 +1026,32 @@ EVALUATE:
                   }
                }
             }
-            for (i=0;psTab[i].pcKyw!=NULL;i++) {
-               if (strxcmp(isCas,pcDef,psTab[i].pcKyw,0,0,FALSE)==0) {
-                  char* pcPat=(char*)malloc(strlen(pcDef)+strlen(pcCmd+2));
-                  if (pcPat==NULL) {
-                     fprintf(pfOut,"Memory allocation for path '%s.%s' failed!\n",pcDef,argv[2]);
-                     ERROR(16);
-                  }
-                  errno=0;
-                  siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isFlg,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl);
-                  if (siErr) {
-                     free(pcPat);
-                     ERROR(siErr);
-                  }
-                  sprintf(acNum,"2.%d.",i+1);
-                  sprintf(pcPat,"%s.%s",pcDef,pcCmd);
-                  siErr=siClpDocu(pvHdl,pfDoc,pcPat,acNum,TRUE,FALSE,isNbr);
-                  if (siErr) {
-                     fprintf(pfOut,"Creation of documentation file (%s) failed (%d - %s)\n",pcFil,errno,strerror(errno));
-                     free(pcPat);
-                     ERROR(2);
-                  } else {
-                     fprintf(pfOut,"Documentation for argument \'%s\' successfully created\n",pcPat);
-                     free(pcPat);
-                     ERROR(0);
+            if (pcDef!=NULL && strlen(pcDef)) {
+               for (i=0;psTab[i].pcKyw!=NULL;i++) {
+                  if (strxcmp(isCas,pcDef,psTab[i].pcKyw,0,0,FALSE)==0) {
+                     char* pcPat=(char*)malloc(strlen(pcDef)+strlen(pcCmd+2));
+                     if (pcPat==NULL) {
+                        fprintf(pfOut,"Memory allocation for path '%s.%s' failed!\n",pcDef,argv[2]);
+                        ERROR(16);
+                     }
+                     errno=0;
+                     siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isFlg,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl);
+                     if (siErr) {
+                        free(pcPat);
+                        ERROR(siErr);
+                     }
+                     sprintf(acNum,"2.%d.",i+1);
+                     sprintf(pcPat,"%s.%s",pcDef,pcCmd);
+                     siErr=siClpDocu(pvHdl,pfDoc,pcPat,acNum,TRUE,FALSE,isNbr);
+                     if (siErr) {
+                        fprintf(pfOut,"Creation of documentation file (%s) failed (%d - %s)\n",pcFil,errno,strerror(errno));
+                        free(pcPat);
+                        ERROR(2);
+                     } else {
+                        fprintf(pfOut,"Documentation for argument \'%s\' successfully created\n",pcPat);
+                        free(pcPat);
+                        ERROR(0);
+                     }
                   }
                }
             }
@@ -1459,23 +1467,25 @@ EVALUATE:
                ERROR(0);
             }
          }
-         for (i=0;psTab[i].pcKyw!=NULL;i++) {
-            if (strxcmp(isCas,pcDef,psTab[i].pcKyw,0,0,FALSE)==0) {
-               char* pcPat=(char*)malloc(strlen(pcDef)+strlen(argv[2]+2));
-               if (pcPat==NULL) {
-                  fprintf(pfOut,"Memory allocation for path '%s.%s' failed!\n",pcDef,argv[2]);
-                  ERROR(16);
-               }
-               siErr=siClePropertyInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isFlg,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl);
-               if (siErr) {
+         if (pcDef!=NULL && strlen(pcDef)) {
+            for (i=0;psTab[i].pcKyw!=NULL;i++) {
+               if (strxcmp(isCas,pcDef,psTab[i].pcKyw,0,0,FALSE)==0) {
+                  char* pcPat=(char*)malloc(strlen(pcDef)+strlen(argv[2]+2));
+                  if (pcPat==NULL) {
+                     fprintf(pfOut,"Memory allocation for path '%s.%s' failed!\n",pcDef,argv[2]);
+                     ERROR(16);
+                  }
+                  siErr=siClePropertyInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isFlg,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl);
+                  if (siErr) {
+                     free(pcPat);
+                     ERROR(siErr);
+                  }
+                  sprintf(pcPat,"%s.%s",pcDef,argv[2]);
+                  fprintf(pfOut,"Properties for argument \'%s\':\n",pcPat);
+                  vdPrnProperties(pvHdl,pcPat,siDep);
                   free(pcPat);
-                  ERROR(siErr);
+                  ERROR(0);
                }
-               sprintf(pcPat,"%s.%s",pcDef,argv[2]);
-               fprintf(pfOut,"Properties for argument \'%s\':\n",pcPat);
-               vdPrnProperties(pvHdl,pcPat,siDep);
-               free(pcPat);
-               ERROR(0);
             }
          }
       }
