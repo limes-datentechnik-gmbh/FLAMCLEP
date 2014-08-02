@@ -68,11 +68,12 @@
  * 1.1.13: Provide license text at run and oid for the mapping function
  * 1.1.14: Compare of keywords instead of compare up to key word length
  * 1.1.15: Add built-in function CHGPROP
+ * 1.1.16: Add alias list for getprop and default for chgprop if pcDef=="flam"
  */
-#define CLE_VSN_STR       "1.1.15"
+#define CLE_VSN_STR       "1.1.16"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        1
-#define CLE_VSN_REVISION       15
+#define CLE_VSN_REVISION       16
 
 /* Definition der Konstanten **************************************************/
 #define CLEMAX_CNFLEN            1023
@@ -1429,7 +1430,7 @@ EVALUATE:
       }
       fprintf(pfOut,"%s %s SETPROP filename\n",pcDep,argv[0]);
       ERROR(8);
-   } else if (strxcmp(isCas,argv[1],"CHGPROP",0,0,FALSE)==0) {
+   } else if (strxcmp(isCas,argv[1],"CHGPROP",0,0,FALSE)==0 || (pcDef!=NULL && strxcmp(isCas,pcDef,"flam",0,0,FALSE)==0 && strxcmp(isCas,argv[1],"DEFAULT",0,0,FALSE)==0)) {
       if (argc>=3) {
          for (i=0;psTab[i].pcKyw!=NULL;i++) {
             if (strxcmp(isCas,argv[2],psTab[i].pcKyw,0,0,FALSE)==0) {
@@ -1521,7 +1522,7 @@ EVALUATE:
          fprintf(pfOut,"Delete configuration keyword '%s' was successful\n",acCnf);
          ERROR(0);
       }
-   } else if (strxcmp(isCas,argv[1],"GETPROP",0,0,FALSE)==0) {
+   } else if (strxcmp(isCas,argv[1],"GETPROP",0,0,FALSE)==0 || (pcDef!=NULL && strxcmp(isCas,pcDef,"flam",0,0,FALSE)==0 && strxcmp(isCas,argv[1],"LIST",0,0,FALSE)==0)) {
       if (argc==2) {
          fprintf(pfOut,"Properties for program \'%s\':\n",pcPgm);
          for (i=0;psTab[i].pcKyw!=NULL;i++) {
