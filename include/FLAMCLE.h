@@ -117,6 +117,7 @@ All these built-in functions are available:
  * * GENPROP  - Generates a property file
  * * SETPROP  - Activates a property file
  * * DELPROP  - Removes a property file from configuration
+ * * CHGPROP  - Updates property values in the current property file
  * * GETPROP  - Displays current properties
  * * SETOWNER - Defines the current owner
  * * GETOWNER - Displays current owner setting
@@ -143,6 +144,7 @@ Below, you can find the syntax for each built-in function:
  * * GENDOCU [command[.paht]=]filename [NONBR]
  * * GENPROP [command=]filename
  * * SETPROP [command=]filename
+ * * CHGPROP command property_list
  * * DELPROP [command]
  * * GETPROP [command[.path] [DEPTH1 | ... | DEPTH9 | ALL]]
  * * SETOWNER name
@@ -496,6 +498,7 @@ typedef struct CleCommand {
  * - GENDOCU [command[.path]=]filename [NONBR]
  * - GENPROP [command=]filename
  * - SETPROP [command=]filename
+ * - CHGPROP command property_list
  * - DELPROP [command]
  * - GETPROP [command[.path] [DEPTH1 | ... | DEPTH9 | ALL]]
  * - SETOWNER name

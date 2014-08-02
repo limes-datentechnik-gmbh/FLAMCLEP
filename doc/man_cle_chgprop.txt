@@ -1,0 +1,45 @@
+With built-in function CHGPROP you can update property values in the
+current active (see SETPROP) property file for a dedicated command. If
+no property file is activated a property file  will be generated (see
+GENPROP), updated with the provided property list and activated (see
+SETPROP).
+
+The first parameter of CHGPROP is the command name. All other parameter 
+are prefixed with the root (owner.program.command.) then concatenated to
+a blank separated property list. This property list is parsed with the
+CLP. If no property list provided the property file for the command is
+parsed or generated and then activated without any update.
+
+The built-in function reads and parse the current activated property
+file, then it parse the provided property list and writes the updated
+property file back to the disk. The current active property file could
+be a global not command specific property file. In such case a new 
+command specific property file is generated and activated.
+
+If currently no corresponding property file defined (see SETPROP) for
+this owner, program and command a property file is generated. The file
+names below are used in the current working directory:
+   
+On distributed systems (WINDOWS, UNIX, MAC)
+    ".owner.program.command.properties"
+
+On mainframe systems (ZOS, VSE, BS200, ...)
+    "OWNER.PROGRAM.COMMAND.PROP"
+
+If the default file names and path above not sufficient you can change
+this names over the corresponding environment variables below:
+
+    OWNER_PROGRAM_COMMAND_PROPERTY_FILENAME
+    
+Property files are managed per owner, this means updates are only done
+for the current owner.
+
+See <<appendix-properties>> for the current property file content.
+
+.EXAMPLES
+
+-----------------------------------------------------------------------
+   $ program CHGPROP path="value"
+   $ flam4 CHGPROP mode="CX8"
+   $ flcl CHGPROP conv.read.text.suptws="ON"
+-----------------------------------------------------------------------

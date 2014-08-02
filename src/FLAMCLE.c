@@ -67,15 +67,18 @@
  * 1.1.12: Support default command or built-in function
  * 1.1.13: Provide license text at run and oid for the mapping function
  * 1.1.14: Compare of keywords instead of compare up to key word length
+ * 1.1.15: Add built-in function CHGPROP
  */
-#define CLE_VSN_STR       "1.1.14"
+#define CLE_VSN_STR       "1.1.15"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        1
-#define CLE_VSN_REVISION       14
+#define CLE_VSN_REVISION       15
 
 /* Definition der Konstanten **************************************************/
 #define CLEMAX_CNFLEN            1023
 #define CLEMAX_CNFSIZ            1024
+#define CLEMAX_FILLEN            1023
+#define CLEMAX_FILSIZ            1024
 #define CLEMAX_PGMLEN            63
 #define CLEMAX_PGMSIZ            64
 #define CLEMAX_CMDLEN            65535
@@ -128,7 +131,41 @@ static int siClePropertyInit(
    const char*                   pcOpt,
    const char*                   pcEnt,
    TsCnfHdl*                     psCnf,
-   void**                        ppHdl);
+   void**                        ppHdl,
+   char*                         pcFil,
+   int*                          piFil);
+
+static int siClePropertyFinish(
+   const char*                   pcOwn,
+   const char*                   pcPgm,
+   const char*                   pcCmd,
+   FILE*                         pfOut,
+   FILE*                         pfTrc,
+   TsCnfHdl*                     psCnf,
+   void*                         pvHdl,
+   const char*                   pcFil,
+   const int                     siFil);
+
+static int siCleChangeProperties(
+   tpfIni                        pfIni,
+   void*                         pvClp,
+   const char*                   pcOwn,
+   const char*                   pcPgm,
+   const char*                   pcCmd,
+   const char*                   pcMan,
+   const char*                   pcHlp,
+   const char*                   pcPro,
+   const int*                    piOid,
+   const TsClpArgument*          psTab,
+   const int                     isCas,
+   const int                     isFlg,
+   const int                     siMkl,
+   FILE*                         pfOut,
+   FILE*                         pfTrc,
+   const char*                   pcDep,
+   const char*                   pcOpt,
+   const char*                   pcEnt,
+   TsCnfHdl*                     psCnf);
 
 static int siCleCommandInit(
    tpfIni                        pfIni,
@@ -258,7 +295,8 @@ static int siCleGetProperties(
    const char*                   pcPgm,
    const char*                   pcFct,
    char*                         pcFil,
-   char*                         pcPro);
+   char*                         pcPro,
+   int*                          piFlg);
 
 static int siCleGetCommand(
    void*                         pvHdl,
@@ -372,7 +410,7 @@ extern int siCleExecute(
    const char*                   pcFin,
    const char*                   pcDef)
 {
-   int                           i,l,s,siErr,siDep,siCnt;
+   int                           i,j,l,s,siErr,siDep,siCnt;
    char*                         pcPos=NULL;
    char*                         pcLst=NULL;
    static char                   acCmd[CLEMAX_CMDSIZ];
@@ -387,6 +425,8 @@ extern int siCleExecute(
    FILE*                         pfDoc=NULL;
    FILE*                         pfPro=NULL;
    char**                        ppArg=NULL;
+   char                          acFil[CLEMAX_FILSIZ];
+   int                           siFil=0;
 
    if (psTab==NULL || argc==0 || argv==NULL || pcPgm==NULL || pcHlp==NULL || pfOut==NULL || pcDep==NULL || pcOpt==NULL || pcEnt==NULL ||
        strlen(pcPgm)==0 || strlen(pcHlp)==0 || strlen(pcPgm)>CLEMAX_PGMLEN) return(24);
@@ -418,10 +458,24 @@ extern int siCleExecute(
    sprintf(acCnf,"%s_CONFIG_FILE",acPgm);
    pcCnf=getenv(acCnf);
    if (pcCnf==NULL) {
+
+
 #ifdef __HOST__
-      sprintf(acCnf,"%s.config",pcPgm);
+      {
+         int k;
+         for (j=k=i=0;pcPgm[i] && k<8;i++) {
+            if (isalnum(pcPgm[i])) {
+               acCnf[j]=toupper(pcPgm[i]);
+               j++; k++;
+            }
+         }
+         acCnf[j]=0x00;
+         strcat(acCnf,".CONFIG");
+
+      }
 #else
       sprintf(acCnf,".%s.config",pcPgm);
+      for (i=0;acCnf[i];i++) acCnf[i]=tolower(acCnf[i]);
 #endif
       pcCnf=acCnf;
    }
@@ -728,7 +782,7 @@ EVALUATE:
                      ERROR(siErr);
                   }
                   sprintf(pcPat,"%s.%s",psTab[i].pcKyw,argv[2]);
-                  fprintf(pfOut,"Help for argument \'%s\':-%s-\n",pcPat,psTab[i].pcKyw);
+                  fprintf(pfOut,"Help for argument \'%s\':\n",pcPat);
                   vdPrnCommandHelp(pvHdl,pcPat,siDep,TRUE);
                   if (siDep==0) {
                      fprintf(pfOut,"ARGUMENTS\n");
@@ -812,87 +866,93 @@ EVALUATE:
             if (isMan==TRUE) fprintf(pfOut,"Manual page for built-in function \'SETPROP\' successfully written to \'%s\'\n",pcFil);
             if (isAll==FALSE) ERROR(0);
          }
+         if (strxcmp(isCas,pcCmd,"CHGPROP",0,0,FALSE)==0 || isAll) {
+            if (isMan==FALSE) fprintf(pfOut,"Manual page for built-in function \'CHGPROP\':\n\n");
+            vdCleManFunction(pfDoc,"~","4.7" ,"CHGPROP" ,HLP_CLE_CHGPROP ,acOwn,pcPgm,SYN_CLE_CHGPROP,MAN_CLE_CHGPROP,isMan,TRUE);
+            if (isMan==TRUE) fprintf(pfOut,"Manual page for built-in function \'CHGPROP\' successfully written to \'%s\'\n",pcFil);
+            if (isAll==FALSE) ERROR(0);
+         }
          if (strxcmp(isCas,pcCmd,"DELPROP",0,0,FALSE)==0 || isAll) {
             if (isMan==FALSE) fprintf(pfOut,"Manual page for built-in function \'DELPROP\':\n\n");
-            vdCleManFunction(pfDoc,"~","4.7" ,"DELPROP" ,HLP_CLE_DELPROP ,acOwn,pcPgm,SYN_CLE_DELPROP,MAN_CLE_DELPROP,isMan,TRUE);
+            vdCleManFunction(pfDoc,"~","4.8" ,"DELPROP" ,HLP_CLE_DELPROP ,acOwn,pcPgm,SYN_CLE_DELPROP,MAN_CLE_DELPROP,isMan,TRUE);
             if (isMan==TRUE) fprintf(pfOut,"Manual page for built-in function \'DELPROP\' successfully written to \'%s\'\n",pcFil);
             if (isAll==FALSE) ERROR(0);
          }
          if (strxcmp(isCas,pcCmd,"GETPROP",0,0,FALSE)==0 || isAll) {
             if (isMan==FALSE) fprintf(pfOut,"Manual page for built-in function \'GETPROP\':\n\n");
-            vdCleManFunction(pfDoc,"~","4.8" ,"GETPROP" ,HLP_CLE_GETPROP ,acOwn,pcPgm,SYN_CLE_GETPROP,MAN_CLE_GETPROP,isMan,TRUE);
+            vdCleManFunction(pfDoc,"~","4.9" ,"GETPROP" ,HLP_CLE_GETPROP ,acOwn,pcPgm,SYN_CLE_GETPROP,MAN_CLE_GETPROP,isMan,TRUE);
             if (isMan==TRUE) fprintf(pfOut,"Manual page for built-in function \'GETPROP\' successfully written to \'%s\'\n",pcFil);
             if (isAll==FALSE) ERROR(0);
          }
          if (strxcmp(isCas,pcCmd,"SETOWNER",0,0,FALSE)==0 || isAll) {
             if (isMan==FALSE) fprintf(pfOut,"Manual page for built-in function \'SETOWNER\':\n\n");
-            vdCleManFunction(pfDoc,"~","4.9" ,"SETOWNER",HLP_CLE_SETOWNER,acOwn,pcPgm,SYN_CLE_SETOWNER,MAN_CLE_SETOWNER,isMan,TRUE);
+            vdCleManFunction(pfDoc,"~","4.10" ,"SETOWNER",HLP_CLE_SETOWNER,acOwn,pcPgm,SYN_CLE_SETOWNER,MAN_CLE_SETOWNER,isMan,TRUE);
             if (isMan==TRUE) fprintf(pfOut,"Manual page for built-in function \'SETOWNER\' successfully written to \'%s\'\n",pcFil);
             if (isAll==FALSE) ERROR(0);
          }
          if (strxcmp(isCas,pcCmd,"GETOWNER",0,0,FALSE)==0 || isAll) {
             if (isMan==FALSE) fprintf(pfOut,"Manual page for built-in function \'GETOWNER\':\n\n");
-            vdCleManFunction(pfDoc,"~","4.10","GETOWNER",HLP_CLE_GETOWNER,acOwn,pcPgm,SYN_CLE_GETOWNER,MAN_CLE_GETOWNER,isMan,TRUE);
+            vdCleManFunction(pfDoc,"~","4.11","GETOWNER",HLP_CLE_GETOWNER,acOwn,pcPgm,SYN_CLE_GETOWNER,MAN_CLE_GETOWNER,isMan,TRUE);
             if (isMan==TRUE) fprintf(pfOut,"Manual page for built-in function \'GETOWNER\' successfully written to \'%s\'\n",pcFil);
             if (isAll==FALSE) ERROR(0);
          }
          if (strxcmp(isCas,pcCmd,"SETENV",0,0,FALSE)==0 || isAll) {
             if (isMan==FALSE) fprintf(pfOut,"Manual page for built-in function \'SETENV\':\n\n");
-            vdCleManFunction(pfDoc,"~","4.11" ,"SETENV",HLP_CLE_SETENV,acOwn,pcPgm,SYN_CLE_SETENV,MAN_CLE_SETENV,isMan,TRUE);
+            vdCleManFunction(pfDoc,"~","4.12" ,"SETENV",HLP_CLE_SETENV,acOwn,pcPgm,SYN_CLE_SETENV,MAN_CLE_SETENV,isMan,TRUE);
             if (isMan==TRUE) fprintf(pfOut,"Manual page for built-in function \'SETENV\' successfully written to \'%s\'\n",pcFil);
             if (isAll==FALSE) ERROR(0);
          }
          if (strxcmp(isCas,pcCmd,"GETENV",0,0,FALSE)==0 || isAll) {
             if (isMan==FALSE) fprintf(pfOut,"Manual page for built-in function \'GETENV\':\n\n");
-            vdCleManFunction(pfDoc,"~","4.12" ,"GETENV",HLP_CLE_GETENV,acOwn,pcPgm,SYN_CLE_GETENV,MAN_CLE_GETENV,isMan,TRUE);
+            vdCleManFunction(pfDoc,"~","4.13" ,"GETENV",HLP_CLE_GETENV,acOwn,pcPgm,SYN_CLE_GETENV,MAN_CLE_GETENV,isMan,TRUE);
             if (isMan==TRUE) fprintf(pfOut,"Manual page for built-in function \'GETENV\' successfully written to \'%s\'\n",pcFil);
             if (isAll==FALSE) ERROR(0);
          }
          if (strxcmp(isCas,pcCmd,"DELENV",0,0,FALSE)==0 || isAll) {
             if (isMan==FALSE) fprintf(pfOut,"Manual page for built-in function \'DELENV\':\n\n");
-            vdCleManFunction(pfDoc,"~","4.13" ,"DELENV",HLP_CLE_DELENV,acOwn,pcPgm,SYN_CLE_DELENV,MAN_CLE_DELENV,isMan,TRUE);
+            vdCleManFunction(pfDoc,"~","4.14" ,"DELENV",HLP_CLE_DELENV,acOwn,pcPgm,SYN_CLE_DELENV,MAN_CLE_DELENV,isMan,TRUE);
             if (isMan==TRUE) fprintf(pfOut,"Manual page for built-in function \'DELENV\' successfully written to \'%s\'\n",pcFil);
             if (isAll==FALSE) ERROR(0);
          }
          if (strxcmp(isCas,pcCmd,"TRACE",0,0,FALSE)==0 || isAll) {
             if (isMan==FALSE) fprintf(pfOut,"Manual page for built-in function \'TRACE\':\n\n");
-            vdCleManFunction(pfDoc,"~","4.14","TRACE"   ,HLP_CLE_TRACE   ,acOwn,pcPgm,SYN_CLE_TRACE,MAN_CLE_TRACE,isMan,TRUE);
+            vdCleManFunction(pfDoc,"~","4.15","TRACE"   ,HLP_CLE_TRACE   ,acOwn,pcPgm,SYN_CLE_TRACE,MAN_CLE_TRACE,isMan,TRUE);
             if (isMan==TRUE) fprintf(pfOut,"Manual page for built-in function \'TRACE\' successfully written to \'%s\'\n",pcFil);
             if (isAll==FALSE) ERROR(0);
          }
          if (strxcmp(isCas,pcCmd,"CONFIG",0,0,FALSE)==0 || isAll) {
             if (isMan==FALSE) fprintf(pfOut,"Manual page for built-in function \'CONFIG\':\n\n");
-            vdCleManFunction(pfDoc,"~","4.15","CONFIG"  ,HLP_CLE_CONFIG  ,acOwn,pcPgm,SYN_CLE_CONFIG,MAN_CLE_CONFIG,isMan,TRUE);
+            vdCleManFunction(pfDoc,"~","4.16","CONFIG"  ,HLP_CLE_CONFIG  ,acOwn,pcPgm,SYN_CLE_CONFIG,MAN_CLE_CONFIG,isMan,TRUE);
             if (isMan==TRUE) fprintf(pfOut,"Manual page for built-in function \'CONFIG\' successfully written to \'%s\'\n",pcFil);
             if (isAll==FALSE) ERROR(0);
          }
          if (strxcmp(isCas,pcCmd,"GRAMMAR",0,0,FALSE)==0 || isAll) {
             if (isMan==FALSE) fprintf(pfOut,"Manual page for built-in function \'GRAMMAR\':\n\n");
-            vdCleManFunction(pfDoc,"~","4.16","GRAMMAR" ,HLP_CLE_GRAMMAR ,acOwn,pcPgm,SYN_CLE_GRAMMAR,MAN_CLE_GRAMMAR,isMan,TRUE);
+            vdCleManFunction(pfDoc,"~","4.17","GRAMMAR" ,HLP_CLE_GRAMMAR ,acOwn,pcPgm,SYN_CLE_GRAMMAR,MAN_CLE_GRAMMAR,isMan,TRUE);
             if (isMan==TRUE) fprintf(pfOut,"Manual page for built-in function \'GRAMMAR\' successfully written to \'%s\'\n",pcFil);
             if (isAll==FALSE) ERROR(0);
          }
          if (strxcmp(isCas,pcCmd,"LEXEM",0,0,FALSE)==0 || isAll) {
             if (isMan==FALSE) fprintf(pfOut,"Manual page for built-in function \'LEXEM\':\n\n");
-            vdCleManFunction(pfDoc,"~","4.17","LEXEM"   ,HLP_CLE_LEXEM   ,acOwn,pcPgm,SYN_CLE_LEXEM,MAN_CLE_LEXEM,isMan,TRUE);
+            vdCleManFunction(pfDoc,"~","4.18","LEXEM"   ,HLP_CLE_LEXEM   ,acOwn,pcPgm,SYN_CLE_LEXEM,MAN_CLE_LEXEM,isMan,TRUE);
             if (isMan==TRUE) fprintf(pfOut,"Manual page for built-in function \'LEXEM\' successfully written to \'%s\'\n",pcFil);
             if (isAll==FALSE) ERROR(0);
          }
          if (strxcmp(isCas,pcCmd,"LICENSE",0,0,FALSE)==0 || isAll) {
             if (isMan==FALSE) fprintf(pfOut,"Manual page for built-in function \'LICENSE\':\n\n");
-            vdCleManFunction(pfDoc,"~","4.18","LICENSE" ,HLP_CLE_LICENSE ,acOwn,pcPgm,SYN_CLE_LICENSE,MAN_CLE_LICENSE,isMan,TRUE);
+            vdCleManFunction(pfDoc,"~","4.19","LICENSE" ,HLP_CLE_LICENSE ,acOwn,pcPgm,SYN_CLE_LICENSE,MAN_CLE_LICENSE,isMan,TRUE);
             if (isMan==TRUE) fprintf(pfOut,"Manual page for built-in function \'LICENSE\' successfully written to \'%s\'\n",pcFil);
             if (isAll==FALSE) ERROR(0);
          }
          if (strxcmp(isCas,pcCmd,"VERSION",0,0,FALSE)==0 || isAll) {
             if (isMan==FALSE) fprintf(pfOut,"Manual page for built-in function \'VERSION\':\n\n");
-            vdCleManFunction(pfDoc,"~","4.19","VERSION" ,HLP_CLE_VERSION ,acOwn,pcPgm,SYN_CLE_VERSION,MAN_CLE_VERSION,isMan,TRUE);
+            vdCleManFunction(pfDoc,"~","4.20","VERSION" ,HLP_CLE_VERSION ,acOwn,pcPgm,SYN_CLE_VERSION,MAN_CLE_VERSION,isMan,TRUE);
             if (isMan==TRUE) fprintf(pfOut,"Manual page for built-in function \'VERSION\' successfully written to \'%s\'\n",pcFil);
             if (isAll==FALSE) ERROR(0);
          }
          if (strxcmp(isCas,pcCmd,"ABOUT",0,0,FALSE)==0 || isAll) {
             if (isMan==FALSE) fprintf(pfOut,"Manual page for built-in function \'ABOUT\':\n\n");
-            vdCleManFunction(pfDoc,"~","4.20","ABOUT"   ,HLP_CLE_ABOUT   ,acOwn,pcPgm,SYN_CLE_ABOUT,MAN_CLE_ABOUT,isMan,TRUE);
+            vdCleManFunction(pfDoc,"~","4.21","ABOUT"   ,HLP_CLE_ABOUT   ,acOwn,pcPgm,SYN_CLE_ABOUT,MAN_CLE_ABOUT,isMan,TRUE);
             if (isMan==TRUE) fprintf(pfOut,"Manual page for built-in function \'ABOUT\' successfully written to \'%s\'\n",pcFil);
             if (isAll==FALSE) ERROR(0);
          }
@@ -1116,20 +1176,21 @@ EVALUATE:
             vdCleManFunction(pfDoc,"~","4.4" ,"GENDOCU" ,HLP_CLE_GENDOCU ,acOwn,pcPgm,SYN_CLE_GENDOCU ,MAN_CLE_GENDOCU ,FALSE,isNbr);
             vdCleManFunction(pfDoc,"~","4.5" ,"GENPROP" ,HLP_CLE_GENPROP ,acOwn,pcPgm,SYN_CLE_GENPROP ,MAN_CLE_GENPROP ,FALSE,isNbr);
             vdCleManFunction(pfDoc,"~","4.6" ,"SETPROP" ,HLP_CLE_SETPROP ,acOwn,pcPgm,SYN_CLE_SETPROP ,MAN_CLE_SETPROP ,FALSE,isNbr);
-            vdCleManFunction(pfDoc,"~","4.7" ,"DELPROP" ,HLP_CLE_DELPROP ,acOwn,pcPgm,SYN_CLE_DELPROP ,MAN_CLE_DELPROP ,FALSE,isNbr);
-            vdCleManFunction(pfDoc,"~","4.8" ,"GETPROP" ,HLP_CLE_GETPROP ,acOwn,pcPgm,SYN_CLE_GETPROP ,MAN_CLE_GETPROP ,FALSE,isNbr);
-            vdCleManFunction(pfDoc,"~","4.9" ,"SETOWNER",HLP_CLE_SETOWNER,acOwn,pcPgm,SYN_CLE_SETOWNER,MAN_CLE_SETOWNER,FALSE,isNbr);
-            vdCleManFunction(pfDoc,"~","4.10","GETOWNER",HLP_CLE_GETOWNER,acOwn,pcPgm,SYN_CLE_GETOWNER,MAN_CLE_GETOWNER,FALSE,isNbr);
-            vdCleManFunction(pfDoc,"~","4.11","SETENV"  ,HLP_CLE_SETENV  ,acOwn,pcPgm,SYN_CLE_SETENV  ,MAN_CLE_SETENV  ,FALSE,isNbr);
-            vdCleManFunction(pfDoc,"~","4.12","GETENV"  ,HLP_CLE_GETENV  ,acOwn,pcPgm,SYN_CLE_GETENV  ,MAN_CLE_GETENV  ,FALSE,isNbr);
-            vdCleManFunction(pfDoc,"~","4.13","DELENV"  ,HLP_CLE_DELENV  ,acOwn,pcPgm,SYN_CLE_DELENV  ,MAN_CLE_DELENV  ,FALSE,isNbr);
-            vdCleManFunction(pfDoc,"~","4.14","TRACE"   ,HLP_CLE_TRACE   ,acOwn,pcPgm,SYN_CLE_TRACE   ,MAN_CLE_TRACE   ,FALSE,isNbr);
-            vdCleManFunction(pfDoc,"~","4.15","CONFIG"  ,HLP_CLE_CONFIG  ,acOwn,pcPgm,SYN_CLE_CONFIG  ,MAN_CLE_CONFIG  ,FALSE,isNbr);
-            vdCleManFunction(pfDoc,"~","4.16","GRAMMAR" ,HLP_CLE_GRAMMAR ,acOwn,pcPgm,SYN_CLE_GRAMMAR ,MAN_CLE_GRAMMAR ,FALSE,isNbr);
-            vdCleManFunction(pfDoc,"~","4.17","LEXEM"   ,HLP_CLE_LEXEM   ,acOwn,pcPgm,SYN_CLE_LEXEM   ,MAN_CLE_LEXEM   ,FALSE,isNbr);
-            vdCleManFunction(pfDoc,"~","4.18","LICENSE" ,HLP_CLE_LICENSE ,acOwn,pcPgm,SYN_CLE_LICENSE ,MAN_CLE_LICENSE ,FALSE,isNbr);
-            vdCleManFunction(pfDoc,"~","4.19","VERSION" ,HLP_CLE_VERSION ,acOwn,pcPgm,SYN_CLE_VERSION ,MAN_CLE_VERSION ,FALSE,isNbr);
-            vdCleManFunction(pfDoc,"~","4.20","ABOUT"   ,HLP_CLE_ABOUT   ,acOwn,pcPgm,SYN_CLE_ABOUT   ,MAN_CLE_ABOUT   ,FALSE,isNbr);
+            vdCleManFunction(pfDoc,"~","4.7" ,"CHGPROP" ,HLP_CLE_CHGPROP ,acOwn,pcPgm,SYN_CLE_CHGPROP ,MAN_CLE_CHGPROP ,FALSE,isNbr);
+            vdCleManFunction(pfDoc,"~","4.8" ,"DELPROP" ,HLP_CLE_DELPROP ,acOwn,pcPgm,SYN_CLE_DELPROP ,MAN_CLE_DELPROP ,FALSE,isNbr);
+            vdCleManFunction(pfDoc,"~","4.9" ,"GETPROP" ,HLP_CLE_GETPROP ,acOwn,pcPgm,SYN_CLE_GETPROP ,MAN_CLE_GETPROP ,FALSE,isNbr);
+            vdCleManFunction(pfDoc,"~","4.10","SETOWNER",HLP_CLE_SETOWNER,acOwn,pcPgm,SYN_CLE_SETOWNER,MAN_CLE_SETOWNER,FALSE,isNbr);
+            vdCleManFunction(pfDoc,"~","4.11","GETOWNER",HLP_CLE_GETOWNER,acOwn,pcPgm,SYN_CLE_GETOWNER,MAN_CLE_GETOWNER,FALSE,isNbr);
+            vdCleManFunction(pfDoc,"~","4.12","SETENV"  ,HLP_CLE_SETENV  ,acOwn,pcPgm,SYN_CLE_SETENV  ,MAN_CLE_SETENV  ,FALSE,isNbr);
+            vdCleManFunction(pfDoc,"~","4.13","GETENV"  ,HLP_CLE_GETENV  ,acOwn,pcPgm,SYN_CLE_GETENV  ,MAN_CLE_GETENV  ,FALSE,isNbr);
+            vdCleManFunction(pfDoc,"~","4.14","DELENV"  ,HLP_CLE_DELENV  ,acOwn,pcPgm,SYN_CLE_DELENV  ,MAN_CLE_DELENV  ,FALSE,isNbr);
+            vdCleManFunction(pfDoc,"~","4.15","TRACE"   ,HLP_CLE_TRACE   ,acOwn,pcPgm,SYN_CLE_TRACE   ,MAN_CLE_TRACE   ,FALSE,isNbr);
+            vdCleManFunction(pfDoc,"~","4.16","CONFIG"  ,HLP_CLE_CONFIG  ,acOwn,pcPgm,SYN_CLE_CONFIG  ,MAN_CLE_CONFIG  ,FALSE,isNbr);
+            vdCleManFunction(pfDoc,"~","4.17","GRAMMAR" ,HLP_CLE_GRAMMAR ,acOwn,pcPgm,SYN_CLE_GRAMMAR ,MAN_CLE_GRAMMAR ,FALSE,isNbr);
+            vdCleManFunction(pfDoc,"~","4.18","LEXEM"   ,HLP_CLE_LEXEM   ,acOwn,pcPgm,SYN_CLE_LEXEM   ,MAN_CLE_LEXEM   ,FALSE,isNbr);
+            vdCleManFunction(pfDoc,"~","4.19","LICENSE" ,HLP_CLE_LICENSE ,acOwn,pcPgm,SYN_CLE_LICENSE ,MAN_CLE_LICENSE ,FALSE,isNbr);
+            vdCleManFunction(pfDoc,"~","4.20","VERSION" ,HLP_CLE_VERSION ,acOwn,pcPgm,SYN_CLE_VERSION ,MAN_CLE_VERSION ,FALSE,isNbr);
+            vdCleManFunction(pfDoc,"~","4.21","ABOUT"   ,HLP_CLE_ABOUT   ,acOwn,pcPgm,SYN_CLE_ABOUT   ,MAN_CLE_ABOUT   ,FALSE,isNbr);
 
             s=1;
             siErr=siCleSimpleInit(pfOut,pcDep,pcOpt,pcEnt,&pvHdl);
@@ -1176,7 +1237,9 @@ EVALUATE:
             fprintf(pfDoc,"\n# Property file for: %s.%s #\n\n",acOwn,pcPgm);
             fprintf(pfDoc,HLP_CLE_PROPFIL);
             for (siErr=CLP_OK, i=0;psTab[i].pcKyw!=NULL && siErr==CLP_OK;i++) {
-               siErr=siClePropertyInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isFlg,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl);
+               siErr=siClePropertyInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,
+                                       psTab[i].piOid,psTab[i].psTab,isCas,isFlg,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,
+                                       &pvHdl,acFil,&siFil);
                if (siErr) ERROR(siErr);
                siErr=siClpProperties(pvHdl,10,psTab[i].pcKyw,pfDoc);
                vdClpClose(pvHdl); pvHdl=NULL;
@@ -1269,7 +1332,9 @@ EVALUATE:
          if (pcCmd==NULL) {
             errno=0;
             for (siErr=CLP_OK, i=0;psTab[i].pcKyw!=NULL && siErr==CLP_OK;i++) {
-               siErr=siClePropertyInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isFlg,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl);
+               siErr=siClePropertyInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,
+                                       psTab[i].piOid,psTab[i].psTab,isCas,isFlg,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,
+                                       &pvHdl,acFil,&siFil);
                if (siErr) ERROR(siErr);
                siErr=siClpProperties(pvHdl,10,psTab[i].pcKyw,pfPro);
                vdClpClose(pvHdl); pvHdl=NULL;
@@ -1284,7 +1349,9 @@ EVALUATE:
          } else {
             for (i=0;psTab[i].pcKyw!=NULL;i++) {
                if (strxcmp(isCas,pcCmd,psTab[i].pcKyw,0,0,FALSE)==0) {
-                  siErr=siClePropertyInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isFlg,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl);
+                  siErr=siClePropertyInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,
+                                          psTab[i].piOid,psTab[i].psTab,isCas,isFlg,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,
+                                          &pvHdl,acFil,&siFil);
                   if (siErr) ERROR(siErr);
                   errno=0;
                   siErr=siClpProperties(pvHdl,10,psTab[i].pcKyw,pfPro);
@@ -1362,6 +1429,60 @@ EVALUATE:
       }
       fprintf(pfOut,"%s %s SETPROP filename\n",pcDep,argv[0]);
       ERROR(8);
+   } else if (strxcmp(isCas,argv[1],"CHGPROP",0,0,FALSE)==0) {
+      if (argc>=3) {
+         for (i=0;psTab[i].pcKyw!=NULL;i++) {
+            if (strxcmp(isCas,argv[2],psTab[i].pcKyw,0,0,FALSE)==0) {
+               char acPro[CLEMAX_CMDSIZ]="";
+               for (j=3;j<argc;j++) {
+                  if (strlen(acPro)+strlen(argv[j])+1>=CLEMAX_CMDLEN) {
+                     fprintf(pfOut,"Argument list is too long (more then %d byte)!\n",CLEMAX_CMDLEN);
+                     return(8);
+                  }
+                  if (j>3) strcat(acPro," ");
+                  strcat(acPro,acOwn);
+                  strcat(acPro,".");
+                  strcat(acPro,pcPgm);
+                  strcat(acPro,".");
+                  strcat(acPro,psTab[i].pcKyw);
+                  strcat(acPro,".");
+                  strcat(acPro,argv[j]);
+               }
+               ERROR(siCleChangeProperties(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,acPro,
+                                           psTab[i].piOid,psTab[i].psTab,isCas,isFlg,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf));
+            }
+         }
+      }
+      if (pcDef!=NULL && strlen(pcDef)) {
+         for (i=0;psTab[i].pcKyw!=NULL;i++) {
+            if (strxcmp(isCas,pcDef,psTab[i].pcKyw,0,0,FALSE)==0) {
+               char acPro[CLEMAX_CMDSIZ]="";
+               for (j=2;j<argc;j++) {
+                  if (strlen(acPro)+strlen(argv[j])+strlen(acOwn)+strlen(pcPgm)+strlen(psTab[i].pcKyw)+5>=CLEMAX_CMDLEN) {
+                     fprintf(pfOut,"Argument list is too long (more then %d byte)!\n",CLEMAX_CMDLEN);
+                     return(8);
+                  }
+                  if (j>2) strcat(acPro," ");
+                  strcat(acPro,acOwn);
+                  strcat(acPro,".");
+                  strcat(acPro,pcPgm);
+                  strcat(acPro,".");
+                  strcat(acPro,psTab[i].pcKyw);
+                  strcat(acPro,".");
+                  strcat(acPro,argv[j]);
+               }
+               ERROR(siCleChangeProperties(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,acPro,
+                                           psTab[i].piOid,psTab[i].psTab,isCas,isFlg,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf));
+            }
+         }
+      }
+      fprintf(pfOut,"Syntax for built-in function \'CHGPROP\' not valid\n");
+      for (i=0;psTab[i].pcKyw!=NULL;i++) {
+         if (psTab[i].siFlg) {
+            fprintf(pfOut,"%s %s CHGPROP %s property_list\n",pcDep,argv[0],psTab[i].pcKyw);
+         }
+      }
+      ERROR(8);
    } else if (strxcmp(isCas,argv[1],"DELPROP",0,0,FALSE)==0) {
       if (argc==2) {
          if (strlen(acOwn)+strlen(pcPgm)+20>=sizeof(acCnf)) {
@@ -1404,7 +1525,9 @@ EVALUATE:
       if (argc==2) {
          fprintf(pfOut,"Properties for program \'%s\':\n",pcPgm);
          for (i=0;psTab[i].pcKyw!=NULL;i++) {
-            siErr=siClePropertyInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isFlg,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl);
+            siErr=siClePropertyInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,
+                                    psTab[i].piOid,psTab[i].psTab,isCas,isFlg,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,
+                                    &pvHdl,acFil,&siFil);
             if (siErr) ERROR(siErr);
             vdPrnProperties(pvHdl,psTab[i].pcKyw,10);
             vdClpClose(pvHdl); pvHdl=NULL;
@@ -1456,7 +1579,9 @@ EVALUATE:
          }
          for (i=0;psTab[i].pcKyw!=NULL;i++) {
             if (strxcmp(isCas,argv[2],psTab[i].pcKyw,0,'.',TRUE)==0) {
-               siErr=siClePropertyInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isFlg,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl);
+               siErr=siClePropertyInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,
+                                       psTab[i].piOid,psTab[i].psTab,isCas,isFlg,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,
+                                       &pvHdl,acFil,&siFil);
                if (siErr) ERROR(siErr);
                if (strlen(argv[2])==strlen(psTab[i].pcKyw)) {
                   fprintf(pfOut,"Properties for command \'%s\':\n",argv[2]);
@@ -1475,7 +1600,9 @@ EVALUATE:
                      fprintf(pfOut,"Memory allocation for path '%s.%s' failed!\n",pcDef,argv[2]);
                      ERROR(16);
                   }
-                  siErr=siClePropertyInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isFlg,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl);
+                  siErr=siClePropertyInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,
+                                          psTab[i].piOid,psTab[i].psTab,isCas,isFlg,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,
+                                          &pvHdl,acFil,&siFil);
                   if (siErr) {
                      free(pcPat);
                      ERROR(siErr);
@@ -1711,19 +1838,18 @@ static int siClePropertyInit(
    const char*                   pcOpt,
    const char*                   pcEnt,
    TsCnfHdl*                     psCnf,
-   void**                        ppHdl)
+   void**                        ppHdl,
+   char*                         pcFil,
+   int*                          piFil)
 {
    int                           siErr;
    int                           isOvl=(piOid==NULL)?FALSE:TRUE;
    unsigned int                  uiFlg=0;
    static char                   acPro[CLEMAX_PROSIZ];
-   char                          acFil[1025];
    char*                         pcPos=NULL;
    char*                         pcLst=NULL;
 
-
    *ppHdl=NULL;
-
    siErr=pfIni(pfOut,pfTrc,pcOwn,pcPgm,pvClp);
    if (siErr) {
       fprintf(pfOut,"Initialization of CLP structure for command \'%s\' failed!\n",pcCmd);
@@ -1735,18 +1861,98 @@ static int siClePropertyInit(
       fprintf(pfOut,"Open of property parser for command \'%s\' failed!\n",pcCmd);
       return(12);
    }
-   siErr=siCleGetProperties(*ppHdl,pfOut,psCnf,pcOwn,pcPgm,pcCmd,acFil,acPro);
+   siErr=siCleGetProperties(*ppHdl,pfOut,psCnf,pcOwn,pcPgm,pcCmd,pcFil,acPro,piFil);
    if (siErr) {
       vdClpClose(*ppHdl);*ppHdl=NULL;
       return(siErr);
    }
    siErr=siClpParsePro(*ppHdl,acPro,FALSE,&pcPos,&pcLst);
    if (siErr<0) {
-      fprintf(pfOut,"Property parser for command \'%s\' failed!\n",pcCmd);
-      vdPrnPropertyError(*ppHdl,pfOut,acFil,acPro,pcPos,pcLst,pcDep);
+      fprintf(pfOut,"Parsing property file \'%s\' for command \'%s\' failed!\n",pcFil,pcCmd);
+      vdPrnPropertyError(*ppHdl,pfOut,pcFil,acPro,pcPos,pcLst,pcDep);
       vdClpClose(*ppHdl);*ppHdl=NULL;
       return(6);
    }
+   return(0);
+}
+
+static int siClePropertyFinish(
+   const char*                   pcOwn,
+   const char*                   pcPgm,
+   const char*                   pcCmd,
+   FILE*                         pfOut,
+   FILE*                         pfTrc,
+   TsCnfHdl*                     psCnf,
+   void*                         pvHdl,
+   const char*                   pcFil,
+   const int                     siFil)
+{
+   int                           siErr,i;
+   FILE*                         pfPro;
+   char                          acEnv[CLEMAX_CNFSIZ];
+   char                          acCnf[CLEMAX_CNFSIZ];
+   sprintf(acEnv,"%s_%s_%s_PROPERTY_FILENAME",pcOwn,pcPgm,pcCmd);
+   for (i=0;acEnv[i];i++) acEnv[i]=toupper(acEnv[i]);
+   if (siFil!=3) {
+      pcFil=getenv(acEnv);
+      if (pcFil==NULL) {
+#ifdef __HOST__
+         {
+            int j,k;
+            for (j=k=i=0;pcOwn[i] && k<8;i++) {
+               if (isalnum(pcOwn[i])) {
+                  acEnv[j]=toupper(pcOwn[i]);
+                  j++; k++;
+               }
+            }
+            acEnv[j]='.'; j++;
+            for (k=i=0;pcPgm[i] && k<8;i++) {
+               if (isalnum(pcPgm[i])) {
+                  acEnv[j]=toupper(pcPgm[i]);
+                  j++; k++;
+               }
+            }
+            acEnv[j]='.'; j++;
+            for (k=i=0;pcCmd[i] && k<8;i++) {
+               if (isalnum(pcCmd[i])) {
+                  acEnv[j]=toupper(pcCmd[i]);
+                  j++; k++;
+               }
+            }
+            acEnv[j]=0x00;
+            strcat(acEnv,"%s.PROPER");
+         }
+#else
+         sprintf(acEnv,".%s.%s.%s.properties",pcOwn,pcPgm,pcCmd);
+         for (i=0;acEnv[i];i++) acEnv[i]=tolower(acEnv[i]);
+#endif
+         pcFil=acEnv;
+      }
+   }
+   errno=0;
+   pfPro=fopen(pcFil,"w");
+   if (pfPro==NULL) {
+      fprintf(pfOut,"Cannot open the property file \'%s\' for write operation (%d-%s)\n",pcFil,errno,strerror(errno));
+      vdClpClose(pvHdl);
+      return(16);
+   }
+
+   siErr=siClpProperties(pvHdl,10,pcCmd,pfPro);
+   if (siErr<0) {
+      fprintf(pfOut,"Write property file (%s) for command \'%s\' failed (%d-%s)\n",pcFil,pcCmd,errno,strerror(errno));
+      vdClpClose(pvHdl); fclose(pfPro); return(2);
+   }
+   vdClpClose(pvHdl); fclose(pfPro);
+   fprintf(pfOut,"Property file (%s) for command \'%s\' successfully written\n",pcFil,pcCmd);
+
+   sprintf(acCnf,"%s.%s.%s.property.file",pcOwn,pcPgm,pcCmd);
+   siErr=siCnfSet(psCnf,pfOut,acCnf,pcFil,TRUE);
+   if (siErr) {
+      fprintf(pfOut,"Activation of property file (%s) for command \'%s\' failed\n",pcFil,pcCmd);
+      return(2);
+   }
+   fprintf(pfOut,"Setting configuration keyword \'%s\' to value \'%s\' was successful\n",acCnf,pcFil);
+   fprintf(pfOut,"Activation of property file (%s) for command \'%s\' was successful\n",pcFil,pcCmd);
 
    return(0);
 }
@@ -1772,11 +1978,11 @@ static int siCleCommandInit(
    TsCnfHdl*                     psCnf,
    void**                        ppHdl)
 {
-   int                           siErr;
+   int                           siErr,siFil=0;
    int                           isOvl=(piOid==NULL)?FALSE:TRUE;
-   unsigned int                  uiFlg=0;
+   unsigned int                  uiFlg;
    static char                   acPro[CLEMAX_PROSIZ];
-   char                          acFil[1025];
+   char                          acFil[CLEMAX_FILSIZ];
    char*                         pcPos=NULL;
    char*                         pcLst=NULL;
 
@@ -1794,7 +2000,7 @@ static int siCleCommandInit(
       fprintf(pfOut,"Open of property parser for command \'%s\' failed!\n",pcCmd);
       return(12);
    }
-   siErr=siCleGetProperties(*ppHdl,pfOut,psCnf,pcOwn,pcPgm,pcCmd,acFil,acPro);
+   siErr=siCleGetProperties(*ppHdl,pfOut,psCnf,pcOwn,pcPgm,pcCmd,acFil,acPro,&siFil);
    if (siErr) {
       vdClpClose(*ppHdl);*ppHdl=NULL;
       return(siErr);
@@ -1834,6 +2040,53 @@ static int siCleSimpleInit(
       fprintf(pfOut,"Open of command line parser for grammar and lexeme print out failed!\n");
       return(12);
    }
+   return(0);
+}
+
+static int siCleChangeProperties(
+   tpfIni                        pfIni,
+   void*                         pvClp,
+   const char*                   pcOwn,
+   const char*                   pcPgm,
+   const char*                   pcCmd,
+   const char*                   pcMan,
+   const char*                   pcHlp,
+   const char*                   pcPro,
+   const int*                    piOid,
+   const TsClpArgument*          psTab,
+   const int                     isCas,
+   const int                     isFlg,
+   const int                     siMkl,
+   FILE*                         pfOut,
+   FILE*                         pfTrc,
+   const char*                   pcDep,
+   const char*                   pcOpt,
+   const char*                   pcEnt,
+   TsCnfHdl*                     psCnf)
+{
+   int                           siErr;
+   void*                         pvHdl=NULL;
+   char*                         pcPos=NULL;
+   char*                         pcLst=NULL;
+   char                          acFil[CLEMAX_FILSIZ];
+   int                           siFil=0;
+
+   siErr=siClePropertyInit(pfIni,pvClp,pcOwn,pcPgm,pcCmd,pcMan,pcHlp,
+                           piOid,psTab,isCas,isFlg,siMkl,pfOut,pfTrc,
+                           pcDep,pcOpt,pcEnt,psCnf,&pvHdl,acFil,&siFil);
+   if (siErr) return(siErr);
+
+   siErr=siClpParsePro(pvHdl,pcPro,TRUE,&pcPos,&pcLst);
+   if (siErr<0) {
+      fprintf(pfOut,"Property parser for command \'%s\' failed!\n",pcCmd);
+      vdPrnPropertyError(pvHdl,pfOut,NULL,pcPro,pcPos,pcLst,pcDep);
+      vdClpClose(pvHdl);
+      return(6);
+   }
+
+   siErr=siClePropertyFinish(pcOwn,pcPgm,pcCmd,pfOut,pfTrc,psCnf,pvHdl,acFil,siFil);
+   if (siErr) return(siErr);
+
    return(0);
 }
 
@@ -2066,6 +2319,7 @@ static void vdPrnStaticSyntax(
    fprintf(pfOut,"%s%s %s %s\n"                               ,pcDep,pcDep,pcPgm,SYN_CLE_GENDOCU );
    fprintf(pfOut,"%s%s %s %s\n"                               ,pcDep,pcDep,pcPgm,SYN_CLE_GENPROP );
    fprintf(pfOut,"%s%s %s %s\n"                               ,pcDep,pcDep,pcPgm,SYN_CLE_SETPROP );
+   fprintf(pfOut,"%s%s %s %s\n"                               ,pcDep,pcDep,pcPgm,SYN_CLE_CHGPROP );
    fprintf(pfOut,"%s%s %s %s\n"                               ,pcDep,pcDep,pcPgm,SYN_CLE_DELPROP );
    fprintf(pfOut,"%s%s %s %s\n"                               ,pcDep,pcDep,pcPgm,SYN_CLE_GETPROP );
    fprintf(pfOut,"%s%s %s %s\n"                               ,pcDep,pcDep,pcPgm,SYN_CLE_SETOWNER);
@@ -2103,6 +2357,7 @@ static void vdPrnStaticHelp(
    fprintf(pfOut,"%s%s %s GENDOCU  - %s\n",pcDep,pcDep,pcPgm,HLP_CLE_GENDOCU );
    fprintf(pfOut,"%s%s %s GENPROP  - %s\n",pcDep,pcDep,pcPgm,HLP_CLE_GENPROP );
    fprintf(pfOut,"%s%s %s SETPROP  - %s\n",pcDep,pcDep,pcPgm,HLP_CLE_SETPROP );
+   fprintf(pfOut,"%s%s %s CHGPROP  - %s\n",pcDep,pcDep,pcPgm,HLP_CLE_CHGPROP );
    fprintf(pfOut,"%s%s %s DELPROP  - %s\n",pcDep,pcDep,pcPgm,HLP_CLE_DELPROP );
    fprintf(pfOut,"%s%s %s GETPROP  - %s\n",pcDep,pcDep,pcPgm,HLP_CLE_GETPROP );
    fprintf(pfOut,"%s%s %s SETOWNER - %s\n",pcDep,pcDep,pcPgm,HLP_CLE_SETOWNER);
@@ -2198,8 +2453,13 @@ static void vdPrnPropertyError(
    const char*                   pcDep)
 {
    int                           i,l;
-   if (pcPos==pcPro) fprintf(pfOut,"%s Property error in file \'%s\' at byte %d ("   ,pcDep,pcFil,((int)(pcPos-pcPro))+1);
-               else  fprintf(pfOut,"%s Property error in file \'%s\' at byte %d (...",pcDep,pcFil,((int)(pcPos-pcPro))+1);
+   if (pcFil!=NULL && strlen(pcFil)) {
+      if (pcPos==pcPro) fprintf(pfOut,"%s Property error in file \'%s\' at byte %d ("   ,pcDep,pcFil,((int)(pcPos-pcPro))+1);
+                  else  fprintf(pfOut,"%s Property error in file \'%s\' at byte %d (...",pcDep,pcFil,((int)(pcPos-pcPro))+1);
+   } else {
+      if (pcPos==pcPro) fprintf(pfOut,"%s Property error in property list at byte %d ("   ,pcDep,((int)(pcPos-pcPro))+1);
+                  else  fprintf(pfOut,"%s Property error in property list at byte %d (...",pcDep,((int)(pcPos-pcPro))+1);
+   }
    for (i=0;i<32 && !iscntrl(pcPos[i]);i++) fprintf(pfOut,"%c",pcPos[i]);
    if (pcPos[i]==EOS) fprintf(pfOut,")\n");
                  else fprintf(pfOut,"...)\n");
@@ -2234,7 +2494,8 @@ static int siCleGetProperties(
    const char*             pcPgm,
    const char*             pcFct,
    char*                   pcFil,
-   char*                   pcPro)
+   char*                   pcPro,
+   int*                    piFlg)
 {
    int                     siPro,siRst;
    char*                   pcHlp=NULL;
@@ -2256,16 +2517,18 @@ static int siCleGetProperties(
          sprintf(acRot,"%s.property.file",pcOwn);
          pcHlp=pcCnfGet(psCnf,acRot);
          if (pcHlp==NULL) {
+            pcPro[0]=0x00;
+            *piFlg=0;
             return(0);
-         }
-      }
-   }
+         } else *piFlg=1;
+      } else *piFlg=2;
+   } else *piFlg=3;
 
    errno=0;
    strcpy(pcFil,pcHlp);
    pfPro=fopen(pcFil,"r");
    if (pfPro==NULL) {
-      fprintf(pfOut,"Cannot open the property file \'%s\'  (%d-%s)\n",pcFil,errno,strerror(errno));
+      fprintf(pfOut,"Cannot open the property file \'%s\' for read operation (%d-%s)\n",pcFil,errno,strerror(errno));
       return(0);
    }
    errno=0;

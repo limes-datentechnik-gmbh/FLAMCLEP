@@ -19,6 +19,14 @@ BUILT-IN FUNCTIONS::
    messages, manual pages and documentation. There are additional built-
    in functions that can be used for owner, property and trace manage-
    ment.
+CHG::
+   Change
+CHANGING OF PROPERTIES::
+   With built-in function CHGPROP you can update a property value in the
+   current active property file (see SETPROP) for a certain command. If
+   no command specific property file is activated a property file will
+   be generated (see GENPROP), updated and activated (see SETPROP).
+   $ program CHGPROP command property_list
 CLEP::
    Command line executor and parser
 CLEP-ABOUT::
@@ -169,8 +177,8 @@ SETTING OF PROPERTY FILE::
    define a command with appropriate options (SETPROP). The property
    file can be made with GENPROP and will be activated for the actual
    owner. If you have successfully created the property file you can
-   activate it, but it will be still inactive until you alter the default
-   settings.
+   activate it, but it will be still inactive until you alter the
+   default settings.
 SHELL SCRIPT::
    Commands can be stored in a text file called shell script. The Shell
    Script is itself a command and can be called like a system command
