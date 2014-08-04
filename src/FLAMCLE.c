@@ -509,7 +509,13 @@ extern int siCleExecute(
       }
 #else
       if (pcHom!=NULL && strlen(pcHom)) {
-         sprintf(acCnf,"%s.%s.config",pcHom,pcPgm);
+         sprintf(acCnf,".%s.config",pcPgm);
+         pfHlp=fopen(acCnf,"r");
+         if (pfHlp==NULL) {
+            sprintf(acCnf,"%s.%s.config",pcHom,pcPgm);
+         } else {
+            fclose(pfHlp);
+         }
       } else {
          sprintf(acCnf,".%s.config",pcPgm);
       }
