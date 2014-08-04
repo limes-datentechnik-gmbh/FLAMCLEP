@@ -2589,7 +2589,7 @@ static int siCleGetProperties(
    fclose(pfPro);
    *pcHlp=EOS;
    if (siRst==0) {
-      fprintf(pfOut,"Property file is too big (more then %d byte)\n",CLEMAX_PROLEN);
+      fprintf(pfOut,"Property file is too big (more than %d bytes)\n",CLEMAX_PROLEN);
       return(8);
    }
 
@@ -2621,7 +2621,7 @@ static int siCleGetCommand(
    if (argv[1][l]==EOS) {
       for (i=2;i<argc;i++) {
          if (strlen(pcCmd)+strlen(argv[i])+1>=CLEMAX_CMDLEN) {
-            fprintf(pfOut,"Argument list is too long (more then %d byte)!\n",CLEMAX_CMDLEN);
+            fprintf(pfOut,"Argument list is too long (more than %d bytes)!\n",CLEMAX_CMDLEN);
             return(8);
          }
          if (i>2) strcat(pcCmd," ");
@@ -2631,14 +2631,14 @@ static int siCleGetCommand(
       strcat(pcCmd,&argv[1][l]);
       for (i=2;i<argc;i++) {
          if (strlen(pcCmd)+strlen(argv[i])+1>=CLEMAX_CMDLEN) {
-            fprintf(pfOut,"Argument list is too long (more then %d byte)!\n",CLEMAX_CMDLEN);
+            fprintf(pfOut,"Argument list is too long (more than %d bytes)!\n",CLEMAX_CMDLEN);
             return(8);
          }
          strcat(pcCmd," "); strcat(pcCmd,argv[i]);
       }
    } else if (argv[1][l]=='=') {
       if (argc!=2) {
-         fprintf(pfOut,"The expected parameter file name for \'%s\' is split into more then one parameter\n",pcFct);
+         fprintf(pfOut,"The expected parameter file name for \'%s\' is split into more than one parameter\n",pcFct);
          fprintf(pfOut,"The parameter file name must start with \" and end with \" to join anything into one parameter\n");
          fprintf(pfOut,"Syntax for command \'%s\' not valid\n",pcFct);
          fprintf(pfOut,"%s %s %s=\" parameter file name \"\n",pcDep,argv[0],pcFct);
@@ -2646,7 +2646,7 @@ static int siCleGetCommand(
          return(8);
       }
       if (strlen(argv[1])>=CLEMAX_CMDLEN) {
-         fprintf(pfOut,"Parameter file name is too long (more then %d byte)!\n",CLEMAX_CMDLEN);
+         fprintf(pfOut,"Parameter file name is too long (more than %d bytes)!\n",CLEMAX_CMDLEN);
          return(8);
       }
       strcpy(pcCmd,argv[1]+l+1);
@@ -2672,7 +2672,7 @@ static int siCleGetCommand(
       fclose(pfCmd);
       *pcHlp=EOS;
       if (siRst==0) {
-         fprintf(pfOut,"Parameter file is too big (more then %d byte)\n",CLEMAX_CMDLEN);
+         fprintf(pfOut,"Parameter file is too big (more than %d bytes)\n",CLEMAX_CMDLEN);
          return(8);
       }
    } else {
