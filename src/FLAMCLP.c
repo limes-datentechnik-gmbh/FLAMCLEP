@@ -4,7 +4,7 @@
  *
  * LIMES Command Line Executor (CLE) in ANSI-C
  * @author FALK REICHBOTT
- * @date  17.04.2014
+ * @date  04.08.2014
  * @copyright (c) 2014 limes datentechnik gmbh
  * www.flam.de
  * This software is provided 'as-is', without any express or implied

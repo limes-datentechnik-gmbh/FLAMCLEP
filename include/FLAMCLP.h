@@ -6,7 +6,7 @@
  *
  * LIMES Command Line Parser (FLAMCLP) in ANSI-C
  * @author Falk Reichbott
- * @date 26.07.2014\n
+ * @date 04.08.2014\n
  * @copyright (c) 2014 limes datentechnik gmbh
  * www.flam.de
  *

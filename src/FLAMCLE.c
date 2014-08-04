@@ -4,7 +4,7 @@
  *
  * LIMES Command Line Executor (CLE) in ANSI-C
  * @author FALK REICHBOTT
- * @date  07.07.2014
+ * @date  04.08.2014
  * @copyright (c) 2014 limes datentechnik gmbh
  * www.flam.de
  * This software is provided 'as-is', without any express or implied
@@ -22,13 +22,13 @@
  *    not be misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source
  *    distribution.
- ******************************************************************************/
+ **********************************************************************/
 /*
  * TASK:0000086 Fehlermeldungen ueberarbeiten (Zentralisierung)
  * TASK:0000086 Wide character support fuer command files einbauen
  * TASK:0000086 Mehrsprachigkeit einbauen
  */
-/* Standard-Includes **********************************************************/
+/* Standard-Includes **************************************************/
 
 #include <ctype.h>
 #include <stdio.h>
@@ -40,17 +40,17 @@
 #define putenv(s) _putenv((s))
 #endif
 
-/* Include eigener Bibliotheken  **********************************************/
+/* Include eigener Bibliotheken  **************************************/
 
 #include "FLAMCLP.h"
 
-/* Include der Schnittstelle **************************************************/
+/* Include der Schnittstelle ******************************************/
 
 #include "FLAMCLE.h"
 #include "CLEMAN.h"
 #include "CLEMSG.h"
 
-/* Definition der Version von FL-CLE ******************************************
+/* Definition der Version von FL-CLE ***********************************
  *
  * Changelog:
  * 1.1.1: Fix of the envar bug (ISSUE: 0000182)
@@ -69,13 +69,14 @@
  * 1.1.14: Compare of keywords instead of compare up to key word length
  * 1.1.15: Add built-in function CHGPROP
  * 1.1.16: Add alias list for getprop and default for chgprop if pcDef=="flam"
+ * 1.1.17: Use HOMEDIR as default dir for config and property files
  */
-#define CLE_VSN_STR       "1.1.16"
+#define CLE_VSN_STR       "1.1.17"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        1
-#define CLE_VSN_REVISION       16
+#define CLE_VSN_REVISION       17
 
-/* Definition der Konstanten **************************************************/
+/* Definition der Konstanten ******************************************/
 #define CLEMAX_CNFLEN            1023
 #define CLEMAX_CNFSIZ            1024
 #define CLEMAX_FILLEN            1023
@@ -91,7 +92,35 @@
 #define CLEMAX_PATLEN            1023
 #define CLEMAX_PATSIZ            1024
 
-/* Definition der Strukturen *************************************************/
+/* HOME and USER ******************************************************/
+
+#ifdef __WIN__
+#define _WIN32_IE 0x5000
+#include <shlobj.h>
+#include <windows.h>
+static char* HOMEDIR(int flg) {
+   static char dir[MAX_PATH+1]="";
+   SHGetFolderPath(NULL,CSIDL_PERSONAL,NULL,0,dir);
+   if (flg) strcat(dir,"\\");
+   return(dir);
+}
+#else
+#include <unistd.h>
+#include <sys/types.h>
+#include <pwd.h>
+static char* HOMEDIR(int flg) {
+   static char dir[CLEMAX_FILSIZ]="";
+   struct passwd* uP = getpwuid(geteuid());
+   if (NULL != uP) {
+      strncpy(dir,uP->pw_dir,sizeof(dir)-2);
+      dir[sizeof(dir)-2]=0x00;
+      if (flg) strcat(dir,"/");
+   }
+   return(dir);
+}
+#endif
+
+/* Definition der Strukturen ******************************************/
 
 typedef struct CnfEnt {
    struct CnfEnt*                psNxt;
@@ -111,7 +140,7 @@ typedef struct CnfHdl {
    TsCnfEnt*                     psLst;
 }TsCnfHdl;
 
-/* Deklaration der internen Funktionen ***************************************/
+/* Deklaration der internen Funktionen ********************************/
 
 static int siClePropertyInit(
    tpfIni                        pfIni,
@@ -137,6 +166,7 @@ static int siClePropertyInit(
    int*                          piFil);
 
 static int siClePropertyFinish(
+   const char*                   pcHom,
    const char*                   pcOwn,
    const char*                   pcPgm,
    const char*                   pcCmd,
@@ -150,6 +180,7 @@ static int siClePropertyFinish(
 static int siCleChangeProperties(
    tpfIni                        pfIni,
    void*                         pvClp,
+   const char*                   pcHom,
    const char*                   pcOwn,
    const char*                   pcPgm,
    const char*                   pcCmd,
@@ -350,7 +381,7 @@ static int siCnfClr(
 static void vdCnfCls(
    TsCnfHdl*                     psHdl);
 
-/* Implementierung der externen Funktionen ***********************************/
+/* Implementierung der externen Funktionen ****************************/
 #define VSNLENGTHMAX   256
 #define VSNLENGTHMIN   0
 #define ABOLENGTHMAX   1024
@@ -428,6 +459,7 @@ extern int siCleExecute(
    char**                        ppArg=NULL;
    char                          acFil[CLEMAX_FILSIZ];
    int                           siFil=0;
+   char*                         pcHom=HOMEDIR(1);
 
    if (psTab==NULL || argc==0 || argv==NULL || pcPgm==NULL || pcHlp==NULL || pfOut==NULL || pcDep==NULL || pcOpt==NULL || pcEnt==NULL ||
        strlen(pcPgm)==0 || strlen(pcHlp)==0 || strlen(pcPgm)>CLEMAX_PGMLEN) return(24);
@@ -460,7 +492,6 @@ extern int siCleExecute(
    pcCnf=getenv(acCnf);
    if (pcCnf==NULL) {
 
-
 #ifdef __HOST__
       {
          int k;
@@ -475,7 +506,11 @@ extern int siCleExecute(
 
       }
 #else
-      sprintf(acCnf,".%s.config",pcPgm);
+      if (pcHom!=NULL && strlen(pcHom)) {
+         sprintf(acCnf,"%s.%s.config",pcHom,pcPgm);
+      } else {
+         sprintf(acCnf,".%s.config",pcPgm);
+      }
       for (i=0;acCnf[i];i++) acCnf[i]=tolower(acCnf[i]);
 #endif
       pcCnf=acCnf;
@@ -1449,8 +1484,8 @@ EVALUATE:
                   strcat(acPro,".");
                   strcat(acPro,argv[j]);
                }
-               ERROR(siCleChangeProperties(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,acPro,
-                                           psTab[i].piOid,psTab[i].psTab,isCas,isFlg,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf));
+               ERROR(siCleChangeProperties(psTab[i].pfIni,psTab[i].pvClp,pcHom,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,
+                                           acPro,psTab[i].piOid,psTab[i].psTab,isCas,isFlg,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf));
             }
          }
       }
@@ -1472,8 +1507,8 @@ EVALUATE:
                   strcat(acPro,".");
                   strcat(acPro,argv[j]);
                }
-               ERROR(siCleChangeProperties(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,acPro,
-                                           psTab[i].piOid,psTab[i].psTab,isCas,isFlg,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf));
+               ERROR(siCleChangeProperties(psTab[i].pfIni,psTab[i].pvClp,pcHom,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,
+                                           acPro,psTab[i].piOid,psTab[i].psTab,isCas,isFlg,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf));
             }
          }
       }
@@ -1817,7 +1852,7 @@ EVALUATE:
 }
 #undef ERROR
 
-/* Interne Funktionen *********************************************************/
+/* Interne Funktionen *************************************************/
 
 
 static int siClePropertyInit(
@@ -1878,6 +1913,7 @@ static int siClePropertyInit(
 }
 
 static int siClePropertyFinish(
+   const char*                   pcHom,
    const char*                   pcOwn,
    const char*                   pcPgm,
    const char*                   pcCmd,
@@ -1924,7 +1960,11 @@ static int siClePropertyFinish(
             strcat(acEnv,"%s.PROPER");
          }
 #else
-         sprintf(acEnv,".%s.%s.%s.properties",pcOwn,pcPgm,pcCmd);
+         if (pcHom!=NULL && strlen(pcHom)) {
+            sprintf(acEnv,"%s.%s.%s.%s.properties",pcHom,pcOwn,pcPgm,pcCmd);
+         } else {
+            sprintf(acEnv,".%s.%s.%s.properties",pcOwn,pcPgm,pcCmd);
+         }
          for (i=0;acEnv[i];i++) acEnv[i]=tolower(acEnv[i]);
 #endif
          pcFil=acEnv;
@@ -2047,6 +2087,7 @@ static int siCleSimpleInit(
 static int siCleChangeProperties(
    tpfIni                        pfIni,
    void*                         pvClp,
+   const char*                   pcHom,
    const char*                   pcOwn,
    const char*                   pcPgm,
    const char*                   pcCmd,
@@ -2085,7 +2126,7 @@ static int siCleChangeProperties(
       return(6);
    }
 
-   siErr=siClePropertyFinish(pcOwn,pcPgm,pcCmd,pfOut,pfTrc,psCnf,pvHdl,acFil,siFil);
+   siErr=siClePropertyFinish(pcHom,pcOwn,pcPgm,pcCmd,pfOut,pfTrc,psCnf,pvHdl,acFil,siFil);
    if (siErr) return(siErr);
 
    return(0);
@@ -2963,5 +3004,5 @@ static void vdCnfCls(
    }
 }
 
-/*****************************************************************************/
+/**********************************************************************/
 

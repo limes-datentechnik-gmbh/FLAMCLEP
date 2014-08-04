@@ -8,7 +8,9 @@ The first parameter of CHGPROP is the command name. All other parameter
 are prefixed with the root (owner.program.command.) then concatenated to
 a blank separated property list. This property list is parsed with the
 CLP. If no property list provided the property file for the command is
-parsed or generated and then activated without any update.
+parsed or generated and then activated without any update. This behavior
+can easily used to generate and activate property files for the
+different commands.
 
 The built-in function reads and parse the current activated property
 file, then it parse the provided property list and writes the updated
@@ -18,18 +20,24 @@ command specific property file is generated and activated.
 
 If currently no corresponding property file defined (see SETPROP) for
 this owner, program and command a property file is generated. The file
-names below are used in the current working directory:
+names below are used in the home directory:
    
 On distributed systems (WINDOWS, UNIX, MAC)
     ".owner.program.command.properties"
 
 On mainframe systems (ZOS, VSE, BS200, ...)
-    "OWNER.PROGRAM.COMMAND.PROP"
+    "'SYSUID.OWNER.PROGRAM.COMMAND.PROP'"
 
 If the default file names and path above not sufficient you can change
-this names over the corresponding environment variables below:
+this names over the corresponding environment variables below. These
+setting can be used to define a global place where the property files
+are stored.
 
     OWNER_PROGRAM_COMMAND_PROPERTY_FILENAME
+    
+If the home directory not defined, then the current working directory is
+used as default to save the property files. On Mainframes SYSUID are
+used for the first level qualifier, to represent the "home directory". 
     
 Property files are managed per owner, this means updates are only done
 for the current owner.
