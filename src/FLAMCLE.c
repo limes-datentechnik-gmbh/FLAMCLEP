@@ -70,11 +70,13 @@
  * 1.1.15: Add built-in function CHGPROP
  * 1.1.16: Add alias list for getprop and default for chgprop if pcDef=="flam"
  * 1.1.17: Use HOMEDIR as default dir for config and property files
+ * 1.1.18: Support new option at GETPROP to print all or only defined (set) properties
+ * 1.1.19: search config file first in working dir and then in home dir for read operation
  */
-#define CLE_VSN_STR       "1.1.17"
+#define CLE_VSN_STR       "1.1.19"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        1
-#define CLE_VSN_REVISION       17
+#define CLE_VSN_REVISION       19
 
 /* Definition der Konstanten ******************************************/
 #define CLEMAX_CNFLEN            1023
@@ -317,6 +319,7 @@ static void vdPrnPropertyError(
 static void vdPrnProperties(
    void*                         pvHdl,
    const char*                   pcPat,
+   const int                     isSet,
    const int                     siDep);
 
 static int siCleGetProperties(
@@ -442,7 +445,7 @@ extern int siCleExecute(
    const char*                   pcFin,
    const char*                   pcDef)
 {
-   int                           i,j,l,s,siErr,siDep,siCnt;
+   int                           i,j,l,s,siErr,siDep,siCnt,isSet=0;
    char*                         pcPos=NULL;
    char*                         pcLst=NULL;
    static char                   acCmd[CLEMAX_CMDSIZ];
@@ -504,7 +507,13 @@ extern int siCleExecute(
       }
 #else
       if (pcHom!=NULL && strlen(pcHom)) {
-         sprintf(acCnf,"%s.%s.config",pcHom,pcPgm);
+         sprintf(acCnf,".%s.config",pcPgm);
+         pfHlp=fopen(acCnf,"r");
+         if (pfHlp==NULL) {
+            sprintf(acCnf,"%s.%s.config",pcHom,pcPgm);
+         } else {
+            fclose(pfHlp);
+         }
       } else {
          sprintf(acCnf,".%s.config",pcPgm);
       }
@@ -1274,7 +1283,7 @@ EVALUATE:
                                        psTab[i].piOid,psTab[i].psTab,isCas,isFlg,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,
                                        &pvHdl,acFil,&siFil);
                if (siErr) ERROR(siErr);
-               siErr=siClpProperties(pvHdl,10,psTab[i].pcKyw,pfDoc);
+               siErr=siClpProperties(pvHdl,FALSE,10,psTab[i].pcKyw,pfDoc);
                vdClpClose(pvHdl); pvHdl=NULL;
             }
             fprintf(pfDoc,"------------------------------------------------------------------------\n\n");
@@ -1369,7 +1378,7 @@ EVALUATE:
                                        psTab[i].piOid,psTab[i].psTab,isCas,isFlg,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,
                                        &pvHdl,acFil,&siFil);
                if (siErr) ERROR(siErr);
-               siErr=siClpProperties(pvHdl,10,psTab[i].pcKyw,pfPro);
+               siErr=siClpProperties(pvHdl,FALSE,10,psTab[i].pcKyw,pfPro);
                vdClpClose(pvHdl); pvHdl=NULL;
             }
             if (siErr<0) {
@@ -1387,7 +1396,7 @@ EVALUATE:
                                           &pvHdl,acFil,&siFil);
                   if (siErr) ERROR(siErr);
                   errno=0;
-                  siErr=siClpProperties(pvHdl,10,psTab[i].pcKyw,pfPro);
+                  siErr=siClpProperties(pvHdl,FALSE,10,psTab[i].pcKyw,pfPro);
                   vdClpClose(pvHdl); pvHdl=NULL;
                   if (siErr<0) {
                      fprintf(pfOut,"Write property file (%s) for command \'%s\' failed (%d-%s)\n",pcFil,pcCmd,errno,strerror(errno));
@@ -1562,36 +1571,38 @@ EVALUATE:
                                     psTab[i].piOid,psTab[i].psTab,isCas,isFlg,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,
                                     &pvHdl,acFil,&siFil);
             if (siErr) ERROR(siErr);
-            vdPrnProperties(pvHdl,psTab[i].pcKyw,10);
+            vdPrnProperties(pvHdl,psTab[i].pcKyw,TRUE,10);
             vdClpClose(pvHdl); pvHdl=NULL;
          }
          ERROR(0);
       } else if (argc>=3) {
          if (argc==3) {
-            siDep=1;
+            siDep=1;  isSet=FALSE;
          } else if (argc==4) {
             if (argv[3][0]=='-') argv[3]++;
             if (argv[3][0]=='-') argv[3]++;
             if (strxcmp(isCas,argv[3],"ALL",0,0,FALSE)==0) {
-               siDep=10;
+               siDep=10; isSet=TRUE;
+            } else if (strxcmp(isCas,argv[3],"DEPALL",0,0,FALSE)==0) {
+                  siDep=1; isSet=FALSE;
             } else if (strxcmp(isCas,argv[3],"DEPTH1",0,0,FALSE)==0) {
-                  siDep=1;
+                  siDep=1; isSet=FALSE;
             } else if (strxcmp(isCas,argv[3],"DEPTH2",0,0,FALSE)==0) {
-                  siDep=2;
+                  siDep=2; isSet=FALSE;
             } else if (strxcmp(isCas,argv[3],"DEPTH3",0,0,FALSE)==0) {
-                  siDep=3;
+                  siDep=3; isSet=FALSE;
             } else if (strxcmp(isCas,argv[3],"DEPTH4",0,0,FALSE)==0) {
-                  siDep=4;
+                  siDep=4; isSet=FALSE;
             } else if (strxcmp(isCas,argv[3],"DEPTH5",0,0,FALSE)==0) {
-                  siDep=5;
+                  siDep=5; isSet=FALSE;
             } else if (strxcmp(isCas,argv[3],"DEPTH6",0,0,FALSE)==0) {
-                  siDep=6;
+                  siDep=6; isSet=FALSE;
             } else if (strxcmp(isCas,argv[3],"DEPTH7",0,0,FALSE)==0) {
-                  siDep=7;
+                  siDep=7; isSet=FALSE;
             } else if (strxcmp(isCas,argv[3],"DEPTH8",0,0,FALSE)==0) {
-                  siDep=8;
+                  siDep=8; isSet=FALSE;
             } else if (strxcmp(isCas,argv[3],"DEPTH9",0,0,FALSE)==0) {
-                  siDep=9;
+                  siDep=9; isSet=FALSE;
             } else {
                fprintf(pfOut,"Syntax for built-in function \'GETPROP\' not valid\n");
                for (i=0;psTab[i].pcKyw!=NULL ;i++) {
@@ -1621,7 +1632,7 @@ EVALUATE:
                } else {
                   fprintf(pfOut,"Properties for argument \'%s\':\n",argv[2]);
                }
-               vdPrnProperties(pvHdl,argv[2],siDep);
+               vdPrnProperties(pvHdl,argv[2],isSet,siDep);
                ERROR(0);
             }
          }
@@ -1642,7 +1653,7 @@ EVALUATE:
                   }
                   sprintf(pcPat,"%s.%s",pcDef,argv[2]);
                   fprintf(pfOut,"Properties for argument \'%s\':\n",pcPat);
-                  vdPrnProperties(pvHdl,pcPat,siDep);
+                  vdPrnProperties(pvHdl,pcPat,isSet,siDep);
                   free(pcPat);
                   ERROR(0);
                }
@@ -1975,7 +1986,7 @@ static int siClePropertyFinish(
       return(16);
    }
 
-   siErr=siClpProperties(pvHdl,10,pcCmd,pfPro);
+   siErr=siClpProperties(pvHdl,FALSE,10,pcCmd,pfPro);
    if (siErr<0) {
       fprintf(pfOut,"Write property file (%s) for command \'%s\' failed (%d-%s)\n",pcFil,pcCmd,errno,strerror(errno));
       vdClpClose(pvHdl); fclose(pfPro); return(2);
@@ -2520,9 +2531,10 @@ static void vdPrnPropertyError(
 static void vdPrnProperties(
    void*                   pvHdl,
    const char*             pcPat,
+   const int               isSet,
    const int               siDep)
 {
-   siClpProperties(pvHdl,siDep,pcPat,NULL);
+   siClpProperties(pvHdl,isSet,siDep,pcPat,NULL);
 }
 
 static int siCleGetProperties(

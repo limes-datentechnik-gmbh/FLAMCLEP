@@ -146,7 +146,7 @@ Below, you can find the syntax for each built-in function:
  * * SETPROP [command=]filename
  * * CHGPROP command property_list # root (owner.program.command) is prefixed
  * * DELPROP [command]
- * * GETPROP [command[.path] [DEPTH1 | ... | DEPTH9 | ALL]]
+ * * GETPROP [command[.path] [DEPTH1 | ... | DEPTH9 | DEPALL | ALL]]
  * * SETOWNER name
  * * GETOWNER
  * * SETENV variable=value
@@ -501,7 +501,7 @@ typedef struct CleCommand {
  * - SETPROP [command=]filename
  * - CHGPROP command property_list # root (owner.program.command) is prefixed
  * - DELPROP [command]
- * - GETPROP [command[.path] [DEPTH1 | ... | DEPTH9 | ALL]]
+ * - GETPROP [command[.path] [DEPTH1 | ... | DEPTH9 | DEPALL | ALL]]
  * - SETOWNER name
  * - GETOWNER
  * - SETENV variable=name

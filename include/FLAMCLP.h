@@ -765,6 +765,8 @@ extern int siClpDocu(
  * The function produces a property list with the current default values
  *
  * @param[in]  pvHdl Pointer to the corresponding handle created with \a pvClpOpen
+ * @param[in]  isSet If true only already defined else all properties are printed
+ * @param[in]  siDep Depth of next levels to print (1-One Level, 2-Two Level, ..., <9-All)
  * @param[in]  pcPat Path (root.input...) to limit the amount of properties
  * @param[in]  pfPro File pointer to write the property list (if NULL then pfHlp of FLAMCLP is used)
  *
@@ -772,6 +774,7 @@ extern int siClpDocu(
  */
 extern int siClpProperties(
    void*                         pvHdl,
+   const int                     isSet,
    const int                     siDep,
    const char*                   pcPat,
    FILE*                         pfPro);
