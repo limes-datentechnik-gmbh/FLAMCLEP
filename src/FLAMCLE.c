@@ -71,11 +71,12 @@
  * 1.1.16: Add alias list for getprop and default for chgprop if pcDef=="flam"
  * 1.1.17: Use HOMEDIR as default dir for config and property files
  * 1.1.18: Support new option at GETPROP to print all or only defined (set) properties
+ * 1.1.19: search config file first in working dir and then in home dir for read operation
  */
-#define CLE_VSN_STR       "1.1.18"
+#define CLE_VSN_STR       "1.1.19"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        1
-#define CLE_VSN_REVISION       18
+#define CLE_VSN_REVISION       19
 
 /* Definition der Konstanten ******************************************/
 #define CLEMAX_CNFLEN            1023
