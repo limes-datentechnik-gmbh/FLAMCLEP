@@ -15,9 +15,13 @@ See <<appendix-properties>> for the current property file content.
 
 Specifies the depth of the output. Default is DEPTH1.
 
-   ALL
+   DEPALL
 
 Shows all properties to the specified path, not just DEPTH1.
+
+   ALL
+
+Shows all defined properties to the specified path.
 
 .EXAMPLES
 
@@ -27,5 +31,5 @@ Shows all properties to the specified path, not just DEPTH1.
    $ program GETPROP command
    $ program GETPROP command ALL
    $ program GETPROP command.para
-   $ program GETPROP command.para ALL
+   $ program GETPROP command.para DEPALL
 -----------------------------------------------------------------------

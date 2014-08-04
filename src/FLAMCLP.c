@@ -65,12 +65,13 @@
  * 1.1.17: Support line comment (initiated with ';' up to '\n')
  * 1.1.18: Support object without parenthesis and overlays without dot
  * 1.1.19: Extent strxcmp() to support keyword compare and stop flag
+ * 1.1.20: Support flag to print all or only defined (set) properties
  **/
 
-#define CLP_VSN_STR       "1.1.19"
+#define CLP_VSN_STR       "1.1.20"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        1
-#define CLP_VSN_REVISION       19
+#define CLP_VSN_REVISION       20
 
 /* Definition der Flag-Makros *************************************************/
 
@@ -558,6 +559,7 @@ static int siClpPrnPro(
    void*                         pvHdl,
    FILE*                         pfOut,
    int                           isMan,
+   const int                     isAll,
    const int                     siLev,
    const int                     siDep,
    const TsSym*                  psTab);
@@ -1250,6 +1252,7 @@ extern int siClpDocu(
 
 extern int siClpProperties(
    void*                         pvHdl,
+   const int                     isSet,
    const int                     siDep,
    const char*                   pcPat,
    FILE*                         pfOut)
@@ -1283,7 +1286,7 @@ extern int siClpProperties(
             psTab=psArg->psDep;
          }
          if (psTab!=NULL) {
-            siErr=siClpPrnPro(pvHdl,pfOut,FALSE,siLev,siLev+siDep,psTab);
+            siErr=siClpPrnPro(pvHdl,pfOut,FALSE,isSet,siLev,siLev+siDep,psTab);
             if (siErr<0) return(siErr);
          } else {
             if (psHdl->pfErr!=NULL) {
@@ -1300,7 +1303,7 @@ extern int siClpProperties(
          return(CLPERR_SEM);
       }
    } else {
-      siErr=siClpPrnPro(pvHdl,pfOut,FALSE,0,siDep,psTab);
+      siErr=siClpPrnPro(pvHdl,pfOut,FALSE,isSet,0,siDep,psTab);
       if (siErr<0) return(siErr);
    }
    return(CLP_OK);
@@ -5483,6 +5486,7 @@ static int siClpPrnPro(
    void*                         pvHdl,
    FILE*                         pfOut,
    int                           isMan,
+   const int                     isSet,
    const int                     siLev,
    const int                     siDep,
    const TsSym*                  psTab)
@@ -5510,24 +5514,34 @@ static int siClpPrnPro(
    if (siLev<siDep || siDep>9) {
       for (psHlp=psTab;psHlp!=NULL;psHlp=psHlp->psNxt) {
          if (CLPISS_ARG(psHlp->psStd->uiFlg) && CLPISS_PRO(psHlp->psStd->uiFlg)) {
-            if ((isMan || (!CLPISS_CMD(psHlp->psStd->uiFlg))) && psHlp->psFix->pcMan!=NULL && strlen(psHlp->psFix->pcMan)) {
-               fprintf(pfOut,"\n# DESCRIPTION for %s.%s.%s.%s:\n %s #\n",psHdl->pcOwn,psHdl->pcPgm,fpcPat(pvHdl,siLev),psHlp->psStd->pcKyw,psHlp->psFix->pcMan);
-               isMan=TRUE;
-            } else {
-               if (isMan) fprintf(pfOut,"\n");
-               isMan=FALSE;
-            }
-            if (psHlp->psFix->pcDft!=NULL) {
+            if (psHlp->psFix->pcDft!=NULL && strlen(psHlp->psFix->pcDft)) {
+               if ((isMan || (!CLPISS_CMD(psHlp->psStd->uiFlg))) && psHlp->psFix->pcMan!=NULL && strlen(psHlp->psFix->pcMan)) {
+                  fprintf(pfOut,"\n# DESCRIPTION for %s.%s.%s.%s:\n %s #\n",psHdl->pcOwn,psHdl->pcPgm,fpcPat(pvHdl,siLev),psHlp->psStd->pcKyw,psHlp->psFix->pcMan);
+                  isMan=TRUE;
+               } else {
+                  if (isMan) fprintf(pfOut,"\n");
+                  isMan=FALSE;
+               }
                fprintf(pfOut,"%s.%s.%s.%s=\"%s\" ",psHdl->pcOwn,psHdl->pcPgm,fpcPat(pvHdl,siLev),psHlp->psStd->pcKyw,psHlp->psFix->pcDft);
+               fprintf(pfOut,"# TYPE: %s HELP: %s #\n",apClpTyp[psHlp->psFix->siTyp],psHlp->psFix->pcHlp);
             } else {
-               fprintf(pfOut,"%s.%s.%s.%s=\"\" ",psHdl->pcOwn,psHdl->pcPgm,fpcPat(pvHdl,siLev),psHlp->psStd->pcKyw);
+               if (isSet==FALSE) {
+                  if ((isMan || (!CLPISS_CMD(psHlp->psStd->uiFlg))) && psHlp->psFix->pcMan!=NULL && strlen(psHlp->psFix->pcMan)) {
+                     fprintf(pfOut,"\n# DESCRIPTION for %s.%s.%s.%s:\n %s #\n",psHdl->pcOwn,psHdl->pcPgm,fpcPat(pvHdl,siLev),psHlp->psStd->pcKyw,psHlp->psFix->pcMan);
+                     isMan=TRUE;
+                  } else {
+                     if (isMan) fprintf(pfOut,"\n");
+                     isMan=FALSE;
+                  }
+                  fprintf(pfOut,"%s.%s.%s.%s=\"\" ",psHdl->pcOwn,psHdl->pcPgm,fpcPat(pvHdl,siLev),psHlp->psStd->pcKyw);
+                  fprintf(pfOut,"# TYPE: %s HELP: %s #\n",apClpTyp[psHlp->psFix->siTyp],psHlp->psFix->pcHlp);
+               }
             }
-            fprintf(pfOut,"# TYPE: %s HELP: %s #\n",apClpTyp[psHlp->psFix->siTyp],psHlp->psFix->pcHlp);
 
             if (psHlp->psDep!=NULL) {
                if (psHlp->psFix->siTyp==CLPTYP_OBJECT || psHlp->psFix->siTyp==CLPTYP_OVRLAY) {
                   psHdl->apPat[siLev]=psHlp;
-                  siErr=siClpPrnPro(pvHdl,pfOut,isMan,siLev+1,siDep,psHlp->psDep);
+                  siErr=siClpPrnPro(pvHdl,pfOut,isMan,isSet,siLev+1,siDep,psHlp->psDep);
                   if (siErr<0) return(siErr);
                }
             }
