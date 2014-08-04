@@ -1,6 +1,7 @@
 This function allows to set environment variables within the 
 configuration file for a certain owner. All defined environment
-variables are placed in the current environment table of the process.
+variables are placed in the current environment table of the process
+before a command is executed.
 
 Attention: *The environment variables will be temporary overwritten*
 

@@ -5,14 +5,15 @@ extensive information about these capabilities.
 Additional You can use the build-in function'GENDOCU' to generate a
 complete or parts of the user manual.
 
-To read the parameter of a command, a compiler is applied.
-To see the regular expressions (lexems) and the corresponding
-grammar, please use the build in functions 'LEXEM' and 'GRAMMAR'.
+To read the parameter of a command, a compiler (command line processor
+CLP) is applied. To see the regular expressions (lexems) and the
+corresponding grammar, please use the build in functions 'LEXEM' and
+'GRAMMAR'.
 
-The command line parser uses an owner management in order to separate
-the settings for different clients and a property management for each
-command. If problems occur, you can activate a trace and manage all
-configuration settings.
+The command line executer (CLE) uses an owner management in order to
+separate the settings for different clients and a property management
+for each command. If problems occur, you can activate a trace and
+manage all configuration settings.
 
 For each command execution You can define environment variables which
 are managed over the configuration file.

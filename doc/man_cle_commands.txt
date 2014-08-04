@@ -22,7 +22,14 @@ For the syntax of an overlay braces '{}' are used to keep all possible
 arguments of an overlay logically together. These braces are not part
 of the real syntax. The braces are only written to demonstrate
 clearly that one of these arguments must be selected with the
-DOT operator for defining the overlay.
+DOT operator (optional) for defining the overlay.
+
+To be compatible with certain shells the features below are implemented:
+
+ * Strings can be enclosed with '' or ""
+ * Strings can also defined without quotes 
+ * Keywords can also start with "-" or "--" in front of the qualifier
+ * If it unique then parenthesis and the dot can be omit for object and overlays
 
 Commands can be declared in deep hierarchical depth. In order to
 simplify their handling the path is a powerful instrument for managing

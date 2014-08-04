@@ -6,7 +6,7 @@
  *
  * LIMES Command Line Executor (FLAMCLE) in ANSI-C
  * @author Falk Reichbott
- * @date 26.07.2014\n
+ * @date 24.08.2014\n
  * @copyright (c) 2014 limes datentechnik gmbh
  * www.flam.de
  *
@@ -86,7 +86,7 @@ Below, you can find a possibly incomplete list of FLAMCLE feature:
  * * The look and feel can be defined freely
  * * Syntax, help and manpage support for program, commands and arguments
  * * Extensive documentation generation in ASCIIDOC format for the user manual
- * * Powerful property file management (generation, activation, ...)
+ * * Powerful property file management (generation, activation, update, ...)
  * * Simple configuration data management (own environment variables)
  * * Automatic keyword shortening for arguments
  * * Support for many data types, like:
@@ -101,7 +101,7 @@ Below, you can find a possibly incomplete list of FLAMCLE feature:
  * * The main table for a command can be defined as object or overlay
  * * Keyword, help message and detailed description can be freely defined for the program, each command, argument or constant definition
  * * Aliases for each argument can also be defined and are handled as options for the same value.
- * * Available and usable on each platform including WIN, UNIX, MAC, ZOS, VSE, ...
+ * * Available and usable on each platform including WIN, UNIX, USS, ZOS, ...
  * * Support of STDENV as DD name for environment variables on mainframes
  * * Keywords (commands, built-in functions, ON, OFF, ALL, DEPTH1, ...) can start optional with "-" or "--"
 
@@ -116,8 +116,8 @@ All these built-in functions are available:
  * * GENDOCU  - Generates auxiliary documentation
  * * GENPROP  - Generates a property file
  * * SETPROP  - Activates a property file
- * * DELPROP  - Removes a property file from configuration
  * * CHGPROP  - Updates property values in the current property file
+ * * DELPROP  - Removes a property file from configuration
  * * GETPROP  - Displays current properties
  * * SETOWNER - Defines the current owner
  * * GETOWNER - Displays current owner setting
@@ -144,7 +144,7 @@ Below, you can find the syntax for each built-in function:
  * * GENDOCU [command[.paht]=]filename [NONBR]
  * * GENPROP [command=]filename
  * * SETPROP [command=]filename
- * * CHGPROP command property_list
+ * * CHGPROP command property_list # root (owner.program.command) is prefixed
  * * DELPROP [command]
  * * GETPROP [command[.path] [DEPTH1 | ... | DEPTH9 | ALL]]
  * * SETOWNER name
@@ -327,6 +327,7 @@ typedef int (*tpfIni)(
    const char*                   pcOwn,
    const char*                   pcPgm,
    void*                         pvClp);
+
 /**
  * Type definition for mapping function
  *
@@ -347,8 +348,8 @@ typedef int (*tpfIni)(
  * For overlay based commands the pointer to the object identifier is
  * provided (taken from siCleExecute). This integer can then be used to
  * choose the correct data structure from the corresponding CLP union
- * for mapping. The piOid can also used to give a integer back to the
- * caller of siCleExecute() from mapping if this pointer not NULL.
+ * for mapping. (The piOid can also (mis)used to give back a integer to
+ * the caller of siCleExecute() from mapping if this pointer not NULL.)
  *
  * @param[in]  pfOut File pointer for outputs (mainly error messages, given over CleExecute)
  * @param[in]  pfTrc File pointer for tracing (mainly for complex stuff, given over CleExecute)
@@ -498,7 +499,7 @@ typedef struct CleCommand {
  * - GENDOCU [command[.path]=]filename [NONBR]
  * - GENPROP [command=]filename
  * - SETPROP [command=]filename
- * - CHGPROP command property_list
+ * - CHGPROP command property_list # root (owner.program.command) is prefixed
  * - DELPROP [command]
  * - GETPROP [command[.path] [DEPTH1 | ... | DEPTH9 | ALL]]
  * - SETOWNER name

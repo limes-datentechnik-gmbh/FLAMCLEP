@@ -5,7 +5,7 @@ you get a structured list of arguments:
  * keyword           - the keyword for the argument
  * (TYPE: ...)       - the type of this argument
  * help message      - the short help text
- * (PROPERTY: [...]) - the current property value (optional)
+ * (PROPERTY: [...]) - the current hard coded property value (optional)
 
 The keyword can be abbreviated, but it must be unique for this list.
 The required letters are upper case if case sensitive mode is used.
