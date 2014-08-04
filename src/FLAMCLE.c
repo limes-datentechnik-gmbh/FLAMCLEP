@@ -494,16 +494,13 @@ extern int siCleExecute(
 
 #ifdef __HOST__
       {
-         int k;
-         for (j=k=i=0;pcPgm[i] && k<8;i++) {
+         for (j=i=0;pcPgm[i] && j<8;i++) {
             if (isalnum(pcPgm[i])) {
                acCnf[j]=toupper(pcPgm[i]);
-               j++; k++;
+               j++;
             }
          }
-         acCnf[j]=0x00;
-         strcat(acCnf,".CONFIG");
-
+         strcpy(&acCnf[j],".CONFIG");
       }
 #else
       if (pcHom!=NULL && strlen(pcHom)) {
