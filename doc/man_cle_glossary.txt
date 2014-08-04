@@ -22,10 +22,11 @@ BUILT-IN FUNCTIONS::
 CHG::
    Change
 CHANGING OF PROPERTIES::
-   With built-in function CHGPROP you can update a property value in the
-   current active property file (see SETPROP) for a certain command. If
-   no command specific property file is activated a property file will
-   be generated (see GENPROP), updated and activated (see SETPROP).
+   With the built-in function CHGPROP, you can update a property value
+   in the currently active property file (see SETPROP) for a certain
+   command. If no command specific property file is activated, a
+   property file is generated (see GENPROP), updated and activated (see
+   SETPROP).
    $ program CHGPROP command property_list
 CLEP::
    Command line executor and parser

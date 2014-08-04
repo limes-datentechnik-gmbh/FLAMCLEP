@@ -1,10 +1,10 @@
-A property file is generated for all commands when only a filename
-is given. If a command is specified a property file for this command
-will be made. Property files can be used to define default settings for
-commands. For each parameter a property entry is written to a text
-file. At the beginning of the text file are elucidation to help in
-editing the setting of properties. A property file can be activated
-with the built-in function SETPROP.
+A property file is generated for all commands if only a filename
+is provided. If a command is specified, a property file for this
+specific command is created. Property files can be used to define
+default settings for commands. For each parameter, a property entry is
+written to a text file. The text file contains comments to help in
+editing the properties. A property file can be activated with the
+built-in function SETPROP.
 
 Property files will be activated by their owner. A specific property
 file overrules the general property file. At time of generation all
@@ -14,7 +14,7 @@ We recommend to work only with command specific property files, because
 the built-in function CHGPROP can be used to generate, update and 
 activate a property file for a certain command.
 
-To optimize the program performance one can remove all unnecessary
+To optimize the program performance, one can remove all unnecessary
 properties.
 
 See <<appendix-properties>> for the current property file content. 

@@ -1,45 +1,45 @@
-With built-in function CHGPROP you can update property values in the
-current active (see SETPROP) property file for a dedicated command. If
-no property file is activated a property file  will be generated (see
-GENPROP), updated with the provided property list and activated (see
-SETPROP).
+The built-in function CHGPROP updates property values in the currently
+active (see SETPROP) property file for a dedicated command. If no
+property file is activated, a property file  is generated (see GENPROP),
+updated with the provided property list and activated (see SETPROP).
 
-The first parameter of CHGPROP is the command name. All other parameter 
-are prefixed with the root (owner.program.command.) then concatenated to
-a blank separated property list. This property list is parsed with the
-CLP. If no property list provided the property file for the command is
-parsed or generated and then activated without any update. This behavior
-can easily used to generate and activate property files for the
-different commands.
+The first parameter of CHGPROP is the command name. All other parameters 
+are prefixed with the root (owner.program.command.) and concatenated to
+a space-separated property list. This property list is parsed by the
+CLP. If no property list is provided, the property file for the command
+is either parsed or (if it does not exist) generated and then activated
+without any update. This behavior can be used to generate and activate
+property files for the different commands.
 
-The built-in function reads and parse the current activated property
-file, then it parse the provided property list and writes the updated
-property file back to the disk. The current active property file could
-be a global not command specific property file. In such case a new 
+The built-in function reads and parses the currently activate property
+file. Then it parses the provided property list and writes the updated
+property file back to disk. The currently active property file could be
+a global, not command specific property file. In such a case, a new 
 command specific property file is generated and activated.
 
-If currently no corresponding property file defined (see SETPROP) for
-this owner, program and command a property file is generated. The file
-names below are used in the home directory:
+If no property file is defined (see SETPROP) that corresponds to the
+owner, program and command, a property file is generated. The filename
+formats below are used to read or write property files from/to the home
+directory:
    
-On distributed systems (WINDOWS, UNIX, MAC)
+On non-mainframe systems (WINDOWS, UNIX, MAC):
     ".owner.program.command.properties"
 
-On mainframe systems (ZOS, VSE, BS200, ...)
+On mainframe systems (ZOS, VSE, BS200, ...):
     "'SYSUID.OWNER.PROGRAM.COMMAND.PROP'"
 
-If the default file names and path above not sufficient you can change
-this names over the corresponding environment variables below. These
-setting can be used to define a global place where the property files
-are stored.
+If the default filenames and/or path are not sufficient, you can change
+the filename of each property file by setting environment variables
+using the following naming convention:
 
     OWNER_PROGRAM_COMMAND_PROPERTY_FILENAME
     
-If the home directory not defined, then the current working directory is
-used as default to save the property files. On Mainframes SYSUID are
-used for the first level qualifier, to represent the "home directory". 
-    
-Property files are managed per owner, this means updates are only done
+If no home directory is defined, then the current working directory is
+used as default directory to save the property files. On mainframes 
+SYSUID is used for the first level qualifier, to represent the
+"home directory".
+
+Property files are managed per owner: This means updates are only done
 for the current owner.
 
 See <<appendix-properties>> for the current property file content.
