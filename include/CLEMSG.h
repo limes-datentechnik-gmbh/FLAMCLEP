@@ -39,7 +39,7 @@ static const char* SYN_CLE_GENPROP ="GENPROP [command=]filename";
 static const char* HLP_CLE_SETPROP ="Activate a property file";
 static const char* SYN_CLE_SETPROP ="SETPROP [command=]filename";
 static const char* HLP_CLE_CHGPROP ="Change a property value in the currently active property file";
-static const char* SYN_CLE_CHGPROP ="CHGPROP command property_list # root (owner.program.command) are prefixed";
+static const char* SYN_CLE_CHGPROP ="CHGPROP command property_list # root (owner.program.command) is prefixed #";
 static const char* HLP_CLE_DELPROP ="Remove a property file from configuration";
 static const char* SYN_CLE_DELPROP ="DELPROP [command]";
 static const char* HLP_CLE_GETPROP ="Show current properties";

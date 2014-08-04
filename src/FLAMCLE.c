@@ -1478,7 +1478,7 @@ EVALUATE:
                char acPro[CLEMAX_CMDSIZ]="";
                for (j=3;j<argc;j++) {
                   if (strlen(acPro)+strlen(argv[j])+strlen(acOwn)+strlen(pcPgm)+strlen(psTab[i].pcKyw)+5>CLEMAX_CMDSIZ) {
-                     fprintf(pfOut,"Argument list is too long!\n");
+                     fprintf(pfOut,"Argument list is too long! (more than %d bytes)!\n",CLEMAX_CMDLEN);
                      return(8);
                   }
                   if (j>3) strcat(acPro," ");
@@ -1501,7 +1501,7 @@ EVALUATE:
                char acPro[CLEMAX_CMDSIZ]="";
                for (j=2;j<argc;j++) {
                   if (strlen(acPro)+strlen(argv[j])+strlen(acOwn)+strlen(pcPgm)+strlen(psTab[i].pcKyw)+5>CLEMAX_CMDSIZ) {
-                     fprintf(pfOut,"Argument list is too long!\n");
+                     fprintf(pfOut,"Argument list is too long! (more than %d bytes)!\n",CLEMAX_CMDLEN);
                      return(8);
                   }
                   if (j>2) strcat(acPro," ");
@@ -2629,8 +2629,8 @@ static int siCleGetCommand(
    }
    if (argv[1][l]==EOS) {
       for (i=2;i<argc;i++) {
-         if (strlen(pcCmd)+strlen(argv[i])+1>=CLEMAX_CMDLEN) {
-            fprintf(pfOut,"Argument list is too long (more than %d bytes)!\n",CLEMAX_CMDLEN);
+         if (strlen(pcCmd)+strlen(argv[i])+2>CLEMAX_CMDLEN) {
+            fprintf(pfOut,"Argument list is too long! (more than %d bytes)!\n",CLEMAX_CMDLEN);
             return(8);
          }
          if (i>2) strcat(pcCmd," ");
@@ -2639,8 +2639,8 @@ static int siCleGetCommand(
    } else if (argv[1][l]=='.' || argv[1][l]=='(') {
       strcat(pcCmd,&argv[1][l]);
       for (i=2;i<argc;i++) {
-         if (strlen(pcCmd)+strlen(argv[i])+1>=CLEMAX_CMDLEN) {
-            fprintf(pfOut,"Argument list is too long (more than %d bytes)!\n",CLEMAX_CMDLEN);
+         if (strlen(pcCmd)+strlen(argv[i])+2>CLEMAX_CMDLEN) {
+            fprintf(pfOut,"Argument list is too long! (more than %d bytes)!\n",CLEMAX_CMDLEN);
             return(8);
          }
          strcat(pcCmd," "); strcat(pcCmd,argv[i]);

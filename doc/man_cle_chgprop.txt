@@ -47,7 +47,5 @@ See <<appendix-properties>> for the current property file content.
 .EXAMPLES
 
 -----------------------------------------------------------------------
-   $ program CHGPROP path="value"
-   $ flam4 CHGPROP mode="CX8"
-   $ flcl CHGPROP conv.read.text.suptws="ON"
+   $ program CHGPROP command path="value" # path without root # 
 -----------------------------------------------------------------------
