@@ -1472,7 +1472,7 @@ EVALUATE:
                char acPro[CLEMAX_CMDSIZ]="";
                for (j=3;j<argc;j++) {
                   if (strlen(acPro)+strlen(argv[j])+strlen(acOwn)+strlen(pcPgm)+strlen(psTab[i].pcKyw)+5>CLEMAX_CMDSIZ) {
-                     fprintf(pfOut,"Argument list is too long (more then %d byte)!\n",CLEMAX_CMDLEN);
+                     fprintf(pfOut,"Argument list is too long!\n");
                      return(8);
                   }
                   if (j>3) strcat(acPro," ");
@@ -1495,7 +1495,7 @@ EVALUATE:
                char acPro[CLEMAX_CMDSIZ]="";
                for (j=2;j<argc;j++) {
                   if (strlen(acPro)+strlen(argv[j])+strlen(acOwn)+strlen(pcPgm)+strlen(psTab[i].pcKyw)+5>CLEMAX_CMDSIZ) {
-                     fprintf(pfOut,"Argument list is too long (more then %d byte)!\n",CLEMAX_CMDLEN);
+                     fprintf(pfOut,"Argument list is too long!\n");
                      return(8);
                   }
                   if (j>2) strcat(acPro," ");
