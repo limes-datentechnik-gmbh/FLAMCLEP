@@ -1480,7 +1480,7 @@ EVALUATE:
                char acPro[CLEMAX_CMDSIZ]="";
                for (j=3;j<argc;j++) {
                   if (strlen(acPro)+strlen(argv[j])+strlen(acOwn)+strlen(pcPgm)+strlen(psTab[i].pcKyw)+5>CLEMAX_CMDSIZ) {
-                     fprintf(pfOut,"Argument list is too long! (more than %d bytes)!\n",CLEMAX_CMDLEN);
+                     fprintf(pfOut,"Argument list is too long!\n");
                      return(8);
                   }
                   if (j>3) strcat(acPro," ");
@@ -1503,7 +1503,7 @@ EVALUATE:
                char acPro[CLEMAX_CMDSIZ]="";
                for (j=2;j<argc;j++) {
                   if (strlen(acPro)+strlen(argv[j])+strlen(acOwn)+strlen(pcPgm)+strlen(psTab[i].pcKyw)+5>CLEMAX_CMDSIZ) {
-                     fprintf(pfOut,"Argument list is too long! (more than %d bytes)!\n",CLEMAX_CMDLEN);
+                     fprintf(pfOut,"Argument list is too long!\n");
                      return(8);
                   }
                   if (j>2) strcat(acPro," ");
@@ -1938,9 +1938,9 @@ static int siClePropertyFinish(
    FILE*                         pfPro;
    char                          acEnv[CLEMAX_CNFSIZ];
    char                          acCnf[CLEMAX_CNFSIZ];
-   sprintf(acEnv,"%s_%s_%s_PROPERTY_FILENAME",pcOwn,pcPgm,pcCmd);
-   for (i=0;acEnv[i];i++) acEnv[i]=toupper(acEnv[i]);
    if (siFil!=3) {
+      sprintf(acEnv,"%s_%s_%s_PROPERTY_FILENAME",pcOwn,pcPgm,pcCmd);
+      for (i=0;acEnv[i];i++) acEnv[i]=toupper(acEnv[i]);
       pcFil=getenv(acEnv);
       if (pcFil==NULL) {
 #ifdef __HOST__
@@ -1996,15 +1996,16 @@ static int siClePropertyFinish(
    vdClpClose(pvHdl); fclose(pfPro);
    fprintf(pfOut,"Property file (%s) for command \'%s\' successfully written\n",pcFil,pcCmd);
 
-   sprintf(acCnf,"%s.%s.%s.property.file",pcOwn,pcPgm,pcCmd);
-   siErr=siCnfSet(psCnf,pfOut,acCnf,pcFil,TRUE);
-   if (siErr) {
-      fprintf(pfOut,"Activation of property file (%s) for command \'%s\' failed\n",pcFil,pcCmd);
-      return(2);
+   if (siFil!=3) {
+      sprintf(acCnf,"%s.%s.%s.property.file",pcOwn,pcPgm,pcCmd);
+      siErr=siCnfSet(psCnf,pfOut,acCnf,pcFil,TRUE);
+      if (siErr) {
+         fprintf(pfOut,"Activation of property file (%s) for command \'%s\' failed\n",pcFil,pcCmd);
+         return(2);
+      }
+      fprintf(pfOut,"Setting configuration keyword \'%s\' to value \'%s\' was successful\n",acCnf,pcFil);
+      fprintf(pfOut,"Activation of property file (%s) for command \'%s\' was successful\n",pcFil,pcCmd);
    }
-   fprintf(pfOut,"Setting configuration keyword \'%s\' to value \'%s\' was successful\n",acCnf,pcFil);
-   fprintf(pfOut,"Activation of property file (%s) for command \'%s\' was successful\n",pcFil,pcCmd);
-
    return(0);
 }
 
