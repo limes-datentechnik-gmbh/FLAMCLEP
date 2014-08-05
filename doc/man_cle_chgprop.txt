@@ -11,7 +11,7 @@ is either parsed or (if it does not exist) generated and then activated
 without any update. This behavior can be used to generate and activate
 property files for the different commands.
 
-The built-in function reads and parses the currently activate property
+The built-in function reads and parses the currently active property
 file. Then it parses the provided property list and writes the updated
 property file back to disk. The currently active property file could be
 a global, not command specific property file. In such a case, a new 
