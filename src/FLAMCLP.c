@@ -98,7 +98,7 @@
 
 /* Definition der Konstanten **************************************************/
 
-#define CLPMAX_TABCNT            128
+#define CLPMAX_TABCNT            256
 #define CLPMAX_HDEPTH            128
 #define CLPMAX_LEXLEN            1023
 #define CLPMAX_LEXSIZ            1024
