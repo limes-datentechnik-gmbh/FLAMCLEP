@@ -420,7 +420,7 @@ extern const char* pcCleAbout(const int l)
 }
 
 #undef  ERROR
-#define ERROR(x) return(siCleEndExecution((x),psCnf,pfTrc,pfDoc,pfPro,ppArg,pvHdl))
+#define ERROR(x) return(siCleEndExecution((x),psCnf,pfTrh,pfDoc,pfPro,ppArg,pvHdl))
 extern int siCleExecute(
    const TsCleCommand*           psTab,
    int                           argc,
@@ -454,7 +454,8 @@ extern int siCleExecute(
    char                          acCnf[CLEMAX_CNFSIZ];
    char                          acOwn[CLEMAX_CNFSIZ];
    char                          acPgm[CLEMAX_PGMSIZ];
-   FILE*                         pfHlp=NULL;
+   FILE*                         pfTrh=NULL;
+   FILE*                         pfTmp=NULL;
    void*                         pvHdl=NULL;
    char                          acNum[CLEMAX_NUMSIZ];
    FILE*                         pfDoc=NULL;
@@ -469,22 +470,23 @@ extern int siCleExecute(
 
    for (i=0;pcPgm[i];i++) acPgm[i]=toupper(pcPgm[i]);
 
-   pfHlp=fopen("DD:STDENV","r");
-   if (pfHlp!=NULL) {
+   pfTmp=fopen("DD:STDENV","r");
+   if (pfTmp!=NULL) {
       memset(acCnf,0,sizeof(acCnf));
-      while (fgets(acCnf,sizeof(acCnf)-1,pfHlp)!=NULL) {
+      while (fgets(acCnf,sizeof(acCnf)-1,pfTmp)!=NULL) {
          pcCnf=acCnf+strlen(acCnf);
          while (isspace(*(pcCnf-1))) {
             pcCnf--; *pcCnf=EOS;
          }
          if (putenv(acCnf)) {
             fprintf(pfOut,"Put variable (%s) to environment failed\n",acCnf);
+            fclose(pfTmp);
             return(16);
          } else {
             fprintf(pfOut,"Put variable (%s) to environment successful\n",acCnf);
          }
       }
-      fclose(pfHlp);
+      fclose(pfTmp);
    }
 
    errno=0;
@@ -508,11 +510,11 @@ extern int siCleExecute(
 #else
       if (pcHom!=NULL && strlen(pcHom)) {
          sprintf(acCnf,".%s.config",pcPgm);
-         pfHlp=fopen(acCnf,"r");
-         if (pfHlp==NULL) {
+         pfTmp=fopen(acCnf,"r");
+         if (pfTmp==NULL) {
             sprintf(acCnf,"%s.%s.config",pcHom,pcPgm);
          } else {
-            fclose(pfHlp);
+            fclose(pfTmp);
          }
       } else {
          sprintf(acCnf,".%s.config",pcPgm);
@@ -547,10 +549,10 @@ extern int siCleExecute(
       sprintf(acCnf,"%s.%s.trace.file",acOwn,pcPgm);
       pcCnf=pcCnfGet(psCnf,acCnf);
       if (pcCnf!=NULL && strlen(pcCnf)) {
-         pfHlp=fopen(pcCnf,"w");
-         if (pfHlp==NULL) {
+         pfTrh=fopen(pcCnf,"w");
+         if (pfTrh==NULL) {
             fprintf(pfOut,"Open of trace file (%s) failed\n",pcCnf);
-         } else pfTrc=pfHlp;
+         } else pfTrc=pfTrh;
       }
    } else pfTrc=NULL;
 
