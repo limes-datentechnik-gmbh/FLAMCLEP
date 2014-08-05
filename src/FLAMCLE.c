@@ -1493,7 +1493,7 @@ EVALUATE:
                   strcat(acPro,".");
                   pcTmp=strchr(argv[j],'=');
                   if (pcTmp!=NULL) {
-                     pcTmp=0x00; pcTmp++;
+                     *pcTmp=0x00; pcTmp++;
                      strcat(acPro,argv[j]);
                      strcat(acPro,"=\"");
                      strcat(acPro,pcTmp);
@@ -1527,7 +1527,7 @@ EVALUATE:
                   strcat(acPro,".");
                   pcTmp=strchr(argv[j],'=');
                   if (pcTmp!=NULL) {
-                     pcTmp=0x00; pcTmp++;
+                     *pcTmp=0x00; pcTmp++;
                      strcat(acPro,argv[j]);
                      strcat(acPro,"=\"");
                      strcat(acPro,pcTmp);

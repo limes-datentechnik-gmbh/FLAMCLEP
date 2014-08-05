@@ -42,10 +42,16 @@ SYSUID is used for the first level qualifier, to represent the
 Property files are managed per owner: This means updates are only done
 for the current owner.
 
+To simplify the entry of properties the double quotations marks for the
+supplement string are added by CHGPROP. To delete a property you can
+simply specify the path without the root and with out a sign.   
+
 See <<appendix-properties>> for the current property file content.
 
 .EXAMPLES
 
 -----------------------------------------------------------------------
-   $ program CHGPROP command path="value" # path without root # 
+   $ program CHGPROP command overlay.object.argument=value  
+   $ program CHGPROP command overlay.object.argument  
+   $ program CHGPROP command object.argument=value1 argument=value2 
 -----------------------------------------------------------------------
