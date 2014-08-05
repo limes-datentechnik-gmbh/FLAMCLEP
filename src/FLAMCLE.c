@@ -464,6 +464,7 @@ extern int siCleExecute(
    char                          acFil[CLEMAX_FILSIZ];
    int                           siFil=0;
    char*                         pcHom=HOMEDIR(1);
+   char*                         pcTmp=NULL;
 
    if (psTab==NULL || argc==0 || argv==NULL || pcPgm==NULL || pcHlp==NULL || pfOut==NULL || pcDep==NULL || pcOpt==NULL || pcEnt==NULL ||
        strlen(pcPgm)==0 || strlen(pcHlp)==0 || strlen(pcPgm)>CLEMAX_PGMLEN) return(24);
@@ -1479,7 +1480,7 @@ EVALUATE:
             if (strxcmp(isCas,argv[2],psTab[i].pcKyw,0,0,FALSE)==0) {
                char acPro[CLEMAX_CMDSIZ]="";
                for (j=3;j<argc;j++) {
-                  if (strlen(acPro)+strlen(argv[j])+strlen(acOwn)+strlen(pcPgm)+strlen(psTab[i].pcKyw)+5>CLEMAX_CMDSIZ) {
+                  if (strlen(acPro)+strlen(argv[j])+strlen(acOwn)+strlen(pcPgm)+strlen(psTab[i].pcKyw)+8>CLEMAX_CMDSIZ) {
                      fprintf(pfOut,"Argument list is too long!\n");
                      return(8);
                   }
@@ -1490,7 +1491,18 @@ EVALUATE:
                   strcat(acPro,".");
                   strcat(acPro,psTab[i].pcKyw);
                   strcat(acPro,".");
-                  strcat(acPro,argv[j]);
+                  pcTmp=strchr(argv[j],'=');
+                  if (pcTmp!=NULL) {
+                     pcTmp=0x00; pcTmp++;
+                     strcat(acPro,argv[j]);
+                     strcat(acPro,"=\"");
+                     strcat(acPro,pcTmp);
+                     strcat(acPro,"\"");
+                  } else {
+                     strcat(acPro,argv[j]);
+                     strcat(acPro,"=\"");
+                     strcat(acPro,"\"");
+                  }
                }
                ERROR(siCleChangeProperties(psTab[i].pfIni,psTab[i].pvClp,pcHom,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,
                                            acPro,psTab[i].piOid,psTab[i].psTab,isCas,isFlg,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf));
@@ -1513,7 +1525,18 @@ EVALUATE:
                   strcat(acPro,".");
                   strcat(acPro,psTab[i].pcKyw);
                   strcat(acPro,".");
-                  strcat(acPro,argv[j]);
+                  pcTmp=strchr(argv[j],'=');
+                  if (pcTmp!=NULL) {
+                     pcTmp=0x00; pcTmp++;
+                     strcat(acPro,argv[j]);
+                     strcat(acPro,"=\"");
+                     strcat(acPro,pcTmp);
+                     strcat(acPro,"\"");
+                  } else {
+                     strcat(acPro,argv[j]);
+                     strcat(acPro,"=\"");
+                     strcat(acPro,"\"");
+                  }
                }
                ERROR(siCleChangeProperties(psTab[i].pfIni,psTab[i].pvClp,pcHom,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,
                                            acPro,psTab[i].piOid,psTab[i].psTab,isCas,isFlg,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf));
