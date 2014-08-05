@@ -420,7 +420,7 @@ extern const char* pcCleAbout(const int l)
 }
 
 #undef  ERROR
-#define ERROR(x) return(siCleEndExecution((x),psCnf,pfHlp,pfDoc,pfPro,ppArg,pvHdl))
+#define ERROR(x) return(siCleEndExecution((x),psCnf,pfTrc,pfDoc,pfPro,ppArg,pvHdl))
 extern int siCleExecute(
    const TsCleCommand*           psTab,
    int                           argc,
