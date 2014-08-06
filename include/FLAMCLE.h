@@ -144,9 +144,9 @@ Below, you can find the syntax for each built-in function:
  * * GENDOCU [command[.paht]=]filename [NONBR]
  * * GENPROP [command=]filename
  * * SETPROP [command=]filename
- * * CHGPROP command property_list # root (owner.program.command) is prefixed #
+ * * CHGPROP command [path[=value]]*
  * * DELPROP [command]
- * * GETPROP [command[.path] [DEPTH1 | ... | DEPTH9 | DEPALL | ALL]]
+ * * GETPROP [command[.path] [DEPTH1 | ... | DEPTH9 | DEPALL | DEFALL]]
  * * SETOWNER name
  * * GETOWNER
  * * SETENV variable=value
@@ -499,9 +499,9 @@ typedef struct CleCommand {
  * - GENDOCU [command[.path]=]filename [NONBR]
  * - GENPROP [command=]filename
  * - SETPROP [command=]filename
- * - CHGPROP command property_list # root (owner.program.command) is prefixed #
+ * - CHGPROP command [path[=value]]*
  * - DELPROP [command]
- * - GETPROP [command[.path] [DEPTH1 | ... | DEPTH9 | DEPALL | ALL]]
+ * - GETPROP [command[.path] [DEPTH1 | ... | DEPTH9 | DEPALL | DEFALL]]
  * - SETOWNER name
  * - GETOWNER
  * - SETENV variable=name

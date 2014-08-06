@@ -19,7 +19,7 @@ Specifies the depth of the output. Default is DEPTH1.
 
 Shows all properties to the specified path, not just DEPTH1.
 
-   ALL
+   DEFALL
 
 Shows all defined properties to the specified path.
 
@@ -27,9 +27,8 @@ Shows all defined properties to the specified path.
 
 -----------------------------------------------------------------------
    $ program GETPROP
-   $ program GETPROP ALL
    $ program GETPROP command
-   $ program GETPROP command ALL
+   $ program GETPROP command DEFALL
    $ program GETPROP command.para
    $ program GETPROP command.para DEPALL
 -----------------------------------------------------------------------

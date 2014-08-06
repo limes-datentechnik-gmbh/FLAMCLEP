@@ -1589,7 +1589,7 @@ EVALUATE:
       fprintf(pfOut,"Syntax for built-in function \'CHGPROP\' not valid\n");
       for (i=0;psTab[i].pcKyw!=NULL;i++) {
          if (psTab[i].siFlg) {
-            fprintf(pfOut,"%s %s CHGPROP %s property_list\n",pcDep,argv[0],psTab[i].pcKyw);
+            fprintf(pfOut,"%s %s CHGPROP %s [path[=value]]*\n",pcDep,argv[0],psTab[i].pcKyw);
          }
       }
       ERROR(8);
@@ -1649,10 +1649,10 @@ EVALUATE:
          } else if (argc==4) {
             if (argv[3][0]=='-') argv[3]++;
             if (argv[3][0]=='-') argv[3]++;
-            if (strxcmp(isCas,argv[3],"ALL",0,0,FALSE)==0) {
+            if (strxcmp(isCas,argv[3],"DEFALL",0,0,FALSE)==0) {
                siDep=10; isSet=TRUE;
             } else if (strxcmp(isCas,argv[3],"DEPALL",0,0,FALSE)==0) {
-                  siDep=1; isSet=FALSE;
+                  siDep=10; isSet=FALSE;
             } else if (strxcmp(isCas,argv[3],"DEPTH1",0,0,FALSE)==0) {
                   siDep=1; isSet=FALSE;
             } else if (strxcmp(isCas,argv[3],"DEPTH2",0,0,FALSE)==0) {
@@ -1675,7 +1675,7 @@ EVALUATE:
                fprintf(pfOut,"Syntax for built-in function \'GETPROP\' not valid\n");
                for (i=0;psTab[i].pcKyw!=NULL ;i++) {
                   if (psTab[i].siFlg) {
-                     fprintf(pfOut,"%s %s GETPROP %s[.path] [DEPTH1 | DEPTH2 | ... | DEPTH9 | ALL]\n",pcDep,argv[0],psTab[i].pcKyw);
+                     fprintf(pfOut,"%s %s GETPROP %s[.path] [DEPTH1 | DEPTH2 | ... | DEPTH9 | DEPALL | DEFALL]\n",pcDep,argv[0],psTab[i].pcKyw);
                   }
                }
                ERROR(8);
@@ -1684,7 +1684,7 @@ EVALUATE:
             fprintf(pfOut,"Syntax for built-in function \'GETPROP\' not valid\n");
             for (i=0;psTab[i].pcKyw!=NULL ;i++) {
                if (psTab[i].siFlg) {
-                  fprintf(pfOut,"%s %s GETPROP %s[.path] [DEPTH1 | DEPTH2 | ... | DEPTH9 | ALL]\n",pcDep,argv[0],psTab[i].pcKyw);
+                  fprintf(pfOut,"%s %s GETPROP %s[.path] [DEPTH1 | DEPTH2 | ... | DEPTH9 | DEPALL | DEFALL]\n",pcDep,argv[0],psTab[i].pcKyw);
                }
             }
             ERROR(8);
@@ -1731,7 +1731,7 @@ EVALUATE:
       fprintf(pfOut,"Syntax for built-in function \'GETPROP\' not valid\n");
       for (i=0;psTab[i].pcKyw!=NULL ;i++) {
          if (psTab[i].siFlg) {
-            fprintf(pfOut,"%s %s GETPROP %s[.path] [DEPTH1 | DEPTH2 | ... | DEPTH9 | ALL]\n",pcDep,argv[0],psTab[i].pcKyw);
+            fprintf(pfOut,"%s %s GETPROP %s[.path] [DEPTH1 | DEPTH2 | ... | DEPTH9 | DEPALL | DEFALL]\n",pcDep,argv[0],psTab[i].pcKyw);
          }
       }
       fprintf(pfOut,"%s %s GETPROP\n",pcDep,argv[0]);

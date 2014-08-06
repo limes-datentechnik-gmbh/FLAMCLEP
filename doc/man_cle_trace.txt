@@ -7,10 +7,12 @@ If no trace file is defined, stdout/stderr is used as default. To
 prevent tracing on the screen, please define a trace file first before
 tracing is switched on.
 
+Don't use spaces between the keyword FILE, the sign and the filename.
+
 .EXAMPLES
 
 -----------------------------------------------------------------------
-   $ program TRACE file=filename
+   $ program TRACE FILE=filename
    $ program TRACE ON
    $ program TRACE OFF
 -----------------------------------------------------------------------

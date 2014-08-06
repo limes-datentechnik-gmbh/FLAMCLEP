@@ -27,7 +27,7 @@ CHANGING OF PROPERTIES::
    command. If no command specific property file is activated, a
    property file is generated (see GENPROP), updated and activated (see
    SETPROP).
-   $ program CHGPROP command property_list
+   $ program CHGPROP command [path[=value]]*
 CLEP::
    Command line executor and parser
 CLEP-ABOUT::
