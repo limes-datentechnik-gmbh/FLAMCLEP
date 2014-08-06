@@ -259,6 +259,16 @@ Grammar for property file
     kywlst   -> KYW '.' kywlst\n
              |  KYW
 
+Compiler switches
+-----------------
+
+For compilation the defines below must be set:
+
+    __DEBUG__     for a debug build
+    __RELEASE__   for a release build
+    __WIN__       for WINDOWS platforms
+    __HOST__      for mainframe platforms
+
  *
  ******************************************************************************/
 

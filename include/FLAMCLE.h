@@ -261,6 +261,17 @@ Grammar for argument list, parameter file or property file
     --|--|                |  KEYWORD
     --|--| SUPPLEMENT is a string in double quotation marks ("property")
 
+
+Compiler switches
+-----------------
+
+For compilation the defines below must be set:
+
+    __DEBUG__     for a debug build
+    __RELEASE__   for a release build
+    __WIN__       for WINDOWS platforms
+    __HOST__      for mainframe platforms
+
  *
  ******************************************************************************/
 

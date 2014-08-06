@@ -142,16 +142,6 @@ static const char* HOMEDIR(int flg) { // TODO: not thread-safe
             if (len>0 && len+1<sizeof(dir[0])) {
                strcpy(dir[0], uP->pw_dir);
                strcpy(dir[1], uP->pw_dir);
-         /*
-               if (strlen(dir)==0) {
-         #ifdef __ZUSS__
-                  strcpy(dir,"/u/");
-         #else
-                  strcpy(dir,"/home/");
-         #endif
-                  strcat(dir,cuserid(NULL));
-               }
-         */
                strcat(dir[0],"/");
             }
          }
