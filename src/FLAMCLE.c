@@ -100,25 +100,68 @@
 #define _WIN32_IE 0x5000
 #include <shlobj.h>
 #include <windows.h>
-static char* HOMEDIR(int flg) {
-   static char dir[MAX_PATH+1]="";
-   SHGetFolderPath(NULL,CSIDL_PERSONAL,NULL,0,dir);
-   if (flg) strcat(dir,"\\");
-   return(dir);
+static const char* HOMEDIR(int flg) { // TODO: not thread-safe
+   static char dir[2][MAX_PATH+1]={{'\0'}, {'\0'}};
+   static int homedirSet=FALSE;
+
+   if (!homedirSet) {
+      if (SHGetFolderPath(NULL,CSIDL_PROFILE,NULL,0,dir[0])==S_OK && strlen(dir[0])>0) {
+         strcpy(dir[1], dir[0]);
+         strcat(dir[0],"\\");
+      }
+
+      homedirSet=TRUE;
+   }
+   if (flg)
+      return dir[0];
+   else
+      return dir[1];
 }
 #else
 #include <unistd.h>
 #include <sys/types.h>
 #include <pwd.h>
-static char* HOMEDIR(int flg) {
-   static char dir[CLEMAX_FILSIZ]="";
-   struct passwd* uP = getpwuid(geteuid());
-   if (NULL != uP) {
-      strncpy(dir,uP->pw_dir,sizeof(dir)-2);
-      dir[sizeof(dir)-2]=0x00;
-      if (flg) strcat(dir,"/");
+static const char* HOMEDIR(int flg) { // TODO: not thread-safe
+   static char dir[2][CLEMAX_FILSIZ]={{'\0'}, {'\0'}};
+   static int  homedirSet=FALSE;
+
+   if (!homedirSet) {
+      size_t len;
+      char* home=getenv("HOME");
+      if (home!=NULL) {
+         len=strlen(home);
+         if (len>0 && len+1<sizeof(dir[0])) {
+            strcpy(dir[0], home);
+            strcpy(dir[1], home);
+            strcat(dir[0],"/");
+         }
+      } else {
+         struct passwd* uP = getpwuid(geteuid());
+         if (uP != NULL && uP->pw_dir != NULL) {
+            len=strlen(uP->pw_dir);
+            if (len>0 && len+1<sizeof(dir[0])) {
+               strcpy(dir[0], uP->pw_dir);
+               strcpy(dir[1], uP->pw_dir);
+         /*
+               if (strlen(dir)==0) {
+         #ifdef __ZUSS__
+                  strcpy(dir,"/u/");
+         #else
+                  strcpy(dir,"/home/");
+         #endif
+                  strcat(dir,cuserid(NULL));
+               }
+         */
+               strcat(dir[0],"/");
+            }
+         }
+      }
+      homedirSet=TRUE;
    }
-   return(dir);
+   if (flg)
+      return dir[0];
+   else
+      return dir[1];
 }
 #endif
 
@@ -463,7 +506,7 @@ extern int siCleExecute(
    char**                        ppArg=NULL;
    char                          acFil[CLEMAX_FILSIZ];
    int                           siFil=0;
-   char*                         pcHom=HOMEDIR(1);
+   const char*                   pcHom=HOMEDIR(1);
    char*                         pcTmp=NULL;
 
    if (psTab==NULL || argc==0 || argv==NULL || pcPgm==NULL || pcHlp==NULL || pfOut==NULL || pcDep==NULL || pcOpt==NULL || pcEnt==NULL ||
