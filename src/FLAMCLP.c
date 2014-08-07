@@ -1948,9 +1948,9 @@ static int siClpSymFnd(
    if (psTab==NULL) {
       if (psHdl->pfErr!=NULL) {
          fprintf(psHdl->pfErr,"SYNTAX-ERROR\n");
-         fprintf(psHdl->pfErr,"%s Keyword \'%s.%s\' not valid in this case\n",fpcPre(pvHdl,0),fpcPat(pvHdl,siLev),pcKyw);
-         fprintf(psHdl->pfErr,"%s You might want to specify a string (\'%s\') instead of this keyword (%s)\n",fpcPre(pvHdl,0),pcKyw,pcKyw);
-         fprintf(psHdl->pfErr,"%s Or end of path achieved\n",fpcPre(pvHdl,0));
+         fprintf(psHdl->pfErr,"%s Keyword \'%s.%s\' not valid\n",fpcPre(pvHdl,0),fpcPat(pvHdl,siLev),pcKyw);
+         fprintf(psHdl->pfErr,"%s You might want to specify a string (\'%s\') instead of the keyword (%s)\n",fpcPre(pvHdl,0),pcKyw,pcKyw);
+         fprintf(psHdl->pfErr,"%s Or unexpected end of path reached\n",fpcPre(pvHdl,0));
       }
       return(CLPERR_SYN);
    }
@@ -3028,7 +3028,7 @@ static int siClpPrsKywLst(
       if (strlen(pcPat)+strlen(psHdl->acLex)+1>=CLPMAX_PATLEN) {
          if (psHdl->pfErr!=NULL) {
             fprintf(psHdl->pfErr,"INTERNAL-ERROR\n");
-            fprintf(psHdl->pfErr,"%s Property path (%s) is too long (more then %d byte)\n",fpcPre(pvHdl,0),pcPat,CLPMAX_PATLEN);
+            fprintf(psHdl->pfErr,"%s Property path (%s) is too long (more than %d byte)\n",fpcPre(pvHdl,0),pcPat,CLPMAX_PATLEN);
          }
          return(CLPERR_INT);
       }
