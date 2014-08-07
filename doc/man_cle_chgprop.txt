@@ -3,23 +3,24 @@ active (see SETPROP) property file for a dedicated command. If no
 property file is activated, a property file  is generated (see GENPROP),
 updated with the provided property list and activated (see SETPROP).
 
-The first parameter of CHGPROP is the command name. All other parameters 
-are prefixed with the root (owner.program.command.), the values are
-enclosed in double quotation marks to build supplement strings and then
-concatenated to a space-separated property list (please don't use spaces
-between the path, the sign and the value). This property list is parsed
-by the CLP. If no property list is provided, the property file for the
-command is either parsed or (if it does not exist) generated and then
-activated without any update. This behavior can be used to generate and
-activate command specific property files for the different commands.
+The first argument of CHGPROP is the command name. All other arguments 
+are key-value pairs of properties that should be updated. The key is
+internally prefixed with the root (owner.program.command.). The values
+are enclosed in double quotation marks. Multiple properties of a command
+can be updated at once by separating them with a space character (please
+do not use spaces between key, assignment character (=) and the value).
+This set of properties is parsed by the CLP. If no property is provided,
+the property file for the command is either parsed or generated (if it
+does not exist) and then activated without updating properties. This
+behavior can be used to generate and activate command specific property
+files for the different commands.
 
 The built-in function reads and parses the currently active property
 file. Then it parses the provided property list and writes the updated
 property file back to disk. The currently active property file could be
 a global, not command specific property file. In such a case, a new 
-command specific property file is generated and activated. Such
-a generated command specific property file take over all the settings
-from the global property file. 
+command specific property file is generated and activated. Properties
+from the global property file are copied into the newly generated one.
 
 If no property file is defined (see SETPROP) that corresponds to the
 owner, program and command, a property file is generated. The filename

@@ -14,7 +14,8 @@ We recommend to work only with command specific property files, because
 the built-in function CHGPROP can be used to generate, update and 
 activate a property file for a certain command.
 
-Don't use spaces between the command, the sign and the filename.
+Do not use space characters between the key, assignment character (=)
+and filename.
 
 To optimize the program performance, one can remove all unnecessary
 properties.

@@ -6,7 +6,8 @@ This function prints the corresponding section from the user manual on
 the screen (doctype: *book*). If a filename is given then the doctype
 *manpage* of ASCIIDOC is written to the file.
 
-Don't use spaces between the path, the sign and the filename.
+Do not use space characters between the key, assignment character (=)
+and filename.
 
 The files in ASCIIDOC format can be used to generate manpages with the
 tool http://www.methods.co.nz/asciidoc/[ASCIIDOC].

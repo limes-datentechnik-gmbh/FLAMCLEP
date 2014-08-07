@@ -7,7 +7,9 @@ If no trace file is defined, stdout/stderr is used as default. To
 prevent tracing on the screen, please define a trace file first before
 tracing is switched on.
 
-Don't use spaces between the keyword FILE, the sign and the filename.
+Do not use space characters between the key, assignment character (=)
+and filename.
+
 
 .EXAMPLES
 
