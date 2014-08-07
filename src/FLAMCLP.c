@@ -66,12 +66,13 @@
  * 1.1.18: Support object without parenthesis and overlays without dot
  * 1.1.19: Extent strxcmp() to support keyword compare and stop flag
  * 1.1.20: Support flag to print all or only defined (set) properties
+ * 1.1.21: Support flag to print aliases at help (if false aliases are now suppressed at help)
  **/
 
-#define CLP_VSN_STR       "1.1.20"
+#define CLP_VSN_STR       "1.1.21"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        1
-#define CLP_VSN_REVISION       20
+#define CLP_VSN_REVISION       21
 
 /* Definition der Flag-Makros *************************************************/
 
@@ -541,6 +542,7 @@ static int siClpPrnCmd(
 static int siClpPrnHlp(
    void*                         pvHdl,
    FILE*                         pfOut,
+   const int                     isAli,
    const int                     siLev,
    const int                     siDep,
    const int                     siTyp,
@@ -873,6 +875,7 @@ extern int siClpHelp(
    void*                         pvHdl,
    const int                     siDep,
    const char*                   pcPat,
+   const int                     isAli,
    const int                     isMan)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
@@ -917,7 +920,7 @@ extern int siClpHelp(
                   }
                }
             } else {
-               siErr=siClpPrnHlp(pvHdl,psHdl->pfHlp,siLev,siLev+siDep,-1,psTab);
+               siErr=siClpPrnHlp(pvHdl,psHdl->pfHlp,isAli,siLev,siLev+siDep,-1,psTab);
                if (siErr<0) return(siErr);
             }
          } else {
@@ -946,7 +949,7 @@ extern int siClpHelp(
             fprintf(psHdl->pfHlp,"No detailed description available for this command.\n");
          }
       } else {
-         siErr=siClpPrnHlp(pvHdl,psHdl->pfHlp,0,siDep,-1,psTab);
+         siErr=siClpPrnHlp(pvHdl,psHdl->pfHlp,isAli,0,siDep,-1,psTab);
          if (siErr<0) return(siErr);
       }
    }
@@ -5129,6 +5132,7 @@ static int siClpPrnCmd(
 static int siClpPrnHlp(
    void*                         pvHdl,
    FILE*                         pfOut,
+   const int                     isAli,
    const int                     siLev,
    const int                     siDep,
    const int                     siTyp,
@@ -5157,16 +5161,18 @@ static int siClpPrnHlp(
    if (siLev<siDep || siDep>9) {
       for (psHlp=psTab;psHlp!=NULL;psHlp=psHlp->psNxt) {
          if ((psHlp->psFix->siTyp==siTyp || siTyp<0) && CLPISS_CMD(psHlp->psStd->uiFlg) && !CLPISS_LNK(psHlp->psStd->uiFlg)) {
-            vdClpPrnArg(pvHdl,pfOut,siLev,psHlp->psStd->pcKyw,psHlp->psStd->pcAli,psHlp->psStd->siKwl,psHlp->psFix->siTyp,psHlp->psFix->pcHlp,psHlp->psFix->pcDft);
-            if (psHlp->psDep!=NULL) {
-               if (psHlp->psFix->siTyp==CLPTYP_OBJECT || psHlp->psFix->siTyp==CLPTYP_OVRLAY) {
-                  psHdl->apPat[siLev]=psHlp;
-                  siErr=siClpPrnHlp(pvHdl,pfOut,siLev+1,siDep,-1,psHlp->psDep);
-                  if (siErr<0) return(siErr);
-               } else {
-                  psHdl->apPat[siLev]=psHlp;
-                  siErr=siClpPrnHlp(pvHdl,pfOut,siLev+1,siDep,psHlp->psFix->siTyp,psHlp->psDep);
-                  if (siErr<0) return(siErr);
+            if (!CLPISS_ALI(psHlp->psStd->uiFlg) || (CLPISS_ALI(psHlp->psStd->uiFlg) && isAli)) {
+               vdClpPrnArg(pvHdl,pfOut,siLev,psHlp->psStd->pcKyw,psHlp->psStd->pcAli,psHlp->psStd->siKwl,psHlp->psFix->siTyp,psHlp->psFix->pcHlp,psHlp->psFix->pcDft);
+               if (psHlp->psDep!=NULL) {
+                  if (psHlp->psFix->siTyp==CLPTYP_OBJECT || psHlp->psFix->siTyp==CLPTYP_OVRLAY) {
+                     psHdl->apPat[siLev]=psHlp;
+                     siErr=siClpPrnHlp(pvHdl,pfOut,isAli,siLev+1,siDep,-1,psHlp->psDep);
+                     if (siErr<0) return(siErr);
+                  } else {
+                     psHdl->apPat[siLev]=psHlp;
+                     siErr=siClpPrnHlp(pvHdl,pfOut,isAli,siLev+1,siDep,psHlp->psFix->siTyp,psHlp->psDep);
+                     if (siErr<0) return(siErr);
+                  }
                }
             }
          }

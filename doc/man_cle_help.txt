@@ -28,12 +28,13 @@ Specifies the depth of the output. Default is DEPTH1.
 
    ALL
 
-Shows complete help below specified path, not just DEPTH1.
+Shows complete help below specified path, not just DEPTH1 and includes
+all aliases defined for a certain argument.
 
    MAN
 
 Shows additionally the detailed description for this program, command
-or parameter.
+or parameter and the next level of arguments including the aliases.
 
 .EXAMPLES
 
