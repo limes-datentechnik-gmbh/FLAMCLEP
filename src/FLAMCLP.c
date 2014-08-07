@@ -848,6 +848,7 @@ extern int siClpSyntax(
             if (siErr<0) return (siErr);
          } else {
             if (psHdl->pfErr!=NULL) {
+               // TODO: Fehlermeldung verbessern, versteht man nicht
                fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
                fprintf(psHdl->pfErr,"%s End of path reached, no parameter table anymore\n",fpcPre(pvHdl,0));
             }
@@ -1142,6 +1143,7 @@ extern int siClpDocu(
                      }
                   } else {
                      if (psHdl->pfErr!=NULL) {
+                        // TODO: Fehlermeldung verbessern, "End of path reached" ist zu technisch
                         fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
                         fprintf(psHdl->pfErr,"%s End of path reached, no valid argument or constant\n",fpcPre(pvHdl,0));
                      }
@@ -1150,6 +1152,7 @@ extern int siClpDocu(
                } else {
                   if (psHdl->pfErr!=NULL) {
                      fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
+                     // TODO: Fehlermeldung verbessern, versteht man nicht
                      fprintf(psHdl->pfErr,"%s End of path reached, no parameter table anymore\n",fpcPre(pvHdl,0));
                   }
                   return(CLPERR_SEM);
@@ -1290,6 +1293,7 @@ extern int siClpProperties(
             if (siErr<0) return(siErr);
          } else {
             if (psHdl->pfErr!=NULL) {
+               // TODO: Fehlermeldung verbessern, versteht man nicht
                fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
                fprintf(psHdl->pfErr,"%s End of path reached, no parameter table anymore\n",fpcPre(pvHdl,0));
             }
