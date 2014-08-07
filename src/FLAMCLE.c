@@ -72,11 +72,12 @@
  * 1.1.17: Use HOMEDIR as default dir for config and property files
  * 1.1.18: Support new option at GETPROP to print all or only defined (set) properties
  * 1.1.19: search config file first in working dir and then in home dir for read operation
+ * 1.1.20: print aliases at help only if keyword ALL or MAN is used
  */
-#define CLE_VSN_STR       "1.1.19"
+#define CLE_VSN_STR       "1.1.20"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        1
-#define CLE_VSN_REVISION       19
+#define CLE_VSN_REVISION       20
 
 /* Definition der Konstanten ******************************************/
 #define CLEMAX_CNFLEN            1023
@@ -322,6 +323,7 @@ static void vdPrnCommandHelp(
    void*                         pvHdl,
    const char*                   pcCmd,
    const int                     siDep,
+   const int                     isAli,
    const int                     isMan);
 
 static void vdPrnCommandManpage(
@@ -838,10 +840,10 @@ EVALUATE:
                } else {
                   fprintf(pfOut,"Help for argument \'%s\':\n",argv[2]);
                }
-               vdPrnCommandHelp(pvHdl,argv[2],siDep,TRUE);
+               vdPrnCommandHelp(pvHdl,argv[2],siDep,siDep>9,TRUE);
                if (siDep==0) {
                   fprintf(pfOut,"ARGUMENTS\n");
-                  vdPrnCommandHelp(pvHdl,argv[2],1,FALSE);
+                  vdPrnCommandHelp(pvHdl,argv[2],1,TRUE,FALSE);
                }
                ERROR(0);
             }
@@ -861,10 +863,10 @@ EVALUATE:
                   }
                   sprintf(pcPat,"%s.%s",psTab[i].pcKyw,argv[2]);
                   fprintf(pfOut,"Help for argument \'%s\':\n",pcPat);
-                  vdPrnCommandHelp(pvHdl,pcPat,siDep,TRUE);
+                  vdPrnCommandHelp(pvHdl,pcPat,siDep,siDep>9,TRUE);
                   if (siDep==0) {
                      fprintf(pfOut,"ARGUMENTS\n");
-                     vdPrnCommandHelp(pvHdl,pcPat,1,FALSE);
+                     vdPrnCommandHelp(pvHdl,pcPat,1,TRUE,FALSE);
                   }
                   free(pcPat);
                   ERROR(0);
@@ -2504,9 +2506,10 @@ static void vdPrnCommandHelp(
    void*                   pvHdl,
    const char*             pcCmd,
    const int               siDep,
+   const int               isAli,
    const int               isMan)
 {
-   siClpHelp(pvHdl,siDep,pcCmd,isMan);
+   siClpHelp(pvHdl,siDep,pcCmd,isAli,isMan);
 }
 
 static void vdPrnCommandManpage(
