@@ -564,7 +564,8 @@ static int siClpPrnPro(
    const int                     isAll,
    const int                     siLev,
    const int                     siDep,
-   const TsSym*                  psTab);
+   const TsSym*                  psTab,
+   const char*                   pcLeaf);
 
 static char* fpcPre(
    void*                         pvHdl,
@@ -1271,6 +1272,7 @@ extern int siClpProperties(
    char                          acKyw[CLPMAX_LEXSIZ];
    int                           siErr,siLev,i;
    int                           l=strlen(psHdl->pcCmd);
+   char*                         pcLeaf=NULL;
 
    if (pfOut==NULL) pfOut=psHdl->pfHlp;
 
@@ -1289,10 +1291,15 @@ extern int siClpProperties(
             siErr=siClpSymFnd(pvHdl,siLev,0,acKyw,psTab,&psArg,NULL);
             if (siErr<0) return(siErr);
             psHdl->apPat[siLev]=psArg;
-            psTab=psArg->psDep;
+            if (psArg->psDep!=NULL) {
+               psTab=psArg->psDep;
+            } else {
+               pcLeaf=pcKyw;
+            }
          }
+         if (pcLeaf!=NULL) siLev--;
          if (psTab!=NULL) {
-            siErr=siClpPrnPro(pvHdl,pfOut,FALSE,isSet,siLev,siLev+siDep,psTab);
+            siErr=siClpPrnPro(pvHdl,pfOut,FALSE,isSet,siLev,siLev+siDep,psTab,pcLeaf);
             if (siErr<0) return(siErr);
          } else {
             if (psHdl->pfErr!=NULL) {
@@ -1310,7 +1317,7 @@ extern int siClpProperties(
          return(CLPERR_SEM);
       }
    } else {
-      siErr=siClpPrnPro(pvHdl,pfOut,FALSE,isSet,0,siDep,psTab);
+      siErr=siClpPrnPro(pvHdl,pfOut,FALSE,isSet,0,siDep,psTab,NULL);
       if (siErr<0) return(siErr);
    }
    return(CLP_OK);
@@ -5499,7 +5506,8 @@ static int siClpPrnPro(
    const int                     isSet,
    const int                     siLev,
    const int                     siDep,
-   const TsSym*                  psTab)
+   const TsSym*                  psTab,
+   const char*                   pcLeaf)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    const TsSym*                  psHlp;
@@ -5523,7 +5531,7 @@ static int siClpPrnPro(
 
    if (siLev<siDep || siDep>9) {
       for (psHlp=psTab;psHlp!=NULL;psHlp=psHlp->psNxt) {
-         if (CLPISS_ARG(psHlp->psStd->uiFlg) && CLPISS_PRO(psHlp->psStd->uiFlg)) {
+         if (CLPISS_ARG(psHlp->psStd->uiFlg) && CLPISS_PRO(psHlp->psStd->uiFlg) && (pcLeaf==NULL || strxcmp(psHdl->isCas,psHlp->psStd->pcKyw,pcLeaf,0,0,FALSE)==0)) {
             if (psHlp->psFix->pcDft!=NULL && strlen(psHlp->psFix->pcDft)) {
                if ((isMan || (!CLPISS_CMD(psHlp->psStd->uiFlg))) && psHlp->psFix->pcMan!=NULL && strlen(psHlp->psFix->pcMan)) {
                   fprintf(pfOut,"\n# DESCRIPTION for %s.%s.%s.%s:\n %s #\n",psHdl->pcOwn,psHdl->pcPgm,fpcPat(pvHdl,siLev),psHlp->psStd->pcKyw,psHlp->psFix->pcMan);
@@ -5551,7 +5559,7 @@ static int siClpPrnPro(
             if (psHlp->psDep!=NULL) {
                if (psHlp->psFix->siTyp==CLPTYP_OBJECT || psHlp->psFix->siTyp==CLPTYP_OVRLAY) {
                   psHdl->apPat[siLev]=psHlp;
-                  siErr=siClpPrnPro(pvHdl,pfOut,isMan,isSet,siLev+1,siDep,psHlp->psDep);
+                  siErr=siClpPrnPro(pvHdl,pfOut,isMan,isSet,siLev+1,siDep,psHlp->psDep, NULL);
                   if (siErr<0) return(siErr);
                }
             }
