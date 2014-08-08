@@ -67,12 +67,13 @@
  * 1.1.19: Extent strxcmp() to support keyword compare and stop flag
  * 1.1.20: Support flag to print all or only defined (set) properties
  * 1.1.21: Support flag to print aliases at help (if false aliases are now suppressed at help)
+ * 1.1.22: Support property generation up to single parameters
  **/
 
-#define CLP_VSN_STR       "1.1.21"
+#define CLP_VSN_STR       "1.1.22"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        1
-#define CLP_VSN_REVISION       21
+#define CLP_VSN_REVISION       22
 
 /* Definition der Flag-Makros *************************************************/
 
@@ -565,7 +566,7 @@ static int siClpPrnPro(
    const int                     siLev,
    const int                     siDep,
    const TsSym*                  psTab,
-   const char*                   pcLeaf);
+   const char*                   pcArg);
 
 static char* fpcPre(
    void*                         pvHdl,
@@ -851,9 +852,8 @@ extern int siClpSyntax(
             if (siErr<0) return (siErr);
          } else {
             if (psHdl->pfErr!=NULL) {
-               // TODO: Fehlermeldung verbessern, versteht man nicht
                fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
-               fprintf(psHdl->pfErr,"%s End of path reached, no parameter table anymore\n",fpcPre(pvHdl,0));
+               fprintf(psHdl->pfErr,"%s Path (%s) contains to many or invalid qualifiers\n",fpcPre(pvHdl,0),pcPat);
             }
             return(CLPERR_SEM);
          }
@@ -1147,17 +1147,15 @@ extern int siClpDocu(
                      }
                   } else {
                      if (psHdl->pfErr!=NULL) {
-                        // TODO: Fehlermeldung verbessern, "End of path reached" ist zu technisch
                         fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
-                        fprintf(psHdl->pfErr,"%s End of path reached, no valid argument or constant\n",fpcPre(pvHdl,0));
+                        fprintf(psHdl->pfErr,"%s Path (%s) contains to many or invalid qualifiers\n",fpcPre(pvHdl,0),pcPat);
                      }
                      return(CLPERR_SEM);
                   }
                } else {
                   if (psHdl->pfErr!=NULL) {
                      fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
-                     // TODO: Fehlermeldung verbessern, versteht man nicht
-                     fprintf(psHdl->pfErr,"%s End of path reached, no parameter table anymore\n",fpcPre(pvHdl,0));
+                     fprintf(psHdl->pfErr,"%s Path (%s) contains to many or invalid qualifiers\n",fpcPre(pvHdl,0),pcPat);
                   }
                   return(CLPERR_SEM);
                }
@@ -1272,7 +1270,7 @@ extern int siClpProperties(
    char                          acKyw[CLPMAX_LEXSIZ];
    int                           siErr,siLev,i;
    int                           l=strlen(psHdl->pcCmd);
-   char*                         pcLeaf=NULL;
+   char*                         pcArg=NULL;
 
    if (pfOut==NULL) pfOut=psHdl->pfHlp;
 
@@ -1288,27 +1286,25 @@ extern int siClpProperties(
          for (siLev=0,pcPtr=strchr(pcPat,'.');pcPtr!=NULL && siLev<CLPMAX_HDEPTH;pcPtr=strchr(pcPtr+1,'.'),siLev++) {
             for (pcKyw=pcPtr+1,i=0;pcKyw[i]!=EOS && pcKyw[i]!='.' && i<CLPMAX_LEXLEN;i++) acKyw[i]=pcKyw[i];
             acKyw[i]=EOS;
+            if (pcArg!=NULL) {
+               if (psHdl->pfErr!=NULL) {
+                  fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
+                  fprintf(psHdl->pfErr,"%s Path (%s) contains to many or invalid qualifiers\n",fpcPre(pvHdl,0),pcPat);
+               }
+               return(CLPERR_SEM);
+            }
             siErr=siClpSymFnd(pvHdl,siLev,0,acKyw,psTab,&psArg,NULL);
             if (siErr<0) return(siErr);
             psHdl->apPat[siLev]=psArg;
             if (psArg->psDep!=NULL) {
                psTab=psArg->psDep;
             } else {
-               pcLeaf=pcKyw;
+               pcArg=acKyw;
             }
          }
-         if (pcLeaf!=NULL) siLev--;
-         if (psTab!=NULL) {
-            siErr=siClpPrnPro(pvHdl,pfOut,FALSE,isSet,siLev,siLev+siDep,psTab,pcLeaf);
-            if (siErr<0) return(siErr);
-         } else {
-            if (psHdl->pfErr!=NULL) {
-               // TODO: Fehlermeldung verbessern, versteht man nicht
-               fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
-               fprintf(psHdl->pfErr,"%s End of path reached, no parameter table anymore\n",fpcPre(pvHdl,0));
-            }
-            return(CLPERR_SEM);
-         }
+         if (pcArg!=NULL) siLev--;
+         siErr=siClpPrnPro(pvHdl,pfOut,FALSE,isSet,siLev,siLev+siDep,psTab,pcArg);
+         if (siErr<0) return(siErr);
       } else {
          if (psHdl->pfErr!=NULL) {
             fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
@@ -5507,7 +5503,7 @@ static int siClpPrnPro(
    const int                     siLev,
    const int                     siDep,
    const TsSym*                  psTab,
-   const char*                   pcLeaf)
+   const char*                   pcArg)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    const TsSym*                  psHlp;
@@ -5531,7 +5527,7 @@ static int siClpPrnPro(
 
    if (siLev<siDep || siDep>9) {
       for (psHlp=psTab;psHlp!=NULL;psHlp=psHlp->psNxt) {
-         if (CLPISS_ARG(psHlp->psStd->uiFlg) && CLPISS_PRO(psHlp->psStd->uiFlg) && (pcLeaf==NULL || strxcmp(psHdl->isCas,psHlp->psStd->pcKyw,pcLeaf,0,0,FALSE)==0)) {
+         if (CLPISS_ARG(psHlp->psStd->uiFlg) && CLPISS_PRO(psHlp->psStd->uiFlg) && (pcArg==NULL || strxcmp(psHdl->isCas,psHlp->psStd->pcKyw,pcArg,0,0,FALSE)==0)) {
             if (psHlp->psFix->pcDft!=NULL && strlen(psHlp->psFix->pcDft)) {
                if ((isMan || (!CLPISS_CMD(psHlp->psStd->uiFlg))) && psHlp->psFix->pcMan!=NULL && strlen(psHlp->psFix->pcMan)) {
                   fprintf(pfOut,"\n# DESCRIPTION for %s.%s.%s.%s:\n %s #\n",psHdl->pcOwn,psHdl->pcPgm,fpcPat(pvHdl,siLev),psHlp->psStd->pcKyw,psHlp->psFix->pcMan);
@@ -5559,7 +5555,7 @@ static int siClpPrnPro(
             if (psHlp->psDep!=NULL) {
                if (psHlp->psFix->siTyp==CLPTYP_OBJECT || psHlp->psFix->siTyp==CLPTYP_OVRLAY) {
                   psHdl->apPat[siLev]=psHlp;
-                  siErr=siClpPrnPro(pvHdl,pfOut,isMan,isSet,siLev+1,siDep,psHlp->psDep, NULL);
+                  siErr=siClpPrnPro(pvHdl,pfOut,isMan,isSet,siLev+1,siDep,psHlp->psDep,NULL);
                   if (siErr<0) return(siErr);
                }
             }
