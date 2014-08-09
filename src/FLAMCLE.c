@@ -2194,11 +2194,14 @@ static int siCleChangeProperties(
       vdClpClose(pvHdl);
       return(6);
    }
-   if (siErr==1)
-      fprintf(pfOut, "Updated 1 property\n");
-   else
-      fprintf(pfOut, "Updated %d properties\n", siErr);
 
+   if (siErr==0) {
+      fprintf(pfOut, "Don't update any property of file '%s'\n",acFil);
+   } else if (siErr==1) {
+      fprintf(pfOut, "Updated 1 property of file '%s'\n",acFil);
+   } else {
+      fprintf(pfOut, "Updated %d properties of file '%s'\n",siErr,acFil);
+   }
 
    siErr=siClePropertyFinish(pcHom,pcOwn,pcPgm,pcCmd,pfOut,pfTrc,psCnf,pvHdl,acFil,siFil);
    if (siErr) return(siErr);
