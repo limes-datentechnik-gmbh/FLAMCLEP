@@ -1270,7 +1270,7 @@ extern int siClpProperties(
    char                          acKyw[CLPMAX_LEXSIZ];
    int                           siErr,siLev,i;
    int                           l=strlen(psHdl->pcCmd);
-   char*                         pcArg=NULL;
+   const char*                   pcArg=NULL;
 
    if (pfOut==NULL) pfOut=psHdl->pfHlp;
 
@@ -1299,7 +1299,7 @@ extern int siClpProperties(
             if (psArg->psDep!=NULL) {
                psTab=psArg->psDep;
             } else {
-               pcArg=acKyw;
+               pcArg=psArg->psStd->pcKyw;
             }
          }
          if (pcArg!=NULL) siLev--;
