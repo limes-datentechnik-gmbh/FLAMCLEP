@@ -2025,7 +2025,7 @@ static int siClePropertyFinish(
                }
             }
             acEnv[j]=0x00;
-            strcat(acEnv,"%s.PROPER");
+            strcat(acEnv,".PROPER");
          }
 #else
          if (pcHom!=NULL && strlen(pcHom)) {
