@@ -641,6 +641,9 @@ extern void* pvClpOpen(
  *
  * The function parses the property list and returns OK or the error code and error position (byte offset)
  *
+ * Attention: Property parsing only effects the default values in the symbol table and don't write anything
+ * to the CLP structure. You must use the same CLP handle for property and command line parsing.
+ *
  * @param[in]  pvHdl Pointer to the corresponding handle created with \a pvClpOpen
  * @param[in]  pcPro Pointer to a zero terminated string containing the property list for parsing
  * @param[in]  isChk Boolean to enable (TRUE) or disable (FALSE) validation of the root in path
