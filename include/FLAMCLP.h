@@ -134,11 +134,11 @@ command line results from a file or argc/argv.
 If the flag CLPFLG_PWD used, string outputs will be result in
 "###SECRECT###' and float or number outputs in a value of 0.
 
-Parsing of the properties only change the default values in the symbol
-table and has no effect for the CLP strukture. After parsing the command
-line the corresponding FLAMCLP structure is filled with the entered
-values and the FLAMCLP can be closed or another
-command line parsed.
+Parsing of the properties (can be done a lot of times over different
+sources) only change the default values in the symbol table and has no
+effect for the CLP structure. First after parsing the command line the
+corresponding FLAMCLP structure is filled with the entered values and
+the FLAMCLP can be closed or another command line parsed.
 
 Normal procedure to use CLP:
 
