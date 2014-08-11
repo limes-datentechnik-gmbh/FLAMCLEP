@@ -68,12 +68,13 @@
  * 1.1.20: Support flag to print all or only defined (set) properties
  * 1.1.21: Support flag to print aliases at help (if false aliases are now suppressed at help)
  * 1.1.22: Support property generation up to single parameters
+ * 1.1.23: eliminate uiFlg to manage file properties and command line with the same symbol table
  **/
 
-#define CLP_VSN_STR       "1.1.22"
+#define CLP_VSN_STR       "1.1.23"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        1
-#define CLP_VSN_REVISION       22
+#define CLP_VSN_REVISION       23
 
 /* Definition der Flag-Makros *************************************************/
 
@@ -212,7 +213,6 @@ typedef struct Hdl {
    const char*                   pcDep;
    const char*                   pcOpt;
    const char*                   pcEnt;
-   unsigned int                  uiFlg;
    int                           siMkl;
    int                           isOvl;
    int                           isChk;
@@ -638,7 +638,6 @@ extern void* pvClpOpen(
    const char*                   pcMan,
    const char*                   pcHlp,
    const int                     isOvl,
-   const unsigned int            uiFlg,
    const TsClpArgument*          psTab,
    void*                         pvDat,
    FILE*                         pfHlp,
@@ -664,7 +663,6 @@ extern void* pvClpOpen(
          psHdl->pcMan=pcMan;
          psHdl->pcHlp=pcHlp;
          psHdl->isOvl=isOvl;
-         psHdl->uiFlg=uiFlg;
          psHdl->pcSrc=NULL;
          psHdl->pcCur=NULL;
          psHdl->pcOld=NULL;
@@ -1677,7 +1675,7 @@ static int siClpSymIni(
    int                           siErr;
    TsSym*                        psCur=NULL;
    TsSym*                        psFst=NULL;
-   int                           i,j,isIns;
+   int                           i,j;
 
    if (psTab==NULL) {
       fprintf(psHdl->pfErr,"TABLE-ERROR\n");
@@ -1710,14 +1708,7 @@ static int siClpSymIni(
          return(CLPERR_TAB);
       }
 
-      isIns=TRUE;
-      if (psHdl->uiFlg && (CLPISS_PRO(psTab[i].uiFlg) || CLPISS_CMD(psTab[i].uiFlg) || CLPISS_DMY(psTab[i].uiFlg))) {
-         isIns=FALSE;
-         if (CLPISS_PRO(psHdl->uiFlg) && CLPISS_PRO(psTab[i].uiFlg)) isIns=TRUE;
-         if (CLPISS_CMD(psHdl->uiFlg) && CLPISS_CMD(psTab[i].uiFlg)) isIns=TRUE;
-      }
-
-      if (isIns) {
+      if (!CLPISS_DMY(psTab[i].uiFlg)) {
          psCur=psClpSymIns(pvHdl,siLev,i,&psTab[i],psHih,psCur);
          if (psCur==NULL) return(CLPERR_MEM);
          if (j==0) *ppFst=psCur;

@@ -73,11 +73,12 @@
  * 1.1.18: Support new option at GETPROP to print all or only defined (set) properties
  * 1.1.19: search config file first in working dir and then in home dir for read operation
  * 1.1.20: print aliases at help only if keyword ALL or MAN is used
+ * 1.1.21: eliminate isFlg from CleExecute() to accept file properties
  */
-#define CLE_VSN_STR       "1.1.20"
+#define CLE_VSN_STR       "1.1.21"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        1
-#define CLE_VSN_REVISION       20
+#define CLE_VSN_REVISION       21
 
 /* Definition der Konstanten ******************************************/
 #define CLEMAX_CNFLEN            1023
@@ -189,7 +190,6 @@ static int siClePropertyInit(
    const int*                    piOid,
    const TsClpArgument*          psTab,
    const int                     isCas,
-   const int                     isFlg,
    const int                     siMkl,
    FILE*                         pfOut,
    FILE*                         pfTrc,
@@ -226,7 +226,6 @@ static int siCleChangeProperties(
    const int*                    piOid,
    const TsClpArgument*          psTab,
    const int                     isCas,
-   const int                     isFlg,
    const int                     siMkl,
    FILE*                         pfOut,
    FILE*                         pfTrc,
@@ -246,7 +245,6 @@ static int siCleCommandInit(
    const int*                    piOid,
    const TsClpArgument*          psTab,
    const int                     isCas,
-   const int                     isFlg,
    const int                     siMkl,
    FILE*                         pfOut,
    FILE*                         pfTrc,
@@ -463,7 +461,6 @@ extern int siCleExecute(
    const char*                   pcOwn,
    const char*                   pcPgm,
    const int                     isCas,
-   const int                     isFlg,
    const int                     siMkl,
    FILE*                         pfOut,
    FILE*                         pfTrc,
@@ -736,7 +733,7 @@ EVALUATE:
          }
          for (i=0;psTab[i].pcKyw!=NULL;i++) {
             if (strxcmp(isCas,argv[2],psTab[i].pcKyw,0,'.',TRUE)==0) {
-               siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isFlg,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl);
+               siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl);
                if (siErr) ERROR(siErr);
                if (strlen(argv[2])==strlen(psTab[i].pcKyw)) {
                   fprintf(pfOut,"Syntax for command \'%s\':\n",argv[2]);
@@ -755,7 +752,7 @@ EVALUATE:
                      fprintf(pfOut,"Memory allocation for path '%s.%s' failed!\n",pcDef,argv[2]);
                      ERROR(16);
                   }
-                  siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isFlg,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl);
+                  siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl);
                   if (siErr) {
                      free(pcPat);
                      ERROR(siErr);
@@ -833,7 +830,7 @@ EVALUATE:
          }
          for (i=0;psTab[i].pcKyw!=NULL;i++) {
             if (strxcmp(isCas,argv[2],psTab[i].pcKyw,0,'.',TRUE)==0) {
-               siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isFlg,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl);
+               siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl);
                if (siErr) ERROR(siErr);
                if (strlen(argv[2])==strlen(psTab[i].pcKyw)) {
                   fprintf(pfOut,"Help for command \'%s\':\n",argv[2]);
@@ -856,7 +853,7 @@ EVALUATE:
                      fprintf(pfOut,"Memory allocation for path '%s.%s' failed!\n",psTab[i].pcKyw,argv[2]);
                      ERROR(16);
                   }
-                  siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isFlg,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl);
+                  siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl);
                   if (siErr) {
                      free(pcPat);
                      ERROR(siErr);
@@ -1045,7 +1042,7 @@ EVALUATE:
                }
             }
             if (strxcmp(isCas,pcCmd,psTab[i].pcKyw,0,'.',TRUE)==0) {
-               siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isFlg,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl);
+               siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl);
                if (siErr) ERROR(siErr);
                if (isMan==FALSE) {
                   if (strlen(pcCmd)==strlen(psTab[i].pcKyw)) {
@@ -1076,7 +1073,7 @@ EVALUATE:
                      fprintf(pfOut,"Memory allocation for path '%s.%s' failed!\n",pcDef,argv[2]);
                      ERROR(16);
                   }
-                  siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isFlg,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl);
+                  siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl);
                   if (siErr) {
                      free(pcPat);
                      ERROR(siErr);
@@ -1149,7 +1146,7 @@ EVALUATE:
             for (i=0;psTab[i].pcKyw!=NULL;i++) {
                if (strxcmp(isCas,pcCmd,psTab[i].pcKyw,0,'.',TRUE)==0) {
                   errno=0;
-                  siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isFlg,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl);
+                  siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl);
                   if (siErr) ERROR(siErr);
                   sprintf(acNum,"2.%d.",i+1);
                   siErr=siClpDocu(pvHdl,pfDoc,pcCmd,acNum,TRUE,FALSE,isNbr);
@@ -1175,7 +1172,7 @@ EVALUATE:
                         ERROR(16);
                      }
                      errno=0;
-                     siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isFlg,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl);
+                     siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl);
                      if (siErr) {
                         free(pcPat);
                         ERROR(siErr);
@@ -1227,7 +1224,7 @@ EVALUATE:
             fprintf(pfDoc,"indexterm:[Available commands]\n\n\n");
 
             for (i=0;psTab[i].pcKyw!=NULL;i++) {
-               siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isFlg,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl);
+               siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl);
                if (siErr) ERROR(siErr);
                if (psTab[i].siFlg) {
                   sprintf(acNum,"3.%d.",i+1);
@@ -1318,8 +1315,7 @@ EVALUATE:
             fprintf(pfDoc,HLP_CLE_PROPFIL);
             for (siErr=CLP_OK, i=0;psTab[i].pcKyw!=NULL && siErr==CLP_OK;i++) {
                siErr=siClePropertyInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,
-                                       psTab[i].piOid,psTab[i].psTab,isCas,isFlg,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,
-                                       &pvHdl,acFil,&siFil);
+                                       psTab[i].piOid,psTab[i].psTab,isCas,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,acFil,&siFil);
                if (siErr) ERROR(siErr);
                siErr=siClpProperties(pvHdl,FALSE,10,psTab[i].pcKyw,pfDoc);
                vdClpClose(pvHdl); pvHdl=NULL;
@@ -1413,8 +1409,7 @@ EVALUATE:
             errno=0;
             for (siErr=CLP_OK, i=0;psTab[i].pcKyw!=NULL && siErr==CLP_OK;i++) {
                siErr=siClePropertyInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,
-                                       psTab[i].piOid,psTab[i].psTab,isCas,isFlg,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,
-                                       &pvHdl,acFil,&siFil);
+                                       psTab[i].piOid,psTab[i].psTab,isCas,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,acFil,&siFil);
                if (siErr) ERROR(siErr);
                siErr=siClpProperties(pvHdl,FALSE,10,psTab[i].pcKyw,pfPro);
                vdClpClose(pvHdl); pvHdl=NULL;
@@ -1430,8 +1425,7 @@ EVALUATE:
             for (i=0;psTab[i].pcKyw!=NULL;i++) {
                if (strxcmp(isCas,pcCmd,psTab[i].pcKyw,0,0,FALSE)==0) {
                   siErr=siClePropertyInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,
-                                          psTab[i].piOid,psTab[i].psTab,isCas,isFlg,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,
-                                          &pvHdl,acFil,&siFil);
+                                          psTab[i].piOid,psTab[i].psTab,isCas,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,acFil,&siFil);
                   if (siErr) ERROR(siErr);
                   errno=0;
                   siErr=siClpProperties(pvHdl,FALSE,10,psTab[i].pcKyw,pfPro);
@@ -1540,7 +1534,7 @@ EVALUATE:
                   }
                }
                ERROR(siCleChangeProperties(psTab[i].pfIni,psTab[i].pvClp,pcHom,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,
-                                           acPro,psTab[i].piOid,psTab[i].psTab,isCas,isFlg,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf));
+                                           acPro,psTab[i].piOid,psTab[i].psTab,isCas,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf));
             }
          }
       }
@@ -1574,7 +1568,7 @@ EVALUATE:
                   }
                }
                ERROR(siCleChangeProperties(psTab[i].pfIni,psTab[i].pvClp,pcHom,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,
-                                           acPro,psTab[i].piOid,psTab[i].psTab,isCas,isFlg,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf));
+                                           acPro,psTab[i].piOid,psTab[i].psTab,isCas,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf));
             }
          }
       }
@@ -1628,7 +1622,7 @@ EVALUATE:
          fprintf(pfOut,"Properties for program \'%s\':\n",pcPgm);
          for (i=0;psTab[i].pcKyw!=NULL;i++) {
             siErr=siClePropertyInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,
-                                    psTab[i].piOid,psTab[i].psTab,isCas,isFlg,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,
+                                    psTab[i].piOid,psTab[i].psTab,isCas,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,
                                     &pvHdl,acFil,&siFil);
             if (siErr) ERROR(siErr);
             vdPrnProperties(pvHdl,psTab[i].pcKyw,TRUE,10);
@@ -1684,8 +1678,7 @@ EVALUATE:
          for (i=0;psTab[i].pcKyw!=NULL;i++) {
             if (strxcmp(isCas,argv[2],psTab[i].pcKyw,0,'.',TRUE)==0) {
                siErr=siClePropertyInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,
-                                       psTab[i].piOid,psTab[i].psTab,isCas,isFlg,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,
-                                       &pvHdl,acFil,&siFil);
+                                       psTab[i].piOid,psTab[i].psTab,isCas,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,acFil,&siFil);
                if (siErr) ERROR(siErr);
                if (strlen(argv[2])==strlen(psTab[i].pcKyw)) {
                   fprintf(pfOut,"Properties for command \'%s\':\n",argv[2]);
@@ -1705,8 +1698,7 @@ EVALUATE:
                      ERROR(16);
                   }
                   siErr=siClePropertyInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,
-                                          psTab[i].piOid,psTab[i].psTab,isCas,isFlg,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,
-                                          &pvHdl,acFil,&siFil);
+                                          psTab[i].piOid,psTab[i].psTab,isCas,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,acFil,&siFil);
                   if (siErr) {
                      free(pcPat);
                      ERROR(siErr);
@@ -1874,7 +1866,7 @@ EVALUATE:
    } else {
       for (i=0;psTab[i].pcKyw!=NULL;i++) {
          if (strxcmp(isCas,argv[1],psTab[i].pcKyw,0,-1,FALSE)==0) {
-            siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isFlg,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl);
+            siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl);
             if (siErr) ERROR(siErr);
             siErr=siCleGetCommand(pvHdl,pfOut,pcDep,psTab[i].pcKyw,argc,argv,acCmd);
             if (siErr) ERROR(siErr);
@@ -1922,7 +1914,6 @@ EVALUATE:
 
 /* Interne Funktionen *************************************************/
 
-
 static int siClePropertyInit(
    tpfIni                        pfIni,
    void*                         pvClp,
@@ -1934,7 +1925,6 @@ static int siClePropertyInit(
    const int*                    piOid,
    const TsClpArgument*          psTab,
    const int                     isCas,
-   const int                     isFlg,
    const int                     siMkl,
    FILE*                         pfOut,
    FILE*                         pfTrc,
@@ -1948,7 +1938,6 @@ static int siClePropertyInit(
 {
    int                           siErr;
    int                           isOvl=(piOid==NULL)?FALSE:TRUE;
-   unsigned int                  uiFlg=0;
    static char                   acPro[CLEMAX_PROSIZ];
    char*                         pcPos=NULL;
    char*                         pcLst=NULL;
@@ -1959,8 +1948,7 @@ static int siClePropertyInit(
       fprintf(pfOut,"Initialization of CLP structure for command \'%s\' failed!\n",pcCmd);
       return(10);
    }
-   uiFlg=(isFlg)?CLPFLG_PRO:0;
-   *ppHdl=pvClpOpen(isCas,siMkl,pcOwn,pcPgm,pcCmd,pcMan,pcHlp,isOvl,uiFlg,psTab,pvClp,pfOut,pfOut,pfTrc,pfTrc,pfTrc,pfTrc,pcDep,pcOpt,pcEnt);
+   *ppHdl=pvClpOpen(isCas,siMkl,pcOwn,pcPgm,pcCmd,pcMan,pcHlp,isOvl,psTab,pvClp,pfOut,pfOut,pfTrc,pfTrc,pfTrc,pfTrc,pcDep,pcOpt,pcEnt);
    if (*ppHdl==NULL) {
       fprintf(pfOut,"Open of property parser for command \'%s\' failed!\n",pcCmd);
       return(12);
@@ -2078,7 +2066,6 @@ static int siCleCommandInit(
    const int*                    piOid,
    const TsClpArgument*          psTab,
    const int                     isCas,
-   const int                     isFlg,
    const int                     siMkl,
    FILE*                         pfOut,
    FILE*                         pfTrc,
@@ -2090,12 +2077,10 @@ static int siCleCommandInit(
 {
    int                           siErr,siFil=0;
    int                           isOvl=(piOid==NULL)?FALSE:TRUE;
-   unsigned int                  uiFlg;
    static char                   acPro[CLEMAX_PROSIZ];
    char                          acFil[CLEMAX_FILSIZ];
    char*                         pcPos=NULL;
    char*                         pcLst=NULL;
-
 
    *ppHdl=NULL;
 
@@ -2104,10 +2089,9 @@ static int siCleCommandInit(
       fprintf(pfOut,"Initialization of CLP structure for command \'%s\' failed!\n",pcCmd);
       return(10);
    }
-   uiFlg=(isFlg)?CLPFLG_PRO:0;
-   *ppHdl=pvClpOpen(isCas,siMkl,pcOwn,pcPgm,pcCmd,pcMan,pcHlp,isOvl,uiFlg,psTab,pvClp,pfOut,pfOut,pfTrc,pfTrc,pfTrc,pfTrc,pcDep,pcOpt,pcEnt);
+   *ppHdl=pvClpOpen(isCas,siMkl,pcOwn,pcPgm,pcCmd,pcMan,pcHlp,isOvl,psTab,pvClp,pfOut,pfOut,pfTrc,pfTrc,pfTrc,pfTrc,pcDep,pcOpt,pcEnt);
    if (*ppHdl==NULL) {
-      fprintf(pfOut,"Open of property parser for command \'%s\' failed!\n",pcCmd);
+      fprintf(pfOut,"Open of parser for command \'%s\' failed!\n",pcCmd);
       return(12);
    }
    siErr=siCleGetProperties(*ppHdl,pfOut,psCnf,pcOwn,pcPgm,pcCmd,acFil,acPro,&siFil);
@@ -2123,14 +2107,6 @@ static int siCleCommandInit(
       return(6);
    }
 
-   vdClpClose(*ppHdl);*ppHdl=NULL;
-
-   uiFlg=(isFlg)?CLPFLG_CMD:0;
-   *ppHdl=pvClpOpen(isCas,siMkl,pcOwn,pcPgm,pcCmd,pcMan,pcHlp,isOvl,uiFlg,psTab,pvClp,pfOut,pfOut,pfTrc,pfTrc,pfTrc,pfTrc,pcDep,pcOpt,pcEnt);
-   if (*ppHdl==NULL) {
-      fprintf(pfOut,"Open of command line parser for command \'%s\' failed!\n",pcCmd);
-      return(12);
-   }
    return(0);
 }
 
@@ -2145,7 +2121,7 @@ static int siCleSimpleInit(
          {CLPTYP_NUMBER,"XX",NULL,0,1,1,0,0,CLPFLG_NON,NULL,NULL,NULL,"XX",0,0.0,NULL},
          {CLPTYP_NON   ,NULL,NULL,0,0,0,0,0,CLPFLG_NON,NULL,NULL,NULL,NULL,0,0.0,NULL}
    };
-   *ppHdl=pvClpOpen(FALSE,0,"","","","","",FALSE,0,asTab,"",pfOut,pfOut,NULL,NULL,NULL,NULL,pcDep,pcOpt,pcEnt);
+   *ppHdl=pvClpOpen(FALSE,0,"","","","","",FALSE,asTab,"",pfOut,pfOut,NULL,NULL,NULL,NULL,pcDep,pcOpt,pcEnt);
    if (*ppHdl==NULL) {
       fprintf(pfOut,"Open of command line parser for grammar and lexeme print out failed!\n");
       return(12);
@@ -2166,7 +2142,6 @@ static int siCleChangeProperties(
    const int*                    piOid,
    const TsClpArgument*          psTab,
    const int                     isCas,
-   const int                     isFlg,
    const int                     siMkl,
    FILE*                         pfOut,
    FILE*                         pfTrc,
@@ -2183,7 +2158,7 @@ static int siCleChangeProperties(
    int                           siFil=0;
 
    siErr=siClePropertyInit(pfIni,pvClp,pcOwn,pcPgm,pcCmd,pcMan,pcHlp,
-                           piOid,psTab,isCas,isFlg,siMkl,pfOut,pfTrc,
+                           piOid,psTab,isCas,siMkl,pfOut,pfTrc,
                            pcDep,pcOpt,pcEnt,psCnf,&pvHdl,acFil,&siFil);
    if (siErr) return(siErr);
 

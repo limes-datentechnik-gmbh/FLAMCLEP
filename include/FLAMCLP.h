@@ -131,20 +131,21 @@ command line. Both property list and command line are provided as zero
 terminated strings. This means that the FLAMCLP does not know whether the
 command line results from a file or argc/argv.
 
-The flags CLPFLG_PRO or CLPFLG_CMD allow to enforce the build
-of a property or command line specific symbol table. This means a property
-only parameter is only valid within property files and a command line only
-parameter is only valid on the command line. If the flag value is 0
-then the parameter flags are only used for visibility, but not for
-parsing. If the flag value is used then the CLP must be opened for property
-parsing, closed and then opened again for command line parsing.
-
 If the flag CLPFLG_PWD used, string outputs will be result in
 "###SECRECT###' and float or number outputs in a value of 0.
 
-After parsing the command line the corresponding FLAMCLP structure is
-filled with the entered values and the FLAMCLP can be closed or another
+Parsing of the properties only change the default values in the symbol
+table and has no effect for the CLP strukture. After parsing the command
+line the corresponding FLAMCLP structure is filled with the entered
+values and the FLAMCLP can be closed or another
 command line parsed.
+
+Normal procedure to use CLP:
+
+   ClpOpen()
+   ClpParsePro()
+   ClpParseCmd()
+   ClpClose()
 
 Beside property and command line parsing the FLAMCLP offers an interactive
 syntax and help function. Additionally you can use a very powerful
@@ -600,7 +601,6 @@ typedef struct ClpArgument {
  * @param[in]  pcMan String constant containing the manual page for this command
  * @param[in]  pcHlp String constant containing the help message for this command
  * @param[in]  isOvl Boolean if TRUE the main table (psTab) is a overlay else it will be interpreted as object
- * @param[in]  uiFlg Integer constant containing either CLPFLG_PRO or CLPFLG_CMD to ensure property or command line specific symbol tables
  * @param[in]  psTab Pointer to the parameter table defining the semantic of the command line
  * @param[out] pvDat Pointer to the structure where the parsed values are stored
  * @param[in]  pfHlp Pointer to the file used for help messages (if not set then stderr)
@@ -624,7 +624,6 @@ extern void* pvClpOpen(
    const char*                   pcMan,
    const char*                   pcHlp,
    const int                     isOvl,
-   const unsigned int            uiFlg,
    const TsClpArgument*          psTab,
    void*                         pvDat,
    FILE*                         pfHlp,
