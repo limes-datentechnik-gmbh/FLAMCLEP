@@ -4769,7 +4769,7 @@ static void vdClpPrnArg(
          siLen=strlen(pcKyw);
          fprintf(pfOut,"%s ",p);
          for (i=0;i<siKwl;i++) fprintf(pfOut,"%c",toupper(pcKyw[i]));
-         for (i=i;i<siLen;i++) fprintf(pfOut,"%c",tolower(pcKyw[i]));
+         for (/*i=i*/;i<siLen;i++) fprintf(pfOut,"%c",tolower(pcKyw[i]));
          if (pcDft!=NULL && strlen(pcDft)) {
             fprintf(pfOut," (%s: %s) - %s (PROPERTY: [%s])\n",a,b,pcHlp,pcDft);
          } else {
