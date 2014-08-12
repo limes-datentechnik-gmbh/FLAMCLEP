@@ -69,12 +69,13 @@
  * 1.1.21: Support flag to print aliases at help (if false aliases are now suppressed at help)
  * 1.1.22: Support property generation up to single parameters
  * 1.1.23: eliminate uiFlg to manage file properties and command line with the same symbol table
+ * 1.1.24: Add support for parameter files for each object and overlay (read.text=parfilename.txt)
  **/
 
-#define CLP_VSN_STR       "1.1.23"
+#define CLP_VSN_STR       "1.1.24"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        1
-#define CLP_VSN_REVISION       23
+#define CLP_VSN_REVISION       24
 
 /* Definition der Flag-Makros *************************************************/
 
@@ -111,6 +112,8 @@
 #define CLPMAX_PATSIZ            1024
 #define CLPMAX_LSTLEN            65535
 #define CLPMAX_LSTSIZ            65536
+#define CLPMAX_FILLEN            65535
+#define CLPMAX_FILSIZ            65536
 
 #define CLPTOK_INI               0
 #define CLPTOK_END               1
@@ -213,6 +216,7 @@ typedef struct Hdl {
    const char*                   pcDep;
    const char*                   pcOpt;
    const char*                   pcEnt;
+   const char*                   pcFil;
    int                           siMkl;
    int                           isOvl;
    int                           isChk;
@@ -331,6 +335,12 @@ static int siClpPrsSwt(
    TsSym*                        psArg);
 
 static int siClpPrsSgn(
+   void*                         pvHdl,
+   const int                     siLev,
+   const int                     siPos,
+   TsSym*                        psArg);
+
+static int siClpPrsFil(
    void*                         pvHdl,
    const int                     siLev,
    const int                     siPos,
@@ -666,6 +676,7 @@ extern void* pvClpOpen(
          psHdl->pcSrc=NULL;
          psHdl->pcCur=NULL;
          psHdl->pcOld=NULL;
+         psHdl->pcFil=NULL;
          psHdl->siTok=CLPTOK_INI;
          psHdl->acLex[0]=EOS;
          psHdl->pvDat=pvDat;
@@ -756,6 +767,7 @@ extern int siClpParseCmd(
    const char*                   pcCmd,
    const int                     isChk,
    int*                          piOid,
+   char**                        ppFil,
    char**                        ppPos,
    char**                        ppLst)
 {
@@ -767,6 +779,7 @@ extern int siClpParseCmd(
    psHdl->pcCur=pcCmd;
    psHdl->pcOld=pcCmd;
    psHdl->isChk=isChk;
+   if (ppFil!=NULL) *ppFil=(char*)psHdl->pcFil;
    if (ppPos!=NULL) *ppPos=(char*)psHdl->pcSrc;
    if (ppLst!=NULL) *ppLst=(char*)psHdl->acLst;
    psHdl->acLex[0]=EOS;
@@ -774,12 +787,14 @@ extern int siClpParseCmd(
       if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"COMMAND-PARSER-BEGIN\n");
       psHdl->siTok=siClpScnSrc(pvHdl,0,NULL);
       if (psHdl->siTok<0) {
+         if (ppFil!=NULL) *ppFil=(char*)psHdl->pcFil;
          if (ppPos!=NULL) *ppPos=(char*)psHdl->pcOld;
          if (ppLst!=NULL) *ppLst=(char*)psHdl->acLst;
          return(psHdl->siTok);
       }
       siCnt=siClpPrsMain(pvHdl,psHdl->psSym,piOid);
       if (siCnt<0) {
+         if (ppFil!=NULL) *ppFil=(char*)psHdl->pcFil;
          if (ppPos!=NULL) *ppPos=(char*)psHdl->pcOld;
          if (ppLst!=NULL) *ppLst=(char*)psHdl->acLst;
          return (siCnt);
@@ -794,6 +809,7 @@ extern int siClpParseCmd(
          if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"COMMAND-PARSER-END(CNT=%d)\n",siCnt);
          return(siCnt);
       } else {
+         if (ppFil!=NULL) *ppFil=(char*)psHdl->pcFil;
          if (ppPos!=NULL) *ppPos=(char*)psHdl->pcOld;
          if (ppLst!=NULL) *ppLst=(char*)psHdl->acLst;
          if (psHdl->pfErr!=NULL) {
@@ -803,6 +819,7 @@ extern int siClpParseCmd(
          return(CLPERR_SYN);
       }
    } else {
+      if (ppFil!=NULL) *ppFil=(char*)psHdl->pcFil;
       if (ppPos!=NULL) *ppPos=(char*)psHdl->pcOld;
       if (ppLst!=NULL) *ppLst=(char*)psHdl->acLst;
       if (psHdl->pfErr!=NULL) {
@@ -2604,7 +2621,9 @@ extern int siClpGrammar(
    fprintf(pfOut,"%s switch         -> KEYWORD                                        \n",fpcPre(pvHdl,1));
    fprintf(pfOut,"%s assignment     -> KEYWORD '=' value                              \n",fpcPre(pvHdl,1));
    fprintf(pfOut,"%s object         -> KEYWORD ['('] parameter_list [')']             \n",fpcPre(pvHdl,1));
+   fprintf(pfOut,"%s                |  KEYWORD '=' STRING # parameter file #          \n",fpcPre(pvHdl,1));
    fprintf(pfOut,"%s overlay        -> KEYWORD ['.'] parameter                        \n",fpcPre(pvHdl,1));
+   fprintf(pfOut,"%s                |  KEYWORD '=' STRING # parameter file #          \n",fpcPre(pvHdl,1));
    fprintf(pfOut,"%s array          -> KEYWORD '[' value_list   ']'                   \n",fpcPre(pvHdl,1));
    fprintf(pfOut,"%s                |  KEYWORD '[' object_list  ']'                   \n",fpcPre(pvHdl,1));
    fprintf(pfOut,"%s                |  KEYWORD '[' overlay_list ']'                   \n",fpcPre(pvHdl,1));
@@ -2664,7 +2683,11 @@ static int siClpPrsPar(
       psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
       if (psHdl->siTok<0) return(psHdl->siTok);
       if (psHdl->siTok==CLPTOK_SGN) {
-         return(siClpPrsSgn(pvHdl,siLev,siPos,psArg));
+         if (psArg->psFix->siTyp==CLPTYP_OBJECT || psArg->psFix->siTyp==CLPTYP_OVRLAY) {
+            return(siClpPrsFil(pvHdl,siLev,siPos,psArg));
+         } else {
+            return(siClpPrsSgn(pvHdl,siLev,siPos,psArg));
+         }
       } else if (psHdl->siTok==CLPTOK_RBO) {
          return(siClpPrsObj(pvHdl,siLev,siPos,psArg));
       } else if (psHdl->siTok==CLPTOK_DOT) {
@@ -2725,6 +2748,117 @@ static int siClpPrsSgn(
          fprintf(psHdl->pfErr,"%s After assignment \'%s.%s=\' number(-123), float(+123.45e78), string(\'abc\') or keyword (MODE) expected\n",fpcPre(pvHdl,0),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
       }
       return(CLPERR_SYN);
+   }
+}
+
+static int siClpPrsFil(
+   void*                         pvHdl,
+   const int                     siLev,
+   const int                     siPos,
+   TsSym*                        psArg)
+{
+   TsHdl*                        psHdl=(TsHdl*)pvHdl;
+   char                          acNam[CLPMAX_LEXSIZ];
+   char                          acPar[CLPMAX_FILSIZ];
+   FILE*                         pfFil;
+   int                           siRst,siLen,siCnt;
+   const char*                   pcCur;
+   const char*                   pcOld;
+   const char*                   pcSrc;
+   const char*                   pcFil;
+   char*                         pcHlp;
+
+   if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d PARFIL(%s=val)\n",fpcPre(pvHdl,siLev),siLev,siPos,psArg->psStd->pcKyw);
+   psHdl->siTok=siClpScnSrc(pvHdl,CLPTOK_STR,psArg);
+   if (psHdl->siTok<0) return(psHdl->siTok);
+   if (psHdl->siTok!=CLPTOK_STR) {
+      if (psHdl->pfErr!=NULL) {
+         fprintf(psHdl->pfErr,"SYNTAX-ERROR\n");
+         fprintf(psHdl->pfErr,"%s After object/overlay assignment \'%s.%s=\' parameter file (\'filename\') expected\n",fpcPre(pvHdl,0),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+      }
+      return(CLPERR_SYN);
+   }
+   strcpy(acNam,psHdl->acLex+2);
+   errno=0; pfFil=fopen(acNam,"r");
+   if (pfFil==NULL) {
+      if (psHdl->pfErr!=NULL) {
+         fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
+         fprintf(psHdl->pfErr,"%s Open of parameter file \'%s\' failed (%d - %s)\n",fpcPre(pvHdl,0),acNam,errno,strerror(errno));
+      }
+      return(CLPERR_SEM);
+   }
+
+   errno=0; acPar[0]=EOS; pcHlp=acPar; siRst=CLPMAX_FILLEN;
+   while (!errno && !feof(pfFil) && siRst) {
+      siLen=fread(pcHlp,1,siRst,pfFil);
+      pcHlp+=siLen; siRst-=siLen;
+   }
+   if (errno && !feof(pfFil)) {
+      if (psHdl->pfErr!=NULL) {
+         fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
+         fprintf(psHdl->pfErr,"%s Error reading parameter file \'%s\' (%d - %s)\n",fpcPre(pvHdl,0),acNam,errno,strerror(errno));
+      }
+      fclose(pfFil); acPar[0]=EOS;
+      return(CLPERR_SEM);
+   }
+   fclose(pfFil); *pcHlp=EOS;
+   if (siRst==0) {
+      if (psHdl->pfErr!=NULL) {
+         fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
+         fprintf(psHdl->pfErr,"%s Parameter file \'%s\' is too big (more than %d bytes)\n",fpcPre(pvHdl,0),acNam,CLPMAX_FILLEN);
+      }
+      return(CLPERR_SEM);
+   }
+
+   pcCur=psHdl->pcCur; psHdl->pcCur=acPar;
+   pcOld=psHdl->pcOld; psHdl->pcOld=acPar;
+   pcSrc=psHdl->pcSrc; psHdl->pcSrc=acPar;
+   pcFil=psHdl->pcFil; psHdl->pcFil=acNam;
+   psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
+   if (psHdl->siTok<0) return(psHdl->siTok);
+   if (psHdl->siTok==CLPTOK_RBO) {
+      psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
+      if (psHdl->siTok<0) return(psHdl->siTok);
+      siCnt=siClpPrsObjWob(pvHdl,siLev,siPos,psArg);
+      if (siCnt<0) return(siCnt);
+      if (psHdl->siTok==CLPTOK_RBC) {
+         psHdl->pcCur=pcCur; psHdl->pcOld=pcOld; psHdl->pcSrc=pcSrc; psHdl->pcFil=pcFil;
+         psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
+         if (psHdl->siTok<0) return(psHdl->siTok);
+         if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d CNT=%d OBJ(%s(parlst))-CLS)\n",fpcPre(pvHdl,siLev),siLev,siPos,siCnt,psArg->psStd->pcKyw);
+      } else {
+         if (psHdl->pfErr!=NULL) {
+            fprintf(psHdl->pfErr,"SYNTAX-ERROR\n");
+            fprintf(psHdl->pfErr,"%s Character \')\' missing (%s)\n",fpcPre(pvHdl,0),fpcPat(pvHdl,siLev));
+         }
+         return(CLPERR_SYN);
+      }
+      return(siCnt);
+   } else if (psHdl->siTok==CLPTOK_DOT) {
+      psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
+      if (psHdl->siTok<0) return(psHdl->siTok);
+      siCnt=siClpPrsOvl(pvHdl,siLev,siPos,psArg);
+      if (siCnt<0) return(siCnt);
+      psHdl->pcCur=pcCur; psHdl->pcOld=pcOld; psHdl->pcSrc=pcSrc; psHdl->pcFil=pcFil;
+      psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
+      if (psHdl->siTok<0) return(psHdl->siTok);
+      return(siCnt);
+   } else {
+      if (psArg->psFix->siTyp==CLPTYP_OBJECT) {
+         siCnt=siClpPrsObjWob(pvHdl,siLev,siPos,psArg);
+         if (siCnt<0) return(siCnt);
+         psHdl->pcCur=pcCur; psHdl->pcOld=pcOld; psHdl->pcSrc=pcSrc; psHdl->pcFil=pcFil;
+         psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
+         if (psHdl->siTok<0) return(psHdl->siTok);
+         return(siCnt);
+      } else {
+         siCnt=siClpPrsOvl(pvHdl,siLev,siPos,psArg);
+         if (siCnt<0) return(siCnt);
+         psHdl->pcCur=pcCur; psHdl->pcOld=pcOld; psHdl->pcSrc=pcSrc; psHdl->pcFil=pcFil;
+         psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
+         if (psHdl->siTok<0) return(psHdl->siTok);
+         return(siCnt);
+      }
    }
 }
 

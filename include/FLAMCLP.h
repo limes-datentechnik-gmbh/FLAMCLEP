@@ -39,13 +39,14 @@ Description
 The command line parser (FLAMCLP) is a complier which reads a command
 string using the lexems and grammar below to fill a structure with the
 corresponding values given in this line. The FLAMCLP works only in memory
-and the syntax and semantic will be defined by a tree of tables. Such a
-table can represent an object (struct) or an overlay (union). Each
-argument in such a table can be a object or overlay again in using
-another table for this type. Basic types are switches, numbers, floats
-or strings. With each argument you can define the required minimum and
-possible maximum amount of occurrences. This means that each argument
-can be an array and arrays are implemented as simplified notations.
+(except parameter files are used for objects or overlays) and the syntax
+and semantic will be defined by a tree of tables. Such a table can
+represent an object (struct) or an overlay (union). Each argument in
+such a table can be a object or overlay again in using another table for
+this type. Basic types are switches, numbers, floats or strings. With
+each argument you can define the required minimum and possible maximum
+amount of occurrences. This means that each argument can be an array and
+arrays are implemented as simplified notations.
 
 The FLAMCLP uses these tables as symbol tables to define the syntax and
 semantic of a command. The same table provides the offset used to
@@ -130,6 +131,10 @@ Then you are able to parse a property list before doing this with the
 command line. Both property list and command line are provided as zero
 terminated strings. This means that the FLAMCLP does not know whether the
 command line results from a file or argc/argv.
+
+For objects and overlays you can use the assignment letter '=' to define
+a parameter file containing the command string for this object or overlay.
+Means for each object or overlay a dedicated parameter file can be used.
 
 If the flag CLPFLG_PWD used, string outputs will be result in
 "###SECRECT###' and float or number outputs in a value of 0.
@@ -221,8 +226,10 @@ Grammar for command line
     sgn      -> KEYWRD '=' val
 
     obj      -> KEYWRD ['('] parlst [')']
+             |  KEYWORD '=' STRING # parameter file #
 
     ovl      -> KEYWRD ['.'] par
+             |  KEYWORD '=' STRING # parameter file #
 
     ary      -> KEYWRD '[' vallst ']'\n
              |  KEYWRD '[' objlst ']'\n
@@ -245,7 +252,9 @@ Grammar for command line
 A list of objects requires parenthesis to enclose the arguments. Only
 for one object of a certain level you can omit the round brackets. If
 you want define more then one object of a certain level you must use
-parenthesis to separate the objects from each other.
+parenthesis to separate the objects from each other. In parameter files
+the command string for an overlay can be start with a dot '.' or not.
+The same is valid for the parenthesis '(...)' of an object.
 
 Grammar for property file
 -------------------------
@@ -669,6 +678,7 @@ extern int siClpParsePro(
  * @param[in]  pcCmd Pointer to a zero terminated string containing the command for parsing
  * @param[in]  isChk Boolean to enable (TRUE) or disable (FALSE) validation of minimum number of entries
  * @param[out] piOid If this pointer is set and the main table is an overlay the corresponding object identifier is returned
+ * @param[out] ppFil Pointer to the name of the parameter file, where the error was detected (NULL if error in provided command line)
  * @param[out] ppPos Pointer in the provided command line where the error was detected
  * @param[out] ppLst Pointer to the parsed parameter list (NULL = no list provided)
  *
@@ -679,6 +689,7 @@ extern int siClpParseCmd(
    const char*                   pcCmd,
    const int                     isChk,
    int*                          piOid,
+   char**                        ppFil,
    char**                        ppPos,
    char**                        ppLst);
 

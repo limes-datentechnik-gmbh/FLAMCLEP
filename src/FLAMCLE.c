@@ -74,11 +74,12 @@
  * 1.1.19: search config file first in working dir and then in home dir for read operation
  * 1.1.20: print aliases at help only if keyword ALL or MAN is used
  * 1.1.21: eliminate isFlg from CleExecute() to accept file properties
+ * 1.1.22: Add support for parameter files for each object and overlay (read.text=parfilename.txt)
  */
-#define CLE_VSN_STR       "1.1.21"
+#define CLE_VSN_STR       "1.1.22"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        1
-#define CLE_VSN_REVISION       21
+#define CLE_VSN_REVISION       22
 
 /* Definition der Konstanten ******************************************/
 #define CLEMAX_CNFLEN            1023
@@ -336,6 +337,7 @@ static void vdPrnCommandError(
    void*                         pvHdl,
    FILE*                         pfOut,
    const char*                   pcCmd,
+   const char*                   pcFil,
    const char*                   pcPos,
    const char*                   pcLst,
    const char*                   pcDep);
@@ -478,8 +480,6 @@ extern int siCleExecute(
    const char*                   pcDef)
 {
    int                           i,j,l,s,siErr,siDep,siCnt,isSet=0;
-   char*                         pcPos=NULL;
-   char*                         pcLst=NULL;
    static char                   acCmd[CLEMAX_CMDSIZ];
    TsCnfHdl*                     psCnf;
    char*                         pcCnf;
@@ -1866,14 +1866,17 @@ EVALUATE:
    } else {
       for (i=0;psTab[i].pcKyw!=NULL;i++) {
          if (strxcmp(isCas,argv[1],psTab[i].pcKyw,0,-1,FALSE)==0) {
+            char*                         pcFil=NULL;
+            char*                         pcPos=NULL;
+            char*                         pcLst=NULL;
             siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl);
             if (siErr) ERROR(siErr);
             siErr=siCleGetCommand(pvHdl,pfOut,pcDep,psTab[i].pcKyw,argc,argv,acCmd);
             if (siErr) ERROR(siErr);
-            siErr=siClpParseCmd(pvHdl,acCmd,TRUE,psTab[i].piOid,&pcPos,&pcLst);
+            siErr=siClpParseCmd(pvHdl,acCmd,TRUE,psTab[i].piOid,&pcFil,&pcPos,&pcLst);
             if (siErr<0) {
                fprintf(pfOut,"Command line parser for command '%s' failed!\n",psTab[i].pcKyw);
-               vdPrnCommandError(pvHdl,pfOut,acCmd,pcPos,pcLst,pcDep);
+               vdPrnCommandError(pvHdl,pfOut,acCmd,pcFil,pcPos,pcLst,pcDep);
                ERROR(6);
             }
             siErr=psTab[i].pfMap(pfOut,pfTrc,psTab[i].piOid,psTab[i].pvClp,psTab[i].pvPar);
@@ -2512,16 +2515,23 @@ static void vdPrnCommandError(
    void*                         pvHdl,
    FILE*                         pfOut,
    const char*                   pcCmd,
+   const char*                   pcFil,
    const char*                   pcPos,
    const char*                   pcLst,
    const char*                   pcDep)
 {
    int                           i,l;
-   if (pcPos==pcCmd) fprintf(pfOut,"%s Command line error at byte %d ("   ,pcDep,((int)(pcPos-pcCmd))+1);
-               else  fprintf(pfOut,"%s Command line error at byte %d (...",pcDep,((int)(pcPos-pcCmd))+1);
-   for (i=0;i<32 && !iscntrl(pcPos[i]);i++) fprintf(pfOut,"%c",pcPos[i]);
-   if (pcPos[i]==EOS) fprintf(pfOut,")\n");
-                 else fprintf(pfOut,"...)\n");
+   if (pcFil!=NULL) {
+      fprintf(pfOut,"%s Command line error in parameter file \'%s\' (...",pcDep,pcFil);
+      for (i=0;i<32 && !iscntrl(pcPos[i]);i++) fprintf(pfOut,"%c",pcPos[i]);
+      fprintf(pfOut,"...)\n");
+   } else {
+      if (pcPos==pcCmd) fprintf(pfOut,"%s Command line error at byte %d ("   ,pcDep,((int)(pcPos-pcCmd))+1);
+                  else  fprintf(pfOut,"%s Command line error at byte %d (...",pcDep,((int)(pcPos-pcCmd))+1);
+      for (i=0;i<32 && !iscntrl(pcPos[i]);i++) fprintf(pfOut,"%c",pcPos[i]);
+      if (pcPos[i]==EOS) fprintf(pfOut,")\n");
+                    else fprintf(pfOut,"...)\n");
+   }
    if (pcLst!=NULL) {
       l=strlen(pcLst);
       if (l>1) {
