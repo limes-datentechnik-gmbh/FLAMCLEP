@@ -135,6 +135,9 @@ command line results from a file or argc/argv.
 For objects and overlays you can use the assignment letter '=' to define
 a parameter file containing the command string for this object or overlay.
 Means for each object or overlay a dedicated parameter file can be used.
+The parameter file must contain a command string which syntax is valid
+for the certain object or overlay. Parameter files are limited to a
+maximum length of 65535 byte.
 
 If the flag CLPFLG_PWD used, string outputs will be result in
 "###SECRECT###' and float or number outputs in a value of 0.
@@ -142,8 +145,8 @@ If the flag CLPFLG_PWD used, string outputs will be result in
 Parsing of the properties (can be done a lot of times over different
 sources) only change the default values in the symbol table and has no
 effect for the CLP structure. First after parsing the command line the
-corresponding FLAMCLP structure is filled with the entered values and
-the FLAMCLP can be closed or another command line parsed.
+corresponding FLAMCLP structure is filled with the properties or entered
+values and the FLAMCLP can be closed or another command line parsed.
 
 Normal procedure to use CLP:
 

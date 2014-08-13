@@ -2810,6 +2810,7 @@ static int siClpPrsFil(
       return(CLPERR_SEM);
    }
 
+   if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"PROPERTY-FILE-PARSER-BEGIN(FILE=%s)\n",acNam);
    pcCur=psHdl->pcCur; psHdl->pcCur=acPar;
    pcOld=psHdl->pcOld; psHdl->pcOld=acPar;
    pcSrc=psHdl->pcSrc; psHdl->pcSrc=acPar;
@@ -2817,48 +2818,34 @@ static int siClpPrsFil(
    psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
    if (psHdl->siTok<0) return(psHdl->siTok);
    if (psHdl->siTok==CLPTOK_RBO) {
-      psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
-      if (psHdl->siTok<0) return(psHdl->siTok);
-      siCnt=siClpPrsObjWob(pvHdl,siLev,siPos,psArg);
+      siCnt=siClpPrsObj(pvHdl,siLev,siPos,psArg);
       if (siCnt<0) return(siCnt);
-      if (psHdl->siTok==CLPTOK_RBC) {
-         psHdl->pcCur=pcCur; psHdl->pcOld=pcOld; psHdl->pcSrc=pcSrc; psHdl->pcFil=pcFil;
-         psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
-         if (psHdl->siTok<0) return(psHdl->siTok);
-         if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d CNT=%d OBJ(%s(parlst))-CLS)\n",fpcPre(pvHdl,siLev),siLev,siPos,siCnt,psArg->psStd->pcKyw);
-      } else {
-         if (psHdl->pfErr!=NULL) {
-            fprintf(psHdl->pfErr,"SYNTAX-ERROR\n");
-            fprintf(psHdl->pfErr,"%s Character \')\' missing (%s)\n",fpcPre(pvHdl,0),fpcPat(pvHdl,siLev));
-         }
-         return(CLPERR_SYN);
-      }
-      return(siCnt);
    } else if (psHdl->siTok==CLPTOK_DOT) {
       psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
       if (psHdl->siTok<0) return(psHdl->siTok);
       siCnt=siClpPrsOvl(pvHdl,siLev,siPos,psArg);
       if (siCnt<0) return(siCnt);
-      psHdl->pcCur=pcCur; psHdl->pcOld=pcOld; psHdl->pcSrc=pcSrc; psHdl->pcFil=pcFil;
-      psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
-      if (psHdl->siTok<0) return(psHdl->siTok);
-      return(siCnt);
    } else {
       if (psArg->psFix->siTyp==CLPTYP_OBJECT) {
          siCnt=siClpPrsObjWob(pvHdl,siLev,siPos,psArg);
          if (siCnt<0) return(siCnt);
-         psHdl->pcCur=pcCur; psHdl->pcOld=pcOld; psHdl->pcSrc=pcSrc; psHdl->pcFil=pcFil;
-         psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
-         if (psHdl->siTok<0) return(psHdl->siTok);
-         return(siCnt);
       } else {
          siCnt=siClpPrsOvl(pvHdl,siLev,siPos,psArg);
          if (siCnt<0) return(siCnt);
-         psHdl->pcCur=pcCur; psHdl->pcOld=pcOld; psHdl->pcSrc=pcSrc; psHdl->pcFil=pcFil;
-         psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
-         if (psHdl->siTok<0) return(psHdl->siTok);
-         return(siCnt);
       }
+   }
+   if (psHdl->siTok==CLPTOK_END) {
+      psHdl->acLex[0]=EOS; psHdl->pcCur=pcCur; psHdl->pcOld=pcOld; psHdl->pcSrc=pcSrc; psHdl->pcFil=pcFil;
+      if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"PROPERTY-FILE-PARSER-END(FILE=%s CNT=%d)\n",acNam,siCnt);
+      psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
+      if (psHdl->siTok<0) return(psHdl->siTok);
+      return(siCnt);
+   } else {
+      if (psHdl->pfErr!=NULL) {
+         fprintf(psHdl->pfErr,"SYNTAX-ERROR\n");
+         fprintf(psHdl->pfErr,"%s Last token (%s) of property file \'%s\' is not EOF\n",fpcPre(pvHdl,0),apClpTok[psHdl->siTok],acNam);
+      }
+      return(CLPERR_SYN);
    }
 }
 
