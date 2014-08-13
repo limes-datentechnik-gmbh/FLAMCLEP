@@ -501,7 +501,8 @@ extern int siCleExecute(
    if (psTab==NULL || argc==0 || argv==NULL || pcPgm==NULL || pcHlp==NULL || pfOut==NULL || pcDep==NULL || pcOpt==NULL || pcEnt==NULL ||
        strlen(pcPgm)==0 || strlen(pcHlp)==0 || strlen(pcPgm)>CLEMAX_PGMLEN) return(24);
 
-   for (i=0;pcPgm[i];i++) acPgm[i]=toupper(pcPgm[i]);
+   for (i=0;pcPgm[i] && i<(sizeof(acPgm)-1);i++) acPgm[i]=toupper(pcPgm[i]);
+   acPgm[i]=0;
 
    pfTmp=fopen("DD:STDENV","r");
    if (pfTmp!=NULL) {
@@ -511,7 +512,8 @@ extern int siCleExecute(
          while (isspace(*(pcCnf-1))) {
             pcCnf--; *pcCnf=EOS;
          }
-         if (putenv(acCnf)) {
+         errno=0; errno|=putenv(acCnf);
+         if (errno) {
             fprintf(pfOut,"Put variable (%s) to environment failed\n",acCnf);
             fclose(pfTmp);
             return(16);
@@ -546,15 +548,20 @@ extern int siCleExecute(
          pfTmp=fopen(acCnf,"r");
          if (pfTmp==NULL) {
             sprintf(acCnf,"%s.%s.config",pcHom,pcPgm);
+            fprintf(pfOut,"Use default configuration file '%s' in home directory\n",acCnf);
          } else {
             fclose(pfTmp);
+            fprintf(pfOut,"Use existing configuration file '%s' in working directory\n",acCnf);
          }
       } else {
          sprintf(acCnf,".%s.config",pcPgm);
+         fprintf(pfOut,"Use default configuration file '%s' in working directory\n",acCnf);
       }
       for (i=0;acCnf[i];i++) acCnf[i]=tolower(acCnf[i]);
 #endif
       pcCnf=acCnf;
+   } else {
+      fprintf(pfOut,"Use configuration file '%s' defined by environment variable '%s'\n",pcCnf,acCnf);
    }
    psCnf=psCnfOpn(pfOut,isCas,pcPgm,pcCnf);
    if (psCnf==NULL) return(11);
@@ -2950,7 +2957,7 @@ static int siCnfPutEnv(
    const char*                   pcOwn,
    const char*                   pcPgm)
 {
-   int                           i,j,r;
+   int                           i,j;
    TsCnfEnt*                     psEnt;
    for (i=j=0,psEnt=psHdl->psFst;psEnt!=NULL;psEnt=psEnt->psNxt,i++) {
       if (strstr(psEnt->acKyw,pcOwn)!=NULL &&
@@ -2959,8 +2966,8 @@ static int siCnfPutEnv(
          const char* pcKyw=strstr(psEnt->acKyw,".envar.")+7;
          if (strlen(pcKyw)+strlen(psEnt->acVal)+2<sizeof(psEnt->acEnv)) {
             sprintf(psEnt->acEnv,"%s=%s",pcKyw,psEnt->acVal);
-            r=putenv(psEnt->acEnv);
-            if (r==0) {
+            errno=0; errno|=putenv(psEnt->acEnv);
+            if (errno==0) {
                const char* pcHlp=getenv(pcKyw);
                if (pcHlp!=NULL) {
                   if (strcmp(pcHlp,psEnt->acVal)==0) {
