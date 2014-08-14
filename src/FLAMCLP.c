@@ -2779,7 +2779,7 @@ static int siClpPrsFil(
       return(CLPERR_SYN);
    }
    strcpy(acNam,psHdl->acLex+2);
-   errno=0; pfFil=fopen(acNam,"r");
+   pfFil=fopen(acNam,"r");
    if (pfFil==NULL) {
       if (psHdl->pfErr!=NULL) {
          fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
@@ -2788,15 +2788,15 @@ static int siClpPrsFil(
       return(CLPERR_SEM);
    }
 
-   errno=0; acPar[0]=EOS; pcHlp=acPar; siRst=CLPMAX_FILLEN;
-   while (!errno && !feof(pfFil) && siRst) {
+   acPar[0]=EOS; pcHlp=acPar; siRst=CLPMAX_FILLEN;
+   while (!ferror(pfFil) && !feof(pfFil) && siRst) {
       siLen=fread(pcHlp,1,siRst,pfFil);
       pcHlp+=siLen; siRst-=siLen;
    }
-   if (errno && !feof(pfFil)) {
+   if (ferror(pfFil) && !feof(pfFil)) {
       if (psHdl->pfErr!=NULL) {
          fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
-         fprintf(psHdl->pfErr,"%s Error reading parameter file \'%s\' (%d - %s)\n",fpcPre(pvHdl,0),acNam,errno,strerror(errno));
+         fprintf(psHdl->pfErr,"%s Error reading parameter file \'%s\' (%d - %s)\n",fpcPre(pvHdl,0),acNam,ferror(pfFil),strerror(ferror(pfFil)));
       }
       fclose(pfFil); acPar[0]=EOS;
       return(CLPERR_SEM);

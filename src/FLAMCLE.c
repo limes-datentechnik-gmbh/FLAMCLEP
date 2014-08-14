@@ -512,9 +512,8 @@ extern int siCleExecute(
          while (isspace(*(pcCnf-1))) {
             pcCnf--; *pcCnf=EOS;
          }
-         errno=0; errno|=putenv(acCnf);
-         if (errno) {
-            fprintf(pfOut,"Put variable (%s) to environment failed\n",acCnf);
+         if (putenv(acCnf)) {
+            fprintf(pfOut,"Put variable (%s) to environment failed (%d - %s)\n",acCnf,errno,strerror(errno));
             fclose(pfTmp);
             return(16);
          } else {
@@ -524,7 +523,6 @@ extern int siCleExecute(
       fclose(pfTmp);
    }
 
-   errno=0;
    sprintf(acCnf,"%s_DEFAULT_OWNER_ID",acPgm);
    pcCnf=getenv(acCnf);
    if (pcCnf!=NULL && strlen(pcCnf) && strlen(pcCnf)<sizeof(acOwn)) strcpy(acOwn,pcCnf); else strcpy(acOwn,pcOwn);
@@ -898,7 +896,7 @@ EVALUATE:
          pcFil=strchr(argv[2],'=');
          if (pcFil!=NULL) {
             *((char*)pcFil)=EOS; pcFil++; pcCmd=argv[2];
-            isMan=TRUE; errno=0; pfDoc=fopen(pcFil,"w");
+            isMan=TRUE; pfDoc=fopen(pcFil,"w");
             if (pfDoc==NULL) {
                fprintf(pfOut,"Open of manual page file (%s) failed (%d - %s)\n",pcFil,errno,strerror(errno));
                ERROR(8);
@@ -1098,7 +1096,7 @@ EVALUATE:
          }
 
          pcFil=argv[2];
-         isMan=TRUE; errno=0; pfDoc=fopen(pcFil,"w");
+         isMan=TRUE; pfDoc=fopen(pcFil,"w");
          if (pfDoc==NULL) {
             fprintf(pfOut,"Open of manual page file (%s) failed (%d - %s)\n",pcFil,errno,strerror(errno));
             ERROR(8);
@@ -1143,7 +1141,6 @@ EVALUATE:
          } else {
             pcFil=argv[2]; pcCmd=NULL;
          }
-         errno=0;
          pfDoc=fopen(pcFil,"w");
          if (pfDoc==NULL) {
             fprintf(pfOut,"Open of documentation file (%s) failed (%d - %s)\n",pcFil,errno,strerror(errno));
@@ -1152,7 +1149,6 @@ EVALUATE:
          if (pcCmd!=NULL) {
             for (i=0;psTab[i].pcKyw!=NULL;i++) {
                if (strxcmp(isCas,pcCmd,psTab[i].pcKyw,0,'.',TRUE)==0) {
-                  errno=0;
                   siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl);
                   if (siErr) ERROR(siErr);
                   sprintf(acNum,"2.%d.",i+1);
@@ -1178,7 +1174,6 @@ EVALUATE:
                         fprintf(pfOut,"Memory allocation for path '%s.%s' failed!\n",pcDef,argv[2]);
                         ERROR(16);
                      }
-                     errno=0;
                      siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl);
                      if (siErr) {
                         free(pcPat);
@@ -1200,7 +1195,6 @@ EVALUATE:
                }
             }
          } else {
-            errno=0;
             if (pcCov!=NULL && strlen(pcCov)) {
                fprintf(pfDoc,"%s\n\n",pcCov);
             } else {
@@ -1402,7 +1396,6 @@ EVALUATE:
          } else {
             pcFil=argv[2]; pcCmd=NULL;
          }
-         errno=0;
          pfPro=fopen(pcFil,"w");
          if (pfPro==NULL) {
             fprintf(pfOut,"Open of property file (%s) failed (%d-%s)\n",pcFil,errno,strerror(errno));
@@ -1413,7 +1406,6 @@ EVALUATE:
          fprintf(pfPro,HLP_CLE_PROPFIL);
 
          if (pcCmd==NULL) {
-            errno=0;
             for (siErr=CLP_OK, i=0;psTab[i].pcKyw!=NULL && siErr==CLP_OK;i++) {
                siErr=siClePropertyInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,
                                        psTab[i].piOid,psTab[i].psTab,isCas,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,acFil,&siFil);
@@ -1434,7 +1426,6 @@ EVALUATE:
                   siErr=siClePropertyInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,
                                           psTab[i].piOid,psTab[i].psTab,isCas,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,acFil,&siFil);
                   if (siErr) ERROR(siErr);
-                  errno=0;
                   siErr=siClpProperties(pvHdl,FALSE,10,psTab[i].pcKyw,pfPro);
                   vdClpClose(pvHdl); pvHdl=NULL;
                   if (siErr<0) {
@@ -2036,7 +2027,6 @@ static int siClePropertyFinish(
          pcFil=acEnv;
       }
    }
-   errno=0;
    pfPro=fopen(pcFil,"w");
    if (pfPro==NULL) {
       fprintf(pfOut,"Cannot open the property file \'%s\' for write operation (%d-%s)\n",pcFil,errno,strerror(errno));
@@ -2637,22 +2627,20 @@ static int siCleGetProperties(
       } else *piFlg=2;
    } else *piFlg=3;
 
-   errno=0;
    strcpy(pcFil,pcHlp);
    pfPro=fopen(pcFil,"r");
    if (pfPro==NULL) {
       fprintf(pfOut,"Cannot open the property file \'%s\' for read operation (%d-%s)\n",pcFil,errno,strerror(errno));
       return(0);
    }
-   errno=0;
    pcPro[0]=EOS; pcHlp=pcPro; siRst=CLEMAX_PROLEN;
-   while (!errno && !feof(pfPro) && siRst) {
+   while (!ferror(pfPro) && !feof(pfPro) && siRst) {
       siPro=fread(pcHlp,1,siRst,pfPro);
       pcHlp+=siPro;
       siRst-=siPro;
    }
-   if (errno && !feof(pfPro)) {
-      fprintf(pfOut,"Error reading property file (%d-%s)\n",errno,strerror(errno));
+   if (ferror(pfPro) && !feof(pfPro)) {
+      fprintf(pfOut,"Error reading property file (%d-%s)\n",ferror(pfPro),strerror(ferror(pfPro)));
       fclose(pfPro);
       pcPro[0]=EOS;
       return(16);
@@ -2721,21 +2709,19 @@ static int siCleGetCommand(
          return(8);
       }
       strcpy(pcCmd,argv[1]+l+1);
-      errno=0;
       pfCmd=fopen(pcCmd,"r");
       if (pfCmd==NULL) {
           fprintf(pfOut,"Cannot open the parameter file \'%s\' (%d-%s)\n",pcCmd,errno,strerror(errno));
          return(8);
       }
-      errno=0;
       pcCmd[0]=0x00; pcHlp=pcCmd; siRst=CLEMAX_CMDLEN;
-      while (!errno && !feof(pfCmd) && siRst) {
+      while (!ferror(pfCmd) && !feof(pfCmd) && siRst) {
          siCmd=fread(pcHlp,1,siRst,pfCmd);
          pcHlp+=siCmd;
          siRst-=siCmd;
       }
-      if (errno && !feof(pfCmd)) {
-         fprintf(pfOut,"Error reading parameter file (%d-%s)\n",errno,strerror(errno));
+      if (ferror(pfCmd) && !feof(pfCmd)) {
+         fprintf(pfOut,"Error reading parameter file (%d-%s)\n",ferror(pfCmd),strerror(ferror(pfCmd)));
          fclose(pfCmd);
          pcCmd[0]=EOS;
          return(16);
@@ -2799,7 +2785,6 @@ static TsCnfHdl* psCnfOpn(
    }
    strcpy(psHdl->acFil,pcFil);
 
-   errno=0;
    pfFil=fopen(psHdl->acFil,"r");
    if (pfFil==NULL && (errno==2 || errno==49 || errno==129)) return(psHdl);
    if (pfFil==NULL) {
@@ -2966,8 +2951,7 @@ static int siCnfPutEnv(
          const char* pcKyw=strstr(psEnt->acKyw,".envar.")+7;
          if (strlen(pcKyw)+strlen(psEnt->acVal)+2<sizeof(psEnt->acEnv)) {
             sprintf(psEnt->acEnv,"%s=%s",pcKyw,psEnt->acVal);
-            errno=0; errno|=putenv(psEnt->acEnv);
-            if (errno==0) {
+            if (putenv(psEnt->acEnv)==0) {
                const char* pcHlp=getenv(pcKyw);
                if (pcHlp!=NULL) {
                   if (strcmp(pcHlp,psEnt->acVal)==0) {
