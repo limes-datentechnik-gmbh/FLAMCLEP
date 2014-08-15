@@ -43,7 +43,7 @@
 /* Include eigener Bibliotheken  **************************************/
 
 #include "FLAMCLP.h"
-#include "CLEPUTL.h"
+#include "CLEPUTLH.h"
 
 /* Include der Schnittstelle ******************************************/
 

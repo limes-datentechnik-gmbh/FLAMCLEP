@@ -42,7 +42,7 @@
 /* Include der Schnittstelle **************************************************/
 
 #include "FLAMCLP.h"
-#include "CLEPUTL.h"
+#include "CLEPUTLH.h"
 
 /* Definition der Version von FL-CLP ******************************************
  *
