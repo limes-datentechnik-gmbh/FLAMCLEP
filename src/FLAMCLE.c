@@ -76,11 +76,13 @@
  * 1.1.20: print aliases at help only if keyword ALL or MAN is used
  * 1.1.21: eliminate isFlg from CleExecute() to accept file properties
  * 1.1.22: Add support for parameter files for each object and overlay (read.text=parfilename.txt)
+ * 1.1.23: Invent CLEPUTL.h/c
+ *
  */
-#define CLE_VSN_STR       "1.1.22"
+#define CLE_VSN_STR       "1.1.23"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        1
-#define CLE_VSN_REVISION       22
+#define CLE_VSN_REVISION       23
 
 /* Definition der Konstanten ******************************************/
 #define CLEMAX_CNFLEN            1023
