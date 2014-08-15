@@ -73,12 +73,13 @@
  * 1.1.24: Add support for parameter files for each object and overlay (read.text=parfilename.txt)
  * 1.1.25: Invent CLEPUTL.h/c
  * 1.1.26: Eleminate static variables to get more thread safe
+ * 1.1.27: To save memory and simplify the usage of CLP the pointer to the data structure can be NULL
  **/
 
-#define CLP_VSN_STR       "1.1.26"
+#define CLP_VSN_STR       "1.1.27"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        1
-#define CLP_VSN_REVISION       26
+#define CLP_VSN_REVISION       27
 
 /* Definition der Flag-Makros *************************************************/
 
@@ -650,7 +651,7 @@ extern void* pvClpOpen(
 {
    TsHdl*                        psHdl=NULL;
    int                           siErr;
-   if (pcOwn!=NULL && pcPgm!=NULL && pcCmd!=NULL && psTab!=NULL && pvDat!=NULL) {
+   if (pcOwn!=NULL && pcPgm!=NULL && pcCmd!=NULL && psTab!=NULL) {
       psHdl=(TsHdl*)calloc(1,sizeof(TsHdl));
       if (psHdl!=NULL) {
          psHdl->isCas=isCas;
@@ -4290,14 +4291,22 @@ static int siClpIniMainObj(
       return(CLPERR_INT);
    }
 
-   for (psHlp=psTab;psHlp!=NULL;psHlp=psHlp->psNxt,psSav++) {
-      *psSav=*psHlp->psVar;
-      psHlp->psVar->pvDat=((char*)psHdl->pvDat)+psHlp->psFix->siOfs;
-      psHlp->psVar->pvPtr=psHlp->psVar->pvDat;
-      psHlp->psVar->siCnt=0;
-      psHlp->psVar->siLen=0;
-      psHlp->psVar->siRst=psHlp->psFix->siSiz;
-      if (CLPISS_FIX(psHlp->psStd->uiFlg)) psHlp->psVar->siRst*=psHlp->psFix->siMax;
+   if (psHdl->pvDat!=NULL) {
+      for (psHlp=psTab;psHlp!=NULL;psHlp=psHlp->psNxt,psSav++) {
+         *psSav=*psHlp->psVar;
+         psHlp->psVar->pvDat=((char*)psHdl->pvDat)+psHlp->psFix->siOfs;
+         psHlp->psVar->pvPtr=psHlp->psVar->pvDat;
+         psHlp->psVar->siCnt=0;
+         psHlp->psVar->siLen=0;
+         psHlp->psVar->siRst=psHlp->psFix->siSiz;
+         if (CLPISS_FIX(psHlp->psStd->uiFlg)) psHlp->psVar->siRst*=psHlp->psFix->siMax;
+      }
+   } else {
+      if (psHdl->pfErr!=NULL) {
+         fprintf(psHdl->pfErr,"PARAMETER-ERROR\n");
+         fprintf(psHdl->pfErr,"%s Pointer to CLP data structure is NULL\n",fpcPre(pvHdl,0));
+      }
+      return(CLPERR_PAR);
    }
 
    if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"BUILD-BEGIN-MAIN-ARGUMENT-LIST\n");
@@ -4375,14 +4384,22 @@ static int siClpIniMainOvl(
       return(CLPERR_INT);
    }
 
-   for (psHlp=psTab;psHlp!=NULL;psHlp=psHlp->psNxt,psSav++) {
-      *psSav=*psHlp->psVar;
-      psHlp->psVar->pvDat=((char*)psHdl->pvDat);
-      psHlp->psVar->pvPtr=psHlp->psVar->pvDat;
-      psHlp->psVar->siCnt=0;
-      psHlp->psVar->siLen=0;
-      psHlp->psVar->siRst=psHlp->psFix->siSiz;
-      if (CLPISS_FIX(psHlp->psStd->uiFlg)) psHlp->psVar->siRst*=psHlp->psFix->siMax;
+   if (psHdl->pvDat!=NULL) {
+      for (psHlp=psTab;psHlp!=NULL;psHlp=psHlp->psNxt,psSav++) {
+         *psSav=*psHlp->psVar;
+         psHlp->psVar->pvDat=((char*)psHdl->pvDat);
+         psHlp->psVar->pvPtr=psHlp->psVar->pvDat;
+         psHlp->psVar->siCnt=0;
+         psHlp->psVar->siLen=0;
+         psHlp->psVar->siRst=psHlp->psFix->siSiz;
+         if (CLPISS_FIX(psHlp->psStd->uiFlg)) psHlp->psVar->siRst*=psHlp->psFix->siMax;
+      }
+   } else {
+      if (psHdl->pfErr!=NULL) {
+         fprintf(psHdl->pfErr,"PARAMETER-ERROR\n");
+         fprintf(psHdl->pfErr,"%s Pointer to CLP data structure is NULL\n",fpcPre(pvHdl,0));
+      }
+      return(CLPERR_PAR);
    }
 
    if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"BUILD-BEGIN-MAIN-ARGUMENT\n");
