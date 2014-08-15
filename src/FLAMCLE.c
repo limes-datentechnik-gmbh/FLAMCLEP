@@ -1906,8 +1906,8 @@ static int siClePropertyInit(
       if (siErr<0) {
          fprintf(pfOut,"Parsing property file \'%s\' for command \'%s\' failed!\n",pcFil,pcCmd);
          vdPrnPropertyError(*ppHdl,pfOut,pcFil,pcPro,pcPos,pcLst,pcDep);
-         free(pcPro);
          vdClpClose(*ppHdl);*ppHdl=NULL;
+         free(pcPro);
          return(6);
       }
       free(pcPro);
@@ -2577,17 +2577,17 @@ static int siCleGetProperties(
    strcpy(pcFil,pcHlp);
    siErr=file2str(pcFil,ppPro,&siSiz);
    if (siErr<0) {
+      if (*ppPro!=NULL) { free(*ppPro); *ppPro=NULL; }
       switch(siErr) {
-      case -1: fprintf(pfOut,"Illegal parameters passed to file2str() (Bug)\n");                            siErr=24; break;
-      case -2: fprintf(pfOut,"Open of property file '%s' failed (%d - %s)\n",pcFil,errno,strerror(errno));  siErr= 0; break;
-      case -3: fprintf(pfOut,"Property file '%s' is too big (interger overflow)\n",pcFil);                  siErr= 8; break;
-      case -4: fprintf(pfOut,"Allocation of memory for property file '%s' failed.\n",pcFil);                siErr=16; break;
-      case -5: fprintf(pfOut,"Read of property file '%s' failed (%d - %s)\n",pcFil,errno,strerror(errno));  siErr=16; break;
-      default: fprintf(pfOut,"An unknown error occurred while reading property file '%s'.\n",pcFil);        siErr=24; break;
+      case -1: fprintf(pfOut,"Illegal parameters passed to file2str() (Bug)\n");                            return(24);
+      case -2: fprintf(pfOut,"Open of property file '%s' failed (%d - %s)\n",pcFil,errno,strerror(errno));  return( 0);
+      case -3: fprintf(pfOut,"Property file '%s' is too big (interger overflow)\n",pcFil);                  return( 8);
+      case -4: fprintf(pfOut,"Allocation of memory for property file '%s' failed.\n",pcFil);                return(16);
+      case -5: fprintf(pfOut,"Read of property file '%s' failed (%d - %s)\n",pcFil,errno,strerror(errno));  return(16);
+      default: fprintf(pfOut,"An unknown error occurred while reading property file '%s'.\n",pcFil);        return(24);
       }
-      if (*ppPro!=NULL)  { free(*ppPro); *ppPro=NULL; }
-   }
-   return(siErr);
+   };
+   return(0);
 }
 
 static int siCleGetCommand(
