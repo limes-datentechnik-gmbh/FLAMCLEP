@@ -2576,7 +2576,7 @@ static int siCleGetProperties(
    } else *piFlg=3;
    strcpy(pcFil,pcHlp);
    siErr=file2str(pcFil,ppPro,&siSiz);
-   if (siErr) {
+   if (siErr<0) {
       switch(siErr) {
       case -1: fprintf(pfOut,"Illegal parameters passed to file2str() (Bug)\n");                            siErr=24; break;
       case -2: fprintf(pfOut,"Open of property file '%s' failed (%d - %s)\n",pcFil,errno,strerror(errno));  siErr= 0; break;

@@ -615,7 +615,7 @@ typedef struct ClpArgument {
  * @param[in]  pcHlp String constant containing the help message for this command
  * @param[in]  isOvl Boolean if TRUE the main table (psTab) is a overlay else it will be interpreted as object
  * @param[in]  psTab Pointer to the parameter table defining the semantic of the command line
- * @param[out] pvDat Pointer to the structure where the parsed values are stored
+ * @param[out] pvDat Pointer to the structure where the parsed values are stored (can be NULL if command line parsing not used)
  * @param[in]  pfHlp Pointer to the file used for help messages (if not set then stderr)
  * @param[in]  pfErr Pointer to the file used for error messages or NULL for no printing
  * @param[in]  pfSym Pointer to the file used for symbol table trace or NULL for no printing
