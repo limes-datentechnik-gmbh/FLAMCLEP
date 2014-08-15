@@ -26,32 +26,23 @@
 extern const char* CUSERID(void) { // TODO: not thread-safe
    static char uid[L_userid]="";
    static int  uidSet=FALSE;
-
-   if (uidSet)
-      return uid;
-
+   if (uidSet) return uid;
    DWORD       siz=sizeof(uid);
    GetUserName(uid,&siz);
-
    uidSet=TRUE;
    return(uid);
 }
 extern const char* HOMEDIR(int flg) { // TODO: not thread-safe
    static char dir[2][MAX_PATH+1]={{'\0'}, {'\0'}};
    static int homedirSet=FALSE;
-
    if (!homedirSet) {
       if (SHGetFolderPath(NULL,CSIDL_PROFILE,NULL,0,dir[0])==S_OK && strlen(dir[0])>0) {
          strcpy(dir[1], dir[0]);
          strcat(dir[0],"\\");
       }
-
       homedirSet=TRUE;
    }
-   if (flg)
-      return dir[0];
-   else
-      return dir[1];
+   if (flg) return dir[0]; else return dir[1];
 }
 #else
 #include <unistd.h>
@@ -60,10 +51,7 @@ extern const char* HOMEDIR(int flg) { // TODO: not thread-safe
 extern const char* CUSERID(void) { // TODO: not thread-safe
    static char uid[L_userid]="";
    static int uidSet=FALSE;
-
-   if (uidSet)
-      return uid;
-
+   if (uidSet) return uid;
    struct passwd* uP = getpwuid(geteuid());
    if (NULL != uP) {
       strncpy(uid,uP->pw_name,sizeof(uid)-1);
@@ -81,7 +69,6 @@ extern const char* CUSERID(void) { // TODO: not thread-safe
 extern const char* HOMEDIR(int flg) { // TODO: not thread-safe
    static char dir[2][L_filnam]={{'\0'}, {'\0'}};
    static int  homedirSet=FALSE;
-
    if (!homedirSet) {
       size_t len;
       char* home=getenv("HOME");
@@ -115,10 +102,7 @@ extern const char* HOMEDIR(int flg) { // TODO: not thread-safe
       }
       homedirSet=TRUE;
    }
-   if (flg)
-      return dir[0];
-   else
-      return dir[1];
+   if (flg) return dir[0]; else return dir[1];
 }
 #endif
 

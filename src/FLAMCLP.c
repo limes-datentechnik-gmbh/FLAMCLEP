@@ -72,12 +72,13 @@
  * 1.1.23: eliminate uiFlg to manage file properties and command line with the same symbol table
  * 1.1.24: Add support for parameter files for each object and overlay (read.text=parfilename.txt)
  * 1.1.25: Invent CLEPUTL.h/c
+ * 1.1.26: Eleminate static variables to get more thread safe
  **/
 
-#define CLP_VSN_STR       "1.1.25"
+#define CLP_VSN_STR       "1.1.26"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        1
-#define CLP_VSN_REVISION       25
+#define CLP_VSN_REVISION       26
 
 /* Definition der Flag-Makros *************************************************/
 
