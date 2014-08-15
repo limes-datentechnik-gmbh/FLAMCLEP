@@ -43,6 +43,7 @@
 /* Include eigener Bibliotheken  **************************************/
 
 #include "FLAMCLP.h"
+#include "CLEPUTL.h"
 
 /* Include der Schnittstelle ******************************************/
 
@@ -96,67 +97,6 @@
 #define CLEMAX_NUMSIZ            1024
 #define CLEMAX_PATLEN            1023
 #define CLEMAX_PATSIZ            1024
-
-/* HOME and USER ******************************************************/
-
-#ifdef __WIN__
-#define _WIN32_IE 0x5000
-#include <shlobj.h>
-#include <windows.h>
-static const char* HOMEDIR(int flg) { // TODO: not thread-safe
-   static char dir[2][MAX_PATH+1]={{'\0'}, {'\0'}};
-   static int homedirSet=FALSE;
-
-   if (!homedirSet) {
-      if (SHGetFolderPath(NULL,CSIDL_PROFILE,NULL,0,dir[0])==S_OK && strlen(dir[0])>0) {
-         strcpy(dir[1], dir[0]);
-         strcat(dir[0],"\\");
-      }
-
-      homedirSet=TRUE;
-   }
-   if (flg)
-      return dir[0];
-   else
-      return dir[1];
-}
-#else
-#include <unistd.h>
-#include <sys/types.h>
-#include <pwd.h>
-static const char* HOMEDIR(int flg) { // TODO: not thread-safe
-   static char dir[2][CLEMAX_FILSIZ]={{'\0'}, {'\0'}};
-   static int  homedirSet=FALSE;
-
-   if (!homedirSet) {
-      size_t len;
-      char* home=getenv("HOME");
-      if (home!=NULL) {
-         len=strlen(home);
-         if (len>0 && len+1<sizeof(dir[0])) {
-            strcpy(dir[0], home);
-            strcpy(dir[1], home);
-            strcat(dir[0],"/");
-         }
-      } else {
-         struct passwd* uP = getpwuid(geteuid());
-         if (uP != NULL && uP->pw_dir != NULL) {
-            len=strlen(uP->pw_dir);
-            if (len>0 && len+1<sizeof(dir[0])) {
-               strcpy(dir[0], uP->pw_dir);
-               strcpy(dir[1], uP->pw_dir);
-               strcat(dir[0],"/");
-            }
-         }
-      }
-      homedirSet=TRUE;
-   }
-   if (flg)
-      return dir[0];
-   else
-      return dir[1];
-}
-#endif
 
 /* Definition der Strukturen ******************************************/
 

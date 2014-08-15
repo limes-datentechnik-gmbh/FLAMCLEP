@@ -855,29 +855,7 @@ extern void vdClpClose(
 extern char* pcClpError(
    int               siErr);
 
-/**
- * Compare of two string
- *
- * The procedure combines strcmp, stricmp, strncmp and strchr in one function.
- *
- * @param[in]  ca Flag if case sensitiv (TRUE) or not (FALSE)
- * @param[in]  s1 String 1 to compare
- * @param[in]  s2 string 2 to compare
- * @param[in]  n  Amount of character to compare
- * @param[in]  c  Character where the compare stops or -1 for keyword syntax
- * @param[in]  f  If true only compare up to zero termination or stop char if false (normal compare) including zero termination or stop char
- *
- * @return signed integer with 0 for equal and !=0 for different
- */
-extern int strxcmp(
-   const int                     ca,
-   const char*                   s1,
-   const char*                   s2,
-   const int                     n,
-   const int                     c,
-   const int                     f);
-
-#endif // CMDLINE_H
+#endif // INC_CLP_H
 
 #ifdef __cplusplus
 }
