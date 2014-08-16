@@ -487,20 +487,20 @@ extern int siCleExecute(
          pfTmp=fopen(acCnf,"r");
          if (pfTmp==NULL) {
             sprintf(acCnf,"%s.%s.config",pcHom,pcPgm);
-            fprintf(pfOut,"Use default configuration file '%s' in home directory\n",acCnf);
+            fprintf(pfOut,"Use default configuration file (%s) in home directory\n",acCnf);
          } else {
             fclose(pfTmp);
-            fprintf(pfOut,"Use existing configuration file '%s' in working directory\n",acCnf);
+            fprintf(pfOut,"Use existing configuration file (%s) in working directory\n",acCnf);
          }
       } else {
          sprintf(acCnf,".%s.config",pcPgm);
-         fprintf(pfOut,"Use default configuration file '%s' in working directory\n",acCnf);
+         fprintf(pfOut,"Use default configuration file (%s) in working directory\n",acCnf);
       }
       for (i=0;acCnf[i];i++) acCnf[i]=tolower(acCnf[i]);
 #endif
       pcCnf=acCnf;
    } else {
-      fprintf(pfOut,"Use configuration file '%s' defined by environment variable '%s'\n",pcCnf,acCnf);
+      fprintf(pfOut,"Use configuration file (%s) defined by environment variable (%s)\n",pcCnf,acCnf);
    }
    psCnf=psCnfOpn(pfOut,isCas,pcPgm,pcCnf);
    if (psCnf==NULL) return(11);
@@ -2122,11 +2122,11 @@ static int siCleChangeProperties(
    }
 
    if (siErr==0) {
-      fprintf(pfOut, "Don't update any property of file '%s'\n",acFil);
+      fprintf(pfOut, "Don't update any property in property file (%s)\n",acFil);
    } else if (siErr==1) {
-      fprintf(pfOut, "Updated 1 property of file '%s'\n",acFil);
+      fprintf(pfOut, "Updated 1 property in property file (%s)\n",acFil);
    } else {
-      fprintf(pfOut, "Updated %d properties of file '%s'\n",siErr,acFil);
+      fprintf(pfOut, "Updated %d properties in property file '%s'\n",siErr,acFil);
    }
 
    siErr=siClePropertyFinish(pcHom,pcOwn,pcPgm,pcCmd,pfOut,pfTrc,psCnf,pvHdl,acFil,siFil);
