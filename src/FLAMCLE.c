@@ -2581,12 +2581,12 @@ static int siCleGetProperties(
       switch(siErr) {
       case -1: fprintf(pfOut,"Illegal parameters passed to file2str() (Bug)\n");                            return(24);
       case -2: fprintf(pfOut,"Open of property file '%s' failed (%d - %s)\n",pcFil,errno,strerror(errno));  return( 0);
-      case -3: fprintf(pfOut,"Property file '%s' is too big (interger overflow)\n",pcFil);                  return( 8);
+      case -3: fprintf(pfOut,"Property file '%s' is too big (integer overflow)\n",pcFil);                   return( 8);
       case -4: fprintf(pfOut,"Allocation of memory for property file '%s' failed.\n",pcFil);                return(16);
       case -5: fprintf(pfOut,"Read of property file '%s' failed (%d - %s)\n",pcFil,errno,strerror(errno));  return(16);
       default: fprintf(pfOut,"An unknown error occurred while reading property file '%s'.\n",pcFil);        return(24);
       }
-   };
+   }
    return(0);
 }
 
