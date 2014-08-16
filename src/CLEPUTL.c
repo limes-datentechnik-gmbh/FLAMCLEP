@@ -10,6 +10,7 @@
 #define _UNIX03_WITHDRAWN
 #define _POSIX_SOURCE
 #include <stdio.h>
+#include <errno.h>
 #include <ctype.h>
 #include <string.h>
 #include <strings.h>
@@ -407,6 +408,7 @@ extern int file2str(const char* filename, char** buf, int* bufsize) {
    if (filename==NULL || buf==NULL || bufsize==NULL || *bufsize<0)
       return -1; // bad args
 
+   errno=0;
    pfFile=fopen(filename, "r");
    if (pfFile == NULL) {
       return -2; // fopen failed
