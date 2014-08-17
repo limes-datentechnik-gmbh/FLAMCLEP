@@ -2745,15 +2745,13 @@ static int siClpPrsFil(
    TsSym*                        psArg)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
-   char                          acNam[CLPMAX_LEXSIZ];
-   char                          acPar[CLPMAX_FILSIZ];
-   FILE*                         pfFil;
-   int                           siRst,siLen,siCnt;
+   static char                   acNam[CLPMAX_LEXSIZ];
+   char*                         pcPar=NULL;
+   int                           siCnt,siErr,siSiz=0;
    const char*                   pcCur;
    const char*                   pcOld;
    const char*                   pcSrc;
    const char*                   pcFil;
-   char*                         pcHlp;
 
    if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d PARFIL(%s=val)\n",fpcPre(pvHdl,siLev),siLev,siPos,psArg->psStd->pcKyw);
    psHdl->siTok=siClpScnSrc(pvHdl,CLPTOK_STR,psArg);
@@ -2766,61 +2764,64 @@ static int siClpPrsFil(
       return(CLPERR_SYN);
    }
    strcpy(acNam,psHdl->acLex+2);
-   pfFil=fopen(acNam,"r");
-   if (pfFil==NULL) {
-      if (psHdl->pfErr!=NULL) {
-         fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
-         fprintf(psHdl->pfErr,"%s Open of parameter file \'%s\' failed (%d - %s)\n",fpcPre(pvHdl,0),acNam,errno,strerror(errno));
+   siErr=file2str(acNam,&pcPar,&siSiz);
+   if (siErr<0) {
+      fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
+      switch(siErr) {
+      case -1: fprintf(psHdl->pfErr,"%s Illegal parameters passed to file2str() (Bug)\n",fpcPre(pvHdl,0)); break;
+      case -2: fprintf(psHdl->pfErr,"%s Open of parameter file (%s) failed (%d - %s)\n",fpcPre(pvHdl,0),acNam,errno,strerror(errno)); break;
+      case -3: fprintf(psHdl->pfErr,"%s Parameter file (%s) is too big (integer overflow)\n",fpcPre(pvHdl,0),acNam); break;
+      case -4: fprintf(psHdl->pfErr,"%s Allocation of memory for parameter file (%s) failed.\n",fpcPre(pvHdl,0),acNam);break;
+      case -5: fprintf(psHdl->pfErr,"%s Read of parameter file (%s) failed (%d - %s)\n",fpcPre(pvHdl,0),acNam,errno,strerror(errno)); break;
+      default: fprintf(psHdl->pfErr,"%s An unknown error occurred while reading parameter file (%s).\n",fpcPre(pvHdl,0),acNam); break;
       }
-      return(CLPERR_SEM);
-   }
-
-   acPar[0]=EOS; pcHlp=acPar; siRst=CLPMAX_FILLEN;
-   while (!ferror(pfFil) && !feof(pfFil) && siRst) {
-      siLen=fread(pcHlp,1,siRst,pfFil);
-      pcHlp+=siLen; siRst-=siLen;
-   }
-   if (ferror(pfFil) && !feof(pfFil)) {
-      if (psHdl->pfErr!=NULL) {
-         fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
-         fprintf(psHdl->pfErr,"%s Error reading parameter file \'%s\' (%d - %s)\n",fpcPre(pvHdl,0),acNam,ferror(pfFil),strerror(ferror(pfFil)));
-      }
-      fclose(pfFil); acPar[0]=EOS;
-      return(CLPERR_SEM);
-   }
-   fclose(pfFil); *pcHlp=EOS;
-   if (siRst==0) {
-      if (psHdl->pfErr!=NULL) {
-         fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
-         fprintf(psHdl->pfErr,"%s Parameter file \'%s\' is too big (more than %d bytes)\n",fpcPre(pvHdl,0),acNam,CLPMAX_FILLEN);
-      }
+      if (pcPar!=NULL) free(pcPar);
       return(CLPERR_SEM);
    }
 
    if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"PROPERTY-FILE-PARSER-BEGIN(FILE=%s)\n",acNam);
-   pcCur=psHdl->pcCur; psHdl->pcCur=acPar;
-   pcOld=psHdl->pcOld; psHdl->pcOld=acPar;
-   pcSrc=psHdl->pcSrc; psHdl->pcSrc=acPar;
+   pcCur=psHdl->pcCur; psHdl->pcCur=pcPar;
+   pcOld=psHdl->pcOld; psHdl->pcOld=pcPar;
+   pcSrc=psHdl->pcSrc; psHdl->pcSrc=pcPar;
    pcFil=psHdl->pcFil; psHdl->pcFil=acNam;
    psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
-   if (psHdl->siTok<0) return(psHdl->siTok);
+   if (psHdl->siTok<0) {
+      if (pcPar!=NULL) free(pcPar);
+      return(psHdl->siTok);
+   }
    if (psHdl->siTok==CLPTOK_RBO) {
       siCnt=siClpPrsObj(pvHdl,siLev,siPos,psArg);
-      if (siCnt<0) return(siCnt);
+      if (siCnt<0) {
+         if (pcPar!=NULL) free(pcPar);
+         return(siCnt);
+      }
    } else if (psHdl->siTok==CLPTOK_DOT) {
       psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
-      if (psHdl->siTok<0) return(psHdl->siTok);
+      if (psHdl->siTok<0) {
+         if (pcPar!=NULL) free(pcPar);
+         return(psHdl->siTok);
+      }
       siCnt=siClpPrsOvl(pvHdl,siLev,siPos,psArg);
-      if (siCnt<0) return(siCnt);
+      if (siCnt<0) {
+         if (pcPar!=NULL) free(pcPar);
+         return(siCnt);
+      }
    } else {
       if (psArg->psFix->siTyp==CLPTYP_OBJECT) {
          siCnt=siClpPrsObjWob(pvHdl,siLev,siPos,psArg);
-         if (siCnt<0) return(siCnt);
+         if (siCnt<0) {
+            if (pcPar!=NULL) free(pcPar);
+            return(siCnt);
+         }
       } else {
          siCnt=siClpPrsOvl(pvHdl,siLev,siPos,psArg);
-         if (siCnt<0) return(siCnt);
+         if (siCnt<0) {
+            if (pcPar!=NULL) free(pcPar);
+            return(siCnt);
+         }
       }
    }
+   if (pcPar!=NULL) free(pcPar);
    if (psHdl->siTok==CLPTOK_END) {
       psHdl->acLex[0]=EOS; psHdl->pcCur=pcCur; psHdl->pcOld=pcOld; psHdl->pcSrc=pcSrc; psHdl->pcFil=pcFil;
       if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"PROPERTY-FILE-PARSER-END(FILE=%s CNT=%d)\n",acNam,siCnt);
