@@ -132,12 +132,13 @@ command line. Both property list and command line are provided as zero
 terminated strings. This means that the FLAMCLP does not know whether the
 command line results from a file or argc/argv.
 
-For objects and overlays you can use the assignment letter '=' to define
-a parameter file containing the command string for this object or overlay.
-Means for each object or overlay a dedicated parameter file can be used.
-The parameter file must contain a command string which syntax is valid
-for the certain object or overlay. Parameter files are limited to a
-maximum length of 65535 byte.
+If the isPfl (is parameter file) flag TRUE: For objects and overlays you
+can use the assignment letter '=' to define a parameter file containing
+the command string for this object or overlay. Means for each object or
+overlay a dedicated parameter file can be used. The parameter file must
+contain a command string which syntax is valid for the certain object or
+overlay. CLP open the file with format string "r". To use DD names on
+mainframes the file name must like "DD:name".
 
 If the flag CLPFLG_PWD used, string outputs will be result in
 "###SECRECT###' and float or number outputs in a value of 0.
@@ -160,6 +161,12 @@ syntax and help function. Additionally you can use a very powerful
 function to generate single manual pages or complete user manuals,
 You can make also use of the supported grammar and regular expressions
 (lexems).
+
+Only ClpParseCmd() use the pvDat pointer. All other functions only work
+on the symbol table. Means if you don't use ClpParseCmd() the pointer to
+the CLP structure (pvDat) can be NULL. This is useful if only help,
+syntax, documentation or property management required. For such function
+no corresponding CLP structure must be allocated.
 
 The implementation of the FLAMCLP is finished with the Command Line
 Executor (FLAMCLE) with which you can define your list of commands by
@@ -607,6 +614,7 @@ typedef struct ClpArgument {
  * The function uses the argument table and corresponding structure and creates the handle for the command line parser (FLAMCLP)
  *
  * @param[in]  isCas Boolean to enable case sensitive parsing of keywords (recommended is FLASE)
+ * @param[in]  isPfl Boolean to enable parameter files per object and overlay (recommended is TRUE)
  * @param[in]  siMkl Integer defining the minimal key word length (siMkl<=0 --> full length, no auto abbreviation)
  * @param[in]  pcOwn String constant containing the owner name for the root in the path ("de.limes")
  * @param[in]  pcPgm String constant containing the program name for the root in the path ("flcl")
@@ -630,6 +638,7 @@ typedef struct ClpArgument {
  */
 extern void* pvClpOpen(
    const int                     isCas,
+   const int                     isPfl,
    const int                     siMkl,
    const char*                   pcOwn,
    const char*                   pcPgm,
