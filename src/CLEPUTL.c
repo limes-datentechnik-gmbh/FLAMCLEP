@@ -10,6 +10,7 @@
 #define _UNIX03_WITHDRAWN
 #define _POSIX_SOURCE
 #include <stdio.h>
+#include <errno.h>
 #include <ctype.h>
 #include <string.h>
 #include <strings.h>
@@ -17,7 +18,7 @@
 #include <stdarg.h>
 #include <limits.h>
 
-#include "CLEPUTLH.h"
+#include "CLEPUTL.h"
 
 #ifdef __WIN__
 #define _WIN32_IE 0x5000
@@ -26,32 +27,23 @@
 extern const char* CUSERID(void) { // TODO: not thread-safe
    static char uid[L_userid]="";
    static int  uidSet=FALSE;
-
-   if (uidSet)
-      return uid;
-
+   if (uidSet) return uid;
    DWORD       siz=sizeof(uid);
    GetUserName(uid,&siz);
-
    uidSet=TRUE;
    return(uid);
 }
 extern const char* HOMEDIR(int flg) { // TODO: not thread-safe
    static char dir[2][MAX_PATH+1]={{'\0'}, {'\0'}};
    static int homedirSet=FALSE;
-
    if (!homedirSet) {
       if (SHGetFolderPath(NULL,CSIDL_PROFILE,NULL,0,dir[0])==S_OK && strlen(dir[0])>0) {
          strcpy(dir[1], dir[0]);
          strcat(dir[0],"\\");
       }
-
       homedirSet=TRUE;
    }
-   if (flg)
-      return dir[0];
-   else
-      return dir[1];
+   if (flg) return dir[0]; else return dir[1];
 }
 #else
 #include <unistd.h>
@@ -60,10 +52,7 @@ extern const char* HOMEDIR(int flg) { // TODO: not thread-safe
 extern const char* CUSERID(void) { // TODO: not thread-safe
    static char uid[L_userid]="";
    static int uidSet=FALSE;
-
-   if (uidSet)
-      return uid;
-
+   if (uidSet) return uid;
    struct passwd* uP = getpwuid(geteuid());
    if (NULL != uP) {
       strncpy(uid,uP->pw_name,sizeof(uid)-1);
@@ -81,7 +70,6 @@ extern const char* CUSERID(void) { // TODO: not thread-safe
 extern const char* HOMEDIR(int flg) { // TODO: not thread-safe
    static char dir[2][L_filnam]={{'\0'}, {'\0'}};
    static int  homedirSet=FALSE;
-
    if (!homedirSet) {
       size_t len;
       char* home=getenv("HOME");
@@ -115,10 +103,7 @@ extern const char* HOMEDIR(int flg) { // TODO: not thread-safe
       }
       homedirSet=TRUE;
    }
-   if (flg)
-      return dir[0];
-   else
-      return dir[1];
+   if (flg) return dir[0]; else return dir[1];
 }
 #endif
 
@@ -423,6 +408,7 @@ extern int file2str(const char* filename, char** buf, int* bufsize) {
    if (filename==NULL || buf==NULL || bufsize==NULL || *bufsize<0)
       return -1; // bad args
 
+   errno=0;
    pfFile=fopen(filename, "r");
    if (pfFile == NULL) {
       return -2; // fopen failed

@@ -271,7 +271,8 @@ For compilation the defines below must be set:
     __RELEASE__   for a release build
     __WIN__       for WINDOWS platforms
     __HOST__      for mainframe platforms
-
+    __BUILDNR__   to define the build number (integer, default is 0)
+    __BUILD__     to define the build string ("debug", "release", "alpha", ...)
  *
  ******************************************************************************/
 

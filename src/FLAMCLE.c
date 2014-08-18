@@ -43,7 +43,7 @@
 /* Include eigener Bibliotheken  **************************************/
 
 #include "FLAMCLP.h"
-#include "CLEPUTLH.h"
+#include "CLEPUTL.h"
 
 /* Include der Schnittstelle ******************************************/
 
@@ -77,12 +77,13 @@
  * 1.1.21: eliminate isFlg from CleExecute() to accept file properties
  * 1.1.22: Add support for parameter files for each object and overlay (read.text=parfilename.txt)
  * 1.1.23: Invent CLEPUTL.h/c
+ * 1.1.24: Use file2str() and get it more thrad save
  *
  */
-#define CLE_VSN_STR       "1.1.23"
+#define CLE_VSN_STR       "1.1.24"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        1
-#define CLE_VSN_REVISION       23
+#define CLE_VSN_REVISION       24
 
 /* Definition der Konstanten ******************************************/
 #define CLEMAX_CNFLEN            1023
@@ -93,8 +94,6 @@
 #define CLEMAX_PGMSIZ            64
 #define CLEMAX_CMDLEN            65535
 #define CLEMAX_CMDSIZ            65536
-#define CLEMAX_PROLEN            262143
-#define CLEMAX_PROSIZ            262144
 #define CLEMAX_NUMLEN            1023
 #define CLEMAX_NUMSIZ            1024
 #define CLEMAX_PATLEN            1023
@@ -307,7 +306,7 @@ static int siCleGetProperties(
    const char*                   pcPgm,
    const char*                   pcFct,
    char*                         pcFil,
-   char*                         pcPro,
+   char**                        ppPro,
    int*                          piFlg);
 
 static int siCleGetCommand(
@@ -422,7 +421,7 @@ extern int siCleExecute(
    const char*                   pcDef)
 {
    int                           i,j,l,s,siErr,siDep,siCnt,isSet=0;
-   static char                   acCmd[CLEMAX_CMDSIZ];
+   static char                   acCmd[CLEMAX_CMDSIZ];//TODO: not thread save
    TsCnfHdl*                     psCnf;
    char*                         pcCnf;
    char                          acCnf[CLEMAX_CNFSIZ];
@@ -488,20 +487,20 @@ extern int siCleExecute(
          pfTmp=fopen(acCnf,"r");
          if (pfTmp==NULL) {
             sprintf(acCnf,"%s.%s.config",pcHom,pcPgm);
-            fprintf(pfOut,"Use default configuration file '%s' in home directory\n",acCnf);
+            fprintf(pfOut,"Use default configuration file (%s) in home directory\n",acCnf);
          } else {
             fclose(pfTmp);
-            fprintf(pfOut,"Use existing configuration file '%s' in working directory\n",acCnf);
+            fprintf(pfOut,"Use existing configuration file (%s) in working directory\n",acCnf);
          }
       } else {
          sprintf(acCnf,".%s.config",pcPgm);
-         fprintf(pfOut,"Use default configuration file '%s' in working directory\n",acCnf);
+         fprintf(pfOut,"Use default configuration file (%s) in working directory\n",acCnf);
       }
       for (i=0;acCnf[i];i++) acCnf[i]=tolower(acCnf[i]);
 #endif
       pcCnf=acCnf;
    } else {
-      fprintf(pfOut,"Use configuration file '%s' defined by environment variable '%s'\n",pcCnf,acCnf);
+      fprintf(pfOut,"Use configuration file (%s) defined by environment variable (%s)\n",pcCnf,acCnf);
    }
    psCnf=psCnfOpn(pfOut,isCas,pcPgm,pcCnf);
    if (psCnf==NULL) return(11);
@@ -1881,7 +1880,7 @@ static int siClePropertyInit(
 {
    int                           siErr;
    int                           isOvl=(piOid==NULL)?FALSE:TRUE;
-   static char                   acPro[CLEMAX_PROSIZ];
+   char*                         pcPro=NULL;
    char*                         pcPos=NULL;
    char*                         pcLst=NULL;
 
@@ -1896,17 +1895,22 @@ static int siClePropertyInit(
       fprintf(pfOut,"Open of property parser for command \'%s\' failed!\n",pcCmd);
       return(12);
    }
-   siErr=siCleGetProperties(*ppHdl,pfOut,psCnf,pcOwn,pcPgm,pcCmd,pcFil,acPro,piFil);
+   siErr=siCleGetProperties(*ppHdl,pfOut,psCnf,pcOwn,pcPgm,pcCmd,pcFil,&pcPro,piFil);
    if (siErr) {
+      if (pcPro!=NULL) free(pcPro);
       vdClpClose(*ppHdl);*ppHdl=NULL;
       return(siErr);
    }
-   siErr=siClpParsePro(*ppHdl,acPro,FALSE,&pcPos,&pcLst);
-   if (siErr<0) {
-      fprintf(pfOut,"Parsing property file \'%s\' for command \'%s\' failed!\n",pcFil,pcCmd);
-      vdPrnPropertyError(*ppHdl,pfOut,pcFil,acPro,pcPos,pcLst,pcDep);
-      vdClpClose(*ppHdl);*ppHdl=NULL;
-      return(6);
+   if (pcPro!=NULL) {
+      siErr=siClpParsePro(*ppHdl,pcPro,FALSE,&pcPos,&pcLst);
+      if (siErr<0) {
+         fprintf(pfOut,"Parsing property file \'%s\' for command \'%s\' failed!\n",pcFil,pcCmd);
+         vdPrnPropertyError(*ppHdl,pfOut,pcFil,pcPro,pcPos,pcLst,pcDep);
+         vdClpClose(*ppHdl);*ppHdl=NULL;
+         free(pcPro);
+         return(6);
+      }
+      free(pcPro);
    }
    return(0);
 }
@@ -2019,8 +2023,8 @@ static int siCleCommandInit(
 {
    int                           siErr,siFil=0;
    int                           isOvl=(piOid==NULL)?FALSE:TRUE;
-   static char                   acPro[CLEMAX_PROSIZ];
    char                          acFil[CLEMAX_FILSIZ];
+   char*                         pcPro=NULL;
    char*                         pcPos=NULL;
    char*                         pcLst=NULL;
 
@@ -2036,17 +2040,22 @@ static int siCleCommandInit(
       fprintf(pfOut,"Open of parser for command \'%s\' failed!\n",pcCmd);
       return(12);
    }
-   siErr=siCleGetProperties(*ppHdl,pfOut,psCnf,pcOwn,pcPgm,pcCmd,acFil,acPro,&siFil);
+   siErr=siCleGetProperties(*ppHdl,pfOut,psCnf,pcOwn,pcPgm,pcCmd,acFil,&pcPro,&siFil);
    if (siErr) {
       vdClpClose(*ppHdl);*ppHdl=NULL;
+      if (pcPro!=NULL) free(pcPro);
       return(siErr);
    }
-   siErr=siClpParsePro(*ppHdl,acPro,FALSE,&pcPos,&pcLst);
-   if (siErr<0) {
-      fprintf(pfOut,"Property parser for command \'%s\' failed!\n",pcCmd);
-      vdPrnPropertyError(*ppHdl,pfOut,acFil,acPro,pcPos,pcLst,pcDep);
-      vdClpClose(*ppHdl);*ppHdl=NULL;
-      return(6);
+   if (pcPro!=NULL) {
+      siErr=siClpParsePro(*ppHdl,pcPro,FALSE,&pcPos,&pcLst);
+      if (siErr<0) {
+         fprintf(pfOut,"Property parser for command \'%s\' failed!\n",pcCmd);
+         vdPrnPropertyError(*ppHdl,pfOut,acFil,pcPro,pcPos,pcLst,pcDep);
+         vdClpClose(*ppHdl);*ppHdl=NULL;
+         free(pcPro);
+         return(6);
+      }
+      free(pcPro);
    }
 
    return(0);
@@ -2113,11 +2122,11 @@ static int siCleChangeProperties(
    }
 
    if (siErr==0) {
-      fprintf(pfOut, "Don't update any property of file '%s'\n",acFil);
+      fprintf(pfOut, "Don't update any property in property file (%s)\n",acFil);
    } else if (siErr==1) {
-      fprintf(pfOut, "Updated 1 property of file '%s'\n",acFil);
+      fprintf(pfOut, "Updated 1 property in property file (%s)\n",acFil);
    } else {
-      fprintf(pfOut, "Updated %d properties of file '%s'\n",siErr,acFil);
+      fprintf(pfOut, "Updated %d properties in property file '%s'\n",siErr,acFil);
    }
 
    siErr=siClePropertyFinish(pcHom,pcOwn,pcPgm,pcCmd,pfOut,pfTrc,psCnf,pvHdl,acFil,siFil);
@@ -2539,16 +2548,14 @@ static int siCleGetProperties(
    const char*             pcPgm,
    const char*             pcFct,
    char*                   pcFil,
-   char*                   pcPro,
+   char**                  ppPro,
    int*                    piFlg)
 {
-   int                     siPro,siRst;
+   int                     siErr,siSiz=0;
    char*                   pcHlp=NULL;
-   FILE*                   pfPro=NULL;
    char                    acRot[CLEMAX_PATSIZ];
 
    pcFil[0]=EOS;
-   pcPro[0]=EOS;
    if (strlen(pcOwn)+strlen(pcPgm)+strlen(pcFct)+2>=CLEMAX_PATLEN) {
       fprintf(pfOut,"Rot (%s.%s.%s) is too long (>=%d)\n",pcOwn,pcPgm,pcFct,CLEMAX_PATLEN);
       return(0);
@@ -2562,38 +2569,24 @@ static int siCleGetProperties(
          sprintf(acRot,"%s.property.file",pcOwn);
          pcHlp=pcCnfGet(psCnf,acRot);
          if (pcHlp==NULL) {
-            pcPro[0]=0x00;
             *piFlg=0;
             return(0);
          } else *piFlg=1;
       } else *piFlg=2;
    } else *piFlg=3;
-
    strcpy(pcFil,pcHlp);
-   pfPro=fopen(pcFil,"r");
-   if (pfPro==NULL) {
-      fprintf(pfOut,"Cannot open the property file \'%s\' for read operation (%d-%s)\n",pcFil,errno,strerror(errno));
-      return(0);
+   siErr=file2str(pcFil,ppPro,&siSiz);
+   if (siErr<0) {
+      if (*ppPro!=NULL) { free(*ppPro); *ppPro=NULL; }
+      switch(siErr) {
+      case -1: fprintf(pfOut,"Illegal parameters passed to file2str() (Bug)\n");                            return(24);
+      case -2: fprintf(pfOut,"Open of property file (%s) failed (%d - %s)\n",pcFil,errno,strerror(errno));  return( 0);
+      case -3: fprintf(pfOut,"Property file (%s) is too big (integer overflow)\n",pcFil);                   return( 8);
+      case -4: fprintf(pfOut,"Allocation of memory for property file (%s) failed.\n",pcFil);                return(16);
+      case -5: fprintf(pfOut,"Read of property file (%s) failed (%d - %s)\n",pcFil,errno,strerror(errno));  return(16);
+      default: fprintf(pfOut,"An unknown error occurred while reading property file (%s).\n",pcFil);        return(24);
+      }
    }
-   pcPro[0]=EOS; pcHlp=pcPro; siRst=CLEMAX_PROLEN;
-   while (!ferror(pfPro) && !feof(pfPro) && siRst) {
-      siPro=fread(pcHlp,1,siRst,pfPro);
-      pcHlp+=siPro;
-      siRst-=siPro;
-   }
-   if (ferror(pfPro) && !feof(pfPro)) {
-      fprintf(pfOut,"Error reading property file (%d-%s)\n",ferror(pfPro),strerror(ferror(pfPro)));
-      fclose(pfPro);
-      pcPro[0]=EOS;
-      return(16);
-   }
-   fclose(pfPro);
-   *pcHlp=EOS;
-   if (siRst==0) {
-      fprintf(pfOut,"Property file is too big (more than %d bytes)\n",CLEMAX_PROLEN);
-      return(8);
-   }
-
    return(0);
 }
 
@@ -2695,7 +2688,7 @@ static TsCnfHdl* psCnfOpn(
    const char*                   pcFil)
 {
    FILE*                         pfFil;
-   static char                   acBuf[32768];
+   char                          acBuf[4046];
    char*                         pcHlp=NULL;
    char*                         pcKyw=NULL;
    char*                         pcVal=NULL;
