@@ -104,6 +104,7 @@ Below, you can find a possibly incomplete list of FLAMCLE feature:
  * * Available and usable on each platform including WIN, UNIX, USS, ZOS, ...
  * * Support of STDENV as DD name for environment variables on mainframes
  * * Keywords (commands, built-in functions, ON, OFF, ALL, DEPTH1, ...) can start optional with "-" or "--"
+ * * Support for parameter files per command, object or overlay
 
 Built-in Functions
 ------------------
@@ -503,7 +504,7 @@ typedef struct CleCommand {
 /**
  * Execute command line
  *
- * The function uses several command line parsers to execute different commands based on argc and argv given in the main function of a program
+ * The function uses the command line parsers to execute different commands based on argc and argv given in the main function of a program
  * and provides the additional built-in functions below:
  * - SYNTAX [command[.path] [DEPTH1 | ... | DEPTH9 | ALL]]
  * - HELP   [command[.path] [DEPTH1 | ... | DEPTH9 | ALL]] [MAN]
@@ -532,7 +533,8 @@ typedef struct CleCommand {
  * @param[in]  argv  List of pointers to the command line parameters (argv of main(int argc, char* argv[]))
  * @param[in]  pcOwn Default owner id (owner ids are used to identify properties and other things "com.company")
  * @param[in]  pcPgm Logical program name (can be different from argv[0] and will be used in the root "com.company.program")
- * @param[in]  isCas Switch to enable case sensitive interpretation of the command line
+ * @param[in]  isCas Switch to enable case sensitive interpretation of the command line (recommended is FLASE)
+ * @param[in]  isPfl Switch to enable parameter file support for object and overlays (recommended is TRUE)
  * @param[in]  siMkl Integer defining the minimal key word length (siMkl<=0 --> full length, no auto abbreviation)
  * @param[in]  pfOut File pointer for help and error messages (if not defined stderr will be used)
  * @param[in]  pfTrc Default trace file if no trace file is defined with the configuration data management (recommended: NULL, stdout or stderr)
@@ -571,6 +573,7 @@ extern int siCleExecute(
    const char*                   pcOwn,
    const char*                   pcPgm,
    const int                     isCas,
+   const int                     isPfl,
    const int                     siMkl,
    FILE*                         pfOut,
    FILE*                         pfTrc,

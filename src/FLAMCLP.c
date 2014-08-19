@@ -72,14 +72,15 @@
  * 1.1.23: eliminate uiFlg to manage file properties and command line with the same symbol table
  * 1.1.24: Add support for parameter files for each object and overlay (read.text=parfilename.txt)
  * 1.1.25: Invent CLEPUTL.h/c
- * 1.1.26: Eleminate static variables to get more thread safe
+ * 1.1.26: Eliminate static variables to get more thread safe
  * 1.1.27: To save memory and simplify the usage of CLP the pointer to the data structure can be NULL
+ * 1.1.28: Improve error handling (count rows and cols, print error msg and build error structure) and support isPfl-Flag
  **/
 
-#define CLP_VSN_STR       "1.1.27"
+#define CLP_VSN_STR       "1.1.28"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        1
-#define CLP_VSN_REVISION       27
+#define CLP_VSN_REVISION       28
 
 /* Definition der Flag-Makros *************************************************/
 
@@ -225,6 +226,7 @@ typedef struct Hdl {
    int                           isOvl;
    int                           isChk;
    int                           isCas;
+   int                           isPfl;
    int                           siTok;
    char                          acLex[CLPMAX_LEXSIZ];
    TsSym*                        psSym;
@@ -239,6 +241,10 @@ typedef struct Hdl {
    char                          acPat[CLPMAX_PATSIZ];
    char                          acPre[CLPMAX_PRESIZ];
    char                          acLst[CLPMAX_LSTSIZ];
+   int                           siRow;
+   int                           siCol;
+   int                           siOfs;
+   int                           siErr;
 } TsHdl;
 
 /* Deklaration der internen Funktionen ***************************************/
@@ -630,6 +636,7 @@ extern char* pcClpError(
 
 extern void* pvClpOpen(
    const int                     isCas,
+   const int                     isPfl,
    const int                     siMkl,
    const char*                   pcOwn,
    const char*                   pcPgm,
@@ -655,6 +662,7 @@ extern void* pvClpOpen(
       psHdl=(TsHdl*)calloc(1,sizeof(TsHdl));
       if (psHdl!=NULL) {
          psHdl->isCas=isCas;
+         psHdl->isPfl=isPfl;
          psHdl->siMkl=siMkl;
          psHdl->pcOwn=pcOwn;
          psHdl->pcPgm=pcPgm;
@@ -2136,10 +2144,24 @@ static int siClpScnNat(
          *ppCur=pcCur;
          return(CLPTOK_END);
       } else if (isspace(*pcCur) || iscntrl(*pcCur) || (*pcCur)==',') { /*separation*/
+         if (*pcCur=='\n') {
+            psHdl->siRow++;
+            psHdl->siCol=0;
+         } else psHdl->siCol++;
+         psHdl->siOfs++;
          pcCur++;
       } else if (*pcCur=='#') { /*comment*/
+         psHdl->siOfs++;
+         psHdl->siCol++;
          pcCur++;
-         while (*pcCur!='#' && *pcCur!=EOS) pcCur++;
+         while (*pcCur!='#' && *pcCur!=EOS) {
+            if (*pcCur=='\n') {
+               psHdl->siRow++;
+               psHdl->siCol=0;
+            } else psHdl->siCol++;
+            psHdl->siOfs++;
+            pcCur++;
+         }
          if (*pcCur!='#') {
             if (pfErr!=NULL) {
                 fprintf(pfErr,"LEXICAL-ERROR\n");
@@ -2147,20 +2169,51 @@ static int siClpScnNat(
             }
             return(CLPERR_LEX);
          }
+         psHdl->siOfs++;
+         psHdl->siCol++;
          pcCur++;
       } else if (*pcCur==';') { /*line comment*/
+         psHdl->siOfs++;
+         psHdl->siCol++;
          pcCur++;
-         while (*pcCur!='\n' && *pcCur!=EOS) pcCur++;
-         if (*pcCur=='\n') pcCur++;
+         while (*pcCur!='\n' && *pcCur!=EOS) {
+            if (*pcCur=='\n') {
+               psHdl->siRow++;
+               psHdl->siCol=0;
+            } else psHdl->siCol++;
+            psHdl->siOfs++;
+            pcCur++;
+         }
+         if (*pcCur=='\n') {
+            psHdl->siRow++;
+            psHdl->siCol=0;
+            psHdl->siOfs++;
+            pcCur++;
+         }
       } else if (pcCur[0]==SPMCHR) {/*supplement || simple string*/
          char* pcSup;
          *pcLex='d'; pcLex++;
          *pcLex='\''; pcLex++;
          pcSup=pcLex;
-         pcCur+=1;
+         psHdl->siOfs++;
+         psHdl->siCol++;
+         pcCur++;
          while (pcCur[0]!=EOS && (pcCur[0]!=SPMCHR || (pcCur[0]==SPMCHR && pcCur[1]==SPMCHR))  && pcLex<pcEnd) {
             *pcLex=*pcCur; pcLex++;
-            pcCur+=(pcCur[0]==SPMCHR)?2:1;
+            if (*pcCur=='\n') {
+               psHdl->siRow++;
+               psHdl->siCol=0;
+               psHdl->siOfs++;
+               pcCur++;
+            } else if (pcCur[0]==SPMCHR) {
+               psHdl->siCol+=2;
+               psHdl->siOfs+=2;
+               pcCur+=2;
+            } else {
+               psHdl->siCol++;
+               psHdl->siOfs++;
+               pcCur++;
+            }
          }
          *pcLex=EOS;
          if (*pcCur!=SPMCHR) {
@@ -2170,7 +2223,10 @@ static int siClpScnNat(
             }
             return(CLPERR_LEX);
          }
-         pcCur++; *ppCur=pcCur;
+         psHdl->siCol++;
+         psHdl->siOfs++;
+         pcCur++;
+         *ppCur=pcCur;
          if (uiTok==CLPTOK_SUP) {
             char* p1=pcHlp;
             char* p2=pcSup;
@@ -2189,10 +2245,25 @@ static int siClpScnNat(
          *pcLex='d'; pcLex++;
          *pcLex='\''; pcLex++;
          pcSup=pcLex;
-         pcCur+=1;
+         psHdl->siOfs++;
+         psHdl->siCol++;
+         pcCur++;
          while (pcCur[0]!=EOS && (pcCur[0]!=STRCHR || (pcCur[0]==STRCHR && pcCur[1]==STRCHR)) &&  pcLex<pcEnd) {
             *pcLex=*pcCur; pcLex++;
-            pcCur+=(pcCur[0]==STRCHR)?2:1;
+            if (*pcCur=='\n') {
+               psHdl->siRow++;
+               psHdl->siCol=0;
+               psHdl->siOfs++;
+               pcCur++;
+            } else if (pcCur[0]==STRCHR) {
+               psHdl->siCol+=2;
+               psHdl->siOfs+=2;
+               pcCur+=2;
+            } else {
+               psHdl->siCol++;
+               psHdl->siOfs++;
+               pcCur++;
+            }
          }
          *pcLex=EOS;
          if (*pcCur!=STRCHR) {
@@ -2202,7 +2273,10 @@ static int siClpScnNat(
             }
             return(CLPERR_LEX);
          }
-         pcCur++; *ppCur=pcCur;
+         psHdl->siCol++;
+         psHdl->siOfs++;
+         pcCur++;
+         *ppCur=pcCur;
          if (uiTok==CLPTOK_SUP) {
             char* p1=pcHlp;
             char* p2=pcSup;
@@ -2217,13 +2291,28 @@ static int siClpScnNat(
             return(CLPTOK_STR);
          }
       } else if ((tolower(pcCur[0])=='x' || tolower(pcCur[0])=='a' ||tolower(pcCur[0])=='e' ||
-                  tolower(pcCur[0])=='c' || tolower(pcCur[0])=='s') && pcCur[1]==STRCHR) {/*defined string*/
+                  tolower(pcCur[0])=='c' || tolower(pcCur[0])=='s') && pcCur[1]==STRCHR) {/*defined string '...'*/
          *pcLex=tolower(*pcCur); pcLex++;
          *pcLex='\''; pcLex++;
+         psHdl->siCol+=2;
+         psHdl->siOfs+=2;
          pcCur+=2;
          while (pcCur[0]!=EOS && (pcCur[0]!=STRCHR || (pcCur[0]==STRCHR && pcCur[1]==STRCHR)) &&  pcLex<pcEnd) {
             *pcLex=*pcCur; pcLex++;
-            pcCur+=(pcCur[0]==STRCHR)?2:1;
+            if (*pcCur=='\n') {
+               psHdl->siRow++;
+               psHdl->siCol=0;
+               psHdl->siOfs++;
+               pcCur++;
+            } else if (pcCur[0]==STRCHR) {
+               psHdl->siCol+=2;
+               psHdl->siOfs+=2;
+               pcCur+=2;
+            } else {
+               psHdl->siCol++;
+               psHdl->siOfs++;
+               pcCur++;
+            }
          }
          *pcLex=EOS;
          if (*pcCur!=STRCHR) {
@@ -2233,21 +2322,69 @@ static int siClpScnNat(
             }
             return(CLPERR_LEX);
          }
+         psHdl->siCol++;
+         psHdl->siOfs++;
          pcCur++;
-         if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(STR)-LEXEM(%s)\n",isPrnLex(psArg,pcHlp));
          *ppCur=pcCur;
+         if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(STR)-LEXEM(%s)\n",isPrnLex(psArg,pcHlp));
+         return(CLPTOK_STR);
+      } else if ((tolower(pcCur[0])=='x' || tolower(pcCur[0])=='a' ||tolower(pcCur[0])=='e' ||
+                  tolower(pcCur[0])=='c' || tolower(pcCur[0])=='s') && pcCur[1]==SPMCHR) {/*defined string "..."*/
+         *pcLex=tolower(*pcCur); pcLex++;
+         *pcLex='\''; pcLex++;
+         psHdl->siCol+=2;
+         psHdl->siOfs+=2;
+         pcCur+=2;
+         while (pcCur[0]!=EOS && (pcCur[0]!=SPMCHR || (pcCur[0]==SPMCHR && pcCur[1]==SPMCHR)) &&  pcLex<pcEnd) {
+            *pcLex=*pcCur; pcLex++;
+            if (*pcCur=='\n') {
+               psHdl->siRow++;
+               psHdl->siCol=0;
+               psHdl->siOfs++;
+               pcCur++;
+            } else if (pcCur[0]==SPMCHR) {
+               psHdl->siCol+=2;
+               psHdl->siOfs+=2;
+               pcCur+=2;
+            } else {
+               psHdl->siCol++;
+               psHdl->siOfs++;
+               pcCur++;
+            }
+         }
+         *pcLex=EOS;
+         if (*pcCur!=SPMCHR) {
+            if (pfErr!=NULL) {
+               fprintf(pfErr,"LEXICAL-ERROR\n");
+               fprintf(pfErr,"%s String literal not terminated with \'%c\'\n",fpcPre(pvHdl,0),SPMCHR);
+            }
+            return(CLPERR_LEX);
+         }
+         psHdl->siCol++;
+         psHdl->siOfs++;
+         pcCur++;
+         *ppCur=pcCur;
+         if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(STR)-LEXEM(%s)\n",isPrnLex(psArg,pcHlp));
          return(CLPTOK_STR);
       } else if ((pcCur[0]=='-' && isalpha(pcCur[1])) || (pcCur[0]=='-' && pcCur[1]=='-' && isalpha(pcCur[2]))) { /*defined keyword*/
-         while (pcCur[0]=='-') pcCur++;
+         while (pcCur[0]=='-') {
+            psHdl->siCol++;
+            psHdl->siOfs++;
+            pcCur++;
+         }
          *pcLex=*pcCur;
+         psHdl->siCol++;
+         psHdl->siOfs++;
          pcCur++; pcLex++;
          while (isKyw(*pcCur) && pcLex<pcEnd) {
             *pcLex=*pcCur;
+            psHdl->siCol++;
+            psHdl->siOfs++;
             pcCur++; pcLex++;
          }
          *pcLex=EOS;
-         if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(KYW)-LEXEM(%s)\n",pcHlp);
          *ppCur=pcCur;
+         if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(KYW)-LEXEM(%s)\n",pcHlp);
          return(CLPTOK_KYW);
       } else if (uiTok==CLPTOK_STR && isprint(pcCur[0]) && pcCur[0]!='(' && pcCur[0]!=')' && pcCur[0]!='[' && pcCur[0]!=']') {/*required string*/
          char*             pcKyw;
@@ -2257,11 +2394,16 @@ static int siClpScnNat(
          if (psArg!=NULL && psArg->psDep!=NULL) {
             int               k,j,f;
             TsSym*            psHlp;
-
             *pcLex=*pcCur;
+            *ppCur=pcCur;
+            psHdl->siCol++;
+            psHdl->siOfs++;
             pcCur++; pcLex++;
             while (isKyw(*pcCur) && pcLex<pcEnd) {
                *pcLex=*pcCur;
+               *ppCur=pcCur;
+               psHdl->siCol++;
+               psHdl->siOfs++;
                pcCur++; pcLex++;
             }
             *pcLex=EOS;
@@ -2296,82 +2438,124 @@ static int siClpScnNat(
             }
          }
          while (pcCur[0]!=EOS && isprint(pcCur[0]) && pcCur[0]!=' ' && pcCur[0]!=',' && pcCur[0]!='(' && pcCur[0]!=')' && pcCur[0]!='[' && pcCur[0]!=']' &&  pcLex<pcEnd) {
-            *pcLex=*pcCur; pcLex++; pcCur++;
+            *pcLex=*pcCur;
+            psHdl->siCol++;
+            psHdl->siOfs++;
+            pcLex++; pcCur++;
          }
          *pcLex=EOS;
-         if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(STR)-LEXEM(%s)\n",isPrnLex(psArg,pcHlp));
          *ppCur=pcCur;
+         if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(STR)-LEXEM(%s)\n",isPrnLex(psArg,pcHlp));
          return(CLPTOK_STR);
       } else if (isalpha(pcCur[0])) { /*simple keyword*/
          *pcLex=*pcCur;
+         psHdl->siCol++;
+         psHdl->siOfs++;
          pcCur++; pcLex++;
          while ((isKyw(*pcCur)) && pcLex<pcEnd) {
             *pcLex=*pcCur;
+            psHdl->siCol++;
+            psHdl->siOfs++;
             pcCur++; pcLex++;
          }
          *pcLex=EOS;
-         if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(KYW)-LEXEM(%s)\n",pcHlp);
          *ppCur=pcCur;
+         if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(KYW)-LEXEM(%s)\n",pcHlp);
          return(CLPTOK_KYW);
       } else if (((pcCur[0]=='+' || pcCur[0]=='-') && isdigit(pcCur[1])) || isdigit(pcCur[0])) { /*number*/
          if (pcCur[0]=='+' || pcCur[0]=='-') {
-            pcLex[1]=pcCur[0]; pcCur++;
+            pcLex[1]=pcCur[0];
+            psHdl->siCol++;
+            psHdl->siOfs++;
+            pcCur++;
          } else pcLex[1]=' ';
          if ((pcCur[0]=='0') &&
              (tolower(pcCur[1])=='b' || tolower(pcCur[1])=='o' || tolower(pcCur[1])=='d' || tolower(pcCur[1])=='x' || tolower(pcCur[1])=='t') &&
              (isdigit(pcCur[2]) || (isxdigit(pcCur[2]) && tolower(pcCur[1])=='x'))) {
-            pcLex[0]=tolower(pcCur[1]); pcCur+=2;
+            pcLex[0]=tolower(pcCur[1]);
+            psHdl->siCol+=2;
+            psHdl->siOfs+=2;
+            pcCur+=2;
          } else pcLex[0]='d';
          pcLex+=2;
          if (pcHlp[0]=='x') {
             while (isxdigit(*pcCur) && pcLex<pcEnd) {
                *pcLex=*pcCur;
+               psHdl->siCol++;
+               psHdl->siOfs++;
                pcCur++; pcLex++;
             }
          } else if (pcHlp[0]=='t') {
             memset(&tm,0,sizeof(tm));
             while (isdigit(*pcCur) && pcLex<pcEnd) {
                *pcLex=*pcCur;
+               psHdl->siCol++;
+               psHdl->siOfs++;
                pcCur++; pcLex++;
             }
             *pcLex=EOS;
             if (pcCur[0]=='/' && isdigit(pcCur[1])) {
                tm.tm_year=strtol(pcHlp+2,NULL,10);
-               pcLex=pcHlp+2; pcCur++;
+               pcLex=pcHlp+2;
+               psHdl->siCol++;
+               psHdl->siOfs++;
+               pcCur++;
                while (isdigit(*pcCur) && pcLex<pcEnd) {
                   *pcLex=*pcCur;
+                  psHdl->siCol++;
+                  psHdl->siOfs++;
                   pcCur++; pcLex++;
                }
                *pcLex=EOS;
                if (pcCur[0]=='/' && isdigit(pcCur[1])) {
                   tm.tm_mon=strtol(pcHlp+2,NULL,10);
-                  pcLex=pcHlp+2; pcCur++;
+                  pcLex=pcHlp+2;
+                  psHdl->siCol++;
+                  psHdl->siOfs++;
+                  pcCur++;
                   while (isdigit(*pcCur) && pcLex<pcEnd) {
                      *pcLex=*pcCur;
+                     psHdl->siCol++;
+                     psHdl->siOfs++;
                      pcCur++; pcLex++;
                   }
                   *pcLex=EOS;
                   if (pcCur[0]=='.' && isdigit(pcCur[1])) {
                      tm.tm_mday=strtol(pcHlp+2,NULL,10);
-                     pcLex=pcHlp+2; pcCur++;
+                     pcLex=pcHlp+2;
+                     psHdl->siCol++;
+                     psHdl->siOfs++;
+                     pcCur++;
                      while (isdigit(*pcCur) && pcLex<pcEnd) {
                         *pcLex=*pcCur;
+                        psHdl->siCol++;
+                        psHdl->siOfs++;
                         pcCur++; pcLex++;
                      }
                      *pcLex=EOS;
                      if (pcCur[0]==':' && isdigit(pcCur[1])) {
                         tm.tm_hour=strtol(pcHlp+2,NULL,10);
-                        pcLex=pcHlp+2; pcCur++;
+                        pcLex=pcHlp+2;
+                        psHdl->siCol++;
+                        psHdl->siOfs++;
+                        pcCur++;
                         while (isdigit(*pcCur) && pcLex<pcEnd) {
                            *pcLex=*pcCur;
+                           psHdl->siCol++;
+                           psHdl->siOfs++;
                            pcCur++; pcLex++;
                         }
                         *pcLex=EOS;
                         if (pcCur[0]==':' && isdigit(pcCur[1])) {
                            tm.tm_min=strtol(pcHlp+2,NULL,10);
-                           pcLex=pcHlp+2; pcCur++;
+                           pcLex=pcHlp+2;
+                           psHdl->siCol++;
+                           psHdl->siOfs++;
+                           pcCur++;
                            while (isdigit(*pcCur) && pcLex<pcEnd) {
                               *pcLex=*pcCur;
+                              psHdl->siCol++;
+                              psHdl->siOfs++;
                               pcCur++; pcLex++;
                            }
                            *pcLex=EOS;
@@ -2446,8 +2630,8 @@ static int siClpScnNat(
                            }
                            pcHlp[1]=' ';
                            sprintf(pcHlp+2,"%"PRIu64"",t);
-                           if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(NUM)-LEXEM(%s)\n",isPrnLex(psArg,pcHlp));
                            *ppCur=pcCur;
+                           if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(NUM)-LEXEM(%s)\n",isPrnLex(psArg,pcHlp));
                            return(CLPTOK_NUM);
                         } else {
                            if (pfErr!=NULL) {
@@ -2487,90 +2671,126 @@ static int siClpScnNat(
          } else {
             while (isdigit(*pcCur) && pcLex<pcEnd) {
                *pcLex=*pcCur;
+               psHdl->siCol++;
+               psHdl->siOfs++;
                pcCur++; pcLex++;
             }
          }
          if (pcHlp[0]=='d' && pcCur[0]=='.' && (isdigit(pcCur[1]))) { /*float*/
             *pcLex=*pcCur;
+            psHdl->siCol++;
+            psHdl->siOfs++;
             pcCur++; pcLex++;
             while (isdigit(*pcCur) && pcLex<pcEnd) {
                *pcLex=*pcCur;
+               psHdl->siCol++;
+               psHdl->siOfs++;
                pcCur++; pcLex++;
             }
             if ((tolower(pcCur[0])=='e') && (isdigit(pcCur[1]) ||
                 (pcCur[1]=='+' && isdigit(pcCur[2])) ||
                 (pcCur[1]=='-' && isdigit(pcCur[2])))) { /*float*/
                *pcLex=*pcCur;
+               psHdl->siCol++;
+               psHdl->siOfs++;
                pcCur++; pcLex++;
                if (!isdigit(pcCur[0])) {
                   *pcLex=*pcCur;
+                  psHdl->siCol++;
+                  psHdl->siOfs++;
                   pcCur++; pcLex++;
                }
                while (isdigit(*pcCur) && pcLex<pcEnd) {
                   *pcLex=*pcCur;
+                  psHdl->siCol++;
+                  psHdl->siOfs++;
                   pcCur++; pcLex++;
                }
                *pcLex=EOS;
-               if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(FLT)-LEXEM(%s)\n",isPrnLex(psArg,pcHlp));
                *ppCur=pcCur;
+               if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(FLT)-LEXEM(%s)\n",isPrnLex(psArg,pcHlp));
                return(CLPTOK_FLT);
             }
             *pcLex=EOS;
-            if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(FLT)-LEXEM(%s)\n",isPrnLex(psArg,pcHlp));
             *ppCur=pcCur;
+            if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(FLT)-LEXEM(%s)\n",isPrnLex(psArg,pcHlp));
             return(CLPTOK_FLT);
          } else if ((tolower(pcCur[0])=='e') && (isdigit(pcCur[1]) ||
                     (pcCur[1]=='+' && isdigit(pcCur[2])) ||
                     (pcCur[1]=='-' && isdigit(pcCur[2])))) { /*float*/
             *pcLex=*pcCur;
+            psHdl->siCol++;
+            psHdl->siOfs++;
             pcCur++; pcLex++;
             if (!isdigit(pcCur[0])) {
                *pcLex=*pcCur;
+               psHdl->siCol++;
+               psHdl->siOfs++;
                pcCur++; pcLex++;
             }
             while (isdigit(*pcCur) && pcLex<pcEnd) {
                *pcLex=*pcCur;
+               psHdl->siCol++;
+               psHdl->siOfs++;
                pcCur++; pcLex++;
             }
             *pcLex=EOS;
-            if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(FLT)-LEXEM(%s)\n",isPrnLex(psArg,pcHlp));
             *ppCur=pcCur;
+            if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(FLT)-LEXEM(%s)\n",isPrnLex(psArg,pcHlp));
             return(CLPTOK_FLT);
          } else {
             *pcLex=EOS;
-            if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(NUM)-LEXEM(%s)\n",isPrnLex(psArg,pcHlp));
             *ppCur=pcCur;
+            if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(NUM)-LEXEM(%s)\n",isPrnLex(psArg,pcHlp));
             return(CLPTOK_NUM);
          }
       } else if (*pcCur=='=') { /*sign*/
-         pcCur++; pcLex[0]='='; pcLex[1]=EOS;
-         if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(SGN)-LEXEM(%s)\n",pcHlp);
+         pcLex[0]='='; pcLex[1]=EOS;
+         psHdl->siCol++;
+         psHdl->siOfs++;
+         pcCur++;
          *ppCur=pcCur;
+         if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(SGN)-LEXEM(%s)\n",pcHlp);
          return(CLPTOK_SGN);
       } else if (*pcCur=='.') { /*dot*/
-         pcCur++; pcLex[0]='.'; pcLex[1]=EOS;
-         if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(DOT)-LEXEM(%s)\n",pcHlp);
+         pcLex[0]='.'; pcLex[1]=EOS;
+         psHdl->siCol++;
+         psHdl->siOfs++;
+         pcCur++;
          *ppCur=pcCur;
+         if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(DOT)-LEXEM(%s)\n",pcHlp);
          return(CLPTOK_DOT);
       } else if (*pcCur=='(') { /*round bracket open*/
-         pcCur++;  pcLex[0]='('; pcLex[1]=EOS;
-         if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(RBO)-LEXEM(%s)\n",pcHlp);
+         pcLex[0]='('; pcLex[1]=EOS;
+         psHdl->siCol++;
+         psHdl->siOfs++;
+         pcCur++;
          *ppCur=pcCur;
+         if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(RBO)-LEXEM(%s)\n",pcHlp);
          return(CLPTOK_RBO);
       } else if (*pcCur==')') { /*round bracket close*/
-         pcCur++;  pcLex[0]=')'; pcLex[1]=EOS;
-         if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(RBC)-LEXEM(%s)\n",pcHlp);
+         pcLex[0]=')'; pcLex[1]=EOS;
+         psHdl->siCol++;
+         psHdl->siOfs++;
+         pcCur++;
          *ppCur=pcCur;
+         if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(RBC)-LEXEM(%s)\n",pcHlp);
          return(CLPTOK_RBC);
       } else if (*pcCur=='[') { /*squared bracket open*/
-         pcCur++;  pcLex[0]='['; pcLex[1]=EOS;
-         if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(SBO)-LEXEM(%s)\n",pcHlp);
+         pcLex[0]='['; pcLex[1]=EOS;
+         psHdl->siCol++;
+         psHdl->siOfs++;
+         pcCur++;
          *ppCur=pcCur;
+         if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(SBO)-LEXEM(%s)\n",pcHlp);
          return(CLPTOK_SBO);
       } else if (*pcCur==']') { /*squared bracket close*/
-         pcCur++;  pcLex[0]=']'; pcLex[1]=EOS;
-         if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(SBC)-LEXEM(%s)\n",pcHlp);
+         pcLex[0]=']'; pcLex[1]=EOS;
+         psHdl->siCol++;
+         psHdl->siOfs++;
+         pcCur++;
          *ppCur=pcCur;
+         if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(SBC)-LEXEM(%s)\n",pcHlp);
          return(CLPTOK_SBC);
       } else { /*lexical error*/
          pcLex[0]=EOS;
@@ -2599,6 +2819,7 @@ extern int siClpGrammar(
    void*                         pvHdl,
    FILE*                         pfOut)
 {
+   TsHdl*                        psHdl=(TsHdl*)pvHdl;
    fprintf(pfOut,"%s Command Line Parser                                              \n",fpcPre(pvHdl,0));
    fprintf(pfOut,"%s command        -> ['('] parameter_list [')']       (main=object) \n",fpcPre(pvHdl,1));
    fprintf(pfOut,"%s                |  ['.'] parameter                  (main=overlay)\n",fpcPre(pvHdl,1));
@@ -2608,9 +2829,13 @@ extern int siClpGrammar(
    fprintf(pfOut,"%s switch         -> KEYWORD                                        \n",fpcPre(pvHdl,1));
    fprintf(pfOut,"%s assignment     -> KEYWORD '=' value                              \n",fpcPre(pvHdl,1));
    fprintf(pfOut,"%s object         -> KEYWORD ['('] parameter_list [')']             \n",fpcPre(pvHdl,1));
+if (psHdl->isPfl) {
    fprintf(pfOut,"%s                |  KEYWORD '=' STRING # parameter file #          \n",fpcPre(pvHdl,1));
+}
    fprintf(pfOut,"%s overlay        -> KEYWORD ['.'] parameter                        \n",fpcPre(pvHdl,1));
+if (psHdl->isPfl) {
    fprintf(pfOut,"%s                |  KEYWORD '=' STRING # parameter file #          \n",fpcPre(pvHdl,1));
+}
    fprintf(pfOut,"%s array          -> KEYWORD '[' value_list   ']'                   \n",fpcPre(pvHdl,1));
    fprintf(pfOut,"%s                |  KEYWORD '[' object_list  ']'                   \n",fpcPre(pvHdl,1));
    fprintf(pfOut,"%s                |  KEYWORD '[' overlay_list ']'                   \n",fpcPre(pvHdl,1));
@@ -2670,7 +2895,7 @@ static int siClpPrsPar(
       psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
       if (psHdl->siTok<0) return(psHdl->siTok);
       if (psHdl->siTok==CLPTOK_SGN) {
-         if (psArg->psFix->siTyp==CLPTYP_OBJECT || psArg->psFix->siTyp==CLPTYP_OVRLAY) {
+         if (psHdl->isPfl && (psArg->psFix->siTyp==CLPTYP_OBJECT || psArg->psFix->siTyp==CLPTYP_OVRLAY)) {
             return(siClpPrsFil(pvHdl,siLev,siPos,psArg));
          } else {
             return(siClpPrsSgn(pvHdl,siLev,siPos,psArg));

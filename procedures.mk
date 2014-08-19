@@ -1,26 +1,12 @@
 # CLE/P makefile(procedures)
 
-$(BLDDIR_DEB)/%.d: %.c
-	@set -e; rm -f $@; \
-	echo generate $@; \
-	$(CC) $(INC_OPT) $(DEB_OPT) $(DEBGEN_FLAGS) $(@:.d=.o) $< > $@.$$$$; \
-	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
-	rm -f $@.$$$$
-
-$(BLDDIR_REL)/%.d: %.c
-	@set -e; rm -f $@; \
-	echo generate $@; \
-	$(CC) $(INC_OPT) $(REL_OPT) $(DEBGEN_FLAGS) $(@:.d=.o) $< > $@.$$$$; \
-	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
-	rm -f $@.$$$$
-
 $(BLDDIR_DEB)/%.o : %.c
 	@echo build $@
-	@$(CC) -c $(DEB_OPT) -o $@ $<
+	@$(CC) -c $(DEB_OPT) $(DEPF) $(@:.o=.d) $(DEPO) $@ -o $@ $<
 
 $(BLDDIR_REL)/%.o : %.c
 	@echo build $@
-	@$(CC) -c $(REL_OPT) -o $@ $<
+	@$(CC) -c $(REL_OPT) $(DEPF) $(@:.o=.d) $(DEPO) $@ -o $@ $<
 
 .PHONY: all release debug tools doc
 
@@ -58,14 +44,14 @@ tools:
 
 $(BINDIR_DEB)/clptst$(BIN_EXT): $(CLPTST_DEB_OBJS)
 	@echo linking $@
-	$(LD) $(DEB_LDF) -o $@ $(CLPTST_DEB_OBJS) $(LIBS)
+	@$(LD) $(DEB_LDF) -o $@ $(CLPTST_DEB_OBJS) $(LIBS)
 
 
 # ----- RELEASE TARGETS --------------------------------------------
 
 $(BINDIR_REL)/clptst$(BIN_EXT): $(CLPTST_REL_OBJS)
 	@echo linking $@
-	$(LD) $(REL_LDF) -o $@ $(CLPTST_REL_OBJS) $(LIBS)
+	@$(LD) $(REL_LDF) -o $@ $(CLPTST_REL_OBJS) $(LIBS)
 	@$(STRIP) $@
 
 doc:
