@@ -416,7 +416,10 @@ extern int file2str(const char* filename, char** buf, int* bufsize) {
 
    while (!ferror(pfFile) && !feof(pfFile)) {
       if (*bufsize-siLen<freadLen+1) {
-         if (*bufsize>INT_MAX-(freadLen*2+1)) return -3; // integer overflow
+         if (*bufsize>INT_MAX-(freadLen*2+1)) {
+            fclose(pfFile);
+            return -3; // integer overflow
+         }
          siHlp=*bufsize+freadLen*2+1;
          pcHlp=(char*)realloc(*buf, siHlp);
          if (pcHlp==NULL) {
