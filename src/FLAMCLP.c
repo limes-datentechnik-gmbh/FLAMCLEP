@@ -2566,12 +2566,9 @@ static int siClpPrsPar(
          }
       }
    } else {
-      if (psHdl->pfErr!=NULL) {
-         fprintf(psHdl->pfErr,"SYNTAX-ERROR\n");
-         fprintf(psHdl->pfErr,"%s Keyword expected (%s.?)\n",fpcPre(pvHdl,0),fpcPat(pvHdl,siLev));
-         fprintf(psHdl->pfErr,"%s Valid values:\n",fpcPre(pvHdl,0));
-         vdClpPrnArgTab(pvHdl,psHdl->pfErr,1,-1,psTab);
-      }
+      CLPERR(psHdl,CLPERR_SYN,"Keyword expected (%s.?)",fpcPat(pvHdl,siLev));
+      CLPERRADD(psHdl,0,"Please use one of the arguments below:%s","");
+      vdClpPrnArgTab(pvHdl,psHdl->pfErr,1,-1,psTab);
       return(CLPERR_SYN);
    }
 }
@@ -2602,12 +2599,7 @@ static int siClpPrsSgn(
    case CLPTOK_FLT: return(siClpPrsVal(pvHdl,siLev,siPos,0,CLPTYP_FLOATN,psArg));
    case CLPTOK_STR: return(siClpPrsVal(pvHdl,siLev,siPos,0,CLPTYP_STRING,psArg));
    case CLPTOK_KYW: return(siClpPrsVal(pvHdl,siLev,siPos,0,psArg->psFix->siTyp,psArg));
-   default:
-      if (psHdl->pfErr!=NULL) {
-         fprintf(psHdl->pfErr,"SYNTAX-ERROR\n");
-         fprintf(psHdl->pfErr,"%s After assignment \'%s.%s=\' number(-123), float(+123.45e78), string(\'abc\') or keyword (MODE) expected\n",fpcPre(pvHdl,0),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
-      }
-      return(CLPERR_SYN);
+   default:         return(CLPERR(psHdl,CLPERR_SYN,"After assignment \'%s.%s=\' number(-123), float(+123.45e78), string(\'abc\') or keyword (MODE) expected",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw));
    }
 }
 
@@ -2631,26 +2623,21 @@ static int siClpPrsFil(
    psHdl->siTok=siClpScnSrc(pvHdl,CLPTOK_STR,psArg);
    if (psHdl->siTok<0) return(psHdl->siTok);
    if (psHdl->siTok!=CLPTOK_STR) {
-      if (psHdl->pfErr!=NULL) {
-         fprintf(psHdl->pfErr,"SYNTAX-ERROR\n");
-         fprintf(psHdl->pfErr,"%s After object/overlay assignment \'%s.%s=\' parameter file (\'filename\') expected\n",fpcPre(pvHdl,0),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
-      }
-      return(CLPERR_SYN);
+      return CLPERR(psHdl,CLPERR_SYN,"After object/overlay assignment \'%s.%s=\' parameter file (\'filename\') expected",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
    }
    strcpy(acFil,psHdl->acLex+2);
    siErr=file2str(acFil,&pcPar,&siSiz);
    if (siErr<0) {
-      fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
       switch(siErr) {
-      case -1: fprintf(psHdl->pfErr,"%s Illegal parameters passed to file2str() (Bug)\n",fpcPre(pvHdl,0)); break;
-      case -2: fprintf(psHdl->pfErr,"%s Open of parameter file (%s) failed (%d - %s)\n",fpcPre(pvHdl,0),acFil,errno,strerror(errno)); break;
-      case -3: fprintf(psHdl->pfErr,"%s Parameter file (%s) is too big (integer overflow)\n",fpcPre(pvHdl,0),acFil); break;
-      case -4: fprintf(psHdl->pfErr,"%s Allocation of memory for parameter file (%s) failed.\n",fpcPre(pvHdl,0),acFil);break;
-      case -5: fprintf(psHdl->pfErr,"%s Read of parameter file (%s) failed (%d - %s)\n",fpcPre(pvHdl,0),acFil,errno,strerror(errno)); break;
-      default: fprintf(psHdl->pfErr,"%s An unknown error occurred while reading parameter file (%s).\n",fpcPre(pvHdl,0),acFil); break;
+      case -1: siErr=CLPERR(psHdl,CLPERR_INT,"Illegal parameters passed to file2str() (Bug)%s","");break;
+      case -2: siErr=CLPERR(psHdl,CLPERR_SYS,"Open of parameter file (%s) failed (%d - %s)",acFil,errno,strerror(errno));break;
+      case -3: siErr=CLPERR(psHdl,CLPERR_SEM,"Parameter file (%s) is too big (integer overflow)",acFil);break;
+      case -4: siErr=CLPERR(psHdl,CLPERR_MEM,"Allocation of memory for parameter file (%s) failed",acFil);break;
+      case -5: siErr=CLPERR(psHdl,CLPERR_SYS,"Read of parameter file (%s) failed (%d - %s)",acFil,errno,strerror(errno));break;
+      default: siErr=CLPERR(psHdl,CLPERR_SYS,"An unknown error occurred while reading parameter file (%s)",acFil);break;
       }
       if (pcPar!=NULL) free(pcPar);
-      return(CLPERR_SEM);
+      return(siErr);
    }
 
    if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"PARAMETER-FILE-PARSER-BEGIN(FILE=%s)\n",acFil);
@@ -2707,11 +2694,7 @@ static int siClpPrsFil(
       if (psHdl->siTok<0) return(psHdl->siTok);
       return(siCnt);
    } else {
-      if (psHdl->pfErr!=NULL) {
-         fprintf(psHdl->pfErr,"SYNTAX-ERROR\n");
-         fprintf(psHdl->pfErr,"%s Last token (%s) of property file \'%s\' is not EOF\n",fpcPre(pvHdl,0),apClpTok[psHdl->siTok],acFil);
-      }
-      return(CLPERR_SYN);
+      return CLPERR(psHdl,CLPERR_SYN,"Last token (%s) of parameter file \'%s\' is not EOF",apClpTok[psHdl->siTok],acFil);
    }
 }
 
@@ -2755,11 +2738,7 @@ static int siClpPrsObj(
       if (psHdl->siTok<0) return(psHdl->siTok);
       if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d CNT=%d OBJ(%s(parlst))-CLS)\n",fpcPre(pvHdl,siLev),siLev,siPos,siCnt,psArg->psStd->pcKyw);
    } else {
-      if (psHdl->pfErr!=NULL) {
-         fprintf(psHdl->pfErr,"SYNTAX-ERROR\n");
-         fprintf(psHdl->pfErr,"%s Character \')\' missing (%s)\n",fpcPre(pvHdl,0),fpcPat(pvHdl,siLev));
-      }
-      return(CLPERR_SYN);
+      return CLPERR(psHdl,CLPERR_SYN,"Character \')\' missing (%s)",fpcPat(pvHdl,siLev));
    }
    return(CLP_OK);
 }
@@ -2819,11 +2798,7 @@ static int siClpPrsMain(
             psHdl->siTok=siClpScnSrc(pvHdl,0,NULL);
             if (psHdl->siTok<0) return(psHdl->siTok);
          } else {
-            if (psHdl->pfErr!=NULL) {
-               fprintf(psHdl->pfErr,"SYNTAX-ERROR\n");
-               fprintf(psHdl->pfErr,"%s Character \')\' missing (MAIN)\n",fpcPre(pvHdl,0));
-            }
-            return(CLPERR_SYN);
+            return CLPERR(psHdl,CLPERR_SYN,"Character \')\' missing (MAIN)%s","");
          }
       } else {
          siCnt=siClpPrsParLst(pvHdl,0,NULL,psTab);
@@ -2854,11 +2829,7 @@ static int siClpPrsAry(
    case CLPTYP_OBJECT: siCnt=siClpPrsObjLst(pvHdl,siLev,psArg); break;
    case CLPTYP_OVRLAY: siCnt=siClpPrsOvlLst(pvHdl,siLev,psArg); break;
    default:
-      if (psHdl->pfErr!=NULL) {
-         fprintf(psHdl->pfErr,"SEMANTIC-ERROR\n");
-         fprintf(psHdl->pfErr,"%s Type (%d) of parameter \'%s.%s\' is not supported with arrays\n",fpcPre(pvHdl,0),psArg->psFix->siTyp,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
-      }
-      return(CLPERR_SEM);
+      return CLPERR(psHdl,CLPERR_SEM,"Type (%d) of parameter \'%s.%s\' is not supported with arrays",psArg->psFix->siTyp,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
    }
    if (siCnt<0) return(siCnt);
    if (psHdl->siTok==CLPTOK_SBC) {
@@ -2867,11 +2838,7 @@ static int siClpPrsAry(
       if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d CNT=%d ARY(%s[typlst])-CLS)\n",fpcPre(pvHdl,siLev),siLev,siPos,siCnt,psArg->psStd->pcKyw);
       return(CLP_OK);
    } else {
-      if (psHdl->pfErr!=NULL) {
-         fprintf(psHdl->pfErr,"SYNTAX-ERROR\n");
-         fprintf(psHdl->pfErr,"%s Character \']\' missing (%s)\n",fpcPre(pvHdl,0),fpcPat(pvHdl,siLev));
-      }
-      return(CLPERR_SYN);
+      return CLPERR(psHdl,CLPERR_SYN,"Character \']\' missing (%s)",fpcPat(pvHdl,siLev));
    }
 }
 
@@ -2988,18 +2955,10 @@ static int siClpPrsPro(
          if (psHdl->siTok<0) return(psHdl->siTok);
          return(siClpBldPro(pvHdl,acPat,acSup));
       } else {
-         if (psHdl->pfErr!=NULL) {
-            fprintf(psHdl->pfErr,"SYNTAX-ERROR\n");
-            fprintf(psHdl->pfErr,"%s Property string (\"...\") missing (%s)\n",fpcPre(pvHdl,0),acPat);
-         }
-         return(CLPERR_SYN);
+         return CLPERR(psHdl,CLPERR_SYN,"Property string (\"...\") missing (%s)",acPat);
       }
    } else {
-      if (psHdl->pfErr!=NULL) {
-         fprintf(psHdl->pfErr,"SYNTAX-ERROR\n");
-         fprintf(psHdl->pfErr,"%s Assignment character (\'=\') missing (%s)\n",fpcPre(pvHdl,0),acPat);
-      }
-      return(CLPERR_SYN);
+      return CLPERR(psHdl,CLPERR_SYN,"Assignment character (\'=\') missing (%s)",acPat);
    }
 }
 
@@ -3014,11 +2973,7 @@ static int siClpPrsKywLst(
    pcPat[0]=EOS;
    while (psHdl->siTok==CLPTOK_KYW) {
       if (strlen(pcPat)+strlen(psHdl->acLex)+1>=CLPMAX_PATLEN) {
-         if (psHdl->pfErr!=NULL) {
-            fprintf(psHdl->pfErr,"INTERNAL-ERROR\n");
-            fprintf(psHdl->pfErr,"%s Property path (%s) is too long (more than %d byte)\n",fpcPre(pvHdl,0),pcPat,CLPMAX_PATLEN);
-         }
-         return(CLPERR_INT);
+         return CLPERR(psHdl,CLPERR_INT,"Property path (%s) is too long (more than %d byte)",pcPat,CLPMAX_PATLEN);
       }
       strcat(pcPat,psHdl->acLex);
       psHdl->siTok=siClpScnSrc(pvHdl,0,NULL);
