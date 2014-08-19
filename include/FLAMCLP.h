@@ -5,7 +5,7 @@
  * @brief definitions for <b>C</b>ommand <b>L</b>ine <b>P</b>arsing
  *
  * LIMES Command Line Parser (FLAMCLP) in ANSI-C
- * @author Falk Reichbott
+ * @author limes datentechnik gmbh
  * @date 04.08.2014\n
  * @copyright (c) 2014 limes datentechnik gmbh
  * www.flam.de
@@ -25,6 +25,9 @@
  *    not be misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source
  *    distribution.
+ *
+ * If you need professional services or support for this library please
+ * contact support@flam.de.
  *
 \internal The following description of Grammar, Lexeme and property file grammar
 is intended by 4 spaces to be rendered as code block in doxygenerated html.

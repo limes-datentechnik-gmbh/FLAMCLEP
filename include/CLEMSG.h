@@ -4,7 +4,7 @@
  * @brief messages for <b>C</b>ommand <b>L</b>ine <b>E</b>xecution
  *
  * LIMES Command Line Executor (CLE) in ANSI-C
- * @author Falk Reichbott
+ * @author limes datentechnik gmbh
  * @date 05.09.2013\n
  * @copyright (c) 2013 limes datentechnik gmbh
  * www.flam.de
@@ -23,6 +23,9 @@
  *    not be misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source
  *    distribution.
+ *
+ * If you need professional services or support for this library please
+ * contact support@flam.de.
  *
 ***********************************************************************/
 

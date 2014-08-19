@@ -5,7 +5,7 @@
  * @brief definitions for <b>C</b>ommand <b>L</b>ine <b>E</b>xecution
  *
  * LIMES Command Line Executor (FLAMCLE) in ANSI-C
- * @author Falk Reichbott
+ * @author limes datentechnik gmbh
  * @date 24.08.2014\n
  * @copyright (c) 2014 limes datentechnik gmbh
  * www.flam.de
@@ -26,6 +26,8 @@
  * 3. This notice may not be removed or altered from any source
  *    distribution.
  *
+ * If you need professional services or support for this library please
+ * contact support@flam.de.
 
 Description
 -----------

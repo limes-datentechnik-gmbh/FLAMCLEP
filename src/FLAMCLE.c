@@ -3,7 +3,7 @@
  * @brief  LIMES Command Line Execution in ANSI-C
  *
  * LIMES Command Line Executor (CLE) in ANSI-C
- * @author FALK REICHBOTT
+ * @author limes datentechnik gmbh
  * @date  04.08.2014
  * @copyright (c) 2014 limes datentechnik gmbh
  * www.flam.de
@@ -22,6 +22,10 @@
  *    not be misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source
  *    distribution.
+ *
+ * If you need professional services or support for this library please
+ * contact support@flam.de.
+ *
  **********************************************************************/
 /*
  * TASK:0000086 Fehlermeldungen ueberarbeiten (Zentralisierung)
