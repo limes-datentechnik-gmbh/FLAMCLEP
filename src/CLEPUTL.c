@@ -407,6 +407,8 @@ extern int file2str(const char* filename, char** buf, int* bufsize) {
 
    if (filename==NULL || buf==NULL || bufsize==NULL || *bufsize<0)
       return -1; // bad args
+   if (*buf==NULL)
+      *bufsize=0;
 
    errno=0;
    pfFile=fopen(filename, "r");
