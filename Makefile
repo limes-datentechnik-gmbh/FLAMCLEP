@@ -8,7 +8,7 @@ BINDIR_REL = bin/release
 
 INC_OPT = -I include
 
-CFLAGS= -Wall -fPIC
+CFLAGS= -Wall -fPIC -std=c99
 DEB_OPT = $(CFLAGS) -g -O0 -D__UNIX__ -D__XLIN__ -D__DEBUG__  $(INC_OPT)
 REL_OPT = $(CFLAGS) -O3 -D__UNIX__ -D__XLIN__ -D__RELEASE__ $(INC_OPT)
 DEPF = -MMD -MF

@@ -93,6 +93,23 @@ extern U32 chr2ebc(
 extern int file2str(const char* filename, char** buf, int* bufsize);
 
 /**
+ * Takes an array of null-terminated strings and concatenates all strings
+ * into one single string separated by the specified separator. The resulting
+ * string is put into the out buffer which may be reallocated if necessary.
+ * @param array Input array of null-terminated strings.
+ * @param count Number of string in array
+ * @param separ Separator of arbitrary length (may be NULL if separLen=0)
+ * @param separLen length of separator
+ * @param out Pointer to an output buffer (may be reallocated)
+ * @param outlen Size of output buffer
+ * @return Error codes:
+ *         *  0: success
+ *         * -1: invalid arguments
+ *         * -2: realloc() failed
+ */
+extern int arr2str(const char** array, const size_t count, const char* separ, const size_t separLen, char** out, size_t* outlen);
+
+/**
  * Compare of two string
  *
  * The procedure combines strcmp, stricmp, strncmp and strchr in one function.

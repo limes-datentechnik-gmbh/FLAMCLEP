@@ -407,6 +407,8 @@ extern int file2str(const char* filename, char** buf, int* bufsize) {
 
    if (filename==NULL || buf==NULL || bufsize==NULL || *bufsize<0)
       return -1; // bad args
+   if (*buf==NULL)
+      *bufsize=0;
 
    errno=0;
    pfFile=fopen(filename, "r");
@@ -439,6 +441,51 @@ extern int file2str(const char* filename, char** buf, int* bufsize) {
    fclose(pfFile);
    (*buf)[siLen]='\0';
    return siLen;
+}
+
+extern int arr2str(const char** array, const size_t count, const char* separ, const size_t separLen, char** out, size_t* outlen) {
+   size_t uiSumLen=((count-1)*separLen)+1;
+   size_t uiLens[count];
+   char*  pcHlp;
+   char*  pcOut;
+
+   if (array==NULL || out==NULL || outlen==0 || (separLen>0 && separ==NULL))
+      return -1; // bad args
+   if (*out==NULL)
+      *outlen=0;
+
+   size_t i;
+   for (i=0; i<count; i++) {
+      uiLens[i]=strlen(array[i]);
+      uiSumLen+=uiLens[i];
+   }
+
+   if (*outlen<uiSumLen) {
+      pcHlp=(char*)realloc(*out, uiSumLen);
+      if (pcHlp==NULL) {
+         return -2; // realloc failed
+      }
+      *outlen=uiSumLen;
+      *out=pcHlp;
+   }
+
+
+   pcOut=*out;
+   if (count>0) {
+      memcpy(pcOut, array[0], uiLens[0]);
+      pcOut+=uiLens[0];
+      for (i=1; i<count; i++) {
+         if (separLen>0) {
+            memcpy(pcOut, separ, separLen);
+            pcOut+=separLen;
+         }
+         memcpy(pcOut, array[i], uiLens[i]);
+         pcOut+=uiLens[i];
+      }
+   }
+   *pcOut='\0';
+
+   return 0;
 }
 
 extern int strxcmp(

@@ -30,6 +30,7 @@
  */
 /* Standard-Includes **************************************************/
 
+#define _SVID_SOURCE
 #include <ctype.h>
 #include <stdio.h>
 #include <string.h>
