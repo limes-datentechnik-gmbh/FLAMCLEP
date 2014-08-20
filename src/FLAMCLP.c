@@ -110,9 +110,6 @@
 
 /* Definition der Konstanten **************************************************/
 
-#define CLPSRC_CMD               ":command line:"
-#define CLPSRC_PRO               ":property string:"
-
 #define CLPMAX_TABCNT            256
 #define CLPMAX_HDEPTH            128
 #define CLPMAX_LEXLEN            1023
@@ -230,15 +227,6 @@ typedef struct Sym {
    TsFix*                        psFix;
    TsVar*                        psVar;
 }TsSym;
-
-typedef struct Err {
-   int                           siErr;
-   int                           siRow;
-   int                           siCol;
-   char*                         pcMsg;
-   char*                         pcLst;
-   char*                         pcSrc;
-}TsErr;
 
 typedef struct Hdl {
    const char*                   pcOwn;
@@ -626,11 +614,11 @@ static int CLPERR(TsHdl* psHdl,int siErr, char* pcMsg, ...) {
       fprintf(psHdl->pfErr,"\n");
       if (psHdl->pcCur>psHdl->pcSrc || strlen(psHdl->acLst) || psHdl->siRow) {
          if (strcmp(psHdl->acSrc,CLPSRC_CMD)==0) {
-            fprintf(psHdl->pfErr,"%s Cause: Row=%d Column=%d from command line\n",   fpcPre(psHdl,1),psHdl->siRow+1,psHdl->siCol);
+            fprintf(psHdl->pfErr,"%s Cause: Row=%d Column=%d from command line\n", fpcPre(psHdl,1),psHdl->siRow+1,psHdl->siCol);
          } else if (strcmp(psHdl->acSrc,CLPSRC_PRO)==0) {
-            fprintf(psHdl->pfErr,"%s Cause: Row=%d Column=%d from property string\n",fpcPre(psHdl,1),psHdl->siRow+1,psHdl->siCol);
+            fprintf(psHdl->pfErr,"%s Cause: Row=%d Column=%d from property list\n",fpcPre(psHdl,1),psHdl->siRow+1,psHdl->siCol);
          } else {
-            fprintf(psHdl->pfErr,"%s Cause: Row=%d Column=%d in file %s\n",          fpcPre(psHdl,1),psHdl->siRow+1,psHdl->siCol,psHdl->acSrc);
+            fprintf(psHdl->pfErr,"%s Cause: Row=%d Column=%d in file %s\n",        fpcPre(psHdl,1),psHdl->siRow+1,psHdl->siCol,psHdl->acSrc);
          }
          fprintf(psHdl->pfErr,"%s \"",fpcPre(psHdl,1));
          for (p=psHdl->pcRow;!iscntrl(*p);p++) fprintf(psHdl->pfErr,"%c",*p);
@@ -745,7 +733,8 @@ extern void* pvClpOpen(
    FILE*                         pfBld,
    const char*                   pcDep,
    const char*                   pcOpt,
-   const char*                   pcEnt)
+   const char*                   pcEnt,
+   TsClpError*                   psErr)
 {
    TsHdl*                        psHdl=NULL;
    int                           siErr;
@@ -783,6 +772,12 @@ extern void* pvClpOpen(
          siErr=siClpSymCal(psHdl,0,NULL,psHdl->psSym);
          if (siErr<0) { vdClpSymDel(psHdl->psSym); free(psHdl); return(NULL); }
          vdClpSymTrc(psHdl);
+         if (psErr!=NULL) {
+            psErr->pcMsg=psHdl->acMsg;
+            psErr->pcSrc=psHdl->acSrc;
+            psErr->piRow=&psHdl->siRow;
+            psErr->piCol=&psHdl->siCol;
+         }
       }
    }
    return((void*)psHdl);
@@ -790,38 +785,31 @@ extern void* pvClpOpen(
 
 extern int siClpParsePro(
    void*                         pvHdl,
+   const char*                   pcSrc,
    const char*                   pcPro,
    const int                     isChk,
-   char**                        ppPos,
    char**                        ppLst)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    int                           siCnt;
 
    psHdl->acLst[0]=EOS;
-   strcpy(psHdl->acSrc,CLPSRC_PRO);
+   if (pcSrc!=NULL && strlen(pcSrc)) {
+      snprintf(psHdl->acSrc,sizeof(psHdl->acSrc),"%s",pcSrc);
+   } else strcpy(psHdl->acSrc,CLPSRC_PRO);
    psHdl->pcSrc=pcPro;
    psHdl->pcCur=pcPro;
    psHdl->pcOld=pcPro;
    psHdl->pcRow=pcPro;
    psHdl->isChk=isChk;
-   if (ppPos!=NULL) *ppPos=(char*)psHdl->pcSrc;
    if (ppLst!=NULL) *ppLst=(char*)psHdl->acLst;
    psHdl->acLex[0]=EOS;
    if (psHdl->siTok==CLPTOK_INI) {
       if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"PROPERTY-PARSER-BEGIN\n");
       psHdl->siTok=siClpScnSrc(pvHdl,0,NULL);
-      if (psHdl->siTok<0) {
-         if (ppPos!=NULL) *ppPos=(char*)psHdl->pcOld;
-         if (ppLst!=NULL) *ppLst=(char*)psHdl->acLst;
-         return(psHdl->siTok);
-      }
+      if (psHdl->siTok<0) return(psHdl->siTok);
       siCnt=siClpPrsProLst(pvHdl,psHdl->psSym);
-      if (siCnt<0) {
-         if (ppPos!=NULL) *ppPos=(char*)psHdl->pcOld;
-         if (ppLst!=NULL) *ppLst=(char*)psHdl->acLst;
-         return(siCnt);
-      }
+      if (siCnt<0) return(siCnt);
       if (psHdl->siTok==CLPTOK_END) {
          psHdl->siTok=CLPTOK_INI;
          psHdl->pcSrc=NULL;
@@ -831,57 +819,38 @@ extern int siClpParsePro(
          psHdl->isChk=FALSE;
          if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"PROPERTY-PARSER-END(CNT=%d)\n",siCnt);
          return(siCnt);
-      } else {
-         if (ppPos!=NULL) *ppPos=(char*)psHdl->pcOld;
-         if (ppLst!=NULL) *ppLst=(char*)psHdl->acLst;
-         return CLPERR(psHdl,CLPERR_SYN,"Last token (%s) of property list is not EOS",apClpTok[psHdl->siTok]);
-      }
-   } else {
-      if (ppPos!=NULL) *ppPos=(char*)psHdl->pcOld;
-      if (ppLst!=NULL) *ppLst=(char*)psHdl->acLst;
-      return CLPERR(psHdl,CLPERR_SYN,"Initial token (%s) in handle is not valid",apClpTok[psHdl->siTok]);
-   }
+      } else return CLPERR(psHdl,CLPERR_SYN,"Last token (%s) of property list is not EOS",apClpTok[psHdl->siTok]);
+   } else return CLPERR(psHdl,CLPERR_SYN,"Initial token (%s) in handle is not valid",apClpTok[psHdl->siTok]);
 }
 
 extern int siClpParseCmd(
    void*                         pvHdl,
+   const char*                   pcSrc,
    const char*                   pcCmd,
    const int                     isChk,
    int*                          piOid,
-   char**                        ppFil,
-   char**                        ppPos,
    char**                        ppLst)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    int                           siCnt;
 
    psHdl->acLst[0]=EOS;
-   strcpy(psHdl->acSrc,CLPSRC_CMD);
+   if (pcSrc!=NULL && strlen(pcSrc)) {
+      snprintf(psHdl->acSrc,sizeof(psHdl->acSrc),"%s",pcSrc);
+   } else strcpy(psHdl->acSrc,CLPSRC_PRO);
    psHdl->pcSrc=pcCmd;
    psHdl->pcCur=pcCmd;
    psHdl->pcOld=pcCmd;
    psHdl->pcRow=pcCmd;
    psHdl->isChk=isChk;
-   if (ppFil!=NULL) *ppFil=(char*)psHdl->acSrc;
-   if (ppPos!=NULL) *ppPos=(char*)psHdl->pcSrc;
    if (ppLst!=NULL) *ppLst=(char*)psHdl->acLst;
    psHdl->acLex[0]=EOS;
    if (psHdl->siTok==CLPTOK_INI) {
       if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"COMMAND-PARSER-BEGIN\n");
       psHdl->siTok=siClpScnSrc(pvHdl,0,NULL);
-      if (psHdl->siTok<0) {
-         if (ppFil!=NULL) *ppFil=(char*)psHdl->acSrc;
-         if (ppPos!=NULL) *ppPos=(char*)psHdl->pcOld;
-         if (ppLst!=NULL) *ppLst=(char*)psHdl->acLst;
-         return(psHdl->siTok);
-      }
+      if (psHdl->siTok<0) return(psHdl->siTok);
       siCnt=siClpPrsMain(pvHdl,psHdl->psSym,piOid);
-      if (siCnt<0) {
-         if (ppFil!=NULL) *ppFil=(char*)psHdl->acSrc;
-         if (ppPos!=NULL) *ppPos=(char*)psHdl->pcOld;
-         if (ppLst!=NULL) *ppLst=(char*)psHdl->acLst;
-         return (siCnt);
-      }
+      if (siCnt<0) return (siCnt);
       if (psHdl->siTok==CLPTOK_END) {
          psHdl->siTok=CLPTOK_INI;
          psHdl->pcSrc=NULL;
@@ -891,18 +860,8 @@ extern int siClpParseCmd(
          psHdl->isChk=FALSE;
          if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"COMMAND-PARSER-END(CNT=%d)\n",siCnt);
          return(siCnt);
-      } else {
-         if (ppFil!=NULL) *ppFil=(char*)psHdl->acSrc;
-         if (ppPos!=NULL) *ppPos=(char*)psHdl->pcOld;
-         if (ppLst!=NULL) *ppLst=(char*)psHdl->acLst;
-         return CLPERR(psHdl,CLPERR_SYN,"Last token (%s) of parameter list is not EOS",apClpTok[psHdl->siTok]);
-      }
-   } else {
-      if (ppFil!=NULL) *ppFil=(char*)psHdl->acSrc;
-      if (ppPos!=NULL) *ppPos=(char*)psHdl->pcOld;
-      if (ppLst!=NULL) *ppLst=(char*)psHdl->acLst;
-      return CLPERR(psHdl,CLPERR_SYN,"Initial token (%s) in handle is not valid",apClpTok[psHdl->siTok]);
-   }
+      } else return CLPERR(psHdl,CLPERR_SYN,"Last token (%s) of parameter list is not EOS",apClpTok[psHdl->siTok]);
+   } else return CLPERR(psHdl,CLPERR_SYN,"Initial token (%s) in handle is not valid",apClpTok[psHdl->siTok]);
 }
 
 extern int siClpSyntax(

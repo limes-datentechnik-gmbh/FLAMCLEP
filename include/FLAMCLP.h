@@ -152,6 +152,9 @@ effect for the CLP structure. First after parsing the command line the
 corresponding FLAMCLP structure is filled with the properties or entered
 values and the FLAMCLP can be closed or another command line parsed.
 
+Attention: If pointer to values in the CLP handle used (ppLst, psErr) then
+you cannot close the CLP or you must copy the values before.
+
 Normal procedure to use CLP:
 
    ClpOpen()
@@ -495,6 +498,12 @@ extern const char* pcClpAbout(const int l);
 #define CLPFLG_PWD               0x01000000UL
 
 /**
+* Default source strings
+*/
+#define CLPSRC_CMD               ":command line:"
+#define CLPSRC_PRO               ":property list:"
+
+/**
  * \struct TsClpArgument
  *
  * This structure is used to define a table of arguments\n
@@ -611,6 +620,32 @@ typedef struct ClpArgument {
  */
 #define CLPCONTAB_CLS                           {CLPTYP_NON   , NULL,NULL,0,0,  0  ,0,0,CLPFLG_NON           ,NULL,NULL, NULL, NULL,  0  , 0.0 ,NULL       }
 
+
+/** Defines a structure with error information
+ *
+ * A pointer to this structure can provide at siClpOpen() to have access to
+ * the error information managed in the CLP handle.
+ *
+ *  *pcMsg* Points to a zero terminated string containing the current error message
+ *  *pcSrc* Points to a zero terminated string containing the current source
+ *          The initial source can be defined for command line or property file parsing.
+ *          If the initial source not defined the constant definitions below are used:\n
+ *          * for command line parsing    ":command line:"   see CLPSRC_CMD\n
+ *          * for property string parsing ":property list:"  see CLPSRC_PRO\n
+ *          If a parameter file assigned and cause of the error *pcSrc* points to this file name
+ *  *piRow* Points to an integer containing the current row for the error in *pcSrc*
+ *  *piCol* Points to an integer containing the current column for the error in *pcSrc*
+ *
+ *  The pointer are set by CLP and valid until CLP is closed.
+ */
+typedef struct ClpError {
+   const char*                   pcMsg;
+   const char*                   pcSrc;
+   const int*                    piRow;
+   const int*                    piCol;
+}TsClpError;
+
+
 /**
  * Open command line parser
  *
@@ -636,6 +671,10 @@ typedef struct ClpArgument {
  * @param[in]  pcDep String used for hierarchical print outs (help, errors, trace (recommended "--|"))
  * @param[in]  pcOpt String used to separate options (recommended "/")
  * @param[in]  pcEnt String used to separate list entries (recommended ",")
+ * @param[out] psErr Pointer to the error structure. If the pointer != NULL the structure is filled with pointers to
+ *                   certain error informations in the CLP handle. If pfErr defined all error information are printed
+ *                   by CLP. In this case these structure is not required. If pfErr==NULL you can use these structure
+ *                   to gather all error information of CLP in memory. The pointer are only valid until vsClpClose().
  *
  * @return void pointer to the memory containing the handle
  */
@@ -659,30 +698,32 @@ extern void* pvClpOpen(
    FILE*                         pfBld,
    const char*                   pcDep,
    const char*                   pcOpt,
-   const char*                   pcEnt);
+   const char*                   pcEnt,
+   TsClpError*                   psErr);
 
 /**
  * Parse the property list
  *
- * The function parses the property list and returns OK or the error code and error position (byte offset)
+ * The function parses the property list
  *
  * Attention: Property parsing only effects the default values in the symbol table and don't write anything
  * to the CLP structure. You must use the same CLP handle for property and command line parsing.
  *
  * @param[in]  pvHdl Pointer to the corresponding handle created with \a pvClpOpen
+ * @param[in]  pcSrc Pointer to a zero terminated string containing the source name for the property list
+ *                   Property list are mainly taken from a file. It is useful to provide this file name for error printing
  * @param[in]  pcPro Pointer to a zero terminated string containing the property list for parsing
  * @param[in]  isChk Boolean to enable (TRUE) or disable (FALSE) validation of the root in path
  *             (if FALSE then other properties are ignored, if TRUE then other properties are not possible)
- * @param[out] ppPos Pointer in the provided property list where the error was detected
- * @param[out] ppLst Pointer to the parsed parameter list (NULL = no list provided)
+ * @param[out] ppLst Pointer to the parsed parameter list (NULL = no list provided) in the CLP handle
  *
  * @return signed integer with CLP_OK(0) or an error code (CLPERR_xxxxxx)
  */
 extern int siClpParsePro(
    void*                         pvHdl,
+   const char*                   pcSrc,
    const char*                   pcPro,
    const int                     isChk,
-   char**                        ppPos,
    char**                        ppLst);
 
 /**
@@ -691,22 +732,21 @@ extern int siClpParsePro(
  * The function parses the command line and returns OK or the error code and error position (byte offset)
  *
  * @param[in]  pvHdl Pointer to the corresponding handle created with \a pvClpOpen
+ * @param[in]  pcSrc Pointer to a zero terminated string containing the source name for the command line
+ *                   If the command line taken from a file it is useful to provide this file name for error printing else use NULL.
  * @param[in]  pcCmd Pointer to a zero terminated string containing the command for parsing
  * @param[in]  isChk Boolean to enable (TRUE) or disable (FALSE) validation of minimum number of entries
  * @param[out] piOid If this pointer is set and the main table is an overlay the corresponding object identifier is returned
- * @param[out] ppFil Pointer to the name of the parameter file, where the error was detected (NULL if error in provided command line)
- * @param[out] ppPos Pointer in the provided command line where the error was detected
- * @param[out] ppLst Pointer to the parsed parameter list (NULL = no list provided)
+ * @param[out] ppLst Pointer to the parsed parameter list (NULL = no list provided) in the CLP handle
  *
  * @return signed integer with CLP_OK(0) or an error code (CLPERR_xxxxxx)
  */
 extern int siClpParseCmd(
    void*                         pvHdl,
+   const char*                   pcSrc,
    const char*                   pcCmd,
    const int                     isChk,
    int*                          piOid,
-   char**                        ppFil,
-   char**                        ppPos,
    char**                        ppLst);
 
 /**

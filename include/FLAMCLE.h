@@ -397,7 +397,7 @@ typedef int (*tpfMap)(
  * @param[in]  pcLic Current license text (given from CleExecute)
  * @param[in]  pcFkt Current function name (key word of the command)
  * @param[in]  pcCmd Current command (complete entered line of user)
- * @param[in]  pcLst Current list of parsed arguments (given from FLAMCLP)
+ * @param[in]  pcLst Current list of parsed arguments (given from FLAMCLP, could be NULL or empty)
  * @param[in]  pvPar Pointer to the filled parameter for the run of the subprogram
 
  * @return     Error code (!=0) for termination or 0 for success

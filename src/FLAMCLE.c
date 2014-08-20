@@ -285,24 +285,6 @@ static void vdPrnCommandManpage(
    const int                     isMan,
    const int                     isNbr);
 
-static void vdPrnCommandError(
-   void*                         pvHdl,
-   FILE*                         pfOut,
-   const char*                   pcCmd,
-   const char*                   pcFil,
-   const char*                   pcPos,
-   const char*                   pcLst,
-   const char*                   pcDep);
-
-static void vdPrnPropertyError(
-   void*                         pvHdl,
-   FILE*                         pfOut,
-   const char*                   pcFil,
-   const char*                   pcPro,
-   const char*                   pcPos,
-   const char*                   pcLst,
-   const char*                   pcDep);
-
 static void vdPrnProperties(
    void*                         pvHdl,
    const char*                   pcPat,
@@ -327,6 +309,7 @@ static int siCleGetCommand(
    const char*                   pcFct,
    int                           argc,
    char*                         argv[],
+   char*                         pcFil,
    char*                         pcCmd);
 
 static TsCnfHdl* psCnfOpn(
@@ -1817,25 +1800,32 @@ EVALUATE:
    } else {
       for (i=0;psTab[i].pcKyw!=NULL;i++) {
          if (strxcmp(isCas,argv[1],psTab[i].pcKyw,0,-1,FALSE)==0) {
-            char*                         pcFil=NULL;
-            char*                         pcPos=NULL;
+            char*                         pcTls=NULL;
             char*                         pcLst=NULL;
             siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isPfl,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl);
             if (siErr) ERROR(siErr);
-            siErr=siCleGetCommand(pvHdl,pfOut,pcDep,psTab[i].pcKyw,argc,argv,acCmd);
+            siErr=siCleGetCommand(pvHdl,pfOut,pcDep,psTab[i].pcKyw,argc,argv,acFil,acCmd);
             if (siErr) ERROR(siErr);
-            siErr=siClpParseCmd(pvHdl,acCmd,TRUE,psTab[i].piOid,&pcFil,&pcPos,&pcLst);
+            siErr=siClpParseCmd(pvHdl,acFil,acCmd,TRUE,psTab[i].piOid,&pcTls);
             if (siErr<0) {
                fprintf(pfOut,"Command line parser for command '%s' failed!\n",psTab[i].pcKyw);
-               vdPrnCommandError(pvHdl,pfOut,acCmd,pcFil,pcPos,pcLst,pcDep);
                ERROR(6);
             }
+            if (pcTls!=NULL) {
+               pcLst=(char*)malloc(strlen(pcTls)+1);
+               if (pcLst!=NULL) {
+                  strcpy(pcLst,pcTls);
+               }
+            }
+            vdClpClose(pvHdl); pvHdl=NULL;
             siErr=psTab[i].pfMap(pfOut,pfTrc,psTab[i].piOid,psTab[i].pvClp,psTab[i].pvPar);
             if (siErr) {
                fprintf(pfOut,"Mapping of CLP structure for command '%s' failed!\n",psTab[i].pcKyw);
+               if (pcLst!=NULL) free(pcLst);
                ERROR(4);
             }
             siErr=psTab[i].pfRun(pfOut,pfTrc,acOwn,pcPgm,pcVsn,pcAbo,pcLic,psTab[i].pcKyw,acCmd,pcLst,psTab[i].pvPar);
+            if (pcLst!=NULL) free(pcLst);
             if (siErr)  {
                fprintf(pfOut,"Run of command '%s' failed!\n",psTab[i].pcKyw);
                siErr=psTab[i].pfFin(pfOut,pfTrc,psTab[i].pvPar);
@@ -1894,8 +1884,6 @@ static int siClePropertyInit(
    int                           siErr;
    int                           isOvl=(piOid==NULL)?FALSE:TRUE;
    char*                         pcPro=NULL;
-   char*                         pcPos=NULL;
-   char*                         pcLst=NULL;
 
    *ppHdl=NULL;
    siErr=pfIni(pfOut,pfTrc,pcOwn,pcPgm,pvClp);
@@ -1903,7 +1891,7 @@ static int siClePropertyInit(
       fprintf(pfOut,"Initialization of CLP structure for command \'%s\' failed!\n",pcCmd);
       return(10);
    }
-   *ppHdl=pvClpOpen(isCas,isPfl,siMkl,pcOwn,pcPgm,pcCmd,pcMan,pcHlp,isOvl,psTab,pvClp,pfOut,pfOut,pfTrc,pfTrc,pfTrc,pfTrc,pcDep,pcOpt,pcEnt);
+   *ppHdl=pvClpOpen(isCas,isPfl,siMkl,pcOwn,pcPgm,pcCmd,pcMan,pcHlp,isOvl,psTab,pvClp,pfOut,pfOut,pfTrc,pfTrc,pfTrc,pfTrc,pcDep,pcOpt,pcEnt,NULL);
    if (*ppHdl==NULL) {
       fprintf(pfOut,"Open of property parser for command \'%s\' failed!\n",pcCmd);
       return(12);
@@ -1915,10 +1903,9 @@ static int siClePropertyInit(
       return(siErr);
    }
    if (pcPro!=NULL) {
-      siErr=siClpParsePro(*ppHdl,pcPro,FALSE,&pcPos,&pcLst);
+      siErr=siClpParsePro(*ppHdl,pcFil,pcPro,FALSE,NULL);
       if (siErr<0) {
          fprintf(pfOut,"Parsing property file \'%s\' for command \'%s\' failed!\n",pcFil,pcCmd);
-         vdPrnPropertyError(*ppHdl,pfOut,pcFil,pcPro,pcPos,pcLst,pcDep);
          vdClpClose(*ppHdl);*ppHdl=NULL;
          free(pcPro);
          return(6);
@@ -2039,8 +2026,6 @@ static int siCleCommandInit(
    int                           isOvl=(piOid==NULL)?FALSE:TRUE;
    char                          acFil[CLEMAX_FILSIZ];
    char*                         pcPro=NULL;
-   char*                         pcPos=NULL;
-   char*                         pcLst=NULL;
 
    *ppHdl=NULL;
 
@@ -2049,7 +2034,7 @@ static int siCleCommandInit(
       fprintf(pfOut,"Initialization of CLP structure for command \'%s\' failed!\n",pcCmd);
       return(10);
    }
-   *ppHdl=pvClpOpen(isCas,isPfl,siMkl,pcOwn,pcPgm,pcCmd,pcMan,pcHlp,isOvl,psTab,pvClp,pfOut,pfOut,pfTrc,pfTrc,pfTrc,pfTrc,pcDep,pcOpt,pcEnt);
+   *ppHdl=pvClpOpen(isCas,isPfl,siMkl,pcOwn,pcPgm,pcCmd,pcMan,pcHlp,isOvl,psTab,pvClp,pfOut,pfOut,pfTrc,pfTrc,pfTrc,pfTrc,pcDep,pcOpt,pcEnt,NULL);
    if (*ppHdl==NULL) {
       fprintf(pfOut,"Open of parser for command \'%s\' failed!\n",pcCmd);
       return(12);
@@ -2061,10 +2046,9 @@ static int siCleCommandInit(
       return(siErr);
    }
    if (pcPro!=NULL) {
-      siErr=siClpParsePro(*ppHdl,pcPro,FALSE,&pcPos,&pcLst);
+      siErr=siClpParsePro(*ppHdl,acFil,pcPro,FALSE,NULL);
       if (siErr<0) {
          fprintf(pfOut,"Property parser for command \'%s\' failed!\n",pcCmd);
-         vdPrnPropertyError(*ppHdl,pfOut,acFil,pcPro,pcPos,pcLst,pcDep);
          vdClpClose(*ppHdl);*ppHdl=NULL;
          free(pcPro);
          return(6);
@@ -2087,7 +2071,7 @@ static int siCleSimpleInit(
          {CLPTYP_NUMBER,"XX",NULL,0,1,1,0,0,CLPFLG_NON,NULL,NULL,NULL,"XX",0,0.0,NULL},
          {CLPTYP_NON   ,NULL,NULL,0,0,0,0,0,CLPFLG_NON,NULL,NULL,NULL,NULL,0,0.0,NULL}
    };
-   *ppHdl=pvClpOpen(FALSE,isPfl,0,"","","","","",FALSE,asTab,"",pfOut,pfOut,NULL,NULL,NULL,NULL,pcDep,pcOpt,pcEnt);
+   *ppHdl=pvClpOpen(FALSE,isPfl,0,"","","","","",FALSE,asTab,"",pfOut,pfOut,NULL,NULL,NULL,NULL,pcDep,pcOpt,pcEnt,NULL);
    if (*ppHdl==NULL) {
       fprintf(pfOut,"Open of command line parser for grammar and lexem print out failed!\n");
       return(12);
@@ -2119,8 +2103,6 @@ static int siCleChangeProperties(
 {
    int                           siErr;
    void*                         pvHdl=NULL;
-   char*                         pcPos=NULL;
-   char*                         pcLst=NULL;
    char                          acFil[CLEMAX_FILSIZ];
    int                           siFil=0;
 
@@ -2129,10 +2111,9 @@ static int siCleChangeProperties(
                            pcDep,pcOpt,pcEnt,psCnf,&pvHdl,acFil,&siFil);
    if (siErr) return(siErr);
 
-   siErr=siClpParsePro(pvHdl,pcPro,TRUE,&pcPos,&pcLst);
+   siErr=siClpParsePro(pvHdl,acFil,pcPro,TRUE,NULL);
    if (siErr<0) {
       fprintf(pfOut,"Property parser for command \'%s\' failed!\n",pcCmd);
-      vdPrnPropertyError(pvHdl,pfOut,NULL,pcPro,pcPos,pcLst,pcDep);
       vdClpClose(pvHdl);
       return(6);
    }
@@ -2475,78 +2456,6 @@ static void vdPrnCommandManpage(
    siClpDocu(pvHdl,pfOut,pcCmd,acNum,FALSE,isMan,isNbr);
 }
 
-static void vdPrnCommandError(
-   void*                         pvHdl,
-   FILE*                         pfOut,
-   const char*                   pcCmd,
-   const char*                   pcFil,
-   const char*                   pcPos,
-   const char*                   pcLst,
-   const char*                   pcDep)
-{
-   int                           i,l;
-   if (pcFil!=NULL) {
-      fprintf(pfOut,"%s Command line error in parameter file \'%s\' (...",pcDep,pcFil);
-      for (i=0;i<32 && !iscntrl(pcPos[i]);i++) fprintf(pfOut,"%c",pcPos[i]);
-      fprintf(pfOut,"...)\n");
-   } else {
-      if (pcPos==pcCmd) fprintf(pfOut,"%s Command line error at byte %d ("   ,pcDep,((int)(pcPos-pcCmd))+1);
-                  else  fprintf(pfOut,"%s Command line error at byte %d (...",pcDep,((int)(pcPos-pcCmd))+1);
-      for (i=0;i<32 && !iscntrl(pcPos[i]);i++) fprintf(pfOut,"%c",pcPos[i]);
-      if (pcPos[i]==EOS) fprintf(pfOut,")\n");
-                    else fprintf(pfOut,"...)\n");
-   }
-   if (pcLst!=NULL) {
-      l=strlen(pcLst);
-      if (l>1) {
-         l--;
-         fprintf(pfOut,"%s after successful parsing of arguments below:\n",pcDep);
-         fprintf(pfOut,"%s%s ",pcDep,pcDep);
-         for (i=0;i<l;i++) {
-            if (pcLst[i]=='\n') {
-               fprintf(pfOut,"\n%s%s ",pcDep,pcDep);
-            } else fprintf(pfOut,"%c",pcLst[i]);
-         }
-         fprintf(pfOut,"\n");
-      } else fprintf(pfOut,"%s Something with the first argument is wrong\n",pcDep);
-   }
-}
-
-static void vdPrnPropertyError(
-   void*                         pvHdl,
-   FILE*                         pfOut,
-   const char*                   pcFil,
-   const char*                   pcPro,
-   const char*                   pcPos,
-   const char*                   pcLst,
-   const char*                   pcDep)
-{
-   int                           i,l;
-   if (pcFil!=NULL && strlen(pcFil)) {
-      if (pcPos==pcPro) fprintf(pfOut,"%s Property error in file \'%s\' at byte %d ("   ,pcDep,pcFil,((int)(pcPos-pcPro))+1);
-                  else  fprintf(pfOut,"%s Property error in file \'%s\' at byte %d (...",pcDep,pcFil,((int)(pcPos-pcPro))+1);
-   } else {
-      if (pcPos==pcPro) fprintf(pfOut,"%s Property error in property list at byte %d ("   ,pcDep,((int)(pcPos-pcPro))+1);
-                  else  fprintf(pfOut,"%s Property error in property list at byte %d (...",pcDep,((int)(pcPos-pcPro))+1);
-   }
-   for (i=0;i<32 && !iscntrl(pcPos[i]);i++) fprintf(pfOut,"%c",pcPos[i]);
-   if (pcPos[i]==EOS) fprintf(pfOut,")\n");
-                 else fprintf(pfOut,"...)\n");
-   if (pcLst!=NULL) {
-      l=strlen(pcLst);
-      if (l>1) {
-         l--;
-         fprintf(pfOut,"%s after successful parsing of properties below:\n",pcDep);
-         fprintf(pfOut,"%s%s ",pcDep,pcDep);
-         for (i=0;i<l;i++) {
-            if (pcLst[i]=='\n') {
-               fprintf(pfOut,"\n%s%s ",pcDep,pcDep);
-            } else fprintf(pfOut,"%c",pcLst[i]);
-         }
-      } else fprintf(pfOut,"%s Something is wrong with the first property\n",pcDep);
-   }
-}
-
 static void vdPrnProperties(
    void*                   pvHdl,
    const char*             pcPat,
@@ -2590,7 +2499,7 @@ static int siCleGetProperties(
          } else *piFlg=1;
       } else *piFlg=2;
    } else *piFlg=3;
-   strcpy(pcFil,pcHlp);
+   snprintf(pcFil,CLEMAX_FILSIZ,"%s",pcHlp);
    siErr=file2str(pcFil,ppPro,&siSiz);
    if (siErr<0) {
       if (*ppPro!=NULL) { free(*ppPro); *ppPro=NULL; }
@@ -2613,11 +2522,13 @@ static int siCleGetCommand(
    const char*             pcFct,
    int                     argc,
    char*                   argv[],
+   char*                   pcFil,
    char*                   pcCmd)
 {
    int                     i,siCmd,siRst,l=strlen(pcFct);
    char*                   pcHlp=NULL;
    FILE*                   pfCmd=NULL;
+   pcFil[0]=EOS;
    pcCmd[0]=EOS;
    if (argc==2 && argv[1][l]!='=' && argv[1][l]!='.' && argv[1][l]!='(') {
       fprintf(pfOut,"Argument list (\"...\") for command \'%s\' missing\n",pcFct);
@@ -2659,8 +2570,9 @@ static int siCleGetCommand(
          fprintf(pfOut,"Parameter file name is too long (more than %d bytes)!\n",CLEMAX_CMDLEN);
          return(8);
       }
-      strcpy(pcCmd,argv[1]+l+1);
-      pfCmd=fopen(pcCmd,"r");
+      snprintf(pcFil,CLEMAX_FILSIZ,"%s",argv[1]+l+1);
+      //TODO: replace with file2str()
+      pfCmd=fopen(pcFil,"r");
       if (pfCmd==NULL) {
           fprintf(pfOut,"Cannot open the parameter file \'%s\' (%d-%s)\n",pcCmd,errno,strerror(errno));
          return(8);
