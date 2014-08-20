@@ -614,11 +614,11 @@ static int CLPERR(TsHdl* psHdl,int siErr, char* pcMsg, ...) {
       fprintf(psHdl->pfErr,"\n");
       if (psHdl->pcCur>psHdl->pcSrc || strlen(psHdl->acLst) || psHdl->siRow) {
          if (strcmp(psHdl->acSrc,CLPSRC_CMD)==0) {
-            fprintf(psHdl->pfErr,"%s Cause: Row=%d Column=%d from command line\n", fpcPre(psHdl,1),psHdl->siRow+1,psHdl->siCol);
+            fprintf(psHdl->pfErr,"%s Cause: Row=%d Column=%d from command line\n", fpcPre(psHdl,1),psHdl->siRow,psHdl->siCol);
          } else if (strcmp(psHdl->acSrc,CLPSRC_PRO)==0) {
-            fprintf(psHdl->pfErr,"%s Cause: Row=%d Column=%d from property list\n",fpcPre(psHdl,1),psHdl->siRow+1,psHdl->siCol);
+            fprintf(psHdl->pfErr,"%s Cause: Row=%d Column=%d from property list\n",fpcPre(psHdl,1),psHdl->siRow,psHdl->siCol);
          } else {
-            fprintf(psHdl->pfErr,"%s Cause: Row=%d Column=%d in file %s\n",        fpcPre(psHdl,1),psHdl->siRow+1,psHdl->siCol,psHdl->acSrc);
+            fprintf(psHdl->pfErr,"%s Cause: Row=%d Column=%d in file %s\n",        fpcPre(psHdl,1),psHdl->siRow,psHdl->siCol,psHdl->acSrc);
          }
          fprintf(psHdl->pfErr,"%s \"",fpcPre(psHdl,1));
          for (p=psHdl->pcRow;!iscntrl(*p);p++) fprintf(psHdl->pfErr,"%c",*p);
@@ -803,6 +803,7 @@ extern int siClpParsePro(
    psHdl->pcRow=pcPro;
    psHdl->isChk=isChk;
    if (ppLst!=NULL) *ppLst=(char*)psHdl->acLst;
+   psHdl->siRow=1;
    psHdl->acLex[0]=EOS;
    if (psHdl->siTok==CLPTOK_INI) {
       if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"PROPERTY-PARSER-BEGIN\n");
@@ -844,6 +845,7 @@ extern int siClpParseCmd(
    psHdl->pcRow=pcCmd;
    psHdl->isChk=isChk;
    if (ppLst!=NULL) *ppLst=(char*)psHdl->acLst;
+   psHdl->siRow=1;
    psHdl->acLex[0]=EOS;
    if (psHdl->siTok==CLPTOK_INI) {
       if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"COMMAND-PARSER-BEGIN\n");
@@ -2615,7 +2617,7 @@ static int siClpPrsFil(
    pcSrc=psHdl->pcSrc; psHdl->pcSrc=pcPar;
    pcOld=psHdl->pcOld; psHdl->pcOld=pcPar;
    pcRow=psHdl->pcRow; psHdl->pcRow=pcPar;
-   siRow=psHdl->siRow; psHdl->siRow=0;
+   siRow=psHdl->siRow; psHdl->siRow=1;
    psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
    if (psHdl->siTok<0) {
       if (pcPar!=NULL) free(pcPar);
