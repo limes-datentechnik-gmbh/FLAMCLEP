@@ -655,9 +655,11 @@ static int CLPERR(TsHdl* psHdl,int siErr, char* pcMsg, ...) {
       }
    }
    l=sprintf(psHdl->acMsg,"%s: ",pcClpErr(siErr));
-   va_start(argv,pcMsg); vsnprintf(psHdl->acMsg+l,CLPMAX_MSGLEN-(l+1),pcMsg,argv); va_end(argv);
-   strcat(psHdl->acMsg,"\n");
-
+   if (l>0) {
+      va_start(argv,pcMsg); vsnprintf(psHdl->acMsg+l,CLPMAX_MSGLEN-(l+1),pcMsg,argv); va_end(argv);
+   } else {
+      sprintf(psHdl->acMsg,"%s",pcClpError(siErr));
+   }
    return(siErr);
 }
 
