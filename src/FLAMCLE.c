@@ -841,6 +841,7 @@ EVALUATE:
             pcCmd=argv[2];
             isMan=FALSE;
             pfDoc=pfOut;
+            pcFil="STDOUT";
          }
          if (strxcmp(isCas,pcCmd,"ALL",0,0,FALSE)==0 || strxcmp(isCas,pcCmd,"-ALL",0,0,FALSE)==0 || strxcmp(isCas,pcCmd,"--ALL",0,0,FALSE)==0) {
             isAll=TRUE;

@@ -3010,7 +3010,7 @@ static int siClpBldPro(
             return CLPERR(psHdl,CLPERR_SEM,"Path '%s' for property \"%s\" is not an argument or alias",pcPat,isPrnStr(psArg,pcPro));
          }
       } else {
-         return CLPERR(psHdl,CLPERR_SEM,"Path '%s' for property \"%s\" not found",pcPat,isPrnStr(psArg,pcPro));
+         return CLPERR(psHdl,CLPERR_SEM,"Path '%s' not valid",pcPat);
       }
    } else {
       if (psHdl->isChk) {
