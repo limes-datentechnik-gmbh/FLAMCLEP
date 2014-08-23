@@ -832,7 +832,7 @@ extern int siClpParseCmd(
    psHdl->acLst[0]=EOS;
    if (pcSrc!=NULL && strlen(pcSrc)) {
       snprintf(psHdl->acSrc,sizeof(psHdl->acSrc),"%s",pcSrc);
-   } else strcpy(psHdl->acSrc,CLPSRC_PRO);
+   } else strcpy(psHdl->acSrc,CLPSRC_CMD);
    psHdl->pcSrc=pcCmd;
    psHdl->pcCur=pcCmd;
    psHdl->pcOld=pcCmd;
