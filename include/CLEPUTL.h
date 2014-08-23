@@ -25,6 +25,12 @@
  * If you need professional services or support for this library please
  * contact support@flam.de.
  *
+ **********************************************************************
+ *
+ * This interface provides utility function for CLE and CLP. It must
+ * static linked to CLP and or CLE because it returns pointer to static
+ * variables.
+ *
  **********************************************************************/
 
 #ifdef __cplusplus

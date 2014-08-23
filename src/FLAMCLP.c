@@ -78,12 +78,13 @@
  * 1.1.26: Eliminate static variables to get more thread safe
  * 1.1.27: To save memory and simplify the usage of CLP the pointer to the data structure can be NULL
  * 1.1.28: Improve error handling (count rows and cols, print error msg and build error structure) and support isPfl-Flag
+ * 1.1.29: Replace static variables for version and about to make it possible to use the lib as DLL
  **/
 
-#define CLP_VSN_STR       "1.1.28"
+#define CLP_VSN_STR       "1.1.29"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        1
-#define CLP_VSN_REVISION       28
+#define CLP_VSN_REVISION       29
 
 /* Definition der Flag-Makros *************************************************/
 
@@ -666,32 +667,25 @@ static void CLPERRADD(TsHdl* psHdl,int siLev, char* pcMsg, ...) {
 #define ABOLENGTHMAX   512
 #define ABOLENGTHMIN   0
 
+char gacClpVsn[VSNLENGTHMAX];
+char gacClpAbo[ABOLENGTHMAX];
+
 extern const char* pcClpVersion(const int l)
 {
-   static C08                 acVsn[VSNLENGTHMAX];
-   sprintf(acVsn,"%2.2d FLAM-CLP VERSION: %s.%u BUILD: %s %s %s\n",l,CLP_VSN_STR,__BUILDNR__,__BUILD__,__DATE__,__TIME__);
-   if (strlen(acVsn)>=VSNLENGTHMAX || strlen(acVsn)<VSNLENGTHMIN) {
-      fprintf(stderr,"\n*** Static area (%d) for version string (%d) too small or too big ***\n\n%s\n\n",(int)sizeof(acVsn),(int)strlen(acVsn),acVsn);
-      exit(-1);
-   }
-   return(acVsn);
+   snprintf(gacClpVsn,VSNLENGTHMAX,"%2.2d FLAM-CLP VERSION: %s.%u BUILD: %s %s %s\n",l,CLP_VSN_STR,__BUILDNR__,__BUILD__,__DATE__,__TIME__);
+   return(gacClpVsn);
 }
 
 extern const char* pcClpAbout(const int l)
 {
-   static char                acAbo[ABOLENGTHMAX];
-   sprintf(acAbo,
+   snprintf(gacClpAbo,ABOLENGTHMAX,
    "%2.2d Frankenstein Limes Command Line Parser (FLAM-CLP)\n"
    "   Version: %s.%u Build: %s %s %s\n"
    "   Copyright (C) limes datentechnik (R) gmbh\n"
    "   This library is open source from the FLAM(R) project: http://www.flam.de\n"
    "   for license see: https://github.com/limes-datentechnik-gmbh/flamclep\n"
    ,l,CLP_VSN_STR,__BUILDNR__,__BUILD__,__DATE__,__TIME__);
-   if (strlen(acAbo)>=ABOLENGTHMAX || strlen(acAbo)<ABOLENGTHMIN) {
-      fprintf(stderr,"\n*** Static area (%d) for about message (%d) too small or too big ***\n\n%s\n\n",(int)sizeof(acAbo),(int)strlen(acAbo),acAbo);
-      exit(-1);
-   }
-   return(acAbo);
+   return(gacClpAbo);
 }
 
 extern char* pcClpError(
