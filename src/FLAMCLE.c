@@ -86,12 +86,13 @@
  * 1.1.25: Support switch to enable parameter files for object and overlays
  *         Improve error handling (using new CLP error structure and printing)
  * 1.1.26: Replace static variables for version and about to make it possible to use the lib as DLL
+ * 1.1.27: Fix issue 547: Parameter files working properly
  *
  */
-#define CLE_VSN_STR       "1.1.26"
+#define CLE_VSN_STR       "1.1.27"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        1
-#define CLE_VSN_REVISION       26
+#define CLE_VSN_REVISION       27
 
 /* Definition der Konstanten ******************************************/
 #define CLEMAX_CNFLEN            1023
@@ -1794,7 +1795,7 @@ EVALUATE:
       ERROR(8);
    } else {
       for (i=0;psTab[i].pcKyw!=NULL;i++) {
-         if (strxcmp(isCas,argv[1],psTab[i].pcKyw,0,-1,FALSE)==0) {
+         if (strxcmp(isCas,argv[1],psTab[i].pcKyw,0,-1,FALSE)==0 || strxcmp(isCas,argv[1],psTab[i].pcKyw,0,'=',TRUE)==0) {
             char*                         pcTls=NULL;
             char*                         pcLst=NULL;
             siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isPfl,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl);
@@ -2569,7 +2570,7 @@ static int siCleGetCommand(
       //TODO: replace with file2str()
       pfCmd=fopen(pcFil,"r");
       if (pfCmd==NULL) {
-          fprintf(pfOut,"Cannot open the parameter file \'%s\' (%d-%s)\n",pcCmd,errno,strerror(errno));
+          fprintf(pfOut,"Cannot open the parameter file \'%s\' (%d-%s)\n",pcFil,errno,strerror(errno));
          return(8);
       }
       pcCmd[0]=0x00; pcHlp=pcCmd; siRst=CLEMAX_CMDLEN;
@@ -2579,7 +2580,7 @@ static int siCleGetCommand(
          siRst-=siCmd;
       }
       if (ferror(pfCmd) && !feof(pfCmd)) {
-         fprintf(pfOut,"Error reading parameter file (%d-%s)\n",ferror(pfCmd),strerror(ferror(pfCmd)));
+         fprintf(pfOut,"Error reading parameter file \'%s\' (%d-%s)\n",pcFil,ferror(pfCmd),strerror(ferror(pfCmd)));
          fclose(pfCmd);
          pcCmd[0]=EOS;
          return(16);
@@ -2587,7 +2588,7 @@ static int siCleGetCommand(
       fclose(pfCmd);
       *pcHlp=EOS;
       if (siRst==0) {
-         fprintf(pfOut,"Parameter file is too big (more than %d bytes)\n",CLEMAX_CMDLEN);
+         fprintf(pfOut,"Parameter file \'%s\' is too big (more than %d bytes)\n",pcFil,CLEMAX_CMDLEN);
          return(8);
       }
    } else {
