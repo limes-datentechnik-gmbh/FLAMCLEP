@@ -605,7 +605,7 @@ static char* fpcPat(
 
 static int CLPERR(TsHdl* psHdl,int siErr, char* pcMsg, ...) {
    const char*          p;
-   int                  i,l;
+   int                  i,l,f=FALSE;
    va_list              argv;
    psHdl->siErr=siErr;
    psHdl->siCol=(int)((psHdl->pcOld-psHdl->pcRow)+1);
@@ -624,11 +624,24 @@ static int CLPERR(TsHdl* psHdl,int siErr, char* pcMsg, ...) {
          fprintf(psHdl->pfErr,"%s \"",fpcPre(psHdl,1));
          for (p=psHdl->pcRow;!iscntrl(*p);p++) fprintf(psHdl->pfErr,"%c",*p);
          fprintf(psHdl->pfErr,"\"\n");
-         fprintf(psHdl->pfErr,"%s  ",fpcPre(psHdl,1));
-         for (p=psHdl->pcRow;!iscntrl(*p);p++) {
-            if (p>=psHdl->pcOld && p<psHdl->pcCur) fprintf(psHdl->pfErr,"^"); else fprintf(psHdl->pfErr," ");
+         if (psHdl->pcCur==psHdl->pcRow) {
+            fprintf(psHdl->pfErr,"%s ^",fpcPre(psHdl,1));
+         } else {
+            fprintf(psHdl->pfErr,"%s  ",fpcPre(psHdl,1));
          }
-         fprintf(psHdl->pfErr," \n");
+         for (p=psHdl->pcRow;!iscntrl(*p);p++) {
+            if (p>=psHdl->pcOld && p<psHdl->pcCur) {
+               f=TRUE;
+               fprintf(psHdl->pfErr,"^");
+            } else {
+               fprintf(psHdl->pfErr," ");
+            }
+         }
+         if (f) {
+            fprintf(psHdl->pfErr," \n");
+         } else {
+            fprintf(psHdl->pfErr,"^\n");
+         }
          l=strlen(psHdl->acLst);
          if (l>1) {
             l--;
