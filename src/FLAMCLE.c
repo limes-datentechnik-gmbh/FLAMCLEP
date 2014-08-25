@@ -47,8 +47,8 @@
 
 /* Include eigener Bibliotheken  **************************************/
 
-#include "FLAMCLP.h"
 #include "CLEPUTL.h"
+#include "FLAMCLP.h"
 
 /* Include der Schnittstelle ******************************************/
 
@@ -87,7 +87,7 @@
  *         Improve error handling (using new CLP error structure and printing)
  * 1.1.26: Replace static variables for version and about to make it possible to use the lib as DLL
  * 1.1.27: Fix issue 547: Parameter files working properly
- * 1.1.28: Rework to make CLEP better usable with DLLs (eliminate global variables, adjust about and version)
+ * 1.1.28: Rework to make CLEP better usable with DLLs (eliminate global variables, adjust about and version, correct includes)
  *
  */
 #define CLE_VSN_STR       "1.1.28"
@@ -420,8 +420,10 @@ extern int siCleExecute(
    char**                        ppArg=NULL;
    char                          acFil[CLEMAX_FILSIZ];
    int                           siFil=0;
-   const char*                   pcHom=HOMEDIR(1);
+   char                          acHom[CLEMAX_FILSIZ]="";
    char*                         pcTmp=NULL;
+
+   HOMEDIR(TRUE,sizeof(acHom),acHom);
 
    if (psTab==NULL || argc==0 || argv==NULL || pcPgm==NULL || pcHlp==NULL || pfOut==NULL || pcDep==NULL || pcOpt==NULL || pcEnt==NULL ||
        strlen(pcPgm)==0 || strlen(pcHlp)==0 || strlen(pcPgm)>CLEMAX_PGMLEN) return(24);
@@ -466,11 +468,11 @@ extern int siCleExecute(
          strcpy(&acCnf[j],".CONFIG");
       }
 #else
-      if (pcHom!=NULL && strlen(pcHom)) {
+      if (strlen(acHom)) {
          sprintf(acCnf,".%s.config",pcPgm);
          pfTmp=fopen(acCnf,"r");
          if (pfTmp==NULL) {
-            sprintf(acCnf,"%s.%s.config",pcHom,pcPgm);
+            sprintf(acCnf,"%s.%s.config",acHom,pcPgm);
             fprintf(pfOut,"Use default configuration file (%s) in home directory\n",acCnf);
          } else {
             fclose(pfTmp);
@@ -1457,7 +1459,7 @@ EVALUATE:
                      strcat(acPro,"\"");
                   }
                }
-               ERROR(siCleChangeProperties(psTab[i].pfIni,psTab[i].pvClp,pcHom,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,
+               ERROR(siCleChangeProperties(psTab[i].pfIni,psTab[i].pvClp,acHom,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,
                                            acPro,psTab[i].piOid,psTab[i].psTab,isCas,isPfl,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf));
             }
          }
@@ -1491,7 +1493,7 @@ EVALUATE:
                      strcat(acPro,"\"");
                   }
                }
-               ERROR(siCleChangeProperties(psTab[i].pfIni,psTab[i].pvClp,pcHom,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,
+               ERROR(siCleChangeProperties(psTab[i].pfIni,psTab[i].pvClp,acHom,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,
                                            acPro,psTab[i].piOid,psTab[i].psTab,isCas,isPfl,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf));
             }
          }

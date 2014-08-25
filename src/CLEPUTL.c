@@ -45,86 +45,54 @@
 #define _WIN32_IE 0x5000
 #include <shlobj.h>
 #include <windows.h>
-extern const char* CUSERID(void) { // TODO: not thread-safe
-   static char uid[L_userid]="";
-   static int  uidSet=FALSE;
-   if (uidSet) return uid;
-   DWORD       siz=sizeof(uid);
-   GetUserName(uid,&siz);
-   uidSet=TRUE;
-   return(uid);
+extern const char* CUSERID(const int size, char* buffer) {
+   buffer[0]=0x00;
+   GetUserName(buffer,size);
+   return(buffer);
 }
-extern const char* HOMEDIR(int flg) { // TODO: not thread-safe
-   static char dir[2][MAX_PATH+1]={{'\0'}, {'\0'}};
-   static int homedirSet=FALSE;
-   if (!homedirSet) {
-      if (SHGetFolderPath(NULL,CSIDL_PROFILE,NULL,0,dir[0])==S_OK && strlen(dir[0])>0) {
-         strcpy(dir[1], dir[0]);
-         strcat(dir[0],"\\");
-      }
-      homedirSet=TRUE;
+extern const char* HOMEDIR(int flag, const int size, char* buffer) {
+   char path[MAX_PATH]="";
+   buffer[0]=0x00;
+   SHGetFolderPath(NULL,CSIDL_PROFILE,NULL,0,path);
+   if (flag) {
+      snprintf(buffer,size,"%s\\",path);
+   } else {
+      snprintf(buffer,size,"%s",path);
    }
-   if (flg) return dir[0]; else return dir[1];
+   return(buffer);
 }
 #else
 #include <unistd.h>
 #include <sys/types.h>
 #include <pwd.h>
-extern const char* CUSERID(void) { // TODO: not thread-safe
-   static char uid[L_userid]="";
-   static int uidSet=FALSE;
-   if (uidSet) return uid;
+extern const char* CUSERID(const int size, char* buffer) {
+   buffer[0]=0x00;
    struct passwd* uP = getpwuid(geteuid());
    if (NULL != uP) {
-      strncpy(uid,uP->pw_name,sizeof(uid)-1);
-      uid[sizeof(uid)-1]=0x00;
-/*
-      if (strlen(uid)==0) {
-         strncpy(uid,cuserid(NULL),sizeof(uid)-1);
-         uid[sizeof(uid)-1]=0x00;
-      }
-*/
+      snprintf(buffer,size,"%s",uP->pw_name);
    }
-   uidSet=TRUE;
-   return(uid);
+   return(buffer);
 }
-extern const char* HOMEDIR(int flg) { // TODO: not thread-safe
-   static char dir[2][L_filnam]={{'\0'}, {'\0'}};
-   static int  homedirSet=FALSE;
-   if (!homedirSet) {
-      size_t len;
-      char* home=getenv("HOME");
-      if (home!=NULL) {
-         len=strlen(home);
-         if (len>0 && len+1<sizeof(dir[0])) {
-            strcpy(dir[0], home);
-            strcpy(dir[1], home);
-            strcat(dir[0],"/");
-         }
+extern const char* HOMEDIR(int flag, const int size, char* buffer) {
+   const char*    home=getenv("HOME");
+   buffer[0]=0x00;
+   if (home!=NULL) {
+      if (flag) {
+         snprintf(buffer,size,"%s/",home);
       } else {
-         struct passwd* uP = getpwuid(geteuid());
-         if (uP != NULL && uP->pw_dir != NULL) {
-            len=strlen(uP->pw_dir);
-            if (len>0 && len+1<sizeof(dir[0])) {
-               strcpy(dir[0], uP->pw_dir);
-               strcpy(dir[1], uP->pw_dir);
-         /*
-               if (strlen(dir)==0) {
-         #ifdef __ZUSS__
-                  strcpy(dir,"/u/");
-         #else
-                  strcpy(dir,"/home/");
-         #endif
-                  strcat(dir,cuserid(NULL));
-               }
-         */
-               strcat(dir[0],"/");
-            }
+         snprintf(buffer,size,"%s",home);
+      }
+   } else {
+      struct passwd* uP = getpwuid(geteuid());
+      if (uP != NULL && uP->pw_dir != NULL) {
+         if (flag) {
+            snprintf(buffer,size,"%s/",uP->pw_dir);
+         } else {
+            snprintf(buffer,size,"%s",uP->pw_dir);
          }
       }
-      homedirSet=TRUE;
    }
-   if (flg) return dir[0]; else return dir[1];
+   return(buffer);
 }
 #endif
 
@@ -139,13 +107,13 @@ extern int snprintc(char* buffer,size_t size,const char* format,...) {
    } else return (0);
 }
 
-extern U32 hex2bin(
-   const C08*           hex,
-         U08*           bin,
-   const U32            len)
+extern unsigned int hex2bin(
+   const char*          hex,
+         unsigned char* bin,
+   const unsigned int   len)
 {
-   U32                  i,j;
-   U08                  h1,h2;
+   unsigned int         i,j;
+   unsigned char        h1,h2;
 
    for (j=i=0;i<len-1;i+=2,j++)
    {
@@ -194,12 +162,12 @@ extern U32 hex2bin(
    return(j);
 }
 
-extern U32 chr2asc(
-   const C08*           chr,
-         C08*           asc,
-   const U32            len)
+extern unsigned int chr2asc(
+   const char*          chr,
+         char*          asc,
+   const unsigned int   len)
 {
-   U32                  i;
+   unsigned int         i;
    for (i=0;i<len;i++) {
       switch (chr[i]) {
          case '\n' : asc[i]=0x0A; break;
@@ -311,12 +279,12 @@ extern U32 chr2asc(
    return(i);
 }
 
-extern U32 chr2ebc(
-   const C08*           chr,
-         C08*           asc,
-   const U32            len)
+extern unsigned int chr2ebc(
+   const char*          chr,
+         char*          asc,
+   const unsigned int   len)
 {
-   U32                  i;
+   unsigned int         i;
    for (i=0;i<len;i++) {
       switch (chr[i]) {
          case '\n': asc[i]=0x25; break;
@@ -433,7 +401,7 @@ extern int file2str(const char* filename, char** buf, int* bufsize) {
    int siLen=0, siHlp;
    char* pcHlp;
    FILE* pfFile=NULL;
-   static const int freadLen=65536;
+   const int freadLen=65536;
 
    if (filename==NULL || buf==NULL || bufsize==NULL || *bufsize<0)
       return -1; // bad args

@@ -1,5 +1,5 @@
-/******************************************************************************/
-/*******************************************************************************/
+/**********************************************************************/
+/**********************************************************************/
 /**
  * @file FLAMCLP.h
  * @brief definitions for <b>C</b>ommand <b>L</b>ine <b>P</b>arsing
@@ -297,7 +297,7 @@ For compilation the defines below must be set:
     __BUILDNR__   to define the build number (integer, default is 0)
     __BUILD__     to define the build string ("debug", "release", "alpha", ...)
  *
- ******************************************************************************/
+ **********************************************************************/
 
 #ifdef __cplusplus
    extern "C" {
@@ -306,9 +306,6 @@ For compilation the defines below must be set:
 #ifndef INC_CLP_H
 #define INC_CLP_H
 
-#ifndef __BUILDNR__
-#define __BUILDNR__ 0
-#endif
 
 #ifdef __HOST__
    #define pcClpVersion          flclpvsn
@@ -328,26 +325,25 @@ For compilation the defines below must be set:
 
 #include <inttypes.h>
 
-/* Standard defines ***********************************************************/
+/* Standard defines ***************************************************/
 
-   #ifdef __RELEASE__
-      #define  __BUILD__         "RELEASE"
-   #endif
-   #ifdef __DEBUG__
-      #define  __BUILD__         "DEBUG"
-   #endif
-   #ifndef __BUILD__
-      #define  __BUILD__         "UNKNOWN"
-   #endif
-   #ifndef TRUE
-      #define TRUE               (1)
-   #endif
-   #ifndef FALSE
-      #define FALSE              (0)
-   #endif
-   #ifndef EOS
-      #define EOS                (0x00)
-   #endif
+#ifndef __BUILDNR__
+#  define __BUILDNR__         0
+#endif
+#ifdef __RELEASE__
+#  define  __BUILD__         "RELEASE"
+#endif
+#ifdef __DEBUG__
+#  define  __BUILD__         "DEBUG"
+#endif
+#ifndef __BUILD__
+#  define  __BUILD__         "UNKNOWN"
+#endif
+
+/**
+ * Please use this defines for the data types in the tables to be ensure
+ * the correct size for the parser.
+ */
    #ifndef I08
          #define I08             int8_t
    #endif
@@ -921,6 +917,8 @@ extern void vdClpClose(
  */
 extern char* pcClpError(
    int               siErr);
+
+/**********************************************************************/
 
 #endif // INC_CLP_H
 

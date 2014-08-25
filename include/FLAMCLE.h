@@ -286,8 +286,6 @@ For compilation the defines below must be set:
 #ifndef INC_CLE_H
 #define INC_CLE_H
 
-#include "FLAMCLP.h"
-
 #ifdef __HOST__
    #define pcCleVersion          flclepvsn
    #define pcCleAbout            flclepabo

@@ -25,13 +25,13 @@
  *
  * If you need professional services or support for this library please
  * contact support@flam.de.
- ******************************************************************************/
+ **********************************************************************/
 /*
  * TASK:0000086 Centralized error messages
  * TASK:0000086 Multi-language support
  */
 
-/* Standard-Includes **********************************************************/
+/* Standard-Includes **************************************************/
 
 #include <time.h>
 #include <errno.h>
@@ -42,12 +42,12 @@
 #include <stdarg.h>
 #include <inttypes.h>
 
-/* Include der Schnittstelle **************************************************/
+/* Include der Schnittstelle ******************************************/
 
-#include "FLAMCLP.h"
 #include "CLEPUTL.h"
+#include "FLAMCLP.h"
 
-/* Definition der Version von FL-CLP ******************************************
+/* Definition der Version von FL-CLP **********************************
  *
  * Changelog:
  * 1.1.1: Adjust version and about
@@ -79,7 +79,7 @@
  * 1.1.27: To save memory and simplify the usage of CLP the pointer to the data structure can be NULL
  * 1.1.28: Improve error handling (count rows and cols, print error msg and build error structure) and support isPfl-Flag
  * 1.1.29: Replace static variables for version and about to make it possible to use the lib as DLL
- * 1.1.30: Rework to make CLEP better usable with DLLs (eliminate global variables, adjust about and version)
+ * 1.1.30: Rework to make CLEP better usable with DLLs (eliminate global variables, adjust about and version, adjust includes)
  **/
 
 #define CLP_VSN_STR       "1.1.30"
@@ -87,7 +87,7 @@
 #define CLP_VSN_MINOR        1
 #define CLP_VSN_REVISION       30
 
-/* Definition der Flag-Makros *************************************************/
+/* Definition der Flag-Makros *****************************************/
 
 #define CLPISS_ALI(flg)          ((flg)&CLPFLG_ALI)
 #define CLPISS_CON(flg)          ((flg)&CLPFLG_CON)
@@ -110,7 +110,7 @@
 #define CLPISS_LNK(flg)          (CLPISS_CNT(flg) ||  CLPISS_OID(flg) ||  CLPISS_ELN(flg) || CLPISS_SLN(flg) ||  CLPISS_TLN(flg))
 #define CLPISS_ARG(flg)          ((!CLPISS_LNK(flg)) && (!CLPISS_CON(flg)) && (!CLPISS_ALI(flg)))
 
-/* Definition der Konstanten **************************************************/
+/* Definition der Konstanten ******************************************/
 
 #define CLPMAX_TABCNT            256
 #define CLPMAX_HDEPTH            128
@@ -181,7 +181,7 @@ static const char* pcClpErr(int siErr) {
    }
 }
 
-/* Definition der Strukturen *************************************************/
+/* Definition der Strukturen ******************************************/
 
 typedef struct Std {
    const char*                   pcKyw;
@@ -270,7 +270,7 @@ typedef struct Hdl {
 } TsHdl;
 
 
-/* Deklaration der internen Funktionen ***************************************/
+/* Deklaration der internen Funktionen ********************************/
 
 static TsSym* psClpSymIns(
    void*                         pvHdl,
@@ -1329,7 +1329,7 @@ extern void vdClpClose(
    }
 }
 
-/* Interne Funktionen *********************************************************/
+/* Interne Funktionen *************************************************/
 
 static char* get_env(const char* fmtstr, ...)
 {
@@ -1912,7 +1912,7 @@ static void vdClpSymDel(
    }
 }
 
-/* Scanner ********************************************************************/
+/* Scanner ************************************************************/
 
 /*now difference between host and open world anymore */
 #ifdef __HOST__
@@ -2433,7 +2433,7 @@ static int siClpScnSrc(
    return(siClpScnNat(pvHdl,psHdl->pfErr,psHdl->pfScn,&psHdl->pcCur,psHdl->acLex,uiTok,psArg));
 }
 
-/*****************************************************************************/
+/**********************************************************************/
 
 extern int siClpGrammar(
    void*                         pvHdl,
@@ -2890,7 +2890,7 @@ static int siClpPrsVal(
    }
 }
 
-/*****************************************************************************/
+/**********************************************************************/
 
 static int siClpPrsProLst(
    void*                         pvHdl,
@@ -2960,7 +2960,7 @@ static int siClpPrsKywLst(
    return(siLev);
 }
 
-/*****************************************************************************/
+/**********************************************************************/
 
 #define isPrnInt(p,v) (CLPISS_PWD(p->psStd->uiFlg)?((I64)0):(v))
 #define isPrnFlt(p,v) (CLPISS_PWD(p->psStd->uiFlg)?((F64)0.0):(v))
@@ -4107,7 +4107,7 @@ static int siClpFinOvl(
    return(psArg->psFix->siTyp);
 }
 
-/*****************************************************************************/
+/**********************************************************************/
 
 static int siClpSetDefault(
    void*                         pvHdl,
@@ -4184,7 +4184,7 @@ static int siClpSetDefault(
    return(CLP_OK);
 }
 
-/*****************************************************************************/
+/**********************************************************************/
 
 static void vdClpPrnArg(
    void*                         pvHdl,
@@ -4942,7 +4942,7 @@ static int siClpPrnPro(
    return (CLP_OK);
 }
 
-/******************************************************************************/
+/**********************************************************************/
 
 static char* fpcPre(
    void*                         pvHdl,
@@ -4972,4 +4972,4 @@ static char* fpcPat(
    return(psHdl->acPat);
 }
 
-/******************************************************************************/
+/**********************************************************************/
