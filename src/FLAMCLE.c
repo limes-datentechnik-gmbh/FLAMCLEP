@@ -362,6 +362,7 @@ static void vdCnfCls(
 #define ABOLENGTHMAX   1024
 #define ABOLENGTHMIN   0
 
+// TODO: globale Variablen eliminieren
 char gacCleVsn[VSNLENGTHMAX];
 char gacCleAbo[ABOLENGTHMAX];
 
