@@ -40,13 +40,24 @@
 #ifndef INC_CLEPUTL_H
 #define INC_CLEPUTL_H
 
-#include"FLAMCLP.h"
+#ifndef TRUE
+#  define TRUE             (1)
+#endif
+
+#ifndef FALSE
+#  define FALSE            (0)
+#endif
+
+#ifndef EOS
+   #define EOS             (0x00)
+#endif
 
 #ifndef L_userid
-   #define L_userid        257
+#  define L_userid         (257)
 #endif
+
 #ifndef L_filnam
-   #define L_filnam        1025
+#  define L_filnam         (1025)
 #endif
 
 #define isKyw(c) (isalnum(c) || (c)=='_' || (c)=='-')
@@ -54,52 +65,66 @@
 /**********************************************************************/
 
 /**
- *
- * @return
+ * Return the current user id.
+ * @param size    size of the buffer
+ * @param buffer  pointer to the buffer
+ * @return        pointer to the buffer containing the current user id (zero terminated)
  */
-extern const char* CUSERID(void);
+extern const char* CUSERID(const int size, char* buffer);
 
 /**
- * @param flg
- * @return
+ * Return the current home directory.
+ * @param flag    if true then slash/backslash are added
+ * @param size    size of the string buffer
+ * @param buffer  pointer to the buffer
+ * @return        pointer to the buffer containing the current home directory (zero terminated)
  */
-extern const char* HOMEDIR(int flg);
+extern const char* HOMEDIR(const int flag, const int siz, char* buffer);
 
 /**
- *
- * @param hex
- * @param bin
- * @param len
- * @return
+ * Works like snprintf but concatenate the format string to the buffer.
+ * @param buffer  pointer to the string buffer
+ * @param size    size of the string buffer
+ * @param format  format string
+ * @return        amount of characters printed (0 are mainly a error)
  */
-extern U32 hex2bin(
-   const C08*           hex,
-         U08*           bin,
-   const U32            len);
+extern int snprintc(char* buffer,size_t size,const char* format,...);
 
 /**
- *
- * @param chr
- * @param asc
- * @param len
- * @return
+ * Convert from hex to binary
+ * @param hex  hex string
+ * @param bin  binary string
+ * @param len  length
+ * @return     amount of converted bytes
  */
-extern U32 chr2asc(
-   const C08*           chr,
-         C08*           asc,
-   const U32            len);
+extern unsigned int hex2bin(
+   const char*          hex,
+         unsigned char* bin,
+   const unsigned int   len);
 
 /**
- *
- * @param chr
- * @param asc
- * @param len
- * @return
+ * Convert character string to US-ASCII(UTF-8) and stops at not convertible chars
+ * @param chr  character string
+ * @param asc  ASCII string
+ * @param len  length
+ * @return     amount of converted bytes
  */
-extern U32 chr2ebc(
-   const C08*           chr,
-         C08*           asc,
-   const U32            len);
+extern unsigned int chr2asc(
+   const char*          chr,
+         char*          asc,
+   const unsigned int   len);
+
+/**
+ * Convert character string to EBCDIC(only non variant characters) and stops at not convertible chars
+ * @param chr  character string
+ * @param asc  EBCDIC string
+ * @param len  length
+ * @return     amount of converted bytes
+ */
+extern unsigned int chr2ebc(
+   const char*          chr,
+         char*          asc,
+   const unsigned int   len);
 
 /**
  * Read a file using the specified filename and reads the whole content

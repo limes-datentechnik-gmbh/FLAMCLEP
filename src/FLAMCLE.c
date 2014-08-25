@@ -47,8 +47,8 @@
 
 /* Include eigener Bibliotheken  **************************************/
 
-#include "FLAMCLP.h"
 #include "CLEPUTL.h"
+#include "FLAMCLP.h"
 
 /* Include der Schnittstelle ******************************************/
 
@@ -87,12 +87,13 @@
  *         Improve error handling (using new CLP error structure and printing)
  * 1.1.26: Replace static variables for version and about to make it possible to use the lib as DLL
  * 1.1.27: Fix issue 547: Parameter files working properly
+ * 1.1.28: Rework to make CLEP better usable with DLLs (eliminate global variables, adjust about and version, correct includes)
  *
  */
-#define CLE_VSN_STR       "1.1.27"
+#define CLE_VSN_STR       "1.1.28"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        1
-#define CLE_VSN_REVISION       27
+#define CLE_VSN_REVISION       28
 
 /* Definition der Konstanten ******************************************/
 #define CLEMAX_CNFLEN            1023
@@ -357,32 +358,24 @@ static void vdCnfCls(
    TsCnfHdl*                     psHdl);
 
 /* Implementierung der externen Funktionen ****************************/
-#define VSNLENGTHMAX   256
-#define VSNLENGTHMIN   0
-#define ABOLENGTHMAX   1024
-#define ABOLENGTHMIN   0
 
-// TODO: globale Variablen eliminieren
-char gacCleVsn[VSNLENGTHMAX];
-char gacCleAbo[ABOLENGTHMAX];
-
-extern const char* pcCleVersion(const int l)
+extern const char* pcCleVersion(const int l, const int s, char* b)
 {
-   snprintf(gacCleVsn,VSNLENGTHMAX,"%2.2d FLAM-CLE VERSION: %s.%u BUILD: %s %s %s\n%s",l,CLE_VSN_STR,__BUILDNR__,__BUILD__,__DATE__,__TIME__,pcClpVersion(l+1));
-   return(gacCleVsn);
+   snprintc(b,s,"%2.2d FLAM-CLE VERSION: %s.%u BUILD: %s %s %s\n",l,CLE_VSN_STR,__BUILDNR__,__BUILD__,__DATE__,__TIME__);
+   return(pcClpVersion(l+1,s,b));
 }
 
-extern const char* pcCleAbout(const int l)
+extern const char* pcCleAbout(const int l, const int s, char* b)
 {
-   snprintf(gacCleAbo,ABOLENGTHMAX,
+   snprintc(b,s,
    "%2.2d Frankenstein Limes Command Line Execution (FLAM-CLE)\n"
    "   Version: %s.%u Build: %s %s %s\n"
    "   Copyright (C) limes datentechnik (R) gmbh\n"
    "   This library is open source from the FLAM(R) project: http://www.flam.de\n"
    "   for license see: https://github.com/limes-datentechnik-gmbh/flamclep\n"
-   "This library uses the internal library below:\n%s"
-   ,l,CLE_VSN_STR,__BUILDNR__,__BUILD__,__DATE__,__TIME__,pcClpAbout(l+1));
-   return(gacCleAbo);
+   "This library uses the internal library below:\n"
+   ,l,CLE_VSN_STR,__BUILDNR__,__BUILD__,__DATE__,__TIME__);
+   return(pcClpAbout(l+1,s,b));
 }
 
 #undef  ERROR
@@ -427,8 +420,10 @@ extern int siCleExecute(
    char**                        ppArg=NULL;
    char                          acFil[CLEMAX_FILSIZ];
    int                           siFil=0;
-   const char*                   pcHom=HOMEDIR(1);
+   char                          acHom[CLEMAX_FILSIZ]="";
    char*                         pcTmp=NULL;
+
+   HOMEDIR(TRUE,sizeof(acHom),acHom);
 
    if (psTab==NULL || argc==0 || argv==NULL || pcPgm==NULL || pcHlp==NULL || pfOut==NULL || pcDep==NULL || pcOpt==NULL || pcEnt==NULL ||
        strlen(pcPgm)==0 || strlen(pcHlp)==0 || strlen(pcPgm)>CLEMAX_PGMLEN) return(24);
@@ -473,11 +468,11 @@ extern int siCleExecute(
          strcpy(&acCnf[j],".CONFIG");
       }
 #else
-      if (pcHom!=NULL && strlen(pcHom)) {
+      if (strlen(acHom)) {
          sprintf(acCnf,".%s.config",pcPgm);
          pfTmp=fopen(acCnf,"r");
          if (pfTmp==NULL) {
-            sprintf(acCnf,"%s.%s.config",pcHom,pcPgm);
+            sprintf(acCnf,"%s.%s.config",acHom,pcPgm);
             fprintf(pfOut,"Use default configuration file (%s) in home directory\n",acCnf);
          } else {
             fclose(pfTmp);
@@ -1464,7 +1459,7 @@ EVALUATE:
                      strcat(acPro,"\"");
                   }
                }
-               ERROR(siCleChangeProperties(psTab[i].pfIni,psTab[i].pvClp,pcHom,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,
+               ERROR(siCleChangeProperties(psTab[i].pfIni,psTab[i].pvClp,acHom,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,
                                            acPro,psTab[i].piOid,psTab[i].psTab,isCas,isPfl,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf));
             }
          }
@@ -1498,7 +1493,7 @@ EVALUATE:
                      strcat(acPro,"\"");
                   }
                }
-               ERROR(siCleChangeProperties(psTab[i].pfIni,psTab[i].pvClp,pcHom,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,
+               ERROR(siCleChangeProperties(psTab[i].pfIni,psTab[i].pvClp,acHom,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,
                                            acPro,psTab[i].piOid,psTab[i].psTab,isCas,isPfl,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf));
             }
          }
