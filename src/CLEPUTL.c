@@ -130,6 +130,15 @@ extern const char* HOMEDIR(int flg) { // TODO: not thread-safe
 
 /* implementation of the external functions ***********************************/
 
+extern int snprintc(char* buffer,size_t size,const char* format,...) {
+   va_list  argv;
+   int      r,h=strlen(buffer);
+   if (size>(h+1)) {
+      va_start(argv,format); r=vsnprintf(buffer+h,size-(h+1),format,argv); va_end(argv);
+      return(r);
+   } else return (0);
+}
+
 extern U32 hex2bin(
    const C08*           hex,
          U08*           bin,

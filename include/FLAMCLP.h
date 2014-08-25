@@ -389,10 +389,17 @@ For compilation the defines below must be set:
  *
  * @param l level of visible hierarchy in the first 2 numbers of the string
  *          the number can later be used to better visualize the hierarchy
+ * @param s size of the provided string buffer (including space for zero termination)
+ * @param b buffer for the version string
+ *          must contain a zero terminated string
+ *          the version string will be concatenated
+ *          the size including the 0-byte is the limit
+ *          if (strlen(b)==s-1) then more space is required for the complete version string
+ *          a good size for the version string is 128 byte
  *
- * @return pointer to a zero terminated string with a new line at the end
+ * @return pointer to a zero terminated version string (return(b))
  */
-extern const char* pcClpVersion(const int l);
+extern const char* pcClpVersion(const int l, const int s, char* b);
 
 /**
  * Get about information
@@ -401,10 +408,17 @@ extern const char* pcClpVersion(const int l);
  *
  * @param l level of visible hierarchy in the first 2 numbers of the string
  *          the number can later be used to better visualize the hierarchy
+ * @param s size of the provided string buffer (including space for zero termination)
+ * @param b buffer for the about string
+ *          must contain a zero terminated string
+ *          the about string will be concatenated
+ *          the size including the 0-byte is the limit
+ *          if (strlen(b)==s-1) then more space is required for the complete about string
+ *          a good size for the about string is 512 byte
  *
- * @return pointer to a zero terminated string with a new line at the end
+ * @return pointer to a zero terminated about string (return(b))
  */
-extern const char* pcClpAbout(const int l);
+extern const char* pcClpAbout(const int l, const int s, char* b);
 
 /**
  * Return code for a successful parsing

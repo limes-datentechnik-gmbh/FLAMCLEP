@@ -294,29 +294,44 @@ For compilation the defines below must be set:
    #define siCleExecute          flclepexe
 #endif
 
-/**
- * Get version information
- *
- * The function returns the version information for this library
- *
- * @param l level of visible hierarchy in the first 2 numbers of the string
- *          the number can later be used to better visualize the hierarchy
- *
- * @return pointer to a zero terminated string with a new line at the end
- */
-extern const char* pcCleVersion(const int l);
 
 /**
- * Get about information
- *
- * The function returns the about information for this library
- *
- * @param l level of visible hierarchy in the first 2 numbers of the string
- *          the number can later be used to better visualize the hierarchy
- *
- * @return pointer to a zero terminated string with a new line at the end
- */
-extern const char* pcCleAbout(const int l);
+* Get version information
+*
+* The function returns the version information for this library
+*
+* @param l level of visible hierarchy in the first 2 numbers of the string
+*          the number can later be used to better visualize the hierarchy
+* @param s size of the provided string buffer (including space for zero termination)
+* @param b buffer for the version string
+*          must contain a zero terminated string
+*          the version string will be concatenated
+*          the size including the 0-byte is the limit
+*          if (strlen(b)==s-1) then more space is required for the complete version string
+*          a good size for the version string is 256 byte
+*
+* @return pointer to a zero terminated version string (return(b))
+*/
+extern const char* pcCleVersion(const int l, const int s, char* b);
+
+/**
+* Get about information
+*
+* The function returns the about information for this library
+*
+* @param l level of visible hierarchy in the first 2 numbers of the string
+*          the number can later be used to better visualize the hierarchy
+* @param s size of the provided string buffer (including space for zero termination)
+* @param b buffer for the about string
+*          must contain a zero terminated string
+*          the about string will be concatenated
+*          the size including the 0-byte is the limit
+*          if (strlen(b)==s-1) then more space is required for the complete about string
+*          a good size for the about string is 1024 byte
+*
+* @return pointer to a zero terminated about string (return(b))
+*/
+extern const char* pcCleAbout(const int l, const int s, char* b);
 
 /**
  * Type definition for initialization function

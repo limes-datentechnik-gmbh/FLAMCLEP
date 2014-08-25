@@ -54,23 +54,33 @@
 /**********************************************************************/
 
 /**
- *
- * @return
+ * Return the current user id.
+ * @return Pointer to the current user id
  */
 extern const char* CUSERID(void);
 
 /**
- * @param flg
- * @return
+ * Return the current hone directory.
+ * @param flg If true then slash/backslash are added
+ * @return Pointer to the current home directory
  */
 extern const char* HOMEDIR(int flg);
 
 /**
- *
- * @param hex
- * @param bin
- * @param len
- * @return
+ * Works like snprintf but concatenate the format string to the buffer.
+ * @param buffer  pointer to the string buffer
+ * @param size    size of the string buffer
+ * @param format  format string
+ * @return        amount of characters printed (0 are mainly a error)
+ */
+extern int snprintc(char* buffer,size_t size,const char* format,...);
+
+/**
+ * Convert from hex to binary
+ * @param hex  hex string
+ * @param bin  binary string
+ * @param len  length
+ * @return     amount of converted bytes
  */
 extern U32 hex2bin(
    const C08*           hex,
@@ -78,11 +88,11 @@ extern U32 hex2bin(
    const U32            len);
 
 /**
- *
- * @param chr
- * @param asc
- * @param len
- * @return
+ * Convert character string to US-ASCII(UTF-8) and stops at not convertible chars
+ * @param chr  character string
+ * @param asc  ASCII string
+ * @param len  length
+ * @return     amount of converted bytes
  */
 extern U32 chr2asc(
    const C08*           chr,
@@ -90,11 +100,11 @@ extern U32 chr2asc(
    const U32            len);
 
 /**
- *
- * @param chr
- * @param asc
- * @param len
- * @return
+ * Convert character string to EBCDIC(only non variant characters) and stops at not convertible chars
+ * @param chr  character string
+ * @param asc  EBCDIC string
+ * @param len  length
+ * @return     amount of converted bytes
  */
 extern U32 chr2ebc(
    const C08*           chr,

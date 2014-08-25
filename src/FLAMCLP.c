@@ -79,12 +79,13 @@
  * 1.1.27: To save memory and simplify the usage of CLP the pointer to the data structure can be NULL
  * 1.1.28: Improve error handling (count rows and cols, print error msg and build error structure) and support isPfl-Flag
  * 1.1.29: Replace static variables for version and about to make it possible to use the lib as DLL
+ * 1.1.30: Rework to make CLEP better usable with DLLs (eliminate global variables, adjust about and version)
  **/
 
-#define CLP_VSN_STR       "1.1.29"
+#define CLP_VSN_STR       "1.1.30"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        1
-#define CLP_VSN_REVISION       29
+#define CLP_VSN_REVISION       30
 
 /* Definition der Flag-Makros *************************************************/
 
@@ -674,31 +675,24 @@ static void CLPERRADD(TsHdl* psHdl,int siLev, char* pcMsg, ...) {
    }
 }
 
-/* Implementierung der externen Funktionen ***********************************/
-#define VSNLENGTHMAX   128
-#define VSNLENGTHMIN   0
-#define ABOLENGTHMAX   512
-#define ABOLENGTHMIN   0
+/* Implementierung der externen Funktionen ****************************/
 
-char gacClpVsn[VSNLENGTHMAX];
-char gacClpAbo[ABOLENGTHMAX];
-
-extern const char* pcClpVersion(const int l)
+extern const char* pcClpVersion(const int l, const int s, char* b)
 {
-   snprintf(gacClpVsn,VSNLENGTHMAX,"%2.2d FLAM-CLP VERSION: %s.%u BUILD: %s %s %s\n",l,CLP_VSN_STR,__BUILDNR__,__BUILD__,__DATE__,__TIME__);
-   return(gacClpVsn);
+   snprintc(b,s,"%2.2d FLAM-CLP VERSION: %s.%u BUILD: %s %s %s\n",l,CLP_VSN_STR,__BUILDNR__,__BUILD__,__DATE__,__TIME__);
+   return(b);
 }
 
-extern const char* pcClpAbout(const int l)
+extern const char* pcClpAbout(const int l, const int s, char* b)
 {
-   snprintf(gacClpAbo,ABOLENGTHMAX,
+   snprintc(b,s,
    "%2.2d Frankenstein Limes Command Line Parser (FLAM-CLP)\n"
    "   Version: %s.%u Build: %s %s %s\n"
    "   Copyright (C) limes datentechnik (R) gmbh\n"
    "   This library is open source from the FLAM(R) project: http://www.flam.de\n"
    "   for license see: https://github.com/limes-datentechnik-gmbh/flamclep\n"
    ,l,CLP_VSN_STR,__BUILDNR__,__BUILD__,__DATE__,__TIME__);
-   return(gacClpAbo);
+   return(b);
 }
 
 extern char* pcClpError(
