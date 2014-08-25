@@ -33,9 +33,7 @@
 #include "CLEPUTL.h"
 #include "FLAMCLP.h"
 
-
 typedef C08  string5[5];
-
 
 #define DEFINE_STRUCT
 #include "CLPMAC.h"
@@ -245,7 +243,7 @@ static void printOverlay(
    char           acPre[1025]="";
    switch (siOid) {
    case 1: printf("%s.siSwt=%d\n",pcPfx,(int)psDat->siSwt);break;
-   case 2: printf("%s.acStr=\'%s\'\n",pcPfx,     psDat->acStr);break;
+   case 2: printf("%s.acStr=\'%s\'\n",pcPfx, psDat->acStr);break;
    case 3:
       sprintf(acPre,"%s.stAll",pcPfx);
       printAllTypes(acPre,&psDat->stAll);
@@ -379,7 +377,7 @@ int main(int argc, char * argv[])
             fclose(f);
             if (memcmp(&stMain,&stHelp,sizeof(stMain))) {
                for (i=0;i<sizeof(stMain) && ((char*)&stMain)[i]==((char*)&stHelp)[i];i++);
-               printf("\n!!! Verification not successfull !!! Position: %d(%u)\n",i,(U32)sizeof(stMain));
+               printf("\n!!! Verification not successfull !!! Position: %d(%u)\n",i,(unsigned)sizeof(stMain));
                printf(  "                 ^^^                \n");
             } else {
                printf("\n*** Verification successfull ***\n");

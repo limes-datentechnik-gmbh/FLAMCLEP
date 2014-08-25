@@ -323,6 +323,7 @@ For compilation the defines below must be set:
    #define pcClpError            flclperr
 #endif
 
+#include <stdint.h>
 #include <inttypes.h>
 
 /* Standard defines ***************************************************/
