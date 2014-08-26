@@ -608,12 +608,14 @@ static int CLPERR(TsHdl* psHdl,int siErr, char* pcMsg, ...) {
    int                  i,l,f=FALSE;
    va_list              argv;
    psHdl->siErr=siErr;
-   psHdl->siCol=(int)((psHdl->pcOld-psHdl->pcRow)+1);
+   if (psHdl->pcRow!=NULL && psHdl->pcOld>=psHdl->pcRow) {
+      psHdl->siCol=(int)((psHdl->pcOld-psHdl->pcRow)+1);
+   } else psHdl->siCol=0;
    if (psHdl->pfErr!=NULL) {
       fprintf(psHdl->pfErr,"%s:\n%s ",pcClpErr(siErr),fpcPre(psHdl,0));
       va_start(argv,pcMsg); vfprintf(psHdl->pfErr,pcMsg,argv); va_end(argv);
       fprintf(psHdl->pfErr,"\n");
-      if (psHdl->pcCur>psHdl->pcSrc || strlen(psHdl->acLst) || psHdl->siRow) {
+      if (psHdl->pcSrc!=NULL && psHdl->pcRow!=NULL && psHdl->pcOld!=NULL && psHdl->pcCur!=NULL && (psHdl->pcCur>psHdl->pcSrc || strlen(psHdl->acLst) || psHdl->siRow)) {
          if (strcmp(psHdl->acSrc,CLPSRC_CMD)==0) {
             fprintf(psHdl->pfErr,"%s Cause: Row=%d Column=%d from command line\n", fpcPre(psHdl,1),psHdl->siRow,psHdl->siCol);
          } else if (strcmp(psHdl->acSrc,CLPSRC_PRO)==0) {
@@ -804,6 +806,7 @@ extern int siClpParsePro(
    psHdl->isChk=isChk;
    if (ppLst!=NULL) *ppLst=(char*)psHdl->acLst;
    psHdl->siRow=1;
+   psHdl->siCol=0;
    psHdl->acLex[0]=EOS;
    if (psHdl->siTok==CLPTOK_INI) {
       if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"PROPERTY-PARSER-BEGIN\n");
@@ -846,6 +849,7 @@ extern int siClpParseCmd(
    psHdl->isChk=isChk;
    if (ppLst!=NULL) *ppLst=(char*)psHdl->acLst;
    psHdl->siRow=1;
+   psHdl->siCol=0;
    psHdl->acLex[0]=EOS;
    if (psHdl->siTok==CLPTOK_INI) {
       if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"COMMAND-PARSER-BEGIN\n");
@@ -881,6 +885,20 @@ extern int siClpSyntax(
    char                          acKyw[CLPMAX_LEXSIZ];
    int                           siErr,siLev,i;
    int                           l=strlen(psHdl->pcCmd);
+
+   psHdl->pcSrc=NULL;
+   psHdl->pcCur=NULL;
+   psHdl->pcOld=NULL;
+   psHdl->pcRow=NULL;
+   psHdl->siCol=0;
+   psHdl->siRow=0;
+   psHdl->acLex[0]=EOS;
+   psHdl->acMsg[0]=EOS;
+   psHdl->acLst[0]=EOS;
+   psHdl->acPat[0]=EOS;
+   psHdl->acPre[0]=EOS;
+   strcpy(psHdl->acSrc,":SYNTAX:");
+
    if (pcPat!=NULL && strlen(pcPat)) {
       if (strxcmp(psHdl->isCas,psHdl->pcCmd,pcPat,l,0,FALSE)==0) {
          if (strlen(pcPat)>l && pcPat[l]!='.') {
@@ -926,6 +944,19 @@ extern int siClpHelp(
    char                          acKyw[CLPMAX_LEXSIZ];
    int                           siErr,siLev,i;
    int                           l=strlen(psHdl->pcCmd);
+
+   psHdl->pcSrc=NULL;
+   psHdl->pcCur=NULL;
+   psHdl->pcOld=NULL;
+   psHdl->pcRow=NULL;
+   psHdl->siCol=0;
+   psHdl->siRow=0;
+   psHdl->acLex[0]=EOS;
+   psHdl->acMsg[0]=EOS;
+   psHdl->acLst[0]=EOS;
+   psHdl->acPat[0]=EOS;
+   psHdl->acPre[0]=EOS;
+   strcpy(psHdl->acSrc,":HELP:");
 
    if (pcPat!=NULL && strlen(pcPat)) {
       if (strxcmp(psHdl->isCas,psHdl->pcCmd,pcPat,l,0,FALSE)==0) {
@@ -1009,6 +1040,19 @@ extern int siClpDocu(
    char                          acHlp[CLPMAX_PRESIZ];
    char                          acArg[20];
    const char*                   p;
+
+   psHdl->pcSrc=NULL;
+   psHdl->pcCur=NULL;
+   psHdl->pcOld=NULL;
+   psHdl->pcRow=NULL;
+   psHdl->siCol=0;
+   psHdl->siRow=0;
+   psHdl->acLex[0]=EOS;
+   psHdl->acMsg[0]=EOS;
+   psHdl->acLst[0]=EOS;
+   psHdl->acPat[0]=EOS;
+   psHdl->acPre[0]=EOS;
+   strcpy(psHdl->acSrc,":DOCU:");
 
    if (pcNum!=NULL && strlen(pcNum)<100) {
       if (pcPat!=NULL && strlen(pcPat)) {
@@ -1283,8 +1327,20 @@ extern int siClpProperties(
    int                           l=strlen(psHdl->pcCmd);
    const char*                   pcArg=NULL;
 
-   if (pfOut==NULL) pfOut=psHdl->pfHlp;
+   psHdl->pcSrc=NULL;
+   psHdl->pcCur=NULL;
+   psHdl->pcOld=NULL;
+   psHdl->pcRow=NULL;
+   psHdl->siCol=0;
+   psHdl->siRow=0;
+   psHdl->acLex[0]=EOS;
+   psHdl->acMsg[0]=EOS;
+   psHdl->acLst[0]=EOS;
+   psHdl->acPat[0]=EOS;
+   psHdl->acPre[0]=EOS;
+   strcpy(psHdl->acSrc,":PROPERTIES:");
 
+   if (pfOut==NULL) pfOut=psHdl->pfHlp;
    if (pcPat!=NULL && strlen(pcPat)) {
       if (strxcmp(psHdl->isCas,psHdl->pcCmd,pcPat,l,0,FALSE)==0) {
          if (strlen(pcPat)>l && pcPat[l]!='.') {
