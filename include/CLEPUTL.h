@@ -1,6 +1,6 @@
 /**
  * @file
- * @brief  Deklaration diverser Hilfsfunktionen in ANSI C
+ * @brief  Declaration of utility functions for CLP/CLE in ANSI C
  * @author limes datentechnik gmbh
  * @date  03.01.2012
  * @copyright limes datentechnik gmbh
@@ -27,9 +27,8 @@
  *
  **********************************************************************
  *
- * This interface provides utility function for CLE and CLP. It must
- * static linked to CLP and or CLE because it returns pointer to static
- * variables.
+ * This interface provides utility function for CLE and CLP. It should
+ * static linked to CLP and or CLE.
  *
  **********************************************************************/
 
