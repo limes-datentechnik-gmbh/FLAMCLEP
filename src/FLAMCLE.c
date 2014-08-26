@@ -2532,6 +2532,7 @@ static int siCleGetCommand(
       return(8);
    }
    if (argv[1][l]==EOS) {
+      //TODO: replace with arr2str
       for (i=2;i<argc;i++) {
          if (strlen(pcCmd)+strlen(argv[i])+2>CLEMAX_CMDLEN) {
             fprintf(pfOut,"Argument list is too long! (more than %d bytes)!\n",CLEMAX_CMDLEN);
@@ -2542,6 +2543,7 @@ static int siCleGetCommand(
       }
    } else if (argv[1][l]=='.' || argv[1][l]=='(') {
       strcat(pcCmd,&argv[1][l]);
+      //TODO: replace with arr2str
       for (i=2;i<argc;i++) {
          if (strlen(pcCmd)+strlen(argv[i])+2>CLEMAX_CMDLEN) {
             fprintf(pfOut,"Argument list is too long! (more than %d bytes)!\n",CLEMAX_CMDLEN);
