@@ -440,13 +440,13 @@ extern int file2str(const char* filename, char** buf, int* bufsize) {
    return siLen;
 }
 
-extern int arr2str(const char** array, const size_t count, const char* separ, const size_t separLen, char** out, size_t* outlen) {
+extern int arry2str(char* array[], const int count, const char* separ, const int separLen, char** out, int* outlen) {
    size_t uiSumLen=((count-1)*separLen)+1;
    size_t uiLens[count];
    char*  pcHlp;
    char*  pcOut;
 
-   if (array==NULL || out==NULL || outlen==0 || (separLen>0 && separ==NULL))
+   if (array==NULL || out==NULL || outlen==NULL || (separLen>0 && separ==NULL))
       return -1; // bad args
    if (*out==NULL)
       *outlen=0;
@@ -498,16 +498,23 @@ extern int strxcmp(
       if (n) {
          int i=1;
          if (c==-1) {
-            while (d==0 && *s1!=0 && *s2!=0 && i<n && isKyw(*s1) && isKyw(*s2)) {
+            while (d==0 && *s1!=0 && *s2!=0 && isKyw(*s1) && isKyw(*s2)) {
                s1++; s2++; i++;
                d=*s1-*s2;
             }
+            if (i<n) return(n-i);
             if (f && (!isKyw(*s1) || !isKyw(*s2))) return(0);
-         } else {
-            while (d==0 && *s1!=0 && *s2!=0 && i<n && *s1!=c && *s2!=c) {
+         } else if (c==0) {
+            while (d==0 && *s1!=0 && *s2!=0 && i<n) {
                s1++; s2++; i++;
                d=*s1-*s2;
             }
+         } else {
+            while (d==0 && *s1!=0 && *s2!=0 && *s1!=c && *s2!=c) {
+               s1++; s2++; i++;
+               d=*s1-*s2;
+            }
+            if (i<n) return(n-i);
             if (f && (*s1==c || *s2==c)) return(0);
          }
          return(d);
@@ -518,6 +525,11 @@ extern int strxcmp(
                d=*s1-*s2;
             }
             if (f && (!isKyw(*s1) || !isKyw(*s2))) return(0);
+         } else if (c==0) {
+            while (d==0 && *s1!=0 && *s2!=0) {
+               s1++; s2++;
+               d=*s1-*s2;
+            }
          } else {
             while (d==0 && *s1!=0 && *s2!=0 && *s1!=c && *s2!=c) {
                s1++; s2++;
@@ -532,16 +544,23 @@ extern int strxcmp(
       if (n) {
          int i=1;
          if (c==-1) {
-            while (d==0 && *s1!=0 && *s2!=0 && i<n && isKyw(*s1) && isKyw(*s2)) {
+            while (d==0 && *s1!=0 && *s2!=0 && isKyw(*s1) && isKyw(*s2)) {
                s1++; s2++; i++;
                d=tolower(*s1)-tolower(*s2);
             }
+            if (i<n) return(n-i);
             if (f && (!isKyw(*s1) || !isKyw(*s2))) return(0);
-         } else {
-            while (d==0 && *s1!=0 && *s2!=0 && i<n && tolower(*s1)!=tolower(c) && tolower(*s2)!=tolower(c)) {
+         } else if (c==0) {
+            while (d==0 && *s1!=0 && *s2!=0 && i<n) {
                s1++; s2++; i++;
                d=tolower(*s1)-tolower(*s2);
             }
+         } else {
+            while (d==0 && *s1!=0 && *s2!=0 && tolower(*s1)!=tolower(c) && tolower(*s2)!=tolower(c)) {
+               s1++; s2++; i++;
+               d=tolower(*s1)-tolower(*s2);
+            }
+            if (i<n) return(n-i);
             if (f && (tolower(*s1)==tolower(c) || tolower(*s2)==tolower(c))) return(0);
          }
          return(d);
@@ -552,6 +571,11 @@ extern int strxcmp(
                d=tolower(*s1)-tolower(*s2);
             }
             if (f && (!isKyw(*s1) || !isKyw(*s2))) return(0);
+         } else if (c==0){
+            while (d==0 && *s1!=0 && *s2!=0) {
+               s1++; s2++;
+               d=tolower(*s1)-tolower(*s2);
+            }
          } else {
             while (d==0 && *s1!=0 && *s2!=0 && tolower(*s1)!=tolower(c) && *s2!=tolower(c)) {
                s1++; s2++;

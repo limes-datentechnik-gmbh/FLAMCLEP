@@ -158,7 +158,7 @@ extern int file2str(const char* filename, char** buf, int* bufsize);
  *         * -1: invalid arguments
  *         * -2: realloc() failed
  */
-extern int arr2str(const char** array, const size_t count, const char* separ, const size_t separLen, char** out, size_t* outlen);
+extern int arry2str(char* array[], const int count, const char* separ, const int separLen, char** out, int* outlen);
 
 /**
  * Compare of two string
@@ -168,7 +168,7 @@ extern int arr2str(const char** array, const size_t count, const char* separ, co
  * @param[in]  ca Flag if case sensitiv (TRUE) or not (FALSE)
  * @param[in]  s1 String 1 to compare
  * @param[in]  s2 string 2 to compare
- * @param[in]  n  Amount of character to compare
+ * @param[in]  n  If c!=0 then minimum else maximum amount of character to compare  (0=disabled)
  * @param[in]  c  Character where the compare stops or -1 for keyword syntax
  * @param[in]  f  If true only compare up to zero termination or stop char if false (normal compare) including zero termination or stop char
  *

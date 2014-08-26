@@ -88,12 +88,13 @@
  * 1.1.26: Replace static variables for version and about to make it possible to use the lib as DLL
  * 1.1.27: Fix issue 547: Parameter files working properly
  * 1.1.28: Rework to make CLEP better usable with DLLs (eliminate global variables, adjust about and version, correct includes)
+ * 1.1.29: Use arry2str for command line to remove last static vars, fix object and overlay handling if default command (>flam4 "(flamin=...)")
  *
  */
-#define CLE_VSN_STR       "1.1.28"
+#define CLE_VSN_STR       "1.1.29"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        1
-#define CLE_VSN_REVISION       28
+#define CLE_VSN_REVISION       29
 
 /* Definition der Konstanten ******************************************/
 #define CLEMAX_CNFLEN            1023
@@ -102,8 +103,6 @@
 #define CLEMAX_FILSIZ            1024
 #define CLEMAX_PGMLEN            63
 #define CLEMAX_PGMSIZ            64
-#define CLEMAX_CMDLEN            65535
-#define CLEMAX_CMDSIZ            65536
 #define CLEMAX_NUMLEN            1023
 #define CLEMAX_NUMSIZ            1024
 #define CLEMAX_PATLEN            1023
@@ -313,7 +312,7 @@ static int siCleGetCommand(
    int                           argc,
    char*                         argv[],
    char*                         pcFil,
-   char*                         pcCmd);
+   char**                        ppCmd);
 
 static TsCnfHdl* psCnfOpn(
    FILE*                         pfOut,
@@ -405,7 +404,6 @@ extern int siCleExecute(
    const char*                   pcDef)
 {
    int                           i,j,l,s,siErr,siDep,siCnt,isSet=0;
-   static char                   acCmd[CLEMAX_CMDSIZ];//TODO: not thread save
    TsCnfHdl*                     psCnf;
    char*                         pcCnf;
    char                          acCnf[CLEMAX_CNFSIZ];
@@ -542,6 +540,7 @@ extern int siCleExecute(
             ERROR(16);
          }
          ppArg[0]=argv[0]; ppArg[1]=(char*)pcDef; argc=2; argv=ppArg;
+         for (i=0;i<argc;i++) printf("%s\n",argv[i]);
       } else {
          fprintf(pfOut,"Command or built-in function required!\n");
          vdPrnStaticSyntax(pfOut,psTab,argv[0],pcDep,pcOpt);
@@ -1433,9 +1432,9 @@ EVALUATE:
       if (argc>=3) {
          for (i=0;psTab[i].pcKyw!=NULL;i++) {
             if (strxcmp(isCas,argv[2],psTab[i].pcKyw,0,0,FALSE)==0) {
-               char acPro[CLEMAX_CMDSIZ]="";
+               char acPro[CLEMAX_PATSIZ]="";
                for (j=3;j<argc;j++) {
-                  if (strlen(acPro)+strlen(argv[j])+strlen(acOwn)+strlen(pcPgm)+strlen(psTab[i].pcKyw)+8>CLEMAX_CMDSIZ) {
+                  if (strlen(acPro)+strlen(argv[j])+strlen(acOwn)+strlen(pcPgm)+strlen(psTab[i].pcKyw)+8>CLEMAX_PATSIZ) {
                      fprintf(pfOut,"Argument list is too long!\n");
                      return(8);
                   }
@@ -1467,9 +1466,9 @@ EVALUATE:
       if (pcDef!=NULL && strlen(pcDef)) {
          for (i=0;psTab[i].pcKyw!=NULL;i++) {
             if (strxcmp(isCas,pcDef,psTab[i].pcKyw,0,0,FALSE)==0) {
-               char acPro[CLEMAX_CMDSIZ]="";
+               char acPro[CLEMAX_PATSIZ]="";
                for (j=2;j<argc;j++) {
-                  if (strlen(acPro)+strlen(argv[j])+strlen(acOwn)+strlen(pcPgm)+strlen(psTab[i].pcKyw)+5>CLEMAX_CMDSIZ) {
+                  if (strlen(acPro)+strlen(argv[j])+strlen(acOwn)+strlen(pcPgm)+strlen(psTab[i].pcKyw)+5>CLEMAX_PATSIZ) {
                      fprintf(pfOut,"Argument list is too long!\n");
                      return(8);
                   }
@@ -1791,16 +1790,22 @@ EVALUATE:
       ERROR(8);
    } else {
       for (i=0;psTab[i].pcKyw!=NULL;i++) {
-         if (strxcmp(isCas,argv[1],psTab[i].pcKyw,0,-1,FALSE)==0 || strxcmp(isCas,argv[1],psTab[i].pcKyw,0,'=',TRUE)==0) {
+         l=strlen(psTab[i].pcKyw);
+         if (strxcmp(isCas,argv[1],psTab[i].pcKyw,0,-1,FALSE)==0 ||
+             strxcmp(isCas,argv[1],psTab[i].pcKyw,l,'=',TRUE)==0 ||
+             strxcmp(isCas,argv[1],psTab[i].pcKyw,l,'(',TRUE)==0 ||
+             strxcmp(isCas,argv[1],psTab[i].pcKyw,l,'.',TRUE)==0) {
+            char*                         pcCmd=NULL;
             char*                         pcTls=NULL;
             char*                         pcLst=NULL;
             siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isPfl,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl);
             if (siErr) ERROR(siErr);
-            siErr=siCleGetCommand(pvHdl,pfOut,pcDep,psTab[i].pcKyw,argc,argv,acFil,acCmd);
+            siErr=siCleGetCommand(pvHdl,pfOut,pcDep,psTab[i].pcKyw,argc,argv,acFil,&pcCmd);
             if (siErr) ERROR(siErr);
-            siErr=siClpParseCmd(pvHdl,acFil,acCmd,TRUE,psTab[i].piOid,&pcTls);
+            siErr=siClpParseCmd(pvHdl,acFil,pcCmd,TRUE,psTab[i].piOid,&pcTls);
             if (siErr<0) {
                fprintf(pfOut,"Command line parser for command '%s' failed!\n",psTab[i].pcKyw);
+               if (pcCmd!=NULL) free(pcCmd);
                ERROR(6);
             }
             if (pcTls!=NULL) {
@@ -1813,10 +1818,12 @@ EVALUATE:
             siErr=psTab[i].pfMap(pfOut,pfTrc,psTab[i].piOid,psTab[i].pvClp,psTab[i].pvPar);
             if (siErr) {
                fprintf(pfOut,"Mapping of CLP structure for command '%s' failed!\n",psTab[i].pcKyw);
+               if (pcCmd!=NULL) free(pcCmd);
                if (pcLst!=NULL) free(pcLst);
                ERROR(4);
             }
-            siErr=psTab[i].pfRun(pfOut,pfTrc,acOwn,pcPgm,pcVsn,pcAbo,pcLic,psTab[i].pcKyw,acCmd,pcLst,psTab[i].pvPar);
+            siErr=psTab[i].pfRun(pfOut,pfTrc,acOwn,pcPgm,pcVsn,pcAbo,pcLic,psTab[i].pcKyw,pcCmd,pcLst,psTab[i].pvPar);
+            if (pcCmd!=NULL) free(pcCmd);
             if (pcLst!=NULL) free(pcLst);
             if (siErr)  {
                fprintf(pfOut,"Run of command '%s' failed!\n",psTab[i].pcKyw);
@@ -1839,6 +1846,7 @@ EVALUATE:
          }
          for (i=argc;i>1;i--) ppArg[i]=argv[i-1];
          ppArg[0]=argv[0]; ppArg[1]=(char*)pcDef; argc++; argv=ppArg;
+         for (i=0;i<argc;i++) printf("2 %s\n",argv[i]);
          goto EVALUATE;
       }
       fprintf(pfOut,"Command or built-in function \'%s\' not supported\n",argv[1]);
@@ -2515,13 +2523,11 @@ static int siCleGetCommand(
    int                     argc,
    char*                   argv[],
    char*                   pcFil,
-   char*                   pcCmd)
+   char**                  ppCmd)
 {
-   int                     i,siCmd,siRst,l=strlen(pcFct);
-   char*                   pcHlp=NULL;
-   FILE*                   pfCmd=NULL;
+   int                     siErr,siSiz=0;
+   int                     l=strlen(pcFct);
    pcFil[0]=EOS;
-   pcCmd[0]=EOS;
    if (argc==2 && argv[1][l]!='=' && argv[1][l]!='.' && argv[1][l]!='(') {
       fprintf(pfOut,"Argument list (\"...\") for command \'%s\' missing\n",pcFct);
       fprintf(pfOut,"Syntax for command \'%s\' not valid\n",pcFct);
@@ -2532,24 +2538,25 @@ static int siCleGetCommand(
       return(8);
    }
    if (argv[1][l]==EOS) {
-      //TODO: replace with arr2str
-      for (i=2;i<argc;i++) {
-         if (strlen(pcCmd)+strlen(argv[i])+2>CLEMAX_CMDLEN) {
-            fprintf(pfOut,"Argument list is too long! (more than %d bytes)!\n",CLEMAX_CMDLEN);
-            return(8);
+      siErr=arry2str(argv+2,argc-2," ",1,ppCmd,&siSiz);
+      if (siErr<0) {
+         if (*ppCmd!=NULL) { free(*ppCmd); *ppCmd=NULL; }
+         switch(siErr) {
+         case -1: fprintf(pfOut,"Illegal parameters passed to arry2str() (Bug)\n");         return(24);
+         case -2: fprintf(pfOut,"Allocation of memory for command line failed.\n");         return(16);
+         default: fprintf(pfOut,"An unknown error occurred while reading command line.\n"); return(24);
          }
-         if (i>2) strcat(pcCmd," ");
-         strcat(pcCmd,argv[i]);
       }
    } else if (argv[1][l]=='.' || argv[1][l]=='(') {
-      strcat(pcCmd,&argv[1][l]);
-      //TODO: replace with arr2str
-      for (i=2;i<argc;i++) {
-         if (strlen(pcCmd)+strlen(argv[i])+2>CLEMAX_CMDLEN) {
-            fprintf(pfOut,"Argument list is too long! (more than %d bytes)!\n",CLEMAX_CMDLEN);
-            return(8);
+      argv[1]=&argv[1][l];
+      siErr=arry2str(argv+1,argc-1," ",1,ppCmd,&siSiz);
+      if (siErr<0) {
+         if (*ppCmd!=NULL) { free(*ppCmd); *ppCmd=NULL; }
+         switch(siErr) {
+         case -1: fprintf(pfOut,"Illegal parameters passed to arry2str() (Bug)\n");         return(24);
+         case -2: fprintf(pfOut,"Allocation of memory for command line failed.\n");         return(16);
+         default: fprintf(pfOut,"An unknown error occurred while reading command line.\n"); return(24);
          }
-         strcat(pcCmd," "); strcat(pcCmd,argv[i]);
       }
    } else if (argv[1][l]=='=') {
       if (argc!=2) {
@@ -2560,34 +2567,22 @@ static int siCleGetCommand(
          fprintf(pfOut,"Please use \'%s SYNTAX %s[.path]\' for more information\n",argv[0],pcFct);
          return(8);
       }
-      if (strlen(argv[1])>=CLEMAX_CMDLEN) {
-         fprintf(pfOut,"Parameter file name is too long (more than %d bytes)!\n",CLEMAX_CMDLEN);
+      if (strlen(argv[1])>=CLEMAX_FILLEN) {
+         fprintf(pfOut,"Parameter file name is too long (more than %d bytes)!\n",CLEMAX_FILLEN);
          return(8);
       }
       snprintf(pcFil,CLEMAX_FILSIZ,"%s",argv[1]+l+1);
-      //TODO: replace with file2str()
-      pfCmd=fopen(pcFil,"r");
-      if (pfCmd==NULL) {
-          fprintf(pfOut,"Cannot open the parameter file \'%s\' (%d-%s)\n",pcFil,errno,strerror(errno));
-         return(8);
-      }
-      pcCmd[0]=0x00; pcHlp=pcCmd; siRst=CLEMAX_CMDLEN;
-      while (!ferror(pfCmd) && !feof(pfCmd) && siRst) {
-         siCmd=fread(pcHlp,1,siRst,pfCmd);
-         pcHlp+=siCmd;
-         siRst-=siCmd;
-      }
-      if (ferror(pfCmd) && !feof(pfCmd)) {
-         fprintf(pfOut,"Error reading parameter file \'%s\' (%d-%s)\n",pcFil,ferror(pfCmd),strerror(ferror(pfCmd)));
-         fclose(pfCmd);
-         pcCmd[0]=EOS;
-         return(16);
-      }
-      fclose(pfCmd);
-      *pcHlp=EOS;
-      if (siRst==0) {
-         fprintf(pfOut,"Parameter file \'%s\' is too big (more than %d bytes)\n",pcFil,CLEMAX_CMDLEN);
-         return(8);
+      siErr=file2str(pcFil,ppCmd,&siSiz);
+      if (siErr<0) {
+         if (*ppCmd!=NULL) { free(*ppCmd); *ppCmd=NULL; }
+         switch(siErr) {
+         case -1: fprintf(pfOut,"Illegal parameters passed to file2str() (Bug)\n");                           return(24);
+         case -2: fprintf(pfOut,"Open of command file (%s) failed (%d - %s)\n",pcFil,errno,strerror(errno));  return( 0);
+         case -3: fprintf(pfOut,"Command file (%s) is too big (integer overflow)\n",pcFil);                   return( 8);
+         case -4: fprintf(pfOut,"Allocation of memory for command file (%s) failed.\n",pcFil);                return(16);
+         case -5: fprintf(pfOut,"Read of command file (%s) failed (%d - %s)\n",pcFil,errno,strerror(errno));  return(16);
+         default: fprintf(pfOut,"An unknown error occurred while reading command file (%s).\n",pcFil);        return(24);
+         }
       }
    } else {
       fprintf(pfOut,"No blank space ' ', equal sign '=', dot '.' or bracket '(' behind \'%s\'\n",pcFct);
