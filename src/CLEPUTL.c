@@ -38,6 +38,9 @@
 #include <stdarg.h>
 #include <limits.h>
 
+#ifdef __FL5__
+#include "FLAMUTL.h"
+#endif
 #include "CLEPUTL.h"
 
 #ifdef __WIN__

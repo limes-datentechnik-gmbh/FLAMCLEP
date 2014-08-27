@@ -1439,7 +1439,7 @@ EVALUATE:
                for (j=3;j<argc;j++) {
                   if (strlen(acPro)+strlen(argv[j])+strlen(acOwn)+strlen(pcPgm)+strlen(psTab[i].pcKyw)+8>CLEMAX_PATSIZ) {
                      fprintf(pfOut,"Argument list is too long!\n");
-                     return(8);
+                     ERROR(8);
                   }
                   if (j>3) strcat(acPro," ");
                   strcat(acPro,acOwn);
@@ -1473,7 +1473,7 @@ EVALUATE:
                for (j=2;j<argc;j++) {
                   if (strlen(acPro)+strlen(argv[j])+strlen(acOwn)+strlen(pcPgm)+strlen(psTab[i].pcKyw)+5>CLEMAX_PATSIZ) {
                      fprintf(pfOut,"Argument list is too long!\n");
-                     return(8);
+                     ERROR(8);
                   }
                   if (j>2) strcat(acPro," ");
                   strcat(acPro,acOwn);
@@ -2873,13 +2873,16 @@ static int siCnfClr(
    FILE*                         pfOut,
    const char*                   pcPre)
 {
-   int                           i;
+   int                           i=0;
    TsCnfEnt*                     psEnt;
    TsCnfEnt*                     psHlp;
-   for (i=0,psEnt=psHdl->psFst;psEnt!=NULL;psEnt=psHlp,i++) {
+   psEnt=psHdl->psFst;
+   while(psEnt!=NULL) {
       psHlp=psEnt->psNxt;
       memset(psEnt,0,sizeof(TsCnfEnt));
       free(psEnt);
+      psEnt=psHlp;
+      i++;
    }
    psHdl->psFst=NULL;
    psHdl->psLst=NULL;
@@ -2909,8 +2912,8 @@ static void vdCnfCls(
             psHlp=psEnt->psNxt; free(psEnt); psEnt=psHlp;
          }
          if (pfFil!=NULL) fclose(pfFil);
-         free(psHdl);
       }
+      free(psHdl);
    }
 }
 
