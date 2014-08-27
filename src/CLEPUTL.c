@@ -38,7 +38,7 @@
 #include <stdarg.h>
 #include <limits.h>
 
-#ifdef __FL5__
+#if defined(__FL5__) && defined(__DEBUG__)
 #include "FLAMUTL.h"
 #endif
 #include "CLEPUTL.h"
