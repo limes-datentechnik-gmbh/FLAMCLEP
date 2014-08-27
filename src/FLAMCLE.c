@@ -92,12 +92,13 @@
  * 1.1.27: Fix issue 547: Parameter files working properly
  * 1.1.28: Rework to make CLEP better usable with DLLs (eliminate global variables, adjust about and version, correct includes)
  * 1.1.29: Use arry2str for command line to remove last static vars, fix object and overlay handling if default command (>flam4 "(flamin=...)")
+ * 1.1.30: Use memchecker (FLAMUTL) if CLP used in FL5 project
  *
  */
-#define CLE_VSN_STR       "1.1.29"
+#define CLE_VSN_STR       "1.1.30"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        1
-#define CLE_VSN_REVISION       29
+#define CLE_VSN_REVISION       30
 
 /* Definition der Konstanten ******************************************/
 #define CLEMAX_CNFLEN            1023
