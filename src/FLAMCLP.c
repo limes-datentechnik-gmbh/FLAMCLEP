@@ -41,9 +41,11 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
-/* Include der Schnittstelle ******************************************/
-
+#ifdef __FL5__
+#include "FLAMUTL.h"
+#endif
 #include "CLEPUTL.h"
+/* Include der Schnittstelle ******************************************/
 #include "FLAMCLP.h"
 
 /* Definition der Version von FL-CLP **********************************

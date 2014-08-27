@@ -47,6 +47,9 @@
 
 /* Include eigener Bibliotheken  **************************************/
 
+#ifdef __FL5__
+#include "FLAMUTL.h"
+#endif
 #include "CLEPUTL.h"
 #include "FLAMCLP.h"
 
