@@ -571,7 +571,7 @@ extern int strxcmp(
                d=tolower(*s1)-tolower(*s2);
             }
             if (f && (!isKyw(*s1) || !isKyw(*s2))) return(0);
-         } else if (c==0){
+         } else if (c==0) {
             while (d==0 && *s1!=0 && *s2!=0) {
                s1++; s2++;
                d=tolower(*s1)-tolower(*s2);
