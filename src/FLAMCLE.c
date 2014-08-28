@@ -92,7 +92,7 @@
  * 1.1.27: Fix issue 547: Parameter files working properly
  * 1.1.28: Rework to make CLEP better usable with DLLs (eliminate global variables, adjust about and version, correct includes)
  * 1.1.29: Use arry2str for command line to remove last static vars, fix object and overlay handling if default command (>flam4 "(flamin=...)")
- * 1.1.30: Use memchecker (FLAMUTL) if CLP used in FL5 project
+ * 1.1.30: Use memchecker (FLAMUTL) if CLP used in FL5 project and fix memory leaks
  *
  */
 #define CLE_VSN_STR       "1.1.30"
@@ -1156,16 +1156,17 @@ EVALUATE:
             fprintf(pfDoc,"indexterm:[Available commands]\n\n\n");
 
             for (i=0;psTab[i].pcKyw!=NULL;i++) {
-               siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isPfl,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl);
-               if (siErr) ERROR(siErr);
                if (psTab[i].siFlg) {
+                  siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isPfl,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl);
+                  if (siErr) ERROR(siErr);
                   sprintf(acNum,"3.%d.",i+1);
                   siErr=siClpDocu(pvHdl,pfDoc,psTab[i].pcKyw,acNum,TRUE,FALSE,isNbr);
-                  vdClpClose(pvHdl); pvHdl=NULL;
                   if (siErr<0) {
                      fprintf(pfOut,"Creation of documentation file (%s) failed (%d - %s)\n",pcFil,errno,strerror(errno));
+                     vdClpClose(pvHdl); pvHdl=NULL;
                      ERROR(2);
                   }
+                  vdClpClose(pvHdl); pvHdl=NULL;
                }
             }
 

@@ -81,7 +81,7 @@
  * 1.1.28: Improve error handling (count rows and cols, print error msg and build error structure) and support isPfl-Flag
  * 1.1.29: Replace static variables for version and about to make it possible to use the lib as DLL
  * 1.1.30: Rework to make CLEP better usable with DLLs (eliminate global variables, adjust about and version, adjust includes)
- * 1.1.31: Use memchecker (FLAMUTL) if CLP used in FL5 project
+ * 1.1.31: Use memchecker (FLAMUTL) if CLP used in FL5 project and fix memory leaks
  **/
 
 #define CLP_VSN_STR       "1.1.31"
