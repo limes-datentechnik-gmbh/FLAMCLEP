@@ -667,7 +667,7 @@ EVALUATE:
             ERROR(8);
          }
          for (i=0;psTab[i].pcKyw!=NULL;i++) {
-            if (strxcmp(isCas,argv[2],psTab[i].pcKyw,0,'.',TRUE)==0) {
+            if (strxcmp(isCas,argv[2],psTab[i].pcKyw,strlen(psTab[i].pcKyw),'.',TRUE)==0) {
                siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isPfl,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl);
                if (siErr) ERROR(siErr);
                if (strlen(argv[2])==strlen(psTab[i].pcKyw)) {
@@ -764,7 +764,7 @@ EVALUATE:
             ERROR(8);
          }
          for (i=0;psTab[i].pcKyw!=NULL;i++) {
-            if (strxcmp(isCas,argv[2],psTab[i].pcKyw,0,'.',TRUE)==0) {
+            if (strxcmp(isCas,argv[2],psTab[i].pcKyw,strlen(psTab[i].pcKyw),'.',TRUE)==0) {
                siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isPfl,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl);
                if (siErr) ERROR(siErr);
                if (strlen(argv[2])==strlen(psTab[i].pcKyw)) {
@@ -977,7 +977,7 @@ EVALUATE:
                   pcCmd="";
                }
             }
-            if (strxcmp(isCas,pcCmd,psTab[i].pcKyw,0,'.',TRUE)==0) {
+            if (strxcmp(isCas,pcCmd,psTab[i].pcKyw,strlen(psTab[i].pcKyw),'.',TRUE)==0) {
                siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isPfl,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl);
                if (siErr) ERROR(siErr);
                if (isMan==FALSE) {
@@ -1079,7 +1079,7 @@ EVALUATE:
          }
          if (pcCmd!=NULL) {
             for (i=0;psTab[i].pcKyw!=NULL;i++) {
-               if (strxcmp(isCas,pcCmd,psTab[i].pcKyw,0,'.',TRUE)==0) {
+               if (strxcmp(isCas,pcCmd,psTab[i].pcKyw,strlen(psTab[i].pcKyw),'.',TRUE)==0) {
                   siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isPfl,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl);
                   if (siErr) ERROR(siErr);
                   sprintf(acNum,"2.%d.",i+1);
@@ -1606,7 +1606,7 @@ EVALUATE:
             ERROR(8);
          }
          for (i=0;psTab[i].pcKyw!=NULL;i++) {
-            if (strxcmp(isCas,argv[2],psTab[i].pcKyw,0,'.',TRUE)==0) {
+            if (strxcmp(isCas,argv[2],psTab[i].pcKyw,strlen(psTab[i].pcKyw),'.',TRUE)==0) {
                siErr=siClePropertyInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,
                                        psTab[i].piOid,psTab[i].psTab,isCas,isPfl,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,acFil,&siFil);
                if (siErr) ERROR(siErr);
