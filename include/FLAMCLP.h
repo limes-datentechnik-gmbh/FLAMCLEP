@@ -290,12 +290,13 @@ Compiler switches
 
 For compilation the defines below must be set:
 
-    __DEBUG__     for a debug build
-    __RELEASE__   for a release build
-    __WIN__       for WINDOWS platforms
-    __HOST__      for mainframe platforms
-    __BUILDNR__   to define the build number (integer, default is 0)
-    __BUILD__     to define the build string ("debug", "release", "alpha", ...)
+    __DEBUG__        for a debug build
+    __RELEASE__      for a release build
+    __WIN__          for WINDOWS platforms
+    __HOST__         for mainframe platforms
+    __BUILDNR__      to define the build number (integer, default is 0)
+    __BUILD__        to define the build string ("debug", "release", "alpha", ...)
+    __HOSTSHORTING__ to short function names to 8 character for mainframes
  *
  **********************************************************************/
 
@@ -307,20 +308,20 @@ For compilation the defines below must be set:
 #define INC_CLP_H
 
 
-#ifdef __HOST__
-   #define pcClpVersion          flclpvsn
-   #define pcClpAbout            flclpabo
-   #define pvClpOpen             flclpopn
-   #define siClpParsePro         flclprsp
-   #define siClpParseCmd         flclprsc
-   #define siClpProperties       flclppro
-   #define siClpSyntax           flclpsyn
-   #define siClpHelp             flclphlp
-   #define siClpDocu             flclpdoc
-   #define siClpLexem            flclplex
-   #define siClpGrammar          flclpgrm
-   #define vdClpClose            flclpcls
-   #define pcClpError            flclperr
+#ifdef __HOSTSHORTING__
+   #define pcClpVersion          FLCLPVSN
+   #define pcClpAbout            FLCLPABO
+   #define pvClpOpen             FLCLPOPN
+   #define siClpParsePro         FLCLPRSP
+   #define siClpParseCmd         FLCLPRSC
+   #define siClpProperties       FLCLPPRO
+   #define siClpSyntax           FLCLPSYN
+   #define siClpHelp             FLCLPHLP
+   #define siClpDocu             FLCLPDOC
+   #define siClpLexem            FLCLPLEX
+   #define siClpGrammar          FLCLPGRM
+   #define vdClpClose            FLCLPCLS
+   #define pcClpError            FLCLPERR
 #endif
 
 #include <stdint.h>
