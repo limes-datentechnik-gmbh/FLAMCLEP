@@ -78,7 +78,7 @@ extern const char* CUSERID(const int size, char* buffer) {
 extern const char* HOMEDIR(int flag, const int size, char* buffer) {
    const char*    home=getenv("HOME");
    buffer[0]=0x00;
-   if (home!=NULL) {
+   if (home!=NULL && strlen(home)) {
       if (flag) {
          snprintf(buffer,size,"%s/",home);
       } else {
