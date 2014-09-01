@@ -47,13 +47,14 @@
 #define _WIN32_IE 0x5000
 #include <shlobj.h>
 #include <windows.h>
-extern const char* CUSERID(const int size, char* buffer) {
+extern char* CUSERID(const int size, char* buffer) {
+   unsigned int tmp=size;
    buffer[0]=0x00;
-   GetUserName(buffer,size);
+   GetUserName(buffer,&tmp);
    return(buffer);
 }
-extern const char* HOMEDIR(int flag, const int size, char* buffer) {
-   char path[MAX_PATH]="";
+extern char* HOMEDIR(int flag, const int size, char* buffer) {
+   char path[MAX_PATH+1]="";
    buffer[0]=0x00;
    SHGetFolderPath(NULL,CSIDL_PROFILE,NULL,0,path);
    if (flag) {
@@ -67,7 +68,7 @@ extern const char* HOMEDIR(int flag, const int size, char* buffer) {
 #include <unistd.h>
 #include <sys/types.h>
 #include <pwd.h>
-extern const char* CUSERID(const int size, char* buffer) {
+extern char* CUSERID(const int size, char* buffer) {
    buffer[0]=0x00;
    struct passwd* uP = getpwuid(geteuid());
    if (NULL != uP) {
@@ -75,7 +76,7 @@ extern const char* CUSERID(const int size, char* buffer) {
    }
    return(buffer);
 }
-extern const char* HOMEDIR(int flag, const int size, char* buffer) {
+extern char* HOMEDIR(int flag, const int size, char* buffer) {
    const char*    home=getenv("HOME");
    buffer[0]=0x00;
    if (home!=NULL && strlen(home)) {
