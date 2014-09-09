@@ -47,9 +47,6 @@
 
 /* Include eigener Bibliotheken  **************************************/
 
-#if defined(__FL5__) && defined(__DEBUG__)
-#include "FLAMUTL.h"
-#endif
 #include "CLEPUTL.h"
 #include "FLAMCLP.h"
 
@@ -92,7 +89,7 @@
  * 1.1.27: Fix issue 547: Parameter files working properly
  * 1.1.28: Rework to make CLEP better usable with DLLs (eliminate global variables, adjust about and version, correct includes)
  * 1.1.29: Use arry2str for command line to remove last static vars, fix object and overlay handling if default command (>flam4 "(flamin=...)")
- * 1.1.30: Use memchecker (FLAMUTL) if CLP used in FL5 project and fix memory leaks
+ * 1.1.30: fix memory leaks found with memchecker
  *
  */
 #define CLE_VSN_STR       "1.1.30"
