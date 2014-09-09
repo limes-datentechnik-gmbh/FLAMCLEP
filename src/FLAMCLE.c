@@ -90,12 +90,13 @@
  * 1.1.28: Rework to make CLEP better usable with DLLs (eliminate global variables, adjust about and version, correct includes)
  * 1.1.29: Use arry2str for command line to remove last static vars, fix object and overlay handling if default command (>flam4 "(flamin=...)")
  * 1.1.30: fix memory leaks found with memchecker
+ * 1.1.31: Support definition of the owner per run of a command
  *
  */
-#define CLE_VSN_STR       "1.1.30"
+#define CLE_VSN_STR       "1.1.31"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        1
-#define CLE_VSN_REVISION       30
+#define CLE_VSN_REVISION       31
 
 /* Definition der Konstanten ******************************************/
 #define CLEMAX_CNFLEN            1023
@@ -1791,53 +1792,61 @@ EVALUATE:
       fprintf(pfOut,"%s %s CONFIG CLEAR\n",pcDep,argv[0]);
       ERROR(8);
    } else {
-      for (i=0;psTab[i].pcKyw!=NULL;i++) {
-         l=strlen(psTab[i].pcKyw);
-         if (strxcmp(isCas,argv[1],psTab[i].pcKyw,0,-1,FALSE)==0 ||
-             strxcmp(isCas,argv[1],psTab[i].pcKyw,l,'=',TRUE)==0 ||
-             strxcmp(isCas,argv[1],psTab[i].pcKyw,l,'(',TRUE)==0 ||
-             strxcmp(isCas,argv[1],psTab[i].pcKyw,l,'.',TRUE)==0) {
-            char*                         pcCmd=NULL;
-            char*                         pcTls=NULL;
-            char*                         pcLst=NULL;
-            siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isPfl,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl);
-            if (siErr) ERROR(siErr);
-            siErr=siCleGetCommand(pvHdl,pfOut,pcDep,psTab[i].pcKyw,argc,argv,acFil,&pcCmd);
-            if (siErr) ERROR(siErr);
-            siErr=siClpParseCmd(pvHdl,acFil,pcCmd,TRUE,psTab[i].piOid,&pcTls);
-            if (siErr<0) {
-               fprintf(pfOut,"Command line parser for command '%s' failed!\n",psTab[i].pcKyw);
-               if (pcCmd!=NULL) free(pcCmd);
-               ERROR(6);
-            }
-            if (pcTls!=NULL) {
-               pcLst=(char*)malloc(strlen(pcTls)+1);
-               if (pcLst!=NULL) {
-                  strcpy(pcLst,pcTls);
+      if (strxcmp(isCas,argv[1],"OWNER=",6,0,FALSE)==0) {
+         snprintf(acOwn,sizeof(acOwn),"%s",&argv[1][6]);
+         fprintf(pfOut,"Use owner: '%s'\n",acOwn);
+         for (i=1;i<argc;i++) argv[i]=argv[i+1];
+         argc--;
+      }
+      if (argc>1) {
+         for (i=0;psTab[i].pcKyw!=NULL;i++) {
+            l=strlen(psTab[i].pcKyw);
+            if (strxcmp(isCas,argv[1],psTab[i].pcKyw,0,-1,FALSE)==0 ||
+                strxcmp(isCas,argv[1],psTab[i].pcKyw,l,'=',TRUE)==0 ||
+                strxcmp(isCas,argv[1],psTab[i].pcKyw,l,'(',TRUE)==0 ||
+                strxcmp(isCas,argv[1],psTab[i].pcKyw,l,'.',TRUE)==0) {
+               char*                         pcCmd=NULL;
+               char*                         pcTls=NULL;
+               char*                         pcLst=NULL;
+               siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isPfl,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl);
+               if (siErr) ERROR(siErr);
+               siErr=siCleGetCommand(pvHdl,pfOut,pcDep,psTab[i].pcKyw,argc,argv,acFil,&pcCmd);
+               if (siErr) ERROR(siErr);
+               siErr=siClpParseCmd(pvHdl,acFil,pcCmd,TRUE,psTab[i].piOid,&pcTls);
+               if (siErr<0) {
+                  fprintf(pfOut,"Command line parser for command '%s' failed!\n",psTab[i].pcKyw);
+                  if (pcCmd!=NULL) free(pcCmd);
+                  ERROR(6);
                }
-            }
-            vdClpClose(pvHdl); pvHdl=NULL;
-            siErr=psTab[i].pfMap(pfOut,pfTrc,psTab[i].piOid,psTab[i].pvClp,psTab[i].pvPar);
-            if (siErr) {
-               fprintf(pfOut,"Mapping of CLP structure for command '%s' failed!\n",psTab[i].pcKyw);
+               if (pcTls!=NULL) {
+                  pcLst=(char*)malloc(strlen(pcTls)+1);
+                  if (pcLst!=NULL) {
+                     strcpy(pcLst,pcTls);
+                  }
+               }
+               vdClpClose(pvHdl); pvHdl=NULL;
+               siErr=psTab[i].pfMap(pfOut,pfTrc,psTab[i].piOid,psTab[i].pvClp,psTab[i].pvPar);
+               if (siErr) {
+                  fprintf(pfOut,"Mapping of CLP structure for command '%s' failed!\n",psTab[i].pcKyw);
+                  if (pcCmd!=NULL) free(pcCmd);
+                  if (pcLst!=NULL) free(pcLst);
+                  ERROR(4);
+               }
+               siErr=psTab[i].pfRun(pfOut,pfTrc,acOwn,pcPgm,pcVsn,pcAbo,pcLic,psTab[i].pcKyw,pcCmd,pcLst,psTab[i].pvPar);
                if (pcCmd!=NULL) free(pcCmd);
                if (pcLst!=NULL) free(pcLst);
-               ERROR(4);
-            }
-            siErr=psTab[i].pfRun(pfOut,pfTrc,acOwn,pcPgm,pcVsn,pcAbo,pcLic,psTab[i].pcKyw,pcCmd,pcLst,psTab[i].pvPar);
-            if (pcCmd!=NULL) free(pcCmd);
-            if (pcLst!=NULL) free(pcLst);
-            if (siErr)  {
-               fprintf(pfOut,"Run of command '%s' failed!\n",psTab[i].pcKyw);
+               if (siErr)  {
+                  fprintf(pfOut,"Run of command '%s' failed!\n",psTab[i].pcKyw);
+                  siErr=psTab[i].pfFin(pfOut,pfTrc,psTab[i].pvPar);
+                  ERROR(2);
+               }
                siErr=psTab[i].pfFin(pfOut,pfTrc,psTab[i].pvPar);
-               ERROR(2);
+               if (siErr) {
+                  fprintf(pfOut,"Finish/cleanup for command '%s' failed!\n",psTab[i].pcKyw);
+                  ERROR(1);
+               }
+               ERROR(0);
             }
-            siErr=psTab[i].pfFin(pfOut,pfTrc,psTab[i].pvPar);
-            if (siErr) {
-               fprintf(pfOut,"Finish/cleanup for command '%s' failed!\n",psTab[i].pcKyw);
-               ERROR(1);
-            }
-            ERROR(0);
          }
       }
       if (pcDef!=NULL && strlen(pcDef) && ppArg==NULL) {
@@ -1848,7 +1857,6 @@ EVALUATE:
          }
          for (i=argc;i>1;i--) ppArg[i]=argv[i-1];
          ppArg[0]=argv[0]; ppArg[1]=(char*)pcDef; argc++; argv=ppArg;
-         for (i=0;i<argc;i++) printf("2 %s\n",argv[i]);
          goto EVALUATE;
       }
       fprintf(pfOut,"Command or built-in function \'%s\' not supported\n",argv[1]);
@@ -2354,8 +2362,8 @@ static void vdPrnStaticSyntax(
       }
    }
    fprintf(pfOut,"\n");
-   fprintf(pfOut,"%s%s %s command \"... argument list ...\"\n",pcDep,pcDep,pcPgm                 );
-   fprintf(pfOut,"%s%s %s command=\" parameter file name \"\n",pcDep,pcDep,pcPgm                 );
+   fprintf(pfOut,"%s%s %s [OWNER=oid] command \"... argument list ...\"\n",pcDep,pcDep,pcPgm     );
+   fprintf(pfOut,"%s%s %s [OWNER=oid] command=\" parameter file name \"\n",pcDep,pcDep,pcPgm     );
    fprintf(pfOut,"%s Built-in functions:\n"                   ,pcDep                             );
    fprintf(pfOut,"%s%s %s %s\n"                               ,pcDep,pcDep,pcPgm,SYN_CLE_SYNTAX  );
    fprintf(pfOut,"%s%s %s %s\n"                               ,pcDep,pcDep,pcPgm,SYN_CLE_HELP    );
@@ -2590,8 +2598,8 @@ static int siCleGetCommand(
       fprintf(pfOut,"No blank space ' ', equal sign '=', dot '.' or bracket '(' behind \'%s\'\n",pcFct);
       fprintf(pfOut,"Please use a blank space to define an argument list or an equal sign for a parameter file\n");
       fprintf(pfOut,"Syntax for command \'%s\' not valid\n",pcFct);
-      fprintf(pfOut,"%s %s %s \"... argument list ...\"\n",pcDep,argv[0],pcFct);
-      fprintf(pfOut,"%s %s %s=\" parameter file name \"\n",pcDep,argv[0],pcFct);
+      fprintf(pfOut,"%s %s [OWNER=oid] %s \"... argument list ...\"\n",pcDep,argv[0],pcFct);
+      fprintf(pfOut,"%s %s [OWNER=oid] %s=\" parameter file name \"\n",pcDep,argv[0],pcFct);
       fprintf(pfOut,"Please use \'%s SYNTAX %s[.path]\' for more information\n",argv[0],pcFct);
       return(8);
    }

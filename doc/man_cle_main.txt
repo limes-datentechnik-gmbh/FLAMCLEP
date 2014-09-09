@@ -15,8 +15,8 @@ separate the settings for different clients and a property management
 for each command. If problems occur, you can activate a trace and
 manage all configuration settings.
 
-For each command execution You can define environment variables which
-are managed over the configuration file.
+For each command execution you can define the owner and environment
+variables which are managed over the configuration file.
 
 The default trace file is 'stdout'. If you activate the trace before a
 trace file is defined, the trace will be printed on the screen.

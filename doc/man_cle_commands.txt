@@ -24,7 +24,8 @@ of the real syntax. The braces are only written to demonstrate
 clearly that one of these arguments must be selected with the
 DOT operator (optional) for defining the overlay.
 
-To be compatible with certain shells the features below are implemented:
+To be compatible with certain shells, the features below are
+implemented:
 
  * Strings can be enclosed with '' or ""
  * Strings can also defined without quotes 
@@ -35,3 +36,6 @@ Commands can be declared in deep hierarchical depth. In order to
 simplify their handling the path is a powerful instrument for managing
 only relevant parts of it. Because of that the path is printed for each
 synopsis.
+
+To run commands under different owners, the owner id can be defined in
+front of the command.
