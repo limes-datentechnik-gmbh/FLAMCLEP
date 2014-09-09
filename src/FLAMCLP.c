@@ -79,12 +79,13 @@
  * 1.1.29: Replace static variables for version and about to make it possible to use the lib as DLL
  * 1.1.30: Rework to make CLEP better usable with DLLs (eliminate global variables, adjust about and version, adjust includes)
  * 1.1.31: fix memory leaks found with memchecker
+ * 1.1.32: use SELECTION as Type in argument lists if the selection flag on and KEYWORD for constant definitions
  **/
 
-#define CLP_VSN_STR       "1.1.31"
+#define CLP_VSN_STR       "1.1.32"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        1
-#define CLP_VSN_REVISION       31
+#define CLP_VSN_REVISION       32
 
 /* Definition der Flag-Makros *****************************************/
 
@@ -529,7 +530,9 @@ static void vdClpPrnArg(
    const int                     siKwl,
    const int                     siTyp,
    const char*                   pcHlp,
-   const char*                   pcDft);
+   const char*                   pcDft,
+   const int                     isSel,
+   const int                     isCon);
 
 static void vdClpPrnArgTab(
    void*                         pvHdl,
@@ -3832,11 +3835,13 @@ static int siClpFinMainObj(
             if (psHlp->psFix->siMin<=1) {
                CLPERR(psHdl,CLPERR_SEM,"Parameter \'%s.%s\' not specified",fpcPat(pvHdl,0),psHlp->psStd->pcKyw);
                CLPERRADD(psHdl,0,"Please specify parameter:%s","");
-               vdClpPrnArg(pvHdl,psHdl->pfErr,1,psHlp->psStd->pcKyw,psHlp->psStd->pcAli,psHlp->psStd->siKwl,psHlp->psFix->siTyp,psHlp->psFix->pcHlp,psHlp->psFix->pcDft);
+               vdClpPrnArg(pvHdl,psHdl->pfErr,1,psHlp->psStd->pcKyw,psHlp->psStd->pcAli,psHlp->psStd->siKwl,psHlp->psFix->siTyp,psHlp->psFix->pcHlp,psHlp->psFix->pcDft,
+                           CLPISS_SEL(psHlp->psStd->uiFlg),CLPISS_CON(psHlp->psStd->uiFlg));
             } else {
                CLPERR(psHdl,CLPERR_SEM,"Amount of occurrences (%d) of parameter \'%s.%s\' is smaller than required minimum amount (%d)",psHlp->psVar->siCnt,fpcPat(pvHdl,0),psHlp->psStd->pcKyw,psHlp->psFix->siMin);
                CLPERRADD(psHdl,0,"Please specify parameter additionally %d times:%s","");
-               vdClpPrnArg(pvHdl,psHdl->pfErr,1,psHlp->psStd->pcKyw,psHlp->psStd->pcAli,psHlp->psStd->siKwl,psHlp->psFix->siTyp,psHlp->psFix->pcHlp,psHlp->psFix->pcDft);
+               vdClpPrnArg(pvHdl,psHdl->pfErr,1,psHlp->psStd->pcKyw,psHlp->psStd->pcAli,psHlp->psStd->siKwl,psHlp->psFix->siTyp,psHlp->psFix->pcHlp,psHlp->psFix->pcDft,
+                           CLPISS_SEL(psHlp->psStd->uiFlg),CLPISS_CON(psHlp->psStd->uiFlg));
             }
             return(CLPERR_SEM);
          }
@@ -3910,11 +3915,13 @@ static int siClpFinMainOvl(
                if (psHlp->psFix->siMin<=1) {
                   CLPERR(psHdl,CLPERR_SEM,"Parameter \'%s.%s\' not specified",fpcPat(pvHdl,0),psHlp->psStd->pcKyw);
                   CLPERRADD(psHdl,0,"Please specify parameter:%s","");
-                  vdClpPrnArg(pvHdl,psHdl->pfErr,1,psHlp->psStd->pcKyw,psHlp->psStd->pcAli,psHlp->psStd->siKwl,psHlp->psFix->siTyp,psHlp->psFix->pcHlp,psHlp->psFix->pcDft);
+                  vdClpPrnArg(pvHdl,psHdl->pfErr,1,psHlp->psStd->pcKyw,psHlp->psStd->pcAli,psHlp->psStd->siKwl,psHlp->psFix->siTyp,psHlp->psFix->pcHlp,psHlp->psFix->pcDft,
+                              CLPISS_SEL(psHlp->psStd->uiFlg),CLPISS_SEL(psHlp->psStd->uiFlg));
                } else {
                   CLPERR(psHdl,CLPERR_SEM,"Amount of occurrences (%d) of parameter \'%s.%s\' is smaller than required minimum amount (%d)",psHlp->psVar->siCnt,fpcPat(pvHdl,0),psHlp->psStd->pcKyw,psHlp->psFix->siMin);
                   CLPERRADD(psHdl,0,"Please specify parameter additionally %d times:%s","");
-                  vdClpPrnArg(pvHdl,psHdl->pfErr,1,psHlp->psStd->pcKyw,psHlp->psStd->pcAli,psHlp->psStd->siKwl,psHlp->psFix->siTyp,psHlp->psFix->pcHlp,psHlp->psFix->pcDft);
+                  vdClpPrnArg(pvHdl,psHdl->pfErr,1,psHlp->psStd->pcKyw,psHlp->psStd->pcAli,psHlp->psStd->siKwl,psHlp->psFix->siTyp,psHlp->psFix->pcHlp,psHlp->psFix->pcDft,
+                              CLPISS_SEL(psHlp->psStd->uiFlg),CLPISS_CON(psHlp->psStd->uiFlg));
                }
                return(CLPERR_SEM);
             }
@@ -4011,11 +4018,13 @@ static int siClpFinObj(
             if (psHlp->psFix->siMin<=1) {
                CLPERR(psHdl,CLPERR_SEM,"Parameter \'%s.%s.%s\' not specified",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,psHlp->psStd->pcKyw);
                CLPERRADD(psHdl,0,"Please specify parameter:%s","");
-               vdClpPrnArg(pvHdl,psHdl->pfErr,1,psHlp->psStd->pcKyw,psHlp->psStd->pcAli,psHlp->psStd->siKwl,psHlp->psFix->siTyp,psHlp->psFix->pcHlp,psHlp->psFix->pcDft);
+               vdClpPrnArg(pvHdl,psHdl->pfErr,1,psHlp->psStd->pcKyw,psHlp->psStd->pcAli,psHlp->psStd->siKwl,psHlp->psFix->siTyp,psHlp->psFix->pcHlp,psHlp->psFix->pcDft,
+                           CLPISS_SEL(psHlp->psStd->uiFlg),CLPISS_CON(psHlp->psStd->uiFlg));
             } else {
                CLPERR(psHdl,CLPERR_SEM,"Amount of occurrences (%d) of parameter \'%s.%s.%s\' is smaller than required minimum amount (%d)",psDep->psVar->siCnt,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,psHlp->psStd->pcKyw,psHlp->psFix->siMin);
                CLPERRADD(psHdl,0,"Please specify parameter additionally %d times:%s","");
-               vdClpPrnArg(pvHdl,psHdl->pfErr,1,psHlp->psStd->pcKyw,psHlp->psStd->pcAli,psHlp->psStd->siKwl,psHlp->psFix->siTyp,psHlp->psFix->pcHlp,psHlp->psFix->pcDft);
+               vdClpPrnArg(pvHdl,psHdl->pfErr,1,psHlp->psStd->pcKyw,psHlp->psStd->pcAli,psHlp->psStd->siKwl,psHlp->psFix->siTyp,psHlp->psFix->pcHlp,psHlp->psFix->pcDft,
+                           CLPISS_SEL(psHlp->psStd->uiFlg),CLPISS_CON(psHlp->psStd->uiFlg));
             }
             return(CLPERR_SEM);
          }
@@ -4129,11 +4138,13 @@ static int siClpFinOvl(
                if (psHlp->psFix->siMin<=1) {
                   CLPERR(psHdl,CLPERR_SEM,"Parameter \'%s.%s.%s\' not specified",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,psHlp->psStd->pcKyw);
                   CLPERRADD(psHdl,0,"Please specify parameter:%s","");
-                  vdClpPrnArg(pvHdl,psHdl->pfErr,1,psHlp->psStd->pcKyw,psHlp->psStd->pcAli,psHlp->psStd->siKwl,psHlp->psFix->siTyp,psHlp->psFix->pcHlp,psHlp->psFix->pcDft);
+                  vdClpPrnArg(pvHdl,psHdl->pfErr,1,psHlp->psStd->pcKyw,psHlp->psStd->pcAli,psHlp->psStd->siKwl,psHlp->psFix->siTyp,psHlp->psFix->pcHlp,psHlp->psFix->pcDft,
+                              CLPISS_SEL(psHlp->psStd->uiFlg),CLPISS_CON(psHlp->psStd->uiFlg));
                } else {
                   CLPERR(psHdl,CLPERR_SEM,"Amount of occurrences (%d) of parameter \'%s.%s.%s\' is smaller than required minimum amount (%d)",psDep->psVar->siCnt,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,psHlp->psStd->pcKyw,psHlp->psFix->siMin);
                   CLPERRADD(psHdl,0,"Please specify parameter additionally %d times:%s","");
-                  vdClpPrnArg(pvHdl,psHdl->pfErr,1,psHlp->psStd->pcKyw,psHlp->psStd->pcAli,psHlp->psStd->siKwl,psHlp->psFix->siTyp,psHlp->psFix->pcHlp,psHlp->psFix->pcDft);
+                  vdClpPrnArg(pvHdl,psHdl->pfErr,1,psHlp->psStd->pcKyw,psHlp->psStd->pcAli,psHlp->psStd->siKwl,psHlp->psFix->siTyp,psHlp->psFix->pcHlp,psHlp->psFix->pcDft,
+                              CLPISS_SEL(psHlp->psStd->uiFlg),CLPISS_CON(psHlp->psStd->uiFlg));
                }
                return(CLPERR_SEM);
             }
@@ -4250,13 +4261,16 @@ static void vdClpPrnArg(
    const int                     siKwl,
    const int                     siTyp,
    const char*                   pcHlp,
-   const char*                   pcDft)
+   const char*                   pcDft,
+   const int                     isSel,
+   const int                     isCon)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    char*                         p=fpcPre(pvHdl,siLev);
    int                           i,siLen;
    const char*                   a="TYPE";
-   const char*                   b=apClpTyp[siTyp];
+   const char*                   b=(isSel)?"SELECTION":((isCon)?"KEYWORD":apClpTyp[siTyp]);
+
    if (pcAli!=NULL && strlen(pcAli)) {
       a="ALIAS";
       b=pcAli;
@@ -4295,7 +4309,8 @@ static void vdClpPrnArgTab(
    const TsSym*                  psHlp;
    for (psHlp=psTab;psHlp!=NULL;psHlp=psHlp->psNxt) {
       if ((psHlp->psFix->siTyp==siTyp || siTyp<0) && !CLPISS_LNK(psHlp->psStd->uiFlg)) {
-         vdClpPrnArg(pvHdl,pfOut,siLev,psHlp->psStd->pcKyw,psHlp->psStd->pcAli,psHlp->psStd->siKwl,psHlp->psFix->siTyp,psHlp->psFix->pcHlp,psHlp->psFix->pcDft);
+         vdClpPrnArg(pvHdl,pfOut,siLev,psHlp->psStd->pcKyw,psHlp->psStd->pcAli,psHlp->psStd->siKwl,psHlp->psFix->siTyp,psHlp->psFix->pcHlp,psHlp->psFix->pcDft,
+                     CLPISS_SEL(psHlp->psStd->uiFlg),CLPISS_CON(psHlp->psStd->uiFlg));
       }
    }
 }
@@ -4612,7 +4627,8 @@ static int siClpPrnHlp(
       for (psHlp=psTab;psHlp!=NULL;psHlp=psHlp->psNxt) {
          if ((psHlp->psFix->siTyp==siTyp || siTyp<0) && CLPISS_CMD(psHlp->psStd->uiFlg) && !CLPISS_LNK(psHlp->psStd->uiFlg)) {
             if (!CLPISS_ALI(psHlp->psStd->uiFlg) || (CLPISS_ALI(psHlp->psStd->uiFlg) && isAli)) {
-               vdClpPrnArg(pvHdl,pfOut,siLev,psHlp->psStd->pcKyw,psHlp->psStd->pcAli,psHlp->psStd->siKwl,psHlp->psFix->siTyp,psHlp->psFix->pcHlp,psHlp->psFix->pcDft);
+               vdClpPrnArg(pvHdl,pfOut,siLev,psHlp->psStd->pcKyw,psHlp->psStd->pcAli,psHlp->psStd->siKwl,psHlp->psFix->siTyp,psHlp->psFix->pcHlp,psHlp->psFix->pcDft,
+                           CLPISS_SEL(psHlp->psStd->uiFlg),CLPISS_CON(psHlp->psStd->uiFlg));
                if (psHlp->psDep!=NULL) {
                   if (psHlp->psFix->siTyp==CLPTYP_OBJECT || psHlp->psFix->siTyp==CLPTYP_OVRLAY) {
                      psHdl->apPat[siLev]=psHlp;
