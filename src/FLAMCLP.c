@@ -80,12 +80,13 @@
  * 1.1.30: Rework to make CLEP better usable with DLLs (eliminate global variables, adjust about and version, adjust includes)
  * 1.1.31: fix memory leaks found with memchecker
  * 1.1.32: use SELECTION as Type in argument lists if the selection flag on and KEYWORD for constant definitions
+ * 1.1.33: If no SELECTION but keywords possible the help shows a additional statement that you can enter also a value
  **/
 
-#define CLP_VSN_STR       "1.1.32"
+#define CLP_VSN_STR       "1.1.33"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        1
-#define CLP_VSN_REVISION       32
+#define CLP_VSN_REVISION       33
 
 /* Definition der Flag-Makros *****************************************/
 
@@ -538,7 +539,7 @@ static void vdClpPrnArgTab(
    void*                         pvHdl,
    FILE*                         pfOut,
    const int                     siLev,
-   const int                     siTyp,
+   int                           siTyp,
    const TsSym*                  psTab);
 
 static void vdClpPrnAli(
@@ -577,7 +578,8 @@ static int siClpPrnHlp(
    const int                     siLev,
    const int                     siDep,
    const int                     siTyp,
-   const TsSym*                  psArg);
+   const TsSym*                  psArg,
+   const int                     isFlg);
 
 static int siClpPrnDoc(
    void*                         pvHdl,
@@ -990,8 +992,18 @@ extern int siClpHelp(
                   }
                }
             } else {
-               siErr=siClpPrnHlp(pvHdl,psHdl->pfHlp,isAli,siLev,siLev+siDep,-1,psTab);
-               if (siErr<0) return(siErr);
+               if (psArg->psFix->siTyp==CLPTYP_OBJECT || psArg->psFix->siTyp==CLPTYP_OVRLAY) {
+                  siErr=siClpPrnHlp(pvHdl,psHdl->pfHlp,isAli,siLev,siLev+siDep,-1,psTab,FALSE);
+                  if (siErr<0) return(siErr);
+               } else {
+                  if (CLPISS_SEL(psArg->psStd->uiFlg)) {
+                     siErr=siClpPrnHlp(pvHdl,psHdl->pfHlp,isAli,siLev,siLev+siDep,psArg->psFix->siTyp,psTab,FALSE);
+                     if (siErr<0) return(siErr);
+                  } else {
+                     siErr=siClpPrnHlp(pvHdl,psHdl->pfHlp,isAli,siLev,siLev+siDep,psArg->psFix->siTyp,psTab,TRUE);
+                     if (siErr<0) return(siErr);
+                  }
+               }
             }
          } else {
             if (isMan) {
@@ -1015,7 +1027,7 @@ extern int siClpHelp(
             fprintf(psHdl->pfHlp,"No detailed description available for this command.\n");
          }
       } else {
-         siErr=siClpPrnHlp(pvHdl,psHdl->pfHlp,isAli,0,siDep,-1,psTab);
+         siErr=siClpPrnHlp(pvHdl,psHdl->pfHlp,isAli,0,siDep,-1,psTab,FALSE);
          if (siErr<0) return(siErr);
       }
    }
@@ -4303,10 +4315,22 @@ static void vdClpPrnArgTab(
    void*                         pvHdl,
    FILE*                         pfOut,
    const int                     siLev,
-   const int                     siTyp,
+   int                           siTyp,
    const TsSym*                  psTab)
 {
    const TsSym*                  psHlp;
+   if (psTab!=NULL && psTab->psHih!=NULL) {
+      if (CLPISS_CON(psTab->psStd->uiFlg)) {
+         if (siTyp<0) siTyp=psTab->psHih->psFix->siTyp;
+         if (CLPISS_SEL(psTab->psHih->psStd->uiFlg)==FALSE) {
+            if (siTyp>=0) {
+               fprintf(pfOut,"%s Enter a value (TYPE: %s) or use one of the keywords below:\n",fpcPre(pvHdl,siLev),apClpTyp[siTyp]);
+            } else {
+               fprintf(pfOut,"%s Enter a value or use one of the keywords below:\n",fpcPre(pvHdl,siLev));
+            }
+         }
+      }
+   }
    for (psHlp=psTab;psHlp!=NULL;psHlp=psHlp->psNxt) {
       if ((psHlp->psFix->siTyp==siTyp || siTyp<0) && !CLPISS_LNK(psHlp->psStd->uiFlg)) {
          vdClpPrnArg(pvHdl,pfOut,siLev,psHlp->psStd->pcKyw,psHlp->psStd->pcAli,psHlp->psStd->siKwl,psHlp->psFix->siTyp,psHlp->psFix->pcHlp,psHlp->psFix->pcDft,
@@ -4609,7 +4633,8 @@ static int siClpPrnHlp(
    const int                     siLev,
    const int                     siDep,
    const int                     siTyp,
-   const TsSym*                  psTab)
+   const TsSym*                  psTab,
+   const int                     isFlg)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    const TsSym*                  psHlp;
@@ -4624,6 +4649,13 @@ static int siClpPrnHlp(
    }
 
    if (siLev<siDep || siDep>9) {
+      if (isFlg) {
+         if (siTyp>=0) {
+            fprintf(pfOut,"%s Enter a value (TYPE: %s) or use one of the keywords below:\n",fpcPre(pvHdl,siLev),apClpTyp[siTyp]);
+         } else {
+            fprintf(pfOut,"%s Enter a value or use one of the keywords below:\n",fpcPre(pvHdl,siLev));
+         }
+      }
       for (psHlp=psTab;psHlp!=NULL;psHlp=psHlp->psNxt) {
          if ((psHlp->psFix->siTyp==siTyp || siTyp<0) && CLPISS_CMD(psHlp->psStd->uiFlg) && !CLPISS_LNK(psHlp->psStd->uiFlg)) {
             if (!CLPISS_ALI(psHlp->psStd->uiFlg) || (CLPISS_ALI(psHlp->psStd->uiFlg) && isAli)) {
@@ -4632,12 +4664,17 @@ static int siClpPrnHlp(
                if (psHlp->psDep!=NULL) {
                   if (psHlp->psFix->siTyp==CLPTYP_OBJECT || psHlp->psFix->siTyp==CLPTYP_OVRLAY) {
                      psHdl->apPat[siLev]=psHlp;
-                     siErr=siClpPrnHlp(pvHdl,pfOut,isAli,siLev+1,siDep,-1,psHlp->psDep);
+                     siErr=siClpPrnHlp(pvHdl,pfOut,isAli,siLev+1,siDep,-1,psHlp->psDep,FALSE);
                      if (siErr<0) return(siErr);
                   } else {
                      psHdl->apPat[siLev]=psHlp;
-                     siErr=siClpPrnHlp(pvHdl,pfOut,isAli,siLev+1,siDep,psHlp->psFix->siTyp,psHlp->psDep);
-                     if (siErr<0) return(siErr);
+                     if (CLPISS_SEL(psHlp->psStd->uiFlg)) {
+                        siErr=siClpPrnHlp(pvHdl,pfOut,isAli,siLev+1,siDep,psHlp->psFix->siTyp,psHlp->psDep,FALSE);
+                        if (siErr<0) return(siErr);
+                     } else {
+                        siErr=siClpPrnHlp(pvHdl,pfOut,isAli,siLev+1,siDep,psHlp->psFix->siTyp,psHlp->psDep,TRUE);
+                        if (siErr<0) return(siErr);
+                     }
                   }
                }
             }
