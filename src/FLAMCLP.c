@@ -992,17 +992,22 @@ extern int siClpHelp(
                   }
                }
             } else {
-               if (psArg->psFix->siTyp==CLPTYP_OBJECT || psArg->psFix->siTyp==CLPTYP_OVRLAY) {
-                  siErr=siClpPrnHlp(pvHdl,psHdl->pfHlp,isAli,siLev,siLev+siDep,-1,psTab,FALSE);
-                  if (siErr<0) return(siErr);
-               } else {
-                  if (CLPISS_SEL(psArg->psStd->uiFlg)) {
-                     siErr=siClpPrnHlp(pvHdl,psHdl->pfHlp,isAli,siLev,siLev+siDep,psArg->psFix->siTyp,psTab,FALSE);
+               if (psArg!=NULL) {
+                  if (psArg->psFix->siTyp==CLPTYP_OBJECT || psArg->psFix->siTyp==CLPTYP_OVRLAY) {
+                     siErr=siClpPrnHlp(pvHdl,psHdl->pfHlp,isAli,siLev,siLev+siDep,-1,psTab,FALSE);
                      if (siErr<0) return(siErr);
                   } else {
-                     siErr=siClpPrnHlp(pvHdl,psHdl->pfHlp,isAli,siLev,siLev+siDep,psArg->psFix->siTyp,psTab,TRUE);
-                     if (siErr<0) return(siErr);
+                     if (CLPISS_SEL(psArg->psStd->uiFlg)) {
+                        siErr=siClpPrnHlp(pvHdl,psHdl->pfHlp,isAli,siLev,siLev+siDep,psArg->psFix->siTyp,psTab,FALSE);
+                        if (siErr<0) return(siErr);
+                     } else {
+                        siErr=siClpPrnHlp(pvHdl,psHdl->pfHlp,isAli,siLev,siLev+siDep,psArg->psFix->siTyp,psTab,TRUE);
+                        if (siErr<0) return(siErr);
+                     }
                   }
+               } else {
+                  siErr=siClpPrnHlp(pvHdl,psHdl->pfHlp,isAli,siLev,siLev+siDep,-1,psTab,FALSE);
+                  if (siErr<0) return(siErr);
                }
             }
          } else {
