@@ -69,7 +69,7 @@
  * @param buffer  pointer to the buffer
  * @return        pointer to the buffer containing the current user id (zero terminated)
  */
-extern char* CUSERID(const int size, char* buffer);
+extern char* userid(const int size, char* buffer);
 
 /**
  * Return the current home directory.
@@ -78,7 +78,7 @@ extern char* CUSERID(const int size, char* buffer);
  * @param buffer  pointer to the buffer
  * @return        pointer to the buffer containing the current home directory (zero terminated)
  */
-extern char* HOMEDIR(const int flag, const int siz, char* buffer);
+extern char* homedir(const int flag, const int siz, char* buffer);
 
 /**
  * Works like snprintf but concatenate the format string to the buffer.

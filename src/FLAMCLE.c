@@ -423,7 +423,7 @@ extern int siCleExecute(
    char                          acHom[CLEMAX_FILSIZ]="";
    char*                         pcTmp=NULL;
 
-   HOMEDIR(TRUE,sizeof(acHom),acHom);
+   homedir(TRUE,sizeof(acHom),acHom);
 
    if (psTab==NULL || argc==0 || argv==NULL || pcPgm==NULL || pcHlp==NULL || pfOut==NULL || pcDep==NULL || pcOpt==NULL || pcEnt==NULL ||
        strlen(pcPgm)==0 || strlen(pcHlp)==0 || strlen(pcPgm)>CLEMAX_PGMLEN) return(24);
