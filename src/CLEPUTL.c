@@ -66,16 +66,16 @@ extern char* homedir(int flag, const int size, char* buffer) {
 #include <sys/types.h>
 #include <pwd.h>
 extern char* userid(const int size, char* buffer) {
-   buffer[0]=0x00;
    struct passwd* uP = getpwuid(geteuid());
    if (NULL != uP) {
       snprintf(buffer,size,"%s",uP->pw_name);
+   } else {
+      if (size>=0) buffer[0]=0x00;
    }
    return(buffer);
 }
 extern char* homedir(int flag, const int size, char* buffer) {
    const char*    home=getenv("HOME");
-   buffer[0]=0x00;
    if (home!=NULL && strlen(home)) {
       if (flag) {
          snprintf(buffer,size,"%s/",home);
@@ -89,6 +89,12 @@ extern char* homedir(int flag, const int size, char* buffer) {
             snprintf(buffer,size,"%s/",uP->pw_dir);
          } else {
             snprintf(buffer,size,"%s",uP->pw_dir);
+         }
+      } else {
+         if (flag) {
+            snprintf(buffer,size,"/");
+         } else {
+            if (size>=0) buffer[0]=0x00;
          }
       }
    }
