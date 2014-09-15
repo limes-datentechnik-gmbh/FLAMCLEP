@@ -81,12 +81,13 @@
  * 1.1.31: fix memory leaks found with memchecker
  * 1.1.32: use SELECTION as Type in argument lists if the selection flag on and KEYWORD for constant definitions
  * 1.1.33: If no SELECTION but keywords possible the help shows a additional statement that you can enter also a value
+ * 1.1.34: Get properties from environment variables and property files working
  **/
 
-#define CLP_VSN_STR       "1.1.33"
+#define CLP_VSN_STR       "1.1.34"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        1
-#define CLP_VSN_REVISION       33
+#define CLP_VSN_REVISION       34
 
 /* Definition der Flag-Makros *****************************************/
 
@@ -1462,11 +1463,13 @@ static TsSym* psClpSymIns(
    psSym->psStd->siPos=siPos;
    psSym->psFix->pcMan=psArg->pcMan;
    psSym->psFix->pcHlp=psArg->pcHlp;
-   pcEnv=get_env("%s.%s.%s",psHdl->pcOwn,psHdl->pcPgm,fpcPat(pvHdl,siLev));
-   if (pcEnv==NULL) {
-      pcEnv=get_env("%s.%s",psHdl->pcPgm,fpcPat(pvHdl,siLev));
+   if (CLPISS_ARG(psArg->uiFlg)) {
+      pcEnv=get_env("%s.%s.%s.%s",psHdl->pcOwn,psHdl->pcPgm,fpcPat(pvHdl,siLev),psArg->pcKyw);
       if (pcEnv==NULL) {
-         pcEnv=get_env("%s",fpcPat(pvHdl,siLev));
+         pcEnv=get_env("%s.%s.%s",psHdl->pcPgm,fpcPat(pvHdl,siLev),psArg->pcKyw);
+         if (pcEnv==NULL) {
+            pcEnv=get_env("%s.%s",fpcPat(pvHdl,siLev),psArg->pcKyw);
+         }
       }
    }
    if (pcEnv!=NULL && strlen(pcEnv)) {
@@ -1677,7 +1680,7 @@ static int siClpSymIni(
       if (psArg==NULL) {
          return CLPERR(psHdl,CLPERR_TAB,"Argument table not defined%s","");
       } else {
-         return CLPERR(psHdl,CLPERR_TAB,"Parameter table of argument \'%s.%s\' not defined",fpcPat(pvHdl,siLev),psArg->pcKyw);
+         return CLPERR(psHdl,CLPERR_TAB,"Parameter table of argument \'%s:%s\' not defined",fpcPat(pvHdl,siLev),psArg->pcKyw);
       }
    }
 
@@ -1686,7 +1689,7 @@ static int siClpSymIni(
          if (psArg==NULL) {
             return CLPERR(psHdl,CLPERR_TAB,"Argument table bigger than maximal supported entry count (%d)",CLPMAX_TABCNT);
          } else {
-            return CLPERR(psHdl,CLPERR_TAB,"Table for key word (%s.%s) bigger than maximal supported entry count (%d)",fpcPat(pvHdl,siLev),psArg->pcKyw,CLPMAX_TABCNT);
+            return CLPERR(psHdl,CLPERR_TAB,"Table for key word (%s:%s) bigger than maximal supported entry count (%d)",fpcPat(pvHdl,siLev),psArg->pcKyw,CLPMAX_TABCNT);
          }
       }
 
@@ -1694,14 +1697,14 @@ static int siClpSymIni(
          if (psArg==NULL) {
             return CLPERR(psHdl,CLPERR_TAB,"There is no keyword defined in argument table at index %d",i);
          } else {
-            return CLPERR(psHdl,CLPERR_TAB,"Table for key word (%s.%s) has no keyword defined at index %d",fpcPat(pvHdl,siLev),psArg->pcKyw,i);
+            return CLPERR(psHdl,CLPERR_TAB,"Table for key word (%s:%s) has no keyword defined at index %d",fpcPat(pvHdl,siLev),psArg->pcKyw,i);
          }
       }
 
       if (!CLPISS_DMY(psTab[i].uiFlg)) {
          psCur=psClpSymIns(pvHdl,siLev,i,&psTab[i],psHih,psCur);
          if (psCur==NULL) {
-            return CLPERR(psHdl,CLPERR_SYS,"Insert of symbol (%s.%s.%s) in symbol table failed",fpcPat(pvHdl,siLev),psArg->pcKyw,psTab[i].pcKyw);
+            return CLPERR(psHdl,CLPERR_SYS,"Insert of symbol (%s.%s) in symbol table failed",fpcPat(pvHdl,siLev),psTab[i].pcKyw);
          }
          if (j==0) *ppFst=psCur;
 
@@ -4207,9 +4210,18 @@ static int siClpSetDefault(
    int                           siErr,siInd,siTok;
 
    if (CLPISS_ARG(psArg->psStd->uiFlg) && psArg->psVar->siCnt==0 && psArg->psFix->pcDft!=NULL && strlen(psArg->psFix->pcDft)) {
+/*    TODO: Error stack bauen, FILE und LINE of property file merken
+      if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"SUPPLEMENT-LIST-PARSER-BEGIN(FILE=%s)\n",acFil);
+      strcpy(acSrc,psHdl->acSrc); strcpy(psHdl->acSrc,acFil);
+      pcCur=psHdl->pcCur; psHdl->pcCur=psArg->psFix->pcDft;
+      pcSrc=psHdl->pcSrc; psHdl->pcSrc=psArg->psFix->pcDft;
+      pcOld=psHdl->pcOld; psHdl->pcOld=psArg->psFix->pcDft;
+      pcRow=psHdl->pcRow; psHdl->pcRow=psArg->psFix->pcDft;
+      siRow=psHdl->siRow; psHdl->siRow=1;
+*/
       pcCur=psArg->psFix->pcDft;
-      for (siTok=siClpScnNat(pvHdl,psHdl->pfErr,psHdl->pfScn,&pcCur,acLex,0,psArg);siTok!=CLPTOK_END;
-           siTok=siClpScnNat(pvHdl,psHdl->pfErr,psHdl->pfScn,&pcCur,acLex,0,psArg)) {
+      for (siTok=siClpScnNat(pvHdl,psHdl->pfErr,psHdl->pfScn,&pcCur,acLex,(psArg->psFix->siTyp==CLPTYP_STRING)?CLPTOK_STR:0,psArg);siTok!=CLPTOK_END;
+           siTok=siClpScnNat(pvHdl,psHdl->pfErr,psHdl->pfScn,&pcCur,acLex,(psArg->psFix->siTyp==CLPTYP_STRING)?CLPTOK_STR:0,psArg)) {
          switch(siTok) {
          case CLPTOK_NUM:
             if (psArg->psFix->siTyp==CLPTYP_SWITCH) {
