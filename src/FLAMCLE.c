@@ -34,7 +34,9 @@
  */
 /* Standard-Includes **************************************************/
 
-#define _SVID_SOURCE
+#ifndef _XOPEN_SOURCE
+#define _XOPEN_SOURCE
+#endif
 #include <ctype.h>
 #include <stdio.h>
 #include <string.h>
