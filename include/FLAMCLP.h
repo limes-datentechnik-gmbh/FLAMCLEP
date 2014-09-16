@@ -514,6 +514,11 @@ extern const char* pcClpAbout(const int l, const int s, char* b);
 */
 #define CLPSRC_CMD               ":command line:"
 #define CLPSRC_PRO               ":property list:"
+#define CLPSRC_DEF               ":default value:"
+#define CLPSRC_ENV               ":environment variable:"
+#define CLPSRC_PRF               ":property file:"
+#define CLPSRC_CMF               ":command file:"
+#define CLPSRC_PAF               ":parameter file:"
 
 /**
  * \struct TsClpArgument
