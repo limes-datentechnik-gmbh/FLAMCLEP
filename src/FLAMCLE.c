@@ -93,12 +93,13 @@
  * 1.1.29: Use arry2str for command line to remove last static vars, fix object and overlay handling if default command (>flam4 "(flamin=...)")
  * 1.1.30: fix memory leaks found with memchecker
  * 1.1.31: Support definition of the owner per run of a command
+ * 1.1.32: Support DD names for write operation (log, trace, docs, ...)
  *
  */
-#define CLE_VSN_STR       "1.1.31"
+#define CLE_VSN_STR       "1.1.32"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        1
-#define CLE_VSN_REVISION       31
+#define CLE_VSN_REVISION       32
 
 /* Definition der Konstanten ******************************************/
 #define CLEMAX_CNFLEN            1023
