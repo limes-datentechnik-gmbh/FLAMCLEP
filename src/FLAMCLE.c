@@ -516,7 +516,11 @@ extern int siCleExecute(
       sprintf(acCnf,"%s.%s.trace.file",acOwn,pcPgm);
       pcCnf=pcCnfGet(psCnf,acCnf);
       if (pcCnf!=NULL && strlen(pcCnf)) {
-         pfTrh=fopen(pcCnf,"w");
+         if (toupper(pcCnf[0])=='D' && toupper(pcCnf[1])=='D' && toupper(pcCnf[2])==':') {
+            pfTrh=fopen(pcCnf,"w, recfm=*");
+         } else {
+            pfTrh=fopen(pcCnf,"w");
+         }
          if (pfTrh==NULL) {
             fprintf(pfOut,"Open of trace file (%s) failed\n",pcCnf);
          } else pfTrc=pfTrh;
@@ -826,7 +830,12 @@ EVALUATE:
          pcFil=strchr(argv[2],'=');
          if (pcFil!=NULL) {
             *((char*)pcFil)=EOS; pcFil++; pcCmd=argv[2];
-            isMan=TRUE; pfDoc=fopen(pcFil,"w");
+            isMan=TRUE;
+            if (toupper(pcFil[0])=='D' && toupper(pcFil[1])=='D' && toupper(pcFil[2])==':') {
+               pfDoc=fopen(pcFil,"w, recfm=*");
+            } else {
+               pfDoc=fopen(pcFil,"w");
+            }
             if (pfDoc==NULL) {
                fprintf(pfOut,"Open of manual page file (%s) failed (%d - %s)\n",pcFil,errno,strerror(errno));
                ERROR(8);
@@ -1027,7 +1036,12 @@ EVALUATE:
          }
 
          pcFil=argv[2];
-         isMan=TRUE; pfDoc=fopen(pcFil,"w");
+         isMan=TRUE;
+         if (toupper(pcFil[0])=='D' && toupper(pcFil[1])=='D' && toupper(pcFil[2])==':') {
+            pfDoc=fopen(pcFil,"w, recfm=*");
+         } else {
+            pfDoc=fopen(pcFil,"w");
+         }
          if (pfDoc==NULL) {
             fprintf(pfOut,"Open of manual page file (%s) failed (%d - %s)\n",pcFil,errno,strerror(errno));
             ERROR(8);
@@ -1072,7 +1086,11 @@ EVALUATE:
          } else {
             pcFil=argv[2]; pcCmd=NULL;
          }
-         pfDoc=fopen(pcFil,"w");
+         if (toupper(pcFil[0])=='D' && toupper(pcFil[1])=='D' && toupper(pcFil[2])==':') {
+            pfDoc=fopen(pcFil,"w, recfm=*");
+         } else {
+            pfDoc=fopen(pcFil,"w");
+         }
          if (pfDoc==NULL) {
             fprintf(pfOut,"Open of documentation file (%s) failed (%d - %s)\n",pcFil,errno,strerror(errno));
             ERROR(8);
@@ -1328,7 +1346,11 @@ EVALUATE:
          } else {
             pcFil=argv[2]; pcCmd=NULL;
          }
-         pfPro=fopen(pcFil,"w");
+         if (toupper(pcFil[0])=='D' && toupper(pcFil[1])=='D' && toupper(pcFil[2])==':') {
+            pfPro=fopen(pcFil,"w, recfm=*");
+         } else {
+            pfPro=fopen(pcFil,"w");
+         }
          if (pfPro==NULL) {
             fprintf(pfOut,"Open of property file (%s) failed (%d-%s)\n",pcFil,errno,strerror(errno));
             ERROR(8);
@@ -1985,7 +2007,11 @@ static int siClePropertyFinish(
          pcFil=acEnv;
       }
    }
-   pfPro=fopen(pcFil,"w");
+   if (toupper(pcFil[0])=='D' && toupper(pcFil[1])=='D' && toupper(pcFil[2])==':') {
+      pfPro=fopen(pcFil,"w, recfm=*");
+   } else {
+      pfPro=fopen(pcFil,"w");
+   }
    if (pfPro==NULL) {
       fprintf(pfOut,"Cannot open the property file \'%s\' for write operation (%d-%s)\n",pcFil,errno,strerror(errno));
       vdClpClose(pvHdl);
@@ -2907,12 +2933,22 @@ static void vdCnfCls(
    FILE*                         pfFil=NULL;
    if (psHdl!=NULL) {
       if (psHdl->isClr) {
-         pfFil=fopen(psHdl->acFil,"w");
+         if (toupper(psHdl->acFil[0])=='D' && toupper(psHdl->acFil[1])=='D' && toupper(psHdl->acFil[2])==':') {
+            pfFil=fopen(psHdl->acFil,"w, recfm=*");
+         } else {
+            pfFil=fopen(psHdl->acFil,"w");
+         }
          if (pfFil!=NULL) fclose(pfFil);
          remove(psHdl->acFil);
       } else {
          psEnt=psHdl->psFst;
-         if (psHdl->isChg && strlen(psHdl->acFil)) pfFil=fopen(psHdl->acFil,"w");
+         if (psHdl->isChg && strlen(psHdl->acFil)) {
+            if (toupper(psHdl->acFil[0])=='D' && toupper(psHdl->acFil[1])=='D' && toupper(psHdl->acFil[2])==':') {
+               pfFil=fopen(psHdl->acFil,"w, recfm=*");
+            } else {
+               pfFil=fopen(psHdl->acFil,"w");
+            }
+         }
          if (pfFil!=NULL) {
             fprintf(pfFil,"# Config file for program \'%s\'\n",psHdl->acPgm);
          }
