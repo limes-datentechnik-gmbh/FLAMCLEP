@@ -433,7 +433,7 @@ extern int siCleExecute(
 
    for (i=0;pcPgm[i] && i<(sizeof(acPgm)-1);i++) acPgm[i]=toupper(pcPgm[i]);
    acPgm[i]=0;
-
+#ifdef __HOST__
    pfTmp=fopen("DD:STDENV","r");
    if (pfTmp!=NULL) {
       memset(acCnf,0,sizeof(acCnf));
@@ -452,7 +452,7 @@ extern int siCleExecute(
       }
       fclose(pfTmp);
    }
-
+#endif
    sprintf(acCnf,"%s_DEFAULT_OWNER_ID",acPgm);
    pcCnf=getenv(acCnf);
    if (pcCnf!=NULL && strlen(pcCnf) && strlen(pcCnf)<sizeof(acOwn)) strcpy(acOwn,pcCnf); else strcpy(acOwn,pcOwn);
