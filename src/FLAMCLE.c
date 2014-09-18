@@ -94,12 +94,14 @@
  * 1.1.30: fix memory leaks found with memchecker
  * 1.1.31: Support definition of the owner per run of a command
  * 1.1.32: Support DD names for write operation (log, trace, docs, ...)
+ * 1.1.33: Use setenv() instead of putenv() for DD:STDENV on __HOST__
+ * 1.1.34: Use snprintf() instead of sprintf() for static array strings
  *
  */
-#define CLE_VSN_STR       "1.1.32"
+#define CLE_VSN_STR       "1.1.34"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        1
-#define CLE_VSN_REVISION       32
+#define CLE_VSN_REVISION       33
 
 /* Definition der Konstanten ******************************************/
 #define CLEMAX_CNFLEN            1023
@@ -442,21 +444,25 @@ extern int siCleExecute(
          while (isspace(*(pcCnf-1))) {
             pcCnf--; *pcCnf=EOS;
          }
-         if (putenv(acCnf)) {
-            fprintf(pfOut,"Put variable (%s) to environment failed (%d - %s)\n",acCnf,errno,strerror(errno));
-            fclose(pfTmp);
-            return(16);
-         } else {
-            fprintf(pfOut,"Put variable (%s) to environment successful\n",acCnf);
+         pcCnf=strchr(acCnf,'=');
+         if (pcCnf!=NULL) {
+            *pcCnf=0x00;
+            if (setenv(acCnf,pcCnf+1,TRUE)) {
+               fprintf(pfOut,"Put variable (%s=%s) to environment failed (%d - %s)\n",acCnf,pcCnf+1,errno,strerror(errno));
+               fclose(pfTmp);
+               return(16);
+            } else {
+               fprintf(pfOut,"Put variable (%s=%s) to environment successful\n",acCnf,pcCnf+1);
+            }
          }
       }
       fclose(pfTmp);
    }
 #endif
-   sprintf(acCnf,"%s_DEFAULT_OWNER_ID",acPgm);
+   snprintf(acCnf,sizeof(acCnf),"%s_DEFAULT_OWNER_ID",acPgm);
    pcCnf=getenv(acCnf);
    if (pcCnf!=NULL && strlen(pcCnf) && strlen(pcCnf)<sizeof(acOwn)) strcpy(acOwn,pcCnf); else strcpy(acOwn,pcOwn);
-   sprintf(acCnf,"%s_CONFIG_FILE",acPgm);
+   snprintf(acCnf,sizeof(acCnf),"%s_CONFIG_FILE",acPgm);
    pcCnf=getenv(acCnf);
    if (pcCnf==NULL) {
 
@@ -472,17 +478,17 @@ extern int siCleExecute(
       }
 #else
       if (strlen(acHom)) {
-         sprintf(acCnf,".%s.config",pcPgm);
+         snprintf(acCnf,sizeof(acCnf),".%s.config",pcPgm);
          pfTmp=fopen(acCnf,"r");
          if (pfTmp==NULL) {
-            sprintf(acCnf,"%s.%s.config",acHom,pcPgm);
+            snprintf(acCnf,sizeof(acCnf),"%s.%s.config",acHom,pcPgm);
             fprintf(pfOut,"Use default configuration file (%s) in home directory\n",acCnf);
          } else {
             fclose(pfTmp);
             fprintf(pfOut,"Use existing configuration file (%s) in working directory\n",acCnf);
          }
       } else {
-         sprintf(acCnf,".%s.config",pcPgm);
+         snprintf(acCnf,sizeof(acCnf),".%s.config",pcPgm);
          fprintf(pfOut,"Use default configuration file (%s) in working directory\n",acCnf);
       }
       for (i=0;acCnf[i];i++) acCnf[i]=tolower(acCnf[i]);
@@ -494,7 +500,7 @@ extern int siCleExecute(
    psCnf=psCnfOpn(pfOut,isCas,pcPgm,pcCnf);
    if (psCnf==NULL) return(11);
 
-   sprintf(acCnf,"%s.owner.id",pcPgm);
+   snprintf(acCnf,sizeof(acCnf),"%s.owner.id",pcPgm);
    pcCnf=pcCnfGet(psCnf,acCnf);
    if (pcCnf!=NULL && strlen(pcCnf) && strlen(pcCnf)<sizeof(acOwn)) strcpy(acOwn,pcCnf);
 
@@ -511,10 +517,10 @@ extern int siCleExecute(
    siCnfPutEnv(psCnf,acOwn,pcPgm);
 #endif
 
-   sprintf(acCnf,"%s.%s.trace",acOwn,pcPgm);
+   snprintf(acCnf,sizeof(acCnf),"%s.%s.trace",acOwn,pcPgm);
    pcCnf=pcCnfGet(psCnf,acCnf);
    if (pcCnf!=NULL && strxcmp(isCas,pcCnf,"ON",0,0,FALSE)==0) {
-      sprintf(acCnf,"%s.%s.trace.file",acOwn,pcPgm);
+      snprintf(acCnf,sizeof(acCnf),"%s.%s.trace.file",acOwn,pcPgm);
       pcCnf=pcCnfGet(psCnf,acCnf);
       if (pcCnf!=NULL && strlen(pcCnf)) {
          if (toupper(pcCnf[0])=='D' && toupper(pcCnf[1])=='D' && toupper(pcCnf[2])==':') {
@@ -1101,7 +1107,7 @@ EVALUATE:
                if (strxcmp(isCas,pcCmd,psTab[i].pcKyw,strlen(psTab[i].pcKyw),'.',TRUE)==0) {
                   siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isPfl,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl);
                   if (siErr) ERROR(siErr);
-                  sprintf(acNum,"2.%d.",i+1);
+                  snprintf(acNum,sizeof(acNum),"2.%d.",i+1);
                   siErr=siClpDocu(pvHdl,pfDoc,pcCmd,acNum,TRUE,FALSE,isNbr);
                   if (siErr) {
                      fprintf(pfOut,"Creation of documentation file (%s) failed (%d - %s)\n",pcFil,errno,strerror(errno));
@@ -1129,7 +1135,7 @@ EVALUATE:
                         free(pcPat);
                         ERROR(siErr);
                      }
-                     sprintf(acNum,"2.%d.",i+1);
+                     snprintf(acNum,sizeof(acNum),"2.%d.",i+1);
                      sprintf(pcPat,"%s.%s",pcDef,pcCmd);
                      siErr=siClpDocu(pvHdl,pfDoc,pcPat,acNum,TRUE,FALSE,isNbr);
                      if (siErr) {
@@ -1148,7 +1154,7 @@ EVALUATE:
             if (pcCov!=NULL && strlen(pcCov)) {
                fprintf(pfDoc,"%s\n\n",pcCov);
             } else {
-               sprintf(acNum,"\'%s\' - User Manual",acPgm); l=strlen(acNum); fprintf(pfDoc,"%s\n",acNum);
+               snprintf(acNum,sizeof(acNum),"\'%s\' - User Manual",acPgm); l=strlen(acNum); fprintf(pfDoc,"%s\n",acNum);
                for (i=0;i<l;i++) fprintf(pfDoc,"="); fprintf(pfDoc,"\n");
                fprintf(pfDoc,":doctype: book\n\n");
             }
@@ -1165,10 +1171,10 @@ EVALUATE:
             vdCleManProgram(pfDoc,psTab,acOwn,pcPgm,pcHlp,pcMan,pcDep,pcOpt,FALSE,isNbr);
 
             if (isNbr) {
-               sprintf(acNum,"3. Available commands"); l=strlen(acNum); fprintf(pfDoc,"%s\n",acNum);
+               snprintf(acNum,sizeof(acNum),"3. Available commands"); l=strlen(acNum); fprintf(pfDoc,"%s\n",acNum);
                for (i=0;i<l;i++) fprintf(pfDoc,"-"); fprintf(pfDoc,"\n\n");
             } else {
-               sprintf(acNum,"Available commands"); l=strlen(acNum); fprintf(pfDoc,"%s\n",acNum);
+               snprintf(acNum,sizeof(acNum),"Available commands"); l=strlen(acNum); fprintf(pfDoc,"%s\n",acNum);
                for (i=0;i<l;i++) fprintf(pfDoc,"-"); fprintf(pfDoc,"\n\n");
             }
             fprintf(pfDoc,"%s\n\n",MAN_CLE_COMMANDS);
@@ -1178,7 +1184,7 @@ EVALUATE:
                if (psTab[i].siFlg) {
                   siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isPfl,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl);
                   if (siErr) ERROR(siErr);
-                  sprintf(acNum,"3.%d.",i+1);
+                  snprintf(acNum,sizeof(acNum),"3.%d.",i+1);
                   siErr=siClpDocu(pvHdl,pfDoc,psTab[i].pcKyw,acNum,TRUE,FALSE,isNbr);
                   if (siErr<0) {
                      fprintf(pfOut,"Creation of documentation file (%s) failed (%d - %s)\n",pcFil,errno,strerror(errno));
@@ -1190,10 +1196,10 @@ EVALUATE:
             }
 
             if (isNbr) {
-               sprintf(acNum,"4. Available built-in functions"); l=strlen(acNum); fprintf(pfDoc,"%s\n",acNum);
+               snprintf(acNum,sizeof(acNum),"4. Available built-in functions"); l=strlen(acNum); fprintf(pfDoc,"%s\n",acNum);
                for (i=0;i<l;i++) fprintf(pfDoc,"-"); fprintf(pfDoc,"\n\n");
             } else {
-               sprintf(acNum,"Available built-in functions"); l=strlen(acNum); fprintf(pfDoc,"%s\n",acNum);
+               snprintf(acNum,sizeof(acNum),"Available built-in functions"); l=strlen(acNum); fprintf(pfDoc,"%s\n",acNum);
                for (i=0;i<l;i++) fprintf(pfDoc,"-"); fprintf(pfDoc,"\n\n");
             }
             fprintf(pfDoc,"%s\n\n",MAN_CLE_FUNCTIONS);
@@ -1423,14 +1429,14 @@ EVALUATE:
                fprintf(pfOut,"Configuration keyword '%s.%s.%s.property.file' too long (>=%u)\n",acOwn,pcPgm,pcCmd,(unsigned)sizeof(acCnf));
                ERROR(8);
             }
-            sprintf(acCnf,"%s.%s.%s.property.file",acOwn,pcPgm,pcCmd);
+            snprintf(acCnf,sizeof(acCnf),"%s.%s.%s.property.file",acOwn,pcPgm,pcCmd);
          } else {
             pcFil=argv[2]; pcCmd=NULL;
             if (strlen(acOwn)+strlen(pcPgm)+20>=sizeof(acCnf)) {
                fprintf(pfOut,"Configuration keyword '%s.%s.property.file' too long (>=%u)\n",acOwn,pcPgm,(unsigned)sizeof(acCnf));
                ERROR(8);
             }
-            sprintf(acCnf,"%s.%s.property.file",acOwn,pcPgm);
+            snprintf(acCnf,sizeof(acCnf),"%s.%s.property.file",acOwn,pcPgm);
          }
          if (strlen(pcFil)==0) {
             fprintf(pfOut,"Syntax for built-in function \'SETPROP\' not valid\n");
@@ -1538,7 +1544,7 @@ EVALUATE:
             fprintf(pfOut,"Configuration keyword '%s.%s.property.file' too long (>=%u)\n",acOwn,pcPgm,(unsigned)sizeof(acCnf));
             ERROR(8);
          }
-         sprintf(acCnf,"%s.%s.property.file",acOwn,pcPgm);
+         snprintf(acCnf,sizeof(acCnf),"%s.%s.property.file",acOwn,pcPgm);
       } else if (argc==3) {
          for (i=0;psTab[i].pcKyw!=NULL && strxcmp(isCas,argv[2],psTab[i].pcKyw,0,0,FALSE);i++);
          if (psTab[i].pcKyw==NULL) {
@@ -1554,7 +1560,7 @@ EVALUATE:
             fprintf(pfOut,"Configuration keyword '%s.%s.%s.property.file' too long (>=%u)\n",acOwn,pcPgm,argv[2],(unsigned)sizeof(acCnf));
             ERROR(8);
          }
-         sprintf(acCnf,"%s.%s.%s.property.file",acOwn,pcPgm,argv[2]);
+         snprintf(acCnf,sizeof(acCnf),"%s.%s.%s.property.file",acOwn,pcPgm,argv[2]);
       } else {
          fprintf(pfOut,"Syntax for built-in function \'DELPROP\' not valid\n");
          for (i=0;psTab[i].pcKyw!=NULL ;i++) {
@@ -1675,7 +1681,7 @@ EVALUATE:
       ERROR(8);
    } else if (strxcmp(isCas,argv[1],"SETOWNER",0,0,FALSE)==0) {
       if (argc==3) {
-         sprintf(acCnf,"%s.owner.id",pcPgm);
+         snprintf(acCnf,sizeof(acCnf),"%s.owner.id",pcPgm);
          siErr=siCnfSet(psCnf,pfOut,acCnf,argv[2],TRUE);
          if (siErr) ERROR(2); else {
             fprintf(pfOut,"Setting configuration key word '%s' to value '%s' was successful\n",acCnf,argv[2]);
@@ -1709,7 +1715,7 @@ EVALUATE:
             fprintf(pfOut,"Configuration keyword '%s.%s.envar.%s' too long (>=%u)\n",acOwn,pcPgm,pcEnv,(unsigned)sizeof(acCnf));
             ERROR(8);
          }
-         sprintf(acCnf,"%s.%s.envar.%s",acOwn,pcPgm,pcEnv);
+         snprintf(acCnf,sizeof(acCnf),"%s.%s.envar.%s",acOwn,pcPgm,pcEnv);
          siErr=siCnfSet(psCnf,pfOut,acCnf,pcVal,TRUE);
          if (siErr) ERROR(2); else {
             fprintf(pfOut,"Setting environment variable '%s' to value '%s' was successful\n",acCnf,pcVal);
@@ -1739,7 +1745,7 @@ EVALUATE:
             fprintf(pfOut,"Configuration keyword '%s.%s.envar.%s' too long (>=%u)\n",acOwn,pcPgm,argv[2],(unsigned)sizeof(acCnf));
             ERROR(8);
          }
-         sprintf(acCnf,"%s.%s.envar.%s",acOwn,pcPgm,argv[2]);
+         snprintf(acCnf,sizeof(acCnf),"%s.%s.envar.%s",acOwn,pcPgm,argv[2]);
          siErr=siCnfSet(psCnf,pfOut,acCnf,"",TRUE);
          if (siErr) ERROR(2); else {
             fprintf(pfOut,"Deleting the environment variable '%s' was successful\n",acCnf);
@@ -1752,14 +1758,14 @@ EVALUATE:
    } else if (strxcmp(isCas,argv[1],"TRACE",0,0,FALSE)==0) {
       if (argc==3) {
          if (strxcmp(isCas,argv[2],"ON",0,0,FALSE)==0 || strxcmp(isCas,argv[2],"-ON",0,0,FALSE)==0 || strxcmp(isCas,argv[2],"--ON",0,0,FALSE)==0) {
-            sprintf(acCnf,"%s.%s.trace",acOwn,pcPgm);
+            snprintf(acCnf,sizeof(acCnf),"%s.%s.trace",acOwn,pcPgm);
             siErr=siCnfSet(psCnf,pfOut,acCnf,"ON",TRUE);
             if (siErr) ERROR(2); else {
                fprintf(pfOut,"Setting configuration keyword '%s' to value 'ON' was successful\n",acCnf);
                ERROR(0);
             }
          } else if (strxcmp(isCas,argv[2],"OFF",0,0,FALSE)==0 || strxcmp(isCas,argv[2],"-OFF",0,0,FALSE)==0 || strxcmp(isCas,argv[2],"--OFF",0,0,FALSE)==0) {
-            sprintf(acCnf,"%s.%s.trace",acOwn,pcPgm);
+            snprintf(acCnf,sizeof(acCnf),"%s.%s.trace",acOwn,pcPgm);
             siErr=siCnfSet(psCnf,pfOut,acCnf,"OFF",TRUE);
             if (siErr) ERROR(2); else {
                fprintf(pfOut,"Setting configuration keyword '%s' to value 'OFF' was successful\n",acCnf);
@@ -1772,7 +1778,7 @@ EVALUATE:
             if (pcFil!=NULL) {
                *((char*)pcFil)=EOS; pcFil++; pcCmd=argv[2];
                if (strxcmp(isCas,pcCmd,"FILE",0,0,FALSE)==0) {
-                  sprintf(acCnf,"%s.%s.trace.file",acOwn,pcPgm);
+                  snprintf(acCnf,sizeof(acCnf),"%s.%s.trace.file",acOwn,pcPgm);
                   siErr=siCnfSet(psCnf,pfOut,acCnf,pcFil,TRUE);
                   if (siErr) ERROR(2); else {
                      if (strlen(pcFil)) {
@@ -1967,7 +1973,7 @@ static int siClePropertyFinish(
    char                          acEnv[CLEMAX_CNFSIZ];
    char                          acCnf[CLEMAX_CNFSIZ];
    if (siFil!=3) {
-      sprintf(acEnv,"%s_%s_%s_PROPERTY_FILENAME",pcOwn,pcPgm,pcCmd);
+      snprintf(acEnv,sizeof(acEnv),"%s_%s_%s_PROPERTY_FILENAME",pcOwn,pcPgm,pcCmd);
       for (i=0;acEnv[i];i++) acEnv[i]=toupper(acEnv[i]);
       pcFil=getenv(acEnv);
       if (pcFil==NULL) {
@@ -1999,9 +2005,9 @@ static int siClePropertyFinish(
          }
 #else
          if (pcHom!=NULL && strlen(pcHom)) {
-            sprintf(acEnv,"%s.%s.%s.%s.properties",pcHom,pcOwn,pcPgm,pcCmd);
+            snprintf(acEnv,sizeof(acEnv),"%s.%s.%s.%s.properties",pcHom,pcOwn,pcPgm,pcCmd);
          } else {
-            sprintf(acEnv,".%s.%s.%s.properties",pcOwn,pcPgm,pcCmd);
+            snprintf(acEnv,sizeof(acEnv),".%s.%s.%s.properties",pcOwn,pcPgm,pcCmd);
          }
          for (i=0;acEnv[i];i++) acEnv[i]=tolower(acEnv[i]);
 #endif
@@ -2028,7 +2034,7 @@ static int siClePropertyFinish(
    fprintf(pfOut,"Property file (%s) for command \'%s\' successfully written\n",pcFil,pcCmd);
 
    if (siFil!=3) {
-      sprintf(acCnf,"%s.%s.%s.property.file",pcOwn,pcPgm,pcCmd);
+      snprintf(acCnf,sizeof(acCnf),"%s.%s.%s.property.file",pcOwn,pcPgm,pcCmd);
       siErr=siCnfSet(psCnf,pfOut,acCnf,pcFil,TRUE);
       if (siErr) {
          fprintf(pfOut,"Activation of property file (%s) for command \'%s\' failed\n",pcFil,pcCmd);
@@ -2491,7 +2497,7 @@ static void vdPrnCommandManpage(
    const int               isNbr)
 {
    char                    acNum[CLEMAX_NUMLEN];
-   sprintf(acNum,"3.%d.",siInd+1);
+   snprintf(acNum,sizeof(acNum),"3.%d.",siInd+1);
    siClpDocu(pvHdl,pfOut,pcCmd,acNum,FALSE,isMan,isNbr);
 }
 
@@ -2524,13 +2530,13 @@ static int siCleGetProperties(
       fprintf(pfOut,"Rot (%s.%s.%s) is too long (>=%d)\n",pcOwn,pcPgm,pcFct,CLEMAX_PATLEN);
       return(0);
    }
-   sprintf(acRot,"%s.%s.%s.property.file",pcOwn,pcPgm,pcFct);
+   snprintf(acRot,sizeof(acRot),"%s.%s.%s.property.file",pcOwn,pcPgm,pcFct);
    pcHlp=pcCnfGet(psCnf,acRot);
    if (pcHlp==NULL) {
-      sprintf(acRot,"%s.%s.property.file",pcOwn,pcPgm);
+      snprintf(acRot,sizeof(acRot),"%s.%s.property.file",pcOwn,pcPgm);
       pcHlp=pcCnfGet(psCnf,acRot);
       if (pcHlp==NULL) {
-         sprintf(acRot,"%s.property.file",pcOwn);
+         snprintf(acRot,sizeof(acRot),"%s.property.file",pcOwn);
          pcHlp=pcCnfGet(psCnf,acRot);
          if (pcHlp==NULL) {
             *piFlg=0;
@@ -2841,7 +2847,7 @@ static int siCnfPutEnv(
           strstr(psEnt->acKyw,".envar.")!=NULL) {
          const char* pcKyw=strstr(psEnt->acKyw,".envar.")+7;
          if (strlen(pcKyw)+strlen(psEnt->acVal)+2<sizeof(psEnt->acEnv)) {
-            sprintf(psEnt->acEnv,"%s=%s",pcKyw,psEnt->acVal);
+            snprintf(psEnt->acEnv,sizeof(psEnt->acEnv),"%s=%s",pcKyw,psEnt->acVal);
             if (putenv(psEnt->acEnv)==0) {
                const char* pcHlp=getenv(pcKyw);
                if (pcHlp!=NULL) {
