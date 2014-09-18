@@ -83,12 +83,14 @@
  * 1.1.33: If no SELECTION but keywords possible the help shows a additional statement that you can enter also a value
  * 1.1.34: Get properties from environment variables and property files working
  * 1.1.35: Correct error position (source, row, column) if property parsing used
+ * 1.1.36: Use snprintf() instead of sprintf() for static array strings
+ *
  **/
 
-#define CLP_VSN_STR       "1.1.35"
+#define CLP_VSN_STR       "1.1.36"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        1
-#define CLP_VSN_REVISION       35
+#define CLP_VSN_REVISION       36
 
 /* Definition der Flag-Makros *****************************************/
 
@@ -678,11 +680,11 @@ static int CLPERR(TsHdl* psHdl,int siErr, char* pcMsg, ...) {
          } else fprintf(psHdl->pfErr,"%s Something is wrong with the first argument\n",fpcPre(psHdl,0));
       }
    }
-   l=sprintf(psHdl->acMsg,"%s: ",pcClpErr(siErr));
+   l=snprintf(psHdl->acMsg,sizeof(psHdl->acMsg),"%s: ",pcClpErr(siErr));
    if (l>0) {
       va_start(argv,pcMsg); vsnprintf(psHdl->acMsg+l,CLPMAX_MSGLEN-(l+1),pcMsg,argv); va_end(argv);
    } else {
-      sprintf(psHdl->acMsg,"%s",pcClpError(siErr));
+      snprintf(psHdl->acMsg,sizeof(psHdl->acMsg),"%s",pcClpError(siErr));
    }
    return(siErr);
 }
@@ -1104,7 +1106,7 @@ extern int siClpDocu(
                   if (siErr<0) return(siErr);
                   psHdl->apPat[siLev]=psArg;
                   psTab=psArg->psDep;
-                  sprintf(acHlp,"%s%d.",acNum,siPos+1);
+                  snprintf(acHlp,sizeof(acHlp),"%s%d.",acNum,siPos+1);
                   strcpy(acNum,acHlp);
                }
                if (psArg!=NULL) {
@@ -3086,7 +3088,7 @@ static int siClpBldPro(
    if (strlen(psHdl->pcOwn)+strlen(psHdl->pcPgm)+strlen(psHdl->pcCmd)+2>=CLPMAX_PATLEN) {
       return CLPERR(psHdl,CLPERR_PAR,"Root (%s.%s.%s) is too long (>=%d)",psHdl->pcOwn,psHdl->pcPgm,psHdl->pcCmd,CLPMAX_PATLEN);
    }
-   sprintf(acRot,"%s.%s.%s",psHdl->pcOwn,psHdl->pcPgm,psHdl->pcCmd);
+   snprintf(acRot,sizeof(acRot),"%s.%s.%s",psHdl->pcOwn,psHdl->pcPgm,psHdl->pcCmd);
    l=strlen(acRot);
 
    if (strxcmp(psHdl->isCas,acRot,pcPat,l,0,FALSE)==0) {
@@ -4955,7 +4957,7 @@ static int siClpPrnDoc(
             }
             if (siMan) {
                for (k=m=0;m<siMan;m++) {
-                  sprintf(acNum,"%s%d.",pcNum,k+1);
+                  snprintf(acNum,sizeof(acNum),"%s%d.",pcNum,k+1);
                   if (isNbr) {
                      fprintf(pfDoc,"%s CONSTANT \'%s\'\n",acNum,apMan[m]->psStd->pcKyw);
                      l=strlen(acNum)+strlen(apMan[m]->psStd->pcKyw)+12;
@@ -4998,7 +5000,7 @@ static int siClpPrnDoc(
                case CLPTYP_OVRLAY:strcpy(acArg,"OVERLAY");break;
                default           :strcpy(acArg,"PARAMETER");break;
                }
-               sprintf(acNum,"%s%d.",pcNum,k+1);
+               snprintf(acNum,sizeof(acNum),"%s%d.",pcNum,k+1);
                if (isNbr) {
                   fprintf(pfDoc,"%s %s \'%s\'\n",acNum,acArg,apMan[m]->psStd->pcKyw);
                   l=strlen(acNum)+strlen(acArg)+strlen(apMan[m]->psStd->pcKyw)+4;
