@@ -3262,7 +3262,7 @@ static int siClpBldSwt(
 
    pcHlp=fpcPat(pvHdl,siLev);
    if (strlen(psHdl->acLst) + strlen(pcHlp) + strlen(psArg->psStd->pcKyw) + 8 < CLPMAX_LSTLEN) {
-      sprintf(&psHdl->acLst[strlen(psHdl->acLst)],"%s.%s=TRUE\n",pcHlp,psArg->psStd->pcKyw);
+      sprintf(&psHdl->acLst[strlen(psHdl->acLst)],"%s.%s=ON\n",pcHlp,psArg->psStd->pcKyw);
    }
 
    siErr=siClpBldLnk(pvHdl,siLev,siPos,psArg->psVar->siCnt,psArg->psFix->psCnt,FALSE);
