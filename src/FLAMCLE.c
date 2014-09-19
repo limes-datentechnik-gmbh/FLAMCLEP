@@ -96,18 +96,21 @@
  * 1.1.32: Support DD names for write operation (log, trace, docs, ...)
  * 1.1.33: Use setenv() instead of putenv() for DD:STDENV on __HOST__
  * 1.1.34: Use snprintf() instead of sprintf() for static array strings
+ * 1.1.35: Support file name mapping (+/<Cuser>)
  *
  */
-#define CLE_VSN_STR       "1.1.34"
+#define CLE_VSN_STR       "1.1.35"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        1
-#define CLE_VSN_REVISION       33
+#define CLE_VSN_REVISION       35
 
 /* Definition der Konstanten ******************************************/
 #define CLEMAX_CNFLEN            1023
 #define CLEMAX_CNFSIZ            1024
 #define CLEMAX_FILLEN            1023
 #define CLEMAX_FILSIZ            1024
+#define CLEMAX_MODLEN            31
+#define CLEMAX_MODSIZ            32
 #define CLEMAX_PGMLEN            63
 #define CLEMAX_PGMSIZ            64
 #define CLEMAX_NUMLEN            1023
@@ -130,6 +133,7 @@ typedef struct CnfHdl {
    int                           isClr;
    int                           isCas;
    char                          acFil[CLEMAX_CNFSIZ];
+   char                          acMod[CLEMAX_MODSIZ];
    char                          acPgm[CLEMAX_CNFSIZ];
    TsCnfEnt*                     psFst;
    TsCnfEnt*                     psLst;
@@ -424,6 +428,7 @@ extern int siCleExecute(
    FILE*                         pfPro=NULL;
    char**                        ppArg=NULL;
    char                          acFil[CLEMAX_FILSIZ];
+   char                          acMod[CLEMAX_MODSIZ];
    int                           siFil=0;
    char                          acHom[CLEMAX_FILSIZ]="";
    char*                         pcTmp=NULL;
@@ -523,13 +528,10 @@ extern int siCleExecute(
       snprintf(acCnf,sizeof(acCnf),"%s.%s.trace.file",acOwn,pcPgm);
       pcCnf=pcCnfGet(psCnf,acCnf);
       if (pcCnf!=NULL && strlen(pcCnf)) {
-         if (toupper(pcCnf[0])=='D' && toupper(pcCnf[1])=='D' && toupper(pcCnf[2])==':') {
-            pfTrh=fopen(pcCnf,"w, recfm=*");
-         } else {
-            pfTrh=fopen(pcCnf,"w");
-         }
+         snprintf(acMod,sizeof(acMod),"w%s",cpmapfil(acFil,sizeof(acFil),pcCnf));
+         pfTrh=fopen(acFil,acMod);
          if (pfTrh==NULL) {
-            fprintf(pfOut,"Open of trace file (%s) failed\n",pcCnf);
+            fprintf(pfOut,"Open of trace file (\"%s\",\"%s\") failed\n",acFil,acMod);
          } else pfTrc=pfTrh;
       }
    } else pfTrc=NULL;
@@ -838,13 +840,10 @@ EVALUATE:
          if (pcFil!=NULL) {
             *((char*)pcFil)=EOS; pcFil++; pcCmd=argv[2];
             isMan=TRUE;
-            if (toupper(pcFil[0])=='D' && toupper(pcFil[1])=='D' && toupper(pcFil[2])==':') {
-               pfDoc=fopen(pcFil,"w, recfm=*");
-            } else {
-               pfDoc=fopen(pcFil,"w");
-            }
+            snprintf(acMod,sizeof(acMod),"w%s",cpmapfil(acFil,sizeof(acFil),pcFil));
+            pfDoc=fopen(acFil,acMod);
             if (pfDoc==NULL) {
-               fprintf(pfOut,"Open of manual page file (%s) failed (%d - %s)\n",pcFil,errno,strerror(errno));
+               fprintf(pfOut,"Open of manual page file (\"%s\",\"%s\") failed (%d - %s)\n",acFil,acMod,errno,strerror(errno));
                ERROR(8);
             }
          } else {
@@ -1044,13 +1043,10 @@ EVALUATE:
 
          pcFil=argv[2];
          isMan=TRUE;
-         if (toupper(pcFil[0])=='D' && toupper(pcFil[1])=='D' && toupper(pcFil[2])==':') {
-            pfDoc=fopen(pcFil,"w, recfm=*");
-         } else {
-            pfDoc=fopen(pcFil,"w");
-         }
+         snprintf(acMod,sizeof(acMod),"w%s",cpmapfil(acFil,sizeof(acFil),pcFil));
+         pfDoc=fopen(acFil,acMod);
          if (pfDoc==NULL) {
-            fprintf(pfOut,"Open of manual page file (%s) failed (%d - %s)\n",pcFil,errno,strerror(errno));
+            fprintf(pfOut,"Open of manual page file (\"%s\",\"%s\") failed (%d - %s)\n",acFil,acMod,errno,strerror(errno));
             ERROR(8);
          }
          vdCleManProgram(pfDoc,psTab,acOwn,pcPgm,pcHlp,pcMan,pcDep,pcOpt,TRUE,TRUE);
@@ -1093,13 +1089,10 @@ EVALUATE:
          } else {
             pcFil=argv[2]; pcCmd=NULL;
          }
-         if (toupper(pcFil[0])=='D' && toupper(pcFil[1])=='D' && toupper(pcFil[2])==':') {
-            pfDoc=fopen(pcFil,"w, recfm=*");
-         } else {
-            pfDoc=fopen(pcFil,"w");
-         }
+         snprintf(acMod,sizeof(acMod),"w%s",cpmapfil(acFil,sizeof(acFil),pcFil));
+         pfDoc=fopen(acFil,acMod);
          if (pfDoc==NULL) {
-            fprintf(pfOut,"Open of documentation file (%s) failed (%d - %s)\n",pcFil,errno,strerror(errno));
+            fprintf(pfOut,"Open of documentation file (\"%s\",\"%s\") failed (%d - %s)\n",acFil,acMod,errno,strerror(errno));
             ERROR(8);
          }
          if (pcCmd!=NULL) {
@@ -1353,13 +1346,10 @@ EVALUATE:
          } else {
             pcFil=argv[2]; pcCmd=NULL;
          }
-         if (toupper(pcFil[0])=='D' && toupper(pcFil[1])=='D' && toupper(pcFil[2])==':') {
-            pfPro=fopen(pcFil,"w, recfm=*");
-         } else {
-            pfPro=fopen(pcFil,"w");
-         }
+         snprintf(acMod,sizeof(acMod),"w%s",cpmapfil(acFil,sizeof(acFil),pcFil));
+         pfPro=fopen(acFil,acMod);
          if (pfPro==NULL) {
-            fprintf(pfOut,"Open of property file (%s) failed (%d-%s)\n",pcFil,errno,strerror(errno));
+            fprintf(pfOut,"Open of property file (\"%s\",\"%s\") failed (%d-%s)\n",acFil,acMod,errno,strerror(errno));
             ERROR(8);
          }
          if (pcCmd==NULL) fprintf(pfPro,"\n# Property file for: %s.%s #\n\n",acOwn,pcPgm);
@@ -1972,6 +1962,8 @@ static int siClePropertyFinish(
    FILE*                         pfPro;
    char                          acEnv[CLEMAX_CNFSIZ];
    char                          acCnf[CLEMAX_CNFSIZ];
+   char                          acFil[CLEMAX_FILSIZ];
+   char                          acMod[CLEMAX_MODSIZ];
    if (siFil!=3) {
       snprintf(acEnv,sizeof(acEnv),"%s_%s_%s_PROPERTY_FILENAME",pcOwn,pcPgm,pcCmd);
       for (i=0;acEnv[i];i++) acEnv[i]=toupper(acEnv[i]);
@@ -2014,13 +2006,10 @@ static int siClePropertyFinish(
          pcFil=acEnv;
       }
    }
-   if (toupper(pcFil[0])=='D' && toupper(pcFil[1])=='D' && toupper(pcFil[2])==':') {
-      pfPro=fopen(pcFil,"w, recfm=*");
-   } else {
-      pfPro=fopen(pcFil,"w");
-   }
+   snprintf(acMod,sizeof(acMod),"w%s",cpmapfil(acFil,sizeof(acFil),pcFil));
+   pfPro=fopen(acFil,acMod);
    if (pfPro==NULL) {
-      fprintf(pfOut,"Cannot open the property file \'%s\' for write operation (%d-%s)\n",pcFil,errno,strerror(errno));
+      fprintf(pfOut,"Cannot open the property file (\"%s\",\"%s\") for write operation (%d-%s)\n",acFil,acMod,errno,strerror(errno));
       vdClpClose(pvHdl);
       return(16);
    }
@@ -2544,7 +2533,7 @@ static int siCleGetProperties(
          } else *piFlg=1;
       } else *piFlg=2;
    } else *piFlg=3;
-   snprintf(pcFil,CLEMAX_FILSIZ,"%s",pcHlp);
+   cpmapfil(pcFil,CLEMAX_FILSIZ,pcHlp);
    siErr=file2str(pcFil,ppPro,&siSiz);
    if (siErr<0) {
       if (*ppPro!=NULL) { free(*ppPro); *ppPro=NULL; }
@@ -2616,7 +2605,7 @@ static int siCleGetCommand(
          fprintf(pfOut,"Parameter file name is too long (more than %d bytes)!\n",CLEMAX_FILLEN);
          return(8);
       }
-      snprintf(pcFil,CLEMAX_FILSIZ,"%s",argv[1]+l+1);
+      cpmapfil(pcFil,CLEMAX_FILSIZ,argv[1]+l+1);
       siErr=file2str(pcFil,ppCmd,&siSiz);
       if (siErr<0) {
          if (*ppCmd!=NULL) { free(*ppCmd); *ppCmd=NULL; }
@@ -2680,7 +2669,7 @@ static TsCnfHdl* psCnfOpn(
       free(psHdl);
       return(NULL);
    }
-   strcpy(psHdl->acFil,pcFil);
+   snprintf(psHdl->acMod,sizeof(psHdl->acMod),"w%s",cpmapfil(psHdl->acFil,sizeof(psHdl->acFil),pcFil));
 
    pfFil=fopen(psHdl->acFil,"r");
    if (pfFil==NULL && (errno==2 || errno==49 || errno==129)) return(psHdl);
@@ -2940,24 +2929,16 @@ static void vdCnfCls(
    FILE*                         pfFil=NULL;
    if (psHdl!=NULL) {
       if (psHdl->isClr) {
-         if (toupper(psHdl->acFil[0])=='D' && toupper(psHdl->acFil[1])=='D' && toupper(psHdl->acFil[2])==':') {
-            pfFil=fopen(psHdl->acFil,"w, recfm=*");
-         } else {
-            pfFil=fopen(psHdl->acFil,"w");
-         }
+         pfFil=fopen(psHdl->acFil,psHdl->acMod);
          if (pfFil!=NULL) fclose(pfFil);
-         remove(psHdl->acFil);
+         if (!ISDDNAME(psHdl->acFil)) remove(psHdl->acFil);
       } else {
          psEnt=psHdl->psFst;
          if (psHdl->isChg && strlen(psHdl->acFil)) {
-            if (toupper(psHdl->acFil[0])=='D' && toupper(psHdl->acFil[1])=='D' && toupper(psHdl->acFil[2])==':') {
-               pfFil=fopen(psHdl->acFil,"w, recfm=*");
-            } else {
-               pfFil=fopen(psHdl->acFil,"w");
-            }
+            pfFil=fopen(psHdl->acFil,psHdl->acMod);
          }
          if (pfFil!=NULL) {
-            fprintf(pfFil,"# Config file for program \'%s\'\n",psHdl->acPgm);
+            fprintf(pfFil,"# Configuration file for program \'%s\'\n",psHdl->acPgm);
          }
          while(psEnt!=NULL) {
             if (pfFil!=NULL) fprintf(pfFil,"%s=%s\n",psEnt->acKyw,psEnt->acVal);

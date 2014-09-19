@@ -107,6 +107,7 @@ Below, you can find a possibly incomplete list of FLAMCLE feature:
  * * Support of STDENV as DD name for environment variables on mainframes
  * * Keywords (commands, built-in functions, ON, OFF, ALL, DEPTH1, ...) can start optional with "-" or "--"
  * * Support for parameter files per command, object or overlay
+ * * File name mapping (+/<envar>) and DD:NAME support
 
 Built-in Functions
 ------------------

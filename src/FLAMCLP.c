@@ -84,13 +84,14 @@
  * 1.1.34: Get properties from environment variables and property files working
  * 1.1.35: Correct error position (source, row, column) if property parsing used
  * 1.1.36: Use snprintf() instead of sprintf() for static array strings
+ * 1.1.37: Support file name mapping (+/<Cuser>)
  *
  **/
 
-#define CLP_VSN_STR       "1.1.36"
+#define CLP_VSN_STR       "1.1.37"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        1
-#define CLP_VSN_REVISION       36
+#define CLP_VSN_REVISION       37
 
 /* Definition der Flag-Makros *****************************************/
 
@@ -2697,7 +2698,7 @@ static int siClpPrsFil(
    if (psHdl->siTok!=CLPTOK_STR) {
       return CLPERR(psHdl,CLPERR_SYN,"After object/overlay assignment \'%s.%s=\' parameter file (\'filename\') expected",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
    }
-   strcpy(acFil,psHdl->acLex+2);
+   cpmapfil(acFil,sizeof(acFil),psHdl->acLex+2);
    siErr=file2str(acFil,&pcPar,&siSiz);
    if (siErr<0) {
       switch(siErr) {

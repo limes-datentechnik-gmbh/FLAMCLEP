@@ -42,3 +42,68 @@ This is the ${__BUILD__} build version of the FLAMCLEP.
 * 16 - system error (mainly allocation or some things failed)
 * 20 - access control or license error
 * 24 - fatal error (basic things are damaged)
+
+.USED ENVIRONMENT VARIABLES
+
+ * program_CONFIG_FILE      - the configuration filename (default is '$HOME/.flcl.config' on UNIX/WIN or '&SYSUID..FLCL.CONFIG' on mainframes)
+ * program_DEFAULT_OWNER_ID - the default owner ID (default is 'de.limes')
+
+The environment variables can be set from the system or in the program
+configuration file with the build-in function 'SETENV'. Especially on
+mainframe systems the configuration file is an easy way to define
+environment variables. Additional on host the DD name STDENV is
+supported. The DD:STDENV allows you to define the program_CONFIG_FILE,
+program_DEFAULT_OWNER_ID, LANG and other environment variables for
+example direct in your JCL (FLCL is a sample program name):
+
+-----------------------------------------------------------------------
+ //STDENV   DD *
+ FLCL_CONFIG_FILE=GLOBAL.FLCL.CONFIG
+ LANG=de_DE.IBM-1141
+ HOME=/u/hugo
+ USER=hugo
+ /*
+-----------------------------------------------------------------------
+
+Often it will be useful to have a dedicated environment per user on
+z/OS. In such case it makes sense to define the environment in a
+dedicated file for each user.
+
+-----------------------------------------------------------------------
+ //STDENV   DD DSN=USER.ENVIR(&SYSUID.), DSP=SHR
+-----------------------------------------------------------------------
+
+Beside all the environment variables above you can also set all
+properties as environment variables to overrule the hard coded default
+values. If a property defined as environment variable and over a
+property file, then the value in the property file overrules the
+settings over the environment. The environment variable name for each
+property are builded by the rules below:
+
+ * convert all letters to upper case
+ * replace all dots '.' by underline '_'
+
+To get a list and help for all properties pleas use the built-in
+function 'genprop' to generate property files. The properties can be
+defined per owner, per program and general. The owner specific
+definition overrules the program specific definition and the program
+specific definition overrules the general definition. Examples:
+
+-----------------------------------------------------------------------
+CONV_READ_TEXT_ENL2LF=OFF #in general the 0x15 to 0x25 conversion is off#
+HUGO_FLCL_CONV_READ_TEXT_ENL2LF=ON # for owner 'hugo' the conversion is on#
+-----------------------------------------------------------------------
+
+The value string behind the sign (including the comment) will be used as
+supplement for the command line processor. Aliases are not supported.
+You can only define properties for the main argument. If a string must
+be enclosed then with apostrophe. Please don't use double quotation
+marks, because these are used additional if a new property file build
+based on the environment settings. 
+
+-----------------------------------------------------------------------
+FLCL_ICNV_FROM='IBM-1141'         # this is the best soultion 
+FLCL_ICNV_TO=UTF-8                # "UTF-8" could result in errors
+-----------------------------------------------------------------------
+
+See <<appendix-properties>> for the current property file content.

@@ -61,6 +61,9 @@
 
 #define isKyw(c) (isalnum(c) || (c)=='_' || (c)=='-')
 
+#define ISDDNAME(p)     (toupper((p)[0])=='D' && toupper((p)[1])=='D' && (p)[2]==':')
+#define ISPATHNAME(p)   (strchr((p),'/')!=NULL)
+
 /**********************************************************************/
 
 /**
@@ -87,7 +90,44 @@ extern char* homedir(const int flag, const int siz, char* buffer);
  * @param format  format string
  * @return        amount of characters printed (0 are mainly a error)
  */
-extern int snprintc(char* buffer,size_t size,const char* format,...);
+extern int snprintc(char* buffer,const size_t size,const char* format,...);
+
+/**
+ * Replace each occurrence of char in name by value
+ * @param name string for replacement
+ * @param size size of replacement string
+ * @param chr  character for replacement
+ * @param value value for replacement
+ */
+extern void rplchar(char* name,const size_t size,const char chr, const char* value);
+
+/**
+ * Replace environment variables in a string
+ * @param name string for replacement
+ * @param size size of replacement string
+ * @param opn  character to start enclosing of envar
+ * @param cls  character for end of enclosing of envar
+ */
+extern void rplenvar(char* name,size_t size,const char opn, const char cls);
+
+/**
+ * Replace '+' with "<HOME>" and all enviroment variables enclosed with '<' and '>'
+ * @param file string for replacement
+ * @param size size of replacement string
+ * @return pointer to file
+ */
+extern char* mapfil(char* file,int size);
+
+/**
+ * Replace '+' with "<HOME>" and all environment variables enclosed with '<' and '>'
+ * @param dest string for replacement
+ * @param size size of replacement string
+ * @param source original string
+ * @return pointer to string which must be concatenated to the format string for fopen at write operation ("w/wb/a/...")
+ */
+extern char* cpmapfil(char* dest, int size,const char* source);
+
+/**********************************************************************/
 
 /**
  * Convert from hex to binary

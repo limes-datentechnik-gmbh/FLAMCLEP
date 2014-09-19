@@ -102,6 +102,137 @@ extern char* homedir(int flag, const int size, char* buffer) {
 }
 #endif
 
+/**********************************************************************/
+
+extern void rplchar(char* name,const size_t size,const char c, const char* value)
+{
+   char        h[size];
+   char*       a=name;
+   char*       e=a+strlen(name);
+   const char* v=value;
+   char*       b;
+   char*       p;
+
+   for (b=strchr(a,c);a<e && b!=NULL;b=strchr(a,c)) {
+      if (b[1]==c) {
+         for (p=b;*p;p++) p[0]=p[1];
+         a=b+1;
+      } else {
+         b[0]=0;
+         strncpy(h,b+1,size-1);
+         h[size-1]=0;
+         if (strlen(a)+strlen(v)<size) strcat(a,v);
+         if (strlen(a)+strlen(h)<size) strcat(a,h);
+         a=b+strlen(v);
+      }
+      e=a+strlen(name);
+   }
+}
+
+extern void rplenvar(char* name,const size_t size,const char opn, const char cls)
+{
+   char        h[size];
+   char        x[size];
+   char*       a=name;
+   char*       e=a+strlen(name);
+   char*       b;
+   char*       c;
+   char*       v;
+   char*       p;
+
+   for (b=strchr(a,opn);a<e && b!=NULL;b=strchr(a,opn)) {
+      if (b[1]==opn) {
+         for (p=b;*p;p++) p[0]=p[1];
+         a=b+1;
+      } else {
+         c=strchr(b,cls);
+         if (c!=NULL) {
+            b[0]=c[0]=0;
+            strncpy(h,c+1,size-1);
+            h[size-1]=0;
+            v=getenv(b+1);
+            if (v!=NULL && strlen(v)) {
+               if (strlen(a)+strlen(v)<size) strcat(a,v);
+               if (strlen(a)+strlen(h)<size) strcat(a,h);
+               a=b+strlen(v);
+            } else if (strcmp(b+1,"HOME")==0) {
+               v=homedir(FALSE,size,x);
+               if (strlen(a)+strlen(v)<size) strcat(a,v);
+               if (strlen(a)+strlen(h)<size) strcat(a,h);
+               a=b+strlen(v);
+            } else if (strcmp(b+1,"USER")==0) {
+               v=userid(size,x);
+               if (strlen(a)+strlen(v)<size) strcat(a,v);
+               if (strlen(a)+strlen(h)<size) strcat(a,h);
+               a=b+strlen(v);
+            } else if (strcmp(b+1,"SYSUID")==0) {
+               v=userid(size,x);
+               if (strlen(a)+strlen(v)<size) strcat(a,v);
+               if (strlen(a)+strlen(h)<size) strcat(a,h);
+               a=b+strlen(v);
+            } else if (strcmp(b+1,"CUSER")==0) {
+               v=userid(size,x);
+               for(p=v; *p ;p++) *p = toupper(*p);
+               if (strlen(a)+strlen(v)<size) strcat(a,v);
+               if (strlen(a)+strlen(h)<size) strcat(a,h);
+               a=b+strlen(v);
+            } else if (strcmp(b+1,"cuser")==0) {
+               v=userid(size,x);
+               for(p=v; *p ;p++) *p = tolower(*p);
+               if (strlen(a)+strlen(v)<size) strcat(a,v);
+               if (strlen(a)+strlen(h)<size) strcat(a,h);
+               a=b+strlen(v);
+            } else if (strcmp(b+1,"Cuser")==0) {
+               v=userid(size,x);
+               if (*v) {
+                  *v = toupper(*v);
+                  for(p=v+1; *p ;p++) *p = tolower(*p);
+               }
+               if (strlen(a)+strlen(v)<size) strcat(a,v);
+               if (strlen(a)+strlen(h)<size) strcat(a,h);
+               a=b+strlen(v);
+            } else {
+               strcat(a,h);
+               a=b;
+            }
+         } else {
+            a=b+1;
+         }
+      }
+      e=a+strlen(name);
+   }
+}
+
+extern char* mapfil(char* file,int size) {
+   rplchar(file,size,'+',"<HOME>");
+   rplenvar(file,size,'<','>');
+   return(file);
+}
+
+#ifdef __HOST__
+extern char* cpmapfil(char* dest, int size,const char* source) {
+   if (ISPATHNAME(source)) {
+      snprintf(dest,size,"%s",source);
+      mapfil(dest,size);
+      return("");
+   } else if (ISDDNAME(fn2))
+      snprintf(dest,size,"%s",source);
+      mapfil(dest,size);
+      return(", recfm=*");
+   } else {
+      snprintf(dest,size,"'%s'",source);
+      mapfil(dest,size);
+      return("");
+   }
+}
+#else
+extern char* cpmapfil(char* dest, int size,const char* source) {
+   snprintf(dest,size,"%s",source);
+   mapfil(dest,size);
+   return("");
+}
+#endif
+
 /* implementation of the external functions ***********************************/
 
 extern int snprintc(char* buffer,size_t size,const char* format,...) {
