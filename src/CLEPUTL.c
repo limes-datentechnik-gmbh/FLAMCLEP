@@ -75,7 +75,7 @@ extern char* userid(const int size, char* buffer) {
    return(buffer);
 }
 extern char* homedir(int flag, const int size, char* buffer) {
-   const char*    home=getenv("HOME");
+   const char*    home=GETENV("HOME");
    if (home!=NULL && strlen(home)) {
       if (flag) {
          snprintf(buffer,size,"%s/",home);
@@ -150,7 +150,7 @@ extern void rplenvar(char* name,const size_t size,const char opn, const char cls
             b[0]=c[0]=0;
             strncpy(h,c+1,size-1);
             h[size-1]=0;
-            v=getenv(b+1);
+            v=GETENV(b+1);
             if (v!=NULL && strlen(v)) {
                if (strlen(a)+strlen(v)<size) strcat(a,v);
                if (strlen(a)+strlen(h)<size) strcat(a,h);

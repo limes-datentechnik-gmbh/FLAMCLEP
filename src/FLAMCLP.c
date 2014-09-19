@@ -85,13 +85,14 @@
  * 1.1.35: Correct error position (source, row, column) if property parsing used
  * 1.1.36: Use snprintf() instead of sprintf() for static array strings
  * 1.1.37: Support file name mapping (+/<Cuser>)
+ * 1.1.38: Use GETENV() makro
  *
  **/
 
-#define CLP_VSN_STR       "1.1.37"
+#define CLP_VSN_STR       "1.1.38"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        1
-#define CLP_VSN_REVISION       37
+#define CLP_VSN_REVISION       38
 
 /* Definition der Flag-Makros *****************************************/
 
@@ -1433,7 +1434,7 @@ static char* get_env(char* var,const size_t size,const char* fmtstr, ...)
       var[i]=toupper(var[i]);
       if (var[i]=='.') var[i]='_';
    }
-   return(getenv(var));
+   return(GETENV(var));
 }
 
 #undef  ERROR

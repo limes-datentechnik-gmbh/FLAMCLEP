@@ -64,6 +64,16 @@
 #define ISDDNAME(p)     (toupper((p)[0])=='D' && toupper((p)[1])=='D' && (p)[2]==':')
 #define ISPATHNAME(p)   (strchr((p),'/')!=NULL)
 
+#ifdef __WIN__
+#  define GETENV(name)        getenv((name))
+#  define SETENV(name, value) _putenv_s((name), (value))
+#  define UNSETENV(name)      _putenv_s((name), "")
+#else
+#  define GETENV(name)        getenv((name))
+#  define SETENV(name, value) setenv((name), (value), 1)
+#  define UNSETENV(name)      unsetenv((name))
+#endif
+
 /**********************************************************************/
 
 /**

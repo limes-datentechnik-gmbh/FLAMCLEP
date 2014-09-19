@@ -35,7 +35,7 @@
 /* Standard-Includes **************************************************/
 
 #ifndef _XOPEN_SOURCE
-#define _XOPEN_SOURCE
+#define _XOPEN_SOURCE 600
 #endif
 #include <ctype.h>
 #include <stdio.h>
@@ -43,9 +43,6 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <errno.h>
-#ifdef __WIN__
-#define putenv(s) _putenv((s))
-#endif
 
 /* Include eigener Bibliotheken  **************************************/
 
@@ -97,12 +94,13 @@
  * 1.1.33: Use setenv() instead of putenv() for DD:STDENV on __HOST__
  * 1.1.34: Use snprintf() instead of sprintf() for static array strings
  * 1.1.35: Support file name mapping (+/<Cuser>)
+ * 1.1.36: Introduce SET/GETENV() macros
  *
  */
-#define CLE_VSN_STR       "1.1.35"
+#define CLE_VSN_STR       "1.1.36"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        1
-#define CLE_VSN_REVISION       35
+#define CLE_VSN_REVISION       36
 
 /* Definition der Konstanten ******************************************/
 #define CLEMAX_CNFLEN            1023
@@ -125,7 +123,6 @@ typedef struct CnfEnt {
    struct CnfEnt*                psBak;
    char                          acKyw[CLEMAX_CNFSIZ];
    char                          acVal[CLEMAX_CNFSIZ];
-   char                          acEnv[2*CLEMAX_CNFSIZ];
 }TsCnfEnt;
 
 typedef struct CnfHdl {
@@ -452,7 +449,7 @@ extern int siCleExecute(
          pcCnf=strchr(acCnf,'=');
          if (pcCnf!=NULL) {
             *pcCnf=0x00;
-            if (setenv(acCnf,pcCnf+1,TRUE)) {
+            if (SETENV(acCnf,pcCnf+1,TRUE)) {
                fprintf(pfOut,"Put variable (%s=%s) to environment failed (%d - %s)\n",acCnf,pcCnf+1,errno,strerror(errno));
                fclose(pfTmp);
                return(16);
@@ -465,10 +462,10 @@ extern int siCleExecute(
    }
 #endif
    snprintf(acCnf,sizeof(acCnf),"%s_DEFAULT_OWNER_ID",acPgm);
-   pcCnf=getenv(acCnf);
+   pcCnf=GETENV(acCnf);
    if (pcCnf!=NULL && strlen(pcCnf) && strlen(pcCnf)<sizeof(acOwn)) strcpy(acOwn,pcCnf); else strcpy(acOwn,pcOwn);
    snprintf(acCnf,sizeof(acCnf),"%s_CONFIG_FILE",acPgm);
-   pcCnf=getenv(acCnf);
+   pcCnf=GETENV(acCnf);
    if (pcCnf==NULL) {
 
 #ifdef __HOST__
@@ -1967,7 +1964,7 @@ static int siClePropertyFinish(
    if (siFil!=3) {
       snprintf(acEnv,sizeof(acEnv),"%s_%s_%s_PROPERTY_FILENAME",pcOwn,pcPgm,pcCmd);
       for (i=0;acEnv[i];i++) acEnv[i]=toupper(acEnv[i]);
-      pcFil=getenv(acEnv);
+      pcFil=GETENV(acEnv);
       if (pcFil==NULL) {
 #ifdef __HOST__
          {
@@ -2835,14 +2832,11 @@ static int siCnfPutEnv(
           strstr(psEnt->acKyw,pcPgm)!=NULL &&
           strstr(psEnt->acKyw,".envar.")!=NULL) {
          const char* pcKyw=strstr(psEnt->acKyw,".envar.")+7;
-         if (strlen(pcKyw)+strlen(psEnt->acVal)+2<sizeof(psEnt->acEnv)) {
-            snprintf(psEnt->acEnv,sizeof(psEnt->acEnv),"%s=%s",pcKyw,psEnt->acVal);
-            if (putenv(psEnt->acEnv)==0) {
-               const char* pcHlp=getenv(pcKyw);
-               if (pcHlp!=NULL) {
-                  if (strcmp(pcHlp,psEnt->acVal)==0) {
-                     j++;
-                  }
+         if (SETENV(pcKyw,psEnt->acVal)==0) {
+            const char* pcHlp=GETENV(pcKyw);
+            if (pcHlp!=NULL) {
+               if (strcmp(pcHlp,psEnt->acVal)==0) {
+                  j++;
                }
             }
          }
@@ -2866,7 +2860,7 @@ static int siCnfPrnEnv(
           strstr(psEnt->acKyw,pcPgm)!=NULL &&
           strstr(psEnt->acKyw,".envar.")!=NULL) {
          const char* pcKyw=strstr(psEnt->acKyw,".envar.")+7;
-         const char* pcHlp=getenv(pcKyw);
+         const char* pcHlp=GETENV(pcKyw);
          if (pcHlp!=NULL) {
             if (strcmp(pcHlp,psEnt->acVal)==0) {
                pcAdd="was verified";
