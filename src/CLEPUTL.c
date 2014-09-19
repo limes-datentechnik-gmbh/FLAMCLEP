@@ -215,7 +215,7 @@ extern char* cpmapfil(char* dest, int size,const char* source) {
       snprintf(dest,size,"%s",source);
       mapfil(dest,size);
       return("");
-   } else if (ISDDNAME(fn2))
+   } else if (ISDDNAME(source)) {
       snprintf(dest,size,"%s",source);
       mapfil(dest,size);
       return(", recfm=*");

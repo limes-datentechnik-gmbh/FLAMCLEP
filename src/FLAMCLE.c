@@ -449,7 +449,7 @@ extern int siCleExecute(
          pcCnf=strchr(acCnf,'=');
          if (pcCnf!=NULL) {
             *pcCnf=0x00;
-            if (SETENV(acCnf,pcCnf+1,TRUE)) {
+            if (SETENV(acCnf,pcCnf+1)) {
                fprintf(pfOut,"Put variable (%s=%s) to environment failed (%d - %s)\n",acCnf,pcCnf+1,errno,strerror(errno));
                fclose(pfTmp);
                return(16);
