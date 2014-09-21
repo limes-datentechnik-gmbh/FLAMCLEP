@@ -133,9 +133,10 @@ extern char* mapfil(char* file,int size);
  * @param dest string for replacement
  * @param size size of replacement string
  * @param source original string
+ * @param flag if true data set names (only host) are enclosed in apostrophes (requires full qualified data set names)
  * @return pointer to string which must be concatenated to the format string for fopen at write operation ("w/wb/a/...")
  */
-extern char* cpmapfil(char* dest, int size,const char* source);
+extern char* cpmapfil(char* dest, int size,const char* source,const int flag);
 
 /**********************************************************************/
 

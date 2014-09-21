@@ -91,10 +91,34 @@ extern char* homedir(int flag, const int size, char* buffer) {
             snprintf(buffer,size,"%s",uP->pw_dir);
          }
       } else {
+         char acUsr[64]="";
+         userid(sizeof(acUsr),acUsr);
+         if (strlen(acUsr)) {
+#ifdef __ZOS__
          if (flag) {
-            snprintf(buffer,size,"/");
+            snprintf(buffer,size,"%s.",acUsr);
          } else {
-            if (size>=0) buffer[0]=0x00;
+            snprintf(buffer,size,"%s",acUsr);
+         }
+#elif defined(__USS__)
+         if (flag) {
+            snprintf(buffer,size,"/u/%s/",acUsr);
+         } else {
+            snprintf(buffer,size,"/u/%s",acUsr);
+         }
+#else
+         if (flag) {
+            snprintf(buffer,size,"/home/%s/",acUsr);
+         } else {
+            snprintf(buffer,size,"/home/%s",acUsr);
+         }
+#endif
+         } else {
+            if (flag) {
+               snprintf(buffer,size,"/");
+            } else {
+               if (size>=0) buffer[0]=0x00;
+            }
          }
       }
    }
@@ -210,8 +234,8 @@ extern char* mapfil(char* file,int size) {
 }
 
 #ifdef __HOST__
-extern char* cpmapfil(char* dest, int size,const char* source) {
-   if (ISPATHNAME(source)) {
+extern char* cpmapfil(char* dest, int size,const char* source,const int flag) {
+   if (ISPATHNAME(source) || source[0]=='\'') {
       snprintf(dest,size,"%s",source);
       mapfil(dest,size);
       return("");
@@ -220,13 +244,17 @@ extern char* cpmapfil(char* dest, int size,const char* source) {
       mapfil(dest,size);
       return(", recfm=*");
    } else {
-      snprintf(dest,size,"'%s'",source);
+      if (flag) {
+         snprintf(dest,size,"'%s'",source);
+      } else {
+         snprintf(dest,size,"%s",source);
+      }
       mapfil(dest,size);
       return("");
    }
 }
 #else
-extern char* cpmapfil(char* dest, int size,const char* source) {
+extern char* cpmapfil(char* dest, int size,const char* source,const int flag) {
    snprintf(dest,size,"%s",source);
    mapfil(dest,size);
    return("");
