@@ -13,4 +13,4 @@ FLAMCLEP to handle a command line interpretation. Based on this in the
 description of the built-in function the variable program name are 
 propagated in a neutral form called 'program'. The 'program' qualifier
 must be replaced by the real program name (flcl) to use the examples and
-syntax correctly.  
+syntax correctly.

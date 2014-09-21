@@ -4,8 +4,8 @@ is used.
 
 There are two context free grammars, one is used for the command
 line the other for the parameter file. The parameter file contains
-the same argument list as the command line. The property file defines
-the default settings. For this a different grammar is applied.
+mainly the same argument list as the command line. The property file
+defines the default settings. For this a different grammar is applied.
 
 Properties can be set for each argument, i.e. for arguments
 not used or arguments in overlays. Based on that, properties are set
@@ -16,3 +16,4 @@ command line or parameter file. Thus all defined properties have the
 same effect as arguments on the command line. A property sets this
 argument to the corresponding value if it is not defined on the
 command line.
+

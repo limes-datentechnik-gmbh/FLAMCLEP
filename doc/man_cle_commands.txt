@@ -13,10 +13,10 @@ message, the path, the type and the syntax followed by a detailed
 description.
 
 If an argument of this command is an object or overlay or, if a detailed
-description or constant definition is available for this argument, a
-separate section with synopsis (help, path, type, syntax) and
-description is written, otherwise a bullet list is printed which
-contains the keyword, the syntax and the help message.
+description is available for this argument, a separate section with
+synopsis (help, path, type, syntax) and description is written, 
+otherwise a bullet list is printed which contains the keyword, the
+syntax and the help message.
 
 For the syntax of an overlay braces '{}' are used to keep all possible
 arguments of an overlay logically together. These braces are not part
@@ -28,7 +28,7 @@ To be compatible with certain shells, the features below are
 implemented:
 
  * Strings can be enclosed with '' or ""
- * Strings can also defined without quotes 
+ * Strings can also defined without quotes
  * Keywords can also start with "-" or "--" in front of the qualifier
  * If it unique then parenthesis and the dot can be omit for object and overlays
 

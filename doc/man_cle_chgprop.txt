@@ -31,7 +31,7 @@ On non-mainframe systems (WINDOWS, UNIX, MAC):
     ".owner.program.command.properties"
 
 On mainframe systems (ZOS, VSE, BS200, ...):
-    "'SYSUID.OWNER.PROGRAM.COMMAND.PROP'"
+    "<SYSUID>.OWNER.PROGRAM.COMMAND.PROPS"
 
 If the default filenames and/or path are not sufficient, you can change
 the filename of each property file by setting environment variables

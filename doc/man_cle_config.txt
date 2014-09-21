@@ -19,7 +19,7 @@ improbable), then the working directory is used.
 To read the configuration file and the environment variable above is not
 defined, CLE looks first in the working and then in the home directory.
 This enables you to prefer a property file, by coping it to the current 
-working directory.   
+working directory.
 
 On mainframes as default the data set name 'SYSUID.program.CONFIG' is
 used. SYSUID as high level qualifier is a kind of replacement for the

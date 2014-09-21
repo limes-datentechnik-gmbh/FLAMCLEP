@@ -45,10 +45,14 @@ This is the ${__BUILD__} build version of the FLAMCLEP.
 
 .USED ENVIRONMENT VARIABLES
 
+ * HOME                     - to determine the home directory on UNIX/WIN
+ * USER                     - to determine the current user id on UNIX/WIN 
  * program_CONFIG_FILE      - the configuration filename (default is '$HOME/.flcl.config' on UNIX/WIN or '&SYSUID..FLCL.CONFIG' on mainframes)
  * program_DEFAULT_OWNER_ID - the default owner ID (default is 'de.limes')
-
-The environment variables can be set from the system or in the program
+ * owner_program_command_PROPERTY_FILENAME - To overrule default property file names
+ * path_argument            - to overrule the hard coded default property value
+ 
+Environment variables can be set from the system or in the program
 configuration file with the build-in function 'SETENV'. Especially on
 mainframe systems the configuration file is an easy way to define
 environment variables. Additional on host the DD name STDENV is
@@ -66,17 +70,17 @@ example direct in your JCL (FLCL is a sample program name):
 -----------------------------------------------------------------------
 
 Often it will be useful to have a dedicated environment per user on
-z/OS. In such case it makes sense to define the environment in a
+mainframes. In such case it makes sense to define the environment in a
 dedicated file for each user.
 
 -----------------------------------------------------------------------
  //STDENV   DD DSN=USER.ENVIR(&SYSUID.), DSP=SHR
 -----------------------------------------------------------------------
 
-Beside all the environment variables above you can also set all
+Beside all the environment variables managed by CLE you can also set all
 properties as environment variables to overrule the hard coded default
-values. If a property defined as environment variable and over a
-property file, then the value in the property file overrules the
+values with CLP. If a property defined as environment variable and over
+a property file, then the value in the property file overrules the
 settings over the environment. The environment variable name for each
 property are builded by the rules below:
 
@@ -95,15 +99,53 @@ HUGO_FLCL_CONV_READ_TEXT_ENL2LF=ON # for owner 'hugo' the conversion is on#
 -----------------------------------------------------------------------
 
 The value string behind the sign (including the comment) will be used as
-supplement for the command line processor. Aliases are not supported.
-You can only define properties for the main argument. If a string must
-be enclosed then with apostrophe. Please don't use double quotation
-marks, because these are used additional if a new property file build
-based on the environment settings. 
+supplement for the command line processor. Aliases are not supported in
+this case. You can only define properties for the main argument. If a
+string must be enclosed with apostrophe, please don't use double
+quotation marks, because these are used additional if a new property
+file build based on the environment settings. 
 
 -----------------------------------------------------------------------
-FLCL_ICNV_FROM='IBM-1141'         # this is the best soultion 
+FLCL_ICNV_FROM='IBM-1141'         # this is the best solution 
 FLCL_ICNV_TO=UTF-8                # "UTF-8" could result in errors
 -----------------------------------------------------------------------
 
 See <<appendix-properties>> for the current property file content.
+
+.FILENAME MAPPING
+
+All filenames used by CLEP are additionally mapped based on the rules
+below:
+
+ * The character '+' is replaced with the string "<HOME>"
+ * Each value enclosed with angle brackets (<>) are replaced with the
+   corresponding environment variable. If the environment variable not
+   defined the replacements below are still possible:
+ ** <SYSUID> - Current user id in upper case
+ ** <USER>   - Current user id (case sensitive)
+ ** <CUSER>  - Current user id in upper case == <SYSUID>
+ ** <Cuser>  - Current user id in title case
+ ** <cuser>  - Current user id in lower case
+ ** <HOME>   - Replaces with the users data directory, if this not
+               available the replacements below are done:
+ *** On UNIX with /home/<USER>
+ *** On USS with /u/<USER>
+ *** On ZOS with <SYSUID>
+ * DD names on mainframes must be prefixed with "DD:"
+ * Data set names on mainframes are always full qualified
+ * Path names on mainframes must contain a least one slash '/'
+ * Data set names on USS must start with //
+ ** Full qualified names with HLQ must enclose in apostrophes "//''"
+ ** If apostrophes are not used the SYSUID is prefixed as HLQ
+ * Normal file names on other platforms could be relative
+
+To use a "<" or "+" as a part of a filename the character must be
+specified twice.
+
+Beside this rules you can also use the replacement technologies of your
+shell, but on some platforms $HOME, $USER or something like this are not
+available, for such cases the possibilities above are implemented.
+
+This file name mapping is provided over the library CLEPUTL and should
+also be used for file names managed by the commands supported with this
+program.

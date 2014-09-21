@@ -20,10 +20,11 @@ The path denotes the unique dotted keyword list for one argument. The
 the value list for this argument in accordance with the syntax of the
 command line parser (strings then normally in single quotation marks,
 a opposite usage of the quotation marks is possible but not
-recommended). This means for example that a string must be included in
-apostrophes. The supplement string is returned by the corresponding
-command line parser if no value for this argument is entered on the
-command line or is included in the parameter file.
+recommended). This means for example that a string that requires
+apostrophes must be included in apostrophes ("'...'"). The supplement
+string is returned by the corresponding command line parser if no value
+for this argument is entered on the command line or is included in the
+parameter file.
 
 Behind the property definition the type and help message are printed as
 comment to help in editing the generated property file. The property
