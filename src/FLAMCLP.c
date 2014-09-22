@@ -87,13 +87,14 @@
  * 1.1.37: Support file name mapping (+/<Cuser>)
  * 1.1.38: Use GETENV() makro
  * 1.1.39: Rework all format strings (replace "\'" with "'" for better readability)
+ * 1.1.40: Print synopsis at help if keyword man is used
  *
  **/
 
-#define CLP_VSN_STR       "1.1.39"
+#define CLP_VSN_STR       "1.1.40"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        1
-#define CLP_VSN_REVISION       39
+#define CLP_VSN_REVISION       40
 
 /* Definition der Flag-Makros *****************************************/
 
@@ -999,16 +1000,36 @@ extern int siClpHelp(
          if (psTab!=NULL) {
             if (siDep==0) {
                if (psArg==NULL) {
+                  fprintf(psHdl->pfHlp,   "SYNOPSIS\n");
+                  fprintf(psHdl->pfHlp,   "--------\n");
+                  fprintf(psHdl->pfHlp,   "HELP:   %s\n",psHdl->pcHlp);
+                  fprintf(psHdl->pfHlp,   "PATH:   %s.%s\n",psHdl->pcOwn,psHdl->pcPgm);
+                  if (psHdl->isOvl) {
+                     fprintf(psHdl->pfHlp,"TYPE:   OVERLAY\n");
+                  } else {
+                     fprintf(psHdl->pfHlp,"TYPE:   OBJECT\n");
+                  }
+                  fprintf(psHdl->pfHlp,   "SYNTAX: $ %s ",psHdl->pcPgm); siErr=siClpPrnCmd(pvHdl,psHdl->pfHlp,0,0,1,NULL,psHdl->psSym,FALSE,FALSE); fprintf(psHdl->pfHlp,"\n\n");
+                  fprintf(psHdl->pfHlp,"DESCRIPTION\n");
+                  fprintf(psHdl->pfHlp,"-----------\n");
                   if (psHdl->pcMan!=NULL && strlen(psHdl->pcMan)) {
                      fprintf(psHdl->pfHlp,"%s\n",psHdl->pcMan);
                   } else {
-                     fprintf(psHdl->pfHlp,"No detailed description available for this command.\n");
+                     fprintf(psHdl->pfHlp,"No detailed description available for this command.\n\n");
                   }
                } else {
+                  fprintf(psHdl->pfHlp,"SYNOPSIS\n");
+                  fprintf(psHdl->pfHlp,"--------\n");
+                  fprintf(psHdl->pfHlp,"HELP:   %s\n",psArg->psFix->pcHlp);
+                  fprintf(psHdl->pfHlp,"PATH:   %s\n",fpcPat(pvHdl,siLev-1));
+                  fprintf(psHdl->pfHlp,"TYPE:   %s\n",apClpTyp[psArg->psFix->siTyp]);
+                  fprintf(psHdl->pfHlp,"SYNTAX: "); siErr=siClpPrnSyn(pvHdl,psHdl->pfHlp,FALSE,siLev-1,psArg); fprintf(psHdl->pfHlp,"\n\n");
+                  fprintf(psHdl->pfHlp,"DESCRIPTION\n");
+                  fprintf(psHdl->pfHlp,"-----------\n");
                   if (psArg->psFix->pcMan!=NULL && strlen(psArg->psFix->pcMan)) {
                      fprintf(psHdl->pfHlp,"%s\n",psArg->psFix->pcMan);
                   } else {
-                     fprintf(psHdl->pfHlp,"No detailed description available for this argument.\n");
+                     fprintf(psHdl->pfHlp,"No detailed description available for this argument.\n\n");
                   }
                }
             } else {
@@ -1032,10 +1053,18 @@ extern int siClpHelp(
             }
          } else {
             if (isMan) {
+               fprintf(psHdl->pfHlp,"SYNOPSIS\n");
+               fprintf(psHdl->pfHlp,"--------\n");
+               fprintf(psHdl->pfHlp,"HELP:   %s\n",psArg->psFix->pcHlp);
+               fprintf(psHdl->pfHlp,"PATH:   %s\n",fpcPat(pvHdl,siLev-1));
+               fprintf(psHdl->pfHlp,"TYPE:   %s\n",apClpTyp[psArg->psFix->siTyp]);
+               fprintf(psHdl->pfHlp,"SYNTAX: "); siErr=siClpPrnSyn(pvHdl,psHdl->pfHlp,FALSE,siLev-1,psArg); fprintf(psHdl->pfHlp,"\n\n");
+               fprintf(psHdl->pfHlp,"DESCRIPTION\n");
+               fprintf(psHdl->pfHlp,"-----------\n");
                if (psArg->psFix->pcMan!=NULL && strlen(psArg->psFix->pcMan)) {
                   fprintf(psHdl->pfHlp,"%s\n",psArg->psFix->pcMan);
                } else {
-                  fprintf(psHdl->pfHlp,"No detailed description available for this argument.\n");
+                  fprintf(psHdl->pfHlp,"No detailed description available for this argument.\n\n");
                }
             } else {
                fprintf(psHdl->pfHlp,"No farther arguments available.\n");
@@ -1046,10 +1075,22 @@ extern int siClpHelp(
       }
    } else {
       if (siDep==0) {
+         fprintf(psHdl->pfHlp,   "SYNOPSIS\n");
+         fprintf(psHdl->pfHlp,   "--------\n");
+         fprintf(psHdl->pfHlp,   "HELP:   %s\n",psHdl->pcHlp);
+         fprintf(psHdl->pfHlp,   "PATH:   %s.%s\n",psHdl->pcOwn,psHdl->pcPgm);
+         if (psHdl->isOvl) {
+            fprintf(psHdl->pfHlp,"TYPE:   OVERLAY\n");
+         } else {
+            fprintf(psHdl->pfHlp,"TYPE:   OBJECT\n");
+         }
+         fprintf(psHdl->pfHlp,   "SYNTAX: $ %s ",psHdl->pcPgm); siErr=siClpPrnCmd(pvHdl,psHdl->pfHlp,0,0,1,NULL,psHdl->psSym,FALSE,FALSE); fprintf(psHdl->pfHlp,"\n\n");
+         fprintf(psHdl->pfHlp,"DESCRIPTION\n");
+         fprintf(psHdl->pfHlp,"-----------\n");
          if (psHdl->pcMan!=NULL && strlen(psHdl->pcMan)) {
             fprintf(psHdl->pfHlp,"%s\n",psHdl->pcMan);
          } else {
-            fprintf(psHdl->pfHlp,"No detailed description available for this command.\n");
+            fprintf(psHdl->pfHlp,"No detailed description available for this command.\n\n");
          }
       } else {
          siErr=siClpPrnHlp(pvHdl,psHdl->pfHlp,isAli,0,siDep,-1,psTab,FALSE);

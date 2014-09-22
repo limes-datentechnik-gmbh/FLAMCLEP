@@ -96,12 +96,13 @@
  * 1.1.35: Support file name mapping (+/<Cuser>)
  * 1.1.36: Introduce SET/GETENV() macros
  * 1.1.37: Rework and correct file handling, adjust documentation
+ * 1.1.38: Adjust printout for support of synopsis at help if keyword man is used
  *
  */
-#define CLE_VSN_STR       "1.1.37"
+#define CLE_VSN_STR       "1.1.38"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        1
-#define CLE_VSN_REVISION       37
+#define CLE_VSN_REVISION       38
 
 /* Definition der Konstanten ******************************************/
 #define CLEMAX_CNFLEN            1023
@@ -798,6 +799,7 @@ EVALUATE:
                vdPrnCommandHelp(pvHdl,argv[2],siDep,siDep>9,TRUE);
                if (siDep==0) {
                   fprintf(pfOut,"ARGUMENTS\n");
+                  fprintf(pfOut,"---------\n");
                   vdPrnCommandHelp(pvHdl,argv[2],1,TRUE,FALSE);
                }
                ERROR(0);
@@ -821,6 +823,7 @@ EVALUATE:
                   vdPrnCommandHelp(pvHdl,pcPat,siDep,siDep>9,TRUE);
                   if (siDep==0) {
                      fprintf(pfOut,"ARGUMENTS\n");
+                     fprintf(pfOut,"---------\n");
                      vdPrnCommandHelp(pvHdl,pcPat,1,TRUE,FALSE);
                   }
                   free(pcPat);
