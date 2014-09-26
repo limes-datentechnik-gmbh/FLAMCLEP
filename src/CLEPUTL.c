@@ -94,6 +94,18 @@ extern int win_unsetenv(const char* name)
   return rc;
 }
 
+extern int win_snprintf(char* buffer,size_t size,const char* format,...)
+{
+   va_list  argv;
+   int      r;
+   va_start(argv, format);
+   r = vsnprintf(buffer, size-1, format, argv);
+   va_end(argv);
+   if (r >= size-1)
+         *(buffer+size-1) = 0;
+   return(r);
+}
+
 #else
 #include <unistd.h>
 #include <sys/types.h>
@@ -296,13 +308,21 @@ extern char* cpmapfil(char* dest, int size,const char* source,const int flag) {
 
 /* implementation of the external functions ***********************************/
 
-extern int snprintc(char* buffer,size_t size,const char* format,...) {
+extern int snprintc(char* buffer,size_t size,const char* format,...)
+{
    va_list  argv;
-   int      r,h=strlen(buffer);
-   if (size>(h+1)) {
-      va_start(argv,format); r=vsnprintf(buffer+h,size-(h+1),format,argv); va_end(argv);
+   int      r, h = strlen(buffer);
+   if (size > (h+1)) {
+      va_start(argv, format);
+      r = vsnprintf(buffer+h, size-(h+1), format, argv);
+      va_end(argv);
+#ifdef __WIN__ /* ensure 0-termination on plattforms where this is NOT the case. */
+      if (r >= size-h-1)
+         *(buffer+size-1) = 0;
+#endif
       return(r);
-   } else return (0);
+   } else
+     return (0);
 }
 
 extern unsigned int hex2bin(
