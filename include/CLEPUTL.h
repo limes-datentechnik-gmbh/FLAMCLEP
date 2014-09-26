@@ -66,8 +66,8 @@
 
 #ifdef __WIN__
 #  define GETENV(name)        getenv((name))
-#  define SETENV(name, value) _putenv_s((name), (value))
-#  define UNSETENV(name)      _putenv_s((name), "")
+#  define SETENV(name, value) win_setenv((name), (value))
+#  define UNSETENV(name)      win_unsetenv((name))
 #else
 #  define GETENV(name)        getenv((name))
 #  define SETENV(name, value) setenv((name), (value), 1)

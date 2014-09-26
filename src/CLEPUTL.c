@@ -61,6 +61,39 @@ extern char* homedir(int flag, const int size, char* buffer) {
    }
    return(buffer);
 }
+
+extern int win_setenv(const char* name, const char* value)
+{
+   char* envstr;
+   int rc;
+
+   envstr = (char*) malloc(strlen(name) + strlen(value) + 2);
+   if (NULL == envstr) {
+       errno = ENOMEM;
+       return -1;
+   }
+   sprintf(envstr,"%s=%s",name,value);
+   rc = _putenv(envstr);
+   free(envstr);
+   return rc;
+}
+
+extern int win_unsetenv(const char* name)
+{
+  char* envstr;
+  int rc;
+
+  envstr = (char*) malloc(strlen(name) + 2);
+  if (NULL == envstr) {
+      errno = ENOMEM;
+      return -1;
+  }
+  sprintf(envstr,"%s=",name);
+  rc = _putenv(envstr);
+  free(envstr);
+  return rc;
+}
+
 #else
 #include <unistd.h>
 #include <sys/types.h>
