@@ -88,13 +88,14 @@
  * 1.1.38: Use GETENV() makro
  * 1.1.39: Rework all format strings (replace "\'" with "'" for better readability)
  * 1.1.40: Print synopsis at help if keyword man is used
+ * 1.1.41: Support OID as default for numbers if CLPFLG_DEF defined (if only the keyword used (DECODE))
  *
  **/
 
-#define CLP_VSN_STR       "1.1.40"
+#define CLP_VSN_STR       "1.1.41"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        1
-#define CLP_VSN_REVISION       40
+#define CLP_VSN_REVISION       41
 
 /* Definition der Flag-Makros *****************************************/
 
@@ -111,6 +112,7 @@
 #define CLPISS_ELN(flg)          ((flg)&CLPFLG_ELN)
 #define CLPISS_SLN(flg)          ((flg)&CLPFLG_SLN)
 #define CLPISS_TLN(flg)          ((flg)&CLPFLG_TLN)
+#define CLPISS_DEF(flg)          ((flg)&CLPFLG_DEF)
 #define CLPISS_PWD(flg)          ((flg)&CLPFLG_PWD)
 #define CLPISS_CHR(flg)          ((flg)&CLPFLG_CHR)
 #define CLPISS_ASC(flg)          ((flg)&CLPFLG_ASC)
@@ -357,6 +359,12 @@ static int siClpPrsPar(
    const TsSym*                  psTab,
    int*                          piOid);
 
+static int siClpPrsNum(
+   void*                         pvHdl,
+   const int                     siLev,
+   const int                     siPos,
+   TsSym*                        psArg);
+
 static int siClpPrsSwt(
    void*                         pvHdl,
    const int                     siLev,
@@ -453,6 +461,12 @@ static int siClpBldLnk(
    const int                     isApp);
 
 static int siClpBldSwt(
+   void*                         pvHdl,
+   const int                     siLev,
+   const int                     siPos,
+   TsSym*                        psArg);
+
+static int siClpBldNum(
    void*                         pvHdl,
    const int                     siLev,
    const int                     siPos,
@@ -1570,6 +1584,15 @@ static TsSym* psClpSymIns(
       ERROR(psSym);
    }
 
+   if (psSym->psFix->siTyp!=CLPTYP_NUMBER && CLPISS_DEF(psSym->psStd->uiFlg)) {
+      CLPERR(psHdl,CLPERR_TAB,"Default flag for type '%s' of argument '%s.%s' not supported",apClpTyp[psSym->psFix->siTyp],fpcPat(pvHdl,siLev));
+      ERROR(psSym);
+   }
+   if (psSym->psFix->siTyp==CLPTYP_NUMBER && CLPISS_DEF(psSym->psStd->uiFlg) && psSym->psFix->siMax>1) {
+      CLPERR(psHdl,CLPERR_TAB,"Default flag for arrays of type number of argument '%s.%s' not supported",fpcPat(pvHdl,siLev));
+      ERROR(psSym);
+   }
+
    if (psSym->psStd->pcAli!=NULL) {
       if (psSym->psStd->pcKyw==NULL || strlen(psSym->psStd->pcKyw)==0) {
          CLPERR(psHdl,CLPERR_TAB,"Keyword of alias (%s.%s) is not defined",fpcPat(pvHdl,siLev),psSym->psStd->pcAli);
@@ -2677,6 +2700,8 @@ static int siClpPrsPar(
             return(siClpPrsObjWob(pvHdl,siLev,siPos,psArg));
          } else if (psArg->psFix->siTyp==CLPTYP_OVRLAY) {
             return(siClpPrsOvl(pvHdl,siLev,siPos,psArg));
+         } else if (psArg->psFix->siTyp==CLPTYP_NUMBER && CLPISS_DEF(psArg->psStd->uiFlg)) {
+            return(siClpPrsNum(pvHdl,siLev,siPos,psArg));
          } else {
             return(siClpPrsSwt(pvHdl,siLev,siPos,psArg));
          }
@@ -2687,6 +2712,17 @@ static int siClpPrsPar(
       vdClpPrnArgTab(pvHdl,psHdl->pfErr,1,-1,psTab);
       return(CLPERR_SYN);
    }
+}
+
+static int siClpPrsNum(
+   void*                         pvHdl,
+   const int                     siLev,
+   const int                     siPos,
+   TsSym*                        psArg)
+{
+   TsHdl*                        psHdl=(TsHdl*)pvHdl;
+   if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d NUM(%s) USING OID AS DEFAULT VALUE)\n",fpcPre(pvHdl,siLev),siLev,siPos,psArg->psStd->pcKyw);
+   return(siClpBldNum(pvHdl,siLev,siPos,psArg));
 }
 
 static int siClpPrsSwt(
@@ -3309,6 +3345,84 @@ static int siClpBldSwt(
    pcHlp=fpcPat(pvHdl,siLev);
    if (strlen(psHdl->acLst) + strlen(pcHlp) + strlen(psArg->psStd->pcKyw) + 8 < CLPMAX_LSTLEN) {
       sprintf(&psHdl->acLst[strlen(psHdl->acLst)],"%s.%s=ON\n",pcHlp,psArg->psStd->pcKyw);
+   }
+
+   siErr=siClpBldLnk(pvHdl,siLev,siPos,psArg->psVar->siCnt,psArg->psFix->psCnt,FALSE);
+   if (siErr<0) return(siErr);
+   siErr=siClpBldLnk(pvHdl,siLev,siPos,psArg->psFix->siSiz,psArg->psFix->psEln,TRUE);
+   if (siErr<0) return(siErr);
+   siErr=siClpBldLnk(pvHdl,siLev,siPos,psArg->psVar->siLen,psArg->psFix->psTln,FALSE);
+   if (siErr<0) return(siErr);
+   siErr=siClpBldLnk(pvHdl,siLev,siPos,psArg->psFix->siOid,psArg->psFix->psOid,TRUE);
+   if (siErr<0) return(siErr);
+   return(psArg->psFix->siTyp);
+}
+
+static int siClpBldNum(
+   void*                         pvHdl,
+   const int                     siLev,
+   const int                     siPos,
+   TsSym*                        psArg)
+{
+   TsHdl*                        psHdl=(TsHdl*)pvHdl;
+   const int                     siTyp=CLPTYP_NUMBER;
+   I64                           siVal=psArg->psFix->siOid;
+   char*                         pcHlp=NULL;
+   int                           siErr;
+   if (psArg->psFix->siTyp!=siTyp) {
+      return CLPERR(psHdl,CLPERR_SEM,"The type (%s) of argument '%s.%s' dont match the expected type (%s)",apClpTyp[siTyp],fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
+   }
+   if (psArg->psVar->siCnt>=psArg->psFix->siMax) {
+      return CLPERR(psHdl,CLPERR_SEM,"To many (>%d) occurrences of '%s.%s' with type '%s'",psArg->psFix->siMax,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[siTyp]);
+   }
+   if (psArg->psVar->siRst<psArg->psFix->siSiz) {
+      return CLPERR(psHdl,CLPERR_SIZ,"Rest of space (%d) is not big enough for argument '%s.%s' with type '%s'",psArg->psVar->siRst,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[siTyp]);
+   }
+   if (psArg->psVar->pvDat==NULL || psArg->psVar->pvPtr==NULL) {
+      return CLPERR(psHdl,CLPERR_TAB,"Keyword (%s.%s) and type (%s) of argument defined but data pointer or write pointer not set",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
+   }
+
+   switch (psArg->psFix->siSiz) {
+   case 1:
+      if (siVal<(-128) || siVal>65535) {
+         return CLPERR(psHdl,CLPERR_SEM,"Object identifier (%"PRId64") of '%s.%s' need more than 8 Bit",isPrnInt(psArg,siVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+      }
+      *((I08*)psArg->psVar->pvPtr)=(I08)siVal;
+      if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-NUMBER-I08(PTR=%p CNT=%d LEN=%d RST=%d)%s=%"PRId64"\n",
+                              fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnInt(psArg,siVal));
+      break;
+   case 2:
+      if (siVal<(-32768) || siVal>65535) {
+         return CLPERR(psHdl,CLPERR_SEM,"Object identifier (%"PRId64") of '%s.%s' need more than 16 Bit",isPrnInt(psArg,siVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+      }
+      *((I16*)psArg->psVar->pvPtr)=(I16)siVal;
+      if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-NUMBER-I16(PTR=%p CNT=%d LEN=%d RST=%d)%s=%"PRId64"\n",
+                              fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnInt(psArg,siVal));
+      break;
+   case 4:
+      if (siVal<(-2147483648LL) || siVal>4294967295LL) {
+         return CLPERR(psHdl,CLPERR_SEM,"Object identifier (%"PRId64") of '%s.%s' need more than 32 Bit",isPrnInt(psArg,siVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+      }
+      *((I32*)psArg->psVar->pvPtr)=(I32)siVal;
+      if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-NUMBER-I32(PTR=%p CNT=%d LEN=%d RST=%d)%s=%"PRId64"\n",
+                              fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnInt(psArg,siVal));
+      break;
+   case 8:
+      *((I64*)psArg->psVar->pvPtr)=(I64)siVal;
+      if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-NUMBER-64(PTR=%p CNT=%d LEN=%d RST=%d)%s=%"PRId64"\n",
+                              fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnInt(psArg,siVal));
+      break;
+   default:
+      return CLPERR(psHdl,CLPERR_SIZ,"Size (%d) for the value (%"PRId64") of '%s.%s' is not 1, 2, 4 or 8)",psArg->psFix->siSiz,isPrnInt(psArg,siVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+   }
+   psArg->psVar->pvPtr=((char*)psArg->psVar->pvPtr)+psArg->psFix->siSiz;
+   psArg->psVar->siLen+=psArg->psFix->siSiz;
+   psArg->psVar->siRst-=psArg->psFix->siSiz;
+   psArg->psVar->siCnt++;
+
+   pcHlp=fpcPat(pvHdl,siLev);
+   if (strlen(psHdl->acLst) + strlen(pcHlp) + strlen(psArg->psStd->pcKyw) + 8 < CLPMAX_LSTLEN) {
+      sprintf(&psHdl->acLst[strlen(psHdl->acLst)],"%s.%s=DEFAULT(%d)\n",pcHlp,psArg->psStd->pcKyw,(int)siVal);
    }
 
    siErr=siClpBldLnk(pvHdl,siLev,siPos,psArg->psVar->siCnt,psArg->psFix->psCnt,FALSE);
@@ -4550,14 +4664,33 @@ static int siClpPrnCmd(
             case CLPTYP_NUMBER:
                if (psHlp->psFix->siMax==1) {
                   if (CLPISS_SEL(psHlp->psStd->uiFlg)) {
-                     vdClpPrnAli(pfOut,psHdl->pcOpt,psHlp);fprintf(pfOut,CLP_ASSIGNMENT);
-                     vdClpPrnOpt(pfOut,psHdl->pcOpt,psHlp->psFix->siTyp,psHlp->psDep);
+                     vdClpPrnAli(pfOut,psHdl->pcOpt,psHlp);
+                     if (CLPISS_DEF(psHlp->psStd->uiFlg)) {
+                        fprintf(pfOut,"[%s",CLP_ASSIGNMENT);
+                        vdClpPrnOpt(pfOut,psHdl->pcOpt,psHlp->psFix->siTyp,psHlp->psDep);
+                        fprintf(pfOut,"]");
+                     } else {
+                        fprintf(pfOut,CLP_ASSIGNMENT);
+                        vdClpPrnOpt(pfOut,psHdl->pcOpt,psHlp->psFix->siTyp,psHlp->psDep);
+                     }
                   } else {
                      if (psHlp->psDep!=NULL) {
-                        vdClpPrnAli(pfOut,psHdl->pcOpt,psHlp);fprintf(pfOut,"%snum%s",CLP_ASSIGNMENT,psHdl->pcOpt);
-                        vdClpPrnOpt(pfOut,psHdl->pcOpt,psHlp->psFix->siTyp,psHlp->psDep);
+                        vdClpPrnAli(pfOut,psHdl->pcOpt,psHlp);
+                        if (CLPISS_DEF(psHlp->psStd->uiFlg)) {
+                           fprintf(pfOut,"[%snum%s",CLP_ASSIGNMENT,psHdl->pcOpt);
+                           vdClpPrnOpt(pfOut,psHdl->pcOpt,psHlp->psFix->siTyp,psHlp->psDep);
+                           fprintf(pfOut,"]");
+                        } else {
+                           fprintf(pfOut,"%snum%s",CLP_ASSIGNMENT,psHdl->pcOpt);
+                           vdClpPrnOpt(pfOut,psHdl->pcOpt,psHlp->psFix->siTyp,psHlp->psDep);
+                        }
                      } else {
-                        vdClpPrnAli(pfOut,psHdl->pcOpt,psHlp);fprintf(pfOut,"%snum",CLP_ASSIGNMENT);
+                        vdClpPrnAli(pfOut,psHdl->pcOpt,psHlp);
+                        if (CLPISS_DEF(psHlp->psStd->uiFlg)) {
+                           fprintf(pfOut,"[%snum]",CLP_ASSIGNMENT);
+                        } else {
+                           fprintf(pfOut,"%snum",CLP_ASSIGNMENT);
+                        }
                      }
                   }
                } else if (psHlp->psFix->siMax>1) {
@@ -4754,6 +4887,9 @@ static int siClpPrnHlp(
             if (!CLPISS_ALI(psHlp->psStd->uiFlg) || (CLPISS_ALI(psHlp->psStd->uiFlg) && isAli)) {
                vdClpPrnArg(pvHdl,pfOut,siLev,psHlp->psStd->pcKyw,psHlp->psStd->pcAli,psHlp->psStd->siKwl,psHlp->psFix->siTyp,psHlp->psFix->pcHlp,psHlp->psFix->pcDft,
                            CLPISS_SEL(psHlp->psStd->uiFlg),CLPISS_CON(psHlp->psStd->uiFlg));
+               if (psHlp->psFix->siTyp==CLPTYP_NUMBER && CLPISS_DEF(psHlp->psStd->uiFlg)) {
+                  fprintf(pfOut,"%s If you type the keyword without an assignment of a value, the default (%d) is used\n",fpcPre(pvHdl,siLev+1),psHlp->psFix->siOid);
+               }
                if (psHlp->psDep!=NULL) {
                   if (psHlp->psFix->siTyp==CLPTYP_OBJECT || psHlp->psFix->siTyp==CLPTYP_OVRLAY) {
                      psHdl->apPat[siLev]=psHlp;

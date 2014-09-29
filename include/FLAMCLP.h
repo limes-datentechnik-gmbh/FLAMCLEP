@@ -55,7 +55,7 @@ The FLAMCLP uses these tables as symbol tables to define the syntax and
 semantic of a command. The same table provides the offset used to
 store the parsed values. This offset occurs in a real data structure
 and with CLPMAC.h you can use the same macro to build the tables and
-corresponding structs and unions. This is not mandatory, but we
+corresponding structures and unions. This is not mandatory, but we
 recommend to use the macro in order to be in sync.
 
 The FLAMCLP provides also all internally calculated values in this data
@@ -67,13 +67,21 @@ overlay you can link the corresponding object identifier to determine
 which of the arguments are chosen by the user. You can also get the
 string length and other features. The kind of link is defined over the
 flags field. There are a lot of other flags supported beside links, for
-example  the PWD flag, which tells CLP that this value are only clear in
+example the PWD flag, which tells CLP that this value are only clear in
 the data structure but always obfuscated in logs, traces and other
-printouts to keep the value secret.
+printouts to keep the value secret. Another flag can be used for numbers.
+With CLPFLG_DEF you can activate a extension of the syntax. If this flag
+used for a number then the object identifier is assigned as value if no
+assignment done for this number. Means with this extended syntax you can
+define a switch, which you can assign a number. This is useful for example
+to activate a feature with a default value by using only the key word and
+the user can change the default value by an optional assignment of another
+value.
 
 The FLAMCLP also supports aliases. An alias points to another argument
-and is only an additional keyword that can be used. To be compatible with
-certain shells the features below are implemented.
+and is only an additional keyword that can be used.
+
+To be compatible with certain shells the features below are implemented.
 
  * Strings can be enclosed with '' or ""
  * Strings can also defined without quotes
@@ -498,6 +506,8 @@ extern const char* pcClpAbout(const int l, const int s, char* b);
 #define CLPFLG_SLN               0x00002000UL
 /** CLPFLG_TLN This link will be filled by the calculated total length for the argument (sum of all element lengths) */
 #define CLPFLG_TLN               0x00004000UL
+/** CLPFLG_DEF This flag enable to use the OID as default for numbers is no value assigned (only the keyword used (syntax extension))*/
+#define CLPFLG_DEF               0x00008000UL
 /** CLPFLG_CHR This flag will ensure that a binary string are interpreted by default as local character string (DEFAULT) */
 #define CLPFLG_CHR               0x00010000UL
 /** CLPFLG_ASC This flag will ensure that a binary string are interpreted by default as ASCII character string*/
