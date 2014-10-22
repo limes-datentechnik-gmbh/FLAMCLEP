@@ -1,10 +1,10 @@
 # CLE/P makefile(procedures)
 
-$(BLDDIR_DEB)/%.o : %.c
+$(BLDDIR_DEB)/%.o : %.c $(CLEMAN)
 	@echo build $@
 	@$(CC) -c $(DEB_OPT) $(DEPF) $(@:.o=.d) $(DEPO) $@ -o $@ $<
 
-$(BLDDIR_REL)/%.o : %.c
+$(BLDDIR_REL)/%.o : %.c $(CLEMAN)
 	@echo build $@
 	@$(CC) -c $(REL_OPT) $(DEPF) $(@:.o=.d) $(DEPO) $@ -o $@ $<
 
@@ -40,6 +40,8 @@ $(BLDDIR_REL):
 tools:
 	+make -C tools
 
+$(CLEMAN): tools
+
 # ----- DEBUG TARGETS ----------------------------------------------
 
 $(BINDIR_DEB)/clptst$(BIN_EXT): $(CLPTST_DEB_OBJS)
@@ -66,5 +68,11 @@ cleandep:
 clean:
 	$(RM) -f $(DEB_OBJS) $(DEB_TARGETS)
 	$(RM) -f $(REL_OBJS) $(REL_TARGETS)
+
+.PHONY: distclean
+distclean:
+	rm -rf bin build
+	rm -f include/CLEMAN.h
+	rm -f tools/text2cman
 
 -include $(DEB_DEP) $(REL_DEP)
