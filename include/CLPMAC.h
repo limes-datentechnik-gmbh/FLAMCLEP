@@ -8,7 +8,6 @@
  * @author Falk Reichbott
  * @date 20.10.2012\n
  * @copyright 2012 limes datentechnik gmbh
- * www.flam.de
  *
  * This file is commonly included 2 times in a C file where the command line arguments
  * of a program are defined. The first inclusion is used to define the C struct types

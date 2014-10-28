@@ -7,7 +7,7 @@
  * @author limes datentechnik gmbh
  * @date 05.09.2013\n
  * @copyright (c) 2013 limes datentechnik gmbh
- * www.flam.de
+ *
  * This software is provided 'as-is', without any express or implied
  * warranty. In no event will the authors be held liable for any damages
  * arising from the use of this software.

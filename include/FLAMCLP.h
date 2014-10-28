@@ -2,13 +2,12 @@
 /**********************************************************************/
 /**
  * @file FLAMCLP.h
- * @brief definitions for <b>C</b>ommand <b>L</b>ine <b>P</b>arsing
+ * @brief Definitions for <b>C</b>ommand <b>L</b>ine <b>P</b>arsing
  *
  * LIMES Command Line Parser (FLAMCLP) in ANSI-C
  * @author limes datentechnik gmbh
- * @date 04.08.2014\n
+ * @date 04.08.2014
  * @copyright (c) 2014 limes datentechnik gmbh
- * www.flam.de
  *
  * This software is provided 'as-is', without any express or implied
  * warranty. In no event will the authors be held liable for any damages
@@ -29,12 +28,6 @@
  * If you need professional services or support for this library please
  * contact support@flam.de.
  *
-\internal The following description of Grammar, Lexeme and property file grammar
-is intended by 4 spaces to be rendered as code block in doxygenerated html.
-*/
-/**
- *
-
 
 Description
 -----------
@@ -83,10 +76,10 @@ and is only an additional keyword that can be used.
 
 To be compatible with certain shells the features below are implemented.
 
- * Strings can be enclosed with '' or ""
- * Strings can also defined without quotes
- * Keywords can also start with "-" or "--" in front of the qualifier
- * If it unique then parenthesis and the dot can be omit for object and overlays
+* Strings can be enclosed with '' or ""
+* Strings can also be defined without quotes
+* Keywords can start with "-" or "--" in front of the qualifier
+* If it is unique then parenthesis and the dot can be omitted for objects and overlays
 
 Besides arguments you can also have a constant definition for
 selections. A feature is useful in order to define keywords for values
@@ -151,8 +144,8 @@ contain a command string which syntax is valid for the certain object or
 overlay. CLP open the file with format string "r". To use DD names on
 mainframes the file name must like "DD:name".
 
-If the flag CLPFLG_PWD used, string outputs will be result in
-"###SECRECT###' and float or number outputs in a value of 0.
+If the flag CLPFLG_PWD is used, string outputs conatining passwords will
+result in "###SECRECT###' and float or number outputs in a value of 0.
 
 Parsing of the properties (can be done a lot of times over different
 sources) only change the default values in the symbol table and has no
@@ -163,30 +156,31 @@ values and the FLAMCLP can be closed or another command line parsed.
 Attention: If pointer to values in the CLP handle used (ppLst, psErr) then
 you cannot close the CLP or you must copy the values before.
 
-Normal procedure to use CLP:
-
+The normal procedure to use the CLP:
+@code
    ClpOpen()
    ClpParsePro()
    ClpParseCmd()
    ClpClose()
+@endcode
 
 Beside property and command line parsing the FLAMCLP offers an interactive
-syntax and help function. Additionally you can use a very powerful
+syntax and help function. Additionally, you can use a very powerful
 function to generate single manual pages or complete user manuals,
-You can make also use of the supported grammar and regular expressions
+You can make use of the supported grammar and regular expressions
 (lexems).
 
-Only ClpParseCmd() use the pvDat pointer. All other functions only work
-on the symbol table. Means if you don't use ClpParseCmd() the pointer to
-the CLP structure (pvDat) can be NULL. This is useful if only help,
-syntax, documentation or property management required. For such function
-no corresponding CLP structure must be allocated.
+Only ClpParseCmd() uses the pvDat pointer. All other functions only work
+on the symbol table. This means if you don't use ClpParseCmd() the pointer
+to the CLP structure (pvDat), it can be NULL. This is useful if only help,
+syntax, documentation or property management are required. For these
+functions no corresponding CLP structure must be allocated.
 
 The implementation of the FLAMCLP is finished with the Command Line
 Executor (FLAMCLE) with which you can define your list of commands by
-using an additional table. You can make use only of one new function
+using an additional table. You can make use of only one new function
 that is executed eventually. The FLAMCLE offers an extensive built-in
-functionality and will be the optimal access to the FLAMCLP capabilities.
+functionality and is the optimal access method to the FLAMCLP capabilities.
 
 
 Supported regular expressions
@@ -389,38 +383,38 @@ For compilation the defines below must be set:
    #endif
 
 /**
- * Get version information
+ * @brief Get version information
  *
  * The function returns the version information for this library
  *
- * @param l level of visible hierarchy in the first 2 numbers of the string
+ * @param l Level of visible hierarchy in the first 2 numbers of the string
  *          the number can later be used to better visualize the hierarchy
- * @param s size of the provided string buffer (including space for zero termination)
- * @param b buffer for the version string
- *          must contain a zero terminated string
- *          the version string will be concatenated
- *          the size including the 0-byte is the limit
- *          if (strlen(b)==s-1) then more space is required for the complete version string
- *          a good size for the version string is 128 byte
+ * @param s Size of the provided string buffer (including space for zero termination)
+ * @param b Buffer for the version string.
+ *          Must contain a zero terminated string.
+ *          The version string will be concatenated.
+ *          The size including the 0-byte is the limit.
+ *          If (strlen(b)==s-1) then more space is required for the complete version string.
+ *          A good size for the version string is 128 byte.
  *
- * @return pointer to a zero terminated version string (return(b))
+ * @return Pointer to a zero terminated version string (return(b))
  */
 extern const char* pcClpVersion(const int l, const int s, char* b);
 
 /**
- * Get about information
+ * @brief Get about information
  *
  * The function returns the about information for this library
  *
- * @param l level of visible hierarchy in the first 2 numbers of the string
+ * @param l Level of visible hierarchy in the first 2 numbers of the string
  *          the number can later be used to better visualize the hierarchy
- * @param s size of the provided string buffer (including space for zero termination)
- * @param b buffer for the about string
- *          must contain a zero terminated string
- *          the about string will be concatenated
- *          the size including the 0-byte is the limit
- *          if (strlen(b)==s-1) then more space is required for the complete about string
- *          a good size for the about string is 512 byte
+ * @param s Size of the provided string buffer (including space for zero termination)
+ * @param b Buffer for the about string.
+ *          Must contain a zero terminated string.
+ *          The about string will be concatenated.
+ *          The size including the 0-byte is the limit.
+ *          If (strlen(b)==s-1) then more space is required for the complete about string.
+ *          A good size for the about string is 512 byte.
  *
  * @return pointer to a zero terminated about string (return(b))
  */
@@ -494,7 +488,7 @@ extern const char* pcClpAbout(const int l, const int s, char* b);
 #define CLPFLG_FIX               0x00000020UL
 /** CLPFLG_BIN This argument can contain binary data without zero termination (length must be known or determined with a link) */
 #define CLPFLG_BIN               0x00000040UL
-/** CLPFLG_DMY If set the parameter is not visible, means it will be a dummy */
+/** CLPFLG_DMY If set the parameter is not visible, meaning it is a dummy */
 #define CLPFLG_DMY               0x00000080UL
 /** CLPFLG_CNT This link will be filled by the calculated amount of elements (useful for arrays) */
 #define CLPFLG_CNT               0x00000100UL
@@ -531,61 +525,57 @@ extern const char* pcClpAbout(const int l, const int s, char* b);
 #define CLPSRC_PAF               ":parameter file:"
 
 /**
- * \struct TsClpArgument
- *
- * This structure is used to define a table of arguments\n
+ * @brief Defines a table of arguments
  *
  * To simplify the definition of the corresponding data structures and argument tables it is recommended to use the
  * CLPARGTAB macros defined in CLPMAC.h or for constant definitions the CLPCONTAB macros below.
- *
- * Its members are:
- * \par
- * \b siTyp  Type of this parameter (CLPTYP_xxxxxx)\n
- *           The type will be displayed in context sensitive help messages (TYPE: type_name)\n
- * \b pcKyw  Pointer to a zero terminated key word for this parameter (:alpha:[:alnum:|'-'|'_']*)\n
- * \b pcAli  Pointer to another key word to define an alias (:alpha:[:alnum:|'-'|'_']*)\n
- * \b siMin  Minimum amount of entries for this argument (0-optional n-required)\n
- * \b siMax  Maximum amount of entries for this argument (1-scalar n-array)\n
- * \b siSiz  If fixed size type (switch, number, float, object, overlay) then size of this type else (string) available size in memory
- *           (string type can be defined as FIX with CLPFLG_FIX but this requires a typedef for this string size)\n
- * \b siOfs  Offset of an argument in a structure used for address calculation (please use offset of(t,m) macro)\n
- * \b siOid  Unique integer value representing the argument (object identifier, used in overlays or for switches)\n
- * \b uiFlg  Flag value which can be assigned with CLPFLG_SEL/CON/FIX/CNT/SEN/ELN/TLN/OID/ALI to define different characteristics\n
- * \b psTab  Pointer to another parameter table
- *           for CLPTYP_OBJECT and CLPTYP_OVRLAY describing these structures
- *           for CLPTYP_NUMBER, CLPTYP_FLOATN or CLPTYP_STRING to define selections (constant definitions)\n
- * \b pcDft  Pointer to a zero terminated string to define the default values assigned if no argument was defined
- *           If this pointer is NULL or empty ("") then no initialization will be done\n
- *            - for switches a number literal or the special keywords ON/OFF can be defined\n
- *            - for numbers a number literal or a key word for a constant definition can be defined\n
- *            - for floats a floating point number literal or a key word for a constant definition can be defined\n
- *            - for strings a string literal or a key word for a constant definition can be defined\n
- *            - for objects the special keyword INIT must be defined to initialize the object\n
- *            - for overlays the keyword of the assigning object must be defined to initialize the overlay\n
- *            For arrays of these types a list of the corresponding values (literals or key words) can be defined
- *            The default values will be displayed in context sensitive help messages (PROPERTY: [value_list])\n
- *            This value can be overruled by corresponding environment variable or property definition\n
- * \b pcMan  Pointer to a zero terminated string for a detailed description of this argument
- *           (in ASCIIDOC format, content behind .DESCRIPTION, mainly simply some paragraphs)
- *           Can be a NULL pointer or empty string for constant definition or simple arguments.
- *           It is recommended to use a header file with a define for this long string (mainly for objects and overlays)\n
- * \b pcHlp  Pointer to a zero terminated string for context sensitive help to this argument
- *           Also used as head line in documentation generation. For this only alnum, blank, dot, comma, hyphen and parenthesis are used.
- *           At each other separator the headline will be cut, means it will be possible to have more help information then head line.\n
  */
 typedef struct ClpArgument {
+ /** Type of this parameter (CLPTYP_xxxxxx)\n
+ *           The type will be displayed in context sensitive help messages (TYPE: type_name)*/
    int                           siTyp;
+   /** Pointer to a zero terminated key word for this parameter (:alpha:[:alnum:|'-'|'_']*) */
    const char*                   pcKyw;
+   /** Pointer to another key word to define an alias (:alpha:[:alnum:|'-'|'_']*) */
    const char*                   pcAli;
+   /** Minimum amount of entries for this argument (0-optional n-required) */
    int                           siMin;
+   /** Maximum amount of entries for this argument (1-scalar n-array) */
    int                           siMax;
+   /** If fixed size type (switch, number, float, object, overlay) then size of this type else (string) available size in memory
+    * (string type can be defined as FIX with CLPFLG_FIX but this requires a typedef for this string size)*/
    int                           siSiz;
+   /** Offset of an argument in a structure used for address calculation (please use offset of(t,m) macro) */
    int                           siOfs;
+   /** Unique integer value representing the argument (object identifier, used in overlays or for switches) */
    int                           siOid;
+   /** Flag value which can be assigned with CLPFLG_SEL/CON/FIX/CNT/SEN/ELN/TLN/OID/ALI to define different characteristics */
    unsigned long                 uiFlg;
+   /** Pointer to another parameter table for CLPTYP_OBJECT and CLPTYP_OVRLAY describing these structures
+    *  for CLPTYP_NUMBER, CLPTYP_FLOATN or CLPTYP_STRING to define selections (constant definitions) */
    struct ClpArgument*           psTab;
+   /** Pointer to a zero-terminated string to define the default values assigned if no argument was defined.
+    *  If this pointer is NULL or empty ("") then no initialization is done.
+    *
+    *  - for switches a number literal or the special keywords ON/OFF can be defined
+    *  - for numbers a number literal or a key word for a constant definition can be defined
+    *  - for floats a floating point number literal or a key word for a constant definition can be defined
+    *  - for strings a string literal or a key word for a constant definition can be defined
+    *  - for objects the special keyword INIT must be defined to initialize the object
+    *  - for overlays the keyword of the assigning object must be defined to initialize the overlay
+    *
+    *  For arrays of these types a list of the corresponding values (literals or key words) can be defined
+    *  The default values are displayed in context sensitive help messages (PROPERTY: [value_list])
+    *  This value can be overruled by corresponding environment variable or property definition*/
    const char*                   pcDft;
+   /** Pointer to a zero-terminated string for a detailed description of this argument (in ASCIIDOC format, content
+    *  behind .DESCRIPTION, mainly simply some paragraphs). Can be a NULL pointer or empty string for constant definition
+    *  or simple arguments. It is recommended to use a header file with a define for this long string (mainly for objects
+    *  and overlays)*/
    const char*                   pcMan;
+   /** Pointer to a zero-terminated string for context sensitive help to this argument. Also used as headline in
+    * documentation generation. For this only alnum, blank, dot, comma, hyphen and parenthesis are used. At every other
+    * separator the headline will be cut, meaning it is possible to have more help information than head line. */ // ????
    const char*                   pcHlp;
    signed long long int          siVal;
    double                        flVal;
@@ -650,25 +640,25 @@ typedef struct ClpArgument {
 
 /** Defines a structure with error information
  *
- * A pointer to this structure can provide at siClpOpen() to have access to
+ * A pointer to this structure can be provided at siClpOpen() to have access to
  * the error information managed in the CLP handle.
  *
- *  *pcMsg* Points to a zero terminated string containing the current error message
- *  *pcSrc* Points to a zero terminated string containing the current source
- *          The initial source can be defined for command line or property file parsing.
- *          If the initial source not defined the constant definitions below are used:\n
- *          * for command line parsing    ":command line:"   see CLPSRC_CMD\n
- *          * for property string parsing ":property list:"  see CLPSRC_PRO\n
- *          If a parameter file assigned and cause of the error *pcSrc* points to this file name
- *  *piRow* Points to an integer containing the current row for the error in *pcSrc*
- *  *piCol* Points to an integer containing the current column for the error in *pcSrc*
- *
- *  The pointer are set by CLP and valid until CLP is closed.
+ *  The pointers are set by CLP and valid until CLP is closed.
  */
 typedef struct ClpError {
+   /** Points to a zero-terminated string containing the current error message */
    const char*                   pcMsg;
+   /** Points to a zero-terminated string containing the current source.
+    * The initial source can be defined for command line or property file parsing.
+    * If the initial source is not defined the constant definitions below are used:
+    * * for command line parsing    ":command line:"   see CLPSRC_CMD
+    * * for property string parsing ":property list:"  see CLPSRC_PRO
+    *
+    * If a parameter file assigned and cause of the error *pcSrc* points to this file name*/
    const char*                   pcSrc;
+   /** Points to an integer containing the current row for the error in *pcSrc* */
    const int*                    piRow;
+   /** Points to an integer containing the current column for the error in *pcSrc* */
    const int*                    piCol;
 }TsClpError;
 
@@ -837,7 +827,7 @@ extern int siClpHelp(
  *
  *     'No detailed description available for this command.'
  *
- * The same is valid for objects and overlays, what means that at a minimum each command, overlay and object needs a
+ * The same is valid for objects and overlays, which means that at a minimum each command, overlay and object needs a
  * detailed description of all normal arguments can be printed as bullet list.
  *
  * There will be one level of headlines left for the CleExecute, where the program itself, the

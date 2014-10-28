@@ -2,13 +2,12 @@
 /*******************************************************************************/
 /**
  * @file FLAMCLE.h
- * @brief definitions for <b>C</b>ommand <b>L</b>ine <b>E</b>xecution
+ * @brief Definitions for <b>C</b>ommand <b>L</b>ine <b>E</b>xecution
  *
  * LIMES Command Line Executor (FLAMCLE) in ANSI-C
  * @author limes datentechnik gmbh
  * @date 24.08.2014\n
  * @copyright (c) 2014 limes datentechnik gmbh
- * www.flam.de
  *
  * This software is provided 'as-is', without any express or implied
  * warranty. In no event will the authors be held liable for any damages
@@ -138,8 +137,9 @@ All these built-in functions are available:
  * * ABOUT    - Displays information about the program
 
 To read the manual page, please use:
-
+@code
    program MANPAGE function
+@endcode
 
 Below, you can find the syntax for each built-in function:
 
@@ -167,7 +167,7 @@ Below, you can find the syntax for each built-in function:
 
 Sample program
 --------------
-
+@code
     #include FLAMCLP.h
     #include FLAMCLE.h
 
@@ -205,6 +205,7 @@ Sample program
                            "Frankenstein Limes(R) Command Line for FLUC, FLAM and FLIES",
                            MAN_FLCL_MAIN,MAN_FLCL_COV,MAN_FLCL_GLS,MAN_FLCL_FIN,"CONV"));
     }
+@endcode
 
 Lexemes
 -------
