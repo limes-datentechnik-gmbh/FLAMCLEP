@@ -45,7 +45,7 @@
 #include <shlobj.h>
 #include <windows.h>
 extern char* userid(const int size, char* buffer) {
-   unsigned int tmp=size;
+   DWORD tmp=size;
    buffer[0]=0x00;
    GetUserName(buffer,&tmp);
    return(buffer);
