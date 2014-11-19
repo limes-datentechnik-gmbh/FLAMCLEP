@@ -835,6 +835,9 @@ extern int siClpParsePro(
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    int                           siCnt;
 
+   if (pcPro==NULL)
+      return CLPERR(psHdl,CLPERR_INT,"Property string is NULL");
+
    psHdl->acLst[0]=EOS;
    if (pcSrc!=NULL && strlen(pcSrc)) {
       snprintf(psHdl->acSrc,sizeof(psHdl->acSrc),"%s%s",CLPSRC_PRF,pcSrc);
@@ -877,6 +880,9 @@ extern int siClpParseCmd(
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    int                           siCnt;
+
+   if (pcCmd==NULL)
+      return CLPERR(psHdl,CLPERR_INT,"Command string is NULL");
 
    psHdl->acLst[0]=EOS;
    if (pcSrc!=NULL && strlen(pcSrc)) {
