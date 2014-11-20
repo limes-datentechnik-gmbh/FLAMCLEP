@@ -715,8 +715,8 @@ extern int strxcmp(
    if (ca) {
       int d=*s1-*s2;
       if (n) {
-         int i=1;
          if (c==-1) {
+            int i=0;
             while (d==0 && *s1!=0 && *s2!=0 && isKyw(*s1) && isKyw(*s2)) {
                s1++; s2++; i++;
                d=*s1-*s2;
@@ -724,11 +724,13 @@ extern int strxcmp(
             if (i<n) return(n-i);
             if (f && (!isKyw(*s1) || !isKyw(*s2))) return(0);
          } else if (c==0) {
+            int i=1;
             while (d==0 && *s1!=0 && *s2!=0 && i<n) {
                s1++; s2++; i++;
                d=*s1-*s2;
             }
          } else {
+            int i=0;
             while (d==0 && *s1!=0 && *s2!=0 && *s1!=c && *s2!=c) {
                s1++; s2++; i++;
                d=*s1-*s2;
@@ -761,8 +763,8 @@ extern int strxcmp(
    } else {
       int d=tolower(*s1)-tolower(*s2);
       if (n) {
-         int i=1;
          if (c==-1) {
+            int i=0;
             while (d==0 && *s1!=0 && *s2!=0 && isKyw(*s1) && isKyw(*s2)) {
                s1++; s2++; i++;
                d=tolower(*s1)-tolower(*s2);
@@ -770,11 +772,13 @@ extern int strxcmp(
             if (i<n) return(n-i);
             if (f && (!isKyw(*s1) || !isKyw(*s2))) return(0);
          } else if (c==0) {
+            int i=1;
             while (d==0 && *s1!=0 && *s2!=0 && i<n) {
                s1++; s2++; i++;
                d=tolower(*s1)-tolower(*s2);
             }
          } else {
+            int i=0;
             while (d==0 && *s1!=0 && *s2!=0 && tolower(*s1)!=tolower(c) && tolower(*s2)!=tolower(c)) {
                s1++; s2++; i++;
                d=tolower(*s1)-tolower(*s2);
