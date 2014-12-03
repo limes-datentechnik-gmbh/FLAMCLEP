@@ -89,13 +89,14 @@
  * 1.1.39: Rework all format strings (replace "\'" with "'" for better readability)
  * 1.1.40: Print synopsis at help if keyword man is used
  * 1.1.41: Support OID as default for numbers if CLPFLG_DEF defined (if only the keyword used (DECODE))
+ * 1.1.42: Correct order (scan new token as last step) to fix issue 614
  *
  **/
 
-#define CLP_VSN_STR       "1.1.41"
+#define CLP_VSN_STR       "1.1.42"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        1
-#define CLP_VSN_REVISION       41
+#define CLP_VSN_REVISION       42
 
 /* Definition der Flag-Makros *****************************************/
 
@@ -3062,11 +3063,11 @@ static int siClpPrsVal(
    char                          acVal[CLPMAX_LEXSIZ];
    strcpy(acVal,psHdl->acLex);
    if (psHdl->siTok==CLPTOK_KYW) {
-      psHdl->siTok=siClpScnSrc(pvHdl,siTok,psArg);
-      if (psHdl->siTok<0) return(psHdl->siTok);
       psHdl->apPat[siLev]=psArg;
       siInd=siClpSymFnd(pvHdl,siLev+1,siPos,acVal,psArg->psDep,&psVal,NULL);
       if (siInd<0) return(siInd);
+      psHdl->siTok=siClpScnSrc(pvHdl,siTok,psArg);
+      if (psHdl->siTok<0) return(psHdl->siTok);
       if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d KYW(%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,acVal);
       return(siClpBldCon(pvHdl,siLev,siPos,psArg,psVal));
    } else {
