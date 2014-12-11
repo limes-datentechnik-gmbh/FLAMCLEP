@@ -3457,13 +3457,13 @@ static int siClpBldLit(
    F64                           flVal=0;
    char*                         pcHlp=NULL;
    if (psArg->psFix->siTyp!=siTyp) {
-      return CLPERR(psHdl,CLPERR_SEM,"The type (%s) of argument '%s.%s' don't match the expected type (%s)",apClpTyp[siTyp],fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
+      return CLPERR(psHdl,CLPERR_SEM,"The type (%s) of argument '%s.%s' does not match the expected type (%s)",apClpTyp[siTyp],fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
    }
    if (psArg->psVar->siCnt>=psArg->psFix->siMax) {
-      return CLPERR(psHdl,CLPERR_SEM,"To many (>%d) occurrences of '%s.%s' with type '%s'",psArg->psFix->siMax,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[siTyp]);
+      return CLPERR(psHdl,CLPERR_SEM,"Too many (>%d) occurrences of '%s.%s' with type '%s'",psArg->psFix->siMax,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[siTyp]);
    }
    if (CLPISS_SEL(psArg->psStd->uiFlg)) {
-      CLPERR(psHdl,CLPERR_SEM,"The argument '%s.%s' accept only a keyword representing a constant definition for type '%s'",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
+      CLPERR(psHdl,CLPERR_SEM,"The argument '%s.%s' requires one of the defined keywords as value",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
       CLPERRADD(psHdl,0,"Please use one of the following arguments:%s","");
       vdClpPrnArgTab(pvHdl,psHdl->pfErr,1,psArg->psFix->siTyp,psArg->psDep);
       return(CLPERR_SEM);
