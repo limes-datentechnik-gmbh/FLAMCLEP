@@ -118,6 +118,7 @@ All filenames used by CLEP are additionally mapped based on the rules
 below:
 
  * The character '+' is replaced with the string "<HOME>"
+ * On ASCII system also '~' can be used as abbreviation for "<HOME>"
  * Each value enclosed with angle brackets (<>) are replaced with the
    corresponding environment variable. If the environment variable not
    defined the replacements below are still possible:
@@ -139,7 +140,7 @@ below:
  ** If apostrophes are not used the SYSUID is prefixed as HLQ
  * Normal file names on other platforms could be relative
 
-To use a "<" or "+" as a part of a filename the character must be
+To use a "<" or "+" or "~" as a part of a filename the character must be
 specified twice.
 
 Beside this rules you can also use the replacement technologies of your
