@@ -274,6 +274,9 @@ extern void rplenvar(char* name,const size_t size,const char opn, const char cls
 
 extern char* mapfil(char* file,int size) {
    rplchar(file,size,'+',"<HOME>");
+   if ((('0'&0x000000FF)==0x00000030)) {
+      rplchar(file,size,'~',"<HOME>");
+   }
    rplenvar(file,size,'<','>');
    return(file);
 }
