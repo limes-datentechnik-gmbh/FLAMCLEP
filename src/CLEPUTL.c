@@ -273,6 +273,22 @@ extern void rplenvar(char* name,const size_t size,const char opn, const char cls
 }
 
 extern char* mapfil(char* file,int size) {
+   int j,i;
+   for (j=i=0;file[i];i++) {
+#ifdef __WIN__
+      if (file[i]=='/') {
+         file[j]='\\';
+#else
+      if (('0'==0x30 && file[i]=='\\') || ('0'==0xF0 && (file[i]==0xE0 || file[i]==0xEC))) {
+         file[j]='/';
+#endif
+         j++;
+      } else {
+         file[j]=file[i];
+         j++;
+      }
+   }
+   file[j]=0x00;
    rplchar(file,size,'+',"<HOME>");
    if ((('0'&0x000000FF)==0x00000030)) {
       rplchar(file,size,'~',"<HOME>");

@@ -573,7 +573,7 @@ typedef struct CleCommand {
  *
  * @return signed integer with values below:\n
  * 0  - command line, command syntax, mapping, execution and finish of the command was successfull\n
- * 1  - command line, command syntax, mapping, execution was ok but finish of the command command failed\n
+ * 1  - command line, command syntax, mapping, execution was ok but finish of the command failed\n
  * 2  - command line, command syntax and mapping was ok but execution of the command failed\n
  * 4  - command line and command syntax was ok but mapping failed\n
  * 6  - command line was ok but command syntax was wrong\n
