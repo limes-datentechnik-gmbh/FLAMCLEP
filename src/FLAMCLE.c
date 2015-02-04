@@ -97,12 +97,13 @@
  * 1.1.36: Introduce SET/GETENV() macros
  * 1.1.37: Rework and correct file handling, adjust documentation
  * 1.1.38: Adjust printout for support of synopsis at help if keyword man is used
+ * 1.1.39: Correct clang warning (use only literal format strings)
  *
  */
-#define CLE_VSN_STR       "1.1.38"
+#define CLE_VSN_STR       "1.1.39"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        1
-#define CLE_VSN_REVISION       38
+#define CLE_VSN_REVISION       39
 
 /* Definition der Konstanten ******************************************/
 #define CLEMAX_CNFLEN            1023
@@ -1276,7 +1277,7 @@ EVALUATE:
             fprintf(pfDoc,"%s\n",MAN_CLE_APPENDIX_PROPERTIES);
             fprintf(pfDoc,"------------------------------------------------------------------------\n");
             fprintf(pfDoc,"\n# Property file for: %s.%s #\n\n",acOwn,pcPgm);
-            fprintf(pfDoc,HLP_CLE_PROPFIL);
+            fprintf(pfDoc,"%s",HLP_CLE_PROPFIL);
             for (siErr=CLP_OK, i=0;psTab[i].pcKyw!=NULL && siErr==CLP_OK;i++) {
                siErr=siClePropertyInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,
                                        psTab[i].piOid,psTab[i].psTab,isCas,isPfl,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,acHlp,&siFil);
@@ -1367,7 +1368,7 @@ EVALUATE:
          }
          if (pcCmd==NULL) fprintf(pfPro,"\n# Property file for: %s.%s #\n\n",acOwn,pcPgm);
                     else  fprintf(pfPro,"\n# Property file for: %s.%s.%s #\n\n",acOwn,pcPgm,pcCmd);
-         fprintf(pfPro,HLP_CLE_PROPFIL);
+         fprintf(pfPro,"%s",HLP_CLE_PROPFIL);
 
          if (pcCmd==NULL) {
             for (siErr=CLP_OK, i=0;psTab[i].pcKyw!=NULL && siErr==CLP_OK;i++) {
@@ -2364,11 +2365,11 @@ static void vdCleManFunction(
       if (isNbr) {
          fprintf(pfOut,"%s FUNCTION '%s'\n",pcNum,pcFct);
          l=strlen(pcNum)+strlen(pcFct)+12;
-         for (i=0;i<l;i++) fprintf(pfOut,pcLev); fprintf(pfOut,"\n\n");
+         for (i=0;i<l;i++) fprintf(pfOut,"%s",pcLev); fprintf(pfOut,"\n\n");
       } else {
          fprintf(pfOut,"FUNCTION '%s'\n",pcFct);
          l=strlen(pcFct)+11;
-         for (i=0;i<l;i++) fprintf(pfOut,pcLev); fprintf(pfOut,"\n\n");
+         for (i=0;i<l;i++) fprintf(pfOut,"%s",pcLev); fprintf(pfOut,"\n\n");
       }
       fprintf(pfOut,".SYNOPSIS\n\n");
       fprintf(pfOut,"-----------------------------------------------------------------------\n");

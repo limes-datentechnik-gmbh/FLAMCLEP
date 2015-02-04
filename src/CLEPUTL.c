@@ -327,6 +327,14 @@ extern char* cpmapfil(char* dest, int size,const char* source,const int flag) {
 
 /* implementation of the external functions ***********************************/
 
+extern char* strxcpy(char *dest, const char *src, size_t n)
+{
+   size_t i;
+   for (i=0;i<(n-1) && src[i];i++) dest[i]=src[i];
+   dest[i] = '\0';
+   return dest;
+}
+
 extern int snprintc(char* buffer,size_t size,const char* format,...)
 {
    va_list  argv;

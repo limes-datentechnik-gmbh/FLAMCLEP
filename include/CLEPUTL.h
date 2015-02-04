@@ -106,6 +106,15 @@ extern char* homedir(const int flag, const int siz, char* buffer);
 extern int snprintc(char* buffer,const size_t size,const char* format,...);
 
 /**
+ * Works like strncpy but ensure 0 termination.
+ * @param dest    pointer to destination string
+ * @param src     pointer to source string
+ * @param n       size of memory available for buffer
+ * @return        pointer to destination string
+ */
+extern char* strxcpy(char *dest, const char *src, size_t n);
+
+/**
  * Replace each occurrence of char in name by value
  * @param name string for replacement
  * @param size size of replacement string
