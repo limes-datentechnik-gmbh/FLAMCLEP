@@ -2722,6 +2722,8 @@ static TsCnfHdl* psCnfOpn(
                psHdl->psFst=psEnt;
             }
             psHdl->psLst=psEnt;
+         } else {
+            free(psEnt);
          }
       }
    }
@@ -2800,6 +2802,10 @@ static int siCnfSet(
          psHdl->psFst=psEnt;
       }
       psHdl->psLst=psEnt;
+   } else {
+      if (pfOut!=NULL) fprintf(pfOut,"Configuration keyword(%s) and/or value(%s) is empty\n", pcKyw, pcVal);
+      free(psEnt);
+      return (-1);
    }
    psHdl->isChg=TRUE;
    return(0);
