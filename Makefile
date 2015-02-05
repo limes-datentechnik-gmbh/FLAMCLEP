@@ -20,8 +20,12 @@ DEB_LDF = -g
 REL_LDF =
 
 STRIP = strip
+ifeq ($(COMPILER),gnu)
 CC = gcc
-LD = gcc
+else
+CC = clang
+endif
+LD = $(CC)
 
 LIBS = -lm
 
