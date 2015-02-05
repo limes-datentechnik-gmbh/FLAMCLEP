@@ -682,7 +682,8 @@ extern int file2str(const char* filename, char** buf, int* bufsize) {
    }
 
    fclose(pfFile);
-   (*buf)[siLen]='\0';
+   if (*buf!=NULL) // empty file
+      (*buf)[siLen]='\0';
    return siLen;
 }
 
@@ -703,7 +704,9 @@ extern int arry2str(char* array[], const int count, const char* separ, const int
       uiSumLen+=uiLens[i];
    }
 
-   if (*outlen<uiSumLen) {
+   if (*outlen<uiSumLen || *out==NULL) {
+      if (uiSumLen < 1)
+         uiSumLen = 4;
       pcHlp=(char*)realloc(*out, uiSumLen);
       if (pcHlp==NULL) {
          return -2; // realloc failed

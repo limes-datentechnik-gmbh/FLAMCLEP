@@ -1030,7 +1030,10 @@ extern int siClpHelp(
                   } else {
                      fprintf(psHdl->pfHlp,"TYPE:   OBJECT\n");
                   }
-                  fprintf(psHdl->pfHlp,   "SYNTAX: $ %s ",psHdl->pcPgm); siErr=siClpPrnCmd(pvHdl,psHdl->pfHlp,0,0,1,NULL,psHdl->psSym,FALSE,FALSE); fprintf(psHdl->pfHlp,"\n\n");
+                  fprintf(psHdl->pfHlp,   "SYNTAX: $ %s ",psHdl->pcPgm);
+                  siErr=siClpPrnCmd(pvHdl,psHdl->pfHlp,0,0,1,NULL,psHdl->psSym,FALSE,FALSE);
+                  if (siErr<0) return(siErr);
+                  fprintf(psHdl->pfHlp,"\n\n");
                   fprintf(psHdl->pfHlp,"DESCRIPTION\n");
                   fprintf(psHdl->pfHlp,"-----------\n");
                   if (psHdl->pcMan!=NULL && strlen(psHdl->pcMan)) {
@@ -1044,7 +1047,10 @@ extern int siClpHelp(
                   fprintf(psHdl->pfHlp,"HELP:   %s\n",psArg->psFix->pcHlp);
                   fprintf(psHdl->pfHlp,"PATH:   %s\n",fpcPat(pvHdl,siLev-1));
                   fprintf(psHdl->pfHlp,"TYPE:   %s\n",apClpTyp[psArg->psFix->siTyp]);
-                  fprintf(psHdl->pfHlp,"SYNTAX: "); siErr=siClpPrnSyn(pvHdl,psHdl->pfHlp,FALSE,siLev-1,psArg); fprintf(psHdl->pfHlp,"\n\n");
+                  fprintf(psHdl->pfHlp,"SYNTAX: ");
+                  siErr=siClpPrnSyn(pvHdl,psHdl->pfHlp,FALSE,siLev-1,psArg);
+                  fprintf(psHdl->pfHlp,"\n\n");
+                  if (siErr<0) return(siErr);
                   fprintf(psHdl->pfHlp,"DESCRIPTION\n");
                   fprintf(psHdl->pfHlp,"-----------\n");
                   if (psArg->psFix->pcMan!=NULL && strlen(psArg->psFix->pcMan)) {
@@ -1074,16 +1080,23 @@ extern int siClpHelp(
             }
          } else {
             if (isMan) {
-               fprintf(psHdl->pfHlp,"SYNOPSIS\n");
-               fprintf(psHdl->pfHlp,"--------\n");
-               fprintf(psHdl->pfHlp,"HELP:   %s\n",psArg->psFix->pcHlp);
-               fprintf(psHdl->pfHlp,"PATH:   %s\n",fpcPat(pvHdl,siLev-1));
-               fprintf(psHdl->pfHlp,"TYPE:   %s\n",apClpTyp[psArg->psFix->siTyp]);
-               fprintf(psHdl->pfHlp,"SYNTAX: "); siErr=siClpPrnSyn(pvHdl,psHdl->pfHlp,FALSE,siLev-1,psArg); fprintf(psHdl->pfHlp,"\n\n");
-               fprintf(psHdl->pfHlp,"DESCRIPTION\n");
-               fprintf(psHdl->pfHlp,"-----------\n");
-               if (psArg->psFix->pcMan!=NULL && strlen(psArg->psFix->pcMan)) {
-                  fprintf(psHdl->pfHlp,"%s\n",psArg->psFix->pcMan);
+               if (psArg!=NULL) {
+                  fprintf(psHdl->pfHlp,"SYNOPSIS\n");
+                  fprintf(psHdl->pfHlp,"--------\n");
+                  fprintf(psHdl->pfHlp,"HELP:   %s\n",psArg->psFix->pcHlp);
+                  fprintf(psHdl->pfHlp,"PATH:   %s\n",fpcPat(pvHdl,siLev-1));
+                  fprintf(psHdl->pfHlp,"TYPE:   %s\n",apClpTyp[psArg->psFix->siTyp]);
+                  fprintf(psHdl->pfHlp,"SYNTAX: ");
+                  siErr=siClpPrnSyn(pvHdl,psHdl->pfHlp,FALSE,siLev-1,psArg);
+                  fprintf(psHdl->pfHlp,"\n\n");
+                  if (siErr<0) return(siErr);
+                  fprintf(psHdl->pfHlp,"DESCRIPTION\n");
+                  fprintf(psHdl->pfHlp,"-----------\n");
+                  if (psArg->psFix->pcMan!=NULL && strlen(psArg->psFix->pcMan)) {
+                     fprintf(psHdl->pfHlp,"%s\n",psArg->psFix->pcMan);
+                  } else {
+                     fprintf(psHdl->pfHlp,"No detailed description available for this argument.\n\n");
+                  }
                } else {
                   fprintf(psHdl->pfHlp,"No detailed description available for this argument.\n\n");
                }
@@ -1105,7 +1118,10 @@ extern int siClpHelp(
          } else {
             fprintf(psHdl->pfHlp,"TYPE:   OBJECT\n");
          }
-         fprintf(psHdl->pfHlp,   "SYNTAX: $ %s ",psHdl->pcPgm); siErr=siClpPrnCmd(pvHdl,psHdl->pfHlp,0,0,1,NULL,psHdl->psSym,FALSE,FALSE); fprintf(psHdl->pfHlp,"\n\n");
+         fprintf(psHdl->pfHlp,   "SYNTAX: $ %s ",psHdl->pcPgm);
+         siErr=siClpPrnCmd(pvHdl,psHdl->pfHlp,0,0,1,NULL,psHdl->psSym,FALSE,FALSE);
+         fprintf(psHdl->pfHlp,"\n\n");
+         if (siErr<0) return(siErr);
          fprintf(psHdl->pfHlp,"DESCRIPTION\n");
          fprintf(psHdl->pfHlp,"-----------\n");
          if (psHdl->pcMan!=NULL && strlen(psHdl->pcMan)) {
@@ -3875,7 +3891,7 @@ static int siClpBldCon(
          }
          pcArg=(char*)psArg->psVar->pvPtr;
          pcVal=(char*)psVal->psVar->pvDat;
-         for (l=i=0;i<psVal->psVar->siCnt;i++) {
+         for (i=0;i<psVal->psVar->siCnt;i++) {
             if (psArg->psVar->siRst<psArg->psFix->siSiz) {
                return CLPERR(psHdl,CLPERR_SIZ,"Rest of space (%d) is not big enough for argument '%s.%s' with type '%s'",psArg->psVar->siRst,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
             }
@@ -5202,7 +5218,10 @@ static int siClpPrnDoc(
                fprintf(pfDoc,"HELP:   %s\n",apMan[m]->psFix->pcHlp);
                fprintf(pfDoc,"PATH:   %s\n",fpcPat(pvHdl,siLev));
                fprintf(pfDoc,"TYPE:   %s\n",apClpTyp[apMan[m]->psFix->siTyp]);
-               fprintf(pfDoc,"SYNTAX: "); siErr=siClpPrnSyn(pvHdl,pfDoc,FALSE,siLev,apMan[m]); fprintf(pfDoc,"\n");
+               fprintf(pfDoc,"SYNTAX: ");
+               siErr=siClpPrnSyn(pvHdl,pfDoc,FALSE,siLev,apMan[m]);
+               fprintf(pfDoc,"\n");
+               if (siErr<0) return(siErr);
                fprintf(pfDoc,"-----------------------------------------------------------------------\n\n");
                fprintf(pfDoc,".DESCRIPTION\n\n");
                if (apMan[m]->psFix->pcMan!=NULL && strlen(apMan[m]->psFix->pcMan)) {

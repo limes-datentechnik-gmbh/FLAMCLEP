@@ -625,7 +625,7 @@ EVALUATE:
          siErr=siCleSimpleInit(pfOut,isPfl,pcDep,pcOpt,pcEnt,&pvHdl);
          if (siErr) ERROR(siErr);
          fprintf(pfOut,"Lexemes (regular expressions) for argument list or parameter file:\n");
-         siErr=siClpLexem(pvHdl,pfOut);
+         /*siErr=*/siClpLexem(pvHdl,pfOut);
          ERROR(0);
       }
       fprintf(pfOut,"Syntax for built-in function 'LEXEM' not valid\n");
@@ -636,7 +636,7 @@ EVALUATE:
          siErr=siCleSimpleInit(pfOut,isPfl,pcDep,pcOpt,pcEnt,&pvHdl);
          if (siErr) ERROR(siErr);
          fprintf(pfOut,"Grammar for argument list, parameter file or property file\n");
-         siErr=siClpGrammar(pvHdl,pfOut);
+         /*siErr=*/siClpGrammar(pvHdl,pfOut);
          ERROR(0);
       }
       fprintf(pfOut,"Syntax for built-in function 'GRAMMAR' not valid\n");
@@ -1063,7 +1063,7 @@ EVALUATE:
             fprintf(pfOut,"Open of manual page file (\"%s\",\"%s\") failed (%d - %s)\n",acFil,acMod,errno,strerror(errno));
             ERROR(8);
          }
-         vdCleManProgram(pfDoc,psTab,acOwn,pcPgm,pcHlp,pcMan,pcDep,pcOpt,TRUE,TRUE);
+         vdCleManProgram(pfDoc,psTab,acOwn,pcPgm,pcHlp,pcMan,pcDep,pcOpt,isMan,TRUE);
          fprintf(pfOut,"Manual page for program '%s' successfully written to file (%s)\n",pcPgm,acFil);
          ERROR(0);
       }
@@ -1872,7 +1872,7 @@ EVALUATE:
                if (pcLst!=NULL) free(pcLst);
                if (siErr)  {
                   fprintf(pfOut,"Run of command '%s' failed!\n",psTab[i].pcKyw);
-                  siErr=psTab[i].pfFin(pfOut,pfTrc,psTab[i].pvPar);
+                  /*siErr=*/psTab[i].pfFin(pfOut,pfTrc,psTab[i].pvPar);
                   ERROR(2);
                }
                siErr=psTab[i].pfFin(pfOut,pfTrc,psTab[i].pvPar);
@@ -2479,7 +2479,8 @@ static void vdPrnCommandSyntax(
       fprintf(pfOut,"%s %s \"",pcDep,pcPgm);
       siErr=siClpSyntax(pvHdl,FALSE,FALSE,siDep,pcCmd);
       if (siErr==CLP_OK) fprintf(pfOut,"\"\n");
-   } else siErr=siClpSyntax(pvHdl,TRUE,TRUE,siDep,pcCmd);
+   } else
+      siClpSyntax(pvHdl,TRUE,TRUE,siDep,pcCmd);
 }
 
 static void vdPrnCommandHelp(
