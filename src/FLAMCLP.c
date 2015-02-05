@@ -90,13 +90,14 @@
  * 1.1.40: Print synopsis at help if keyword man is used
  * 1.1.41: Support OID as default for numbers if CLPFLG_DEF defined (if only the keyword used (DECODE))
  * 1.1.42: Correct order (scan new token as last step) to fix issue 614
+ * 1.1.43: fix null pointer references
  *
  **/
 
-#define CLP_VSN_STR       "1.1.42"
+#define CLP_VSN_STR       "1.1.43"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        1
-#define CLP_VSN_REVISION       42
+#define CLP_VSN_REVISION       43
 
 /* Definition der Flag-Makros *****************************************/
 

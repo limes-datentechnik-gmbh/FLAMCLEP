@@ -98,12 +98,13 @@
  * 1.1.37: Rework and correct file handling, adjust documentation
  * 1.1.38: Adjust printout for support of synopsis at help if keyword man is used
  * 1.1.39: Correct clang warning (use only literal format strings)
+ * 1.1.40: fix potential memory leaks
  *
  */
-#define CLE_VSN_STR       "1.1.39"
+#define CLE_VSN_STR       "1.1.40"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        1
-#define CLE_VSN_REVISION       39
+#define CLE_VSN_REVISION       40
 
 /* Definition der Konstanten ******************************************/
 #define CLEMAX_CNFLEN            1023
