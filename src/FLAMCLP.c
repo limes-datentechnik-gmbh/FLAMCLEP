@@ -1088,7 +1088,7 @@ extern int siClpHelp(
                   fprintf(psHdl->pfHlp,"No detailed description available for this argument.\n\n");
                }
             } else {
-               fprintf(psHdl->pfHlp,"No farther arguments available.\n");
+               fprintf(psHdl->pfHlp,"No further arguments available.\n");
             }
          }
       } else {
