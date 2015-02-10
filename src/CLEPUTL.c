@@ -53,11 +53,12 @@ extern char* userid(const int size, char* buffer) {
 extern char* homedir(int flag, const int size, char* buffer) {
    char path[MAX_PATH+1]="";
    buffer[0]=0x00;
-   SHGetFolderPath(NULL,CSIDL_PROFILE,NULL,0,path);
-   if (flag) {
-      snprintf(buffer,size,"%s\\",path);
-   } else {
-      snprintf(buffer,size,"%s",path);
+   if (SHGetFolderPath(NULL,CSIDL_PROFILE,NULL,0,path)==S_OK) {
+      if (flag) {
+         snprintf(buffer,size,"%s\\",path);
+      } else {
+         snprintf(buffer,size,"%s",path);
+      }
    }
    return(buffer);
 }
