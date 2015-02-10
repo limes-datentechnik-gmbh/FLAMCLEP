@@ -8,9 +8,11 @@ $(BLDDIR_REL)/%.o : %.c $(CLEMAN)
 	@echo build $@
 	@$(CC) -c $(REL_OPT) $(DEPF) $(@:.o=.d) $(DEPO) $@ -o $@ $<
 
-.PHONY: all release debug tools doc
+.PHONY: any all release debug tools doc
 
-all: debug release
+any: debug
+
+all: debug release doc
 
 release: tools $(REL_TARGETS)
 
