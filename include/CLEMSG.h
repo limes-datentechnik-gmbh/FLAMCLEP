@@ -71,6 +71,8 @@ static const char* HLP_CLE_VERSION ="List version information for the program";
 static const char* SYN_CLE_VERSION ="VERSION";
 static const char* HLP_CLE_ABOUT   ="Show information about the program";
 static const char* SYN_CLE_ABOUT   ="ABOUT";
+static const char* HLP_CLE_ERRORS  ="Show information about return and reason codes of the program";
+static const char* SYN_CLE_ERRORS  ="ERRORS";
 
 static const char* HLP_CLE_PROPFIL =""
 "#------------------------------------------------------------------- #\n"

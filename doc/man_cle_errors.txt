@@ -1,0 +1,12 @@
+This built-in function prints explanations for the return/condition
+codes of the executable and if available the reason codes of executed
+commands.
+
+See <<appendix-returncodes>> and <<appendix reasoncodes>> for an
+explanation and the output of this command.
+
+.EXAMPLES
+
+-----------------------------------------------------------------------
+   $ program ERRORS
+-----------------------------------------------------------------------

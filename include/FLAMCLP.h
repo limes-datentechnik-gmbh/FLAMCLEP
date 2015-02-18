@@ -144,8 +144,8 @@ contain a command string which syntax is valid for the certain object or
 overlay. CLP open the file with format string "r". To use DD names on
 mainframes the file name must like "DD:name".
 
-If the flag CLPFLG_PWD is used, string outputs conatining passwords will
-result in "###SECRECT###' and float or number outputs in a value of 0.
+If the flag CLPFLG_PWD is used, string outputs containing passwords will
+result in "###SECRECT###" and float or number outputs in a value of 0.
 
 Parsing of the properties (can be done a lot of times over different
 sources) only change the default values in the symbol table and has no

@@ -77,6 +77,22 @@ extern int win_snprintf(char *buffer, size_t size, const char *format, ...);
 #  define UNSETENV(name)      unsetenv((name))
 #endif
 
+/* Definition of return/condition codes *******************************/
+
+#define CLERTC_OK             0
+#define CLERTC_FIN            2
+#define CLERTC_WRN            4
+#define CLERTC_RUN            8
+#define CLERTC_MAP            12
+#define CLERTC_SYN            16
+#define CLERTC_CMD            20
+#define CLERTC_INI            24
+#define CLERTC_CFG            28
+#define CLERTC_TAB            32
+#define CLERTC_SYS            36
+#define CLERTC_ACS            40
+#define CLERTC_FAT            64
+
 /**********************************************************************/
 
 /**
@@ -94,7 +110,7 @@ extern char* userid(const int size, char* buffer);
  * @param buffer  pointer to the buffer
  * @return        pointer to the buffer containing the current home directory (zero terminated)
  */
-extern char* homedir(const int flag, const int siz, char* buffer);
+extern char* homedir(const int flag, const int size, char* buffer);
 
 /**
  * Works like snprintf but concatenate the format string to the buffer.

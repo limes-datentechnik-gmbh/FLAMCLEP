@@ -1,13 +1,11 @@
-/******************************************************************************/
-/*******************************************************************************/
 /**
  * @file FLAMCLE.h
  * @brief Definitions for <b>C</b>ommand <b>L</b>ine <b>E</b>xecution
  *
  * LIMES Command Line Executor (FLAMCLE) in ANSI-C
  * @author limes datentechnik gmbh
- * @date 24.08.2014\n
- * @copyright (c) 2014 limes datentechnik gmbh
+ * @date 16.02.2015\n
+ * @copyright (c) 2015 limes datentechnik gmbh
  *
  * This software is provided 'as-is', without any express or implied
  * warranty. In no event will the authors be held liable for any damages
@@ -107,7 +105,8 @@ Below, you can find a possibly incomplete list of FLAMCLE feature:
  * * Support property definitions over environment variables to overrule hard coded default properties
  * * Keywords (commands, built-in functions, ON, OFF, ALL, DEPTH1, ...) can start optional with "-" or "--"
  * * Support for parameter files per command, object or overlay
- * * File name mapping (+/<envar>) and DD:NAME support (see man_cle_main.txt)
+ * * File name mapping and DD:NAME support (see man_cle_main.txt)
+ * * Return/condition code and reason code handling
 
 Built-in Functions
 ------------------
@@ -135,6 +134,7 @@ All these built-in functions are available:
  * * LICENSE  - Displays the license text for the program
  * * VERSION  - Lists version information for the program
  * * ABOUT    - Displays information about the program
+ * * ERRORS   - Displays information about return and reason codes of the program
 
 To read the manual page, please use:
 @code
@@ -164,6 +164,7 @@ Below, you can find the syntax for each built-in function:
  * * LEXEM
  * * VERSION
  * * ABOUT
+ * * ERRORS
 
 Sample program
 --------------
@@ -203,7 +204,7 @@ Sample program
        return(siCleExecute(asCmdTab,argc,argv,"de.limes","flcl",FALSE,0,stderr,stdout,
                            "--|","/",pcFlclVersion(),pcFlclAbout(),"TEST-LICENSE",
                            "Frankenstein Limes(R) Command Line for FLUC, FLAM and FLIES",
-                           MAN_FLCL_MAIN,MAN_FLCL_COV,MAN_FLCL_GLS,MAN_FLCL_FIN,"CONV"));
+                           MAN_FLCL_MAIN,MAN_FLCL_COV,MAN_FLCL_GLS,MAN_FLCL_FIN,"CONV",pcFlmErrors));
     }
 @endcode
 
@@ -351,7 +352,7 @@ extern const char* pcCleAbout(const int l, const int s, char* b);
  * @param[in]  pcPgm Current program name (given over CleExecute)
  * @param[out] pvClp Pointer to the corresonding FLAMCLP structure for initialisation
  *
- * @return     Error code (!=0) for termination or 0 for success
+ * @return     Reason code (!=0) for termination or 0 for success
  */
 typedef int (*tpfIni)(
    FILE*                         pfOut,
@@ -388,8 +389,8 @@ typedef int (*tpfIni)(
  * @param[in]  piOid Pointer to the object identifier for overlay commands, if the pointer set at siCleExecute()
  * @param[in]  pvClp Pointer to the filled FLAMCLP structure (output from the the command line parser)
  * @param[out] pvPar Pointer to the parameter structure, which will be filled based on the FLAMCLP structure with this function
-
- * @return     Error code (!=0) for termination or 0 for success
+ *
+ * @return     Reason code (!=0) for termination or 0 for success
  */
 typedef int (*tpfMap)(
    FILE*                         pfOut,
@@ -405,6 +406,13 @@ typedef int (*tpfMap)(
  * a command using the mapped parameter structure. For logging or other
  * purpose all collected information are also provided at input.
  *
+ * The run function returns like all other functions executed by CLE a
+ * reason code. Additional to the other functions there will be another
+ * indicator to define the condition code (return code of the program).
+ * For the run function 2 possible condition codes are defined. First an
+ * error with value 8 and additional 4 in a case of a warning. The warning
+ * means that the run don't fail, but something was happen.
+ *
  * @param[in]  pfOut File pointer for outputs (given over CleExecute)
  * @param[in]  pfTrc File pointer for tracing (given over CleExecute)
  * @param[in]  pcOwn Current owner name (given over CleExecute)
@@ -416,7 +424,8 @@ typedef int (*tpfMap)(
  * @param[in]  pcCmd Current command (complete entered line of user)
  * @param[in]  pcLst Current list of parsed arguments (given from FLAMCLP, could be NULL or empty)
  * @param[in]  pvPar Pointer to the filled parameter for the run of the subprogram
-
+ * @param[out] piWrn Pointer to an integer which is true if the given reason code only a warning
+ *
  * @return     Error code (!=0) for termination or 0 for success
  */
 typedef int (*tpfRun)(
@@ -430,7 +439,8 @@ typedef int (*tpfRun)(
    const char*                   pcFkt,
    const char*                   pcCmd,
    const char*                   pcLst,
-   const void*                   pvPar);
+   const void*                   pvPar,
+   int*                          piWrn);
 
 /**
  * Type definition for the fin function
@@ -442,12 +452,29 @@ typedef int (*tpfRun)(
  * @param[in]  pfOut File pointer for outputs (given over CleExecute)
  * @param[in]  pfTrc File pointer for tracing (given over CleExecute)
  * @param[in]  pvPar Pointer to the filled parameter structure for cleanup
- * @return     Error code (!=0) for termination or 0 for success
+ * @return     Reason code (!=0) for termination or 0 for success
  */
 typedef int (*tpfFin)(
    FILE*                         pfOut,
    FILE*                         pfTrc,
    void*                         pvPar);
+
+/**
+ * Type definition for the message function
+ *
+ * This function is called to generate a appendix for the reason codes
+ * and to provide better messages in a case of an error.
+ *
+ * In a loop starting with 1 the messages are printed to the appendix.
+ * If a NULL pointer (no message) returned the loop is finished. A empty
+ * message ("") indicates an reason code which is not printed to the
+ * appendix. Is a NULL pointer provided for this function the appendix
+ * for the reason codes and additional error messages are not generated.
+ *
+ * @param[in]  siRsn Reason code from INI, MAP, RUN and FIN function
+ * @return     Pointer to the corresponding message
+ */
+typedef const char* (*tpfMsg)(const int siRsn);
 
 /**
  * \struct TsCleCommand
@@ -546,6 +573,7 @@ typedef struct CleCommand {
  * - LEXEM
  * - VERSION
  * - ABOUT
+ * - ERRORS
  *
  * @param[in]  psTab Pointer to the table which defines the commands
  * @param[in]  argc  Number of command line parameters (argc of main(int argc, char* argv[]))
@@ -570,20 +598,22 @@ typedef struct CleCommand {
  *             if NULL then no glossary are generated, if "" then only the FLAMCLP glossary is added)
  * @param[in]  pcFin Final pages for documentation generation (colophon, copyright, closing aso. in ASCIIDOC format)
  * @param[in]  pcDef Default command or built-in function, which is executed if the first keyword (argv[1]) don't match (if NULL then no default)
+ * @param[in]  pfMsg Pointer to a function which prints a message for an reason code (use to generate the corresponding appendix)\n
  *
- * @return signed integer with values below:\n
- * 0  - command line, command syntax, mapping, execution and finish of the command was successfull\n
- * 1  - command line, command syntax, mapping, execution was ok but finish of the command failed\n
- * 2  - command line, command syntax and mapping was ok but execution of the command failed\n
- * 4  - command line and command syntax was ok but mapping failed\n
- * 6  - command line was ok but command syntax was wrong\n
- * 8  - command line was wrong (user error)\n
- * 10 - initialization is wrong (user error)\n
- * 11 - configuration is wrong (user error)\n
- * 12 - table error (something within the predefined tables is wrong)\n
- * 16 - system error (mainly memory allocation or some thing like this failed)\n
- * 20 - access control or license error\n
- * 24 - fatal error (basic things are damaged)
+ * @return signed integer with the condition codes below:\n
+ * 0  - command line, command syntax, mapping, execution and finish of the command was successful\n
+ * 2  - command line, command syntax, mapping, execution was successful but finish of the command failed\n
+ * 4  - command line, command syntax and mapping was successful but execution of the command returns with a warning\n
+ * 8  - command line, command syntax and mapping was successful but execution of the command returns with an error\n
+ * 12 - command line and command syntax was OK but mapping failed\n
+ * 16 - command line was OK but command syntax was wrong\n
+ * 20 - command line was wrong (user error)\n
+ * 24 - initialization is wrong (user error)\n
+ * 28 - configuration is wrong (user error)\n
+ * 32 - table error (something within the predefined tables is wrong)\n
+ * 36 - system error (mainly memory allocation or some thing like this failed)\n
+ * 40 - access control or license error\n
+ * 64 - fatal error (basic things are damaged)
  */
 extern int siCleExecute(
    const TsCleCommand*           psTab,
@@ -607,7 +637,8 @@ extern int siCleExecute(
    const char*                   pcCov,
    const char*                   pcGls,
    const char*                   pcFin,
-   const char*                   pcDef);
+   const char*                   pcDef,
+   tpfMsg                        pfMsg);
 
 #endif /*INC_CLE_H*/
 

@@ -1,5 +1,5 @@
 /**
- * @file   CLP.c
+ * @file   FLAMCLP.c
  * @brief  LIMES Command Line Parser in ANSI-C
  *
  * LIMES Command Line Executor (CLE) in ANSI-C
