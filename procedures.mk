@@ -58,7 +58,7 @@ $(BINDIR_REL)/clptst$(BIN_EXT): $(CLPTST_REL_OBJS)
 	@$(LD) $(REL_LDF) -o $@ $(CLPTST_REL_OBJS) $(LIBS)
 	@$(STRIP) $@
 
-doc:
+doc: release
 	+make -C doc
 
 
