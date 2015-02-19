@@ -613,7 +613,8 @@ typedef struct CleCommand {
  * 32 - table error (something within the predefined tables is wrong)\n
  * 36 - system error (mainly memory allocation or some thing like this failed)\n
  * 40 - access control or license error\n
- * 64 - fatal error (basic things are damaged)
+ * 44 - interface error (parameter pointer equals to NULL or something like this)\n
+ * 64 - fatal error (basic things are damaged)\n
  */
 extern int siCleExecute(
    const TsCleCommand*           psTab,

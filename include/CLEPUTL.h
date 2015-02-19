@@ -2,7 +2,7 @@
  * @file
  * @brief  Declaration of utility functions for CLP/CLE in ANSI C
  * @author limes datentechnik gmbh
- * @date  03.01.2012
+ * @date   18.02.2015
  * @copyright limes datentechnik gmbh
  *
  * This software is provided 'as-is', without any express or implied
@@ -91,6 +91,7 @@ extern int win_snprintf(char *buffer, size_t size, const char *format, ...);
 #define CLERTC_TAB            32
 #define CLERTC_SYS            36
 #define CLERTC_ACS            40
+#define CLERTC_ITF            44
 #define CLERTC_FAT            64
 
 /**********************************************************************/

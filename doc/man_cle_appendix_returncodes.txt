@@ -15,6 +15,7 @@ This content is printed on the screen with the built-in function
  * 32 - table error (something within the predefined tables is wrong)
  * 36 - system error (mainly memory allocation or some thing like this failed)
  * 40 - access control or license error
+ * 44 - interface error (parameter pointer equals to NULL or something like this)
  * 64 - fatal error (basic things are damaged)
  
 A command execution (run) can result in a return code of 0 on success,
