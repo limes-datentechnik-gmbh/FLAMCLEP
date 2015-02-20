@@ -13,15 +13,15 @@ This content is printed on the screen with the built-in function
  * 24 - initialization is wrong (user error)
  * 28 - configuration is wrong (user error)
  * 32 - table error (something within the predefined tables is wrong)
- * 36 - system error (mainly memory allocation or some thing like this failed)
+ * 36 - system error (e.g. memory allocation failed)
  * 40 - access control or license error
- * 44 - interface error (parameter pointer equals to NULL or something like this)
+ * 44 - interface error (e.g. parameter pointer equals NULL)
  * 64 - fatal error (basic things are damaged)
  
 A command execution (run) can result in a return code of 0 on success,
 a warning represent by value 4 or an error with value 8. If the command
 execution was successful (return code 0) then a return code of 2
 indicates that a call to the finish function failed. Such a fail of the
-finish function is not recognize if the run function returns with a
-warning or an error. All completion codes greater then 8 indicates an
-error in front of the command execution.
+finish function is not recognizable if the run function returns with a
+warning or an error. All completion codes greater then 8 indicate an
+error before command execution.

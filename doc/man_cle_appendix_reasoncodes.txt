@@ -1,4 +1,4 @@
-Below you can find the list of reason codes returned at command
+Below you can find the list of reason codes returned after command
 execution. Each command returns a reason code for the corresponding
 warning (return code 4) or error (return code 8). This content is
 printed on the screen with the built-in function 'ERRORS'.
