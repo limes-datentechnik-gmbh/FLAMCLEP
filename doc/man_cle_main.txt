@@ -10,10 +10,11 @@ CLP) is applied. To see the regular expressions (lexems) and the
 corresponding grammar, please use the build in functions 'LEXEM' and
 'GRAMMAR'.
 
-The return/condition codes of the executable and the reason codes of the
-different commands can be reviewed with the built-in function 'ERRORS'.
-See <<appendix-returncodes>> and, if available, <<appendix reasoncodes>>
-for the meaning of the used condition and reason codes.
+The return/condition/exit codes of the executable and the reason codes
+of the different commands can be reviewed with the built-in function
+ERRORS'.
+See <<appendix-returncodes>> and, if available, <<appendix-reasoncodes>>
+for the meaning of the used return and reason codes.
 
 The command line executer (CLE) uses an owner management in order to
 separate the settings for different clients and a property management

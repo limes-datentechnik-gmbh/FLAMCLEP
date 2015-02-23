@@ -77,7 +77,7 @@ extern int win_snprintf(char *buffer, size_t size, const char *format, ...);
 #  define UNSETENV(name)      unsetenv((name))
 #endif
 
-/* Definition of return/condition codes *******************************/
+/* Definition of return/condition/exit codes **************************/
 
 #define CLERTC_OK             0
 #define CLERTC_FIN            2

@@ -651,7 +651,7 @@ EVALUATE:
    } else if (strxcmp(isCas,argv[1],"ERRORS",0,0,FALSE)==0) {
       if (argc==2) {
          fprintf(pfOut,"\n");
-         fprintf(pfOut,"Return/condition codes of the executable\n");
+         fprintf(pfOut,"Return/condition/exit codes of the executable\n");
          fprintf(pfOut,"----------------------------------------\n\n");
          fprintf(pfOut,"%s\n",MAN_CLE_APPENDIX_RETURNCODES);
          if (pfMsg!=NULL) {

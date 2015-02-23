@@ -106,7 +106,7 @@ Below, you can find a possibly incomplete list of FLAMCLE feature:
  * * Keywords (commands, built-in functions, ON, OFF, ALL, DEPTH1, ...) can start optional with "-" or "--"
  * * Support for parameter files per command, object or overlay
  * * File name mapping and DD:NAME support (see man_cle_main.txt)
- * * Return/condition code and reason code handling
+ * * Return/condition/exit code and reason code handling
 
 Built-in Functions
 ------------------
@@ -426,7 +426,7 @@ typedef int (*tpfMap)(
  * @param[in]  pvPar Pointer to the filled parameter for the run of the subprogram
  * @param[out] piWrn Pointer to an integer which is true if the given reason code only a warning
  *
- * @return     Error code (!=0) for termination or 0 for success
+ * @return     Reason code (!=0) for termination or warning, 0 for success
  */
 typedef int (*tpfRun)(
    FILE*                         pfOut,

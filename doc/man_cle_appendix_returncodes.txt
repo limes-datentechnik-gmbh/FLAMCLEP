@@ -4,24 +4,24 @@ This content is printed on the screen with the built-in function
 'ERRORS'.
 
  * 0  - command line, command syntax, mapping, execution and finish of the command was successful
- * 2  - command line, command syntax, mapping, execution was successful but finish of the command failed
+ * 2  - command line, command syntax, mapping, execution was successful but finish of the command failed (may not happened)
  * 4  - command line, command syntax and mapping was successful but execution of the command returns with a warning
  * 8  - command line, command syntax and mapping was successful but execution of the command returns with an error
- * 12 - command line and command syntax was OK but mapping failed
- * 16 - command line was OK but command syntax was wrong
- * 20 - command line was wrong (user error)
- * 24 - initialization is wrong (user error)
- * 28 - configuration is wrong (user error)
- * 32 - table error (something within the predefined tables is wrong)
+ * 12 - command line and command syntax was OK but mapping of the parameter for command execution failed
+ * 16 - command line was OK but command syntax was wrong (error from command line parser)
+ * 20 - command line it self was wrong (please use built-in function "SYNTAX" for more information)
+ * 24 - initialization of the parameter structure failed (may not happened)
+ * 28 - configuration is wrong (determination of configuration data failed, configuration file is damaged)
+ * 32 - table error (something within the predefined tables is wrong (internal error))
  * 36 - system error (e.g. memory allocation failed)
  * 40 - access control or license error
- * 44 - interface error (e.g. parameter pointer equals NULL)
+ * 44 - interface error (e.g. parameter pointer equals NULL (only at call of subprogram interface))
  * 64 - fatal error (basic things are damaged)
  
 A command execution (run) can result in a return code of 0 on success,
 a warning represent by value 4 or an error with value 8. If the command
 execution was successful (return code 0) then a return code of 2
 indicates that a call to the finish function failed. Such a fail of the
-finish function is not recognizable if the run function returns with a
-warning or an error. All completion codes greater then 8 indicate an
-error before command execution.
+finish function is not recognizable if the run function (command execution)
+returns with a warning or an error. All completion codes greater then 8
+indicate an error before command execution.
