@@ -67,7 +67,7 @@
 #  define C_SBO                 ((gc_sbo)?gc_sbo:init_char(&gc_sbo))
 #  define C_SBC                 ((gc_sbc)?gc_sbc:init_char(&gc_sbc))
 #  define C_TILDE               ((gc_tilde)?gc_tilde:init_char(&gc_tilde))
-else
+#else
 #  define C_SBO              '['
 #  define C_SBC              ']'
 #  define C_TILDE            '~'
