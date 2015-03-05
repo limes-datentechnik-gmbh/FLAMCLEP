@@ -58,6 +58,21 @@
 #  define L_filnam         (1025)
 #endif
 
+
+#if ('0'==0xF0)
+   extern int init_char(int* p);
+   extern static int gc_sbo;
+   extern static int gc_sbc;
+   extern static int gc_tilde;
+#  define C_SBO                 ((gc_sbo)?gc_sbo:init_char(&gc_sbo))
+#  define C_SBC                 ((gc_sbc)?gc_sbc:init_char(&gc_sbc))
+#  define C_TILDE               ((gc_tilde)?gc_tilde:init_char(&gc_tilde))
+else
+#  define C_SBO              '['
+#  define C_SBC              ']'
+#  define C_TILDE            '~'
+#endif
+
 #define isKyw(c) (isalnum(c) || (c)=='_' || (c)=='-')
 
 #define ISDDNAME(p)     (toupper((p)[0])=='D' && toupper((p)[1])=='D' && (p)[2]==':')
@@ -166,6 +181,23 @@ extern char* mapfil(char* file,int size);
  * @return pointer to string which must be concatenated to the format string for fopen at write operation ("w/wb/a/...")
  */
 extern char* cpmapfil(char* dest, int size,const char* source,const int flag);
+
+/**
+ * Map environment variable LANG to CCSID
+ * @param isEBCDIC if true returns EBCDIC code pages else ASCII
+ * @return NULL in case of an error or pointer to a static string containing the CCSID
+ */
+extern const char* mapl2c(unsigned isEBCDIC);
+
+/**
+ * Map environment variable LANG to CCSID
+ * @param pcLang   string containing the value of the environment variable LANG
+ * @param uiLen    length of string vaulue
+ * @param isEbcdic if true returns EBCDIC code pages else ASCII
+ * @return NULL in case of an error or pointer to a static string containing the CCSID
+ */
+extern const char* lng2ccsd(const char* pcLang, unsigned uiLen, unsigned isEbcdic);
+
 
 /**********************************************************************/
 

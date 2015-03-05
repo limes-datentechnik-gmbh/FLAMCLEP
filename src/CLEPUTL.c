@@ -40,6 +40,30 @@
 
 #include "CLEPUTL.h"
 
+#if ('0'==0xF0)
+
+static int gc_sbo=0;
+static int gc_sbc=0;
+static int gc_tilde=0;
+
+extern int init_char(int* p) {
+   char* ccsid=mapl2c(TRUE);
+   if (ccsid!=NULL) {
+      if (strcmp(ccsid,"IBM-500")){
+         gc_sbo='[';
+         gc_sbc=']';
+         gc_tilde='~';
+         return(*p);
+      }
+   }
+   gc_sbo='[';
+   gc_sbc=']';
+   gc_tilde='~';
+   return(*p);
+}
+
+#endif
+
 #ifdef __WIN__
 #define _WIN32_IE 0x5000
 #include <shlobj.h>
@@ -171,6 +195,147 @@ extern char* homedir(int flag, const int size, char* buffer) {
    return(buffer);
 }
 #endif
+
+/**********************************************************************/
+
+extern const char* mapl2c(unsigned isEBCDIC) {
+   const char* pcPtr=NULL;
+   char*       pcHlp=NULL;
+   const char* pcEnv=GETENV("LANG");
+   if (pcEnv!=NULL) {
+      if ((isEBCDIC && '0'==0xF0) || (!isEBCDIC && '0'==0x30)) {
+         pcPtr=strchr(pcEnv,'.');
+         if (pcPtr!=NULL) {
+            pcHlp=strchr(pcPtr+1,'@');
+            if (pcHlp!=NULL) *pcHlp=0x00;
+            pcHlp=strchr(pcPtr+1,'#');
+            if (pcHlp!=NULL) *pcHlp=0x00;
+            return(pcPtr+1);
+         }
+      }
+      return(lng2ccsd(pcEnv, strlen(pcEnv), isEBCDIC));
+   }
+   return(NULL);
+}
+
+extern const char* lng2ccsd(const char* pcLang, unsigned uiLen, unsigned isEbcdic) {
+   char  pcLngCpy[2];
+   char* pcPtr =NULL;
+
+   if (uiLen<1) return NULL;
+   pcLngCpy[0] = tolower(pcLang[0]);
+
+   if (uiLen==1) {
+      if(pcLngCpy[0]=='c') return(isEbcdic?"IBM-1047":"US-ASCII");
+      else                 return NULL;
+   }
+   pcLngCpy[1] = tolower(pcLang[1]);
+
+   pcPtr=memchr(pcLang, '@', uiLen);
+   if (pcPtr!=NULL) {
+      if (((pcPtr-pcLang)+4 < uiLen) && tolower(pcPtr[1])=='e' && tolower(pcPtr[2])=='u' && tolower(pcPtr[3])=='r' && tolower(pcPtr[4])=='o') {
+         return(isEbcdic?"IBM-1148":"ISO8859-15");
+      } else {
+         return(isEbcdic?"IBM-1148":"UTF-8");
+      }
+   }
+
+   if(pcLngCpy[0]=='a') {
+      if(pcLngCpy[1]=='a') return (isEbcdic?NULL:"ISO8859-1");
+      if(pcLngCpy[1]=='f') return (isEbcdic?NULL:"ISO8859-1");
+      if(pcLngCpy[1]=='n') return (isEbcdic?NULL:"ISO8859-15");
+      if(pcLngCpy[1]=='r') return (isEbcdic?"IBM-420":"ISO8859-6");
+   } else if(pcLngCpy[0]=='b') {
+      if(pcLngCpy[1]=='e') return (isEbcdic?NULL:"CP1251");
+      if(pcLngCpy[1]=='g') return (isEbcdic?NULL:"CP1251");
+      if(pcLngCpy[1]=='r') return (isEbcdic?NULL:"ISO8859-1");
+      if(pcLngCpy[1]=='s') return (isEbcdic?"IBM-1153":"ISO8859-2");
+   } else if(pcLngCpy[0]=='c') {
+      if(pcLngCpy[1]=='a') return (isEbcdic?NULL:"ISO8859-15");
+      if(pcLngCpy[1]=='s') return (isEbcdic?"IBM-1153":"ISO8859-2");
+      if(pcLngCpy[1]=='y') return (isEbcdic?NULL:"ISO8859-14");
+   } else if(pcLngCpy[0]=='d') {
+      if(pcLngCpy[1]=='a') return (isEbcdic?"IBM-1142":"ISO8859-1");
+      if(pcLngCpy[1]=='e') return (isEbcdic?"IBM-1141":"ISO8859-1");
+   } else if(pcLngCpy[0]=='e') {
+      if(pcLngCpy[1]=='l') return (isEbcdic?"IBM-875":"ISO8859-7");
+      if(pcLngCpy[1]=='n') return (isEbcdic?"IBM-1140":"ISO8859-1");
+      if(pcLngCpy[1]=='o') return (isEbcdic?NULL:"ISO8859-3");
+      if(pcLngCpy[1]=='s') return (isEbcdic?"IBM-1145":"ISO8859-1");
+      if(pcLngCpy[1]=='t') return (isEbcdic?"IBM-1122":"ISO8859-1");
+      if(pcLngCpy[1]=='u') return (isEbcdic?NULL:"ISO8859-1");
+   } else if(pcLngCpy[0]=='f') {
+      if(pcLngCpy[1]=='i') return (isEbcdic?"IBM-1143":"ISO8859-1");
+      if(pcLngCpy[1]=='o') return (isEbcdic?NULL:"ISO8859-1");
+      if(pcLngCpy[1]=='r') return (isEbcdic?"IBM-1147":"ISO8859-1");
+   } else if(pcLngCpy[0]=='g') {
+      if(pcLngCpy[1]=='a') return (isEbcdic?"IBM-1146":"ISO8859-1");
+      if(pcLngCpy[1]=='d') return (isEbcdic?"IBM-1146":"ISO8859-15");
+      if(pcLngCpy[1]=='l') return (isEbcdic?NULL:"ISO8859-1");
+      if(pcLngCpy[1]=='v') return (isEbcdic?NULL:"ISO8859-1");
+   } else if(pcLngCpy[0]=='h') {
+      if(pcLngCpy[1]=='e') return (isEbcdic?"IBM-424":"ISO8859-8");
+      if(pcLngCpy[1]=='r') return (isEbcdic?"IBM-1153":"ISO8859-2");
+      if(pcLngCpy[1]=='u') return (isEbcdic?"IBM-1153":"ISO8859-2");
+   } else if(pcLngCpy[0]=='i') {
+      if(pcLngCpy[1]=='d') return (isEbcdic?NULL:"ISO8859-1");
+      if(pcLngCpy[1]=='s') return (isEbcdic?"IBM-1149":"ISO8859-1");
+      if(pcLngCpy[1]=='t') return (isEbcdic?"IBM-1144":"ISO8859-1");
+      if(pcLngCpy[1]=='w') return (isEbcdic?NULL:"ISO8859-8");
+   } else if(pcLngCpy[0]=='k') {
+      if(pcLngCpy[1]=='l') return (isEbcdic?NULL:"ISO8859-1");
+      if(pcLngCpy[1]=='u') return (isEbcdic?NULL:"ISO8859-9");
+      if(pcLngCpy[1]=='w') return (isEbcdic?NULL:"ISO8859-1");
+   } else if(pcLngCpy[0]=='l') {
+      if(pcLngCpy[1]=='g') return (isEbcdic?NULL:"ISO8859-10");
+      if(pcLngCpy[1]=='t') return (isEbcdic?"IBM-1156":"ISO8859-13");
+      if(pcLngCpy[1]=='v') return (isEbcdic?"IBM-1156":"ISO8859-13");
+   } else if(pcLngCpy[0]=='m') {
+      if(pcLngCpy[1]=='g') return (isEbcdic?NULL:"ISO8859-15");
+      if(pcLngCpy[1]=='i') return (isEbcdic?NULL:"ISO8859-13");
+      if(pcLngCpy[1]=='k') return (isEbcdic?NULL:"ISO8859-5");
+      if(pcLngCpy[1]=='s') return (isEbcdic?NULL:"ISO8859-1");
+      if(pcLngCpy[1]=='t') return (isEbcdic?NULL:"ISO8859-3");
+   } else if(pcLngCpy[0]=='n') {
+      if(pcLngCpy[1]=='b') return (isEbcdic?"IBM-1142":"ISO8859-1");
+      if(pcLngCpy[1]=='l') return (isEbcdic?"IBM-1140":"ISO8859-1");
+      if(pcLngCpy[1]=='n') return (isEbcdic?"IBM-1142":"ISO8859-1");
+   } else if(pcLngCpy[0]=='o') {
+      if(pcLngCpy[1]=='c') return (isEbcdic?NULL:"ISO8859-1");
+      if(pcLngCpy[1]=='m') return (isEbcdic?NULL:"ISO8859-1");
+   } else if(pcLngCpy[0]=='p') {
+      if(pcLngCpy[1]=='l') return (isEbcdic?"IBM-1153":"ISO8859-2");
+      if(pcLngCpy[1]=='t') return (isEbcdic?"IBM-1140":"ISO8859-1");
+   } else if(pcLngCpy[0]=='r') {
+      if(pcLngCpy[1]=='o') return (isEbcdic?"IBM-1153":"ISO8859-2");
+      if(pcLngCpy[1]=='u') return (isEbcdic?"IBM-1154":"ISO8859-5");
+   } else if(pcLngCpy[0]=='s') {
+      if(pcLngCpy[1]=='k') return (isEbcdic?"IBM-1153":"ISO8859-2");
+      if(pcLngCpy[1]=='l') return (isEbcdic?"IBM-1153":"ISO8859-2");
+      if(pcLngCpy[1]=='o') return (isEbcdic?NULL:"ISO8859-1");
+      if(pcLngCpy[1]=='q') return (isEbcdic?"IBM-1153":"ISO8859-1");
+      if(pcLngCpy[1]=='r') return (isEbcdic?"IBM-1153":"UTF-8");
+      if(pcLngCpy[1]=='t') return (isEbcdic?NULL:"ISO8859-1");
+      if(pcLngCpy[1]=='v') return (isEbcdic?"IBM-1143":"ISO8859-1");
+   } else if(pcLngCpy[0]=='t') {
+      if(pcLngCpy[1]=='g') return (isEbcdic?NULL:"KOI8-T");
+      if(pcLngCpy[1]=='h') return (isEbcdic?NULL:"TIS-620");
+      if(pcLngCpy[1]=='l') return (isEbcdic?NULL:"ISO8859-1");
+      if(pcLngCpy[1]=='r') return (isEbcdic?NULL:"ISO8859-9");
+   } else if(pcLngCpy[0]=='u') {
+      if(pcLngCpy[1]=='k') return (isEbcdic?NULL:"KOI8-U");
+      if(pcLngCpy[1]=='z') return (isEbcdic?NULL:"ISO8859-1");
+   } else if(pcLngCpy[0]=='w') {
+      if(pcLngCpy[1]=='a') return (isEbcdic?NULL:"ISO8859-1");
+   } else if(pcLngCpy[0]=='x') {
+      if(pcLngCpy[1]=='h') return (isEbcdic?NULL:"ISO8859-1");
+   } else if(pcLngCpy[0]=='y') {
+      if(pcLngCpy[1]=='i') return (isEbcdic?NULL:"CP1255");
+   } else if(pcLngCpy[0]=='z') {
+      if(pcLngCpy[1]=='u') return (isEbcdic?NULL:"ISO8859-1");
+   }
+   return NULL;
+}
 
 /**********************************************************************/
 
