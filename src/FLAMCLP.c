@@ -1641,7 +1641,7 @@ static TsSym* psClpSymIns(
          }
       }
       if (k==0) {
-         CLPERR(psHdl,CLPERR_TAB,"Alias '%s' for keyword '%s.%s' can not be resolved",psSym->psStd->pcAli,fpcPat(pvHdl,siLev),psSym->psStd->pcKyw);
+         CLPERR(psHdl,CLPERR_TAB,"Alias '%s' for keyword '%s.%s' cannot be resolved",psSym->psStd->pcAli,fpcPat(pvHdl,siLev),psSym->psStd->pcKyw);
          ERROR(psSym);
       }
    } else if (CLPISS_ARG(psSym->psStd->uiFlg)) {
@@ -1908,7 +1908,7 @@ static int siClpSymCal(
             }
          }
          if (psSym->psFix->psLnk==NULL) {
-            return CLPERR(psHdl,CLPERR_TAB,"Link for keyword '%s.%s' can not be resolved",fpcPat(pvHdl,siLev),psSym->psStd->pcKyw);
+            return CLPERR(psHdl,CLPERR_TAB,"Link for keyword '%s.%s' cannot be resolved",fpcPat(pvHdl,siLev),psSym->psStd->pcKyw);
          }
          if (h>1) {
             return CLPERR(psHdl,CLPERR_TAB,"Link for keyword '%s.%s' is not unique",fpcPat(pvHdl,siLev),psSym->psStd->pcKyw);
@@ -2488,7 +2488,7 @@ static int siClpScnNat(
                               tmAkt->tm_sec  +=tm.tm_sec;
                               t=mktime(tmAkt);
                               if (t==-1) {
-                                 return CLPERR(psHdl,CLPERR_LEX,"The calculated time value (0t%4.4d/%2.2d/%2.2d.%2.2d:%2.2d:%2.2d) can not be converted to a number",
+                                 return CLPERR(psHdl,CLPERR_LEX,"The calculated time value (0t%4.4d/%2.2d/%2.2d.%2.2d:%2.2d:%2.2d) cannot be converted to a number",
                                                                 tmAkt->tm_year+1900,tmAkt->tm_mon+1,tmAkt->tm_mday,tmAkt->tm_hour,tmAkt->tm_min,tmAkt->tm_sec);
                               }
                            } else if (pcHlp[1]=='-') {
@@ -2508,7 +2508,7 @@ static int siClpScnNat(
 
                               t=mktime(tmAkt);
                               if (t==-1) {
-                                 return CLPERR(psHdl,CLPERR_LEX,"The calculated time value (0t%4.4d/%2.2d/%2.2d.%2.2d:%2.2d:%2.2d) can not be converted to a number",
+                                 return CLPERR(psHdl,CLPERR_LEX,"The calculated time value (0t%4.4d/%2.2d/%2.2d.%2.2d:%2.2d:%2.2d) cannot be converted to a number",
                                                                 tmAkt->tm_year+1900,tmAkt->tm_mon+1,tmAkt->tm_mday,tmAkt->tm_hour,tmAkt->tm_min,tmAkt->tm_sec);
                               }
                            } else {
@@ -2516,7 +2516,7 @@ static int siClpScnNat(
                               tm.tm_mon-=1;
                               t=mktime(&tm);
                               if (t==-1) {
-                                 return CLPERR(psHdl,CLPERR_LEX,"The given time value (0t%4.4d/%2.2d/%2.2d.%2.2d:%2.2d:%2.2d) can not be converted to a number",
+                                 return CLPERR(psHdl,CLPERR_LEX,"The given time value (0t%4.4d/%2.2d/%2.2d.%2.2d:%2.2d:%2.2d) cannot be converted to a number",
                                                                 tm.tm_year+1900,tm.tm_mon+1,tm.tm_mday,tm.tm_hour,tm.tm_min,tm.tm_sec);
                               }
                            }
