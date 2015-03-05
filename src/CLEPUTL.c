@@ -40,24 +40,44 @@
 
 #include "CLEPUTL.h"
 
-#if ('0'==0xF0)
+#ifdef __EBCDIC__
 
-static int gc_sbo=0;
-static int gc_sbc=0;
-static int gc_tilde=0;
+int gc_sbo=0;
+int gc_sbc=0;
+int gc_tilde=0;
 
 extern int init_char(int* p) {
    char* ccsid=mapl2c(TRUE);
    if (ccsid!=NULL) {
-      if (strcmp(ccsid,"IBM-500")){
-         gc_sbo='[';
-         gc_sbc=']';
-         gc_tilde='~';
+      if (strcmp(ccsid,"IBM-1148")==0 || strcmp(ccsid,"IBM-1153")==0 || strcmp(ccsid,"IBM-500")==0){
+         gc_sbo  =0x4A;
+         gc_sbc  =0x5A;
+         gc_tilde=0xA1;
          return(*p);
+      } else if (strcmp(ccsid,"IBM-1141")==0 || strcmp(ccsid,"IBM-273")==0) {
+         gc_sbo  =0x63;
+         gc_sbc  =0x5A;
+         gc_tilde=0xFC;
+      } else if (strcmp(ccsid,"IBM-1140")==0 || strcmp(ccsid,"IBM-037")==0) {
+         gc_sbo  =0xBA;
+         gc_sbc  =0xBB;
+         gc_tilde=0xA1;
+      } else if (strcmp(ccsid,"IBM-1143")==0) {
+         gc_sbo  =0xB5;
+         gc_sbc  =0x9F;
+         gc_tilde=0xDC;
+      } else if (strcmp(ccsid,"IBM-1144")==0) {
+         gc_sbo  =0x90;
+         gc_sbc  =0x51;
+         gc_tilde=0x58;
+      } else if (strcmp(ccsid,"IBM-1145")==0) {
+         gc_sbo  =0x4A;
+         gc_sbc  =0x5A;
+         gc_tilde=0xBD;
       }
    }
-   gc_sbo='[';
-   gc_sbc=']';
+   gc_sbo  ='[';
+   gc_sbc  =']';
    gc_tilde='~';
    return(*p);
 }

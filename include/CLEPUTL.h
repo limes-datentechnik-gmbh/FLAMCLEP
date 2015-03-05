@@ -59,11 +59,11 @@
 #endif
 
 
-#if ('0'==0xF0)
+#ifdef __EBCDIC__
    extern int init_char(int* p);
-   extern static int gc_sbo;
-   extern static int gc_sbc;
-   extern static int gc_tilde;
+   extern int gc_sbo;
+   extern int gc_sbc;
+   extern int gc_tilde;
 #  define C_SBO                 ((gc_sbo)?gc_sbo:init_char(&gc_sbo))
 #  define C_SBC                 ((gc_sbc)?gc_sbc:init_char(&gc_sbc))
 #  define C_TILDE               ((gc_tilde)?gc_tilde:init_char(&gc_tilde))
