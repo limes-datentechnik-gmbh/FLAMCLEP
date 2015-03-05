@@ -47,9 +47,9 @@ int gc_sbc=0;
 int gc_tilde=0;
 
 extern int init_char(int* p) {
-   char* ccsid=mapl2c(TRUE);
+   const char* ccsid=mapl2c(TRUE);
    if (ccsid!=NULL) {
-      if (strcmp(ccsid,"IBM-1148")==0 || strcmp(ccsid,"IBM-1153")==0 || strcmp(ccsid,"IBM-1154")==0  || strcmp(ccsid,"IBM-875")==0 || strcmp(ccsid,"IBM-500")==0){
+      if (strcmp(ccsid,"IBM-1148")==0 || strcmp(ccsid,"IBM-1153")==0 || strcmp(ccsid,"IBM-1154")==0 || strcmp(ccsid,"IBM-875")==0 || strcmp(ccsid,"IBM-500")==0){
          gc_sbo  =0x4A;
          gc_sbc  =0x5A;
          gc_tilde=0xA1;
@@ -58,7 +58,7 @@ extern int init_char(int* p) {
          gc_sbo  =0x63;
          gc_sbc  =0x5A;
          gc_tilde=0xFC;
-      } else if (strcmp(ccsid,"IBM-1140")==0 || strcmp(ccsid,"IBM-037" || strcmp(ccsid,"IBM-1156")==0 || strcmp(ccsid,"IBM-424")==0) {
+      } else if (strcmp(ccsid,"IBM-1140")==0 || strcmp(ccsid,"IBM-037")==0 || strcmp(ccsid,"IBM-1156")==0 || strcmp(ccsid,"IBM-424")==0) {
          gc_sbo  =0xBA;
          gc_sbc  =0xBB;
          gc_tilde=0xA1;
