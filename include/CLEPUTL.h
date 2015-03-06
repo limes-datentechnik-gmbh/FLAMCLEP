@@ -61,6 +61,7 @@
 
 #ifdef __EBCDIC__
    extern int init_char(int* p);
+   extern int init_string(char* p);
    extern int gc_exc;
    extern int gc_hsh;
    extern int gc_dol;
@@ -75,6 +76,20 @@
    extern int gc_vbr;
    extern int gc_cbc;
    extern int gc_tld;
+   extern char gs_exc[2];
+   extern char gs_hsh[2];
+   extern char gs_dol[2];
+   extern char gs_ats[2];
+   extern char gs_sbo[2];
+   extern char gs_bsl[2];
+   extern char gs_sbc[2];
+   extern char gs_crt[2];
+   extern char gs_usc[2];
+   extern char gs_grv[2];
+   extern char gs_cbo[2];
+   extern char gs_vbr[2];
+   extern char gs_cbc[2];
+   extern char gs_tld[2];
 #  define C_EXC                 ((gc_exc)?gc_exc:init_char(&gc_exc))
 #  define C_HSH                 ((gc_hsh)?gc_hsh:init_char(&gc_hsh))
 #  define C_DOL                 ((gc_dol)?gc_dol:init_char(&gc_dol))
@@ -89,6 +104,20 @@
 #  define C_VBR                 ((gc_vbr)?gc_vbr:init_char(&gc_vbr))
 #  define C_CBC                 ((gc_cbc)?gc_cbc:init_char(&gc_cbc))
 #  define C_TLD                 ((gc_tld)?gc_tld:init_char(&gc_tld))
+#  define S_EXC                 ((gs_exc[0])?gs_exc:init_string(&gs_exc))
+#  define S_HSH                 ((gs_hsh[0])?gs_hsh:init_string(&gs_hsh))
+#  define S_DOL                 ((gs_dol[0])?gs_dol:init_string(&gs_dol))
+#  define S_ATS                 ((gs_ats[0])?gs_ats:init_string(&gs_ats))
+#  define S_SBO                 ((gs_sbo[0])?gs_sbo:init_string(&gs_sbo))
+#  define S_BSL                 ((gs_bsl[0])?gs_bsl:init_string(&gs_bsl))
+#  define S_SBC                 ((gs_sbc[0])?gs_sbc:init_string(&gs_sbc))
+#  define S_CRT                 ((gs_sbo[0])?gs_crt:init_string(&gs_crt))
+#  define S_USC                 ((gs_usc[0])?gs_usc:init_string(&gs_usc))
+#  define S_GRV                 ((gs_grv[0])?gs_grv:init_string(&gs_grv))
+#  define S_CBO                 ((gs_cbo[0])?gs_cbo:init_string(&gs_cbo))
+#  define S_VBR                 ((gs_vbr[0])?gs_vbr:init_string(&gs_vbr))
+#  define S_CBC                 ((gs_cbc[0])?gs_cbc:init_string(&gs_cbc))
+#  define S_TLD                 ((gs_tld[0])?gs_tld:init_string(&gs_tld))
 #else
 #  define C_EXC              '!'
 #  define C_HSH              '#'
@@ -104,6 +133,20 @@
 #  define C_VBR              '|'
 #  define C_CBC              '}'
 #  define C_TLD              '~'
+#  define S_EXC              "!"
+#  define S_HSH              "#"
+#  define S_DOL              "$"
+#  define S_ATS              "@"
+#  define S_SBO              "["
+#  define S_BSL              "\\"
+#  define S_SBC              "]"
+#  define S_CRT              "^"
+#  define S_USC              "_"
+#  define S_GRV              "`"
+#  define S_CBO              "{"
+#  define S_VBR              "|"
+#  define S_CBC              "}"
+#  define S_TLD              "~"
 #endif
 
 #define isKyw(c) (isalnum(c) || (c)=='_' || (c)=='-')
