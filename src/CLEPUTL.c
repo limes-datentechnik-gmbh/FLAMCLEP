@@ -272,6 +272,21 @@ extern int init_char(int* p) {
       gc_cbc=0x47;
       gc_tld=0xDC;
       break;
+   case 1047:
+      gc_exc=0x5A;
+      gc_hsh=0x7B;
+      gc_dol=0x5B;
+      gc_ats=0x7C;
+      gc_sbo=0xAD;
+      gc_bsl=0xE0;
+      gc_sbc=0xBD;
+      gc_crt=0x5F;
+      gc_grv=0x79;
+      gc_cbo=0xC0;
+      gc_vbr=0x4F;
+      gc_cbc=0xD0;
+      gc_tld=0xA1;
+      break;
    default:
       gc_exc='!';
       gc_hsh='#';
