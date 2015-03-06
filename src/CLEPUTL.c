@@ -41,64 +41,223 @@
 #include "CLEPUTL.h"
 
 #ifdef __EBCDIC__
-
-int gc_sbo=0;
-int gc_sbc=0;
-int gc_tilde=0;
+int        gc_exc=0;
+int        gc_hsh=0;
+int        gc_dol=0;
+int        gc_ats=0;
+int        gc_sbo=0;
+int        gc_bsl=0;
+int        gc_sbc=0;
+int        gc_crt=0;
+int        gc_grv=0;
+int        gc_cbo=0;
+int        gc_vbr=0;
+int        gc_cbc=0;
+int        gc_tld=0;
 
 extern int init_char(int* p) {
    const char* ccsid=mapl2c(TRUE);
    if (ccsid!=NULL) {
-      if (strcmp(ccsid,"IBM-1148")==0 || strcmp(ccsid,"IBM-1153")==0 || strcmp(ccsid,"IBM-1154")==0 || strcmp(ccsid,"IBM-875")==0 || strcmp(ccsid,"IBM-500")==0){
-         gc_sbo  =0x4A;
-         gc_sbc  =0x5A;
-         gc_tilde=0xA1;
-         return(*p);
-      } else if (strcmp(ccsid,"IBM-1141")==0 || strcmp(ccsid,"IBM-273")==0) {
-         gc_sbo  =0x63;
-         gc_sbc  =0x5A;
-         gc_tilde=0xFC;
-      } else if (strcmp(ccsid,"IBM-1140")==0 || strcmp(ccsid,"IBM-037")==0 || strcmp(ccsid,"IBM-1156")==0 || strcmp(ccsid,"IBM-424")==0) {
-         gc_sbo  =0xBA;
-         gc_sbc  =0xBB;
-         gc_tilde=0xA1;
+      if (strcmp(ccsid,"IBM-1140")==0) {
+         gc_exc=0x5A;
+         gc_hsh=0x7B;
+         gc_dol=0x5B;
+         gc_ats=0x7C;
+         gc_sbo=0xBA;
+         gc_bsl=0xE0;
+         gc_sbc=0xBB;
+         gc_crt=0xB0;
+         gc_grv=0x79;
+         gc_cbo=0xC0;
+         gc_vbr=0x4F;
+         gc_cbc=0xD0;
+         gc_tld=0xA1;
+      } else if (strcmp(ccsid,"IBM-1141")==0) {
+         gc_exc=0x4F;
+         gc_hsh=0x7B;
+         gc_dol=0x5B;
+         gc_ats=0xB5;
+         gc_sbo=0x63;
+         gc_bsl=0xEC;
+         gc_sbc=0xFC;
+         gc_crt=0x5F;
+         gc_grv=0x79;
+         gc_cbo=0x43;
+         gc_vbr=0xBB;
+         gc_cbc=0xDC;
+         gc_tld=0x59;
       } else if (strcmp(ccsid,"IBM-1142")==0) {
-         gc_sbo  =0x9E;
-         gc_sbc  =0x9F;
-         gc_tilde=0xDC;
-      } else if (strcmp(ccsid,"IBM-1143")==0 || strcmp(ccsid,"IBM-1122")==0) {
-         gc_sbo  =0xB5;
-         gc_sbc  =0x9F;
-         gc_tilde=0xDC;
+         gc_exc=0x4F;
+         gc_hsh=0x4A;
+         gc_dol=0x67;
+         gc_ats=0x80;
+         gc_sbo=0x9E;
+         gc_bsl=0xE0;
+         gc_sbc=0x9F;
+         gc_crt=0x5F;
+         gc_grv=0x79;
+         gc_cbo=0x9C;
+         gc_vbr=0xBB;
+         gc_cbc=0x47;
+         gc_tld=0xDC;
+      } else if (strcmp(ccsid,"IBM-1143")==0) {
+         gc_exc=0x4F;
+         gc_hsh=0x63;
+         gc_dol=0x67;
+         gc_ats=0xEC;
+         gc_sbo=0xB5;
+         gc_bsl=0x71;
+         gc_sbc=0x9F;
+         gc_crt=0x5F;
+         gc_grv=0x51;
+         gc_cbo=0x43;
+         gc_vbr=0xBB;
+         gc_cbc=0x47;
+         gc_tld=0xDC;
       } else if (strcmp(ccsid,"IBM-1144")==0) {
-         gc_sbo  =0x90;
-         gc_sbc  =0x51;
-         gc_tilde=0x58;
+         gc_exc=0x4F;
+         gc_hsh=0xB1;
+         gc_dol=0x5B;
+         gc_ats=0xB5;
+         gc_sbo=0x90;
+         gc_bsl=0x48;
+         gc_sbc=0x51;
+         gc_crt=0x5F;
+         gc_grv=0xDD;
+         gc_cbo=0x44;
+         gc_vbr=0xBB;
+         gc_cbc=0x54;
+         gc_tld=0x58;
       } else if (strcmp(ccsid,"IBM-1145")==0) {
-         gc_sbo  =0x4A;
-         gc_sbc  =0x5A;
-         gc_tilde=0xBD;
+         gc_exc=0xBB;
+         gc_hsh=0x69;
+         gc_dol=0x5B;
+         gc_ats=0x7C;
+         gc_sbo=0x4A;
+         gc_bsl=0xE0;
+         gc_sbc=0x5A;
+         gc_crt=0xBA;
+         gc_grv=0x79;
+         gc_cbo=0xC0;
+         gc_vbr=0x4F;
+         gc_cbc=0xD0;
+         gc_tld=0xBD;
       } else if (strcmp(ccsid,"IBM-1146")==0) {
-         gc_sbo  =0xB1;
-         gc_sbc  =0xB2;
-         gc_tilde=0xBC;
+         gc_exc=0x5A;
+         gc_hsh=0x7B;
+         gc_dol=0x4A;
+         gc_ats=0x7C;
+         gc_sbo=0xB1;
+         gc_bsl=0xE0;
+         gc_sbc=0xBB;
+         gc_crt=0xBA;
+         gc_grv=0x79;
+         gc_cbo=0xC0;
+         gc_vbr=0x4F;
+         gc_cbc=0xD0;
+         gc_tld=0xBC;
       } else if (strcmp(ccsid,"IBM-1147")==0) {
-         gc_sbo  =0x9A;
-         gc_sbc  =0xB5;
-         gc_tilde=0xBD;
+         gc_exc=0x4F;
+         gc_hsh=0xB1;
+         gc_dol=0x5B;
+         gc_ats=0x44;
+         gc_sbo=0x90;
+         gc_bsl=0x48;
+         gc_sbc=0xB5;
+         gc_crt=0x5F;
+         gc_grv=0xA0;
+         gc_cbo=0x51;
+         gc_vbr=0xBB;
+         gc_cbc=0x54;
+         gc_tld=0xBD;
+      } else if (strcmp(ccsid,"IBM-1148")==0) {
+         gc_exc=0x4F;
+         gc_hsh=0x7B;
+         gc_dol=0x5B;
+         gc_ats=0x7C;
+         gc_sbo=0x4A;
+         gc_bsl=0xE0;
+         gc_sbc=0x5A;
+         gc_crt=0x5F;
+         gc_grv=0x79;
+         gc_cbo=0xC0;
+         gc_vbr=0xBB;
+         gc_cbc=0xD0;
+         gc_tld=0xA1;
       } else if (strcmp(ccsid,"IBM-1149")==0) {
-         gc_sbo  =0xAE;
-         gc_sbc  =0x9E;
-         gc_tilde=0xCC;
+         gc_exc=0x4F;
+         gc_hsh=0x7B;
+         gc_dol=0x5B;
+         gc_ats=0xAC;
+         gc_sbo=0xAE;
+         gc_bsl=0xBE;
+         gc_sbc=0x9E;
+         gc_crt=0xEC;
+         gc_grv=0x8C;
+         gc_cbo=0x8E;
+         gc_vbr=0xBB;
+         gc_cbc=0x9C;
+         gc_tld=0xCC;
+      } else if (strcmp(ccsid,"IBM-1153")==0) {
+         gc_exc=0x4F;
+         gc_hsh=0x7B;
+         gc_dol=0x5B;
+         gc_ats=0x7C;
+         gc_sbo=0x4A;
+         gc_bsl=0xE0;
+         gc_sbc=0x5A;
+         gc_crt=0x5F;
+         gc_grv=0x79;
+         gc_cbo=0xC0;
+         gc_vbr=0x6A;
+         gc_cbc=0xD0;
+         gc_tld=0xA1;
+      } else if (strcmp(ccsid,"IBM-1154")==0) {
+         gc_exc=0x4F;
+         gc_hsh=0x7B;
+         gc_dol=0x5B;
+         gc_ats=0x7C;
+         gc_sbo=0x4A;
+         gc_bsl=0xE0;
+         gc_sbc=0x5A;
+         gc_crt=0x5F;
+         gc_grv=0x79;
+         gc_cbo=0xC0;
+         gc_vbr=0x6A;
+         gc_cbc=0xD0;
+         gc_tld=0xA1;
+      } else if (strcmp(ccsid,"IBM-1156")==0) {
+         gc_exc=0x5A;
+         gc_hsh=0x7B;
+         gc_dol=0x5B;
+         gc_ats=0x7C;
+         gc_sbo=0xBA;
+         gc_bsl=0xE0;
+         gc_sbc=0xBB;
+         gc_crt=0xB0;
+         gc_grv=0x79;
+         gc_cbo=0xC0;
+         gc_vbr=0x4F;
+         gc_cbc=0xD0;
+         gc_tld=0xA1;
       }
    }
-   gc_sbo  ='[';
-   gc_sbc  =']';
-   gc_tilde='~';
+   gc_exc='!';
+   gc_hsh='#';
+   gc_dol='$';
+   gc_ats='@';
+   gc_sbo='[';
+   gc_bsl='\\';
+   gc_sbc=']';
+   gc_crt='^';
+   gc_grv='`';
+   gc_cbo='{';
+   gc_vbr='|';
+   gc_cbc='}';
+   gc_tld='~';
    return(*p);
 }
-
-#endif
+#endif /*__EBCDIC*/
 
 #ifdef __WIN__
 #define _WIN32_IE 0x5000
