@@ -61,16 +61,49 @@
 
 #ifdef __EBCDIC__
    extern int init_char(int* p);
+   extern int gc_exc;
+   extern int gc_hsh;
+   extern int gc_dol;
+   extern int gc_ats;
    extern int gc_sbo;
+   extern int gc_bsl;
    extern int gc_sbc;
-   extern int gc_tilde;
+   extern int gc_crt;
+   extern int gc_usc;
+   extern int gc_grv;
+   extern int gc_cbo;
+   extern int gc_vbr;
+   extern int gc_cbc;
+   extern int gc_tld;
+#  define C_EXC                 ((gc_exc)?gc_exc:init_char(&gc_exc))
+#  define C_HSH                 ((gc_hsh)?gc_hsh:init_char(&gc_hsh))
+#  define C_DOL                 ((gc_dol)?gc_dol:init_char(&gc_dol))
+#  define C_ATS                 ((gc_ats)?gc_ats:init_char(&gc_ats))
 #  define C_SBO                 ((gc_sbo)?gc_sbo:init_char(&gc_sbo))
+#  define C_BSL                 ((gc_bsl)?gc_bsl:init_char(&gc_bsl))
 #  define C_SBC                 ((gc_sbc)?gc_sbc:init_char(&gc_sbc))
-#  define C_TILDE               ((gc_tilde)?gc_tilde:init_char(&gc_tilde))
+#  define C_CRT                 ((gc_sbo)?gc_crt:init_char(&gc_crt))
+#  define C_USC                 ((gc_usc)?gc_usc:init_char(&gc_usc))
+#  define C_GRV                 ((gc_grv)?gc_grv:init_char(&gc_grv))
+#  define C_CBO                 ((gc_cbo)?gc_cbo:init_char(&gc_cbo))
+#  define C_VBR                 ((gc_vbr)?gc_vbr:init_char(&gc_vbr))
+#  define C_CBC                 ((gc_cbc)?gc_cbc:init_char(&gc_cbc))
+#  define C_TLD                 ((gc_tld)?gc_tld:init_char(&gc_tld))
 #else
+#  define C_EXC              '!'
+#  define C_HSH              '#'
+#  define C_DOL              '$'
+#  define C_ATS              '@'
 #  define C_SBO              '['
+#  define C_BSL              '\\'
 #  define C_SBC              ']'
-#  define C_TILDE            '~'
+#  define C_CRT              '^'
+#  define C_USC              '_'
+#  define C_GRV              '`'
+#  define C_CBO              '{'
+#  define C_VBR              '|'
+#  define C_CBC              '}'
+#  define C_TLD              '~'
 #endif
 
 #define isKyw(c) (isalnum(c) || (c)=='_' || (c)=='-')
