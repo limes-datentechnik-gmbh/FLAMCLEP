@@ -61,7 +61,7 @@
 
 #ifdef __EBCDIC__
    extern int init_char(int* p);
-   extern int init_string(char* p);
+   extern char* init_string(char* p);
    extern int gc_exc;
    extern int gc_hsh;
    extern int gc_dol;

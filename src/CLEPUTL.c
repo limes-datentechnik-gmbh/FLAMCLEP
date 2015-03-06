@@ -287,19 +287,19 @@ extern int init_char(int* p) {
       gc_tld=0xDC; gs_tld[0]=0xDC; gs_tld[1]=0x00;
       break;
    default:
-      gc_exc='!'; gs_exc[0]='!'; gs_exc[1]=0x00
-      gc_hsh='#'; gs_hsh[0]='#'; gs_hsh[1]=0x00
-      gc_dol='$'; gs_dol[0]='$'; gs_dol[1]=0x00
-      gc_ats='@'; gs_ats[0]='@'; gs_ats[1]=0x00
-      gc_sbo='['; gs_sbo[0]='['; gs_sbo[1]=0x00
-      gc_bsl='\\'; gs_bsl[0]='\\'; gs_bsl[1]=0x00
-      gc_sbc=']'; gs_sbc[0]=']'; gs_sbc[1]=0x00
-      gc_crt='^'; gs_crt[0]='^'; gs_crt[1]=0x00
-      gc_grv='`'; gs_grv[0]='`'; gs_grv[1]=0x00
-      gc_cbo='{'; gs_cbo[0]='{'; gs_cbo[1]=0x00
-      gc_vbr='|'; gs_vbr[0]='|'; gs_vbr[1]=0x00
-      gc_cbc='}'; gs_cbc[0]='}'; gs_cbc[1]=0x00
-      gc_tld='~'; gs_tld[0]='~'; gs_tld[1]=0x00
+      gc_exc='!'; gs_exc[0]='!'; gs_exc[1]=0x00;
+      gc_hsh='#'; gs_hsh[0]='#'; gs_hsh[1]=0x00;
+      gc_dol='$'; gs_dol[0]='$'; gs_dol[1]=0x00;
+      gc_ats='@'; gs_ats[0]='@'; gs_ats[1]=0x00;
+      gc_sbo='['; gs_sbo[0]='['; gs_sbo[1]=0x00;
+      gc_bsl='\\'; gs_bsl[0]='\\'; gs_bsl[1]=0x00;
+      gc_sbc=']'; gs_sbc[0]=']'; gs_sbc[1]=0x00;
+      gc_crt='^'; gs_crt[0]='^'; gs_crt[1]=0x00;
+      gc_grv='`'; gs_grv[0]='`'; gs_grv[1]=0x00;
+      gc_cbo='{'; gs_cbo[0]='{'; gs_cbo[1]=0x00;
+      gc_vbr='|'; gs_vbr[0]='|'; gs_vbr[1]=0x00;
+      gc_cbc='}'; gs_cbc[0]='}'; gs_cbc[1]=0x00;
+      gc_tld='~'; gs_tld[0]='~'; gs_tld[1]=0x00;
       break;
    }
    return(*p);
