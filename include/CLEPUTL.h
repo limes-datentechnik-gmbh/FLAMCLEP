@@ -231,6 +231,19 @@ extern const char* mapl2c(unsigned isEBCDIC);
  */
 extern const char* lng2ccsd(const char* pcLang, unsigned uiLen, unsigned isEbcdic);
 
+/**
+ * Map CCSID in encoding string
+ * @param csn CCSID
+ * @return    encoding string
+ */
+extern const char* mapccsid(const unsigned int csn);
+
+/**
+ * Map encoding string in CCSID
+ * @param csn encoding string
+ * @return    CCSID
+ */
+extern unsigned int mapcdstr(const char* csn);
 
 /**********************************************************************/
 

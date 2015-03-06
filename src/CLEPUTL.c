@@ -54,207 +54,240 @@ int        gc_cbo=0;
 int        gc_vbr=0;
 int        gc_cbc=0;
 int        gc_tld=0;
-
 extern int init_char(int* p) {
-   const char* ccsid=mapl2c(TRUE);
-   if (ccsid!=NULL) {
-      if (strcmp(ccsid,"IBM-1140")==0) {
-         gc_exc=0x5A;
-         gc_hsh=0x7B;
-         gc_dol=0x5B;
-         gc_ats=0x7C;
-         gc_sbo=0xBA;
-         gc_bsl=0xE0;
-         gc_sbc=0xBB;
-         gc_crt=0xB0;
-         gc_grv=0x79;
-         gc_cbo=0xC0;
-         gc_vbr=0x4F;
-         gc_cbc=0xD0;
-         gc_tld=0xA1;
-      } else if (strcmp(ccsid,"IBM-1141")==0) {
-         gc_exc=0x4F;
-         gc_hsh=0x7B;
-         gc_dol=0x5B;
-         gc_ats=0xB5;
-         gc_sbo=0x63;
-         gc_bsl=0xEC;
-         gc_sbc=0xFC;
-         gc_crt=0x5F;
-         gc_grv=0x79;
-         gc_cbo=0x43;
-         gc_vbr=0xBB;
-         gc_cbc=0xDC;
-         gc_tld=0x59;
-      } else if (strcmp(ccsid,"IBM-1142")==0) {
-         gc_exc=0x4F;
-         gc_hsh=0x4A;
-         gc_dol=0x67;
-         gc_ats=0x80;
-         gc_sbo=0x9E;
-         gc_bsl=0xE0;
-         gc_sbc=0x9F;
-         gc_crt=0x5F;
-         gc_grv=0x79;
-         gc_cbo=0x9C;
-         gc_vbr=0xBB;
-         gc_cbc=0x47;
-         gc_tld=0xDC;
-      } else if (strcmp(ccsid,"IBM-1143")==0) {
-         gc_exc=0x4F;
-         gc_hsh=0x63;
-         gc_dol=0x67;
-         gc_ats=0xEC;
-         gc_sbo=0xB5;
-         gc_bsl=0x71;
-         gc_sbc=0x9F;
-         gc_crt=0x5F;
-         gc_grv=0x51;
-         gc_cbo=0x43;
-         gc_vbr=0xBB;
-         gc_cbc=0x47;
-         gc_tld=0xDC;
-      } else if (strcmp(ccsid,"IBM-1144")==0) {
-         gc_exc=0x4F;
-         gc_hsh=0xB1;
-         gc_dol=0x5B;
-         gc_ats=0xB5;
-         gc_sbo=0x90;
-         gc_bsl=0x48;
-         gc_sbc=0x51;
-         gc_crt=0x5F;
-         gc_grv=0xDD;
-         gc_cbo=0x44;
-         gc_vbr=0xBB;
-         gc_cbc=0x54;
-         gc_tld=0x58;
-      } else if (strcmp(ccsid,"IBM-1145")==0) {
-         gc_exc=0xBB;
-         gc_hsh=0x69;
-         gc_dol=0x5B;
-         gc_ats=0x7C;
-         gc_sbo=0x4A;
-         gc_bsl=0xE0;
-         gc_sbc=0x5A;
-         gc_crt=0xBA;
-         gc_grv=0x79;
-         gc_cbo=0xC0;
-         gc_vbr=0x4F;
-         gc_cbc=0xD0;
-         gc_tld=0xBD;
-      } else if (strcmp(ccsid,"IBM-1146")==0) {
-         gc_exc=0x5A;
-         gc_hsh=0x7B;
-         gc_dol=0x4A;
-         gc_ats=0x7C;
-         gc_sbo=0xB1;
-         gc_bsl=0xE0;
-         gc_sbc=0xBB;
-         gc_crt=0xBA;
-         gc_grv=0x79;
-         gc_cbo=0xC0;
-         gc_vbr=0x4F;
-         gc_cbc=0xD0;
-         gc_tld=0xBC;
-      } else if (strcmp(ccsid,"IBM-1147")==0) {
-         gc_exc=0x4F;
-         gc_hsh=0xB1;
-         gc_dol=0x5B;
-         gc_ats=0x44;
-         gc_sbo=0x90;
-         gc_bsl=0x48;
-         gc_sbc=0xB5;
-         gc_crt=0x5F;
-         gc_grv=0xA0;
-         gc_cbo=0x51;
-         gc_vbr=0xBB;
-         gc_cbc=0x54;
-         gc_tld=0xBD;
-      } else if (strcmp(ccsid,"IBM-1148")==0) {
-         gc_exc=0x4F;
-         gc_hsh=0x7B;
-         gc_dol=0x5B;
-         gc_ats=0x7C;
-         gc_sbo=0x4A;
-         gc_bsl=0xE0;
-         gc_sbc=0x5A;
-         gc_crt=0x5F;
-         gc_grv=0x79;
-         gc_cbo=0xC0;
-         gc_vbr=0xBB;
-         gc_cbc=0xD0;
-         gc_tld=0xA1;
-      } else if (strcmp(ccsid,"IBM-1149")==0) {
-         gc_exc=0x4F;
-         gc_hsh=0x7B;
-         gc_dol=0x5B;
-         gc_ats=0xAC;
-         gc_sbo=0xAE;
-         gc_bsl=0xBE;
-         gc_sbc=0x9E;
-         gc_crt=0xEC;
-         gc_grv=0x8C;
-         gc_cbo=0x8E;
-         gc_vbr=0xBB;
-         gc_cbc=0x9C;
-         gc_tld=0xCC;
-      } else if (strcmp(ccsid,"IBM-1153")==0) {
-         gc_exc=0x4F;
-         gc_hsh=0x7B;
-         gc_dol=0x5B;
-         gc_ats=0x7C;
-         gc_sbo=0x4A;
-         gc_bsl=0xE0;
-         gc_sbc=0x5A;
-         gc_crt=0x5F;
-         gc_grv=0x79;
-         gc_cbo=0xC0;
-         gc_vbr=0x6A;
-         gc_cbc=0xD0;
-         gc_tld=0xA1;
-      } else if (strcmp(ccsid,"IBM-1154")==0) {
-         gc_exc=0x4F;
-         gc_hsh=0x7B;
-         gc_dol=0x5B;
-         gc_ats=0x7C;
-         gc_sbo=0x4A;
-         gc_bsl=0xE0;
-         gc_sbc=0x5A;
-         gc_crt=0x5F;
-         gc_grv=0x79;
-         gc_cbo=0xC0;
-         gc_vbr=0x6A;
-         gc_cbc=0xD0;
-         gc_tld=0xA1;
-      } else if (strcmp(ccsid,"IBM-1156")==0) {
-         gc_exc=0x5A;
-         gc_hsh=0x7B;
-         gc_dol=0x5B;
-         gc_ats=0x7C;
-         gc_sbo=0xBA;
-         gc_bsl=0xE0;
-         gc_sbc=0xBB;
-         gc_crt=0xB0;
-         gc_grv=0x79;
-         gc_cbo=0xC0;
-         gc_vbr=0x4F;
-         gc_cbc=0xD0;
-         gc_tld=0xA1;
-      }
+   unsigned int ccsid=mapcdstr(mapl2c(TRUE));
+   switch (ccsid) {
+   case 37:
+   case 424:
+   case 1140:
+      gc_exc=0x5A;
+      gc_hsh=0x7B;
+      gc_dol=0x5B;
+      gc_ats=0x7C;
+      gc_sbo=0xBA;
+      gc_bsl=0xE0;
+      gc_sbc=0xBB;
+      gc_crt=0xB0;
+      gc_grv=0x79;
+      gc_cbo=0xC0;
+      gc_vbr=0x4F;
+      gc_cbc=0xD0;
+      gc_tld=0xA1;
+      break;
+   case 273:
+   case 1141:
+      gc_exc=0x4F;
+      gc_hsh=0x7B;
+      gc_dol=0x5B;
+      gc_ats=0xB5;
+      gc_sbo=0x63;
+      gc_bsl=0xEC;
+      gc_sbc=0xFC;
+      gc_crt=0x5F;
+      gc_grv=0x79;
+      gc_cbo=0x43;
+      gc_vbr=0xBB;
+      gc_cbc=0xDC;
+      gc_tld=0x59;
+      break;
+   case 1142:
+      gc_exc=0x4F;
+      gc_hsh=0x4A;
+      gc_dol=0x67;
+      gc_ats=0x80;
+      gc_sbo=0x9E;
+      gc_bsl=0xE0;
+      gc_sbc=0x9F;
+      gc_crt=0x5F;
+      gc_grv=0x79;
+      gc_cbo=0x9C;
+      gc_vbr=0xBB;
+      gc_cbc=0x47;
+      gc_tld=0xDC;
+      break;
+   case 1143:
+      gc_exc=0x4F;
+      gc_hsh=0x63;
+      gc_dol=0x67;
+      gc_ats=0xEC;
+      gc_sbo=0xB5;
+      gc_bsl=0x71;
+      gc_sbc=0x9F;
+      gc_crt=0x5F;
+      gc_grv=0x51;
+      gc_cbo=0x43;
+      gc_vbr=0xBB;
+      gc_cbc=0x47;
+      gc_tld=0xDC;
+      break;
+   case 1144:
+      gc_exc=0x4F;
+      gc_hsh=0xB1;
+      gc_dol=0x5B;
+      gc_ats=0xB5;
+      gc_sbo=0x90;
+      gc_bsl=0x48;
+      gc_sbc=0x51;
+      gc_crt=0x5F;
+      gc_grv=0xDD;
+      gc_cbo=0x44;
+      gc_vbr=0xBB;
+      gc_cbc=0x54;
+      gc_tld=0x58;
+      break;
+   case 1145:
+      gc_exc=0xBB;
+      gc_hsh=0x69;
+      gc_dol=0x5B;
+      gc_ats=0x7C;
+      gc_sbo=0x4A;
+      gc_bsl=0xE0;
+      gc_sbc=0x5A;
+      gc_crt=0xBA;
+      gc_grv=0x79;
+      gc_cbo=0xC0;
+      gc_vbr=0x4F;
+      gc_cbc=0xD0;
+      gc_tld=0xBD;
+      break;
+   case 1146:
+      gc_exc=0x5A;
+      gc_hsh=0x7B;
+      gc_dol=0x4A;
+      gc_ats=0x7C;
+      gc_sbo=0xB1;
+      gc_bsl=0xE0;
+      gc_sbc=0xBB;
+      gc_crt=0xBA;
+      gc_grv=0x79;
+      gc_cbo=0xC0;
+      gc_vbr=0x4F;
+      gc_cbc=0xD0;
+      gc_tld=0xBC;
+      break;
+   case 1147:
+      gc_exc=0x4F;
+      gc_hsh=0xB1;
+      gc_dol=0x5B;
+      gc_ats=0x44;
+      gc_sbo=0x90;
+      gc_bsl=0x48;
+      gc_sbc=0xB5;
+      gc_crt=0x5F;
+      gc_grv=0xA0;
+      gc_cbo=0x51;
+      gc_vbr=0xBB;
+      gc_cbc=0x54;
+      gc_tld=0xBD;
+      break;
+   case 500:
+   case 875:
+   case 1148:
+      gc_exc=0x4F;
+      gc_hsh=0x7B;
+      gc_dol=0x5B;
+      gc_ats=0x7C;
+      gc_sbo=0x4A;
+      gc_bsl=0xE0;
+      gc_sbc=0x5A;
+      gc_crt=0x5F;
+      gc_grv=0x79;
+      gc_cbo=0xC0;
+      gc_vbr=0xBB;
+      gc_cbc=0xD0;
+      gc_tld=0xA1;
+      break;
+   case 1149:
+      gc_exc=0x4F;
+      gc_hsh=0x7B;
+      gc_dol=0x5B;
+      gc_ats=0xAC;
+      gc_sbo=0xAE;
+      gc_bsl=0xBE;
+      gc_sbc=0x9E;
+      gc_crt=0xEC;
+      gc_grv=0x8C;
+      gc_cbo=0x8E;
+      gc_vbr=0xBB;
+      gc_cbc=0x9C;
+      gc_tld=0xCC;
+      break;
+   case 1153:
+      gc_exc=0x4F;
+      gc_hsh=0x7B;
+      gc_dol=0x5B;
+      gc_ats=0x7C;
+      gc_sbo=0x4A;
+      gc_bsl=0xE0;
+      gc_sbc=0x5A;
+      gc_crt=0x5F;
+      gc_grv=0x79;
+      gc_cbo=0xC0;
+      gc_vbr=0x6A;
+      gc_cbc=0xD0;
+      gc_tld=0xA1;
+      break;
+   case 1154:
+      gc_exc=0x4F;
+      gc_hsh=0x7B;
+      gc_dol=0x5B;
+      gc_ats=0x7C;
+      gc_sbo=0x4A;
+      gc_bsl=0xE0;
+      gc_sbc=0x5A;
+      gc_crt=0x5F;
+      gc_grv=0x79;
+      gc_cbo=0xC0;
+      gc_vbr=0x6A;
+      gc_cbc=0xD0;
+      gc_tld=0xA1;
+      break;
+   case 1156:
+      gc_exc=0x5A;
+      gc_hsh=0x7B;
+      gc_dol=0x5B;
+      gc_ats=0x7C;
+      gc_sbo=0xBA;
+      gc_bsl=0xE0;
+      gc_sbc=0xBB;
+      gc_crt=0xB0;
+      gc_grv=0x79;
+      gc_cbo=0xC0;
+      gc_vbr=0x4F;
+      gc_cbc=0xD0;
+      gc_tld=0xA1;
+      break;
+   case 1122:
+      gc_exc=0x4F;
+      gc_hsh=0x63;
+      gc_dol=0x67;
+      gc_ats=0xEC;
+      gc_sbo=0xB5;
+      gc_bsl=0x71;
+      gc_sbc=0x9F;
+      gc_crt=0x5F;
+      gc_grv=0x51;
+      gc_cbo=0x43;
+      gc_vbr=0xBB;
+      gc_cbc=0x47;
+      gc_tld=0xDC;
+      break;
+   default:
+      gc_exc='!';
+      gc_hsh='#';
+      gc_dol='$';
+      gc_ats='@';
+      gc_sbo='[';
+      gc_bsl='\\';
+      gc_sbc=']';
+      gc_crt='^';
+      gc_grv='`';
+      gc_cbo='{';
+      gc_vbr='|';
+      gc_cbc='}';
+      gc_tld='~';
+      break;
    }
-   gc_exc='!';
-   gc_hsh='#';
-   gc_dol='$';
-   gc_ats='@';
-   gc_sbo='[';
-   gc_bsl='\\';
-   gc_sbc=']';
-   gc_crt='^';
-   gc_grv='`';
-   gc_cbo='{';
-   gc_vbr='|';
-   gc_cbc='}';
-   gc_tld='~';
    return(*p);
 }
 #endif /*__EBCDIC*/
@@ -530,6 +563,498 @@ extern const char* lng2ccsd(const char* pcLang, unsigned uiLen, unsigned isEbcdi
       if(pcLngCpy[1]=='u') return (isEbcdic?NULL:"ISO8859-1");
    }
    return NULL;
+}
+
+extern unsigned int mapcdstr(const char* p) {
+   int            o;
+   if (p!=NULL) {
+      while (1) {
+         if (*p==0x00) {
+            return(0);
+         } else if (isspace(*p)) {
+            p++;
+         } else if (toupper(p[0])=='U' && toupper(p[1])=='T' && toupper(p[2])=='F') { /*UTF-xxxx*/
+            p+=3; if (p[0]=='-' || p[0]=='_') p++;
+            if (p[0]=='8' && (p[1]==0x00 || isspace(p[1]))) {
+               return(1208);
+            } else if (p[0]=='1' && p[1]=='6') {
+               o=0;  p+=2;
+            } else if (p[0]=='3' && p[1]=='2') {
+               o=32; p+=2;
+            } else if (p[0]=='2') {
+               o=0;  p+=1;
+            } else if (p[0]=='4') {
+               o=32; p+=1;
+            } else return(0);
+            if ((p[0]==0x00 || isspace(p[0]))) {
+               o+=4;
+            } else if (toupper(p[0])=='L' && toupper(p[1])=='E' && (p[2]==0x00 || isspace(p[2]))) {
+               o+=2;
+            } else if (toupper(p[0])=='B' && toupper(p[1])=='E' && (p[2]==0x00 || isspace(p[2]))) {
+               o+=0;
+            } else return(0);
+            return(1200+o);
+         } else if (toupper(p[0])=='U' && toupper(p[1])=='C' && toupper(p[2])=='S') { /*UCS-xxxx*/
+            p+=3; if (p[0]=='-' || p[0]=='_') p++;
+            if (p[0]=='1' && p[1]=='6') {
+               o=0;  p+=2;
+            } else if (p[0]=='3' && p[1]=='2') {
+               o=32; p+=2;
+            } else if (p[0]=='2') {
+               o=0;  p+=1;
+            } else if (p[0]=='4') {
+               o=32; p+=1;
+            } else return(0);
+            if ((p[0]==0x00 || isspace(p[0]))) {
+               o+=4;
+            } else if (toupper(p[0])=='L' && toupper(p[1])=='E' && (p[2]==0x00 || isspace(p[2]))) {
+               o+=2;
+            } else if (toupper(p[0])=='B' && toupper(p[1])=='E' && (p[2]==0x00 || isspace(p[2]))) {
+               o+=0;
+            } else return(0);
+            return(13488+o);
+         } else if (toupper(p[0])=='I' && toupper(p[1])=='S' && toupper(p[2])=='O') { /*ISO*/
+            p+=3; if (p[0]=='-' || p[0]=='_') p++;
+            if (p[0]=='8' && p[1]=='8' && p[2]=='5'  && p[3]=='9') { /*ISO-8859-xx*/
+               p+=4; if (p[0]=='-' || p[0]=='_') p++;
+               for (o=0;isdigit(p[0]);p++) {
+                  o=(o*10)+(p[0]-'0');
+               }
+               if (p[0]==0x00 || isspace(p[0])) {
+                  switch (o) {
+                  case  1: return( 819);
+                  case  2: return( 912);
+                  case  3: return( 913);
+                  case  4: return( 914);
+                  case  5: return( 915);
+                  case  6: return(1089);
+                  case  7: return( 813);
+                  case  8: return( 916);
+                  case  9: return( 920);
+                  case 10: return( 919);
+                  case 11: return( 874);
+                  case 12: return(   0);// not used yet
+                  case 13: return( 921);
+                  case 14: return(   0);// no ccsid defined (Latin-8)
+                  case 15: return( 923);
+                  case 16: return(   0);// no ccsid defined (Latin-10)
+                  default: return(   0);
+                  }
+               } else if (o==8) {
+                  p+=1; if (p[0]=='-') p++;
+                  if (toupper(p[0])=='I' && (p[1]==0x00 || isspace(p[1]))) {
+                     return(62238);
+                  } else return(0);
+               } else return(0);
+            } else if (p[0]=='2' && p[1]=='0' && p[2]=='2'  && p[3]=='2') { /*ISO-2022-xx*/
+               p+=4; if (p[0]=='-' || p[0]=='_') p++;
+               if (toupper(p[0])=='J' && toupper(p[1])=='P' && (p[2]==0x00 || isspace(p[2]))) {
+                  return(5052);
+               } else return(0);
+            } else return(0);
+         } else if (toupper(p[0])=='L' && toupper(p[1])=='A' && toupper(p[2])=='T' && toupper(p[3])=='I' && toupper(p[4])=='N') { /*LATIN*/
+            p+=5; if (p[0]=='-' || p[0]=='_') p++;
+            if (p[0]=='1' && (p[1]==0x00 || isspace(p[1]))) {
+               return(819);
+            } else if (p[0]=='2' && (p[1]==0x00 || isspace(p[1]))) {
+                  return(912);
+            } else if (p[0]=='3' && (p[1]==0x00 || isspace(p[1]))) {
+                  return(913);
+            } else if (p[0]=='4' && (p[1]==0x00 || isspace(p[1]))) {
+                  return(914);
+            } else if (p[0]=='5' && (p[1]==0x00 || isspace(p[1]))) {
+                  return(915);
+            } else if (p[0]=='6' && (p[1]==0x00 || isspace(p[1]))) {
+                  return(919);
+            } else if (p[0]=='7' && (p[1]==0x00 || isspace(p[1]))) {
+                  return(921);
+            } else if (p[0]=='8' && (p[1]==0x00 || isspace(p[1]))) {
+                  return(0);// no CCSID defined
+            } else if (p[0]=='9' && (p[1]==0x00 || isspace(p[1]))) {
+                  return(923);
+            } else if (p[0]=='1' && p[1]=='0' && (p[2]==0x00 || isspace(p[2]))) {
+                  return(0);// no CCSID defined
+            } else return(0);
+         } else if (toupper(p[0])=='C' && toupper(p[1])=='P') { /*CP-125x*/
+            p+=2; if (p[0]=='-') p++;
+            if (p[0]=='1' && p[1]=='2' && p[2]=='5' && isdigit(p[3]) && (p[4]==0x00 || isspace(p[4]))) {
+               return(1250+(p[3]-'0'));
+            } else return(0);
+         } else if (toupper(p[0])=='I' && toupper(p[1])=='B'  && toupper(p[2])=='M') { /*IBM-xxxx*/
+            p+=3; if (p[0]=='-' || p[0]=='_') p++;
+            for (o=0;isdigit(p[0]);p++) {
+               o=(o*10)+(p[0]-'0');
+            }
+            if ((p[0]==0x00 || isspace(p[0])) && o && o<65536) return (o); else return(0);
+         } else if (toupper(p[0])=='U' && toupper(p[1])=='S') { /*US-ASCII*/
+            p+=2; if (p[0]=='-' || p[0]=='_') p++;
+            if (toupper(p[0])=='A' && toupper(p[1])=='S' && toupper(p[2])=='C'  && toupper(p[3])=='I'  && toupper(p[4])=='I' && (p[5]==0x00 || isspace(p[5]))) {
+               return(367);
+            } else return(0);
+         } else if (toupper(p[0])=='D' && toupper(p[1])=='E') { /*DE-ASCII*/
+            p+=2; if (p[0]=='-' || p[0]=='_') p++;
+            if (toupper(p[0])=='A' && toupper(p[1])=='S' && toupper(p[2])=='C'  && toupper(p[3])=='I'  && toupper(p[4])=='I' && (p[5]==0x00 || isspace(p[5]))) {
+               return(66003);
+            } else return(0);
+         } else if (toupper(p[0])=='A' && toupper(p[1])=='S' && toupper(p[2])=='C'  && toupper(p[3])=='I'  && toupper(p[4])=='I' && (p[5]==0x00 || isspace(p[5]))) {
+            return(367);
+         } else if (toupper(p[0])=='K' && toupper(p[1])=='O' && toupper(p[2])=='I'  && p[3]=='8') { /*KOI8-xx*/
+            p+=4; if (p[0]=='-' || p[0]=='_') p++;
+            if (toupper(p[0])=='R' && (p[1]==0x00 || isspace(p[1]))) {
+               return(878);
+            } else if (toupper(p[0])=='R' && toupper(p[1])=='U' && (p[2]==0x00 || isspace(p[2]))) {
+               return(1167);
+            } else if (toupper(p[0])=='U' && (p[1]==0x00 || isspace(p[1]))) {
+               return(1168);
+            } else return(0);
+         } else if (toupper(p[0])=='E' && toupper(p[1])=='U' && toupper(p[2])=='C') { /*EUC-xx*/
+            p+=3; if (p[0]=='-' || p[0]=='_') p++;
+            if (toupper(p[0]=='J') && toupper(p[1]=='P') && (p[2]==0x00 || isspace(p[2]))) {
+               return(954);
+            } else if (toupper(p[0]=='T') && toupper(p[1]=='W') && (p[2]==0x00 || isspace(p[2]))) {
+               return(964);
+            } else if (toupper(p[0]=='K') && toupper(p[1]=='R') && (p[2]==0x00 || isspace(p[2]))) {
+               return(949);
+            } else if (toupper(p[0]=='C') && toupper(p[1]=='N') && (p[2]==0x00 || isspace(p[2]))) {
+               return(1383);
+            } else return(0);
+         } else if (toupper(p[0])=='B' && toupper(p[1])=='I' && toupper(p[2])=='G') { /*BIG-5*/
+            p+=3; if (p[0]=='-' || p[0]=='_') p++;
+            if (p[0]=='5' && (p[1]==0x00 || isspace(p[1]))) {
+               return(950);
+            } else return(0);
+         } else if (toupper(p[0])=='G' && toupper(p[1])=='B') { /*GB*/
+            if (toupper(p[2])=='K' && (p[3]==0x00 || isspace(p[3]))) {
+               return(1386);
+            }
+            p+=2; if (p[0]=='-' || p[0]=='_') p++;
+            if (p[0]=='1' && p[1]=='8' && p[2]=='0' && p[3]=='3' && p[4]=='0' && (p[5]==0x00 || isspace(p[5]))) {
+               return(5488);
+            } else if (p[0]=='2' && p[1]=='3' && p[2]=='1' && p[3]=='2' && (p[4]==0x00 || isspace(p[4]))) {
+               return(1381);
+            } else return(0);
+         } else if (toupper(p[0])=='S' && toupper(p[1])=='H' && toupper(p[2])=='I' && toupper(p[3])=='F' && toupper(p[4])=='T') { /*SHIFT*/
+            p+=5; if (p[0]=='-' || p[0]=='_') p++;
+            if (toupper(p[0])=='J' && toupper(p[1])=='I' && toupper(p[2])=='S' && (p[3]==0x00 || isspace(p[3]))) {
+               return(932);
+            } else return(0);
+         } else if (toupper(p[0])=='W' && toupper(p[1])=='I' && toupper(p[2])=='N' && toupper(p[3])=='D' && toupper(p[4])=='O' && toupper(p[5])=='W' && toupper(p[6])=='S') { /*SHIFT*/
+            p+=7; if (p[0]=='-' || p[0]=='_') p++;
+            if (toupper(p[0])=='3' && toupper(p[1])=='1' && toupper(p[2])=='J' && (p[3]==0x00 || isspace(p[3]))) {
+               return(943);
+            } else return(0);
+         } else if (toupper(p[0])=='K' && toupper(p[1])=='S' && toupper(p[2])=='C') { /*KSC-xx*/
+            p+=3; if (p[0]=='-' || p[0]=='_') p++;
+            if (p[0]=='5' && p[1]=='6' && p[2]=='0' && p[3]=='1' && (p[4]==0x00 || isspace(p[4]))) {
+               return(1363);
+            } else return(0);
+         } else if (toupper(p[0])=='T' && toupper(p[1])=='I' && toupper(p[2])=='S') { /*TIS-xx*/
+            p+=3; if (p[0]=='-' || p[0]=='_') p++;
+            if (p[0]=='6' && p[1]=='2' && p[2]=='0' && (p[3]==0x00 || isspace(p[3]))) {
+               return(1162);
+            } else return(0);
+         } else if (toupper(p[0])=='V' && toupper(p[1])=='I' && toupper(p[2])=='S' && toupper(p[3])=='C' && toupper(p[4])=='I' && toupper(p[5])=='I') { /*VISCII*/
+            p+=6;
+            if (p[0]==0x00 || isspace(p[0])) {
+               return(1129);
+            } else return(0);
+         } else if (toupper(p[0])=='M' && toupper(p[1])=='A' && toupper(p[2])=='C' && toupper(p[3])=='I' && toupper(p[4])=='N' && toupper(p[5])=='T' && toupper(p[6])=='O'  && toupper(p[7])=='S' && toupper(p[8])=='H') { /*MACINTOSH*/
+            p+=9;
+            if (p[0]==0x00 || isspace(p[0])) {
+               return(1275);
+            } else return(0);
+         } else if (toupper(p[0])=='D' && toupper(p[1])=='I'  && toupper(p[2])=='N') { /*DIN-xxxx*/
+            p+=3; if (p[0]=='-' || p[0]=='_') p++;
+            for (o=0;isdigit(p[0]);p++) {
+               o=(o*10)+(p[0]-'0');
+            }
+            if ((p[0]==0x00 || isspace(p[0])) && o == 66003) return (o); else return(0);
+         } else if (isdigit(p[0])) { /*CCSID*/
+            for (o=(p[0]-'0'),p++;isdigit(p[0]);p++) {
+               o=(o*10)+(p[0]-'0');
+            }
+            if ((p[0]==0x00 || isspace(p[0])) && o<65536) {
+               return(o);
+            } else return(0);
+         } else return(0);
+      }
+   } else return(0);
+}
+
+/* TODO: add to mapping above
+   case  1051: return("CSHPROMAN8");
+   case  1212: return("SCSU");
+   case  1213: return("SCSU");
+   case  1214: return("BOCU-1");
+   case  1215: return("BOCU-1");
+*/
+
+/* Function to map ccsid in encoding string */
+extern const char* mapccsid(const unsigned int uiCcsId){
+   switch (uiCcsId) {
+   case    37: return("IBM-037");
+   case   273: return("IBM-273");
+   case   274: return("IBM-274");
+   case   275: return("IBM-275");
+   case   277: return("IBM-277");
+   case   278: return("IBM-278");
+   case   280: return("IBM-280");
+   case   281: return("IBM-281");
+   case   282: return("IBM-282");
+   case   284: return("IBM-284");
+   case   285: return("IBM-285");
+   case   290: return("IBM-290");
+   case   297: return("IBM-297");
+   case   300: return("IBM-300");
+   case   301: return("IBM-301");
+   case   367: return("US-ASCII");
+   case   420: return("IBM-420");
+   case   424: return("IBM-424");
+   case   425: return("IBM-425");
+   case   437: return("IBM-437");
+   case   500: return("IBM-500");
+   case   808: return("ISO8859-5");
+   case   813: return("ISO8859-7");
+   case   819: return("ISO8859-1");
+   case   833: return("IBM-833");
+   case   834: return("IBM-834");
+   case   835: return("IBM-835");
+   case   836: return("IBM-836");
+   case   837: return("IBM-837");
+   case   838: return("IBM-838");
+   case   848: return("IBM-848");
+   case   850: return("IBM-850");
+   case   852: return("IBM-852");
+   case   855: return("IBM-855");
+   case   856: return("IBM-856");
+   case   858: return("IBM-858");
+   case   859: return("IBM-859");
+   case   861: return("IBM-861");
+   case   862: return("IBM-862");
+   case   864: return("IBM-864");
+   case   866: return("IBM-866");
+   case   867: return("IBM-867");
+   case   869: return("IBM-869");
+   case   870: return("IBM-870");
+   case   871: return("IBM-871");
+   case   872: return("IBM-872");
+   case   874: return("ISO8859-11");
+   case   875: return("IBM-875");
+   case   878: return("KOI8-R");
+   case   880: return("IBM-880");
+   case   901: return("IBM-901");
+   case   902: return("IBM-902");
+   case   904: return("IBM-904");
+   case   912: return("ISO8859-2");
+   case   913: return("ISO8859-3");
+   case   914: return("ISO8859-4");
+   case   915: return("ISO8859-5");
+   case   916: return("ISO8859-8");
+   case   919: return("ISO8859-10");
+   case   920: return("ISO8859-9");
+   case   921: return("ISO8859-13");
+   case   922: return("IBM-922");
+   case   923: return("ISO8859-15");
+   case   924: return("IBM-924");
+   case   927: return("IBM-927");
+   case   928: return("IBM-928");
+   case   930: return("IBM-930");
+//   case   932: return("SHIFT-JIS"); //MULTIBYTE
+   case   933: return("IBM-933");
+   case   935: return("IBM-935");
+   case   936: return("IBM-936");
+   case   937: return("IBM-937");
+   case   938: return("IBM-938");
+   case   939: return("IBM-939");
+   case   942: return("IBM-942");
+//   case   943: return("WINDOWS-31J");//MULTIBYTE
+   case   946: return("IBM-946");
+   case   947: return("IBM-947");
+   case   948: return("IBM-948");
+//   case   949: return("EUC-KR");//MULTIBYTE
+//   case   950: return("BIG5");//MULTIBYTE
+   case   951: return("IBM-951");
+//   case   954: return("EUC-JP");//MULTIBYTE
+   case   956: return("IBM-956");
+   case   957: return("IBM-957");
+   case   958: return("IBM-958");
+   case   959: return("IBM-959");
+//   case   964: return("EUC-TW");//MULTIBYTE
+//   case   970: return("EUC-KR");//MULTIBYTE
+   case  1025: return("IBM-1025");
+   case  1026: return("IBM-1026");
+   case  1027: return("IBM-1027");
+   case  1043: return("IBM-1043");
+   case  1046: return("IBM-1046");
+   case  1047: return("IBM-1047");
+   case  1088: return("IBM-1088");
+   case  1089: return("ISO8859-6");
+   case  1112: return("IBM-1112");
+   case  1115: return("IBM-1115");
+   case  1122: return("IBM-1122");
+   case  1123: return("IBM-1123");
+   case  1124: return("IBM-1124");
+   case  1125: return("IBM-1125");
+   case  1126: return("IBM-1126");
+   case  1129: return("VISCII");
+   case  1140: return("IBM-1140");
+   case  1141: return("IBM-1141");
+   case  1142: return("IBM-1142");
+   case  1143: return("IBM-1143");
+   case  1144: return("IBM-1144");
+   case  1145: return("IBM-1145");
+   case  1146: return("IBM-1146");
+   case  1147: return("IBM-1147");
+   case  1148: return("IBM-1148");
+   case  1149: return("IBM-1149");
+   case  1153: return("IBM-1153");
+   case  1154: return("IBM-1154");
+   case  1155: return("IBM-1155");
+   case  1156: return("IBM-1156");
+   case  1157: return("IBM-1157");
+   case  1158: return("IBM-1158");
+   case  1159: return("IBM-1159");
+   case  1160: return("IBM-1160");
+   case  1161: return("IBM-1161");
+   case  1162: return("TIS-620");
+   case  1163: return("VISCII");
+   case  1165: return("IBM-1165");
+   case  1167: return("KOI8-RU");
+   case  1168: return("KOI8-U");
+   case  1200: return("UTF-16BE");
+   case  1201: return("UTF-16BE");
+   case  1202: return("UTF-16LE");
+   case  1203: return("UTF-16LE");
+   case  1204: return("UTF-16");
+   case  1205: return("UTF-16");
+   case  1208: return("UTF-8");
+   case  1209: return("UTF-8");
+   case  1232: return("UTF-32BE");
+   case  1233: return("UTF-32BE");
+   case  1234: return("UTF-32LE");
+   case  1235: return("UTF-32LE");
+   case  1236: return("UTF-32");
+   case  1237: return("UTF-32");
+   case  1250: return("CP1250");
+   case  1251: return("CP1251");
+   case  1252: return("CP1252");
+   case  1253: return("CP1253");
+   case  1254: return("CP1254");
+   case  1255: return("CP1255");
+   case  1256: return("CP1256");
+   case  1257: return("CP1257");
+   case  1258: return("CP1258");
+   case  1275: return("MACINTOSH");
+   case  1362: return("IBM-1362");
+   case  1363: return("KSC-5601");
+   case  1364: return("IBM-1364");
+   case  1370: return("IBM-1370");
+   case  1371: return("IBM-1371");
+   case  1380: return("IBM-1380");
+//   case  1381: return("GB2312");//MULTIBYTE
+//   case  1383: return("EUC-CN");//MULTIBYTE
+//   case  1386: return("GBK");//MULTIBYTE
+   case  1388: return("IBM-1388");
+   case  1390: return("IBM-1390");
+//   case  1392: return("GB18030");//MULTIBYTE
+   case  1399: return("IBM-1399");
+   case  4396: return("IBM-4396");
+   case  4909: return("ISO8859-7");
+   case  4930: return("IBM-4930");
+   case  4933: return("IBM-4933");
+   case  4946: return("IBM-4946");
+   case  4971: return("IBM-4971");
+   case  5026: return("IBM-5026");
+   case  5031: return("IBM-5031");
+   case  5035: return("IBM-5035");
+//   case  5039: return("SHIFT-JIS");//MULTIBYTE
+   case  5052: return("ISO-2022-JP");
+   case  5053: return("IBM-5053");
+   case  5054: return("IBM-5054");
+   case  5055: return("IBM-5055");
+   case  5123: return("IBM-5123");
+   case  5346: return("CP1250");
+   case  5347: return("CP1251");
+   case  5348: return("CP1252");
+   case  5349: return("CP1253");
+   case  5350: return("CP1254");
+   case  5351: return("CP1255");
+   case  5352: return("CP1256");
+   case  5353: return("CP1257");
+   case  5354: return("CP1258");
+   case  5488: return("GB18030");
+   case  8482: return("IBM-8482");
+   case  8612: return("IBM-420");
+   case  8616: return("IBM-424");
+   case  9005: return("ISO8859-7");
+   case  9027: return("IBM-9027");
+   case  9044: return("IBM-9044");
+   case  9061: return("IBM-9061");
+   case  9238: return("IBM-9238");
+   case 12712: return("IBM-12712");
+   case 13121: return("IBM-13121");
+   case 13124: return("IBM-13124");
+   case 13488: return("UCS-2BE");
+   case 13489: return("UCS-2BE");
+   case 13490: return("UCS-2LE");
+   case 13491: return("UCS-2LE");
+   case 13492: return("UCS-2");
+   case 13496: return("UTF-8");
+   case 13497: return("UTF-8");
+   case 13520: return("UCS-4BE");
+   case 13521: return("UCS-4BE");
+   case 13522: return("UCS-4LE");
+   case 13523: return("UCS-4LE");
+   case 13524: return("UCS-4");
+   case 16684: return("IBM-16684");
+   case 16804: return("IBM-16804");
+   case 17248: return("IBM-17248");
+   case 17584: return("UTF-16BE");
+   case 17585: return("UTF-16BE");
+   case 17586: return("UTF-16LE");
+   case 17587: return("UTF-16LE");
+   case 17592: return("UTF-8");
+   case 17593: return("UTF-8");
+   case 17616: return("UTF-32BE");
+   case 17617: return("UTF-32BE");
+   case 17618: return("UTF-32LE");
+   case 17619: return("UTF-32LE");
+   case 28709: return("IBM-28709");
+//   case 33722: return("EUC-JP");//MULTIBYTE
+   case 53668: return("IBM-53668");
+   case 54191: return("IBM-54191");
+   case 62209: return("IBM-862");
+   case 62210: return("ISO8859-8");
+   case 62211: return("IBM-424");
+   case 62213: return("IBM-862");
+   case 62215: return("ISO8859-8");
+   case 62218: return("IBM-864");
+   case 62221: return("IBM-862");
+   case 62222: return("ISO8859-8");
+   case 62223: return("CP1255");
+   case 62224: return("IBM-420");
+   case 62225: return("IBM-864");
+   case 62227: return("ISO8859-6");
+   case 62228: return("CP1256");
+   case 62229: return("IBM-424");
+   case 62231: return("IBM-862");
+   case 62232: return("ISO8859-8");
+   case 62233: return("IBM-420");
+   case 62234: return("IBM-420");
+   case 62235: return("IBM-424");
+   case 62237: return("CP1255");
+   case 62238: return("ISO8859-8-I");
+   case 62239: return("CP1255");
+   case 62240: return("IBM-424");
+   case 62242: return("IBM-862");
+   case 62243: return("ISO8859-8-I");
+   case 62244: return("CP1255");
+   case 62245: return("IBM-424");
+   case 62250: return("IBM-420");
+   case 62383: return("IBM-62383");
+   case 66003: return("DIN-66003");
+   default   : return(NULL);
+   }
 }
 
 /**********************************************************************/

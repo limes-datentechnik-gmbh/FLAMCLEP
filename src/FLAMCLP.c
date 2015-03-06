@@ -669,14 +669,14 @@ static int CLPERR(TsHdl* psHdl,int siErr, char* pcMsg, ...) {
          for (p=psHdl->pcRow;!iscntrl(*p);p++) fprintf(psHdl->pfErr,"%c",*p);
          fprintf(psHdl->pfErr,"\"\n");
          if (psHdl->pcCur==psHdl->pcRow) {
-            fprintf(psHdl->pfErr,"%s ^",fpcPre(psHdl,1));
+            fprintf(psHdl->pfErr,"%s %c",fpcPre(psHdl,1),C_CRT);
          } else {
             fprintf(psHdl->pfErr,"%s  ",fpcPre(psHdl,1));
          }
          for (p=psHdl->pcRow;!iscntrl(*p);p++) {
             if (p>=psHdl->pcOld && p<psHdl->pcCur) {
                f=TRUE;
-               fprintf(psHdl->pfErr,"^");
+               fprintf(psHdl->pfErr,"%c",C_CRT);
             } else {
                fprintf(psHdl->pfErr," ");
             }
@@ -684,7 +684,7 @@ static int CLPERR(TsHdl* psHdl,int siErr, char* pcMsg, ...) {
          if (f) {
             fprintf(psHdl->pfErr," \n");
          } else {
-            fprintf(psHdl->pfErr,"^\n");
+            fprintf(psHdl->pfErr,"%c\n",C_CRT);
          }
          l=strlen(psHdl->acLst);
          if (l>1) {
