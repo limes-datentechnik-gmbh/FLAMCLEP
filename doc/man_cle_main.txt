@@ -34,6 +34,7 @@ This is the ${__BUILD__} build version of the FLAMCLEP.
 
 .USED ENVIRONMENT VARIABLES
 
+ * LANG                     - to determine the CCSID on EBCDIC systems
  * HOME                     - to determine the home directory on UNIX/WIN
  * USER                     - to determine the current user id on UNIX/WIN 
  * program_CONFIG_FILE      - the configuration filename (default is '$HOME/.flcl.config' on UNIX/WIN or '&SYSUID..FLCL.CONFIG' on mainframes)
@@ -139,3 +140,37 @@ available, for such cases the possibilities above are implemented.
 This file name mapping is provided over the library CLEPUTL and should
 also be used for file names managed by the commands supported with this
 program.
+
+.SPECIAL EBCDIC CODE PAGE SUPPORT
+
+To interpret commands correctly the punctuation characters below are on
+different code points depending on the EBCDIC CCSID used to enter this
+values. 
+
+------------------------------------------------------------------------
+   CRITICAL PUNCTUATION CHARACTERS: ! $ # @ [ \\ ] ^ _ ` { | } ~ 
+------------------------------------------------------------------------
+
+These critical characters are interpreted dependent on the environment
+variable LANG. If the environment variable LANG is not defined then the
+compilation default CCSID (f.e. IBM-1047) is used. Below you can find 
+the current list of supported CCSIDs on EBCDIC systems.
+
+------------------------------------------------------------------------
+   SUPPORTED EBCDIC CODE PAGES FOR COMMAND ENTRY:
+   
+      "IBM-1140","IBM-1141","IBM-1142","IBM-1143",
+      "IBM-1144","IBM-1145","IBM-1146","IBM-1147",
+      "IBM-1148","IBM-1149","IBM-1153","IBM-1154",
+      "IBM-1156","IBM-1122","IBM-1047"
+      "IBM-500","IBM-273","IBM-037","IBM-875","IBM-424"
+
+------------------------------------------------------------------------
+
+You can define the code page explicit (LANG=de_DE.IBM-1141) or only the
+language code (LANG=de_DE). If only the language code defined then the
+CCSID is derived from the language code (DE=IBM-1141, US=IBM-1047, ...).
+
+On ASCII/UTF-8 platforms a miss interpretation of punctuation characters 
+smaller 128 is not possible. On such platforms the LANG variable is not
+used for command interpretation.

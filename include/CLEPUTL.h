@@ -2,7 +2,7 @@
  * @file
  * @brief  Declaration of utility functions for CLP/CLE in ANSI C
  * @author limes datentechnik gmbh
- * @date   18.02.2015
+ * @date   06.03.2015
  * @copyright limes datentechnik gmbh
  *
  * This software is provided 'as-is', without any express or implied

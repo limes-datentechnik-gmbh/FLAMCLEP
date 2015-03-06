@@ -4,8 +4,8 @@
  *
  * LIMES Command Line Executor (CLE) in ANSI-C
  * @author limes datentechnik gmbh
- * @date  04.08.2014
- * @copyright (c) 2014 limes datentechnik gmbh
+ * @date  06.03.2015
+ * @copyright (c) 2015 limes datentechnik gmbh
  * www.flam.de
  * This software is provided 'as-is', without any express or implied
  * warranty. In no event will the authors be held liable for any damages
@@ -102,11 +102,12 @@
  * 1.1.41: Change to new condition codes (separation of warnings and error in RUN function)
  *         Add support of reason codes including generation of an appendix in GENDOCU for it
  *         Add new built in function to print out error code messages
+ * 1.1.42: Code page specific interpretation of punctuation characters on EBCDIC systems
  */
-#define CLE_VSN_STR       "1.1.41"
+#define CLE_VSN_STR       "1.1.42"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        1
-#define CLE_VSN_REVISION       41
+#define CLE_VSN_REVISION       42
 
 /* Definition der Konstanten ******************************************/
 #define CLEMAX_CNFLEN            1023
@@ -562,12 +563,12 @@ extern int siCleExecute(
       if (psTab[i].psTab==NULL || psTab[i].pvClp==NULL || psTab[i].pvPar==NULL ||
           psTab[i].pfIni==NULL || psTab[i].pfMap==NULL || psTab[i].pfRun==NULL || psTab[i].pfFin==NULL ||
           psTab[i].pcMan==NULL || psTab[i].pcHlp==NULL || strlen(psTab[i].pcKyw)==0 || strlen(psTab[i].pcMan)==0 || strlen(psTab[i].pcHlp)==0) {
-         fprintf(pfOut,"Row %d of command table not initialized properly!\n",i);
+         fprintf(pfOut,"Row %d of command table not initialized properly\n",i);
          ERROR(CLERTC_TAB);
       }
    }
    if (i==0) {
-      fprintf(pfOut,"Command table is empty!\n");
+      fprintf(pfOut,"Command table is empty\n");
       ERROR(CLERTC_TAB);
    }
 
@@ -575,13 +576,13 @@ extern int siCleExecute(
       if (pcDef!=NULL && strlen(pcDef)) {
          ppArg=malloc((argc+1)*sizeof(*ppArg));
          if (ppArg == NULL) {
-            fprintf(pfOut,"Memory allocation for argument list to run the default command '%s' failed!\n",pcDef);
+            fprintf(pfOut,"Memory allocation for argument list to run the default command '%s' failed\n",pcDef);
             ERROR(CLERTC_SYS);
          }
          ppArg[0]=argv[0]; ppArg[1]=(char*)pcDef; argc=2; argv=ppArg;
          for (i=0;i<argc;i++) printf("%s\n",argv[i]);
       } else {
-         fprintf(pfOut,"Command or built-in function required!\n");
+         fprintf(pfOut,"Command or built-in function required\n");
          vdPrnStaticSyntax(pfOut,psTab,argv[0],pcDep,pcOpt);
          ERROR(CLERTC_CMD);
       }
@@ -656,7 +657,7 @@ EVALUATE:
       if (argc==2) {
          fprintf(pfOut,"\n");
          fprintf(pfOut,"Return/condition/exit codes of the executable\n");
-         fprintf(pfOut,"----------------------------------------\n\n");
+         fprintf(pfOut,"---------------------------------------------\n\n");
          fprintf(pfOut,"%s\n",MAN_CLE_APPENDIX_RETURNCODES);
          if (pfMsg!=NULL) {
             fprintf(pfOut,"Reason codes of the different commands\n");
@@ -738,7 +739,7 @@ EVALUATE:
                if (strxcmp(isCas,pcDef,psTab[i].pcKyw,0,0,FALSE)==0) {
                   char* pcPat=(char*)malloc(strlen(pcDef)+strlen(argv[2]+2));
                   if (pcPat==NULL) {
-                     fprintf(pfOut,"Memory allocation for path '%s.%s' failed!\n",pcDef,argv[2]);
+                     fprintf(pfOut,"Memory allocation for path '%s.%s' failed\n",pcDef,argv[2]);
                      ERROR(CLERTC_SYS);
                   }
                   siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isPfl,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg);
@@ -840,7 +841,7 @@ EVALUATE:
                if (strxcmp(isCas,pcDef,psTab[i].pcKyw,0,0,FALSE)==0) {
                   char* pcPat=(char*)malloc(strlen(psTab[i].pcKyw)+strlen(argv[2]+2));
                   if (pcPat==NULL) {
-                     fprintf(pfOut,"Memory allocation for path '%s.%s' failed!\n",psTab[i].pcKyw,argv[2]);
+                     fprintf(pfOut,"Memory allocation for path '%s.%s' failed\n",psTab[i].pcKyw,argv[2]);
                      ERROR(CLERTC_SYS);
                   }
                   siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isPfl,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg);
@@ -1070,7 +1071,7 @@ EVALUATE:
                if (strxcmp(isCas,pcDef,psTab[i].pcKyw,0,0,FALSE)==0) {
                   char* pcPat=(char*)malloc(strlen(pcDef)+strlen(pcCmd+2));
                   if (pcPat==NULL) {
-                     fprintf(pfOut,"Memory allocation for path '%s.%s' failed!\n",pcDef,argv[2]);
+                     fprintf(pfOut,"Memory allocation for path '%s.%s' failed\n",pcDef,argv[2]);
                      ERROR(CLERTC_SYS);
                   }
                   siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isPfl,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg);
@@ -1169,7 +1170,7 @@ EVALUATE:
                   if (strxcmp(isCas,pcDef,psTab[i].pcKyw,0,0,FALSE)==0) {
                      char* pcPat=(char*)malloc(strlen(pcDef)+strlen(pcCmd+2));
                      if (pcPat==NULL) {
-                        fprintf(pfOut,"Memory allocation for path '%s.%s' failed!\n",pcDef,argv[2]);
+                        fprintf(pfOut,"Memory allocation for path '%s.%s' failed\n",pcDef,argv[2]);
                         ERROR(CLERTC_SYS);
                      }
                      siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isPfl,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg);
@@ -1529,7 +1530,7 @@ EVALUATE:
                char acPro[CLEMAX_PATSIZ]="";
                for (j=3;j<argc;j++) {
                   if (strlen(acPro)+strlen(argv[j])+strlen(acOwn)+strlen(pcPgm)+strlen(psTab[i].pcKyw)+8>CLEMAX_PATSIZ) {
-                     fprintf(pfOut,"Argument list is too long!\n");
+                     fprintf(pfOut,"Argument list is too long\n");
                      ERROR(CLERTC_CMD);
                   }
                   if (j>3) strcat(acPro," ");
@@ -1563,7 +1564,7 @@ EVALUATE:
                char acPro[CLEMAX_PATSIZ]="";
                for (j=2;j<argc;j++) {
                   if (strlen(acPro)+strlen(argv[j])+strlen(acOwn)+strlen(pcPgm)+strlen(psTab[i].pcKyw)+5>CLEMAX_PATSIZ) {
-                     fprintf(pfOut,"Argument list is too long!\n");
+                     fprintf(pfOut,"Argument list is too long\n");
                      ERROR(CLERTC_CMD);
                   }
                   if (j>2) strcat(acPro," ");
@@ -1713,7 +1714,7 @@ EVALUATE:
                if (strxcmp(isCas,pcDef,psTab[i].pcKyw,0,0,FALSE)==0) {
                   char* pcPat=(char*)malloc(strlen(pcDef)+strlen(argv[2]+2));
                   if (pcPat==NULL) {
-                     fprintf(pfOut,"Memory allocation for path '%s.%s' failed!\n",pcDef,argv[2]);
+                     fprintf(pfOut,"Memory allocation for path '%s.%s' failed\n",pcDef,argv[2]);
                      ERROR(CLERTC_SYS);
                   }
                   siErr=siClePropertyInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,
@@ -1905,7 +1906,7 @@ EVALUATE:
                if (siErr) ERROR(siErr);
                siErr=siClpParseCmd(pvHdl,acFil,pcCmd,TRUE,psTab[i].piOid,&pcTls);
                if (siErr<0) {
-                  fprintf(pfOut,"Command line parser for command '%s' failed!\n",psTab[i].pcKyw);
+                  fprintf(pfOut,"Command line parser for command '%s' failed\n",psTab[i].pcKyw);
                   if (pcCmd!=NULL) free(pcCmd);
                   ERROR(CLERTC_SYN);
                }
@@ -1965,7 +1966,7 @@ EVALUATE:
       if (pcDef!=NULL && strlen(pcDef) && ppArg==NULL) {
          ppArg=malloc((argc+1)*sizeof(*ppArg));
          if (ppArg == NULL) {
-            fprintf(pfOut,"Memory allocation for argument list to run the default command '%s' failed!\n",pcDef);
+            fprintf(pfOut,"Memory allocation for argument list to run the default command '%s' failed\n",pcDef);
             ERROR(CLERTC_SYS);
          }
          for (i=argc;i>1;i--) ppArg[i]=argv[i-1];
@@ -2022,7 +2023,7 @@ static int siClePropertyInit(
    }
    *ppHdl=pvClpOpen(isCas,isPfl,siMkl,pcOwn,pcPgm,pcCmd,pcMan,pcHlp,isOvl,psTab,pvClp,pfOut,pfOut,pfTrc,pfTrc,pfTrc,pfTrc,pcDep,pcOpt,pcEnt,NULL);
    if (*ppHdl==NULL) {
-      fprintf(pfOut,"Open of property parser for command '%s' failed!\n",pcCmd);
+      fprintf(pfOut,"Open of property parser for command '%s' failed\n",pcCmd);
       return(CLERTC_TAB);
    }
    siErr=siCleGetProperties(*ppHdl,pfOut,psCnf,pcOwn,pcPgm,pcCmd,pcFil,&pcPro,piFil);
@@ -2034,7 +2035,7 @@ static int siClePropertyInit(
    if (pcPro!=NULL) {
       siErr=siClpParsePro(*ppHdl,pcFil,pcPro,FALSE,NULL);
       if (siErr<0) {
-         fprintf(pfOut,"Parsing property file \"%s\" for command '%s' failed!\n",pcFil,pcCmd);
+         fprintf(pfOut,"Parsing property file \"%s\" for command '%s' failed\n",pcFil,pcCmd);
          vdClpClose(*ppHdl);*ppHdl=NULL;
          free(pcPro);
          return(CLERTC_SYN);
@@ -2175,7 +2176,7 @@ static int siCleCommandInit(
    }
    *ppHdl=pvClpOpen(isCas,isPfl,siMkl,pcOwn,pcPgm,pcCmd,pcMan,pcHlp,isOvl,psTab,pvClp,pfOut,pfOut,pfTrc,pfTrc,pfTrc,pfTrc,pcDep,pcOpt,pcEnt,NULL);
    if (*ppHdl==NULL) {
-      fprintf(pfOut,"Open of parser for command '%s' failed!\n",pcCmd);
+      fprintf(pfOut,"Open of parser for command '%s' failed\n",pcCmd);
       return(CLERTC_TAB);
    }
    siErr=siCleGetProperties(*ppHdl,pfOut,psCnf,pcOwn,pcPgm,pcCmd,acFil,&pcPro,&siFil);
@@ -2187,7 +2188,7 @@ static int siCleCommandInit(
    if (pcPro!=NULL) {
       siErr=siClpParsePro(*ppHdl,acFil,pcPro,FALSE,NULL);
       if (siErr<0) {
-         fprintf(pfOut,"Property parser for command '%s' failed!\n",pcCmd);
+         fprintf(pfOut,"Property parser for command '%s' failed\n",pcCmd);
          vdClpClose(*ppHdl);*ppHdl=NULL;
          free(pcPro);
          return(CLERTC_SYN);
@@ -2212,7 +2213,7 @@ static int siCleSimpleInit(
    };
    *ppHdl=pvClpOpen(FALSE,isPfl,0,"","","","","",FALSE,asTab,"",pfOut,pfOut,NULL,NULL,NULL,NULL,pcDep,pcOpt,pcEnt,NULL);
    if (*ppHdl==NULL) {
-      fprintf(pfOut,"Open of command line parser for grammar and lexem print out failed!\n");
+      fprintf(pfOut,"Open of command line parser for grammar and lexem print out failed\n");
       return(CLERTC_TAB);
    }
    return(CLERTC_OK);
@@ -2253,7 +2254,7 @@ static int siCleChangeProperties(
 
    siErr=siClpParsePro(pvHdl,acFil,pcPro,TRUE,NULL);
    if (siErr<0) {
-      fprintf(pfOut,"Property parser for command '%s' failed!\n",pcCmd);
+      fprintf(pfOut,"Property parser for command '%s' failed\n",pcCmd);
       vdClpClose(pvHdl);
       return(CLERTC_SYN);
    }
@@ -2711,7 +2712,7 @@ static int siCleGetCommand(
          return(CLERTC_CMD);
       }
       if (strlen(argv[1])>=CLEMAX_FILLEN) {
-         fprintf(pfOut,"Parameter file name is too long (more than %d bytes)!\n",CLEMAX_FILLEN);
+         fprintf(pfOut,"Parameter file name is too long (more than %d bytes)\n",CLEMAX_FILLEN);
          return(CLERTC_CMD);
       }
       cpmapfil(pcFil,CLEMAX_FILSIZ,argv[1]+l+1,TRUE);
@@ -2774,7 +2775,7 @@ static TsCnfHdl* psCnfOpn(
    }
 
    while (fgets(acBuf,sizeof(acBuf)-1,pfFil)!=NULL) {
-      pcHlp=strchr(acBuf,'#');
+      pcHlp=strchr(acBuf,C_HSH);
       if (pcHlp!=NULL) *pcHlp=EOS;
       pcHlp=acBuf+strlen(acBuf);
       while (isspace(*(pcHlp-1))) {

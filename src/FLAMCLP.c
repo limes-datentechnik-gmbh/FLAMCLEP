@@ -4,8 +4,8 @@
  *
  * LIMES Command Line Executor (CLE) in ANSI-C
  * @author limes datentechnik gmbh
- * @date  04.08.2014
- * @copyright (c) 2014 limes datentechnik gmbh
+ * @date  06.03.2015
+ * @copyright (c) 2015 limes datentechnik gmbh
  * www.flam.de
  * This software is provided 'as-is', without any express or implied
  * warranty. In no event will the authors be held liable for any damages
@@ -91,13 +91,13 @@
  * 1.1.41: Support OID as default for numbers if CLPFLG_DEF defined (if only the keyword used (DECODE))
  * 1.1.42: Correct order (scan new token as last step) to fix issue 614
  * 1.1.43: fix null pointer references
- *
- **/
+ * 1.1.44: Code page specific interpretation of punctuation characters on EBCDIC systems
+**/
 
-#define CLP_VSN_STR       "1.1.43"
+#define CLP_VSN_STR       "1.1.44"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        1
-#define CLP_VSN_REVISION       43
+#define CLP_VSN_REVISION       44
 
 /* Definition der Flag-Makros *****************************************/
 

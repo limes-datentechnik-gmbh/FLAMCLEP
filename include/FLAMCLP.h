@@ -1,13 +1,12 @@
 /**********************************************************************/
-/**********************************************************************/
 /**
  * @file FLAMCLP.h
  * @brief Definitions for <b>C</b>ommand <b>L</b>ine <b>P</b>arsing
  *
  * LIMES Command Line Parser (FLAMCLP) in ANSI-C
  * @author limes datentechnik gmbh
- * @date 04.08.2014
- * @copyright (c) 2014 limes datentechnik gmbh
+ * @date 06.03.2015
+ * @copyright (c) 2015 limes datentechnik gmbh
  *
  * This software is provided 'as-is', without any express or implied
  * warranty. In no event will the authors be held liable for any damages
@@ -80,6 +79,7 @@ To be compatible with certain shells the features below are implemented.
 * Strings can also be defined without quotes
 * Keywords can start with "-" or "--" in front of the qualifier
 * If it is unique then parenthesis and the dot can be omitted for objects and overlays
+* On EBCDIC systems we use a code page specific interpretation of punctuation characters
 
 Besides arguments you can also have a constant definition for
 selections. A feature is useful in order to define keywords for values

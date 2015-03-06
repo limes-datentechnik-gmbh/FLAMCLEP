@@ -2,7 +2,7 @@
  * @file
  * @brief  Implementierung diverser Hilffunktionen in ANSI C
  * @author limes datentechnik gmbh
- * @date  03.01.2012
+ * @date  06.03.2015
  * @copyright limes datentechnik gmbh
  * www.flam.de
  *
