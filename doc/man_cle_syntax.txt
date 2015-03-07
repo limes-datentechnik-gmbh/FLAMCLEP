@@ -13,7 +13,7 @@ the corresponding command.
 
 .OPTIONS
 
-   DEPTH1 | DEPTH2 | ... | DEPTH9
+   DEPTH1 / DEPTH2 / ... / DEPTH9
 
 Specifies the depth of the output. Default is DEPTH1. If the depth is
 greater than 1 the structured print out is used.

@@ -7,7 +7,7 @@ After generation you can activate the property file, but there will be
 no effect until you change the settings inside the property file,
 because the current default settings are written.
 
-The file name can contain replacement/mapping rules (+/<USER>). 
+The file name can contain replacement/mapping rules (<HOME>/<USER>). 
 
 Do not use space characters between the key, assignment character (=)
 and filename.

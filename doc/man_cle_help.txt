@@ -22,7 +22,7 @@ the manual pages with keyword *MAN*.
 
 .OPTIONS
 
-   DEPTH1 | DEPTH2 | ... | DEPTH9
+   DEPTH1 / DEPTH2 / ... / DEPTH9
 
 Specifies the depth of the output. Default is DEPTH1.
 
