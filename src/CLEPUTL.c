@@ -286,6 +286,21 @@ extern int init_char(int* p) {
       gc_cbc=0x47; gs_cbc[0]=0x47; gs_cbc[1]=0x00;
       gc_tld=0xDC; gs_tld[0]=0xDC; gs_tld[1]=0x00;
       break;
+   case 1047:
+      gc_exc=0x5A; gs_exc[0]=0x5A; gs_exc[1]=0x00;
+      gc_hsh=0x7B; gs_hsh[0]=0x7B; gs_hsh[1]=0x00;
+      gc_dol=0x5B; gs_dol[0]=0x5B; gs_dol[1]=0x00;
+      gc_ats=0x7C; gs_ats[0]=0x7C; gs_ats[1]=0x00;
+      gc_sbo=0xAD; gs_sbo[0]=0xAD; gs_sbo[1]=0x00;
+      gc_bsl=0xE0; gs_bsl[0]=0xE0; gs_bsl[1]=0x00;
+      gc_sbc=0xBD; gs_sbc[0]=0xBD; gs_sbc[1]=0x00;
+      gc_crt=0x5F; gs_crt[0]=0x5F; gs_crt[1]=0x00;
+      gc_grv=0x79; gs_grv[0]=0x79; gs_grv[1]=0x00;
+      gc_cbo=0xC0; gs_cbo[0]=0xC0; gs_cbo[1]=0x00;
+      gc_vbr=0x4F; gs_vbr[0]=0x4F; gs_vbr[1]=0x00;
+      gc_cbc=0xD0; gs_cbc[0]=0xD0; gs_cbc[1]=0x00;
+      gc_tld=0xA1; gs_tld[0]=0xA1; gs_tld[1]=0x00;
+      break;
    default:
       gc_exc='!'; gs_exc[0]='!'; gs_exc[1]=0x00;
       gc_hsh='#'; gs_hsh[0]='#'; gs_hsh[1]=0x00;
