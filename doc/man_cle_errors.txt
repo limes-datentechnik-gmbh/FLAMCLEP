@@ -2,6 +2,18 @@ This built-in function prints explanations for the return/condition/exit
 codes of the executable and, if available, the reason codes of executed
 commands.
 
+The command line executer (CLE) initialized the CLP structure. Calls the
+command line processor (CLP). Calls the mapping function, which converts
+the CLP structure in a corresponding command structure. Then it runs the
+command and as last step it calls the finish function with the command
+structure, to close all files and free all the allocated memory. If one
+of these steps fails, then a corresponding return (condition/exit) code
+is given back from the executable. Only the command execution can result
+in a error (return code 8) or in a warning (return code 4). The command
+it self must return a reason code for such a warning or error. Means the
+return (condition/exit) code can be used to control the batch processing.
+The reason code gives more information about the error or warning.
+
 See <<appendix-returncodes>> and <<appendix-reasoncodes>> for an
 explanation and the output of this command.
 
