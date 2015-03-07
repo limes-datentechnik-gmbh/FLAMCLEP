@@ -5,5 +5,5 @@ should reflect the current license text for this program.
 .EXAMPLES
 
 -----------------------------------------------------------------------
-   $ program LICENSE
+   :> program LICENSE
 -----------------------------------------------------------------------

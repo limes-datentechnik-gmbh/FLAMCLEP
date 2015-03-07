@@ -14,7 +14,7 @@ and filename.
 .EXAMPLES
 
 -----------------------------------------------------------------------
-   $ program TRACE FILE=filename
-   $ program TRACE ON
-   $ program TRACE OFF
+   :> program TRACE FILE=filename
+   :> program TRACE ON
+   :> program TRACE OFF
 -----------------------------------------------------------------------

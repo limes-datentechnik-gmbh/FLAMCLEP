@@ -15,12 +15,12 @@ tool http://www.methods.co.nz/asciidoc/[ASCIIDOC].
 .EXAMPLES
 
 -----------------------------------------------------------------------
-   $ program MANPAGE
-   $ program MANPAGE filename
-   $ program MANPAGE command
-   $ program MANPAGE command=filename
-   $ program MANPAGE function
-   $ program MANPAGE function=filename
-   $ program MANPAGE command.para
-   $ program MANPAGE command.para=filename
+   :> program MANPAGE
+   :> program MANPAGE filename
+   :> program MANPAGE command
+   :> program MANPAGE command=filename
+   :> program MANPAGE function
+   :> program MANPAGE function=filename
+   :> program MANPAGE command.para
+   :> program MANPAGE command.para=filename
 -----------------------------------------------------------------------

@@ -28,6 +28,6 @@ current home directory on distributed system in this case.
 .EXAMPLES
 
 -----------------------------------------------------------------------
-   $ program CONFIG
-   $ program CONFIG CLEAR
+   :> program CONFIG
+   :> program CONFIG CLEAR
 -----------------------------------------------------------------------

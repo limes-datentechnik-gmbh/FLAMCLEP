@@ -26,9 +26,9 @@ Shows all defined properties to the specified path.
 .EXAMPLES
 
 -----------------------------------------------------------------------
-   $ program GETPROP
-   $ program GETPROP command
-   $ program GETPROP command DEFALL
-   $ program GETPROP command.para
-   $ program GETPROP command.para DEPALL
+   :> program GETPROP
+   :> program GETPROP command
+   :> program GETPROP command DEFALL
+   :> program GETPROP command.para
+   :> program GETPROP command.para DEPALL
 -----------------------------------------------------------------------

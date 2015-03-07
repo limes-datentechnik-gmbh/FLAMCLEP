@@ -7,5 +7,5 @@ See <<appendix-version>> for the output of this command.
 .EXAMPLES
 
 -----------------------------------------------------------------------
-   $ program VERSION
+   :> program VERSION
 -----------------------------------------------------------------------

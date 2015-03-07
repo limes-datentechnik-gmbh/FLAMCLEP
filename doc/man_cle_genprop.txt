@@ -27,6 +27,6 @@ See <<appendix-properties>> for the current property file content.
 .EXAMPLES
 
 -----------------------------------------------------------------------
-   $ program GENPROP owner.general.properties
-   $ program GENPROP command=owner.command.properties
+   :> program GENPROP owner.general.properties
+   :> program GENPROP command=owner.command.properties
 -----------------------------------------------------------------------

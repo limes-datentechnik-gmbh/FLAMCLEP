@@ -8,5 +8,5 @@ See <<appendix-about>> for the output of this command.
 .EXAMPLES
 
 -----------------------------------------------------------------------
-   $ program ABOUT
+   :> program ABOUT
 -----------------------------------------------------------------------

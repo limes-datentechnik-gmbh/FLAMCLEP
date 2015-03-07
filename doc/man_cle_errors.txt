@@ -8,5 +8,5 @@ explanation and the output of this command.
 .EXAMPLES
 
 -----------------------------------------------------------------------
-   $ program ERRORS
+   :> program ERRORS
 -----------------------------------------------------------------------

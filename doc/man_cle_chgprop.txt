@@ -55,7 +55,7 @@ See <<appendix-properties>> for the current property file content.
 .EXAMPLES
 
 -----------------------------------------------------------------------
-   $ program CHGPROP command overlay.object.argument=value  
-   $ program CHGPROP command overlay.object.argument  
-   $ program CHGPROP command object.argument=value1 argument=value2 
+   :> program CHGPROP command overlay.object.argument=value  
+   :> program CHGPROP command overlay.object.argument  
+   :> program CHGPROP command object.argument=value1 argument=value2 
 -----------------------------------------------------------------------

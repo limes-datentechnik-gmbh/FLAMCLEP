@@ -21,6 +21,6 @@ See <<appendix-properties>> for the current property file content.
 .EXAMPLES
 
 -----------------------------------------------------------------------
-   $ program SETPROP general.properties
-   $ program SETPROP command=command.properties
+   :> program SETPROP general.properties
+   :> program SETPROP command=command.properties
 -----------------------------------------------------------------------

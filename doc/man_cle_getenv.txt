@@ -7,5 +7,5 @@ Attention: *The environment variables will be temporary overwritten*
 .EXAMPLES
 
 -----------------------------------------------------------------------
-   $ program GETENV
+   :> program GETENV
 -----------------------------------------------------------------------

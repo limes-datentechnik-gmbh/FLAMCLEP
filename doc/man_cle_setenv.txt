@@ -11,6 +11,6 @@ Attention: *The environment variables will be temporary overwritten*
 .EXAMPLES
 
 -----------------------------------------------------------------------
-   $ program SETENV LANG=DE_DE.IBM-1141
-   $ program SETENV LANG=DE_DE.UTF-8
+   :> program SETENV LANG=DE_DE.IBM-1141
+   :> program SETENV LANG=DE_DE.UTF-8
 -----------------------------------------------------------------------
