@@ -153,8 +153,9 @@ values.
 
 These critical characters are interpreted dependent on the environment
 variable LANG. If the environment variable LANG is not defined then the
-compilation default CCSID (f.e. IBM-1047) is used. Below you can find 
-the current list of supported CCSIDs on EBCDIC systems.
+compilation default CCSID (f.e. IBM-1047 on USS and IBM1141 on ZOS) is
+used. Below you can find the current list of supported CCSIDs on EBCDIC
+systems.
 
 ------------------------------------------------------------------------
    SUPPORTED EBCDIC CODE PAGES FOR COMMAND ENTRY:
@@ -168,8 +169,11 @@ the current list of supported CCSIDs on EBCDIC systems.
 ------------------------------------------------------------------------
 
 You can define the code page explicit (LANG=de_DE.IBM-1141) or only the
-language code (LANG=de_DE). If only the language code defined then the
-CCSID is derived from the language code (DE=IBM-1141, US=IBM-1047, ...).
+language code (LANG=de_DE, LANG=C). If only the language code defined
+then the CCSID is derived from the language code (DE=IBM-1141,
+US=IBM-1047, C=IBM-1047, ...).
+
+If possible these critical characters are also converted for print outs.
 
 On ASCII/UTF-8 platforms a miss interpretation of punctuation characters 
 smaller 128 is not possible. On such platforms the LANG variable is not
