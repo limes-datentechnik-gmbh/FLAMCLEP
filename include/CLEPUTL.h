@@ -70,7 +70,6 @@
    extern int gc_bsl;
    extern int gc_sbc;
    extern int gc_crt;
-   extern int gc_usc;
    extern int gc_grv;
    extern int gc_cbo;
    extern int gc_vbr;
@@ -84,7 +83,6 @@
    extern char gs_bsl[2];
    extern char gs_sbc[2];
    extern char gs_crt[2];
-   extern char gs_usc[2];
    extern char gs_grv[2];
    extern char gs_cbo[2];
    extern char gs_vbr[2];
@@ -98,7 +96,6 @@
 #  define C_BSL                 ((gc_bsl)?gc_bsl:init_char(&gc_bsl))
 #  define C_SBC                 ((gc_sbc)?gc_sbc:init_char(&gc_sbc))
 #  define C_CRT                 ((gc_sbo)?gc_crt:init_char(&gc_crt))
-#  define C_USC                 ((gc_usc)?gc_usc:init_char(&gc_usc))
 #  define C_GRV                 ((gc_grv)?gc_grv:init_char(&gc_grv))
 #  define C_CBO                 ((gc_cbo)?gc_cbo:init_char(&gc_cbo))
 #  define C_VBR                 ((gc_vbr)?gc_vbr:init_char(&gc_vbr))
@@ -112,7 +109,6 @@
 #  define S_BSL                 ((gs_bsl[0])?gs_bsl:init_string(gs_bsl))
 #  define S_SBC                 ((gs_sbc[0])?gs_sbc:init_string(gs_sbc))
 #  define S_CRT                 ((gs_sbo[0])?gs_crt:init_string(gs_crt))
-#  define S_USC                 ((gs_usc[0])?gs_usc:init_string(gs_usc))
 #  define S_GRV                 ((gs_grv[0])?gs_grv:init_string(gs_grv))
 #  define S_CBO                 ((gs_cbo[0])?gs_cbo:init_string(gs_cbo))
 #  define S_VBR                 ((gs_vbr[0])?gs_vbr:init_string(gs_vbr))
@@ -127,7 +123,6 @@
 #  define C_BSL              '\\'
 #  define C_SBC              ']'
 #  define C_CRT              '^'
-#  define C_USC              '_'
 #  define C_GRV              '`'
 #  define C_CBO              '{'
 #  define C_VBR              '|'
@@ -141,7 +136,6 @@
 #  define S_BSL              "\\"
 #  define S_SBC              "]"
 #  define S_CRT              "^"
-#  define S_USC              "_"
 #  define S_GRV              "`"
 #  define S_CBO              "{"
 #  define S_VBR              "|"

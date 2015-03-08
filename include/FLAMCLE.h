@@ -107,7 +107,7 @@ Below, you can find a possibly incomplete list of FLAMCLE feature:
  * * Support for parameter files per command, object or overlay
  * * File name mapping and DD:NAME support (see man_cle_main.txt)
  * * Return/condition/exit code and reason code handling
- * * On EBCDIC systems we use a code page specific interpretation of punctuation characters (<pre>!$#@[\]^_`{|}~</pre>) dependent on the environment variable LANG
+ * * On EBCDIC systems we use a code page specific interpretation of punctuation characters (<pre>!$#@[\]^`{|}~</pre>) dependent on the environment variable LANG
 
 Built-in Functions
 ------------------

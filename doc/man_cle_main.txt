@@ -148,7 +148,7 @@ different code points depending on the EBCDIC CCSID used to enter this
 values. 
 
 ------------------------------------------------------------------------
-   CRITICAL PUNCTUATION CHARACTERS: ! $ # @ [ \\ ] ^ _ ` { | } ~ 
+   CRITICAL PUNCTUATION CHARACTERS: ! $ # @ [ \\ ] ^ ` { | } ~ 
 ------------------------------------------------------------------------
 
 These critical characters are interpreted dependent on the environment
