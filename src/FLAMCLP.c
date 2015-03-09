@@ -29,7 +29,6 @@
 /*
  * TASK:0000086 Centralized error messages
  * TASK:0000086 Multi-language support
- * TODO: Replace '[]' with C_SBO/SBC in literals
  */
 
 /* Standard-Includes **************************************************/
@@ -1039,7 +1038,7 @@ extern int siClpHelp(
                   fprintf(psHdl->pfHlp,"DESCRIPTION\n");
                   fprintf(psHdl->pfHlp,"-----------\n");
                   if (psHdl->pcMan!=NULL && strlen(psHdl->pcMan)) {
-                     fprintf(psHdl->pfHlp,"%s\n",psHdl->pcMan);
+                     efprintf(psHdl->pfHlp,"%s\n",psHdl->pcMan);
                   } else {
                      fprintf(psHdl->pfHlp,"No detailed description available for this command.\n\n");
                   }
@@ -1056,7 +1055,7 @@ extern int siClpHelp(
                   fprintf(psHdl->pfHlp,"DESCRIPTION\n");
                   fprintf(psHdl->pfHlp,"-----------\n");
                   if (psArg->psFix->pcMan!=NULL && strlen(psArg->psFix->pcMan)) {
-                     fprintf(psHdl->pfHlp,"%s\n",psArg->psFix->pcMan);
+                     efprintf(psHdl->pfHlp,"%s\n",psArg->psFix->pcMan);
                   } else {
                      fprintf(psHdl->pfHlp,"No detailed description available for this argument.\n\n");
                   }
@@ -1095,7 +1094,7 @@ extern int siClpHelp(
                   fprintf(psHdl->pfHlp,"DESCRIPTION\n");
                   fprintf(psHdl->pfHlp,"-----------\n");
                   if (psArg->psFix->pcMan!=NULL && strlen(psArg->psFix->pcMan)) {
-                     fprintf(psHdl->pfHlp,"%s\n",psArg->psFix->pcMan);
+                     efprintf(psHdl->pfHlp,"%s\n",psArg->psFix->pcMan);
                   } else {
                      fprintf(psHdl->pfHlp,"No detailed description available for this argument.\n\n");
                   }
@@ -1127,7 +1126,7 @@ extern int siClpHelp(
          fprintf(psHdl->pfHlp,"DESCRIPTION\n");
          fprintf(psHdl->pfHlp,"-----------\n");
          if (psHdl->pcMan!=NULL && strlen(psHdl->pcMan)) {
-            fprintf(psHdl->pfHlp,"%s\n",psHdl->pcMan);
+            efprintf(psHdl->pfHlp,"%s\n",psHdl->pcMan);
          } else {
             fprintf(psHdl->pfHlp,"No detailed description available for this command.\n\n");
          }
@@ -1227,7 +1226,7 @@ extern int siClpDocu(
                         fprintf(pfDoc,"DESCRIPTION\n");
                         fprintf(pfDoc,"-----------\n\n");
                         if (psArg->psFix->pcMan!=NULL && strlen(psArg->psFix->pcMan)) {
-                           fprintf(pfDoc,"%s\n\n",psArg->psFix->pcMan);
+                           efprintf(pfDoc,"%s\n\n",psArg->psFix->pcMan);
                         } else {
                            fprintf(pfDoc,"No detailed description available for this argument.\n\n");
                         }
@@ -1259,11 +1258,11 @@ extern int siClpDocu(
                         if (siErr<0) return(siErr);
                         fprintf(pfDoc,".DESCRIPTION\n\n");
                         if (psArg->psFix->pcMan!=NULL && strlen(psArg->psFix->pcMan)) {
-                           fprintf(pfDoc,"%s\n\n",psArg->psFix->pcMan);
+                           efprintf(pfDoc,"%s\n\n",psArg->psFix->pcMan);
                         } else {
                            fprintf(pfDoc,"No detailed description available for this argument.\n\n");
                         }
-                        fprintf(pfDoc,"indexterm:[Argument %s]\n\n\n",psArg->psStd->pcKyw);
+                        fprintf(pfDoc,"indexterm:%cArgument %s%c\n\n\n",C_SBO,psArg->psStd->pcKyw,C_SBC);
                         if (isDep) {
                            siErr=siClpPrnDoc(pvHdl,pfDoc,siLev,isNbr,acNum,psArg,psTab);
                            if (siErr<0) return(siErr);
@@ -1303,7 +1302,7 @@ extern int siClpDocu(
                         fprintf(pfDoc,"DESCRIPTION\n");
                         fprintf(pfDoc,"-----------\n\n");
                         if (psArg->psFix->pcMan!=NULL && strlen(psArg->psFix->pcMan)) {
-                           fprintf(pfDoc,"%s\n\n",psArg->psFix->pcMan);
+                           efprintf(pfDoc,"%s\n\n",psArg->psFix->pcMan);
                         } else {
                            fprintf(pfDoc,"No detailed description available for this constant.\n\n");
                         }
@@ -1330,11 +1329,11 @@ extern int siClpDocu(
                         if (siErr<0) return(siErr);
                         fprintf(pfDoc,".DESCRIPTION\n\n");
                         if (psArg->psFix->pcMan!=NULL && strlen(psArg->psFix->pcMan)) {
-                           fprintf(pfDoc,"%s\n\n",psArg->psFix->pcMan);
+                           efprintf(pfDoc,"%s\n\n",psArg->psFix->pcMan);
                         } else {
                            fprintf(pfDoc,"No detailed description available for this constant.\n\n");
                         }
-                        fprintf(pfDoc,"indexterm:[Constant %s]\n\n\n",psArg->psStd->pcKyw);
+                        fprintf(pfDoc,"indexterm:%cConstant %s%c\n\n\n",C_SBO,psArg->psStd->pcKyw,C_SBC);
                      }
                   } else {
                      return CLPERR(psHdl,CLPERR_SEM,"Path (%s) contains to many or invalid qualifiers",pcPat);
@@ -1383,7 +1382,7 @@ extern int siClpDocu(
          fprintf(pfDoc,   "DESCRIPTION\n");
          fprintf(pfDoc,   "-----------\n\n");
          if (psHdl->pcMan!=NULL && strlen(psHdl->pcMan)) {
-            fprintf(pfDoc,"%s\n\n",psHdl->pcMan);
+            efprintf(pfDoc,"%s\n\n",psHdl->pcMan);
          } else {
             fprintf(pfDoc,"No detailed description available for this command.\n\n");
          }
@@ -1414,11 +1413,11 @@ extern int siClpDocu(
          if (siErr<0) return(siErr);
          fprintf(pfDoc,   ".DESCRIPTION\n\n");
          if (psHdl->pcMan!=NULL && strlen(psHdl->pcMan)) {
-            fprintf(pfDoc,"%s\n\n",psHdl->pcMan);
+            efprintf(pfDoc,"%s\n\n",psHdl->pcMan);
          } else {
             fprintf(pfDoc,"No detailed description available for this command.\n\n");
          }
-         fprintf(pfDoc,   "indexterm:[Command %s]\n\n\n",psHdl->pcCmd);
+         fprintf(pfDoc,   "indexterm:%cCommand %s%c\n\n\n",C_SBO,psHdl->pcCmd,C_SBC);
          if (isDep) {
             siPos=siClpPrnDoc(pvHdl,pfDoc,0,isNbr,pcNum,NULL,psTab);
             if (siPos<0) return(siPos);
@@ -2118,35 +2117,35 @@ static void vdClpSymDel(
 extern int siClpLexem(
    void*                         pvHdl,
    FILE*                         pfOut)
-{  //TODO: replace dia critical characters
-   fprintf(pfOut,"%s COMMENT   '#' [:print:]* '#'                              (will be ignored)\n",fpcPre(pvHdl,0));
-   fprintf(pfOut,"%s LCOMMENT  ';' [:print:]* 'nl'                             (will be ignored)\n",fpcPre(pvHdl,0));
-   fprintf(pfOut,"%s SEPARATOR [:space: | :cntr: | ',']*                  (abbreviated with SEP)\n",fpcPre(pvHdl,0));
-   fprintf(pfOut,"%s OPERATOR  '=' | '.' | '(' | ')' | '[' | ']'  (SGN, DOT, RBO, RBC, SBO, SBC)\n",fpcPre(pvHdl,0));
-   fprintf(pfOut,"%s KEYWORD   ['-'['-']][:alpha:]+[:alnum: | '_' | '-']*    (always predefined)\n",fpcPre(pvHdl,0));
-   fprintf(pfOut,"%s NUMBER    ([+|-]  [ :digit:]+)  |                       (decimal (default))\n",fpcPre(pvHdl,0));
-   fprintf(pfOut,"%s num       ([+|-]0b[ :digit:]+)  |                                  (binary)\n",fpcPre(pvHdl,0));
-   fprintf(pfOut,"%s num       ([+|-]0o[ :digit:]+)  |                                   (octal)\n",fpcPre(pvHdl,0));
-   fprintf(pfOut,"%s num       ([+|-]0d[ :digit:]+)  |                                 (decimal)\n",fpcPre(pvHdl,0));
-   fprintf(pfOut,"%s num       ([+|-]0x[ :xdigit:]+) |                             (hexadecimal)\n",fpcPre(pvHdl,0));
-   fprintf(pfOut,"%s num       ([+|-]0t(yyyy/mm/tt.hh:mm:ss)) |  (relativ (+|-) or absolut time)\n",fpcPre(pvHdl,0));
-   fprintf(pfOut,"%s FLOAT     ([+|-]  [ :digit:]+.[:digit:]+e|E[:digit:]+) | (decimal(default))\n",fpcPre(pvHdl,0));
-   fprintf(pfOut,"%s flt       ([+|-]0d[ :digit:]+.[:digit:]+e|E[:digit:]+)            (decimal)\n",fpcPre(pvHdl,0));
-   fprintf(pfOut,"%s STRING         ''' [:print:]* ''' |          (default (if binary c else s))\n",fpcPre(pvHdl,0));
-   fprintf(pfOut,"%s str       [s|S]''' [:print:]* ''' |                (zero terminated string)\n",fpcPre(pvHdl,0));
-   fprintf(pfOut,"%s str       [c|C]''' [:print:]* ''' |  (binary string in local character set)\n",fpcPre(pvHdl,0));
-   fprintf(pfOut,"%s str       [a|A]''' [:print:]* ''' |                (binary string in ASCII)\n",fpcPre(pvHdl,0));
-   fprintf(pfOut,"%s str       [e|E]''' [:print:]* ''' |               (binary string in EBCDIC)\n",fpcPre(pvHdl,0));
-   fprintf(pfOut,"%s str       [x|X]''' [:print:]* ''' |         (binary string in hex notation)\n",fpcPre(pvHdl,0));
-   fprintf(pfOut,"%s           Strings can contain two '' to represent one '                    \n",fpcPre(pvHdl,0));
-   fprintf(pfOut,"%s           Strings can also be enclosed in \" instead of '                   \n",fpcPre(pvHdl,0));
-   fprintf(pfOut,"%s           Strings can directly start behind a '=' without enclosing '/\"    \n",fpcPre(pvHdl,0));
-   fprintf(pfOut,"%s              In this case the string ends at the next separator or operator\n",fpcPre(pvHdl,0));
-   fprintf(pfOut,"%s              and keywords are preferred. To use keywords, separators or    \n",fpcPre(pvHdl,0));
-   fprintf(pfOut,"%s              operators in strings, enclosing quotes are required.          \n",fpcPre(pvHdl,0));
-   fprintf(pfOut,"%s SUPPLEMENT     '\"' [:print:]* '\"' |   (zero terminated string (properties))\n",fpcPre(pvHdl,0));
-   fprintf(pfOut,"%s           Supplements can contain two \"\" to represent one \"                \n",fpcPre(pvHdl,0));
-   fprintf(pfOut,"%s           Supplements can also be enclosed in ' instead of \"               \n",fpcPre(pvHdl,0));
+{
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," COMMENT   '#' [:print:]* '#'                              (will be ignored)\n");
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," LCOMMENT  ';' [:print:]* 'nl'                             (will be ignored)\n");
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," SEPARATOR [:space: | :cntr: | ',']*                  (abbreviated with SEP)\n");
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," OPERATOR  '=' | '.' | '(' | ')' | '[' | ']'  (SGN, DOT, RBO, RBC, SBO, SBC)\n");
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," KEYWORD   ['-'['-']][:alpha:]+[:alnum: | '_' | '-']*    (always predefined)\n");
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," NUMBER    ([+|-]  [ :digit:]+)  |                       (decimal (default))\n");
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," num       ([+|-]0b[ :digit:]+)  |                                  (binary)\n");
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," num       ([+|-]0o[ :digit:]+)  |                                   (octal)\n");
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," num       ([+|-]0d[ :digit:]+)  |                                 (decimal)\n");
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," num       ([+|-]0x[ :xdigit:]+) |                             (hexadecimal)\n");
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," num       ([+|-]0t(yyyy/mm/tt.hh:mm:ss)) |  (relativ (+|-) or absolut time)\n");
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," FLOAT     ([+|-]  [ :digit:]+.[:digit:]+e|E[:digit:]+) | (decimal(default))\n");
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," flt       ([+|-]0d[ :digit:]+.[:digit:]+e|E[:digit:]+)            (decimal)\n");
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," STRING         ''' [:print:]* ''' |          (default (if binary c else s))\n");
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," str       [s|S]''' [:print:]* ''' |                (zero terminated string)\n");
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," str       [c|C]''' [:print:]* ''' |  (binary string in local character set)\n");
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," str       [a|A]''' [:print:]* ''' |                (binary string in ASCII)\n");
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," str       [e|E]''' [:print:]* ''' |               (binary string in EBCDIC)\n");
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," str       [x|X]''' [:print:]* ''' |         (binary string in hex notation)\n");
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"           Strings can contain two '' to represent one '                    \n");
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"           Strings can also be enclosed in \" instead of '                   \n");
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"           Strings can directly start behind a '=' without enclosing '/\"    \n");
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"              In this case the string ends at the next separator or operator\n");
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"              and keywords are preferred. To use keywords, separators or    \n");
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"              operators in strings, enclosing quotes are required.          \n");
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," SUPPLEMENT     '\"' [:print:]* '\"' |   (zero terminated string (properties))\n");
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"           Supplements can contain two \"\" to represent one \"                \n");
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"           Supplements can also be enclosed in ' instead of \"               \n");
    return(CLP_OK);
 }
 
@@ -2630,44 +2629,44 @@ static int siClpScnSrc(
 extern int siClpGrammar(
    void*                         pvHdl,
    FILE*                         pfOut)
-{//TODO: replace dia critical characters
+{
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
-   fprintf(pfOut,"%s Command Line Parser                                              \n",fpcPre(pvHdl,0));
-   fprintf(pfOut,"%s command        -> ['('] parameter_list [')']       (main=object) \n",fpcPre(pvHdl,1));
-   fprintf(pfOut,"%s                |  ['.'] parameter                  (main=overlay)\n",fpcPre(pvHdl,1));
-   fprintf(pfOut,"%s parameter_list -> parameter SEP parameter_list                   \n",fpcPre(pvHdl,1));
-   fprintf(pfOut,"%s                |  EMPTY                                          \n",fpcPre(pvHdl,1));
-   fprintf(pfOut,"%s parameter      -> switch | assignment | object | overlay | array \n",fpcPre(pvHdl,1));
-   fprintf(pfOut,"%s switch         -> KEYWORD                                        \n",fpcPre(pvHdl,1));
-   fprintf(pfOut,"%s assignment     -> KEYWORD '=' value                              \n",fpcPre(pvHdl,1));
-   fprintf(pfOut,"%s object         -> KEYWORD ['('] parameter_list [')']             \n",fpcPre(pvHdl,1));
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," Command Line Parser                                              \n");
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," command        -> ['('] parameter_list [')']       (main=object) \n");
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  ['.'] parameter                  (main=overlay)\n");
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," parameter_list -> parameter SEP parameter_list                   \n");
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  EMPTY                                          \n");
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," parameter      -> switch | assignment | object | overlay | array \n");
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," switch         -> KEYWORD                                        \n");
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," assignment     -> KEYWORD '=' value                              \n");
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," object         -> KEYWORD ['('] parameter_list [')']             \n");
 if (psHdl->isPfl) {
-   fprintf(pfOut,"%s                |  KEYWORD '=' STRING # parameter file #          \n",fpcPre(pvHdl,1));
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  KEYWORD '=' STRING # parameter file #          \n");
 }
-   fprintf(pfOut,"%s overlay        -> KEYWORD ['.'] parameter                        \n",fpcPre(pvHdl,1));
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," overlay        -> KEYWORD ['.'] parameter                        \n");
 if (psHdl->isPfl) {
-   fprintf(pfOut,"%s                |  KEYWORD '=' STRING # parameter file #          \n",fpcPre(pvHdl,1));
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  KEYWORD '=' STRING # parameter file #          \n");
 }
-   fprintf(pfOut,"%s array          -> KEYWORD '[' value_list   ']'                   \n",fpcPre(pvHdl,1));
-   fprintf(pfOut,"%s                |  KEYWORD '[' object_list  ']'                   \n",fpcPre(pvHdl,1));
-   fprintf(pfOut,"%s                |  KEYWORD '[' overlay_list ']'                   \n",fpcPre(pvHdl,1));
-   fprintf(pfOut,"%s value_list     -> value SEP value_list                           \n",fpcPre(pvHdl,1));
-   fprintf(pfOut,"%s                |  EMPTY                                          \n",fpcPre(pvHdl,1));
-   fprintf(pfOut,"%s object_list    -> object SEP object_list                         \n",fpcPre(pvHdl,1));
-   fprintf(pfOut,"%s                |  EMPTY                                          \n",fpcPre(pvHdl,1));
-   fprintf(pfOut,"%s overlay_list   -> overlay SEP overlay_list                       \n",fpcPre(pvHdl,1));
-   fprintf(pfOut,"%s                |  EMPTY                                          \n",fpcPre(pvHdl,1));
-   fprintf(pfOut,"%s value          -> NUMBER | FLOAT | STRING | KEYWORD              \n",fpcPre(pvHdl,1));
-   fprintf(pfOut,"%s A list of objects requires parenthesis to enclose the arguments  \n",fpcPre(pvHdl,1));
-   fprintf(pfOut,"%s                                                                  \n",fpcPre(pvHdl,1));
-   fprintf(pfOut,"%s Property File Parser                                             \n",fpcPre(pvHdl,0));
-   fprintf(pfOut,"%s properties     -> property_list                                  \n",fpcPre(pvHdl,1));
-   fprintf(pfOut,"%s property_list  -> property SEP property_list                     \n",fpcPre(pvHdl,1));
-   fprintf(pfOut,"%s                |  EMPTY                                          \n",fpcPre(pvHdl,1));
-   fprintf(pfOut,"%s property       -> keyword_list '=' SUPPLEMENT                    \n",fpcPre(pvHdl,1));
-   fprintf(pfOut,"%s keyword_list   -> KEYWORD '.' keyword_list                       \n",fpcPre(pvHdl,1));
-   fprintf(pfOut,"%s                |  KEYWORD                                        \n",fpcPre(pvHdl,1));
-   fprintf(pfOut,"%s SUPPLEMENT is a string in double quotation marks (\"property\")    \n",fpcPre(pvHdl,1));
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," array          -> KEYWORD '[' value_list   ']'                   \n");
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  KEYWORD '[' object_list  ']'                   \n");
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  KEYWORD '[' overlay_list ']'                   \n");
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," value_list     -> value SEP value_list                           \n");
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  EMPTY                                          \n");
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," object_list    -> object SEP object_list                         \n");
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  EMPTY                                          \n");
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," overlay_list   -> overlay SEP overlay_list                       \n");
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  EMPTY                                          \n");
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," value          -> NUMBER | FLOAT | STRING | KEYWORD              \n");
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," A list of objects requires parenthesis to enclose the arguments  \n");
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                                                                  \n");
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," Property File Parser                                             \n");
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," properties     -> property_list                                  \n");
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," property_list  -> property SEP property_list                     \n");
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  EMPTY                                          \n");
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," property       -> keyword_list '=' SUPPLEMENT                    \n");
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," keyword_list   -> KEYWORD '.' keyword_list                       \n");
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  KEYWORD                                        \n");
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," SUPPLEMENT is a string in double quotation marks (\"property\")    \n");
    return(CLP_OK);
 }
 
@@ -2997,7 +2996,7 @@ static int siClpPrsAry(
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    int                           siCnt;
-   if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d ARY(%s[typlst])-OPN)\n",fpcPre(pvHdl,siLev),siLev,siPos,psArg->psStd->pcKyw);
+   if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d ARY(%s%ctyplst%c)-OPN)\n",fpcPre(pvHdl,siLev),siLev,siPos,psArg->psStd->pcKyw,C_SBO,C_SBC);
    psHdl->siTok=(psArg->psFix->siTyp==CLPTYP_STRING)?siClpScnSrc(pvHdl,CLPTOK_STR,psArg):siClpScnSrc(pvHdl,0,psArg);
    if (psHdl->siTok<0) return(psHdl->siTok);
    switch (psArg->psFix->siTyp) {
@@ -3013,7 +3012,7 @@ static int siClpPrsAry(
    if (psHdl->siTok==CLPTOK_SBC) {
       psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
       if (psHdl->siTok<0) return(psHdl->siTok);
-      if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d CNT=%d ARY(%s[typlst])-CLS)\n",fpcPre(pvHdl,siLev),siLev,siPos,siCnt,psArg->psStd->pcKyw);
+      if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d CNT=%d ARY(%s%ctyplst%c)-CLS)\n",fpcPre(pvHdl,siLev),siLev,siPos,siCnt,psArg->psStd->pcKyw,C_SBO,C_SBC);
       return(CLP_OK);
    } else {
       return CLPERR(psHdl,CLPERR_SYN,"Character '%c' missing (%s)",C_SBC,fpcPat(pvHdl,siLev));
@@ -4522,7 +4521,7 @@ static void vdClpPrnArg(
    if (pfOut!=NULL) {
       if (psHdl->isCas) {
          if (pcDft!=NULL && strlen(pcDft)) {
-            fprintf(pfOut,"%s %s (%s: %s) - %s (PROPERTY: [%s])\n",p,pcKyw,a,b,pcHlp,pcDft);
+            fprintf(pfOut,"%s %s (%s: %s) - %s (PROPERTY: %c%s%c)\n",p,pcKyw,a,b,pcHlp,C_SBO,pcDft,C_SBC);
          } else {
             fprintf(pfOut,"%s %s (%s: %s) - %s\n",p,pcKyw,a,b,pcHlp);
          }
@@ -4535,7 +4534,7 @@ static void vdClpPrnArg(
          for (i=0;i<siKwl;i++) fprintf(pfOut,"%c",toupper(pcKyw[i]));
          for (/*i=i*/;i<siLen;i++) fprintf(pfOut,"%c",tolower(pcKyw[i]));
          if (pcDft!=NULL && strlen(pcDft)) {
-            fprintf(pfOut," (%s: %s) - %s (PROPERTY: [%s])\n",a,b,pcHlp,pcDft);
+            fprintf(pfOut," (%s: %s) - %s (PROPERTY: %c%s%c)\n",a,b,pcHlp,C_SBO,pcDft,C_SBC);
          } else {
             fprintf(pfOut," (%s: %s) - %s\n",a,b,pcHlp);
          }
@@ -5180,8 +5179,8 @@ static int siClpPrnDoc(
                   fprintf(pfDoc,"SYNTAX: %s\n",apMan[m]->psStd->pcKyw);
                   fprintf(pfDoc,"-----------------------------------------------------------------------\n\n");
                   fprintf(pfDoc,".DESCRIPTION\n\n");
-                  fprintf(pfDoc,"%s\n\n",apMan[m]->psFix->pcMan);
-                  fprintf(pfDoc,"indexterm:[Constant %s]\n\n\n",apMan[m]->psStd->pcKyw);
+                  efprintf(pfDoc,"%s\n\n",apMan[m]->psFix->pcMan);
+                  fprintf(pfDoc,"indexterm:%cConstant %s%c\n\n\n",C_SBO,apMan[m]->psStd->pcKyw,C_CBC);
                   k++;
                }
             }
@@ -5227,11 +5226,11 @@ static int siClpPrnDoc(
                fprintf(pfDoc,"-----------------------------------------------------------------------\n\n");
                fprintf(pfDoc,".DESCRIPTION\n\n");
                if (apMan[m]->psFix->pcMan!=NULL && strlen(apMan[m]->psFix->pcMan)) {
-                  fprintf(pfDoc,"%s\n\n",apMan[m]->psFix->pcMan);
+                  efprintf(pfDoc,"%s\n\n",apMan[m]->psFix->pcMan);
                } else {
                   fprintf(pfDoc,"No detailed description available for this argument.\n\n");
                }
-               fprintf(pfDoc,"indexterm:[Argument %s]\n\n\n",apMan[m]->psStd->pcKyw);
+               fprintf(pfDoc,"indexterm:%cArgument %s%c\n\n\n",C_SBO,apMan[m]->psStd->pcKyw,C_SBC);
                if (apMan[m]->psDep!=NULL) {
                   siErr=siClpPrnDoc(pvHdl,pfDoc,siLev+1,isNbr,acNum,apMan[m],apMan[m]->psDep);
                   if (siErr<0) return(siErr);
@@ -5271,7 +5270,9 @@ static int siClpPrnPro(
          if (CLPISS_ARG(psHlp->psStd->uiFlg) && CLPISS_PRO(psHlp->psStd->uiFlg) && (pcArg==NULL || strxcmp(psHdl->isCas,psHlp->psStd->pcKyw,pcArg,0,0,FALSE)==0)) {
             if (psHlp->psFix->pcDft!=NULL && strlen(psHlp->psFix->pcDft)) {
                if ((isMan || (!CLPISS_CMD(psHlp->psStd->uiFlg))) && psHlp->psFix->pcMan!=NULL && strlen(psHlp->psFix->pcMan)) {
-                  fprintf(pfOut,"\n%c DESCRIPTION for %s.%s.%s.%s:\n %s %c\n",C_HSH,psHdl->pcOwn,psHdl->pcPgm,fpcPat(pvHdl,siLev),psHlp->psStd->pcKyw,psHlp->psFix->pcMan,C_HSH);
+                  fprintf(pfOut,"\n%c DESCRIPTION for %s.%s.%s.%s:\n",C_HSH,psHdl->pcOwn,psHdl->pcPgm,fpcPat(pvHdl,siLev),psHlp->psStd->pcKyw);
+                  efprintf(pfOut,"%s",psHlp->psFix->pcMan);
+                  fprintf(pfOut," %c\n",C_HSH);
                   isMan=TRUE;
                } else {
                   if (isMan) fprintf(pfOut,"\n");
@@ -5282,7 +5283,9 @@ static int siClpPrnPro(
             } else {
                if (isSet==FALSE) {
                   if ((isMan || (!CLPISS_CMD(psHlp->psStd->uiFlg))) && psHlp->psFix->pcMan!=NULL && strlen(psHlp->psFix->pcMan)) {
-                     fprintf(pfOut,"\n%c DESCRIPTION for %s.%s.%s.%s:\n %s %c\n",C_HSH,psHdl->pcOwn,psHdl->pcPgm,fpcPat(pvHdl,siLev),psHlp->psStd->pcKyw,psHlp->psFix->pcMan,C_HSH);
+                     fprintf(pfOut,"\n%c DESCRIPTION for %s.%s.%s.%s:\n",C_HSH,psHdl->pcOwn,psHdl->pcPgm,fpcPat(pvHdl,siLev),psHlp->psStd->pcKyw);
+                     efprintf(pfOut,"%s",psHlp->psFix->pcMan);
+                     fprintf(pfOut," %c\n",C_HSH);
                      isMan=TRUE;
                   } else {
                      if (isMan) fprintf(pfOut,"\n");

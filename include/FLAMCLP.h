@@ -168,7 +168,8 @@ Beside property and command line parsing the FLAMCLP offers an interactive
 syntax and help function. Additionally, you can use a very powerful
 function to generate single manual pages or complete user manuals,
 You can make use of the supported grammar and regular expressions
-(lexems).
+(lexems). Provided manual pages must be in ASCIIDOC and will be converted
+on EBCDIC systems  from the compile code page in the local code page.
 
 Only ClpParseCmd() uses the pvDat pointer. All other functions only work
 on the symbol table. This means if you don't use ClpParseCmd() the pointer
@@ -674,7 +675,7 @@ typedef struct ClpError {
  * @param[in]  pcOwn String constant containing the owner name for the root in the path ("de.limes")
  * @param[in]  pcPgm String constant containing the program name for the root in the path ("flcl")
  * @param[in]  pcCmd String constant containing the command name for the root in the path ("CONV")
- * @param[in]  pcMan String constant containing the manual page for this command
+ * @param[in]  pcMan String constant containing the manual page for this command (converted on EBCDIC systems)
  * @param[in]  pcHlp String constant containing the help message for this command
  * @param[in]  isOvl Boolean if TRUE the main table (psTab) is a overlay else it will be interpreted as object
  * @param[in]  psTab Pointer to the parameter table defining the semantic of the command line
@@ -685,7 +686,7 @@ typedef struct ClpError {
  * @param[in]  pfScn Pointer to the file used for scanner trace or NULL for no printing
  * @param[in]  pfPrs Pointer to the file used for parser trace or NULL for no printing
  * @param[in]  pfBld Pointer to the file used for builder trace or NULL for no printing
- * @param[in]  pcDep String used for hierarchical print outs (help, errors, trace (recommended "--|"))
+ * @param[in]  pcDep String used for hierarchical print outs (help, errors, trace (recommended S_IDT="--|"))
  * @param[in]  pcOpt String used to separate options (recommended "/")
  * @param[in]  pcEnt String used to separate list entries (recommended ",")
  * @param[out] psErr Pointer to the error structure. If the pointer != NULL the structure is filled with pointers to

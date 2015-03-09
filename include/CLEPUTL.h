@@ -58,6 +58,19 @@
 #  define L_filnam         (1025)
 #endif
 
+#ifdef __WIN__
+extern int win_setenv(const char* name, const char* value);
+extern int win_unsetenv(const char* name);
+extern int win_snprintf(char *buffer, size_t size, const char *format, ...);
+#  define snprintf            win_snprintf
+#  define GETENV(name)        getenv((name))
+#  define SETENV(name, value) win_setenv((name), (value))
+#  define UNSETENV(name)      win_unsetenv((name))
+#else
+#  define GETENV(name)        getenv((name))
+#  define SETENV(name, value) setenv((name), (value), 1)
+#  define UNSETENV(name)      unsetenv((name))
+#endif
 
 #ifdef __EBCDIC__
    extern int init_char(int* p);
@@ -116,7 +129,10 @@
 #  define S_CBC                 ((gs_cbc[0])?gs_cbc:init_string(gs_cbc))
 #  define S_TLD                 ((gs_tld[0])?gs_tld:init_string(gs_tld))
 #  define S_SVB                 ((gs_svb[0])?gs_svb:init_string(gs_svb))
-
+#  define S_IDT                 ((gs_idt[0])?gs_idt:init_string(gs_idt))
+#  define esnprintf             ebcdic_snprintf
+#  define esprintf              ebcdic_sprintf
+#  define efprintf              ebcdic_fprintf
 #else
 #  define C_EXC              '!'
 #  define C_HSH              '#'
@@ -145,26 +161,16 @@
 #  define S_CBC              "}"
 #  define S_TLD              "~"
 #  define S_SVB              "=|"
+#  define S_IDT              "--|"
+#  define esnprintf          snprintf
+#  define esprintf           sprintf
+#  define efprintf           fprintf
 #endif
 
 #define isKyw(c) (isalnum(c) || (c)=='_' || (c)=='-')
 
 #define ISDDNAME(p)     (toupper((p)[0])=='D' && toupper((p)[1])=='D' && (p)[2]==':')
 #define ISPATHNAME(p)   (strchr((p),'/')!=NULL)
-
-#ifdef __WIN__
-extern int win_setenv(const char* name, const char* value);
-extern int win_unsetenv(const char* name);
-extern int win_snprintf(char *buffer, size_t size, const char *format, ...);
-#  define snprintf            win_snprintf
-#  define GETENV(name)        getenv((name))
-#  define SETENV(name, value) win_setenv((name), (value))
-#  define UNSETENV(name)      win_unsetenv((name))
-#else
-#  define GETENV(name)        getenv((name))
-#  define SETENV(name, value) setenv((name), (value), 1)
-#  define UNSETENV(name)      unsetenv((name))
-#endif
 
 /* Definition of return/condition/exit codes **************************/
 

@@ -586,18 +586,18 @@ typedef struct CleCommand {
  * @param[in]  siMkl Integer defining the minimal key word length (siMkl<=0 --> full length, no auto abbreviation)
  * @param[in]  pfOut File pointer for help and error messages (if not defined stderr will be used)
  * @param[in]  pfTrc Default trace file if no trace file is defined with the configuration data management (recommended: NULL, stdout or stderr)
- * @param[in]  pcDep String to visualize hierarchies (recommended: "--|")
+ * @param[in]  pcDep String to visualize hierarchies (recommended: S_IDT="--|")
  * @param[in]  pcOpt String to separate options (recommended: "/")
  * @param[in]  pcEnt String to separate list entries (recommended: ",")
- * @param[in]  pcLic String containing the license information for this program (used by built-in function LICENSE)
- * @param[in]  pcVsn String containing the version information for this program (used by built-in function VERSION)
- * @param[in]  pcAbo String containing the about message for this program (used by built-in function ABOUT)
- * @param[in]  pcHlp Short help message for the whole program
- * @param[in]  pcMan Manual page for the whole program (as == 2.1 DESCRIPTION == in ASCIIDOC format, Level 3-4 can be used for sub chapters)
- * @param[in]  pcCov Cover sheets for documentation generation (Header (Title, Autor, Revision) and Preample in ASCIIDOC format)
- * @param[in]  pcGls Glossary for documentation generation (in ASCIIDOC format (term:: explanation)),
+ * @param[in]  pcLic String containing the license information for this program (used by built-in function LICENSE - not converted on EBCDIC systems)
+ * @param[in]  pcVsn String containing the version information for this program (used by built-in function VERSION - not converted on EBCDIC systems)
+ * @param[in]  pcAbo String containing the about message for this program (used by built-in function ABOUT - not converted on EBCDIC systems)
+ * @param[in]  pcHlp Short help message for the whole program (not converted on EBCDIC systems)
+ * @param[in]  pcMan Manual page for the whole program (as == 2.1 DESCRIPTION == in ASCIIDOC format, Level 3-4 can be used for sub chapters - converted on EBCDIC systems)
+ * @param[in]  pcCov Cover sheets for documentation generation (Header (Title, Autor, Revision) and Preample in ASCIIDOC format - converted on EBCDIC systems)
+ * @param[in]  pcGls Glossary for documentation generation (in ASCIIDOC format (term:: explanation) - converted on EBCDIC systems),
  *             if NULL then no glossary are generated, if "" then only the FLAMCLP glossary is added)
- * @param[in]  pcFin Final pages for documentation generation (colophon, copyright, closing aso. in ASCIIDOC format)
+ * @param[in]  pcFin Final pages for documentation generation (colophon, copyright, closing aso. in ASCIIDOC format - converted on EBCDIC systems)
  * @param[in]  pcDef Default command or built-in function, which is executed if the first keyword (argv[1]) don't match (if NULL then no default)
  * @param[in]  pfMsg Pointer to a function which prints a message for an reason code (use to generate the corresponding appendix)\n
  *

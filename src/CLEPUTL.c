@@ -67,7 +67,8 @@ int        gc_cbc=0;
 char       gs_cbc[2]={0,0};
 int        gc_tld=0;
 char       gs_tld[2]={0,0};
-char       gs_svb[4]={0,0,0,0}
+char       gs_svb[4]={0,0,0,0};
+char       gs_idt[4]={0,0,0,0};
 
 extern int init_char(int* p) {
    unsigned int ccsid=mapcdstr(mapl2c(TRUE));
@@ -320,7 +321,11 @@ extern int init_char(int* p) {
    }
    gs_svb[0]='=';
    gs_svb[1]=gs_vbr[0];
-   gs-svb[2]=0x00;
+   gs_svb[2]=0x00;
+   gs_idt[0]='-';
+   gs_idt[1]='-';
+   gs_idt[2]=gs_vbr[0];
+   gs_idt[3]=0x00;
 
    return(*p);
 }
@@ -328,6 +333,71 @@ extern char* init_string(char* p) {
    init_char(&gc_exc);
    return(p);
 }
+
+extern int ebcdic_snprintf(char* string, size_t size, const char* format, ...) {
+   va_list  argv;
+   char*    p;
+   int      r;
+   va_start(argv, format);
+   r = vsnprintf(string, size, format, argv);
+   va_end(argv);
+   for (p=string;*p;p++) {
+      switch (*p) {
+      case '!' : *p=C_EXC; break;
+      case '$' : *p=C_DOL; break;
+      case '#' : *p=C_HSH; break;
+      case '@' : *p=C_ATS; break;
+      case '[' : *p=C_SBO; break;
+      case '\\': *p=C_BSL; break;
+      case ']' : *p=C_SBC; break;
+      case '^' : *p=C_CRT; break;
+      case '`' : *p=C_GRV; break;
+      case '{' : *p=C_CBO; break;
+      case '|' : *p=C_VBR; break;
+      case '}' : *p=C_CBC; break;
+      case '~' : *p=C_TLD; break;
+      }
+   }
+   return(r);
+}
+
+extern int ebcdic_sprintf(char* string, const char* format, ...) {
+   va_list  argv;
+   char*    p;
+   int      r;
+   va_start(argv, format);
+   r = vsprintf(string, format, argv);
+   va_end(argv);
+   for (p=string;*p;p++) {
+      switch (*p) {
+      case '!' : *p=C_EXC; break;
+      case '$' : *p=C_DOL; break;
+      case '#' : *p=C_HSH; break;
+      case '@' : *p=C_ATS; break;
+      case '[' : *p=C_SBO; break;
+      case '\\': *p=C_BSL; break;
+      case ']' : *p=C_SBC; break;
+      case '^' : *p=C_CRT; break;
+      case '`' : *p=C_GRV; break;
+      case '{' : *p=C_CBO; break;
+      case '|' : *p=C_VBR; break;
+      case '}' : *p=C_CBC; break;
+      case '~' : *p=C_TLD; break;
+      }
+   }
+   return(r);
+}
+
+extern int ebcdic_fprintf(FILE* file, const char* format, ...) {
+   va_list  argv;
+   char     tmp[65536];//TODO: was ist wenn zu klein???
+   char*    p;
+   va_start(argv, format);
+   ebcdic_snprintf(tmp,sizeof(tmp),format,argv);
+   va_end(argv);
+   return(fprintf(file,"%s",tmp));
+}
+
 #endif /*__EBCDIC*/
 
 #ifdef __WIN__
