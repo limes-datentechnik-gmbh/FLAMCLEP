@@ -67,7 +67,7 @@ int        gc_cbc=0;
 char       gs_cbc[2]={0,0};
 int        gc_tld=0;
 char       gs_tld[2]={0,0};
-char       gs_svb[4]={0,0,0,0}
+char       gs_svb[4]={0,0,0,0};
 
 extern int init_char(int* p) {
    unsigned int ccsid=mapcdstr(mapl2c(TRUE));
@@ -320,7 +320,7 @@ extern int init_char(int* p) {
    }
    gs_svb[0]='=';
    gs_svb[1]=gs_vbr[0];
-   gs-svb[2]=0x00;
+   gs_svb[2]=0x00;
 
    return(*p);
 }
