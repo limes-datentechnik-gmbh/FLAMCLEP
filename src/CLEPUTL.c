@@ -326,7 +326,6 @@ extern int init_char(int* p) {
    gs_idt[1]='-';
    gs_idt[2]=gs_vbr[0];
    gs_idt[3]=0x00;
-
    return(*p);
 }
 extern char* init_string(char* p) {
