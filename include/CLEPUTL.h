@@ -105,6 +105,7 @@ extern int win_snprintf(char *buffer, size_t size, const char *format, ...);
    extern char gs_cbc[2];
    extern char gs_tld[2];
    extern char gs_svb[4];
+   extern char gs_sbs[4];
    extern char gs_idt[4];
 #  define C_EXC                 ((gc_exc)?gc_exc:init_char(&gc_exc))
 #  define C_HSH                 ((gc_hsh)?gc_hsh:init_char(&gc_hsh))
@@ -133,6 +134,7 @@ extern int win_snprintf(char *buffer, size_t size, const char *format, ...);
 #  define S_CBC                 ((gs_cbc[0])?gs_cbc:init_string(gs_cbc))
 #  define S_TLD                 ((gs_tld[0])?gs_tld:init_string(gs_tld))
 #  define S_SVB                 ((gs_svb[0])?gs_svb:init_string(gs_svb))
+#  define S_SBS                 ((gs_sbs[0])?gs_sbs:init_string(gs_sbs))
 #  define S_IDT                 ((gs_idt[0])?gs_idt:init_string(gs_idt))
 #  define esnprintf             ebcdic_snprintf
 #  define esprintf              ebcdic_sprintf
@@ -165,6 +167,7 @@ extern int win_snprintf(char *buffer, size_t size, const char *format, ...);
 #  define S_CBC              "}"
 #  define S_TLD              "~"
 #  define S_SVB              "=|"
+#  define S_SBS              "/\\"
 #  define S_IDT              "--|"
 #  define esnprintf          snprintf
 #  define esprintf           sprintf

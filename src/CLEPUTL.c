@@ -68,6 +68,7 @@ char       gs_cbc[2]={0,0};
 int        gc_tld=0;
 char       gs_tld[2]={0,0};
 char       gs_svb[4]={0,0,0,0};
+char       gs_sbs[4]={0,0,0,0};
 char       gs_idt[4]={0,0,0,0};
 
 extern int init_char(int* p) {
@@ -322,6 +323,9 @@ extern int init_char(int* p) {
    gs_svb[0]='=';
    gs_svb[1]=gs_vbr[0];
    gs_svb[2]=0x00;
+   gs_sbs[0]='/';
+   gs_sbs[1]=gs_bls[0];
+   gs_sbs[2]=0x00;
    gs_idt[0]='-';
    gs_idt[1]='-';
    gs_idt[2]=gs_vbr[0];
@@ -414,7 +418,7 @@ extern char* homedir(int flag, const int size, char* buffer) {
    buffer[0]=0x00;
    if (SHGetFolderPath(NULL,CSIDL_PROFILE,NULL,0,path)==S_OK) {
       if (flag) {
-         snprintf(buffer,size,"%s\\",path);
+         snprintf(buffer,size,"%s%c",path,C_BSL);
       } else {
          snprintf(buffer,size,"%s",path);
       }
