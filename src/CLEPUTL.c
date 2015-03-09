@@ -67,6 +67,7 @@ int        gc_cbc=0;
 char       gs_cbc[2]={0,0};
 int        gc_tld=0;
 char       gs_tld[2]={0,0};
+char       gs_svb[4]={0,0,0,0}
 
 extern int init_char(int* p) {
    unsigned int ccsid=mapcdstr(mapl2c(TRUE));
@@ -317,6 +318,10 @@ extern int init_char(int* p) {
       gc_tld='~'; gs_tld[0]='~'; gs_tld[1]=0x00;
       break;
    }
+   gs_svb[0]='=';
+   gs_svb[1]=gs_vbr[0];
+   gs-svb[2]=0x00;
+
    return(*p);
 }
 extern char* init_string(char* p) {
@@ -1193,10 +1198,7 @@ extern void rplenvar(char* name,const size_t size,const char opn, const char cls
 
 extern char* mapfil(char* file,int size) {
    int j,i;
-   rplchar(file,size,'+',"<HOME>");
-   if ((('0'&0x000000FF)==0x00000030)) {
-      rplchar(file,size,'~',"<HOME>");
-   }
+   rplchar(file,size,C_TLD,"<HOME>");
    rplenvar(file,size,'<','>');
    for (j=i=0;file[i];i++) {
 #ifdef __WIN__

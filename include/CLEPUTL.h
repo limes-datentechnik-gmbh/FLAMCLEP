@@ -88,6 +88,7 @@
    extern char gs_vbr[2];
    extern char gs_cbc[2];
    extern char gs_tld[2];
+   extern char gs_svb[4];
 #  define C_EXC                 ((gc_exc)?gc_exc:init_char(&gc_exc))
 #  define C_HSH                 ((gc_hsh)?gc_hsh:init_char(&gc_hsh))
 #  define C_DOL                 ((gc_dol)?gc_dol:init_char(&gc_dol))
@@ -114,6 +115,8 @@
 #  define S_VBR                 ((gs_vbr[0])?gs_vbr:init_string(gs_vbr))
 #  define S_CBC                 ((gs_cbc[0])?gs_cbc:init_string(gs_cbc))
 #  define S_TLD                 ((gs_tld[0])?gs_tld:init_string(gs_tld))
+#  define S_SVB                 ((gs_svb[0])?gs_svb:init_string(gs_svb))
+
 #else
 #  define C_EXC              '!'
 #  define C_HSH              '#'
@@ -141,6 +144,7 @@
 #  define S_VBR              "|"
 #  define S_CBC              "}"
 #  define S_TLD              "~"
+#  define S_SVB              "=|"
 #endif
 
 #define isKyw(c) (isalnum(c) || (c)=='_' || (c)=='-')
@@ -235,7 +239,7 @@ extern void rplchar(char* name,const size_t size,const char chr, const char* val
 extern void rplenvar(char* name,size_t size,const char opn, const char cls);
 
 /**
- * Replace '+' with "<HOME>" and all enviroment variables enclosed with '<' and '>'
+ * Replace '~' with "<HOME>" and all environment variables enclosed with '<' and '>'
  * @param file string for replacement
  * @param size size of replacement string
  * @return pointer to file
@@ -243,7 +247,7 @@ extern void rplenvar(char* name,size_t size,const char opn, const char cls);
 extern char* mapfil(char* file,int size);
 
 /**
- * Replace '+' with "<HOME>" and all environment variables enclosed with '<' and '>'
+ * Replace '~' with "<HOME>" and all environment variables enclosed with '<' and '>'
  * @param dest string for replacement
  * @param size size of replacement string
  * @param source original string
