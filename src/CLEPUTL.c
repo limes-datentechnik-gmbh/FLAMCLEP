@@ -393,12 +393,24 @@ extern int ebcdic_sprintf(char* string, const char* format, ...) {
 
 extern int ebcdic_fprintf(FILE* file, const char* format, ...) {
    va_list  argv;
-   char     tmp[65536];//TODO: was ist wenn zu klein???
-   char*    p;
+   char*    help;
+   char*    temp;
+   size_t   size=2*strlen(format);
+   int      r;
+   temp=(char*)malloc(size);
+   if (temp==NULL) return(0);
    va_start(argv, format);
-   ebcdic_snprintf(tmp,sizeof(tmp),format,argv);
+   r=ebcdic_snprintf(temp,size,format,argv);
+   while (r >= size-1) {
+      size*=2;
+      help=(char*)realloc(temp,size);
+      if (help!=NULL) temp=help; else break;
+      r=ebcdic_snprintf(temp,size,format,argv);
+   }
    va_end(argv);
-   return(fprintf(file,"%s",tmp));
+   r=fprintf(file,"%s",temp);
+   free(temp);
+   return(r);
 }
 
 #endif /*__EBCDIC*/
