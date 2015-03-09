@@ -31,6 +31,7 @@
  * TASK:0000086 Fehlermeldungen ueberarbeiten (Zentralisierung)
  * TASK:0000086 Wide character support fuer command files einbauen
  * TASK:0000086 Mehrsprachigkeit einbauen
+ * TODO: Replace '[]' with C_SBO/SBC in literals
  */
 /* Standard-Includes **************************************************/
 
@@ -707,7 +708,7 @@ EVALUATE:
                fprintf(pfOut,"Syntax for built-in function 'SYNTAX' not valid\n");
                for (i=0;psTab[i].pcKyw!=NULL ;i++) {
                   if (psTab[i].siFlg) {
-                     fprintf(pfOut,"%s %s SYNTAX %s[.path] [DEPTH1 | DEPTH2 | ... | DEPTH9 | ALL]\n",pcDep,argv[0],psTab[i].pcKyw);
+                     fprintf(pfOut,"%s %s SYNTAX %s[.path] [DEPTH1 / DEPTH2 / ... / DEPTH9 / ALL]\n",pcDep,argv[0],psTab[i].pcKyw);
                   }
                }
                ERROR(CLERTC_CMD);
@@ -716,7 +717,7 @@ EVALUATE:
             fprintf(pfOut,"Syntax for built-in function 'SYNTAX' not valid\n");
             for (i=0;psTab[i].pcKyw!=NULL ;i++) {
                if (psTab[i].siFlg) {
-                  fprintf(pfOut,"%s %s SYNTAX %s[.path] [DEPTH1 | DEPTH2 | ... | DEPTH9 | ALL]\n",pcDep,argv[0],psTab[i].pcKyw);
+                  fprintf(pfOut,"%s %s SYNTAX %s[.path] [DEPTH1 / DEPTH2 / ... / DEPTH9 / ALL]\n",pcDep,argv[0],psTab[i].pcKyw);
                }
             }
             ERROR(CLERTC_CMD);
@@ -759,7 +760,7 @@ EVALUATE:
       fprintf(pfOut,"Syntax for built-in function 'SYNTAX' not valid\n");
       for (i=0;psTab[i].pcKyw!=NULL ;i++) {
          if (psTab[i].siFlg) {
-            fprintf(pfOut,"%s %s SYNTAX %s[.path] [DEPTH1 | DEPTH2 | ... | DEPTH9 | ALL]\n",pcDep,argv[0],psTab[i].pcKyw);
+            fprintf(pfOut,"%s %s SYNTAX %s[.path] [DEPTH1 / DEPTH2 / ... / DEPTH9 / ALL]\n",pcDep,argv[0],psTab[i].pcKyw);
          }
       }
       ERROR(CLERTC_CMD);
@@ -804,7 +805,7 @@ EVALUATE:
                fprintf(pfOut,"Syntax for built-in function 'HELP' not valid\n");
                for (i=0;psTab[i].pcKyw!=NULL ;i++) {
                   if (psTab[i].siFlg) {
-                     fprintf(pfOut,"%s %s HELP %s[.path] [DEPTH1 | DEPTH2 | ... | DEPTH9 | ALL] [MAN]\n",pcDep,argv[0],psTab[i].pcKyw);
+                     fprintf(pfOut,"%s %s HELP %s[.path] [DEPTH1 / DEPTH2 / ... / DEPTH9 / ALL] [MAN]\n",pcDep,argv[0],psTab[i].pcKyw);
                   }
                }
                ERROR(CLERTC_CMD);
@@ -813,7 +814,7 @@ EVALUATE:
             fprintf(pfOut,"Syntax for built-in function 'HELP' not valid\n");
             for (i=0;psTab[i].pcKyw!=NULL ;i++) {
                if (psTab[i].siFlg) {
-                  fprintf(pfOut,"%s %s HELP %s[.path] [DEPTH1 | DEPTH2 | ... | DEPTH9 | ALL] [MAN]\n",pcDep,argv[0],psTab[i].pcKyw);
+                  fprintf(pfOut,"%s %s HELP %s[.path] [DEPTH1 / DEPTH2 / ... / DEPTH9 / ALL] [MAN]\n",pcDep,argv[0],psTab[i].pcKyw);
                }
             }
             ERROR(CLERTC_CMD);
@@ -866,7 +867,7 @@ EVALUATE:
       fprintf(pfOut,"Syntax for built-in function 'HELP' not valid\n");
       for (i=0;psTab[i].pcKyw!=NULL ;i++) {
          if (psTab[i].siFlg) {
-            fprintf(pfOut,"%s %s HELP %s[.path] [DEPTH1 | DEPTH2 | ... | DEPTH9 | ALL] [MAN]\n",pcDep,argv[0],psTab[i].pcKyw);
+            fprintf(pfOut,"%s %s HELP %s[.path] [DEPTH1 / DEPTH2 / ... / DEPTH9 / ALL] [MAN]\n",pcDep,argv[0],psTab[i].pcKyw);
          }
       }
       ERROR(CLERTC_CMD);
@@ -904,133 +905,133 @@ EVALUATE:
          }
          if (strxcmp(isCas,pcCmd,"SYNTAX",0,0,FALSE)==0 || isAll) {
             if (isMan==FALSE) fprintf(pfOut,"Manual page for built-in function 'SYNTAX':\n\n");
-            vdCleManFunction(pfDoc,"~","4.1" ,"SYNTAX"  ,HLP_CLE_SYNTAX  ,acOwn,pcPgm,SYN_CLE_SYNTAX,MAN_CLE_SYNTAX,isMan,TRUE);
+            vdCleManFunction(pfDoc,S_TLD,"4.1" ,"SYNTAX"  ,HLP_CLE_SYNTAX  ,acOwn,pcPgm,SYN_CLE_SYNTAX,MAN_CLE_SYNTAX,isMan,TRUE);
             if (isMan==TRUE) fprintf(pfOut,"Manual page for built-in function 'SYNTAX' successfully written to file (%s)\n",acFil);
             if (isAll==FALSE) ERROR(CLERTC_OK);
          }
          if (strxcmp(isCas,pcCmd,"HELP",0,0,FALSE)==0 || isAll) {
             if (isMan==FALSE) fprintf(pfOut,"Manual page for built-in function 'HELP':\n\n");
-            vdCleManFunction(pfDoc,"~","4.2" ,"HELP"    ,HLP_CLE_HELP    ,acOwn,pcPgm,SYN_CLE_HELP,MAN_CLE_HELP,isMan,TRUE);
+            vdCleManFunction(pfDoc,S_TLD,"4.2" ,"HELP"    ,HLP_CLE_HELP    ,acOwn,pcPgm,SYN_CLE_HELP,MAN_CLE_HELP,isMan,TRUE);
             if (isMan==TRUE) fprintf(pfOut,"Manual page for built-in function 'HELP' successfully written to file (%s)\n",acFil);
             if (isAll==FALSE) ERROR(CLERTC_OK);
          }
          if (strxcmp(isCas,pcCmd,"MANPAGE",0,0,FALSE)==0 || isAll) {
             if (isMan==FALSE) fprintf(pfOut,"Manual page for built-in function 'MANPAGE':\n\n");
-            vdCleManFunction(pfDoc,"~","4.3" ,"MANPAGE" ,HLP_CLE_MANPAGE ,acOwn,pcPgm,SYN_CLE_MANPAGE,MAN_CLE_MANPAGE,isMan,TRUE);
+            vdCleManFunction(pfDoc,S_TLD,"4.3" ,"MANPAGE" ,HLP_CLE_MANPAGE ,acOwn,pcPgm,SYN_CLE_MANPAGE,MAN_CLE_MANPAGE,isMan,TRUE);
             if (isMan==TRUE) fprintf(pfOut,"Manual page for built-in function 'MANPAGE' successfully written to file (%s)\n",acFil);
             if (isAll==FALSE) ERROR(CLERTC_OK);
          }
          if (strxcmp(isCas,pcCmd,"GENDOCU",0,0,FALSE)==0 || isAll) {
             if (isMan==FALSE) fprintf(pfOut,"Manual page for built-in function 'GENDOCU':\n\n");
-            vdCleManFunction(pfDoc,"~","4.4" ,"GENDOCU" ,HLP_CLE_GENDOCU ,acOwn,pcPgm,SYN_CLE_GENDOCU,MAN_CLE_GENDOCU,isMan,TRUE);
+            vdCleManFunction(pfDoc,S_TLD,"4.4" ,"GENDOCU" ,HLP_CLE_GENDOCU ,acOwn,pcPgm,SYN_CLE_GENDOCU,MAN_CLE_GENDOCU,isMan,TRUE);
             if (isMan==TRUE) fprintf(pfOut,"Manual page for built-in function 'GENDOCU' successfully written to file (%s)\n",acFil);
             if (isAll==FALSE) ERROR(CLERTC_OK);
          }
          if (strxcmp(isCas,pcCmd,"GENPROP",0,0,FALSE)==0 || isAll) {
             if (isMan==FALSE) fprintf(pfOut,"Manual page for built-in function 'GENPROP':\n\n");
-            vdCleManFunction(pfDoc,"~","4.5" ,"GENPROP" ,HLP_CLE_GENPROP ,acOwn,pcPgm,SYN_CLE_GENPROP,MAN_CLE_GENPROP,isMan,TRUE);
+            vdCleManFunction(pfDoc,S_TLD,"4.5" ,"GENPROP" ,HLP_CLE_GENPROP ,acOwn,pcPgm,SYN_CLE_GENPROP,MAN_CLE_GENPROP,isMan,TRUE);
             if (isMan==TRUE) fprintf(pfOut,"Manual page for built-in function 'GENPROP' successfully written to file (%s)\n",acFil);
             if (isAll==FALSE) ERROR(CLERTC_OK);
          }
          if (strxcmp(isCas,pcCmd,"SETPROP",0,0,FALSE)==0 || isAll) {
             if (isMan==FALSE) fprintf(pfOut,"Manual page for built-in function 'SETPROP':\n\n");
-            vdCleManFunction(pfDoc,"~","4.6" ,"SETPROP" ,HLP_CLE_SETPROP ,acOwn,pcPgm,SYN_CLE_SETPROP,MAN_CLE_SETPROP,isMan,TRUE);
+            vdCleManFunction(pfDoc,S_TLD,"4.6" ,"SETPROP" ,HLP_CLE_SETPROP ,acOwn,pcPgm,SYN_CLE_SETPROP,MAN_CLE_SETPROP,isMan,TRUE);
             if (isMan==TRUE) fprintf(pfOut,"Manual page for built-in function 'SETPROP' successfully written to file (%s)\n",acFil);
             if (isAll==FALSE) ERROR(CLERTC_OK);
          }
          if (strxcmp(isCas,pcCmd,"CHGPROP",0,0,FALSE)==0 || isAll) {
             if (isMan==FALSE) fprintf(pfOut,"Manual page for built-in function 'CHGPROP':\n\n");
-            vdCleManFunction(pfDoc,"~","4.7" ,"CHGPROP" ,HLP_CLE_CHGPROP ,acOwn,pcPgm,SYN_CLE_CHGPROP,MAN_CLE_CHGPROP,isMan,TRUE);
+            vdCleManFunction(pfDoc,S_TLD,"4.7" ,"CHGPROP" ,HLP_CLE_CHGPROP ,acOwn,pcPgm,SYN_CLE_CHGPROP,MAN_CLE_CHGPROP,isMan,TRUE);
             if (isMan==TRUE) fprintf(pfOut,"Manual page for built-in function 'CHGPROP' successfully written to file (%s)\n",acFil);
             if (isAll==FALSE) ERROR(CLERTC_OK);
          }
          if (strxcmp(isCas,pcCmd,"DELPROP",0,0,FALSE)==0 || isAll) {
             if (isMan==FALSE) fprintf(pfOut,"Manual page for built-in function 'DELPROP':\n\n");
-            vdCleManFunction(pfDoc,"~","4.8" ,"DELPROP" ,HLP_CLE_DELPROP ,acOwn,pcPgm,SYN_CLE_DELPROP,MAN_CLE_DELPROP,isMan,TRUE);
+            vdCleManFunction(pfDoc,S_TLD,"4.8" ,"DELPROP" ,HLP_CLE_DELPROP ,acOwn,pcPgm,SYN_CLE_DELPROP,MAN_CLE_DELPROP,isMan,TRUE);
             if (isMan==TRUE) fprintf(pfOut,"Manual page for built-in function 'DELPROP' successfully written to file (%s)\n",acFil);
             if (isAll==FALSE) ERROR(CLERTC_OK);
          }
          if (strxcmp(isCas,pcCmd,"GETPROP",0,0,FALSE)==0 || isAll) {
             if (isMan==FALSE) fprintf(pfOut,"Manual page for built-in function 'GETPROP':\n\n");
-            vdCleManFunction(pfDoc,"~","4.9" ,"GETPROP" ,HLP_CLE_GETPROP ,acOwn,pcPgm,SYN_CLE_GETPROP,MAN_CLE_GETPROP,isMan,TRUE);
+            vdCleManFunction(pfDoc,S_TLD,"4.9" ,"GETPROP" ,HLP_CLE_GETPROP ,acOwn,pcPgm,SYN_CLE_GETPROP,MAN_CLE_GETPROP,isMan,TRUE);
             if (isMan==TRUE) fprintf(pfOut,"Manual page for built-in function 'GETPROP' successfully written to file (%s)\n",acFil);
             if (isAll==FALSE) ERROR(CLERTC_OK);
          }
          if (strxcmp(isCas,pcCmd,"SETOWNER",0,0,FALSE)==0 || isAll) {
             if (isMan==FALSE) fprintf(pfOut,"Manual page for built-in function 'SETOWNER':\n\n");
-            vdCleManFunction(pfDoc,"~","4.10" ,"SETOWNER",HLP_CLE_SETOWNER,acOwn,pcPgm,SYN_CLE_SETOWNER,MAN_CLE_SETOWNER,isMan,TRUE);
+            vdCleManFunction(pfDoc,S_TLD,"4.10" ,"SETOWNER",HLP_CLE_SETOWNER,acOwn,pcPgm,SYN_CLE_SETOWNER,MAN_CLE_SETOWNER,isMan,TRUE);
             if (isMan==TRUE) fprintf(pfOut,"Manual page for built-in function 'SETOWNER' successfully written to file (%s)\n",acFil);
             if (isAll==FALSE) ERROR(CLERTC_OK);
          }
          if (strxcmp(isCas,pcCmd,"GETOWNER",0,0,FALSE)==0 || isAll) {
             if (isMan==FALSE) fprintf(pfOut,"Manual page for built-in function 'GETOWNER':\n\n");
-            vdCleManFunction(pfDoc,"~","4.11","GETOWNER",HLP_CLE_GETOWNER,acOwn,pcPgm,SYN_CLE_GETOWNER,MAN_CLE_GETOWNER,isMan,TRUE);
+            vdCleManFunction(pfDoc,S_TLD,"4.11","GETOWNER",HLP_CLE_GETOWNER,acOwn,pcPgm,SYN_CLE_GETOWNER,MAN_CLE_GETOWNER,isMan,TRUE);
             if (isMan==TRUE) fprintf(pfOut,"Manual page for built-in function 'GETOWNER' successfully written to file (%s)\n",acFil);
             if (isAll==FALSE) ERROR(CLERTC_OK);
          }
          if (strxcmp(isCas,pcCmd,"SETENV",0,0,FALSE)==0 || isAll) {
             if (isMan==FALSE) fprintf(pfOut,"Manual page for built-in function 'SETENV':\n\n");
-            vdCleManFunction(pfDoc,"~","4.12" ,"SETENV",HLP_CLE_SETENV,acOwn,pcPgm,SYN_CLE_SETENV,MAN_CLE_SETENV,isMan,TRUE);
+            vdCleManFunction(pfDoc,S_TLD,"4.12" ,"SETENV",HLP_CLE_SETENV,acOwn,pcPgm,SYN_CLE_SETENV,MAN_CLE_SETENV,isMan,TRUE);
             if (isMan==TRUE) fprintf(pfOut,"Manual page for built-in function 'SETENV' successfully written to file (%s)\n",acFil);
             if (isAll==FALSE) ERROR(CLERTC_OK);
          }
          if (strxcmp(isCas,pcCmd,"GETENV",0,0,FALSE)==0 || isAll) {
             if (isMan==FALSE) fprintf(pfOut,"Manual page for built-in function 'GETENV':\n\n");
-            vdCleManFunction(pfDoc,"~","4.13" ,"GETENV",HLP_CLE_GETENV,acOwn,pcPgm,SYN_CLE_GETENV,MAN_CLE_GETENV,isMan,TRUE);
+            vdCleManFunction(pfDoc,S_TLD,"4.13" ,"GETENV",HLP_CLE_GETENV,acOwn,pcPgm,SYN_CLE_GETENV,MAN_CLE_GETENV,isMan,TRUE);
             if (isMan==TRUE) fprintf(pfOut,"Manual page for built-in function 'GETENV' successfully written to file (%s)\n",acFil);
             if (isAll==FALSE) ERROR(CLERTC_OK);
          }
          if (strxcmp(isCas,pcCmd,"DELENV",0,0,FALSE)==0 || isAll) {
             if (isMan==FALSE) fprintf(pfOut,"Manual page for built-in function 'DELENV':\n\n");
-            vdCleManFunction(pfDoc,"~","4.14" ,"DELENV",HLP_CLE_DELENV,acOwn,pcPgm,SYN_CLE_DELENV,MAN_CLE_DELENV,isMan,TRUE);
+            vdCleManFunction(pfDoc,S_TLD,"4.14" ,"DELENV",HLP_CLE_DELENV,acOwn,pcPgm,SYN_CLE_DELENV,MAN_CLE_DELENV,isMan,TRUE);
             if (isMan==TRUE) fprintf(pfOut,"Manual page for built-in function 'DELENV' successfully written to file (%s)\n",acFil);
             if (isAll==FALSE) ERROR(CLERTC_OK);
          }
          if (strxcmp(isCas,pcCmd,"TRACE",0,0,FALSE)==0 || isAll) {
             if (isMan==FALSE) fprintf(pfOut,"Manual page for built-in function 'TRACE':\n\n");
-            vdCleManFunction(pfDoc,"~","4.15","TRACE"   ,HLP_CLE_TRACE   ,acOwn,pcPgm,SYN_CLE_TRACE,MAN_CLE_TRACE,isMan,TRUE);
+            vdCleManFunction(pfDoc,S_TLD,"4.15","TRACE"   ,HLP_CLE_TRACE   ,acOwn,pcPgm,SYN_CLE_TRACE,MAN_CLE_TRACE,isMan,TRUE);
             if (isMan==TRUE) fprintf(pfOut,"Manual page for built-in function 'TRACE' successfully written to file (%s)\n",acFil);
             if (isAll==FALSE) ERROR(CLERTC_OK);
          }
          if (strxcmp(isCas,pcCmd,"CONFIG",0,0,FALSE)==0 || isAll) {
             if (isMan==FALSE) fprintf(pfOut,"Manual page for built-in function 'CONFIG':\n\n");
-            vdCleManFunction(pfDoc,"~","4.16","CONFIG"  ,HLP_CLE_CONFIG  ,acOwn,pcPgm,SYN_CLE_CONFIG,MAN_CLE_CONFIG,isMan,TRUE);
+            vdCleManFunction(pfDoc,S_TLD,"4.16","CONFIG"  ,HLP_CLE_CONFIG  ,acOwn,pcPgm,SYN_CLE_CONFIG,MAN_CLE_CONFIG,isMan,TRUE);
             if (isMan==TRUE) fprintf(pfOut,"Manual page for built-in function 'CONFIG' successfully written to file (%s)\n",acFil);
             if (isAll==FALSE) ERROR(CLERTC_OK);
          }
          if (strxcmp(isCas,pcCmd,"GRAMMAR",0,0,FALSE)==0 || isAll) {
             if (isMan==FALSE) fprintf(pfOut,"Manual page for built-in function 'GRAMMAR':\n\n");
-            vdCleManFunction(pfDoc,"~","4.17","GRAMMAR" ,HLP_CLE_GRAMMAR ,acOwn,pcPgm,SYN_CLE_GRAMMAR,MAN_CLE_GRAMMAR,isMan,TRUE);
+            vdCleManFunction(pfDoc,S_TLD,"4.17","GRAMMAR" ,HLP_CLE_GRAMMAR ,acOwn,pcPgm,SYN_CLE_GRAMMAR,MAN_CLE_GRAMMAR,isMan,TRUE);
             if (isMan==TRUE) fprintf(pfOut,"Manual page for built-in function 'GRAMMAR' successfully written to file (%s)\n",acFil);
             if (isAll==FALSE) ERROR(CLERTC_OK);
          }
          if (strxcmp(isCas,pcCmd,"LEXEM",0,0,FALSE)==0 || isAll) {
             if (isMan==FALSE) fprintf(pfOut,"Manual page for built-in function 'LEXEM':\n\n");
-            vdCleManFunction(pfDoc,"~","4.18","LEXEM"   ,HLP_CLE_LEXEM   ,acOwn,pcPgm,SYN_CLE_LEXEM,MAN_CLE_LEXEM,isMan,TRUE);
+            vdCleManFunction(pfDoc,S_TLD,"4.18","LEXEM"   ,HLP_CLE_LEXEM   ,acOwn,pcPgm,SYN_CLE_LEXEM,MAN_CLE_LEXEM,isMan,TRUE);
             if (isMan==TRUE) fprintf(pfOut,"Manual page for built-in function 'LEXEM' successfully written to file (%s)\n",acFil);
             if (isAll==FALSE) ERROR(CLERTC_OK);
          }
          if (strxcmp(isCas,pcCmd,"LICENSE",0,0,FALSE)==0 || isAll) {
             if (isMan==FALSE) fprintf(pfOut,"Manual page for built-in function 'LICENSE':\n\n");
-            vdCleManFunction(pfDoc,"~","4.19","LICENSE" ,HLP_CLE_LICENSE ,acOwn,pcPgm,SYN_CLE_LICENSE,MAN_CLE_LICENSE,isMan,TRUE);
+            vdCleManFunction(pfDoc,S_TLD,"4.19","LICENSE" ,HLP_CLE_LICENSE ,acOwn,pcPgm,SYN_CLE_LICENSE,MAN_CLE_LICENSE,isMan,TRUE);
             if (isMan==TRUE) fprintf(pfOut,"Manual page for built-in function 'LICENSE' successfully written to file (%s)\n",acFil);
             if (isAll==FALSE) ERROR(CLERTC_OK);
          }
          if (strxcmp(isCas,pcCmd,"VERSION",0,0,FALSE)==0 || isAll) {
             if (isMan==FALSE) fprintf(pfOut,"Manual page for built-in function 'VERSION':\n\n");
-            vdCleManFunction(pfDoc,"~","4.20","VERSION" ,HLP_CLE_VERSION ,acOwn,pcPgm,SYN_CLE_VERSION,MAN_CLE_VERSION,isMan,TRUE);
+            vdCleManFunction(pfDoc,S_TLD,"4.20","VERSION" ,HLP_CLE_VERSION ,acOwn,pcPgm,SYN_CLE_VERSION,MAN_CLE_VERSION,isMan,TRUE);
             if (isMan==TRUE) fprintf(pfOut,"Manual page for built-in function 'VERSION' successfully written to file (%s)\n",acFil);
             if (isAll==FALSE) ERROR(CLERTC_OK);
          }
          if (strxcmp(isCas,pcCmd,"ABOUT",0,0,FALSE)==0 || isAll) {
             if (isMan==FALSE) fprintf(pfOut,"Manual page for built-in function 'ABOUT':\n\n");
-            vdCleManFunction(pfDoc,"~","4.21","ABOUT"   ,HLP_CLE_ABOUT   ,acOwn,pcPgm,SYN_CLE_ABOUT,MAN_CLE_ABOUT,isMan,TRUE);
+            vdCleManFunction(pfDoc,S_TLD,"4.21","ABOUT"   ,HLP_CLE_ABOUT   ,acOwn,pcPgm,SYN_CLE_ABOUT,MAN_CLE_ABOUT,isMan,TRUE);
             if (isMan==TRUE) fprintf(pfOut,"Manual page for built-in function 'ABOUT' successfully written to file (%s)\n",acFil);
             if (isAll==FALSE) ERROR(CLERTC_OK);
          }
          if (strxcmp(isCas,pcCmd,"ERRORS",0,0,FALSE)==0 || isAll) {
             if (isMan==FALSE) fprintf(pfOut,"Manual page for built-in function 'ERRORS':\n\n");
-            vdCleManFunction(pfDoc,"~","4.22","ERRORS"  ,HLP_CLE_ERRORS  ,acOwn,pcPgm,SYN_CLE_ERRORS,MAN_CLE_ERRORS,isMan,TRUE);
+            vdCleManFunction(pfDoc,S_TLD,"4.22","ERRORS"  ,HLP_CLE_ERRORS  ,acOwn,pcPgm,SYN_CLE_ERRORS,MAN_CLE_ERRORS,isMan,TRUE);
             if (isMan==TRUE) fprintf(pfOut,"Manual page for built-in function 'ERRORS' successfully written to file (%s)\n",acFil);
             if (isAll==FALSE) ERROR(CLERTC_OK);
          }
@@ -1248,28 +1249,28 @@ EVALUATE:
             fprintf(pfDoc,"%s\n\n",MAN_CLE_FUNCTIONS);
             fprintf(pfDoc,"indexterm:[Available built-in functions]\n\n\n");
 
-            vdCleManFunction(pfDoc,"~","4.1" ,"SYNTAX"  ,HLP_CLE_SYNTAX  ,acOwn,pcPgm,SYN_CLE_SYNTAX  ,MAN_CLE_SYNTAX  ,FALSE,isNbr);
-            vdCleManFunction(pfDoc,"~","4.2" ,"HELP"    ,HLP_CLE_HELP    ,acOwn,pcPgm,SYN_CLE_HELP    ,MAN_CLE_HELP    ,FALSE,isNbr);
-            vdCleManFunction(pfDoc,"~","4.3" ,"MANPAGE" ,HLP_CLE_MANPAGE ,acOwn,pcPgm,SYN_CLE_MANPAGE ,MAN_CLE_MANPAGE ,FALSE,isNbr);
-            vdCleManFunction(pfDoc,"~","4.4" ,"GENDOCU" ,HLP_CLE_GENDOCU ,acOwn,pcPgm,SYN_CLE_GENDOCU ,MAN_CLE_GENDOCU ,FALSE,isNbr);
-            vdCleManFunction(pfDoc,"~","4.5" ,"GENPROP" ,HLP_CLE_GENPROP ,acOwn,pcPgm,SYN_CLE_GENPROP ,MAN_CLE_GENPROP ,FALSE,isNbr);
-            vdCleManFunction(pfDoc,"~","4.6" ,"SETPROP" ,HLP_CLE_SETPROP ,acOwn,pcPgm,SYN_CLE_SETPROP ,MAN_CLE_SETPROP ,FALSE,isNbr);
-            vdCleManFunction(pfDoc,"~","4.7" ,"CHGPROP" ,HLP_CLE_CHGPROP ,acOwn,pcPgm,SYN_CLE_CHGPROP ,MAN_CLE_CHGPROP ,FALSE,isNbr);
-            vdCleManFunction(pfDoc,"~","4.8" ,"DELPROP" ,HLP_CLE_DELPROP ,acOwn,pcPgm,SYN_CLE_DELPROP ,MAN_CLE_DELPROP ,FALSE,isNbr);
-            vdCleManFunction(pfDoc,"~","4.9" ,"GETPROP" ,HLP_CLE_GETPROP ,acOwn,pcPgm,SYN_CLE_GETPROP ,MAN_CLE_GETPROP ,FALSE,isNbr);
-            vdCleManFunction(pfDoc,"~","4.10","SETOWNER",HLP_CLE_SETOWNER,acOwn,pcPgm,SYN_CLE_SETOWNER,MAN_CLE_SETOWNER,FALSE,isNbr);
-            vdCleManFunction(pfDoc,"~","4.11","GETOWNER",HLP_CLE_GETOWNER,acOwn,pcPgm,SYN_CLE_GETOWNER,MAN_CLE_GETOWNER,FALSE,isNbr);
-            vdCleManFunction(pfDoc,"~","4.12","SETENV"  ,HLP_CLE_SETENV  ,acOwn,pcPgm,SYN_CLE_SETENV  ,MAN_CLE_SETENV  ,FALSE,isNbr);
-            vdCleManFunction(pfDoc,"~","4.13","GETENV"  ,HLP_CLE_GETENV  ,acOwn,pcPgm,SYN_CLE_GETENV  ,MAN_CLE_GETENV  ,FALSE,isNbr);
-            vdCleManFunction(pfDoc,"~","4.14","DELENV"  ,HLP_CLE_DELENV  ,acOwn,pcPgm,SYN_CLE_DELENV  ,MAN_CLE_DELENV  ,FALSE,isNbr);
-            vdCleManFunction(pfDoc,"~","4.15","TRACE"   ,HLP_CLE_TRACE   ,acOwn,pcPgm,SYN_CLE_TRACE   ,MAN_CLE_TRACE   ,FALSE,isNbr);
-            vdCleManFunction(pfDoc,"~","4.16","CONFIG"  ,HLP_CLE_CONFIG  ,acOwn,pcPgm,SYN_CLE_CONFIG  ,MAN_CLE_CONFIG  ,FALSE,isNbr);
-            vdCleManFunction(pfDoc,"~","4.17","GRAMMAR" ,HLP_CLE_GRAMMAR ,acOwn,pcPgm,SYN_CLE_GRAMMAR ,MAN_CLE_GRAMMAR ,FALSE,isNbr);
-            vdCleManFunction(pfDoc,"~","4.18","LEXEM"   ,HLP_CLE_LEXEM   ,acOwn,pcPgm,SYN_CLE_LEXEM   ,MAN_CLE_LEXEM   ,FALSE,isNbr);
-            vdCleManFunction(pfDoc,"~","4.19","LICENSE" ,HLP_CLE_LICENSE ,acOwn,pcPgm,SYN_CLE_LICENSE ,MAN_CLE_LICENSE ,FALSE,isNbr);
-            vdCleManFunction(pfDoc,"~","4.20","VERSION" ,HLP_CLE_VERSION ,acOwn,pcPgm,SYN_CLE_VERSION ,MAN_CLE_VERSION ,FALSE,isNbr);
-            vdCleManFunction(pfDoc,"~","4.21","ABOUT"   ,HLP_CLE_ABOUT   ,acOwn,pcPgm,SYN_CLE_ABOUT   ,MAN_CLE_ABOUT   ,FALSE,isNbr);
-            vdCleManFunction(pfDoc,"~","4.22","ERRORS"  ,HLP_CLE_ERRORS  ,acOwn,pcPgm,SYN_CLE_ERRORS  ,MAN_CLE_ERRORS  ,FALSE,isNbr);
+            vdCleManFunction(pfDoc,S_TLD,"4.1" ,"SYNTAX"  ,HLP_CLE_SYNTAX  ,acOwn,pcPgm,SYN_CLE_SYNTAX  ,MAN_CLE_SYNTAX  ,FALSE,isNbr);
+            vdCleManFunction(pfDoc,S_TLD,"4.2" ,"HELP"    ,HLP_CLE_HELP    ,acOwn,pcPgm,SYN_CLE_HELP    ,MAN_CLE_HELP    ,FALSE,isNbr);
+            vdCleManFunction(pfDoc,S_TLD,"4.3" ,"MANPAGE" ,HLP_CLE_MANPAGE ,acOwn,pcPgm,SYN_CLE_MANPAGE ,MAN_CLE_MANPAGE ,FALSE,isNbr);
+            vdCleManFunction(pfDoc,S_TLD,"4.4" ,"GENDOCU" ,HLP_CLE_GENDOCU ,acOwn,pcPgm,SYN_CLE_GENDOCU ,MAN_CLE_GENDOCU ,FALSE,isNbr);
+            vdCleManFunction(pfDoc,S_TLD,"4.5" ,"GENPROP" ,HLP_CLE_GENPROP ,acOwn,pcPgm,SYN_CLE_GENPROP ,MAN_CLE_GENPROP ,FALSE,isNbr);
+            vdCleManFunction(pfDoc,S_TLD,"4.6" ,"SETPROP" ,HLP_CLE_SETPROP ,acOwn,pcPgm,SYN_CLE_SETPROP ,MAN_CLE_SETPROP ,FALSE,isNbr);
+            vdCleManFunction(pfDoc,S_TLD,"4.7" ,"CHGPROP" ,HLP_CLE_CHGPROP ,acOwn,pcPgm,SYN_CLE_CHGPROP ,MAN_CLE_CHGPROP ,FALSE,isNbr);
+            vdCleManFunction(pfDoc,S_TLD,"4.8" ,"DELPROP" ,HLP_CLE_DELPROP ,acOwn,pcPgm,SYN_CLE_DELPROP ,MAN_CLE_DELPROP ,FALSE,isNbr);
+            vdCleManFunction(pfDoc,S_TLD,"4.9" ,"GETPROP" ,HLP_CLE_GETPROP ,acOwn,pcPgm,SYN_CLE_GETPROP ,MAN_CLE_GETPROP ,FALSE,isNbr);
+            vdCleManFunction(pfDoc,S_TLD,"4.10","SETOWNER",HLP_CLE_SETOWNER,acOwn,pcPgm,SYN_CLE_SETOWNER,MAN_CLE_SETOWNER,FALSE,isNbr);
+            vdCleManFunction(pfDoc,S_TLD,"4.11","GETOWNER",HLP_CLE_GETOWNER,acOwn,pcPgm,SYN_CLE_GETOWNER,MAN_CLE_GETOWNER,FALSE,isNbr);
+            vdCleManFunction(pfDoc,S_TLD,"4.12","SETENV"  ,HLP_CLE_SETENV  ,acOwn,pcPgm,SYN_CLE_SETENV  ,MAN_CLE_SETENV  ,FALSE,isNbr);
+            vdCleManFunction(pfDoc,S_TLD,"4.13","GETENV"  ,HLP_CLE_GETENV  ,acOwn,pcPgm,SYN_CLE_GETENV  ,MAN_CLE_GETENV  ,FALSE,isNbr);
+            vdCleManFunction(pfDoc,S_TLD,"4.14","DELENV"  ,HLP_CLE_DELENV  ,acOwn,pcPgm,SYN_CLE_DELENV  ,MAN_CLE_DELENV  ,FALSE,isNbr);
+            vdCleManFunction(pfDoc,S_TLD,"4.15","TRACE"   ,HLP_CLE_TRACE   ,acOwn,pcPgm,SYN_CLE_TRACE   ,MAN_CLE_TRACE   ,FALSE,isNbr);
+            vdCleManFunction(pfDoc,S_TLD,"4.16","CONFIG"  ,HLP_CLE_CONFIG  ,acOwn,pcPgm,SYN_CLE_CONFIG  ,MAN_CLE_CONFIG  ,FALSE,isNbr);
+            vdCleManFunction(pfDoc,S_TLD,"4.17","GRAMMAR" ,HLP_CLE_GRAMMAR ,acOwn,pcPgm,SYN_CLE_GRAMMAR ,MAN_CLE_GRAMMAR ,FALSE,isNbr);
+            vdCleManFunction(pfDoc,S_TLD,"4.18","LEXEM"   ,HLP_CLE_LEXEM   ,acOwn,pcPgm,SYN_CLE_LEXEM   ,MAN_CLE_LEXEM   ,FALSE,isNbr);
+            vdCleManFunction(pfDoc,S_TLD,"4.19","LICENSE" ,HLP_CLE_LICENSE ,acOwn,pcPgm,SYN_CLE_LICENSE ,MAN_CLE_LICENSE ,FALSE,isNbr);
+            vdCleManFunction(pfDoc,S_TLD,"4.20","VERSION" ,HLP_CLE_VERSION ,acOwn,pcPgm,SYN_CLE_VERSION ,MAN_CLE_VERSION ,FALSE,isNbr);
+            vdCleManFunction(pfDoc,S_TLD,"4.21","ABOUT"   ,HLP_CLE_ABOUT   ,acOwn,pcPgm,SYN_CLE_ABOUT   ,MAN_CLE_ABOUT   ,FALSE,isNbr);
+            vdCleManFunction(pfDoc,S_TLD,"4.22","ERRORS"  ,HLP_CLE_ERRORS  ,acOwn,pcPgm,SYN_CLE_ERRORS  ,MAN_CLE_ERRORS  ,FALSE,isNbr);
 
             s=1;
             siErr=siCleSimpleInit(pfOut,isPfl,pcDep,pcOpt,pcEnt,&pvHdl);
@@ -1313,7 +1314,7 @@ EVALUATE:
             fprintf(pfDoc,"----------\n\n");
             fprintf(pfDoc,"%s\n",MAN_CLE_APPENDIX_PROPERTIES);
             fprintf(pfDoc,"------------------------------------------------------------------------\n");
-            fprintf(pfDoc,"\n# Property file for: %s.%s #\n\n",acOwn,pcPgm);
+            fprintf(pfDoc,"\n%c Property file for: %s.%s %c\n\n",C_HSH,acOwn,pcPgm,C_HSH);
             fprintf(pfDoc,"%s",HLP_CLE_PROPFIL);
             for (siErr=CLP_OK, i=0;psTab[i].pcKyw!=NULL && siErr==CLP_OK;i++) {
                siErr=siClePropertyInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,
@@ -1423,8 +1424,8 @@ EVALUATE:
             fprintf(pfOut,"Open of property file (\"%s\",\"%s\") failed (%d-%s)\n",acFil,acMod,errno,strerror(errno));
             ERROR(CLERTC_SYS);
          }
-         if (pcCmd==NULL) fprintf(pfPro,"\n# Property file for: %s.%s #\n\n",acOwn,pcPgm);
-                    else  fprintf(pfPro,"\n# Property file for: %s.%s.%s #\n\n",acOwn,pcPgm,pcCmd);
+         if (pcCmd==NULL) fprintf(pfPro,"\n%c Property file for: %s.%s %c\n\n",C_HSH,acOwn,pcPgm,C_HSH);
+                    else  fprintf(pfPro,"\n%c Property file for: %s.%s.%s %c\n\n",C_HSH,acOwn,pcPgm,pcCmd,C_HSH);
          fprintf(pfPro,"%s",HLP_CLE_PROPFIL);
 
          if (pcCmd==NULL) {
@@ -1681,7 +1682,7 @@ EVALUATE:
                fprintf(pfOut,"Syntax for built-in function 'GETPROP' not valid\n");
                for (i=0;psTab[i].pcKyw!=NULL ;i++) {
                   if (psTab[i].siFlg) {
-                     fprintf(pfOut,"%s %s GETPROP %s[.path] [DEPTH1 | DEPTH2 | ... | DEPTH9 | DEPALL | DEFALL]\n",pcDep,argv[0],psTab[i].pcKyw);
+                     fprintf(pfOut,"%s %s GETPROP %s[.path] [DEPTH1 / DEPTH2 / ... / DEPTH9 / DEPALL / DEFALL]\n",pcDep,argv[0],psTab[i].pcKyw);
                   }
                }
                ERROR(CLERTC_CMD);
@@ -1690,7 +1691,7 @@ EVALUATE:
             fprintf(pfOut,"Syntax for built-in function 'GETPROP' not valid\n");
             for (i=0;psTab[i].pcKyw!=NULL ;i++) {
                if (psTab[i].siFlg) {
-                  fprintf(pfOut,"%s %s GETPROP %s[.path] [DEPTH1 | DEPTH2 | ... | DEPTH9 | DEPALL | DEFALL]\n",pcDep,argv[0],psTab[i].pcKyw);
+                  fprintf(pfOut,"%s %s GETPROP %s[.path] [DEPTH1 / DEPTH2 / ... / DEPTH9 / DEPALL / DEFALL]\n",pcDep,argv[0],psTab[i].pcKyw);
                }
             }
             ERROR(CLERTC_CMD);
@@ -1735,7 +1736,7 @@ EVALUATE:
       fprintf(pfOut,"Syntax for built-in function 'GETPROP' not valid\n");
       for (i=0;psTab[i].pcKyw!=NULL ;i++) {
          if (psTab[i].siFlg) {
-            fprintf(pfOut,"%s %s GETPROP %s[.path] [DEPTH1 | DEPTH2 | ... | DEPTH9 | DEPALL | DEFALL]\n",pcDep,argv[0],psTab[i].pcKyw);
+            fprintf(pfOut,"%s %s GETPROP %s[.path] [DEPTH1 / DEPTH2 / ... / DEPTH9 / DEPALL / DEFALL]\n",pcDep,argv[0],psTab[i].pcKyw);
          }
       }
       fprintf(pfOut,"%s %s GETPROP\n",pcDep,argv[0]);
@@ -1920,9 +1921,9 @@ EVALUATE:
                siErr=psTab[i].pfMap(pfOut,pfTrc,psTab[i].piOid,psTab[i].pvClp,psTab[i].pvPar);
                if (siErr) {
                   if (pfMsg!=NULL && (pcMsg=pfMsg(siErr))!=NULL) {
-                     fprintf(pfOut,"Mapping of CLP structure for command '%s' failed! (Return/Reason-Code: %d/%d (%s))\n",psTab[i].pcKyw,CLERTC_MAP,siErr,pcMsg);
+                     fprintf(pfOut,"Mapping of CLP structure for command '%s' failed (Return/Reason-Code: %d/%d (%s))\n",psTab[i].pcKyw,CLERTC_MAP,siErr,pcMsg);
                   } else {
-                     fprintf(pfOut,"Mapping of CLP structure for command '%s' failed! (Return/Reason-Code: %d/%d)\n",psTab[i].pcKyw,CLERTC_MAP,siErr);
+                     fprintf(pfOut,"Mapping of CLP structure for command '%s' failed (Return/Reason-Code: %d/%d)\n",psTab[i].pcKyw,CLERTC_MAP,siErr);
                   }
                   if (pcCmd!=NULL) free(pcCmd);
                   if (pcLst!=NULL) free(pcLst);
@@ -1934,17 +1935,17 @@ EVALUATE:
                if (siErr) {
                   if (isWrn) {
                      if (pfMsg!=NULL && (pcMsg=pfMsg(siErr))!=NULL) {
-                        fprintf(pfOut,"Run of command '%s' ends with warning! (Return/Reason-Code: %d/%d (%s))\n",psTab[i].pcKyw,CLERTC_WRN,siErr,pcMsg);
+                        fprintf(pfOut,"Run of command '%s' ends with warning (Return/Reason-Code: %d/%d (%s))\n",psTab[i].pcKyw,CLERTC_WRN,siErr,pcMsg);
                      } else {
-                        fprintf(pfOut,"Run of command '%s' ends with warning! (Return/Reason-Code: %d/%d)\n",psTab[i].pcKyw,CLERTC_WRN,siErr);
+                        fprintf(pfOut,"Run of command '%s' ends with warning (Return/Reason-Code: %d/%d)\n",psTab[i].pcKyw,CLERTC_WRN,siErr);
                      }
                      psTab[i].pfFin(pfOut,pfTrc,psTab[i].pvPar);
                      ERROR(CLERTC_WRN);
                   } else {
                      if (pfMsg!=NULL && (pcMsg=pfMsg(siErr))!=NULL) {
-                        fprintf(pfOut,"Run of command '%s' failed! (Return/Reason-Code: %d/%d (%s))\n",psTab[i].pcKyw,CLERTC_RUN,siErr,pcMsg);
+                        fprintf(pfOut,"Run of command '%s' failed (Return/Reason-Code: %d/%d (%s))\n",psTab[i].pcKyw,CLERTC_RUN,siErr,pcMsg);
                      } else {
-                        fprintf(pfOut,"Run of command '%s' failed! (Return/Reason-Code: %d/%d)\n",psTab[i].pcKyw,CLERTC_RUN,siErr);
+                        fprintf(pfOut,"Run of command '%s' failed (Return/Reason-Code: %d/%d)\n",psTab[i].pcKyw,CLERTC_RUN,siErr);
                      }
                      psTab[i].pfFin(pfOut,pfTrc,psTab[i].pvPar);
                      ERROR(CLERTC_RUN);
@@ -1953,9 +1954,9 @@ EVALUATE:
                siErr=psTab[i].pfFin(pfOut,pfTrc,psTab[i].pvPar);
                if (siErr) {
                   if (pfMsg!=NULL && (pcMsg=pfMsg(siErr))!=NULL) {
-                     fprintf(pfOut,"Finish/cleanup for command '%s' failed! (Return/Reason-Code: %d/%d (%s))\n",psTab[i].pcKyw,CLERTC_FIN,siErr,pcMsg);
+                     fprintf(pfOut,"Finish/cleanup for command '%s' failed (Return/Reason-Code: %d/%d (%s))\n",psTab[i].pcKyw,CLERTC_FIN,siErr,pcMsg);
                   } else {
-                     fprintf(pfOut,"Finish/cleanup for command '%s' failed! (Return/Reason-Code: %d/%d)\n",psTab[i].pcKyw,CLERTC_FIN,siErr);
+                     fprintf(pfOut,"Finish/cleanup for command '%s' failed (Return/Reason-Code: %d/%d)\n",psTab[i].pcKyw,CLERTC_FIN,siErr);
                   }
                   ERROR(CLERTC_FIN);
                }
@@ -2015,9 +2016,9 @@ static int siClePropertyInit(
    siErr=pfIni(pfOut,pfTrc,pcOwn,pcPgm,pvClp);
    if (siErr) {
       if (pfMsg!=NULL && (pcMsg=pfMsg(siErr))!=NULL) {
-         fprintf(pfOut,"Initialization of CLP structure for command '%s' failed! (Return/Reason-Code: %d/%d (%s))\n",pcCmd,CLERTC_INI,siErr,pcMsg);
+         fprintf(pfOut,"Initialization of CLP structure for command '%s' failed (Return/Reason-Code: %d/%d (%s))\n",pcCmd,CLERTC_INI,siErr,pcMsg);
       } else {
-         fprintf(pfOut,"Initialization of CLP structure for command '%s' failed! (Return/Reason-Code: %d/%d)\n",pcCmd,CLERTC_INI,siErr);
+         fprintf(pfOut,"Initialization of CLP structure for command '%s' failed (Return/Reason-Code: %d/%d)\n",pcCmd,CLERTC_INI,siErr);
       }
       return(CLERTC_INI);
    }
@@ -2168,9 +2169,9 @@ static int siCleCommandInit(
    siErr=pfIni(pfOut,pfTrc,pcOwn,pcPgm,pvClp);
    if (siErr) {
       if (pfMsg!=NULL && (pcMsg=pfMsg(siErr))!=NULL) {
-         fprintf(pfOut,"Initialization of CLP structure for command '%s' failed! (Return/Reason-Code: %d/%d (%s))\n",pcCmd,CLERTC_INI,siErr,pcMsg);
+         fprintf(pfOut,"Initialization of CLP structure for command '%s' failed (Return/Reason-Code: %d/%d (%s))\n",pcCmd,CLERTC_INI,siErr,pcMsg);
       } else {
-         fprintf(pfOut,"Initialization of CLP structure for command '%s' failed! (Return/Reason-Code: %d/%d)\n",pcCmd,CLERTC_INI,siErr);
+         fprintf(pfOut,"Initialization of CLP structure for command '%s' failed (Return/Reason-Code: %d/%d)\n",pcCmd,CLERTC_INI,siErr);
       }
       return(CLERTC_INI);
    }
@@ -2315,13 +2316,13 @@ static void vdCleManProgram(
       fprintf(pfOut,"NAME\n");
       fprintf(pfOut,"----\n\n");
       for(p=pcPgm;*p;p++) fprintf(pfOut,"%c",tolower(*p));
-      fprintf(pfOut," - `%s`\n\n",pcHlp);
+      fprintf(pfOut," - %c%s%c\n\n",C_GRV,pcHlp,C_GRV);
       fprintf(pfOut,"SYNOPSIS\n");
       fprintf(pfOut,"--------\n\n");
       fprintf(pfOut,"-----------------------------------------------------------------------\n");
       fprintf(pfOut,"PATH:   %s\n",pcOwn);
       fprintf(pfOut,"TYPE:   PROGRAM\n");
-      fprintf(pfOut,"SYNTAX: $ %s COMMAND|FUNCTION ...\n",pcPgm);
+      fprintf(pfOut,"SYNTAX: %c %s COMMAND/FUNCTION ...\n",C_DOL,pcPgm);
       fprintf(pfOut,"-----------------------------------------------------------------------\n\n");
       fprintf(pfOut,"DESCRIPTION\n");
       fprintf(pfOut,"-----------\n\n");
@@ -2348,31 +2349,31 @@ static void vdCleManProgram(
       if (isNbr) {
          fprintf(pfOut,"2. PROGRAM '%s'\n",pcPgm);
          l=strlen(pcPgm)+13;
-         for (i=0;i<l;i++) fprintf(pfOut,"-"); fprintf(pfOut,"\n\n");
+         for (i=0;i<l;i++) fprintf(pfOut,"%c",'-'); fprintf(pfOut,"\n\n");
          fprintf(pfOut,"2.1. SYNOPSIS\n");
-         fprintf(pfOut,"~~~~~~~~~~~~~\n\n");
+         for (i=0;i<13;i++) fprintf(pfOut,"%c",C_TLD); fprintf(pfOut,"\n\n");
       } else {
          fprintf(pfOut,"PROGRAM '%s'\n",pcPgm);
          l=strlen(pcPgm)+10;
-         for (i=0;i<l;i++) fprintf(pfOut,"-"); fprintf(pfOut,"\n\n");
+         for (i=0;i<l;i++) fprintf(pfOut,"%c",'-'); fprintf(pfOut,"\n\n");
          fprintf(pfOut,"SYNOPSIS\n");
-         fprintf(pfOut,"~~~~~~~~\n\n");
+         for (i=0;i<8;i++) fprintf(pfOut,"%c",C_TLD); fprintf(pfOut,"\n\n");
       }
       fprintf(pfOut,"-----------------------------------------------------------------------\n");
       fprintf(pfOut,"HELP:   %s\n",pcHlp);
       fprintf(pfOut,"PATH:   %s\n",pcOwn);
       fprintf(pfOut,"TYPE:   PROGRAM\n");
-      fprintf(pfOut,"SYNTAX: $ %s COMMAND|FUNCTION ...\n",pcPgm);
+      fprintf(pfOut,"SYNTAX: %c %s COMMAND/FUNCTION ...\n",C_DOL,pcPgm);
       fprintf(pfOut,"-----------------------------------------------------------------------\n\n");
       fprintf(pfOut,"indexterm:[Synopsis for program %s]\n\n\n",pcPgm);
 
       if (isNbr) {
          fprintf(pfOut,"2.2. DESCRIPTION\n");
-         fprintf(pfOut,"~~~~~~~~~~~~~~~~\n\n");
+         for (i=0;i<16;i++) fprintf(pfOut,"%c",C_TLD); fprintf(pfOut,"\n\n");
 
       } else {
          fprintf(pfOut,"DESCRIPTION\n");
-         fprintf(pfOut,"~~~~~~~~~~~\n\n");
+         for (i=0;i<11;i++) fprintf(pfOut,"%c",C_TLD); fprintf(pfOut,"\n\n");
       }
       if (pcMan!=NULL && strlen(pcMan)) {
          fprintf(pfOut,"%s\n\n",pcMan);
@@ -2380,13 +2381,12 @@ static void vdCleManProgram(
          fprintf(pfOut,"No detailed description available for this program.\n\n");
       }
       fprintf(pfOut,"indexterm:[Description for program %s]\n\n\n",pcPgm);
-
       if (isNbr) {
          fprintf(pfOut,"2.3. SYNTAX\n");
-         fprintf(pfOut,"~~~~~~~~~~~\n\n");
+         for (i=0;i<12;i++) fprintf(pfOut,"%c",C_TLD); fprintf(pfOut,"\n\n");
       } else {
          fprintf(pfOut,"SYNTAX\n");
-         fprintf(pfOut,"~~~~~~\n\n");
+         for (i=0;i<6;i++) fprintf(pfOut,"%c",C_TLD); fprintf(pfOut,"\n\n");
       }
       fprintf(pfOut,"%s\n",MAN_CLE_MAIN_SYNTAX);
       fprintf(pfOut,"------------------------------------------------------------------------\n");
@@ -2397,10 +2397,10 @@ static void vdCleManProgram(
 
       if (isNbr) {
          fprintf(pfOut,"2.4. HELP\n");
-         fprintf(pfOut,"~~~~~~~~~\n\n");
+         for (i=0;i<9;i++) fprintf(pfOut,"%c",C_TLD); fprintf(pfOut,"\n\n");
       } else {
          fprintf(pfOut,"HELP\n");
-         fprintf(pfOut,"~~~~\n\n");
+         for (i=0;i<4;i++) fprintf(pfOut,"%c",C_TLD); fprintf(pfOut,"\n\n");
       }
       fprintf(pfOut,"%s\n",MAN_CLE_MAIN_HELP);
       fprintf(pfOut,"------------------------------------------------------------------------\n");
@@ -2440,13 +2440,13 @@ static void vdCleManFunction(
       for(p=pcPgm;*p;p++) fprintf(pfOut,"%c",tolower(*p));
       fprintf(pfOut,".");
       for(p=pcFct;*p;p++) fprintf(pfOut,"%c",tolower(*p));
-      fprintf(pfOut," - `%s`\n\n",pcHlp);
+      fprintf(pfOut," - %c%s%c\n\n",C_GRV,pcHlp,C_GRV);
       fprintf(pfOut,"SYNOPSIS\n");
       fprintf(pfOut,"--------\n\n");
       fprintf(pfOut,"-----------------------------------------------------------------------\n");
       fprintf(pfOut,"PATH:   %s.%s\n",pcOwn,pcPgm);
       fprintf(pfOut,"TYPE:   BUILT-IN FUNCTION\n");
-      fprintf(pfOut,"SYNTAX: $ %s %s\n",pcPgm,pcSyn);
+      fprintf(pfOut,"SYNTAX: %c %s %s\n",C_DOL,pcPgm,pcSyn);
       fprintf(pfOut,"-----------------------------------------------------------------------\n\n");
       fprintf(pfOut,"DESCRIPTION\n");
       fprintf(pfOut,"-----------\n\n");
@@ -2468,7 +2468,7 @@ static void vdCleManFunction(
       fprintf(pfOut,"HELP:   %s\n",pcHlp);
       fprintf(pfOut,"PATH:   %s.%s\n",pcOwn,pcPgm);
       fprintf(pfOut,"TYPE:   BUILT-IN FUNCTION\n");
-      fprintf(pfOut,"SYNTAX: $ %s %s\n",pcPgm,pcSyn);
+      fprintf(pfOut,"SYNTAX: %c %s %s\n",C_DOL,pcPgm,pcSyn);
       fprintf(pfOut,"-----------------------------------------------------------------------\n\n");
       fprintf(pfOut,".DESCRIPTION\n\n");
       fprintf(pfOut,"%s\n\n",pcMan);
@@ -2964,9 +2964,9 @@ static int siCnfPrnEnv(
             }
          }
          if (pcPre!=NULL && strlen(pcPre)) {
-            fprintf(pfOut,"%s %s=%s # %s\n",pcPre,pcKyw,psEnt->acVal,pcAdd);
+            fprintf(pfOut,"%s %s=%s %c %s\n",pcPre,pcKyw,psEnt->acVal,C_HSH,pcAdd);
          } else {
-            fprintf(pfOut,"%s=%s # %s\n",pcKyw,psEnt->acVal,pcAdd);
+            fprintf(pfOut,"%s=%s %c %s\n",pcKyw,psEnt->acVal,C_HSH,pcAdd);
          }
       }
    }
@@ -3029,7 +3029,7 @@ static void vdCnfCls(
             pfFil=fopen(psHdl->acFil,psHdl->acMod);
          }
          if (pfFil!=NULL) {
-            fprintf(pfFil,"# Configuration file for program '%s'\n",psHdl->acPgm);
+            fprintf(pfFil,"%c Configuration file for program '%s'\n",C_HSH,psHdl->acPgm);
          }
          while(psEnt!=NULL) {
             if (pfFil!=NULL) fprintf(pfFil,"%s=%s\n",psEnt->acKyw,psEnt->acVal);
