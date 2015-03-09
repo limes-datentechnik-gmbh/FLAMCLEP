@@ -105,6 +105,7 @@ extern int win_snprintf(char *buffer, size_t size, const char *format, ...);
    extern char gs_cbc[2];
    extern char gs_tld[2];
    extern char gs_svb[4];
+   extern char gs_idt[4];
 #  define C_EXC                 ((gc_exc)?gc_exc:init_char(&gc_exc))
 #  define C_HSH                 ((gc_hsh)?gc_hsh:init_char(&gc_hsh))
 #  define C_DLR                 ((gc_dlr)?gc_dlr:init_char(&gc_dlr))
