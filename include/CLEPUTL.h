@@ -75,6 +75,9 @@ extern int win_snprintf(char *buffer, size_t size, const char *format, ...);
 #ifdef __EBCDIC__
    extern int init_char(int* p);
    extern char* init_string(char* p);
+   extern int ebcdic_snprintf(char* string, size_t size, const char* format, ...);
+   extern int ebcdic_sprintf(char* string, const char* format, ...);
+   extern int ebcdic_fprintf(FILE* file, const char* format, ...);
    extern int gc_exc;
    extern int gc_hsh;
    extern int gc_dlr;
