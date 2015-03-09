@@ -1272,9 +1272,9 @@ extern char* mapfil(char* file,int size) {
    for (j=i=0;file[i];i++) {
 #ifdef __WIN__
       if (file[i]=='/') {
-         file[j]='\\';
+         file[j]=C_BSL;
 #else
-      if (('0'==0x30 && file[i]=='\\') || ('0'==0xF0 && (file[i]==0xE0 || file[i]==0xEC))) {
+      if (('0'==0x30 && file[i]==C_BSL) || ('0'==0xF0 && (file[i]==0xE0 || file[i]==0xEC))) {
          file[j]='/';
 #endif
          j++;
