@@ -45,8 +45,8 @@ int        gc_exc=0;
 char       gs_exc[2]={0,0};
 int        gc_hsh=0;
 char       gs_hsh[2]={0,0};
-int        gc_dol=0;
-char       gs_dol[2]={0,0};
+int        gc_dlr=0;
+char       gs_dlr[2]={0,0};
 int        gc_ats=0;
 char       gs_ats[2]={0,0};
 int        gc_sbo=0;
@@ -78,7 +78,7 @@ extern int init_char(int* p) {
    case 1140:
       gc_exc=0x5A; gs_exc[0]=0x5A; gs_exc[1]=0x00;
       gc_hsh=0x7B; gs_hsh[0]=0x7B; gs_hsh[1]=0x00;
-      gc_dol=0x5B; gs_dol[0]=0x5B; gs_dol[1]=0x00;
+      gc_dlr=0x5B; gs_dlr[0]=0x5B; gs_dlr[1]=0x00;
       gc_ats=0x7C; gs_ats[0]=0x7C; gs_ats[1]=0x00;
       gc_sbo=0xBA; gs_sbo[0]=0xBA; gs_sbo[1]=0x00;
       gc_bsl=0xE0; gs_bsl[0]=0xE0; gs_bsl[1]=0x00;
@@ -94,7 +94,7 @@ extern int init_char(int* p) {
    case 1141:
       gc_exc=0x4F; gs_exc[0]=0x4F; gs_exc[1]=0x00;
       gc_hsh=0x7B; gs_hsh[0]=0x7B; gs_hsh[1]=0x00;
-      gc_dol=0x5B; gs_dol[0]=0x5B; gs_dol[1]=0x00;
+      gc_dlr=0x5B; gs_dlr[0]=0x5B; gs_dlr[1]=0x00;
       gc_ats=0xB5; gs_ats[0]=0xB5; gs_ats[1]=0x00;
       gc_sbo=0x63; gs_sbo[0]=0x63; gs_sbo[1]=0x00;
       gc_bsl=0xEC; gs_bsl[0]=0xEC; gs_bsl[1]=0x00;
@@ -109,7 +109,7 @@ extern int init_char(int* p) {
    case 1142:
       gc_exc=0x4F; gs_exc[0]=0x4F; gs_exc[1]=0x00;
       gc_hsh=0x4A; gs_hsh[0]=0x4A; gs_hsh[1]=0x00;
-      gc_dol=0x67; gs_dol[0]=0x67; gs_dol[1]=0x00;
+      gc_dlr=0x67; gs_dlr[0]=0x67; gs_dlr[1]=0x00;
       gc_ats=0x80; gs_ats[0]=0x80; gs_ats[1]=0x00;
       gc_sbo=0x9E; gs_sbo[0]=0x9E; gs_sbo[1]=0x00;
       gc_bsl=0xE0; gs_bsl[0]=0xE0; gs_bsl[1]=0x00;
@@ -124,7 +124,7 @@ extern int init_char(int* p) {
    case 1143:
       gc_exc=0x4F; gs_exc[0]=0x4F; gs_exc[1]=0x00;
       gc_hsh=0x63; gs_hsh[0]=0x63; gs_hsh[1]=0x00;
-      gc_dol=0x67; gs_dol[0]=0x67; gs_dol[1]=0x00;
+      gc_dlr=0x67; gs_dlr[0]=0x67; gs_dlr[1]=0x00;
       gc_ats=0xEC; gs_ats[0]=0xEC; gs_ats[1]=0x00;
       gc_sbo=0xB5; gs_sbo[0]=0xB5; gs_sbo[1]=0x00;
       gc_bsl=0x71; gs_bsl[0]=0x71; gs_bsl[1]=0x00;
@@ -139,7 +139,7 @@ extern int init_char(int* p) {
    case 1144:
       gc_exc=0x4F; gs_exc[0]=0x4F; gs_exc[1]=0x00;
       gc_hsh=0xB1; gs_hsh[0]=0xB1; gs_hsh[1]=0x00;
-      gc_dol=0x5B; gs_dol[0]=0x5B; gs_dol[1]=0x00;
+      gc_dlr=0x5B; gs_dlr[0]=0x5B; gs_dlr[1]=0x00;
       gc_ats=0xB5; gs_ats[0]=0xB5; gs_ats[1]=0x00;
       gc_sbo=0x90; gs_sbo[0]=0x90; gs_sbo[1]=0x00;
       gc_bsl=0x48; gs_bsl[0]=0x48; gs_bsl[1]=0x00;
@@ -154,7 +154,7 @@ extern int init_char(int* p) {
    case 1145:
       gc_exc=0xBB; gs_exc[0]=0xBB; gs_exc[1]=0x00;
       gc_hsh=0x69; gs_hsh[0]=0x69; gs_hsh[1]=0x00;
-      gc_dol=0x5B; gs_dol[0]=0x5B; gs_dol[1]=0x00;
+      gc_dlr=0x5B; gs_dlr[0]=0x5B; gs_dlr[1]=0x00;
       gc_ats=0x7C; gs_ats[0]=0x7C; gs_ats[1]=0x00;
       gc_sbo=0x4A; gs_sbo[0]=0x4A; gs_sbo[1]=0x00;
       gc_bsl=0xE0; gs_bsl[0]=0xE0; gs_bsl[1]=0x00;
@@ -169,7 +169,7 @@ extern int init_char(int* p) {
    case 1146:
       gc_exc=0x5A; gs_exc[0]=0x5A; gs_exc[1]=0x00;
       gc_hsh=0x7B; gs_hsh[0]=0x7B; gs_hsh[1]=0x00;
-      gc_dol=0x4A; gs_dol[0]=0x4A; gs_dol[1]=0x00;
+      gc_dlr=0x4A; gs_dlr[0]=0x4A; gs_dlr[1]=0x00;
       gc_ats=0x7C; gs_ats[0]=0x7C; gs_ats[1]=0x00;
       gc_sbo=0xB1; gs_sbo[0]=0xB1; gs_sbo[1]=0x00;
       gc_bsl=0xE0; gs_bsl[0]=0xE0; gs_bsl[1]=0x00;
@@ -184,7 +184,7 @@ extern int init_char(int* p) {
    case 1147:
       gc_exc=0x4F; gs_exc[0]=0x4F; gs_exc[1]=0x00;
       gc_hsh=0xB1; gs_hsh[0]=0xB1; gs_hsh[1]=0x00;
-      gc_dol=0x5B; gs_dol[0]=0x5B; gs_dol[1]=0x00;
+      gc_dlr=0x5B; gs_dlr[0]=0x5B; gs_dlr[1]=0x00;
       gc_ats=0x44; gs_ats[0]=0x44; gs_ats[1]=0x00;
       gc_sbo=0x90; gs_sbo[0]=0x90; gs_sbo[1]=0x00;
       gc_bsl=0x48; gs_bsl[0]=0x48; gs_bsl[1]=0x00;
@@ -201,7 +201,7 @@ extern int init_char(int* p) {
    case 1148:
       gc_exc=0x4F; gs_exc[0]=0x4F; gs_exc[1]=0x00;
       gc_hsh=0x7B; gs_hsh[0]=0x7B; gs_hsh[1]=0x00;
-      gc_dol=0x5B; gs_dol[0]=0x5B; gs_dol[1]=0x00;
+      gc_dlr=0x5B; gs_dlr[0]=0x5B; gs_dlr[1]=0x00;
       gc_ats=0x7C; gs_ats[0]=0x7C; gs_ats[1]=0x00;
       gc_sbo=0x4A; gs_sbo[0]=0x4A; gs_sbo[1]=0x00;
       gc_bsl=0xE0; gs_bsl[0]=0xE0; gs_bsl[1]=0x00;
@@ -216,7 +216,7 @@ extern int init_char(int* p) {
    case 1149:
       gc_exc=0x4F; gs_exc[0]=0x4F; gs_exc[1]=0x00;
       gc_hsh=0x7B; gs_hsh[0]=0x7B; gs_hsh[1]=0x00;
-      gc_dol=0x5B; gs_dol[0]=0x5B; gs_dol[1]=0x00;
+      gc_dlr=0x5B; gs_dlr[0]=0x5B; gs_dlr[1]=0x00;
       gc_ats=0xAC; gs_ats[0]=0xAC; gs_ats[1]=0x00;
       gc_sbo=0xAE; gs_sbo[0]=0xAE; gs_sbo[1]=0x00;
       gc_bsl=0xBE; gs_bsl[0]=0xBE; gs_bsl[1]=0x00;
@@ -231,7 +231,7 @@ extern int init_char(int* p) {
    case 1153:
       gc_exc=0x4F; gs_exc[0]=0x4F; gs_exc[1]=0x00;
       gc_hsh=0x7B; gs_hsh[0]=0x7B; gs_hsh[1]=0x00;
-      gc_dol=0x5B; gs_dol[0]=0x5B; gs_dol[1]=0x00;
+      gc_dlr=0x5B; gs_dlr[0]=0x5B; gs_dlr[1]=0x00;
       gc_ats=0x7C; gs_ats[0]=0x7C; gs_ats[1]=0x00;
       gc_sbo=0x4A; gs_sbo[0]=0x4A; gs_sbo[1]=0x00;
       gc_bsl=0xE0; gs_bsl[0]=0xE0; gs_bsl[1]=0x00;
@@ -246,7 +246,7 @@ extern int init_char(int* p) {
    case 1154:
       gc_exc=0x4F; gs_exc[0]=0x4F; gs_exc[1]=0x00;
       gc_hsh=0x7B; gs_hsh[0]=0x7B; gs_hsh[1]=0x00;
-      gc_dol=0x5B; gs_dol[0]=0x5B; gs_dol[1]=0x00;
+      gc_dlr=0x5B; gs_dlr[0]=0x5B; gs_dlr[1]=0x00;
       gc_ats=0x7C; gs_ats[0]=0x7C; gs_ats[1]=0x00;
       gc_sbo=0x4A; gs_sbo[0]=0x4A; gs_sbo[1]=0x00;
       gc_bsl=0xE0; gs_bsl[0]=0xE0; gs_bsl[1]=0x00;
@@ -261,7 +261,7 @@ extern int init_char(int* p) {
    case 1156:
       gc_exc=0x5A; gs_exc[0]=0x5A; gs_exc[1]=0x00;
       gc_hsh=0x7B; gs_hsh[0]=0x7B; gs_hsh[1]=0x00;
-      gc_dol=0x5B; gs_dol[0]=0x5B; gs_dol[1]=0x00;
+      gc_dlr=0x5B; gs_dlr[0]=0x5B; gs_dlr[1]=0x00;
       gc_ats=0x7C; gs_ats[0]=0x7C; gs_ats[1]=0x00;
       gc_sbo=0xBA; gs_sbo[0]=0xBA; gs_sbo[1]=0x00;
       gc_bsl=0xE0; gs_bsl[0]=0xE0; gs_bsl[1]=0x00;
@@ -276,7 +276,7 @@ extern int init_char(int* p) {
    case 1122:
       gc_exc=0x4F; gs_exc[0]=0x4F; gs_exc[1]=0x00;
       gc_hsh=0x63; gs_hsh[0]=0x63; gs_hsh[1]=0x00;
-      gc_dol=0x67; gs_dol[0]=0x67; gs_dol[1]=0x00;
+      gc_dlr=0x67; gs_dlr[0]=0x67; gs_dlr[1]=0x00;
       gc_ats=0xEC; gs_ats[0]=0xEC; gs_ats[1]=0x00;
       gc_sbo=0xB5; gs_sbo[0]=0xB5; gs_sbo[1]=0x00;
       gc_bsl=0x71; gs_bsl[0]=0x71; gs_bsl[1]=0x00;
@@ -291,7 +291,7 @@ extern int init_char(int* p) {
    case 1047:
       gc_exc=0x5A; gs_exc[0]=0x5A; gs_exc[1]=0x00;
       gc_hsh=0x7B; gs_hsh[0]=0x7B; gs_hsh[1]=0x00;
-      gc_dol=0x5B; gs_dol[0]=0x5B; gs_dol[1]=0x00;
+      gc_dlr=0x5B; gs_dlr[0]=0x5B; gs_dlr[1]=0x00;
       gc_ats=0x7C; gs_ats[0]=0x7C; gs_ats[1]=0x00;
       gc_sbo=0xAD; gs_sbo[0]=0xAD; gs_sbo[1]=0x00;
       gc_bsl=0xE0; gs_bsl[0]=0xE0; gs_bsl[1]=0x00;
@@ -306,7 +306,7 @@ extern int init_char(int* p) {
    default:
       gc_exc='!'; gs_exc[0]='!'; gs_exc[1]=0x00;
       gc_hsh='#'; gs_hsh[0]='#'; gs_hsh[1]=0x00;
-      gc_dol='$'; gs_dol[0]='$'; gs_dol[1]=0x00;
+      gc_dlr='$'; gs_dlr[0]='$'; gs_dlr[1]=0x00;
       gc_ats='@'; gs_ats[0]='@'; gs_ats[1]=0x00;
       gc_sbo='['; gs_sbo[0]='['; gs_sbo[1]=0x00;
       gc_bsl='\\'; gs_bsl[0]='\\'; gs_bsl[1]=0x00;
@@ -343,7 +343,7 @@ extern int ebcdic_snprintf(char* string, size_t size, const char* format, ...) {
    for (p=string;*p;p++) {
       switch (*p) {
       case '!' : *p=C_EXC; break;
-      case '$' : *p=C_DOL; break;
+      case '$' : *p=C_DLR; break;
       case '#' : *p=C_HSH; break;
       case '@' : *p=C_ATS; break;
       case '[' : *p=C_SBO; break;
@@ -370,7 +370,7 @@ extern int ebcdic_sprintf(char* string, const char* format, ...) {
    for (p=string;*p;p++) {
       switch (*p) {
       case '!' : *p=C_EXC; break;
-      case '$' : *p=C_DOL; break;
+      case '$' : *p=C_DLR; break;
       case '#' : *p=C_HSH; break;
       case '@' : *p=C_ATS; break;
       case '[' : *p=C_SBO; break;
