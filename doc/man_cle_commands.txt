@@ -18,7 +18,7 @@ synopsis (help, path, type, syntax) and description is written,
 otherwise a bullet list is printed which contains the keyword, the
 syntax and the help message.
 
-For the syntax of an overlay braces '{}' are used to keep all possible
+For the syntax of an overlay braces `{}` are used to keep all possible
 arguments of an overlay logically together. These braces are not part
 of the real syntax. The braces are only written to demonstrate
 clearly that one of these arguments must be selected with the
@@ -27,8 +27,8 @@ DOT operator (optional) for defining the overlay.
 To be compatible with certain shells, the features below are
 implemented:
 
- * Strings can be enclosed with '' or ""
- * Strings can also defined without quotes
+ * Strings can be enclosed with single '' or double "" quotation marks
+ * Integrated strings (without spaces) can also defined without quotes
  * Keywords can also start with "-" or "--" in front of the qualifier
  * If it unique then parenthesis and the dot can be omit for object and overlays
 

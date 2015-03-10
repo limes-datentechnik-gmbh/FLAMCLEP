@@ -21,7 +21,7 @@ the value list for this argument in accordance with the syntax of the
 command line parser (strings then normally in single quotation marks,
 a opposite usage of the quotation marks is possible but not
 recommended). This means for example that a string that requires
-apostrophes must be included in apostrophes ("'...'"). The supplement
+apostrophes must be included in apostrophes `("'...'")`. The supplement
 string is returned by the corresponding command line parser if no value
 for this argument is entered on the command line or is included in the
 parameter file.

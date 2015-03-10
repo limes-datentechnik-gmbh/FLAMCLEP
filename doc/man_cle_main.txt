@@ -75,10 +75,10 @@ settings over the environment. The environment variable name for each
 property are builded by the rules below:
 
  * convert all letters to upper case
- * replace all dots '.' by underline '_'
+ * replace all dots (`.`) by underline (`_`)
 
 To get a list and help for all properties pleas use the built-in
-function 'genprop' to generate property files. The properties can be
+function 'GENPROP' to generate property files. The properties can be
 defined per owner, per program and general. The owner specific
 definition overrules the program specific definition and the program
 specific definition overrules the general definition. Examples:
@@ -107,8 +107,8 @@ See <<appendix-properties>> for the current property file content.
 All filenames used by CLEP are additionally mapped based on the rules
 below:
 
- * The character '~' is replaced with the string "<HOME>"
- * Each value enclosed with angle brackets (<>) are replaced with the
+ * The tilde character (`~`) is replaced with the string "<HOME>"
+ * Each value enclosed with angle brackets (`<>`) are replaced with the
    corresponding environment variable. If the environment variable not
    defined the replacements below are still possible:
  ** <SYSUID> - Current user id in upper case
@@ -123,9 +123,9 @@ below:
  *** On ZOS with <SYSUID>
  * DD names on mainframes must be prefixed with "DD:"
  * Data set names on mainframes are always full qualified
- * Path names on mainframes must contain a least one slash '/'
+ * Path names on mainframes must contain a least one slash (`/`)
  * Data set names on USS must start with //
- ** Full qualified names with HLQ must enclose in apostrophes "//''"
+ ** Full qualified names with HLQ must enclose in apostrophes ("//''")
  ** If apostrophes are not used the SYSUID is prefixed as HLQ
  * Normal file names on other platforms could be relative
  
@@ -174,14 +174,14 @@ language code (LANG=de_DE, LANG=C). If only the language code defined
 then the CCSID is derived from the language code (DE=IBM-1141,
 US=IBM-1047, C=IBM-1047, ...).
 
-If possible these critical characters are also converted for print outs.
-At output it is not possible to convert anything correctly, because some
-strings for print out are coming from other sources (like system
-messages and others). Only all known literals are converted, for unknown
-variables such a conversion is not possible and CLEP expect that such
-strings are encoded in the correct system code page, but we can not
+If it possible these critical characters are also converted for print
+outs. At output it is not possible to convert anything correctly,
+because some strings for print out are coming from other sources (like
+system messages and others). Only all known literals are converted, for
+unknown variables such a conversion is not possible and CLEP expect that
+such strings are encoded in the correct system code page, but we can not
 guaranty this.
 
 On ASCII/UTF-8 platforms a miss interpretation of punctuation characters 
-smaller 128 is not possible. On such platforms the LANG variable is not
-used for command interpretation or printouts.
+smaller thne 128 is not possible. On such platforms the LANG variable is
+not used for command interpretation or printouts.

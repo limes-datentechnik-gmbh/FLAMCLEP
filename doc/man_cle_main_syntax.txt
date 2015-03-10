@@ -3,22 +3,22 @@ printed on the screen if the built-in function 'SYNTAX' is used.
 
 Each command can be entered as an argument list on the command line or
 in a parameter file. To define a parameter file the assignment character
-'=' must be used. For an argument list a blank or if the command
-(main table) is of type overlay a dot '.' or if the command is of type
-object a round bracket open '(' must be given. If the round bracket open
-is used then the corresponding round bracket close ')' at the end of the
-command is mandatory. The dot and parenthesis are in accordance with
-the normal syntax.
+(`=`) must be used. For an argument list a blank or if the command
+(main table) is of type overlay a dot (`.`) or if the command is of type
+object a round bracket open (`(`) must be given. If the round bracket
+open is used then the corresponding round bracket close (`)`) at the end
+of the command is mandatory. The dot and parenthesis are in accordance
+with the normal syntax.
 
 If an argument list is used all parameters (argv[]) are concatenated
 to one long string and this string is passed to the parser, to allow
 usage of all features of the shell to build the command line input. To
 make sure that anything you enter is passed one by one to the parser
 please use double (WINDOWS(R), UNIX) or single (z/OS(R)) quotation marks
-at the beginning and end of the argument list. If the dot '.' or
-parenthesis '(' ')' is used the complete command can be included in
-double quotation marks. The examples below show all possible command
-entries for the type object:
+at the beginning and end of the argument list. If the dot for overlays
+or parenthesis for objects are used then the complete command must be
+included in double quotation marks. The examples below show all possible
+command entries for the type object:
 
 -----------------------------------------------------------------------
 program command temp() dummy='str'
