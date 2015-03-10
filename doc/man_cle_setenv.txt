@@ -6,7 +6,7 @@ before a command is executed.
 Do not use space characters between the key, assignment character (=)
 and value.
 
-Attention: *The environment variables will be temporary overwritten*
+*Attention:* The environment variables will be temporary overwritten
 
 .EXAMPLES
 
