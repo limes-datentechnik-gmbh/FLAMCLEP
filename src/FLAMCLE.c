@@ -1209,6 +1209,7 @@ EVALUATE:
                for (i=0;i<l;i++) fprintf(pfDoc,"="); fprintf(pfDoc,"\n");
                fprintf(pfDoc,":doctype: book\n\n");
             }
+            efprintf(pfDoc,"[[command-line-processor]]\n");
             if (isNbr) {
                fprintf(pfDoc,"1. COMMAND LINE PROCESSOR\n");
                fprintf(pfDoc,"-------------------------\n\n");
