@@ -1934,9 +1934,9 @@ EVALUATE:
                siErr=psTab[i].pfMap(pfOut,pfTrc,psTab[i].piOid,psTab[i].pvClp,psTab[i].pvPar);
                if (siErr) {
                   if (pfMsg!=NULL && (pcMsg=pfMsg(siErr))!=NULL) {
-                     fprintf(pfOut,"Mapping of CLP structure for command '%s' failed (Return/Reason-Code: %d/%d (%s))\n",psTab[i].pcKyw,CLERTC_MAP,siErr,pcMsg);
+                     fprintf(pfOut,"Mapping of CLP structure for command '%s' failed (Return code: %d / Reason code: %d (%s))\n",psTab[i].pcKyw,CLERTC_MAP,siErr,pcMsg);
                   } else {
-                     fprintf(pfOut,"Mapping of CLP structure for command '%s' failed (Return/Reason-Code: %d/%d)\n",psTab[i].pcKyw,CLERTC_MAP,siErr);
+                     fprintf(pfOut,"Mapping of CLP structure for command '%s' failed (Return code: %d / Reason code: %d)\n",psTab[i].pcKyw,CLERTC_MAP,siErr);
                   }
                   if (pcCmd!=NULL) free(pcCmd);
                   if (pcLst!=NULL) free(pcLst);
@@ -1967,9 +1967,9 @@ EVALUATE:
                siErr=psTab[i].pfFin(pfOut,pfTrc,psTab[i].pvPar);
                if (siErr) {
                   if (pfMsg!=NULL && (pcMsg=pfMsg(siErr))!=NULL) {
-                     fprintf(pfOut,"Finish/cleanup for command '%s' failed (Return/Reason-Code: %d/%d (%s))\n",psTab[i].pcKyw,CLERTC_FIN,siErr,pcMsg);
+                     fprintf(pfOut,"Finish/cleanup for command '%s' failed (Return code: %d / Reason code: %d (%s))\n",psTab[i].pcKyw,CLERTC_FIN,siErr,pcMsg);
                   } else {
-                     fprintf(pfOut,"Finish/cleanup for command '%s' failed (Return/Reason-Code: %d/%d)\n",psTab[i].pcKyw,CLERTC_FIN,siErr);
+                     fprintf(pfOut,"Finish/cleanup for command '%s' failed (Return code: %d / Reason code: %d)\n",psTab[i].pcKyw,CLERTC_FIN,siErr);
                   }
                   ERROR(CLERTC_FIN);
                }
@@ -2029,9 +2029,9 @@ static int siClePropertyInit(
    siErr=pfIni(pfOut,pfTrc,pcOwn,pcPgm,pvClp);
    if (siErr) {
       if (pfMsg!=NULL && (pcMsg=pfMsg(siErr))!=NULL) {
-         fprintf(pfOut,"Initialization of CLP structure for command '%s' failed (Return/Reason-Code: %d/%d (%s))\n",pcCmd,CLERTC_INI,siErr,pcMsg);
+         fprintf(pfOut,"Initialization of CLP structure for command '%s' failed (Return code: %d / Reason code: %d (%s))\n",pcCmd,CLERTC_INI,siErr,pcMsg);
       } else {
-         fprintf(pfOut,"Initialization of CLP structure for command '%s' failed (Return/Reason-Code: %d/%d)\n",pcCmd,CLERTC_INI,siErr);
+         fprintf(pfOut,"Initialization of CLP structure for command '%s' failed (Return code: %d / Reason code: %d)\n",pcCmd,CLERTC_INI,siErr);
       }
       return(CLERTC_INI);
    }
@@ -2182,9 +2182,9 @@ static int siCleCommandInit(
    siErr=pfIni(pfOut,pfTrc,pcOwn,pcPgm,pvClp);
    if (siErr) {
       if (pfMsg!=NULL && (pcMsg=pfMsg(siErr))!=NULL) {
-         fprintf(pfOut,"Initialization of CLP structure for command '%s' failed (Return/Reason-Code: %d/%d (%s))\n",pcCmd,CLERTC_INI,siErr,pcMsg);
+         fprintf(pfOut,"Initialization of CLP structure for command '%s' failed (Return code: %d / Reason code: %d (%s))\n",pcCmd,CLERTC_INI,siErr,pcMsg);
       } else {
-         fprintf(pfOut,"Initialization of CLP structure for command '%s' failed (Return/Reason-Code: %d/%d)\n",pcCmd,CLERTC_INI,siErr);
+         fprintf(pfOut,"Initialization of CLP structure for command '%s' failed (Return code: %d / Reason code: %d)\n",pcCmd,CLERTC_INI,siErr);
       }
       return(CLERTC_INI);
    }
