@@ -1948,17 +1948,17 @@ EVALUATE:
                if (siErr) {
                   if (isWrn) {
                      if (pfMsg!=NULL && (pcMsg=pfMsg(siErr))!=NULL) {
-                        fprintf(pfOut,"Run of command '%s' ends with warning (Return/Reason-Code: %d/%d (%s))\n",psTab[i].pcKyw,CLERTC_WRN,siErr,pcMsg);
+                        fprintf(pfOut,"Run of command '%s' ends with warning (Return code: %d / Reason code: %d (%s))\n",psTab[i].pcKyw,CLERTC_WRN,siErr,pcMsg);
                      } else {
-                        fprintf(pfOut,"Run of command '%s' ends with warning (Return/Reason-Code: %d/%d)\n",psTab[i].pcKyw,CLERTC_WRN,siErr);
+                        fprintf(pfOut,"Run of command '%s' ends with warning (Return code: %d / Reason code: %d)\n",psTab[i].pcKyw,CLERTC_WRN,siErr);
                      }
                      psTab[i].pfFin(pfOut,pfTrc,psTab[i].pvPar);
                      ERROR(CLERTC_WRN);
                   } else {
                      if (pfMsg!=NULL && (pcMsg=pfMsg(siErr))!=NULL) {
-                        fprintf(pfOut,"Run of command '%s' failed (Return/Reason-Code: %d/%d (%s))\n",psTab[i].pcKyw,CLERTC_RUN,siErr,pcMsg);
+                        fprintf(pfOut,"Run of command '%s' failed (Return code: %d / Reason code: %d (%s))\n",psTab[i].pcKyw,CLERTC_RUN,siErr,pcMsg);
                      } else {
-                        fprintf(pfOut,"Run of command '%s' failed (Return/Reason-Code: %d/%d)\n",psTab[i].pcKyw,CLERTC_RUN,siErr);
+                        fprintf(pfOut,"Run of command '%s' failed (Return code: %d / Reason code: %d)\n",psTab[i].pcKyw,CLERTC_RUN,siErr);
                      }
                      psTab[i].pfFin(pfOut,pfTrc,psTab[i].pvPar);
                      ERROR(CLERTC_RUN);
