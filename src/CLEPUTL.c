@@ -324,7 +324,7 @@ extern int init_char(int* p) {
    gs_svb[1]=gs_vbr[0];
    gs_svb[2]=0x00;
    gs_sbs[0]='/';
-   gs_sbs[1]=gs_bls[0];
+   gs_sbs[1]=gs_bsl[0];
    gs_sbs[2]=0x00;
    gs_idt[0]='-';
    gs_idt[1]='-';
@@ -1425,10 +1425,7 @@ extern unsigned int chr2asc(
          case '\r' : asc[i]=0x0D; break;
 
          case ' '  : asc[i]=0x20; break;
-         case C_EXC: asc[i]=0x21; break;
          case '\"' : asc[i]=0x22; break;
-         case C_HSH: asc[i]=0x23; break;
-         case C_DLR: asc[i]=0x24; break;
          case '%'  : asc[i]=0x25; break;
          case '&'  : asc[i]=0x26; break;
          case '\'' : asc[i]=0x27; break;
@@ -1458,7 +1455,6 @@ extern unsigned int chr2asc(
          case '>'  : asc[i]=0x3E; break;
          case '?'  : asc[i]=0x3F; break;
 
-         case C_ATS: asc[i]=0x40; break;
          case 'A'  : asc[i]=0x41; break;
          case 'B'  : asc[i]=0x42; break;
          case 'C'  : asc[i]=0x43; break;
@@ -1486,13 +1482,8 @@ extern unsigned int chr2asc(
          case 'X'  : asc[i]=0x58; break;
          case 'Y'  : asc[i]=0x59; break;
          case 'Z'  : asc[i]=0x5A; break;
-         case C_SBO: asc[i]=0x5B; break;
-         case C_BSL: asc[i]=0x5C; break;
-         case C_SBC: asc[i]=0x5D; break;
-         case C_CRT: asc[i]=0x5E; break;
          case '_'  : asc[i]=0x5F; break;
 
-         case C_GRV: asc[i]=0x60; break;
          case 'a'  : asc[i]=0x61; break;
          case 'b'  : asc[i]=0x62; break;
          case 'c'  : asc[i]=0x63; break;
@@ -1520,11 +1511,38 @@ extern unsigned int chr2asc(
          case 'x'  : asc[i]=0x78; break;
          case 'y'  : asc[i]=0x79; break;
          case 'z'  : asc[i]=0x7A; break;
-         case C_CBO: asc[i]=0x7B; break;
-         case C_VBR: asc[i]=0x7C; break;
-         case C_CBC: asc[i]=0x7D; break;
-         case C_TLD: asc[i]=0x7E; break;
-         default   : asc[i]=0x00; return(i);
+
+         default   :
+            if (chr[i]==C_EXC) {
+               asc[i]=0x21;
+            } else if (chr[i]==C_HSH) {
+               asc[i]=0x23;
+            } else if (chr[i]==C_DLR) {
+               asc[i]=0x24;
+            } else if (chr[i]==C_ATS) {
+               asc[i]=0x40;
+            } else if (chr[i]==C_SBO) {
+               asc[i]=0x5B;
+            } else if (chr[i]==C_BSL) {
+               asc[i]=0x5C;
+            } else if (chr[i]==C_SBC) {
+               asc[i]=0x5D;
+            } else if (chr[i]==C_CRT) {
+               asc[i]=0x5E;
+            } else if (chr[i]==C_GRV) {
+               asc[i]=0x60;
+            } else if (chr[i]==C_CBO) {
+               asc[i]=0x7B;
+            } else if (chr[i]==C_VBR) {
+               asc[i]=0x7C;
+            } else if (chr[i]==C_CBC) {
+               asc[i]=0x7D;
+            } else if (chr[i]==C_TLD) {
+               asc[i]=0x7E;
+            } else {
+               asc[i]=0x00;
+            }
+            return(i);
       }
    }
    return(i);
@@ -1542,10 +1560,7 @@ extern unsigned int chr2ebc(
          case '\r' : ebc[i]=0x0D; break;
 
          case ' '  : ebc[i]=0x40; break;
-         case C_EXC: ebc[i]=0x5A; break;
          case '\"' : ebc[i]=0x7F; break;
-         case C_HSH: ebc[i]=0x7B; break;
-         case C_DLR: ebc[i]=0x5B; break;
          case '%'  : ebc[i]=0x6C; break;
          case '&'  : ebc[i]=0x50; break;
          case '\'' : ebc[i]=0x7D; break;
@@ -1575,7 +1590,6 @@ extern unsigned int chr2ebc(
          case '>'  : ebc[i]=0x6E; break;
          case '?'  : ebc[i]=0x6F; break;
 
-         case C_ATS: ebc[i]=0x7C; break;
          case 'A'  : ebc[i]=0xC1; break;
          case 'B'  : ebc[i]=0xC2; break;
          case 'C'  : ebc[i]=0xC3; break;
@@ -1603,13 +1617,8 @@ extern unsigned int chr2ebc(
          case 'X'  : ebc[i]=0xE7; break;
          case 'Y'  : ebc[i]=0xE8; break;
          case 'Z'  : ebc[i]=0xE9; break;
-         case C_SBO: ebc[i]=0x00; break;
-         case C_BSL: ebc[i]=0xE0; break;
-         case C_SBC: ebc[i]=0x00; break;
-         case C_CRT: ebc[i]=0x5F; break;
          case '_'  : ebc[i]=0x6D; break;
 
-         case C_GRV: ebc[i]=0x79; break;
          case 'a'  : ebc[i]=0x81; break;
          case 'b'  : ebc[i]=0x82; break;
          case 'c'  : ebc[i]=0x83; break;
@@ -1637,12 +1646,38 @@ extern unsigned int chr2ebc(
          case 'x'  : ebc[i]=0xA7; break;
          case 'y'  : ebc[i]=0xA8; break;
          case 'z'  : ebc[i]=0xA9; break;
-         case C_CBO: ebc[i]=0xC0; break;
-         case C_VBR: ebc[i]=0x4F; break;
-         case C_CBC: ebc[i]=0xD0; break;
-         case C_TLD: ebc[i]=0xA1; break;
 
-         default   : ebc[i]=0x00; return(i);
+         default   :
+            if (chr[i]==C_EXC) {
+               ebc[i]=0x5A;
+            } else if (chr[i]==C_HSH) {
+               ebc[i]=0x7B;
+            } else if (chr[i]==C_DLR) {
+               ebc[i]=0x5B;
+            } else if (chr[i]==C_ATS) {
+               ebc[i]=0x7C;
+            } else if (chr[i]==C_SBO) {
+               ebc[i]=0xAD;
+            } else if (chr[i]==C_BSL) {
+               ebc[i]=0xE0;
+            } else if (chr[i]==C_SBC) {
+               ebc[i]=0xBD;
+            } else if (chr[i]==C_CRT) {
+               ebc[i]=0x5F;
+            } else if (chr[i]==C_GRV) {
+               ebc[i]=0x79;
+            } else if (chr[i]==C_CBO) {
+               ebc[i]=0xC0;
+            } else if (chr[i]==C_VBR) {
+               ebc[i]=0x4F;
+            } else if (chr[i]==C_CBC) {
+               ebc[i]=0xD0;
+            } else if (chr[i]==C_TLD) {
+               ebc[i]=0xA1;
+            } else {
+               ebc[i]=0x00;
+            }
+            return(i);
       }
    }
    return(i);
