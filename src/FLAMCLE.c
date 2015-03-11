@@ -31,7 +31,6 @@
  * TASK:0000086 Fehlermeldungen ueberarbeiten (Zentralisierung)
  * TASK:0000086 Wide character support fuer command files einbauen
  * TASK:0000086 Mehrsprachigkeit einbauen
- * TODO: Replace '[]' with C_SBO/SBC in literals
  */
 /* Standard-Includes **************************************************/
 

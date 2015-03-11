@@ -603,13 +603,13 @@ typedef struct CleCommand {
  *
  * @return signed integer with the condition codes below:\n
  * 0  - command line, command syntax, mapping, execution and finish of the command was successful\n
- * 2  - command line, command syntax, mapping, execution was successful but finish of the command failed\n
+ * 2  - command line, command syntax, mapping, execution was successful but cleanup of the command failed (may not happened)\n
  * 4  - command line, command syntax and mapping was successful but execution of the command returns with a warning\n
  * 8  - command line, command syntax and mapping was successful but execution of the command returns with an error\n
  * 12 - command line and command syntax was OK but mapping failed\n
  * 16 - command line was OK but command syntax was wrong\n
  * 20 - command line was wrong (user error)\n
- * 24 - initialization is wrong (user error)\n
+ * 24 - initialization of parameter structure for the command failed (may not happened)\n
  * 28 - configuration is wrong (user error)\n
  * 32 - table error (something within the predefined tables is wrong)\n
  * 36 - system error (mainly memory allocation or some thing like this failed)\n

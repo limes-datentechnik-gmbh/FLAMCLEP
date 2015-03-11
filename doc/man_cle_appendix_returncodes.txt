@@ -4,19 +4,38 @@ This content is printed on the screen with the built-in function
 'ERRORS'.
 
  * 0  - command line, command syntax, mapping, execution and finish of the command was successful
- * 2  - command line, command syntax, mapping, execution was successful but finish of the command failed (may not happened)
+ * 2  - command line, command syntax, mapping, execution was successful but cleanup of the command failed (may not happened)
  * 4  - command line, command syntax and mapping was successful but execution of the command returns with a warning
  * 8  - command line, command syntax and mapping was successful but execution of the command returns with an error
  * 12 - command line and command syntax was OK but mapping of the parameter for command execution failed
  * 16 - command line was OK but command syntax was wrong (error from command line parser)
  * 20 - command line it self was wrong (please use built-in function "SYNTAX" for more information)
- * 24 - initialization of the parameter structure failed (may not happened)
+ * 24 - initialization of the parameter structure for the command failed (may not happened)
  * 28 - configuration is wrong (determination of configuration data failed, configuration file is damaged)
  * 32 - table error (something within the predefined tables is wrong (internal error))
  * 36 - system error (e.g. memory allocation failed)
  * 40 - access control or license error
  * 44 - interface error (e.g. parameter pointer equals NULL (only at call of subprogram interface))
  * 64 - fatal error (basic things are damaged)
+ 
+The command line is interpreted by CLE the command syntax it self by
+CLP. For example:
+ 
+------------------------------------------------------------------------
+
+ :> flcl conv "read.file='test.txt' write.flam(file='test.adc')"
+    |    |     |-- the command string are compiled by CLP
+    |    |     |   and this can result in a syntax error 
+    |    |-- conv is part of the command line
+    |-- flcl is part of the command line
+ 
+ :> flcl conv=para.txt
+    |    |    |-- para.txt is part of the command line, but the content
+    |    |        of para.txt can result in a syntax error of CLP 
+    |    |-- conv is part of the command line
+    |-- flcl is part of the command line
+    
+------------------------------------------------------------------------ 
  
 A command execution (run) can result in a return code of 0 on success,
 a warning represent by value 4 or an error with value 8. If the command
