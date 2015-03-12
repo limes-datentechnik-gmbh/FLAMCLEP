@@ -449,7 +449,7 @@ extern int siCleExecute(
    homedir(TRUE,sizeof(acHom),acHom);
 
    if (psTab==NULL || argc==0 || argv==NULL || pcPgm==NULL || pcHlp==NULL || pfOut==NULL || pcDep==NULL || pcOpt==NULL || pcEnt==NULL ||
-       *pcPgm==0 || *pcHlp==0 || *pcPgm>CLEMAX_PGMLEN) return(CLERTC_FAT);
+       *pcPgm==0 || *pcHlp==0 || strlen(pcPgm)>CLEMAX_PGMLEN) return(CLERTC_FAT);
 
    for (i=0;pcPgm[i] && i<(sizeof(acPgm)-1);i++) acPgm[i]=toupper(pcPgm[i]);
    acPgm[i]=0;
