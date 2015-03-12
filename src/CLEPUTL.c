@@ -475,10 +475,10 @@ extern int win_snprintf(char* buffer,size_t size,const char* format,...)
    va_list  argv;
    int      r;
    va_start(argv, format);
-   r = vsnprintf(buffer, size-1, format, argv);
+   r = vsnprintf(buffer, size, format, argv);
    va_end(argv);
-   if (r >= size-1)
-         *(buffer+size-1) = 0;
+   if (size && (r<0 || r >= (int)(size-1)))
+      *(buffer+size-1) = 0;
    return(r);
 }
 
