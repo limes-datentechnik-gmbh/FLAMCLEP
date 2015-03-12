@@ -103,11 +103,12 @@
  *         Add support of reason codes including generation of an appendix in GENDOCU for it
  *         Add new built in function to print out error code messages
  * 1.1.42: Code page specific interpretation of punctuation characters on EBCDIC systems
+ * 1.1.43: Replace unnecessary strlen()
  */
-#define CLE_VSN_STR       "1.1.42"
+#define CLE_VSN_STR       "1.1.43"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        1
-#define CLE_VSN_REVISION       42
+#define CLE_VSN_REVISION       43
 
 /* Definition der Konstanten ******************************************/
 #define CLEMAX_CNFLEN            1023
@@ -448,7 +449,7 @@ extern int siCleExecute(
    homedir(TRUE,sizeof(acHom),acHom);
 
    if (psTab==NULL || argc==0 || argv==NULL || pcPgm==NULL || pcHlp==NULL || pfOut==NULL || pcDep==NULL || pcOpt==NULL || pcEnt==NULL ||
-       strlen(pcPgm)==0 || strlen(pcHlp)==0 || strlen(pcPgm)>CLEMAX_PGMLEN) return(CLERTC_FAT);
+       *pcPgm==0 || *pcHlp==0 || *pcPgm>CLEMAX_PGMLEN) return(CLERTC_FAT);
 
    for (i=0;pcPgm[i] && i<(sizeof(acPgm)-1);i++) acPgm[i]=toupper(pcPgm[i]);
    acPgm[i]=0;
@@ -465,7 +466,7 @@ extern int siCleExecute(
          if (pcCnf!=NULL) {
             *pcCnf=0x00;
             for (pcTmp=acCnf;isspace(*pcTmp);pcTmp++);
-            if (strlen(pcTmp)) {
+            if (*pcTmp) {
                if (SETENV(pcTmp,pcCnf+1)) {
                   fprintf(pfOut,"Put variable (%s=%s) to environment failed (%d - %s)\n",pcTmp,pcCnf+1,errno,strerror(errno));
                   fclose(pfTmp);
@@ -487,7 +488,7 @@ extern int siCleExecute(
 #endif
    snprintf(acCnf,sizeof(acCnf),"%s_DEFAULT_OWNER_ID",acPgm);
    pcCnf=GETENV(acCnf);
-   if (pcCnf!=NULL && strlen(pcCnf)) snprintf(acOwn,sizeof(acOwn),"%s",pcCnf); else snprintf(acOwn,sizeof(acOwn),"%s",pcOwn);
+   if (pcCnf!=NULL && *pcCnf) snprintf(acOwn,sizeof(acOwn),"%s",pcCnf); else snprintf(acOwn,sizeof(acOwn),"%s",pcOwn);
    snprintf(acCnf,sizeof(acCnf),"%s_CONFIG_FILE",acPgm);
    pcCnf=GETENV(acCnf);
    if (pcCnf==NULL) {
@@ -503,7 +504,7 @@ extern int siCleExecute(
          strcpy(&acCnf[j],".CONFIG");
       }
 #else
-      if (strlen(acHom)) {
+      if (acHom[0]) {
          snprintf(acCnf,sizeof(acCnf),".%s.config",pcPgm);
          pfTmp=fopen(acCnf,"r");
          if (pfTmp==NULL) {
@@ -530,7 +531,7 @@ extern int siCleExecute(
 
    snprintf(acCnf,sizeof(acCnf),"%s.owner.id",pcPgm);
    pcCnf=pcCnfGet(psCnf,acCnf);
-   if (pcCnf!=NULL && strlen(pcCnf)) snprintf(acOwn,sizeof(acOwn),"%s",pcCnf);
+   if (pcCnf!=NULL && *pcCnf) snprintf(acOwn,sizeof(acOwn),"%s",pcCnf);
 
 #ifdef __DEBUG__
    i=siCnfPutEnv(psCnf,acOwn,pcPgm);
@@ -550,7 +551,7 @@ extern int siCleExecute(
    if (pcCnf!=NULL && strxcmp(isCas,pcCnf,"ON",0,0,FALSE)==0) {
       snprintf(acCnf,sizeof(acCnf),"%s.%s.trace.file",acOwn,pcPgm);
       pcCnf=pcCnfGet(psCnf,acCnf);
-      if (pcCnf!=NULL && strlen(pcCnf)) {
+      if (pcCnf!=NULL && *pcCnf) {
          snprintf(acMod,sizeof(acMod),"w%s",cpmapfil(acFil,sizeof(acFil),pcCnf,TRUE));
          pfTrh=fopen(acFil,acMod);
          if (pfTrh==NULL) {
@@ -562,7 +563,7 @@ extern int siCleExecute(
    for (i=0; psTab[i].pcKyw!=NULL; i++) {
       if (psTab[i].psTab==NULL || psTab[i].pvClp==NULL || psTab[i].pvPar==NULL ||
           psTab[i].pfIni==NULL || psTab[i].pfMap==NULL || psTab[i].pfRun==NULL || psTab[i].pfFin==NULL ||
-          psTab[i].pcMan==NULL || psTab[i].pcHlp==NULL || strlen(psTab[i].pcKyw)==0 || strlen(psTab[i].pcMan)==0 || strlen(psTab[i].pcHlp)==0) {
+          psTab[i].pcMan==NULL || psTab[i].pcHlp==NULL || *psTab[i].pcKyw==0 || *psTab[i].pcMan==0 || *psTab[i].pcHlp==0) {
          fprintf(pfOut,"Row %d of command table not initialized properly\n",i);
          ERROR(CLERTC_TAB);
       }
@@ -573,7 +574,7 @@ extern int siCleExecute(
    }
 
    if (argc<2) {
-      if (pcDef!=NULL && strlen(pcDef)) {
+      if (pcDef!=NULL && *pcDef) {
          ppArg=malloc((argc+1)*sizeof(*ppArg));
          if (ppArg == NULL) {
             fprintf(pfOut,"Memory allocation for argument list to run the default command '%s' failed\n",pcDef);
@@ -735,7 +736,7 @@ EVALUATE:
                ERROR(CLERTC_OK);
             }
          }
-         if (pcDef!=NULL && strlen(pcDef)) {
+         if (pcDef!=NULL && *pcDef) {
             for (i=0;psTab[i].pcKyw!=NULL;i++) {
                if (strxcmp(isCas,pcDef,psTab[i].pcKyw,0,0,FALSE)==0) {
                   char* pcPat=(char*)malloc(strlen(pcDef)+strlen(argv[2]+2));
@@ -840,7 +841,7 @@ EVALUATE:
                ERROR(CLERTC_OK);
             }
          }
-         if (pcDef!=NULL && strlen(pcDef)) {
+         if (pcDef!=NULL && *pcDef) {
             for (i=0;psTab[i].pcKyw!=NULL;i++) {
                if (strxcmp(isCas,pcDef,psTab[i].pcKyw,0,0,FALSE)==0) {
                   char* pcPat=(char*)malloc(strlen(psTab[i].pcKyw)+strlen(argv[2]+2));
@@ -1071,7 +1072,7 @@ EVALUATE:
          }
          if (isAll==TRUE) ERROR(CLERTC_OK);
 
-         if (pcDef!=NULL && strlen(pcDef)) {
+         if (pcDef!=NULL && *pcDef) {
             for (i=0;psTab[i].pcKyw!=NULL;i++) {
                if (strxcmp(isCas,pcDef,psTab[i].pcKyw,0,0,FALSE)==0) {
                   char* pcPat=(char*)malloc(strlen(pcDef)+strlen(pcCmd+2));
@@ -1172,7 +1173,7 @@ EVALUATE:
                   }
                }
             }
-            if (pcDef!=NULL && strlen(pcDef)) {
+            if (pcDef!=NULL && *pcDef) {
                for (i=0;psTab[i].pcKyw!=NULL;i++) {
                   if (strxcmp(isCas,pcDef,psTab[i].pcKyw,0,0,FALSE)==0) {
                      char* pcPat=(char*)malloc(strlen(pcDef)+strlen(pcCmd+2));
@@ -1201,7 +1202,7 @@ EVALUATE:
                }
             }
          } else {
-            if (pcCov!=NULL && strlen(pcCov)) {
+            if (pcCov!=NULL && *pcCov) {
                efprintf(pfDoc,"%s\n\n",pcCov);
             } else {
                snprintf(acNum,sizeof(acNum),"'%s' - User Manual",acPgm); l=strlen(acNum); fprintf(pfDoc,"%s\n",acNum);
@@ -1356,7 +1357,7 @@ EVALUATE:
                efprintf(pfDoc,"indexterm:[Appendix Reasoncodes]\n\n\n");
             }
 
-            if (pcVsn!=NULL && strlen(pcVsn)) {
+            if (pcVsn!=NULL && *pcVsn) {
                efprintf(pfDoc,"[[appendix-version]]\n");
                efprintf(pfDoc,"[appendix]\n");
                fprintf(pfDoc,"VERSION\n");
@@ -1368,7 +1369,7 @@ EVALUATE:
                efprintf(pfDoc,"indexterm:[Appendix Version]\n\n\n");
             }
 
-            if (pcAbo!=NULL && strlen(pcAbo)) {
+            if (pcAbo!=NULL && *pcAbo) {
                efprintf(pfDoc,"[[appendix-about]]\n");
                efprintf(pfDoc,"[appendix]\n");
                fprintf(pfDoc,"ABOUT\n");
@@ -1380,7 +1381,7 @@ EVALUATE:
                efprintf(pfDoc,"indexterm:[Appendix About]\n\n\n");
             }
 
-            if (pcGls!=NULL && strlen(pcGls)) {
+            if (pcGls!=NULL && *pcGls) {
                efprintf(pfDoc,"[glossary]\n");
                fprintf(pfDoc,"GLOSSARY\n");
                fprintf(pfDoc,"--------\n\n");
@@ -1393,7 +1394,7 @@ EVALUATE:
             fprintf(pfDoc,"INDEX\n");
             fprintf(pfDoc,"-----\n\n");
 
-            if (pcFin!=NULL && strlen(pcFin)) {
+            if (pcFin!=NULL && *pcFin) {
                efprintf(pfDoc,"\n\n%s\n\n",pcFin);
             } else {
                efprintf(pfDoc,"[colophon]\n");
@@ -1508,7 +1509,7 @@ EVALUATE:
             }
             snprintf(acCnf,sizeof(acCnf),"%s.%s.property.file",acOwn,pcPgm);
          }
-         if (strlen(pcFil)==0) {
+         if (*pcFil==0) {
             fprintf(pfOut,"Syntax for built-in function 'SETPROP' not valid\n");
             for (i=0;psTab[i].pcKyw!=NULL;i++) {
                if (psTab[i].siFlg) {
@@ -1567,7 +1568,7 @@ EVALUATE:
             }
          }
       }
-      if (pcDef!=NULL && strlen(pcDef)) {
+      if (pcDef!=NULL && *pcDef) {
          for (i=0;psTab[i].pcKyw!=NULL;i++) {
             if (strxcmp(isCas,pcDef,psTab[i].pcKyw,0,0,FALSE)==0) {
                char acPro[CLEMAX_PATSIZ]="";
@@ -1721,7 +1722,7 @@ EVALUATE:
                ERROR(CLERTC_OK);
             }
          }
-         if (pcDef!=NULL && strlen(pcDef)) {
+         if (pcDef!=NULL && *pcDef) {
             for (i=0;psTab[i].pcKyw!=NULL;i++) {
                if (strxcmp(isCas,pcDef,psTab[i].pcKyw,0,0,FALSE)==0) {
                   char* pcPat=(char*)malloc(strlen(pcDef)+strlen(argv[2]+2));
@@ -1855,7 +1856,7 @@ EVALUATE:
                   snprintf(acCnf,sizeof(acCnf),"%s.%s.trace.file",acOwn,pcPgm);
                   siErr=siCnfSet(psCnf,pfOut,acCnf,pcFil,TRUE);
                   if (siErr) ERROR(CLERTC_CFG); else {
-                     if (strlen(pcFil)) {
+                     if (*pcFil) {
                         fprintf(pfOut,"Setting configuration keyword '%s' to value '%s' was successful\n",acCnf,pcFil);
                      } else {
                         fprintf(pfOut,"Deleting value from configuration keyword '%s' was successful\n",acCnf);
@@ -1977,7 +1978,7 @@ EVALUATE:
             }
          }
       }
-      if (pcDef!=NULL && strlen(pcDef) && ppArg==NULL) {
+      if (pcDef!=NULL && *pcDef && ppArg==NULL) {
          ppArg=malloc((argc+1)*sizeof(*ppArg));
          if (ppArg == NULL) {
             fprintf(pfOut,"Memory allocation for argument list to run the default command '%s' failed\n",pcDef);
@@ -2110,7 +2111,7 @@ static int siClePropertyFinish(
             strcat(acEnv,".PROPS");
          }
 #else
-         if (pcHom!=NULL && strlen(pcHom)) {
+         if (pcHom!=NULL && *pcHom) {
             snprintf(acEnv,sizeof(acEnv),"%s.%s.%s.%s.properties",pcHom,pcOwn,pcPgm,pcCmd);
          } else {
             snprintf(acEnv,sizeof(acEnv),".%s.%s.%s.properties",pcOwn,pcPgm,pcCmd);
@@ -2339,7 +2340,7 @@ static void vdCleManProgram(
       fprintf(pfOut,"-----------------------------------------------------------------------\n\n");
       fprintf(pfOut,"DESCRIPTION\n");
       fprintf(pfOut,"-----------\n\n");
-      if (pcMan!=NULL && strlen(pcMan)) {
+      if (pcMan!=NULL && *pcMan) {
          efprintf(pfOut,"%s\n\n",pcMan);
       } else {
          fprintf(pfOut,"No detailed description available for this program.\n\n");
@@ -2388,7 +2389,7 @@ static void vdCleManProgram(
          fprintf(pfOut,"DESCRIPTION\n");
          for (i=0;i<11;i++) fprintf(pfOut,"%c",C_TLD); fprintf(pfOut,"\n\n");
       }
-      if (pcMan!=NULL && strlen(pcMan)) {
+      if (pcMan!=NULL && *pcMan) {
          efprintf(pfOut,"%s\n\n",pcMan);
       } else {
          fprintf(pfOut,"No detailed description available for this program.\n\n");
@@ -2777,7 +2778,7 @@ static TsCnfHdl* psCnfOpn(
    psHdl->psFst=NULL;
    psHdl->psLst=NULL;
    if (pcPgm!=NULL) snprintf(psHdl->acPgm,sizeof(psHdl->acPgm),"%s",pcPgm);
-   if (pcFil==NULL || strlen(pcFil)==0) return(psHdl);
+   if (pcFil==NULL || *pcFil==0) return(psHdl);
    snprintf(psHdl->acMod,sizeof(psHdl->acMod),"w%s",cpmapfil(psHdl->acFil,sizeof(psHdl->acFil),pcFil,TRUE));
    pfFil=fopen(psHdl->acFil,"r");
    if (pfFil==NULL && (errno==2 || errno==49 || errno==129)) return(psHdl);
@@ -2867,7 +2868,7 @@ static int siCnfSet(
             }
             free(psEnt);
          } else {
-            if (isOvr || strlen(psEnt->acVal)==0) {
+            if (isOvr || psEnt->acVal[0]==0) {
                strcpy(psEnt->acVal,pcVal);
             }else {
                if (pfOut!=NULL) fprintf(pfOut,"Configuration value (%s) for keyword '%s' already exists\n",psEnt->acVal,psEnt->acKyw);
@@ -2976,7 +2977,7 @@ static int siCnfPrnEnv(
                pcAdd="was verified";
             }
          }
-         if (pcPre!=NULL && strlen(pcPre)) {
+         if (pcPre!=NULL && *pcPre) {
             fprintf(pfOut,"%s %s=%s %c %s\n",pcPre,pcKyw,psEnt->acVal,C_HSH,pcAdd);
          } else {
             fprintf(pfOut,"%s=%s %c %s\n",pcKyw,psEnt->acVal,C_HSH,pcAdd);
@@ -2994,7 +2995,7 @@ static int siCnfPrn(
    int                           i;
    TsCnfEnt*                     psEnt;
    for (i=0,psEnt=psHdl->psFst;psEnt!=NULL;psEnt=psEnt->psNxt,i++) {
-      if (pcPre!=NULL && strlen(pcPre)) {
+      if (pcPre!=NULL && *pcPre) {
          fprintf(pfOut,"%s %s=%s\n",pcPre,psEnt->acKyw,psEnt->acVal);
       } else {
          fprintf(pfOut,"%s=%s\n",psEnt->acKyw,psEnt->acVal);
@@ -3038,7 +3039,7 @@ static void vdCnfCls(
          if (!ISDDNAME(psHdl->acFil)) remove(psHdl->acFil);
       } else {
          psEnt=psHdl->psFst;
-         if (psHdl->isChg && strlen(psHdl->acFil)) {
+         if (psHdl->isChg && psHdl->acFil[0]) {
             pfFil=fopen(psHdl->acFil,psHdl->acMod);
          }
          if (pfFil!=NULL) {

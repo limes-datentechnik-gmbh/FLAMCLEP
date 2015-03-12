@@ -92,12 +92,13 @@
  * 1.1.42: Correct order (scan new token as last step) to fix issue 614
  * 1.1.43: fix null pointer references
  * 1.1.44: Code page specific interpretation of punctuation characters on EBCDIC systems
+ * 1.1.45: Replace unnecessary strlen()
 **/
 
-#define CLP_VSN_STR       "1.1.44"
+#define CLP_VSN_STR       "1.1.45"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        1
-#define CLP_VSN_REVISION       44
+#define CLP_VSN_REVISION       45
 
 /* Definition der Flag-Makros *****************************************/
 
@@ -647,7 +648,7 @@ static int CLPERR(TsHdl* psHdl,int siErr, char* pcMsg, ...) {
       fprintf(psHdl->pfErr,"%s:\n%s ",pcClpErr(siErr),fpcPre(psHdl,0));
       va_start(argv,pcMsg); vfprintf(psHdl->pfErr,pcMsg,argv); va_end(argv);
       fprintf(psHdl->pfErr,"\n");
-      if (psHdl->pcSrc!=NULL && psHdl->pcRow!=NULL && psHdl->pcOld!=NULL && psHdl->pcCur!=NULL && (psHdl->pcCur>psHdl->pcSrc || strlen(psHdl->acLst) || psHdl->siRow)) {
+      if (psHdl->pcSrc!=NULL && psHdl->pcRow!=NULL && psHdl->pcOld!=NULL && psHdl->pcCur!=NULL && (psHdl->pcCur>psHdl->pcSrc || psHdl->acLst[0] || psHdl->siRow)) {
          if (strcmp(psHdl->acSrc,CLPSRC_CMD)==0) {
             fprintf(psHdl->pfErr,"%s Cause: Row=%d Column=%d from command line\n",                fpcPre(psHdl,1),psHdl->siRow,psHdl->siCol);
          } else if (strcmp(psHdl->acSrc,CLPSRC_PRO)==0) {
@@ -841,7 +842,7 @@ extern int siClpParsePro(
       return CLPERR(psHdl,CLPERR_INT,"Property string is NULL");
 
    psHdl->acLst[0]=EOS;
-   if (pcSrc!=NULL && strlen(pcSrc)) {
+   if (pcSrc!=NULL && *pcSrc) {
       snprintf(psHdl->acSrc,sizeof(psHdl->acSrc),"%s%s",CLPSRC_PRF,pcSrc);
    } else strcpy(psHdl->acSrc,CLPSRC_PRO);
    psHdl->pcSrc=pcPro;
@@ -887,7 +888,7 @@ extern int siClpParseCmd(
       return CLPERR(psHdl,CLPERR_INT,"Command string is NULL");
 
    psHdl->acLst[0]=EOS;
-   if (pcSrc!=NULL && strlen(pcSrc)) {
+   if (pcSrc!=NULL && *pcSrc) {
       snprintf(psHdl->acSrc,sizeof(psHdl->acSrc),"%s%s",CLPSRC_CMF,pcSrc);
    } else strcpy(psHdl->acSrc,CLPSRC_CMD);
    psHdl->pcSrc=pcCmd;
@@ -947,7 +948,7 @@ extern int siClpSyntax(
    psHdl->acPre[0]=EOS;
    strcpy(psHdl->acSrc,":SYNTAX:");
 
-   if (pcPat!=NULL && strlen(pcPat)) {
+   if (pcPat!=NULL && *pcPat) {
       if (strxcmp(psHdl->isCas,psHdl->pcCmd,pcPat,l,0,FALSE)==0) {
          if (strlen(pcPat)>l && pcPat[l]!='.') {
             return CLPERR(psHdl,CLPERR_SEM,"Path (%s) is not valid",pcPat);
@@ -1006,7 +1007,7 @@ extern int siClpHelp(
    psHdl->acPre[0]=EOS;
    strcpy(psHdl->acSrc,":HELP:");
 
-   if (pcPat!=NULL && strlen(pcPat)) {
+   if (pcPat!=NULL && *pcPat) {
       if (strxcmp(psHdl->isCas,psHdl->pcCmd,pcPat,l,0,FALSE)==0) {
          if (strlen(pcPat)>l && pcPat[l]!='.') {
             return CLPERR(psHdl,CLPERR_SEM,"Path (%s) is not valid",pcPat);
@@ -1037,7 +1038,7 @@ extern int siClpHelp(
                   fprintf(psHdl->pfHlp,"\n\n");
                   fprintf(psHdl->pfHlp,"DESCRIPTION\n");
                   fprintf(psHdl->pfHlp,"-----------\n");
-                  if (psHdl->pcMan!=NULL && strlen(psHdl->pcMan)) {
+                  if (psHdl->pcMan!=NULL && *psHdl->pcMan) {
                      efprintf(psHdl->pfHlp,"%s\n",psHdl->pcMan);
                   } else {
                      fprintf(psHdl->pfHlp,"No detailed description available for this command.\n\n");
@@ -1054,7 +1055,7 @@ extern int siClpHelp(
                   if (siErr<0) return(siErr);
                   fprintf(psHdl->pfHlp,"DESCRIPTION\n");
                   fprintf(psHdl->pfHlp,"-----------\n");
-                  if (psArg->psFix->pcMan!=NULL && strlen(psArg->psFix->pcMan)) {
+                  if (psArg->psFix->pcMan!=NULL && *psArg->psFix->pcMan) {
                      efprintf(psHdl->pfHlp,"%s\n",psArg->psFix->pcMan);
                   } else {
                      fprintf(psHdl->pfHlp,"No detailed description available for this argument.\n\n");
@@ -1093,7 +1094,7 @@ extern int siClpHelp(
                   if (siErr<0) return(siErr);
                   fprintf(psHdl->pfHlp,"DESCRIPTION\n");
                   fprintf(psHdl->pfHlp,"-----------\n");
-                  if (psArg->psFix->pcMan!=NULL && strlen(psArg->psFix->pcMan)) {
+                  if (psArg->psFix->pcMan!=NULL && *psArg->psFix->pcMan) {
                      efprintf(psHdl->pfHlp,"%s\n",psArg->psFix->pcMan);
                   } else {
                      fprintf(psHdl->pfHlp,"No detailed description available for this argument.\n\n");
@@ -1125,7 +1126,7 @@ extern int siClpHelp(
          if (siErr<0) return(siErr);
          fprintf(psHdl->pfHlp,"DESCRIPTION\n");
          fprintf(psHdl->pfHlp,"-----------\n");
-         if (psHdl->pcMan!=NULL && strlen(psHdl->pcMan)) {
+         if (psHdl->pcMan!=NULL && *psHdl->pcMan) {
             efprintf(psHdl->pfHlp,"%s\n",psHdl->pcMan);
          } else {
             fprintf(psHdl->pfHlp,"No detailed description available for this command.\n\n");
@@ -1174,7 +1175,7 @@ extern int siClpDocu(
    strcpy(psHdl->acSrc,":DOCU:");
 
    if (pcNum!=NULL && strlen(pcNum)<100) {
-      if (pcPat!=NULL && strlen(pcPat)) {
+      if (pcPat!=NULL && *pcPat) {
          if (strxcmp(psHdl->isCas,psHdl->pcCmd,pcPat,l,0,FALSE)==0) {
             if (strlen(pcPat)>l && pcPat[l]!='.') {
                return CLPERR(psHdl,CLPERR_SEM,"Path (%s) is not valid",pcPat);
@@ -1194,7 +1195,7 @@ extern int siClpDocu(
                if (psArg!=NULL) {
                   if (CLPISS_ARG(psArg->psStd->uiFlg)) {
                      if (isMan) {
-                        if (psHdl->pcPgm!=NULL && strlen(psHdl->pcPgm)) {
+                        if (psHdl->pcPgm!=NULL && *psHdl->pcPgm) {
                            for (p=psHdl->pcPgm;*p;p++) fprintf(pfDoc,"%c",tolower(*p));
                            fprintf(pfDoc,".");
                            l=strlen(psHdl->pcPgm)+strlen(fpcPat(pvHdl,siLev))+4;
@@ -1207,7 +1208,7 @@ extern int siClpDocu(
                         fprintf(pfDoc,":doctype: manpage\n\n");
                         fprintf(pfDoc,"NAME\n");
                         fprintf(pfDoc,"----\n\n");
-                        if (psHdl->pcPgm!=NULL && strlen(psHdl->pcPgm)) {
+                        if (psHdl->pcPgm!=NULL && *psHdl->pcPgm) {
                            for (p=psHdl->pcPgm;*p;p++) fprintf(pfDoc,"%c",tolower(*p));
                            fprintf(pfDoc,".");
                            for (p=fpcPat(pvHdl,siLev);*p;p++) fprintf(pfDoc,"%c",tolower(*p));
@@ -1225,7 +1226,7 @@ extern int siClpDocu(
                         if (siErr<0) return(siErr);
                         fprintf(pfDoc,"DESCRIPTION\n");
                         fprintf(pfDoc,"-----------\n\n");
-                        if (psArg->psFix->pcMan!=NULL && strlen(psArg->psFix->pcMan)) {
+                        if (psArg->psFix->pcMan!=NULL && *psArg->psFix->pcMan) {
                            efprintf(pfDoc,"%s\n\n",psArg->psFix->pcMan);
                         } else {
                            fprintf(pfDoc,"No detailed description available for this argument.\n\n");
@@ -1257,7 +1258,7 @@ extern int siClpDocu(
                         fprintf(pfDoc,"-----------------------------------------------------------------------\n\n");
                         if (siErr<0) return(siErr);
                         fprintf(pfDoc,".DESCRIPTION\n\n");
-                        if (psArg->psFix->pcMan!=NULL && strlen(psArg->psFix->pcMan)) {
+                        if (psArg->psFix->pcMan!=NULL && *psArg->psFix->pcMan) {
                            efprintf(pfDoc,"%s\n\n",psArg->psFix->pcMan);
                         } else {
                            fprintf(pfDoc,"No detailed description available for this argument.\n\n");
@@ -1270,7 +1271,7 @@ extern int siClpDocu(
                      }
                   } else if (CLPISS_CON(psArg->psStd->uiFlg)) {
                      if (isMan) {
-                        if (psHdl->pcPgm!=NULL && strlen(psHdl->pcPgm)) {
+                        if (psHdl->pcPgm!=NULL && *psHdl->pcPgm) {
                            for (p=psHdl->pcPgm;*p;p++) fprintf(pfDoc,"%c",tolower(*p));
                            fprintf(pfDoc,".");
                            l=strlen(psHdl->pcPgm)+strlen(fpcPat(pvHdl,siLev))+4;
@@ -1283,7 +1284,7 @@ extern int siClpDocu(
                         fprintf(pfDoc,":doctype: manpage\n\n");
                         fprintf(pfDoc,"NAME\n");
                         fprintf(pfDoc,"----\n\n");
-                        if (psHdl->pcPgm!=NULL && strlen(psHdl->pcPgm)) {
+                        if (psHdl->pcPgm!=NULL && *psHdl->pcPgm) {
                            for (p=psHdl->pcPgm;*p;p++) fprintf(pfDoc,"%c",tolower(*p));
                            fprintf(pfDoc,".");
                            for (p=fpcPat(pvHdl,siLev);*p;p++) fprintf(pfDoc,"%c",tolower(*p));
@@ -1301,7 +1302,7 @@ extern int siClpDocu(
                         if (siErr<0) return(siErr);
                         fprintf(pfDoc,"DESCRIPTION\n");
                         fprintf(pfDoc,"-----------\n\n");
-                        if (psArg->psFix->pcMan!=NULL && strlen(psArg->psFix->pcMan)) {
+                        if (psArg->psFix->pcMan!=NULL && *psArg->psFix->pcMan) {
                            efprintf(pfDoc,"%s\n\n",psArg->psFix->pcMan);
                         } else {
                            fprintf(pfDoc,"No detailed description available for this constant.\n\n");
@@ -1328,7 +1329,7 @@ extern int siClpDocu(
                         fprintf(pfDoc,"-----------------------------------------------------------------------\n\n");
                         if (siErr<0) return(siErr);
                         fprintf(pfDoc,".DESCRIPTION\n\n");
-                        if (psArg->psFix->pcMan!=NULL && strlen(psArg->psFix->pcMan)) {
+                        if (psArg->psFix->pcMan!=NULL && *psArg->psFix->pcMan) {
                            efprintf(pfDoc,"%s\n\n",psArg->psFix->pcMan);
                         } else {
                            fprintf(pfDoc,"No detailed description available for this constant.\n\n");
@@ -1348,7 +1349,7 @@ extern int siClpDocu(
          }
       }
       if (isMan) {
-         if (psHdl->pcPgm!=NULL && strlen(psHdl->pcPgm)) {
+         if (psHdl->pcPgm!=NULL && *psHdl->pcPgm) {
              for (p=psHdl->pcPgm;*p;p++) fprintf(pfDoc,"%c",tolower(*p));
              fprintf(pfDoc,".");
              l=strlen(psHdl->pcPgm)+strlen(psHdl->pcCmd)+4;
@@ -1381,7 +1382,7 @@ extern int siClpDocu(
          if (siErr<0) return(siErr);
          fprintf(pfDoc,   "DESCRIPTION\n");
          fprintf(pfDoc,   "-----------\n\n");
-         if (psHdl->pcMan!=NULL && strlen(psHdl->pcMan)) {
+         if (psHdl->pcMan!=NULL && *psHdl->pcMan) {
             efprintf(pfDoc,"%s\n\n",psHdl->pcMan);
          } else {
             fprintf(pfDoc,"No detailed description available for this command.\n\n");
@@ -1412,7 +1413,7 @@ extern int siClpDocu(
          fprintf(pfDoc,   "-----------------------------------------------------------------------\n\n");
          if (siErr<0) return(siErr);
          fprintf(pfDoc,   ".DESCRIPTION\n\n");
-         if (psHdl->pcMan!=NULL && strlen(psHdl->pcMan)) {
+         if (psHdl->pcMan!=NULL && *psHdl->pcMan) {
             efprintf(pfDoc,"%s\n\n",psHdl->pcMan);
          } else {
             fprintf(pfDoc,"No detailed description available for this command.\n\n");
@@ -1460,7 +1461,7 @@ extern int siClpProperties(
    strcpy(psHdl->acSrc,":PROPERTIES:");
 
    if (pfOut==NULL) pfOut=psHdl->pfHlp;
-   if (pcPat!=NULL && strlen(pcPat)) {
+   if (pcPat!=NULL && *pcPat) {
       if (strxcmp(psHdl->isCas,psHdl->pcCmd,pcPat,l,0,FALSE)==0) {
          if (strlen(pcPat)>l && pcPat[l]!='.') {
             return CLPERR(psHdl,CLPERR_SEM,"Path (%s) is not valid",pcPat);
@@ -1570,7 +1571,7 @@ static TsSym* psClpSymIns(
          }
       }
    }
-   if (pcEnv!=NULL && strlen(pcEnv)) {
+   if (pcEnv!=NULL && *pcEnv) {
       snprintf(psSym->psFix->acPro,sizeof(psSym->psFix->acPro),"%s",pcEnv);
       psSym->psFix->pcDft=psSym->psFix->acPro;
       snprintf(psSym->psFix->acSrc,sizeof(psSym->psFix->acSrc),"%s%s",CLPSRC_ENV,acVar);
@@ -1618,7 +1619,7 @@ static TsSym* psClpSymIns(
    }
 
    if (psSym->psStd->pcAli!=NULL) {
-      if (psSym->psStd->pcKyw==NULL || strlen(psSym->psStd->pcKyw)==0) {
+      if (psSym->psStd->pcKyw==NULL || *psSym->psStd->pcKyw==0) {
          CLPERR(psHdl,CLPERR_TAB,"Keyword of alias (%s.%s) is not defined",fpcPat(pvHdl,siLev),psSym->psStd->pcAli);
          ERROR(psSym);
       }
@@ -1645,7 +1646,7 @@ static TsSym* psClpSymIns(
          ERROR(psSym);
       }
    } else if (CLPISS_ARG(psSym->psStd->uiFlg)) {
-      if (psSym->psStd->pcKyw==NULL || strlen(psSym->psStd->pcKyw)==0) {
+      if (psSym->psStd->pcKyw==NULL || *psSym->psStd->pcKyw==0) {
          CLPERR(psHdl,CLPERR_TAB,"Keyword for argument (%s.?) is not defined",fpcPat(pvHdl,siLev));
          ERROR(psSym);
       }
@@ -1657,12 +1658,12 @@ static TsSym* psClpSymIns(
          CLPERR(psHdl,CLPERR_TAB,"Size for argument '%s.%s' is smaller than 1",fpcPat(pvHdl,siLev),psSym->psStd->pcKyw);
          ERROR(psSym);
       }
-      if (psSym->psFix->pcHlp==NULL || strlen(psSym->psFix->pcHlp)==0) {
+      if (psSym->psFix->pcHlp==NULL || *psSym->psFix->pcHlp==0) {
          CLPERR(psHdl,CLPERR_TAB,"Help for argument '%s.%s' not defined",fpcPat(pvHdl,siLev),psSym->psStd->pcKyw);
          ERROR(psSym);
       }
    } else if (CLPISS_LNK(psSym->psStd->uiFlg)) {
-      if (psSym->psStd->pcKyw==NULL || strlen(psSym->psStd->pcKyw)==0) {
+      if (psSym->psStd->pcKyw==NULL || *psSym->psStd->pcKyw==0) {
          CLPERR(psHdl,CLPERR_TAB,"Keyword of a link (%s.?) is not defined",fpcPat(pvHdl,siLev));
          ERROR(psSym);
       }
@@ -1691,7 +1692,7 @@ static TsSym* psClpSymIns(
          ERROR(psSym);
       }
    } else if (CLPISS_CON(psSym->psStd->uiFlg)) {
-      if (psSym->psStd->pcKyw==NULL || strlen(psSym->psStd->pcKyw)==0) {
+      if (psSym->psStd->pcKyw==NULL || *psSym->psStd->pcKyw==0) {
          CLPERR(psHdl,CLPERR_TAB,"Key word for a constant (%s.?) is not defined",fpcPat(pvHdl,siLev));
          ERROR(psSym);
       }
@@ -1711,7 +1712,7 @@ static TsSym* psClpSymIns(
          CLPERR(psHdl,CLPERR_TAB,"Flags SEL, LNK or ALI set for constant '%s.%s'",fpcPat(pvHdl,siLev),psSym->psStd->pcKyw);
          ERROR(psSym);
       }
-      if (psSym->psFix->pcHlp==NULL || strlen(psSym->psFix->pcHlp)==0) {
+      if (psSym->psFix->pcHlp==NULL || *psSym->psFix->pcHlp==0) {
          CLPERR(psHdl,CLPERR_TAB,"Help for constant '%s.%s' not defined",fpcPat(pvHdl,siLev),psSym->psStd->pcKyw);
          ERROR(psSym);
       }
@@ -3504,7 +3505,7 @@ static int siClpBldLit(
       case 't':siVal=strtoll(pcVal+1,&pcHlp,10); break;
       default: return CLPERR(psHdl,CLPERR_SEM,"Base (%c) of number literal (%s.%s=%s) not supported",pcVal[0],fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,isPrnStr(psArg,pcVal+1));
       }
-      if (errno || strlen(pcHlp)) {
+      if (errno || *pcHlp) {
          return CLPERR(psHdl,CLPERR_SEM,"Number (%s) of '%s.%s' can't be converted to a 64 bit value (rest: %s)",isPrnStr(psArg,pcVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,isPrnStr(psArg,pcHlp));
       }
       switch (psArg->psFix->siSiz) {
@@ -3555,7 +3556,7 @@ static int siClpBldLit(
       case 'd':flVal=strtod(pcVal+1,&pcHlp); break;
       default: return CLPERR(psHdl,CLPERR_SEM,"Base (%c) of floating point literal (%s.%s=%s) not supported",pcVal[0],fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,isPrnStr(psArg,pcVal+1));
       }
-      if (errno || strlen(pcHlp)) {
+      if (errno || *pcHlp) {
          return CLPERR(psHdl,CLPERR_SEM,"Floating number (%s) of '%s.%s' can't be converted to a valid 64 bit value (rest: %s)",isPrnStr(psArg,pcVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,pcHlp);
       }
       switch (psArg->psFix->siSiz) {
@@ -4514,13 +4515,13 @@ static void vdClpPrnArg(
    const char*                   a="TYPE";
    const char*                   b=(isSel)?"SELECTION":((isCon)?"KEYWORD":apClpTyp[siTyp]);
 
-   if (pcAli!=NULL && strlen(pcAli)) {
+   if (pcAli!=NULL && *pcAli) {
       a="ALIAS";
       b=pcAli;
    }
    if (pfOut!=NULL) {
       if (psHdl->isCas) {
-         if (pcDft!=NULL && strlen(pcDft)) {
+         if (pcDft!=NULL && *pcDft) {
             fprintf(pfOut,"%s %s (%s: %s) - %s (PROPERTY: %c%s%c)\n",p,pcKyw,a,b,pcHlp,C_SBO,pcDft,C_SBC);
          } else {
             fprintf(pfOut,"%s %s (%s: %s) - %s\n",p,pcKyw,a,b,pcHlp);
@@ -4533,7 +4534,7 @@ static void vdClpPrnArg(
          fprintf(pfOut,"%s ",p);
          for (i=0;i<siKwl;i++) fprintf(pfOut,"%c",toupper(pcKyw[i]));
          for (/*i=i*/;i<siLen;i++) fprintf(pfOut,"%c",tolower(pcKyw[i]));
-         if (pcDft!=NULL && strlen(pcDft)) {
+         if (pcDft!=NULL && *pcDft) {
             fprintf(pfOut," (%s: %s) - %s (PROPERTY: %c%s%c)\n",a,b,pcHlp,C_SBO,pcDft,C_SBC);
          } else {
             fprintf(pfOut," (%s: %s) - %s\n",a,b,pcHlp);
@@ -5127,11 +5128,11 @@ static int siClpPrnDoc(
       }
       for (isCon=FALSE,psHlp=psTab;psHlp!=NULL;psHlp=psHlp->psNxt) {
          if (CLPISS_ARG(psHlp->psStd->uiFlg) && CLPISS_CMD(psHlp->psStd->uiFlg)) {
-            if (psHlp->psFix->siTyp==CLPTYP_OBJECT || psHlp->psFix->siTyp==CLPTYP_OVRLAY || (psHlp->psFix->pcMan!=NULL && strlen(psHlp->psFix->pcMan))) {
+            if (psHlp->psFix->siTyp==CLPTYP_OBJECT || psHlp->psFix->siTyp==CLPTYP_OVRLAY || (psHlp->psFix->pcMan!=NULL && *psHlp->psFix->pcMan)) {
                apMan[siMan]=psHlp; siMan++;
             } else {
                for (psSel=psHlp->psDep;psSel!=NULL;psSel=psSel->psNxt) {
-                  if (psSel->psFix->pcMan!=NULL && strlen(psSel->psFix->pcMan)) {
+                  if (psSel->psFix->pcMan!=NULL && *psSel->psFix->pcMan) {
                      apMan[siMan]=psHlp; siMan++;
                      break;
                   }
@@ -5141,7 +5142,7 @@ static int siClpPrnDoc(
                }
             }
          } else if (CLPISS_CON(psHlp->psStd->uiFlg) && psArg->psFix->siTyp == psHlp->psFix->siTyp) {
-            if (psHlp->psFix->pcMan!=NULL && strlen(psHlp->psFix->pcMan)) {
+            if (psHlp->psFix->pcMan!=NULL && *psHlp->psFix->pcMan) {
                apMan[siMan]=psHlp; siMan++;
             } else {
                apLst[siLst]=psHlp; siLst++;
@@ -5225,7 +5226,7 @@ static int siClpPrnDoc(
                if (siErr<0) return(siErr);
                fprintf(pfDoc,"-----------------------------------------------------------------------\n\n");
                fprintf(pfDoc,".DESCRIPTION\n\n");
-               if (apMan[m]->psFix->pcMan!=NULL && strlen(apMan[m]->psFix->pcMan)) {
+               if (apMan[m]->psFix->pcMan!=NULL && *apMan[m]->psFix->pcMan) {
                   efprintf(pfDoc,"%s\n\n",apMan[m]->psFix->pcMan);
                } else {
                   fprintf(pfDoc,"No detailed description available for this argument.\n\n");
@@ -5268,8 +5269,8 @@ static int siClpPrnPro(
    if (siLev<siDep || siDep>9) {
       for (psHlp=psTab;psHlp!=NULL;psHlp=psHlp->psNxt) {
          if (CLPISS_ARG(psHlp->psStd->uiFlg) && CLPISS_PRO(psHlp->psStd->uiFlg) && (pcArg==NULL || strxcmp(psHdl->isCas,psHlp->psStd->pcKyw,pcArg,0,0,FALSE)==0)) {
-            if (psHlp->psFix->pcDft!=NULL && strlen(psHlp->psFix->pcDft)) {
-               if ((isMan || (!CLPISS_CMD(psHlp->psStd->uiFlg))) && psHlp->psFix->pcMan!=NULL && strlen(psHlp->psFix->pcMan)) {
+            if (psHlp->psFix->pcDft!=NULL && *psHlp->psFix->pcDft) {
+               if ((isMan || (!CLPISS_CMD(psHlp->psStd->uiFlg))) && psHlp->psFix->pcMan!=NULL && *psHlp->psFix->pcMan) {
                   fprintf(pfOut,"\n%c DESCRIPTION for %s.%s.%s.%s:\n",C_HSH,psHdl->pcOwn,psHdl->pcPgm,fpcPat(pvHdl,siLev),psHlp->psStd->pcKyw);
                   efprintf(pfOut,"%s",psHlp->psFix->pcMan);
                   fprintf(pfOut," %c\n",C_HSH);
@@ -5282,7 +5283,7 @@ static int siClpPrnPro(
                fprintf(pfOut,"%c TYPE: %s HELP: %s %c\n",C_HSH,apClpTyp[psHlp->psFix->siTyp],psHlp->psFix->pcHlp,C_HSH);
             } else {
                if (isSet==FALSE) {
-                  if ((isMan || (!CLPISS_CMD(psHlp->psStd->uiFlg))) && psHlp->psFix->pcMan!=NULL && strlen(psHlp->psFix->pcMan)) {
+                  if ((isMan || (!CLPISS_CMD(psHlp->psStd->uiFlg))) && psHlp->psFix->pcMan!=NULL && *psHlp->psFix->pcMan) {
                      fprintf(pfOut,"\n%c DESCRIPTION for %s.%s.%s.%s:\n",C_HSH,psHdl->pcOwn,psHdl->pcPgm,fpcPat(pvHdl,siLev),psHlp->psStd->pcKyw);
                      efprintf(pfOut,"%s",psHlp->psFix->pcMan);
                      fprintf(pfOut," %c\n",C_HSH);

@@ -497,7 +497,7 @@ extern char* userid(const int size, char* buffer) {
 }
 extern char* homedir(int flag, const int size, char* buffer) {
    const char*    home=GETENV("HOME");
-   if (home!=NULL && strlen(home)) {
+   if (home!=NULL && *home) {
       if (flag) {
          snprintf(buffer,size,"%s/",home);
       } else {
@@ -514,7 +514,7 @@ extern char* homedir(int flag, const int size, char* buffer) {
       } else {
          char acUsr[64]="";
          userid(sizeof(acUsr),acUsr);
-         if (strlen(acUsr)) {
+         if (acUsr[0]) {
 #ifdef __ZOS__
          if (flag) {
             snprintf(buffer,size,"%s.",acUsr);
@@ -1229,7 +1229,7 @@ extern void rplenvar(char* name,const size_t size,const char opn, const char cls
             strncpy(h,c+1,size-1);
             h[size-1]=0;
             v=GETENV(b+1);
-            if (v!=NULL && strlen(v)) {
+            if (v!=NULL && *v) {
                if (strlen(a)+strlen(v)<size) strcat(a,v);
                if (strlen(a)+strlen(h)<size) strcat(a,h);
                a=b+strlen(v);
