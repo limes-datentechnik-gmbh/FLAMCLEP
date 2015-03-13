@@ -344,6 +344,8 @@ extern int ebcdic_snprintf(char* string, size_t size, const char* format, ...) {
    va_start(argv, format);
    r = vsnprintf(string, size, format, argv);
    va_end(argv);
+   // TODO: Checken ob im Test Case FTUTL_snprintf_Tests auf USS/zOS
+   // alles auf OK steht. vsnprintf() sollte in allen Fällen 0-terminieren.
    for (p=string;*p;p++) {
       switch (*p) {
       case '!' : *p=C_EXC; break;
@@ -371,6 +373,8 @@ extern int ebcdic_sprintf(char* string, const char* format, ...) {
    va_start(argv, format);
    r = vsprintf(string, format, argv);
    va_end(argv);
+   // TODO: Checken ob im Test Case FTUTL_snprintf_Tests auf USS/zOS
+   // alles auf OK steht. vsnprintf() sollte in allen Fällen 0-terminieren.
    for (p=string;*p;p++) {
       switch (*p) {
       case '!' : *p=C_EXC; break;
