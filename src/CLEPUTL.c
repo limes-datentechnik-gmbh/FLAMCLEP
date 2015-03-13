@@ -415,6 +415,10 @@ extern int ebcdic_fprintf(FILE* file, const char* format, ...) {
       r=ebcdic_snprintf(temp,size,format,argv);
    }
    va_end(argv);
+   // TODO: da die Lösung sicherstellt, dass temp groß genug ist,
+   // könnte man das fprintf() eigentlich durch fwrite() ersetzen.
+   // (vielleicht sicherheitshalber noch ein if (r>0) davor, nur für
+   // alle Fälle ;-))
    r=fprintf(file,"%s",temp);
    free(temp);
    return(r);
