@@ -499,8 +499,8 @@ typedef const char* (*tpfMsg)(const int siRsn);
  *           For correct numbering, put hidden commands to the end of the table\n
  * \b pcMan  Pointer to a zero terminated string for a detailed description of this command
  *           (in ASCIDOC format, content behind .DESCRIPTION, mainly simply some paragraphs plus .OPTIONS and/or.EXAMPLES)
- *           It is recommended to use a header file with a define for this long string)\n
- * \b pcHlp  String for a short context sensitive help to this command\n
+ *           It is recommended to use a header file with a define for this long string - converted on EBCDIC systems)\n
+ * \b pcHlp  String for a short context sensitive help to this command (converted on EBCDIC systems)\n
  */
 typedef struct CleCommand {
    const char*                   pcKyw;
@@ -592,7 +592,7 @@ typedef struct CleCommand {
  * @param[in]  pcLic String containing the license information for this program (used by built-in function LICENSE - not converted on EBCDIC systems)
  * @param[in]  pcVsn String containing the version information for this program (used by built-in function VERSION - not converted on EBCDIC systems)
  * @param[in]  pcAbo String containing the about message for this program (used by built-in function ABOUT - not converted on EBCDIC systems)
- * @param[in]  pcHlp Short help message for the whole program (not converted on EBCDIC systems)
+ * @param[in]  pcHlp Short help message for the whole program (converted on EBCDIC systems)
  * @param[in]  pcMan Manual page for the whole program (as == 2.1 DESCRIPTION == in ASCIIDOC format, Level 3-4 can be used for sub chapters - converted on EBCDIC systems)
  * @param[in]  pcCov Cover sheets for documentation generation (Header (Title, Autor, Revision) and Preample in ASCIIDOC format - converted on EBCDIC systems)
  * @param[in]  pcGls Glossary for documentation generation (in ASCIIDOC format (term:: explanation) - converted on EBCDIC systems),

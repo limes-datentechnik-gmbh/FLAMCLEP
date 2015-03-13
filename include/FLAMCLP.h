@@ -572,11 +572,12 @@ typedef struct ClpArgument {
    /** Pointer to a zero-terminated string for a detailed description of this argument (in ASCIIDOC format, content
     *  behind .DESCRIPTION, mainly simply some paragraphs). Can be a NULL pointer or empty string for constant definition
     *  or simple arguments. It is recommended to use a header file with a define for this long string (mainly for objects
-    *  and overlays)*/
+    *  and overlays - converted on EBCDIC systems)*/
    const char*                   pcMan;
    /** Pointer to a zero-terminated string for context sensitive help to this argument. Also used as headline in
     * documentation generation. For this only alnum, blank, dot, comma, hyphen and parenthesis are used. At every other
-    * separator the headline will be cut, meaning it is possible to have more help information than head line. */ // ????
+    * separator the headline will be cut, meaning it is possible to have more help information than head line.
+    * (converted on EBCDIC systems) */
    const char*                   pcHlp;
    signed long long int          siVal;
    double                        flVal;
@@ -676,7 +677,7 @@ typedef struct ClpError {
  * @param[in]  pcPgm String constant containing the program name for the root in the path ("flcl")
  * @param[in]  pcCmd String constant containing the command name for the root in the path ("CONV")
  * @param[in]  pcMan String constant containing the manual page for this command (converted on EBCDIC systems)
- * @param[in]  pcHlp String constant containing the help message for this command
+ * @param[in]  pcHlp String constant containing the help message for this command (converted on EBCDIC systems)
  * @param[in]  isOvl Boolean if TRUE the main table (psTab) is a overlay else it will be interpreted as object
  * @param[in]  psTab Pointer to the parameter table defining the semantic of the command line
  * @param[out] pvDat Pointer to the structure where the parsed values are stored (can be NULL if command line parsing not used)

@@ -1025,7 +1025,7 @@ extern int siClpHelp(
                if (psArg==NULL) {
                   fprintf(psHdl->pfHlp,   "SYNOPSIS\n");
                   fprintf(psHdl->pfHlp,   "--------\n");
-                  fprintf(psHdl->pfHlp,   "HELP:   %s\n",psHdl->pcHlp);
+                  efprintf(psHdl->pfHlp,  "HELP:   %s\n",psHdl->pcHlp);
                   fprintf(psHdl->pfHlp,   "PATH:   %s.%s\n",psHdl->pcOwn,psHdl->pcPgm);
                   if (psHdl->isOvl) {
                      fprintf(psHdl->pfHlp,"TYPE:   OVERLAY\n");
@@ -1044,17 +1044,17 @@ extern int siClpHelp(
                      fprintf(psHdl->pfHlp,"No detailed description available for this command.\n\n");
                   }
                } else {
-                  fprintf(psHdl->pfHlp,"SYNOPSIS\n");
-                  fprintf(psHdl->pfHlp,"--------\n");
-                  fprintf(psHdl->pfHlp,"HELP:   %s\n",psArg->psFix->pcHlp);
-                  fprintf(psHdl->pfHlp,"PATH:   %s\n",fpcPat(pvHdl,siLev-1));
-                  fprintf(psHdl->pfHlp,"TYPE:   %s\n",apClpTyp[psArg->psFix->siTyp]);
-                  fprintf(psHdl->pfHlp,"SYNTAX: ");
+                  fprintf(psHdl->pfHlp, "SYNOPSIS\n");
+                  fprintf(psHdl->pfHlp, "--------\n");
+                  efprintf(psHdl->pfHlp,"HELP:   %s\n",psArg->psFix->pcHlp);
+                  fprintf(psHdl->pfHlp, "PATH:   %s\n",fpcPat(pvHdl,siLev-1));
+                  fprintf(psHdl->pfHlp, "TYPE:   %s\n",apClpTyp[psArg->psFix->siTyp]);
+                  fprintf(psHdl->pfHlp, "SYNTAX: ");
                   siErr=siClpPrnSyn(pvHdl,psHdl->pfHlp,FALSE,siLev-1,psArg);
                   fprintf(psHdl->pfHlp,"\n\n");
                   if (siErr<0) return(siErr);
-                  fprintf(psHdl->pfHlp,"DESCRIPTION\n");
-                  fprintf(psHdl->pfHlp,"-----------\n");
+                  fprintf(psHdl->pfHlp, "DESCRIPTION\n");
+                  fprintf(psHdl->pfHlp, "-----------\n");
                   if (psArg->psFix->pcMan!=NULL && *psArg->psFix->pcMan) {
                      efprintf(psHdl->pfHlp,"%s\n",psArg->psFix->pcMan);
                   } else {
@@ -1083,17 +1083,17 @@ extern int siClpHelp(
          } else {
             if (isMan) {
                if (psArg!=NULL) {
-                  fprintf(psHdl->pfHlp,"SYNOPSIS\n");
-                  fprintf(psHdl->pfHlp,"--------\n");
-                  fprintf(psHdl->pfHlp,"HELP:   %s\n",psArg->psFix->pcHlp);
-                  fprintf(psHdl->pfHlp,"PATH:   %s\n",fpcPat(pvHdl,siLev-1));
-                  fprintf(psHdl->pfHlp,"TYPE:   %s\n",apClpTyp[psArg->psFix->siTyp]);
-                  fprintf(psHdl->pfHlp,"SYNTAX: ");
+                  fprintf(psHdl->pfHlp, "SYNOPSIS\n");
+                  fprintf(psHdl->pfHlp, "--------\n");
+                  efprintf(psHdl->pfHlp,"HELP:   %s\n",psArg->psFix->pcHlp);
+                  fprintf(psHdl->pfHlp, "PATH:   %s\n",fpcPat(pvHdl,siLev-1));
+                  fprintf(psHdl->pfHlp, "TYPE:   %s\n",apClpTyp[psArg->psFix->siTyp]);
+                  fprintf(psHdl->pfHlp, "SYNTAX: ");
                   siErr=siClpPrnSyn(pvHdl,psHdl->pfHlp,FALSE,siLev-1,psArg);
-                  fprintf(psHdl->pfHlp,"\n\n");
+                  fprintf(psHdl->pfHlp, "\n\n");
                   if (siErr<0) return(siErr);
-                  fprintf(psHdl->pfHlp,"DESCRIPTION\n");
-                  fprintf(psHdl->pfHlp,"-----------\n");
+                  fprintf(psHdl->pfHlp, "DESCRIPTION\n");
+                  fprintf(psHdl->pfHlp, "-----------\n");
                   if (psArg->psFix->pcMan!=NULL && *psArg->psFix->pcMan) {
                      efprintf(psHdl->pfHlp,"%s\n",psArg->psFix->pcMan);
                   } else {
@@ -1113,7 +1113,7 @@ extern int siClpHelp(
       if (siDep==0) {
          fprintf(psHdl->pfHlp,   "SYNOPSIS\n");
          fprintf(psHdl->pfHlp,   "--------\n");
-         fprintf(psHdl->pfHlp,   "HELP:   %s\n",psHdl->pcHlp);
+         efprintf(psHdl->pfHlp,  "HELP:   %s\n",psHdl->pcHlp);
          fprintf(psHdl->pfHlp,   "PATH:   %s.%s\n",psHdl->pcOwn,psHdl->pcPgm);
          if (psHdl->isOvl) {
             fprintf(psHdl->pfHlp,"TYPE:   OVERLAY\n");
@@ -1205,9 +1205,9 @@ extern int siClpDocu(
                         for (p=fpcPat(pvHdl,siLev);*p;p++) fprintf(pfDoc,"%c",tolower(*p));
                         fprintf(pfDoc,"(3)\n");
                         for (i=0;i<l;i++) fprintf(pfDoc,"="); fprintf(pfDoc,"\n");
-                        fprintf(pfDoc,":doctype: manpage\n\n");
-                        fprintf(pfDoc,"NAME\n");
-                        fprintf(pfDoc,"----\n\n");
+                        fprintf(pfDoc, ":doctype: manpage\n\n");
+                        fprintf(pfDoc, "NAME\n");
+                        fprintf(pfDoc, "----\n\n");
                         if (psHdl->pcPgm!=NULL && *psHdl->pcPgm) {
                            for (p=psHdl->pcPgm;*p;p++) fprintf(pfDoc,"%c",tolower(*p));
                            fprintf(pfDoc,".");
@@ -1215,25 +1215,25 @@ extern int siClpDocu(
                         } else {
                             vdClpPrnAli(pfDoc,", ",psArg);
                         }
-                        fprintf(pfDoc," - %c%s%c\n\n",C_GRV,psArg->psFix->pcHlp,C_GRV);
-                        fprintf(pfDoc,"SYNOPSIS\n");
-                        fprintf(pfDoc,"--------\n\n");
-                        fprintf(pfDoc,"-----------------------------------------------------------------------\n");
-                        fprintf(pfDoc,"PATH:   %s\n",fpcPat(pvHdl,siLev-1));
-                        fprintf(pfDoc,"TYPE:   %s\n",apClpTyp[psArg->psFix->siTyp]);
-                        fprintf(pfDoc,"SYNTAX: "); siErr=siClpPrnSyn(pvHdl,pfDoc,FALSE,siLev-1,psArg); fprintf(pfDoc,"\n");
-                        fprintf(pfDoc,"-----------------------------------------------------------------------\n\n");
+                        efprintf(pfDoc," - `%s`\n\n",psArg->psFix->pcHlp);
+                        fprintf(pfDoc, "SYNOPSIS\n");
+                        fprintf(pfDoc, "--------\n\n");
+                        fprintf(pfDoc, "-----------------------------------------------------------------------\n");
+                        fprintf(pfDoc, "PATH:   %s\n",fpcPat(pvHdl,siLev-1));
+                        fprintf(pfDoc, "TYPE:   %s\n",apClpTyp[psArg->psFix->siTyp]);
+                        fprintf(pfDoc, "SYNTAX: "); siErr=siClpPrnSyn(pvHdl,pfDoc,FALSE,siLev-1,psArg); fprintf(pfDoc,"\n");
+                        fprintf(pfDoc, "-----------------------------------------------------------------------\n\n");
                         if (siErr<0) return(siErr);
-                        fprintf(pfDoc,"DESCRIPTION\n");
-                        fprintf(pfDoc,"-----------\n\n");
+                        fprintf(pfDoc, "DESCRIPTION\n");
+                        fprintf(pfDoc, "-----------\n\n");
                         if (psArg->psFix->pcMan!=NULL && *psArg->psFix->pcMan) {
                            efprintf(pfDoc,"%s\n\n",psArg->psFix->pcMan);
                         } else {
                            fprintf(pfDoc,"No detailed description available for this argument.\n\n");
                         }
-                        fprintf(pfDoc,"AUTHOR\n");
-                        fprintf(pfDoc,"------\n\n");
-                        fprintf(pfDoc,"limes datentechnik(r) gmbh (www.flam.de)\n\n");
+                        fprintf(pfDoc, "AUTHOR\n");
+                        fprintf(pfDoc, "------\n\n");
+                        fprintf(pfDoc, "limes datentechnik(r) gmbh (www.flam.de)\n\n");
                      } else {
                         switch (psArg->psFix->siTyp){
                         case CLPTYP_OBJECT:strcpy(acArg,"OBJECT");break;
@@ -1249,13 +1249,13 @@ extern int siClpDocu(
                            l=strlen(acArg)+strlen(psArg->psStd->pcKyw)+3;
                            for (i=0;i<l;i++) fprintf(pfDoc,"%c",C_CRT); fprintf(pfDoc,"\n\n");
                         }
-                        fprintf(pfDoc,".SYNOPSIS\n\n");
-                        fprintf(pfDoc,"-----------------------------------------------------------------------\n");
-                        fprintf(pfDoc,"HELP:   %s\n",psArg->psFix->pcHlp);
-                        fprintf(pfDoc,"PATH:   %s\n",fpcPat(pvHdl,siLev-1));
-                        fprintf(pfDoc,"TYPE:   %s\n",apClpTyp[psArg->psFix->siTyp]);
-                        fprintf(pfDoc,"SYNTAX: "); siErr=siClpPrnSyn(pvHdl,pfDoc,FALSE,siLev-1,psArg); fprintf(pfDoc,"\n");
-                        fprintf(pfDoc,"-----------------------------------------------------------------------\n\n");
+                        fprintf(pfDoc, ".SYNOPSIS\n\n");
+                        fprintf(pfDoc, "-----------------------------------------------------------------------\n");
+                        efprintf(pfDoc,"HELP:   %s\n",psArg->psFix->pcHlp);
+                        fprintf(pfDoc, "PATH:   %s\n",fpcPat(pvHdl,siLev-1));
+                        fprintf(pfDoc, "TYPE:   %s\n",apClpTyp[psArg->psFix->siTyp]);
+                        fprintf(pfDoc, "SYNTAX: "); siErr=siClpPrnSyn(pvHdl,pfDoc,FALSE,siLev-1,psArg); fprintf(pfDoc,"\n");
+                        fprintf(pfDoc, "-----------------------------------------------------------------------\n\n");
                         if (siErr<0) return(siErr);
                         fprintf(pfDoc,".DESCRIPTION\n\n");
                         if (psArg->psFix->pcMan!=NULL && *psArg->psFix->pcMan) {
@@ -1281,9 +1281,9 @@ extern int siClpDocu(
                         for(p=fpcPat(pvHdl,siLev);*p;p++) fprintf(pfDoc,"%c",tolower(*p));
                         fprintf(pfDoc,"(3)\n");
                         for (i=0;i<l;i++) fprintf(pfDoc,"="); fprintf(pfDoc,"\n");
-                        fprintf(pfDoc,":doctype: manpage\n\n");
-                        fprintf(pfDoc,"NAME\n");
-                        fprintf(pfDoc,"----\n\n");
+                        fprintf(pfDoc, ":doctype: manpage\n\n");
+                        fprintf(pfDoc, "NAME\n");
+                        fprintf(pfDoc, "----\n\n");
                         if (psHdl->pcPgm!=NULL && *psHdl->pcPgm) {
                            for (p=psHdl->pcPgm;*p;p++) fprintf(pfDoc,"%c",tolower(*p));
                            fprintf(pfDoc,".");
@@ -1291,25 +1291,25 @@ extern int siClpDocu(
                         } else {
                            for (p=psArg->psStd->pcKyw;*p;p++) fprintf(pfDoc,"%c",tolower(*p));
                         }
-                        fprintf(pfDoc," - %c%s%c\n\n",C_GRV,psArg->psFix->pcHlp,C_GRV);
-                        fprintf(pfDoc,"SYNOPSIS\n");
-                        fprintf(pfDoc,"--------\n\n");
-                        fprintf(pfDoc,"-----------------------------------------------------------------------\n");
-                        fprintf(pfDoc,"PATH:   %s\n",fpcPat(pvHdl,siLev-1));
-                        fprintf(pfDoc,"TYPE:   %s\n",apClpTyp[psArg->psFix->siTyp]);
-                        fprintf(pfDoc,"SYNTAX: %s\n",psArg->psStd->pcKyw);
-                        fprintf(pfDoc,"-----------------------------------------------------------------------\n\n");
+                        efprintf(pfDoc," - `%s`\n\n",psArg->psFix->pcHlp);
+                        fprintf(pfDoc, "SYNOPSIS\n");
+                        fprintf(pfDoc, "--------\n\n");
+                        fprintf(pfDoc, "-----------------------------------------------------------------------\n");
+                        fprintf(pfDoc, "PATH:   %s\n",fpcPat(pvHdl,siLev-1));
+                        fprintf(pfDoc, "TYPE:   %s\n",apClpTyp[psArg->psFix->siTyp]);
+                        fprintf(pfDoc, "SYNTAX: %s\n",psArg->psStd->pcKyw);
+                        fprintf(pfDoc, "-----------------------------------------------------------------------\n\n");
                         if (siErr<0) return(siErr);
-                        fprintf(pfDoc,"DESCRIPTION\n");
-                        fprintf(pfDoc,"-----------\n\n");
+                        fprintf(pfDoc, "DESCRIPTION\n");
+                        fprintf(pfDoc, "-----------\n\n");
                         if (psArg->psFix->pcMan!=NULL && *psArg->psFix->pcMan) {
                            efprintf(pfDoc,"%s\n\n",psArg->psFix->pcMan);
                         } else {
                            fprintf(pfDoc,"No detailed description available for this constant.\n\n");
                         }
-                        fprintf(pfDoc,"AUTHOR\n");
-                        fprintf(pfDoc,"------\n\n");
-                        fprintf(pfDoc,"limes datentechnik(r) gmbh (www.flam.de)\n\n");
+                        fprintf(pfDoc, "AUTHOR\n");
+                        fprintf(pfDoc, "------\n\n");
+                        fprintf(pfDoc, "limes datentechnik(r) gmbh (www.flam.de)\n\n");
                      } else {
                         if (isNbr) {
                            fprintf(pfDoc,"%s CONSTANT '%s'\n",acNum,psArg->psStd->pcKyw);
@@ -1320,13 +1320,13 @@ extern int siClpDocu(
                            l=strlen(psArg->psStd->pcKyw)+11;
                            for (i=0;i<l;i++) fprintf(pfDoc,"+"); fprintf(pfDoc,"\n\n");
                         }
-                        fprintf(pfDoc,".SYNOPSIS\n\n");
-                        fprintf(pfDoc,"-----------------------------------------------------------------------\n");
-                        fprintf(pfDoc,"HELP:   %s\n",psArg->psFix->pcHlp);
-                        fprintf(pfDoc,"PATH:   %s\n",fpcPat(pvHdl,siLev-1));
-                        fprintf(pfDoc,"TYPE:   %s\n",apClpTyp[psArg->psFix->siTyp]);
-                        fprintf(pfDoc,"SYNTAX: %s\n",psArg->psStd->pcKyw);
-                        fprintf(pfDoc,"-----------------------------------------------------------------------\n\n");
+                        fprintf(pfDoc, ".SYNOPSIS\n\n");
+                        fprintf(pfDoc, "-----------------------------------------------------------------------\n");
+                        efprintf(pfDoc,"HELP:   %s\n",psArg->psFix->pcHlp);
+                        fprintf(pfDoc, "PATH:   %s\n",fpcPat(pvHdl,siLev-1));
+                        fprintf(pfDoc, "TYPE:   %s\n",apClpTyp[psArg->psFix->siTyp]);
+                        fprintf(pfDoc, "SYNTAX: %s\n",psArg->psStd->pcKyw);
+                        fprintf(pfDoc, "-----------------------------------------------------------------------\n\n");
                         if (siErr<0) return(siErr);
                         fprintf(pfDoc,".DESCRIPTION\n\n");
                         if (psArg->psFix->pcMan!=NULL && *psArg->psFix->pcMan) {
@@ -1367,7 +1367,7 @@ extern int siClpDocu(
              fprintf(pfDoc,".");
          }
          for (p=psHdl->pcCmd;*p;p++) fprintf(pfDoc,"%c",tolower(*p));
-         fprintf(pfDoc,   " - %c%s%c\n\n",C_GRV,psHdl->pcHlp,C_GRV);
+         efprintf(pfDoc,  " - `%s`\n\n",psHdl->pcHlp);
          fprintf(pfDoc,   "SYNOPSIS\n");
          fprintf(pfDoc,   "--------\n\n");
          fprintf(pfDoc,   "-----------------------------------------------------------------------\n");
@@ -1402,7 +1402,7 @@ extern int siClpDocu(
          }
          fprintf(pfDoc,   ".SYNOPSIS\n\n");
          fprintf(pfDoc,   "-----------------------------------------------------------------------\n");
-         fprintf(pfDoc,   "HELP:   %s\n",psHdl->pcHlp);
+         efprintf(pfDoc,  "HELP:   %s\n",psHdl->pcHlp);
          fprintf(pfDoc,   "PATH:   %s.%s\n",psHdl->pcOwn,psHdl->pcPgm);
          if (psHdl->isOvl) {
             fprintf(pfDoc,"TYPE:   OVERLAY\n");
@@ -2050,7 +2050,7 @@ static void vdClpSymPrn(
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    TsSym*                        psHlp=psSym;
    while (psHlp!=NULL) {
-      fprintf(psHdl->pfSym,"%s %3.3d - %s (KWL=%d TYP=%s MIN=%d MAX=%d SIZ=%d OFS=%d OID=%d FLG=%8.8lX (NXT=%p BAK=%p DEP=%p HIH=%p ALI=%p CNT=%p OID=%p ELN=%p SLN=%p TLN=%p LNK=%p)) - %s\n",
+      efprintf(psHdl->pfSym,"%s %3.3d - %s (KWL=%d TYP=%s MIN=%d MAX=%d SIZ=%d OFS=%d OID=%d FLG=%8.8lX (NXT=%p BAK=%p DEP=%p HIH=%p ALI=%p CNT=%p OID=%p ELN=%p SLN=%p TLN=%p LNK=%p)) - %s\n",
             fpcPre(pvHdl,siLev),psHlp->psStd->siPos+1,psHlp->psStd->pcKyw,psHlp->psStd->siKwl,apClpTyp[psHlp->psFix->siTyp],psHlp->psFix->siMin,psHlp->psFix->siMax,psHlp->psFix->siSiz,
             psHlp->psFix->siOfs,psHlp->psFix->siOid,psHlp->psStd->uiFlg,psHlp->psNxt,psHlp->psBak,psHlp->psDep,psHlp->psHih,psHlp->psStd->psAli,psHlp->psFix->psCnt,psHlp->psFix->psOid,
             psHlp->psFix->psEln,psHlp->psFix->psSln,psHlp->psFix->psTln,psHlp->psFix->psLnk,psHlp->psFix->pcHlp);
@@ -4522,9 +4522,12 @@ static void vdClpPrnArg(
    if (pfOut!=NULL) {
       if (psHdl->isCas) {
          if (pcDft!=NULL && *pcDft) {
-            fprintf(pfOut,"%s %s (%s: %s) - %s (PROPERTY: %c%s%c)\n",p,pcKyw,a,b,pcHlp,C_SBO,pcDft,C_SBC);
+            fprintf(pfOut,"%s %s (%s: %s) - ",p,pcKyw,a,b);
+            efprintf(pfOut,"%s",pcHlp);
+            fprintf(pfOut," (PROPERTY: %c%s%c)\n",C_SBO,pcDft,C_SBC);
          } else {
-            fprintf(pfOut,"%s %s (%s: %s) - %s\n",p,pcKyw,a,b,pcHlp);
+            fprintf(pfOut,"%s %s (%s: %s) - ",p,pcKyw,a,b);
+            efprintf(pfOut,"%s\n",pcHlp);
          }
          fprintf(pfOut,"%s ",p);
          for (i=0;i<siKwl;i++) fprintf(pfOut,"%c",C_CRT);
@@ -4535,9 +4538,12 @@ static void vdClpPrnArg(
          for (i=0;i<siKwl;i++) fprintf(pfOut,"%c",toupper(pcKyw[i]));
          for (/*i=i*/;i<siLen;i++) fprintf(pfOut,"%c",tolower(pcKyw[i]));
          if (pcDft!=NULL && *pcDft) {
-            fprintf(pfOut," (%s: %s) - %s (PROPERTY: %c%s%c)\n",a,b,pcHlp,C_SBO,pcDft,C_SBC);
+            fprintf(pfOut," (%s: %s) - ",a,b);
+            efprintf(pfOut,"%s",pcHlp);
+            fprintf(pfOut," (PROPERTY: %c%s%c)\n",C_SBO,pcDft,C_SBC);
          } else {
-            fprintf(pfOut," (%s: %s) - %s\n",a,b,pcHlp);
+            fprintf(pfOut," (%s: %s) - ",a,b);
+            efprintf(pfOut,"%s\n",pcHlp);
          }
       }
    }
@@ -5156,7 +5162,7 @@ static int siClpPrnDoc(
             if (siLst) {
                fprintf(pfDoc,".SELECTIONS\n\n");
                for (m=0;m<siLst;m++) {
-                  fprintf(pfDoc," * %c%s - %s%c\n",C_GRV,apLst[m]->psStd->pcKyw,apLst[m]->psFix->pcHlp,C_GRV);
+                  efprintf(pfDoc," * `%s - %s`\n",apLst[m]->psStd->pcKyw,apLst[m]->psFix->pcHlp);
                }
                fprintf(pfDoc,"\n");
             }
@@ -5172,14 +5178,14 @@ static int siClpPrnDoc(
                      l=strlen(apMan[m]->psStd->pcKyw)+11;
                      for (i=0;i<l;i++) fprintf(pfDoc,"+"); fprintf(pfDoc,"\n\n");
                   }
-                  fprintf(pfDoc,".SYNOPSIS\n\n");
-                  fprintf(pfDoc,"-----------------------------------------------------------------------\n");
-                  fprintf(pfDoc,"HELP:   %s\n",apMan[m]->psFix->pcHlp);
-                  fprintf(pfDoc,"PATH:   %s\n",fpcPat(pvHdl,siLev));
-                  fprintf(pfDoc,"TYPE:   %s\n",apClpTyp[apMan[m]->psFix->siTyp]);
-                  fprintf(pfDoc,"SYNTAX: %s\n",apMan[m]->psStd->pcKyw);
-                  fprintf(pfDoc,"-----------------------------------------------------------------------\n\n");
-                  fprintf(pfDoc,".DESCRIPTION\n\n");
+                  fprintf(pfDoc, ".SYNOPSIS\n\n");
+                  fprintf(pfDoc, "-----------------------------------------------------------------------\n");
+                  efprintf(pfDoc,"HELP:   %s\n",apMan[m]->psFix->pcHlp);
+                  fprintf(pfDoc, "PATH:   %s\n",fpcPat(pvHdl,siLev));
+                  fprintf(pfDoc, "TYPE:   %s\n",apClpTyp[apMan[m]->psFix->siTyp]);
+                  fprintf(pfDoc, "SYNTAX: %s\n",apMan[m]->psStd->pcKyw);
+                  fprintf(pfDoc, "-----------------------------------------------------------------------\n\n");
+                  fprintf(pfDoc, ".DESCRIPTION\n\n");
                   efprintf(pfDoc,"%s\n\n",apMan[m]->psFix->pcMan);
                   fprintf(pfDoc,"indexterm:%cConstant %s%c\n\n\n",C_SBO,apMan[m]->psStd->pcKyw,C_CBC);
                   k++;
@@ -5190,9 +5196,9 @@ static int siClpPrnDoc(
          if (siLst) {
             fprintf(pfDoc,".ARGUMENTS\n\n");
             for (m=0;m<siLst;m++) {
-               fprintf(pfDoc," * %c%s: ",C_GRV,apClpTyp[apLst[m]->psFix->siTyp]); siClpPrnSyn(pvHdl,pfDoc,FALSE,siLev,apLst[m]); fprintf(pfDoc," - %s%c\n",apLst[m]->psFix->pcHlp,C_GRV);
+               fprintf(pfDoc," * %c%s: ",C_GRV,apClpTyp[apLst[m]->psFix->siTyp]); siClpPrnSyn(pvHdl,pfDoc,FALSE,siLev,apLst[m]); efprintf(pfDoc," - %s`\n",apLst[m]->psFix->pcHlp);
                for (psSel=apLst[m]->psDep;psSel!=NULL;psSel=psSel->psNxt) {
-                  fprintf(pfDoc," ** %c%s - %s%c\n",C_GRV,psSel->psStd->pcKyw,psSel->psFix->pcHlp,C_GRV);
+                  efprintf(pfDoc," ** `%s - %s`\n",psSel->psStd->pcKyw,psSel->psFix->pcHlp);
                }
             }
             fprintf(pfDoc,"\n");
@@ -5215,17 +5221,17 @@ static int siClpPrnDoc(
                   l=strlen(acArg)+strlen(apMan[m]->psStd->pcKyw)+3;
                   for (i=0;i<l;i++) fprintf(pfDoc,"%c",C_CRT); fprintf(pfDoc,"\n\n");
                }
-               fprintf(pfDoc,".SYNOPSIS\n\n");
-               fprintf(pfDoc,"-----------------------------------------------------------------------\n");
-               fprintf(pfDoc,"HELP:   %s\n",apMan[m]->psFix->pcHlp);
-               fprintf(pfDoc,"PATH:   %s\n",fpcPat(pvHdl,siLev));
-               fprintf(pfDoc,"TYPE:   %s\n",apClpTyp[apMan[m]->psFix->siTyp]);
-               fprintf(pfDoc,"SYNTAX: ");
+               fprintf(pfDoc, ".SYNOPSIS\n\n");
+               fprintf(pfDoc, "-----------------------------------------------------------------------\n");
+               efprintf(pfDoc,"HELP:   %s\n",apMan[m]->psFix->pcHlp);
+               fprintf(pfDoc, "PATH:   %s\n",fpcPat(pvHdl,siLev));
+               fprintf(pfDoc, "TYPE:   %s\n",apClpTyp[apMan[m]->psFix->siTyp]);
+               fprintf(pfDoc, "SYNTAX: ");
                siErr=siClpPrnSyn(pvHdl,pfDoc,FALSE,siLev,apMan[m]);
                fprintf(pfDoc,"\n");
                if (siErr<0) return(siErr);
-               fprintf(pfDoc,"-----------------------------------------------------------------------\n\n");
-               fprintf(pfDoc,".DESCRIPTION\n\n");
+               fprintf(pfDoc, "-----------------------------------------------------------------------\n\n");
+               fprintf(pfDoc, ".DESCRIPTION\n\n");
                if (apMan[m]->psFix->pcMan!=NULL && *apMan[m]->psFix->pcMan) {
                   efprintf(pfDoc,"%s\n\n",apMan[m]->psFix->pcMan);
                } else {
@@ -5280,7 +5286,7 @@ static int siClpPrnPro(
                   isMan=FALSE;
                }
                fprintf(pfOut,"%s.%s.%s.%s=\"%s\" ",psHdl->pcOwn,psHdl->pcPgm,fpcPat(pvHdl,siLev),psHlp->psStd->pcKyw,psHlp->psFix->pcDft);
-               fprintf(pfOut,"%c TYPE: %s HELP: %s %c\n",C_HSH,apClpTyp[psHlp->psFix->siTyp],psHlp->psFix->pcHlp,C_HSH);
+               efprintf(pfOut,"# TYPE: %s HELP: %s #\n",apClpTyp[psHlp->psFix->siTyp],psHlp->psFix->pcHlp);
             } else {
                if (isSet==FALSE) {
                   if ((isMan || (!CLPISS_CMD(psHlp->psStd->uiFlg))) && psHlp->psFix->pcMan!=NULL && *psHlp->psFix->pcMan) {
@@ -5292,8 +5298,8 @@ static int siClpPrnPro(
                      if (isMan) fprintf(pfOut,"\n");
                      isMan=FALSE;
                   }
-                  fprintf(pfOut,"%s.%s.%s.%s=\"\" ",psHdl->pcOwn,psHdl->pcPgm,fpcPat(pvHdl,siLev),psHlp->psStd->pcKyw);
-                  fprintf(pfOut,"%c TYPE: %s HELP: %s %c\n",C_HSH,apClpTyp[psHlp->psFix->siTyp],psHlp->psFix->pcHlp,C_HSH);
+                  fprintf(pfOut, "%s.%s.%s.%s=\"\" ",psHdl->pcOwn,psHdl->pcPgm,fpcPat(pvHdl,siLev),psHlp->psStd->pcKyw);
+                  efprintf(pfOut,"# TYPE: %s HELP: %s #\n",apClpTyp[psHlp->psFix->siTyp],psHlp->psFix->pcHlp);
                }
             }
 

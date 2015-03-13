@@ -2322,24 +2322,24 @@ static void vdCleManProgram(
    const char*                   p;
    if (isMan) {
       for(p=pcPgm;*p;p++) fprintf(pfOut,"%c",tolower(*p));
-      fprintf(pfOut,"(1)\n");
+      fprintf(pfOut, "(1)\n");
       l=strlen(pcPgm)+3;
       for (i=0;i<l;i++) fprintf(pfOut,"=");
-      fprintf(pfOut,"\n");
-      fprintf(pfOut,":doctype: manpage\n\n");
-      fprintf(pfOut,"NAME\n");
-      fprintf(pfOut,"----\n\n");
+      fprintf(pfOut, "\n");
+      fprintf(pfOut, ":doctype: manpage\n\n");
+      fprintf(pfOut, "NAME\n");
+      fprintf(pfOut, "----\n\n");
       for(p=pcPgm;*p;p++) fprintf(pfOut,"%c",tolower(*p));
-      fprintf(pfOut," - %c%s%c\n\n",C_GRV,pcHlp,C_GRV);
-      fprintf(pfOut,"SYNOPSIS\n");
-      fprintf(pfOut,"--------\n\n");
-      fprintf(pfOut,"-----------------------------------------------------------------------\n");
-      fprintf(pfOut,"PATH:   %s\n",pcOwn);
-      fprintf(pfOut,"TYPE:   PROGRAM\n");
-      fprintf(pfOut,"SYNTAX: :> %s COMMAND/FUNCTION ...\n",pcPgm);
-      fprintf(pfOut,"-----------------------------------------------------------------------\n\n");
-      fprintf(pfOut,"DESCRIPTION\n");
-      fprintf(pfOut,"-----------\n\n");
+      efprintf(pfOut," - `%s`\n\n",pcHlp);
+      fprintf(pfOut, "SYNOPSIS\n");
+      fprintf(pfOut, "--------\n\n");
+      fprintf(pfOut, "-----------------------------------------------------------------------\n");
+      fprintf(pfOut, "PATH:   %s\n",pcOwn);
+      fprintf(pfOut, "TYPE:   PROGRAM\n");
+      fprintf(pfOut, "SYNTAX: :> %s COMMAND/FUNCTION ...\n",pcPgm);
+      fprintf(pfOut, "-----------------------------------------------------------------------\n\n");
+      fprintf(pfOut, "DESCRIPTION\n");
+      fprintf(pfOut, "-----------\n\n");
       if (pcMan!=NULL && *pcMan) {
          efprintf(pfOut,"%s\n\n",pcMan);
       } else {
@@ -2373,13 +2373,13 @@ static void vdCleManProgram(
          fprintf(pfOut,"SYNOPSIS\n");
          for (i=0;i<8;i++) fprintf(pfOut,"%c",C_TLD); fprintf(pfOut,"\n\n");
       }
-      fprintf(pfOut,"-----------------------------------------------------------------------\n");
-      fprintf(pfOut,"HELP:   %s\n",pcHlp);
-      fprintf(pfOut,"PATH:   %s\n",pcOwn);
-      fprintf(pfOut,"TYPE:   PROGRAM\n");
-      fprintf(pfOut,"SYNTAX: :> %s COMMAND/FUNCTION ...\n",pcPgm);
-      fprintf(pfOut,"-----------------------------------------------------------------------\n\n");
-      fprintf(pfOut,"indexterm:%cSynopsis for program %s%c\n\n\n",C_SBO,pcPgm,C_SBC);
+      fprintf(pfOut, "-----------------------------------------------------------------------\n");
+      efprintf(pfOut,"HELP:   %s\n",pcHlp);
+      fprintf(pfOut, "PATH:   %s\n",pcOwn);
+      fprintf(pfOut, "TYPE:   PROGRAM\n");
+      fprintf(pfOut, "SYNTAX: :> %s COMMAND/FUNCTION ...\n",pcPgm);
+      fprintf(pfOut, "-----------------------------------------------------------------------\n\n");
+      fprintf(pfOut, "indexterm:%cSynopsis for program %s%c\n\n\n",C_SBO,pcPgm,C_SBC);
 
       if (isNbr) {
          fprintf(pfOut,"2.2. DESCRIPTION\n");
@@ -2442,31 +2442,31 @@ static void vdCleManFunction(
    const char*                   p;
    if (isMan) {
       for(p=pcPgm;*p;p++) fprintf(pfOut,"%c",tolower(*p));
-      fprintf(pfOut,".");
+      fprintf(pfOut, ".");
       for(p=pcFct;*p;p++) fprintf(pfOut,"%c",tolower(*p));
-      fprintf(pfOut,"(1)\n");
+      fprintf(pfOut, "(1)\n");
       l=strlen(pcPgm)+strlen(pcFct)+4;
       for (i=0;i<l;i++) fprintf(pfOut,"=");
-      fprintf(pfOut,"\n");
-      fprintf(pfOut,":doctype: manpage\n\n");
-      fprintf(pfOut,"NAME\n");
-      fprintf(pfOut,"----\n\n");
+      fprintf(pfOut, "\n");
+      fprintf(pfOut, ":doctype: manpage\n\n");
+      fprintf(pfOut, "NAME\n");
+      fprintf(pfOut, "----\n\n");
       for(p=pcPgm;*p;p++) fprintf(pfOut,"%c",tolower(*p));
-      fprintf(pfOut,".");
+      fprintf(pfOut, ".");
       for(p=pcFct;*p;p++) fprintf(pfOut,"%c",tolower(*p));
-      fprintf(pfOut," - %c%s%c\n\n",C_GRV,pcHlp,C_GRV);
-      fprintf(pfOut,"SYNOPSIS\n");
-      fprintf(pfOut,"--------\n\n");
-      fprintf(pfOut,"-----------------------------------------------------------------------\n");
-      fprintf(pfOut,"PATH:   %s.%s\n",pcOwn,pcPgm);
-      fprintf(pfOut,"TYPE:   BUILT-IN FUNCTION\n");
-      fprintf(pfOut,"SYNTAX: :> %s %s\n",pcPgm,pcSyn);
-      fprintf(pfOut,"-----------------------------------------------------------------------\n\n");
-      fprintf(pfOut,"DESCRIPTION\n");
-      fprintf(pfOut,"-----------\n\n");
+      efprintf(pfOut," - `%s`\n\n",pcHlp);
+      fprintf(pfOut, "SYNOPSIS\n");
+      fprintf(pfOut, "--------\n\n");
+      fprintf(pfOut, "-----------------------------------------------------------------------\n");
+      fprintf(pfOut, "PATH:   %s.%s\n",pcOwn,pcPgm);
+      fprintf(pfOut, "TYPE:   BUILT-IN FUNCTION\n");
+      fprintf(pfOut, "SYNTAX: :> %s %s\n",pcPgm,pcSyn);
+      fprintf(pfOut, "-----------------------------------------------------------------------\n\n");
+      fprintf(pfOut, "DESCRIPTION\n");
+      fprintf(pfOut, "-----------\n\n");
       efprintf(pfOut,"%s\n\n",pcMan);
-      fprintf(pfOut,"AUTHOR\n------\n\n");
-      fprintf(pfOut,"limes datentechnik(r) gmbh (www.flam.de)\n\n");
+      fprintf(pfOut, "AUTHOR\n------\n\n");
+      fprintf(pfOut, "limes datentechnik(r) gmbh (www.flam.de)\n\n");
    } else {
       if (isNbr) {
          fprintf(pfOut,"%s FUNCTION '%s'\n",pcNum,pcFct);
@@ -2477,14 +2477,14 @@ static void vdCleManFunction(
          l=strlen(pcFct)+11;
          for (i=0;i<l;i++) fprintf(pfOut,"%s",pcLev); fprintf(pfOut,"\n\n");
       }
-      fprintf(pfOut,".SYNOPSIS\n\n");
-      fprintf(pfOut,"-----------------------------------------------------------------------\n");
-      fprintf(pfOut,"HELP:   %s\n",pcHlp);
-      fprintf(pfOut,"PATH:   %s.%s\n",pcOwn,pcPgm);
-      fprintf(pfOut,"TYPE:   BUILT-IN FUNCTION\n");
-      fprintf(pfOut,"SYNTAX: :> %s %s\n",pcPgm,pcSyn);
-      fprintf(pfOut,"-----------------------------------------------------------------------\n\n");
-      fprintf(pfOut,".DESCRIPTION\n\n");
+      fprintf(pfOut, ".SYNOPSIS\n\n");
+      fprintf(pfOut, "-----------------------------------------------------------------------\n");
+      efprintf(pfOut,"HELP:   %s\n",pcHlp);
+      fprintf(pfOut, "PATH:   %s.%s\n",pcOwn,pcPgm);
+      fprintf(pfOut, "TYPE:   BUILT-IN FUNCTION\n");
+      fprintf(pfOut, "SYNTAX: :> %s %s\n",pcPgm,pcSyn);
+      fprintf(pfOut, "-----------------------------------------------------------------------\n\n");
+      fprintf(pfOut, ".DESCRIPTION\n\n");
       efprintf(pfOut,"%s\n\n",pcMan);
       fprintf(pfOut,"indexterm:%cBuilt-in function %s%c\n\n\n",C_SBO,pcFct,C_SBC);
    }
@@ -2545,32 +2545,32 @@ static void vdPrnStaticHelp(
    fprintf(pfOut,"%s Commands - to execute powerful subprograms\n",pcDep);
    for (i=0;psTab[i].pcKyw!=NULL;i++) {
       if (psTab[i].siFlg) {
-         fprintf(pfOut,"%s%s %s %-8.8s - %s \n",pcDep,pcDep,pcPgm,psTab[i].pcKyw,psTab[i].pcHlp);
+         fprintf(pfOut,"%s%s %s %-8.8s - ",pcDep,pcDep,pcPgm,psTab[i].pcKyw); efprintf(pfOut,"%s \n",psTab[i].pcHlp);
       }
    }
    fprintf(pfOut,"%s Built-in functions - to give interactive support for the commands above\n",pcDep);
-   fprintf(pfOut,"%s%s %s SYNTAX   - %s\n",pcDep,pcDep,pcPgm,HLP_CLE_SYNTAX  );
-   fprintf(pfOut,"%s%s %s HELP     - %s\n",pcDep,pcDep,pcPgm,HLP_CLE_HELP    );
-   fprintf(pfOut,"%s%s %s MANPAGE  - %s\n",pcDep,pcDep,pcPgm,HLP_CLE_MANPAGE );
-   fprintf(pfOut,"%s%s %s GENDOCU  - %s\n",pcDep,pcDep,pcPgm,HLP_CLE_GENDOCU );
-   fprintf(pfOut,"%s%s %s GENPROP  - %s\n",pcDep,pcDep,pcPgm,HLP_CLE_GENPROP );
-   fprintf(pfOut,"%s%s %s SETPROP  - %s\n",pcDep,pcDep,pcPgm,HLP_CLE_SETPROP );
-   fprintf(pfOut,"%s%s %s CHGPROP  - %s\n",pcDep,pcDep,pcPgm,HLP_CLE_CHGPROP );
-   fprintf(pfOut,"%s%s %s DELPROP  - %s\n",pcDep,pcDep,pcPgm,HLP_CLE_DELPROP );
-   fprintf(pfOut,"%s%s %s GETPROP  - %s\n",pcDep,pcDep,pcPgm,HLP_CLE_GETPROP );
-   fprintf(pfOut,"%s%s %s SETOWNER - %s\n",pcDep,pcDep,pcPgm,HLP_CLE_SETOWNER);
-   fprintf(pfOut,"%s%s %s GETOWNER - %s\n",pcDep,pcDep,pcPgm,HLP_CLE_GETOWNER);
-   fprintf(pfOut,"%s%s %s SETENV   - %s\n",pcDep,pcDep,pcPgm,HLP_CLE_SETENV  );
-   fprintf(pfOut,"%s%s %s GETENV   - %s\n",pcDep,pcDep,pcPgm,HLP_CLE_GETENV  );
-   fprintf(pfOut,"%s%s %s DELENV   - %s\n",pcDep,pcDep,pcPgm,HLP_CLE_DELENV  );
-   fprintf(pfOut,"%s%s %s TRACE    - %s\n",pcDep,pcDep,pcPgm,HLP_CLE_TRACE   );
-   fprintf(pfOut,"%s%s %s CONFIG   - %s\n",pcDep,pcDep,pcPgm,HLP_CLE_CONFIG  );
-   fprintf(pfOut,"%s%s %s GRAMMAR  - %s\n",pcDep,pcDep,pcPgm,HLP_CLE_GRAMMAR );
-   fprintf(pfOut,"%s%s %s LEXEM    - %s\n",pcDep,pcDep,pcPgm,HLP_CLE_LEXEM   );
-   fprintf(pfOut,"%s%s %s LICENSE  - %s\n",pcDep,pcDep,pcPgm,HLP_CLE_LICENSE );
-   fprintf(pfOut,"%s%s %s VERSION  - %s\n",pcDep,pcDep,pcPgm,HLP_CLE_VERSION );
-   fprintf(pfOut,"%s%s %s ABOUT    - %s\n",pcDep,pcDep,pcPgm,HLP_CLE_ABOUT   );
-   fprintf(pfOut,"%s%s %s ERRORS   - %s\n",pcDep,pcDep,pcPgm,HLP_CLE_ERRORS  );
+   fprintf(pfOut,"%s%s %s SYNTAX   - ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",HLP_CLE_SYNTAX);
+   fprintf(pfOut,"%s%s %s HELP     - ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",HLP_CLE_HELP);
+   fprintf(pfOut,"%s%s %s MANPAGE  - ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",HLP_CLE_MANPAGE);
+   fprintf(pfOut,"%s%s %s GENDOCU  - ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",HLP_CLE_GENDOCU);
+   fprintf(pfOut,"%s%s %s GENPROP  - ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",HLP_CLE_GENPROP);
+   fprintf(pfOut,"%s%s %s SETPROP  - ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",HLP_CLE_SETPROP);
+   fprintf(pfOut,"%s%s %s CHGPROP  - ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",HLP_CLE_CHGPROP);
+   fprintf(pfOut,"%s%s %s DELPROP  - ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",HLP_CLE_DELPROP);
+   fprintf(pfOut,"%s%s %s GETPROP  - ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",HLP_CLE_GETPROP);
+   fprintf(pfOut,"%s%s %s SETOWNER - ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",HLP_CLE_SETOWNER);
+   fprintf(pfOut,"%s%s %s GETOWNER - ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",HLP_CLE_GETOWNER);
+   fprintf(pfOut,"%s%s %s SETENV   - ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",HLP_CLE_SETENV);
+   fprintf(pfOut,"%s%s %s GETENV   - ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",HLP_CLE_GETENV);
+   fprintf(pfOut,"%s%s %s DELENV   - ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",HLP_CLE_DELENV);
+   fprintf(pfOut,"%s%s %s TRACE    - ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",HLP_CLE_TRACE);
+   fprintf(pfOut,"%s%s %s CONFIG   - ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",HLP_CLE_CONFIG);
+   fprintf(pfOut,"%s%s %s GRAMMAR  - ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",HLP_CLE_GRAMMAR);
+   fprintf(pfOut,"%s%s %s LEXEM    - ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",HLP_CLE_LEXEM);
+   fprintf(pfOut,"%s%s %s LICENSE  - ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",HLP_CLE_LICENSE);
+   fprintf(pfOut,"%s%s %s VERSION  - ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",HLP_CLE_VERSION);
+   fprintf(pfOut,"%s%s %s ABOUT    - ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",HLP_CLE_ABOUT);
+   fprintf(pfOut,"%s%s %s ERRORS   - ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",HLP_CLE_ERRORS);
    fprintf(pfOut,"For more information please use the built-in function 'MANPAGE'\n");
 }
 
