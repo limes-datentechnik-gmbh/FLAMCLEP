@@ -140,35 +140,35 @@ extern int win_snprintf(char *buffer, size_t size, const char *format, ...);
 #  define esprintf              ebcdic_sprintf
 #  define efprintf              ebcdic_fprintf
 #else
-#  define C_EXC              '!' /*DIACOK*/
-#  define C_HSH              '#' /*DIACOK*/
-#  define C_DLR              '$' /*DIACOK*/
-#  define C_ATS              '@' /*DIACOK*/
-#  define C_SBO              '[' /*DIACOK*/
-#  define C_BSL              '\\'/*DIACOK*/
-#  define C_SBC              ']' /*DIACOK*/
-#  define C_CRT              '^' /*DIACOK*/
-#  define C_GRV              '`' /*DIACOK*/
-#  define C_CBO              '{' /*DIACOK*/
-#  define C_VBR              '|' /*DIACOK*/
-#  define C_CBC              '}' /*DIACOK*/
-#  define C_TLD              '~' /*DIACOK*/
-#  define S_EXC              "!" /*DIACOK*/
-#  define S_HSH              "#" /*DIACOK*/
-#  define S_DLR              "$" /*DIACOK*/
-#  define S_ATS              "@" /*DIACOK*/
-#  define S_SBO              "[" /*DIACOK*/
-#  define S_BSL              "\\"/*DIACOK*/
-#  define S_SBC              "]" /*DIACOK*/
-#  define S_CRT              "^" /*DIACOK*/
-#  define S_GRV              "`" /*DIACOK*/
-#  define S_CBO              "{" /*DIACOK*/
-#  define S_VBR              "|" /*DIACOK*/
-#  define S_CBC              "}" /*DIACOK*/
-#  define S_TLD              "~" /*DIACOK*/
-#  define S_SVB              "=|" /*DIACOK*/
-#  define S_SBS              "/\\" /*DIACOK*/
-#  define S_IDT              "--|" /*DIACOK*/
+#  define C_EXC              '!' /*nodiac*/
+#  define C_HSH              '#' /*nodiac*/
+#  define C_DLR              '$' /*nodiac*/
+#  define C_ATS              '@' /*nodiac*/
+#  define C_SBO              '[' /*nodiac*/
+#  define C_BSL              '\\'/*nodiac*/
+#  define C_SBC              ']' /*nodiac*/
+#  define C_CRT              '^' /*nodiac*/
+#  define C_GRV              '`' /*nodiac*/
+#  define C_CBO              '{' /*nodiac*/
+#  define C_VBR              '|' /*nodiac*/
+#  define C_CBC              '}' /*nodiac*/
+#  define C_TLD              '~' /*nodiac*/
+#  define S_EXC              "!" /*nodiac*/
+#  define S_HSH              "#" /*nodiac*/
+#  define S_DLR              "$" /*nodiac*/
+#  define S_ATS              "@" /*nodiac*/
+#  define S_SBO              "[" /*nodiac*/
+#  define S_BSL              "\\"/*nodiac*/
+#  define S_SBC              "]" /*nodiac*/
+#  define S_CRT              "^" /*nodiac*/
+#  define S_GRV              "`" /*nodiac*/
+#  define S_CBO              "{" /*nodiac*/
+#  define S_VBR              "|" /*nodiac*/
+#  define S_CBC              "}" /*nodiac*/
+#  define S_TLD              "~" /*nodiac*/
+#  define S_SVB              "=|" /*nodiac*/
+#  define S_SBS              "/\\" /*nodiac*/
+#  define S_IDT              "--|" /*nodiac*/
 #  define esnprintf          snprintf
 #  define esprintf           sprintf
 #  define efprintf           fprintf

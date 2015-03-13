@@ -557,9 +557,9 @@ extern const char* mapl2c(unsigned isEBCDIC) {
       if ((isEBCDIC && '0'==0xF0) || (!isEBCDIC && '0'==0x30)) {
          pcPtr=strchr(pcEnv,'.');
          if (pcPtr!=NULL) {
-            pcHlp=strchr(pcPtr+1,'@');
+            pcHlp=strchr(pcPtr+1,C_ATS);
             if (pcHlp!=NULL) *pcHlp=0x00;
-            pcHlp=strchr(pcPtr+1,'#');
+            pcHlp=strchr(pcPtr+1,C_HSH);
             if (pcHlp!=NULL) *pcHlp=0x00;
             return(pcPtr+1);
          }
@@ -582,7 +582,7 @@ extern const char* lng2ccsd(const char* pcLang, unsigned uiLen, unsigned isEbcdi
    }
    pcLngCpy[1] = tolower(pcLang[1]);
 
-   pcPtr=memchr(pcLang, '@', uiLen);
+   pcPtr=memchr(pcLang, C_ATS, uiLen);
    if (pcPtr!=NULL) {
       if (((pcPtr-pcLang)+4 < uiLen) && tolower(pcPtr[1])=='e' && tolower(pcPtr[2])=='u' && tolower(pcPtr[3])=='r' && tolower(pcPtr[4])=='o') {
          return(isEbcdic?"IBM-1148":"ISO8859-15");
