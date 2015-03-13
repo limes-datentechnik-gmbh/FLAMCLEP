@@ -344,6 +344,8 @@ extern int ebcdic_snprintf(char* string, size_t size, const char* format, ...) {
    va_start(argv, format);
    r = vsnprintf(string, size, format, argv);
    va_end(argv);
+   // TODO: Checken ob im Test Case FTUTL_snprintf_Tests auf USS/zOS
+   // alles auf OK steht. vsnprintf() sollte in allen Fällen 0-terminieren.
    for (p=string;*p;p++) {
       switch (*p) {
       case '!' : *p=C_EXC; break;/*nodiac*/
@@ -371,6 +373,8 @@ extern int ebcdic_sprintf(char* string, const char* format, ...) {
    va_start(argv, format);
    r = vsprintf(string, format, argv);
    va_end(argv);
+   // TODO: Checken ob im Test Case FTUTL_snprintf_Tests auf USS/zOS
+   // alles auf OK steht. vsnprintf() sollte in allen Fällen 0-terminieren.
    for (p=string;*p;p++) {
       switch (*p) {
       case '!' : *p=C_EXC; break;/*nodiac*/
@@ -395,7 +399,7 @@ extern int ebcdic_fprintf(FILE* file, const char* format, ...) {
    va_list  argv;
    char*    help;
    char*    temp;
-   size_t   size=2*strlen(format);
+   size_t   size=256;
    int      r;
    temp=(char*)malloc(size);
    if (temp==NULL) return(0);
@@ -404,7 +408,10 @@ extern int ebcdic_fprintf(FILE* file, const char* format, ...) {
    while (r >= size-1) {
       size*=2;
       help=(char*)realloc(temp,size);
-      if (help!=NULL) temp=help; else break;
+      if (help!=NULL)
+         temp=help;
+      else
+         break;
       r=ebcdic_snprintf(temp,size,format,argv);
    }
    va_end(argv);
