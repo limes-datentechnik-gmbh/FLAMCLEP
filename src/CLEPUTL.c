@@ -305,19 +305,19 @@ extern int init_char(int* p) {
       gc_tld=0xA1; gs_tld[0]=0xA1; gs_tld[1]=0x00;
       break;
    default:
-      gc_exc='!'; gs_exc[0]='!'; gs_exc[1]=0x00;
-      gc_hsh='#'; gs_hsh[0]='#'; gs_hsh[1]=0x00;
-      gc_dlr='$'; gs_dlr[0]='$'; gs_dlr[1]=0x00;
-      gc_ats='@'; gs_ats[0]='@'; gs_ats[1]=0x00;
-      gc_sbo='['; gs_sbo[0]='['; gs_sbo[1]=0x00;
-      gc_bsl='\\'; gs_bsl[0]='\\'; gs_bsl[1]=0x00;
-      gc_sbc=']'; gs_sbc[0]=']'; gs_sbc[1]=0x00;
-      gc_crt='^'; gs_crt[0]='^'; gs_crt[1]=0x00;
-      gc_grv='`'; gs_grv[0]='`'; gs_grv[1]=0x00;
-      gc_cbo='{'; gs_cbo[0]='{'; gs_cbo[1]=0x00;
-      gc_vbr='|'; gs_vbr[0]='|'; gs_vbr[1]=0x00;
-      gc_cbc='}'; gs_cbc[0]='}'; gs_cbc[1]=0x00;
-      gc_tld='~'; gs_tld[0]='~'; gs_tld[1]=0x00;
+      gc_exc='!'; gs_exc[0]='!'; gs_exc[1]=0x00;/*nodiac*/
+      gc_hsh='#'; gs_hsh[0]='#'; gs_hsh[1]=0x00;/*nodiac*/
+      gc_dlr='$'; gs_dlr[0]='$'; gs_dlr[1]=0x00;/*nodiac*/
+      gc_ats='@'; gs_ats[0]='@'; gs_ats[1]=0x00;/*nodiac*/
+      gc_sbo='['; gs_sbo[0]='['; gs_sbo[1]=0x00;/*nodiac*/
+      gc_bsl='\\'; gs_bsl[0]='\\'; gs_bsl[1]=0x00;/*nodiac*/
+      gc_sbc=']'; gs_sbc[0]=']'; gs_sbc[1]=0x00;/*nodiac*/
+      gc_crt='^'; gs_crt[0]='^'; gs_crt[1]=0x00;/*nodiac*/
+      gc_grv='`'; gs_grv[0]='`'; gs_grv[1]=0x00;/*nodiac*/
+      gc_cbo='{'; gs_cbo[0]='{'; gs_cbo[1]=0x00;/*nodiac*/
+      gc_vbr='|'; gs_vbr[0]='|'; gs_vbr[1]=0x00;/*nodiac*/
+      gc_cbc='}'; gs_cbc[0]='}'; gs_cbc[1]=0x00;/*nodiac*/
+      gc_tld='~'; gs_tld[0]='~'; gs_tld[1]=0x00;/*nodiac*/
       break;
    }
    gs_svb[0]='=';
@@ -346,19 +346,19 @@ extern int ebcdic_snprintf(char* string, size_t size, const char* format, ...) {
    va_end(argv);
    for (p=string;*p;p++) {
       switch (*p) {
-      case '!' : *p=C_EXC; break;
-      case '$' : *p=C_DLR; break;
-      case '#' : *p=C_HSH; break;
-      case '@' : *p=C_ATS; break;
-      case '[' : *p=C_SBO; break;
-      case '\\': *p=C_BSL; break;
-      case ']' : *p=C_SBC; break;
-      case '^' : *p=C_CRT; break;
-      case '`' : *p=C_GRV; break;
-      case '{' : *p=C_CBO; break;
-      case '|' : *p=C_VBR; break;
-      case '}' : *p=C_CBC; break;
-      case '~' : *p=C_TLD; break;
+      case '!' : *p=C_EXC; break;/*nodiac*/
+      case '$' : *p=C_DLR; break;/*nodiac*/
+      case '#' : *p=C_HSH; break;/*nodiac*/
+      case '@' : *p=C_ATS; break;/*nodiac*/
+      case '[' : *p=C_SBO; break;/*nodiac*/
+      case '\\': *p=C_BSL; break;/*nodiac*/
+      case ']' : *p=C_SBC; break;/*nodiac*/
+      case '^' : *p=C_CRT; break;/*nodiac*/
+      case '`' : *p=C_GRV; break;/*nodiac*/
+      case '{' : *p=C_CBO; break;/*nodiac*/
+      case '|' : *p=C_VBR; break;/*nodiac*/
+      case '}' : *p=C_CBC; break;/*nodiac*/
+      case '~' : *p=C_TLD; break;/*nodiac*/
       }
    }
    return(r);
@@ -373,19 +373,19 @@ extern int ebcdic_sprintf(char* string, const char* format, ...) {
    va_end(argv);
    for (p=string;*p;p++) {
       switch (*p) {
-      case '!' : *p=C_EXC; break;
-      case '$' : *p=C_DLR; break;
-      case '#' : *p=C_HSH; break;
-      case '@' : *p=C_ATS; break;
-      case '[' : *p=C_SBO; break;
-      case '\\': *p=C_BSL; break;
-      case ']' : *p=C_SBC; break;
-      case '^' : *p=C_CRT; break;
-      case '`' : *p=C_GRV; break;
-      case '{' : *p=C_CBO; break;
-      case '|' : *p=C_VBR; break;
-      case '}' : *p=C_CBC; break;
-      case '~' : *p=C_TLD; break;
+      case '!' : *p=C_EXC; break;/*nodiac*/
+      case '$' : *p=C_DLR; break;/*nodiac*/
+      case '#' : *p=C_HSH; break;/*nodiac*/
+      case '@' : *p=C_ATS; break;/*nodiac*/
+      case '[' : *p=C_SBO; break;/*nodiac*/
+      case '\\': *p=C_BSL; break;/*nodiac*/
+      case ']' : *p=C_SBC; break;/*nodiac*/
+      case '^' : *p=C_CRT; break;/*nodiac*/
+      case '`' : *p=C_GRV; break;/*nodiac*/
+      case '{' : *p=C_CBO; break;/*nodiac*/
+      case '|' : *p=C_VBR; break;/*nodiac*/
+      case '}' : *p=C_CBC; break;/*nodiac*/
+      case '~' : *p=C_TLD; break;/*nodiac*/
       }
    }
    return(r);
