@@ -399,7 +399,7 @@ extern int ebcdic_fprintf(FILE* file, const char* format, ...) {
    va_list  argv;
    char*    help;
    char*    temp;
-   size_t   size=2*strlen(format);
+   size_t   size=256;
    int      r;
    temp=(char*)malloc(size);
    if (temp==NULL) return(0);
@@ -408,7 +408,10 @@ extern int ebcdic_fprintf(FILE* file, const char* format, ...) {
    while (r >= size-1) {
       size*=2;
       help=(char*)realloc(temp,size);
-      if (help!=NULL) temp=help; else break;
+      if (help!=NULL)
+         temp=help;
+      else
+         break;
       r=ebcdic_snprintf(temp,size,format,argv);
    }
    va_end(argv);
