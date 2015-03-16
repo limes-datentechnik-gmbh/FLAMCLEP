@@ -1293,24 +1293,15 @@ extern void rplenvar(char* name,const size_t size,const char opn, const char cls
 }
 
 extern char* mapfil(char* file,int size) {
-   int j,i;
    rplchar(file,size,C_TLD,"<HOME>");
    rplenvar(file,size,'<','>');
-   for (j=i=0;file[i];i++) {
+   for (char* p=file;*p;p++) {
 #ifdef __WIN__
-      if (file[i]=='/') {
-         file[j]=C_BSL;
+      if (*p=='/') *p=C_BSL;
 #else
-      if (('0'==0x30 && file[i]==C_BSL) || ('0'==0xF0 && (file[i]==0xE0 || file[i]==0xEC))) {
-         file[j]='/';
+      if (*p==C_BSL) *p='/';
 #endif
-         j++;
-      } else {
-         file[j]=file[i];
-         j++;
-      }
    }
-   file[j]=0x00;
    return(file);
 }
 
