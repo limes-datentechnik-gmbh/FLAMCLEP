@@ -72,108 +72,6 @@ extern int win_snprintf(char *buffer, size_t size, const char *format, ...);
 #  define UNSETENV(name)      unsetenv((name))
 #endif
 
-#ifdef __EBCDIC__
-   extern int init_char(int* p);
-   extern char* init_string(char* p);
-   extern int ebcdic_snprintf(char* string, size_t size, const char* format, ...);
-   extern int ebcdic_sprintf(char* string, const char* format, ...);
-   extern int ebcdic_fprintf(FILE* file, const char* format, ...);
-   extern int gc_exc;
-   extern int gc_hsh;
-   extern int gc_dlr;
-   extern int gc_ats;
-   extern int gc_sbo;
-   extern int gc_bsl;
-   extern int gc_sbc;
-   extern int gc_crt;
-   extern int gc_grv;
-   extern int gc_cbo;
-   extern int gc_vbr;
-   extern int gc_cbc;
-   extern int gc_tld;
-   extern char gs_exc[2];
-   extern char gs_hsh[2];
-   extern char gs_dlr[2];
-   extern char gs_ats[2];
-   extern char gs_sbo[2];
-   extern char gs_bsl[2];
-   extern char gs_sbc[2];
-   extern char gs_crt[2];
-   extern char gs_grv[2];
-   extern char gs_cbo[2];
-   extern char gs_vbr[2];
-   extern char gs_cbc[2];
-   extern char gs_tld[2];
-   extern char gs_svb[4];
-   extern char gs_sbs[4];
-   extern char gs_idt[4];
-#  define C_EXC                 ((gc_exc)?gc_exc:init_char(&gc_exc))
-#  define C_HSH                 ((gc_hsh)?gc_hsh:init_char(&gc_hsh))
-#  define C_DLR                 ((gc_dlr)?gc_dlr:init_char(&gc_dlr))
-#  define C_ATS                 ((gc_ats)?gc_ats:init_char(&gc_ats))
-#  define C_SBO                 ((gc_sbo)?gc_sbo:init_char(&gc_sbo))
-#  define C_BSL                 ((gc_bsl)?gc_bsl:init_char(&gc_bsl))
-#  define C_SBC                 ((gc_sbc)?gc_sbc:init_char(&gc_sbc))
-#  define C_CRT                 ((gc_sbo)?gc_crt:init_char(&gc_crt))
-#  define C_GRV                 ((gc_grv)?gc_grv:init_char(&gc_grv))
-#  define C_CBO                 ((gc_cbo)?gc_cbo:init_char(&gc_cbo))
-#  define C_VBR                 ((gc_vbr)?gc_vbr:init_char(&gc_vbr))
-#  define C_CBC                 ((gc_cbc)?gc_cbc:init_char(&gc_cbc))
-#  define C_TLD                 ((gc_tld)?gc_tld:init_char(&gc_tld))
-#  define S_EXC                 ((gs_exc[0])?gs_exc:init_string(gs_exc))
-#  define S_HSH                 ((gs_hsh[0])?gs_hsh:init_string(gs_hsh))
-#  define S_DLR                 ((gs_dlr[0])?gs_dlr:init_string(gs_dlr))
-#  define S_ATS                 ((gs_ats[0])?gs_ats:init_string(gs_ats))
-#  define S_SBO                 ((gs_sbo[0])?gs_sbo:init_string(gs_sbo))
-#  define S_BSL                 ((gs_bsl[0])?gs_bsl:init_string(gs_bsl))
-#  define S_SBC                 ((gs_sbc[0])?gs_sbc:init_string(gs_sbc))
-#  define S_CRT                 ((gs_sbo[0])?gs_crt:init_string(gs_crt))
-#  define S_GRV                 ((gs_grv[0])?gs_grv:init_string(gs_grv))
-#  define S_CBO                 ((gs_cbo[0])?gs_cbo:init_string(gs_cbo))
-#  define S_VBR                 ((gs_vbr[0])?gs_vbr:init_string(gs_vbr))
-#  define S_CBC                 ((gs_cbc[0])?gs_cbc:init_string(gs_cbc))
-#  define S_TLD                 ((gs_tld[0])?gs_tld:init_string(gs_tld))
-#  define S_SVB                 ((gs_svb[0])?gs_svb:init_string(gs_svb))
-#  define S_SBS                 ((gs_sbs[0])?gs_sbs:init_string(gs_sbs))
-#  define S_IDT                 ((gs_idt[0])?gs_idt:init_string(gs_idt))
-#  define esnprintf             ebcdic_snprintf
-#  define esprintf              ebcdic_sprintf
-#  define efprintf              ebcdic_fprintf
-#else
-#  define C_EXC              '!' /*nodiac*/
-#  define C_HSH              '#' /*nodiac*/
-#  define C_DLR              '$' /*nodiac*/
-#  define C_ATS              '@' /*nodiac*/
-#  define C_SBO              '[' /*nodiac*/
-#  define C_BSL              '\\'/*nodiac*/
-#  define C_SBC              ']' /*nodiac*/
-#  define C_CRT              '^' /*nodiac*/
-#  define C_GRV              '`' /*nodiac*/
-#  define C_CBO              '{' /*nodiac*/
-#  define C_VBR              '|' /*nodiac*/
-#  define C_CBC              '}' /*nodiac*/
-#  define C_TLD              '~' /*nodiac*/
-#  define S_EXC              "!" /*nodiac*/
-#  define S_HSH              "#" /*nodiac*/
-#  define S_DLR              "$" /*nodiac*/
-#  define S_ATS              "@" /*nodiac*/
-#  define S_SBO              "[" /*nodiac*/
-#  define S_BSL              "\\"/*nodiac*/
-#  define S_SBC              "]" /*nodiac*/
-#  define S_CRT              "^" /*nodiac*/
-#  define S_GRV              "`" /*nodiac*/
-#  define S_CBO              "{" /*nodiac*/
-#  define S_VBR              "|" /*nodiac*/
-#  define S_CBC              "}" /*nodiac*/
-#  define S_TLD              "~" /*nodiac*/
-#  define S_SVB              "=|" /*nodiac*/
-#  define S_SBS              "/\\" /*nodiac*/
-#  define S_IDT              "--|" /*nodiac*/
-#  define esnprintf          snprintf
-#  define esprintf           sprintf
-#  define efprintf           fprintf
-#endif
-
 #define isKyw(c) (isalnum(c) || (c)=='_' || (c)=='-')
 
 #define ISDDNAME(p)     (toupper((p)[0])=='D' && toupper((p)[1])=='D' && (p)[2]==':')
@@ -393,6 +291,386 @@ extern int strxcmp(
    const int                     n,
    const int                     c,
    const int                     f);
+
+/**********************************************************************/
+
+#ifdef __EBCDIC__
+
+extern int ebcdic_snprintf(char* string, size_t size, const char* format, ...);
+extern int ebcdic_sprintf(char* string, const char* format, ...);
+extern int ebcdic_fprintf(FILE* file, const char* format, ...);
+
+static int        gc_exc=0;
+static char       gs_exc[2]={0,0};
+static int        gc_hsh=0;
+static char       gs_hsh[2]={0,0};
+static int        gc_dlr=0;
+static char       gs_dlr[2]={0,0};
+static int        gc_ats=0;
+static char       gs_ats[2]={0,0};
+static int        gc_sbo=0;
+static char       gs_sbo[2]={0,0};
+static int        gc_bsl=0;
+static char       gs_bsl[2]={0,0};
+static int        gc_sbc=0;
+static char       gs_sbc[2]={0,0};
+static int        gc_crt=0;
+static char       gs_crt[2]={0,0};
+static int        gc_grv=0;
+static char       gs_grv[2]={0,0};
+static int        gc_cbo=0;
+static char       gs_cbo[2]={0,0};
+static int        gc_vbr=0;
+static char       gs_vbr[2]={0,0};
+static int        gc_cbc=0;
+static char       gs_cbc[2]={0,0};
+static int        gc_tld=0;
+static char       gs_tld[2]={0,0};
+static char       gs_svb[4]={0,0,0,0};
+static char       gs_sbs[4]={0,0,0,0};
+static char       gs_idt[4]={0,0,0,0};
+
+static int init_char(int* p) {
+   unsigned int ccsid=mapcdstr(mapl2c(TRUE));
+   switch (ccsid) {
+   case 37:
+   case 424:
+   case 1140:
+      gc_exc=0x5A; gs_exc[0]=0x5A; gs_exc[1]=0x00;
+      gc_hsh=0x7B; gs_hsh[0]=0x7B; gs_hsh[1]=0x00;
+      gc_dlr=0x5B; gs_dlr[0]=0x5B; gs_dlr[1]=0x00;
+      gc_ats=0x7C; gs_ats[0]=0x7C; gs_ats[1]=0x00;
+      gc_sbo=0xBA; gs_sbo[0]=0xBA; gs_sbo[1]=0x00;
+      gc_bsl=0xE0; gs_bsl[0]=0xE0; gs_bsl[1]=0x00;
+      gc_sbc=0xBB; gs_sbc[0]=0xBB; gs_sbc[1]=0x00;
+      gc_crt=0xB0; gs_crt[0]=0xB0; gs_crt[1]=0x00;
+      gc_grv=0x79; gs_grv[0]=0x79; gs_grv[1]=0x00;
+      gc_cbo=0xC0; gs_cbo[0]=0xC0; gs_cbo[1]=0x00;
+      gc_vbr=0x4F; gs_vbr[0]=0x4F; gs_vbr[1]=0x00;
+      gc_cbc=0xD0; gs_cbc[0]=0xD0; gs_cbc[1]=0x00;
+      gc_tld=0xA1; gs_tld[0]=0xA1; gs_tld[1]=0x00;
+      break;
+   case 273:
+   case 1141:
+      gc_exc=0x4F; gs_exc[0]=0x4F; gs_exc[1]=0x00;
+      gc_hsh=0x7B; gs_hsh[0]=0x7B; gs_hsh[1]=0x00;
+      gc_dlr=0x5B; gs_dlr[0]=0x5B; gs_dlr[1]=0x00;
+      gc_ats=0xB5; gs_ats[0]=0xB5; gs_ats[1]=0x00;
+      gc_sbo=0x63; gs_sbo[0]=0x63; gs_sbo[1]=0x00;
+      gc_bsl=0xEC; gs_bsl[0]=0xEC; gs_bsl[1]=0x00;
+      gc_sbc=0xFC; gs_sbc[0]=0xFC; gs_sbc[1]=0x00;
+      gc_crt=0x5F; gs_crt[0]=0x5F; gs_crt[1]=0x00;
+      gc_grv=0x79; gs_grv[0]=0x79; gs_grv[1]=0x00;
+      gc_cbo=0x43; gs_cbo[0]=0x43; gs_cbo[1]=0x00;
+      gc_vbr=0xBB; gs_vbr[0]=0xBB; gs_vbr[1]=0x00;
+      gc_cbc=0xDC; gs_cbc[0]=0xDC; gs_cbc[1]=0x00;
+      gc_tld=0x59; gs_tld[0]=0x59; gs_tld[1]=0x00;
+      break;
+   case 1142:
+      gc_exc=0x4F; gs_exc[0]=0x4F; gs_exc[1]=0x00;
+      gc_hsh=0x4A; gs_hsh[0]=0x4A; gs_hsh[1]=0x00;
+      gc_dlr=0x67; gs_dlr[0]=0x67; gs_dlr[1]=0x00;
+      gc_ats=0x80; gs_ats[0]=0x80; gs_ats[1]=0x00;
+      gc_sbo=0x9E; gs_sbo[0]=0x9E; gs_sbo[1]=0x00;
+      gc_bsl=0xE0; gs_bsl[0]=0xE0; gs_bsl[1]=0x00;
+      gc_sbc=0x9F; gs_sbc[0]=0x9F; gs_sbc[1]=0x00;
+      gc_crt=0x5F; gs_crt[0]=0x5F; gs_crt[1]=0x00;
+      gc_grv=0x79; gs_grv[0]=0x79; gs_grv[1]=0x00;
+      gc_cbo=0x9C; gs_cbo[0]=0x9C; gs_cbo[1]=0x00;
+      gc_vbr=0xBB; gs_vbr[0]=0xBB; gs_vbr[1]=0x00;
+      gc_cbc=0x47; gs_cbc[0]=0x47; gs_cbc[1]=0x00;
+      gc_tld=0xDC; gs_tld[0]=0xDC; gs_tld[1]=0x00;
+      break;
+   case 1143:
+      gc_exc=0x4F; gs_exc[0]=0x4F; gs_exc[1]=0x00;
+      gc_hsh=0x63; gs_hsh[0]=0x63; gs_hsh[1]=0x00;
+      gc_dlr=0x67; gs_dlr[0]=0x67; gs_dlr[1]=0x00;
+      gc_ats=0xEC; gs_ats[0]=0xEC; gs_ats[1]=0x00;
+      gc_sbo=0xB5; gs_sbo[0]=0xB5; gs_sbo[1]=0x00;
+      gc_bsl=0x71; gs_bsl[0]=0x71; gs_bsl[1]=0x00;
+      gc_sbc=0x9F; gs_sbc[0]=0x9F; gs_sbc[1]=0x00;
+      gc_crt=0x5F; gs_crt[0]=0x5F; gs_crt[1]=0x00;
+      gc_grv=0x51; gs_grv[0]=0x51; gs_grv[1]=0x00;
+      gc_cbo=0x43; gs_cbo[0]=0x43; gs_cbo[1]=0x00;
+      gc_vbr=0xBB; gs_vbr[0]=0xBB; gs_vbr[1]=0x00;
+      gc_cbc=0x47; gs_cbc[0]=0x47; gs_cbc[1]=0x00;
+      gc_tld=0xDC; gs_tld[0]=0xDC; gs_tld[1]=0x00;
+      break;
+   case 1144:
+      gc_exc=0x4F; gs_exc[0]=0x4F; gs_exc[1]=0x00;
+      gc_hsh=0xB1; gs_hsh[0]=0xB1; gs_hsh[1]=0x00;
+      gc_dlr=0x5B; gs_dlr[0]=0x5B; gs_dlr[1]=0x00;
+      gc_ats=0xB5; gs_ats[0]=0xB5; gs_ats[1]=0x00;
+      gc_sbo=0x90; gs_sbo[0]=0x90; gs_sbo[1]=0x00;
+      gc_bsl=0x48; gs_bsl[0]=0x48; gs_bsl[1]=0x00;
+      gc_sbc=0x51; gs_sbc[0]=0x51; gs_sbc[1]=0x00;
+      gc_crt=0x5F; gs_crt[0]=0x5F; gs_crt[1]=0x00;
+      gc_grv=0xDD; gs_grv[0]=0xDD; gs_grv[1]=0x00;
+      gc_cbo=0x44; gs_cbo[0]=0x44; gs_cbo[1]=0x00;
+      gc_vbr=0xBB; gs_vbr[0]=0xBB; gs_vbr[1]=0x00;
+      gc_cbc=0x54; gs_cbc[0]=0x54; gs_cbc[1]=0x00;
+      gc_tld=0x58; gs_tld[0]=0x58; gs_tld[1]=0x00;
+      break;
+   case 1145:
+      gc_exc=0xBB; gs_exc[0]=0xBB; gs_exc[1]=0x00;
+      gc_hsh=0x69; gs_hsh[0]=0x69; gs_hsh[1]=0x00;
+      gc_dlr=0x5B; gs_dlr[0]=0x5B; gs_dlr[1]=0x00;
+      gc_ats=0x7C; gs_ats[0]=0x7C; gs_ats[1]=0x00;
+      gc_sbo=0x4A; gs_sbo[0]=0x4A; gs_sbo[1]=0x00;
+      gc_bsl=0xE0; gs_bsl[0]=0xE0; gs_bsl[1]=0x00;
+      gc_sbc=0x5A; gs_sbc[0]=0x5A; gs_sbc[1]=0x00;
+      gc_crt=0xBA; gs_crt[0]=0xBA; gs_crt[1]=0x00;
+      gc_grv=0x79; gs_grv[0]=0x79; gs_grv[1]=0x00;
+      gc_cbo=0xC0; gs_cbo[0]=0xC0; gs_cbo[1]=0x00;
+      gc_vbr=0x4F; gs_vbr[0]=0x4F; gs_vbr[1]=0x00;
+      gc_cbc=0xD0; gs_cbc[0]=0xD0; gs_cbc[1]=0x00;
+      gc_tld=0xBD; gs_tld[0]=0xBD; gs_tld[1]=0x00;
+      break;
+   case 1146:
+      gc_exc=0x5A; gs_exc[0]=0x5A; gs_exc[1]=0x00;
+      gc_hsh=0x7B; gs_hsh[0]=0x7B; gs_hsh[1]=0x00;
+      gc_dlr=0x4A; gs_dlr[0]=0x4A; gs_dlr[1]=0x00;
+      gc_ats=0x7C; gs_ats[0]=0x7C; gs_ats[1]=0x00;
+      gc_sbo=0xB1; gs_sbo[0]=0xB1; gs_sbo[1]=0x00;
+      gc_bsl=0xE0; gs_bsl[0]=0xE0; gs_bsl[1]=0x00;
+      gc_sbc=0xBB; gs_sbc[0]=0xBB; gs_sbc[1]=0x00;
+      gc_crt=0xBA; gs_crt[0]=0xBA; gs_crt[1]=0x00;
+      gc_grv=0x79; gs_grv[0]=0x79; gs_grv[1]=0x00;
+      gc_cbo=0xC0; gs_cbo[0]=0xC0; gs_cbo[1]=0x00;
+      gc_vbr=0x4F; gs_vbr[0]=0x4F; gs_vbr[1]=0x00;
+      gc_cbc=0xD0; gs_cbc[0]=0xD0; gs_cbc[1]=0x00;
+      gc_tld=0xBC; gs_tld[0]=0xBC; gs_tld[1]=0x00;
+      break;
+   case 1147:
+      gc_exc=0x4F; gs_exc[0]=0x4F; gs_exc[1]=0x00;
+      gc_hsh=0xB1; gs_hsh[0]=0xB1; gs_hsh[1]=0x00;
+      gc_dlr=0x5B; gs_dlr[0]=0x5B; gs_dlr[1]=0x00;
+      gc_ats=0x44; gs_ats[0]=0x44; gs_ats[1]=0x00;
+      gc_sbo=0x90; gs_sbo[0]=0x90; gs_sbo[1]=0x00;
+      gc_bsl=0x48; gs_bsl[0]=0x48; gs_bsl[1]=0x00;
+      gc_sbc=0xB5; gs_sbc[0]=0xB5; gs_sbc[1]=0x00;
+      gc_crt=0x5F; gs_crt[0]=0x5F; gs_crt[1]=0x00;
+      gc_grv=0xA0; gs_grv[0]=0xA0; gs_grv[1]=0x00;
+      gc_cbo=0x51; gs_cbo[0]=0x51; gs_cbo[1]=0x00;
+      gc_vbr=0xBB; gs_vbr[0]=0xBB; gs_vbr[1]=0x00;
+      gc_cbc=0x54; gs_cbc[0]=0x54; gs_cbc[1]=0x00;
+      gc_tld=0xBD; gs_tld[0]=0xBD; gs_tld[1]=0x00;
+      break;
+   case 500:
+   case 875:
+   case 1148:
+      gc_exc=0x4F; gs_exc[0]=0x4F; gs_exc[1]=0x00;
+      gc_hsh=0x7B; gs_hsh[0]=0x7B; gs_hsh[1]=0x00;
+      gc_dlr=0x5B; gs_dlr[0]=0x5B; gs_dlr[1]=0x00;
+      gc_ats=0x7C; gs_ats[0]=0x7C; gs_ats[1]=0x00;
+      gc_sbo=0x4A; gs_sbo[0]=0x4A; gs_sbo[1]=0x00;
+      gc_bsl=0xE0; gs_bsl[0]=0xE0; gs_bsl[1]=0x00;
+      gc_sbc=0x5A; gs_sbc[0]=0x5A; gs_sbc[1]=0x00;
+      gc_crt=0x5F; gs_crt[0]=0x5F; gs_crt[1]=0x00;
+      gc_grv=0x79; gs_grv[0]=0x79; gs_grv[1]=0x00;
+      gc_cbo=0xC0; gs_cbo[0]=0xC0; gs_cbo[1]=0x00;
+      gc_vbr=0xBB; gs_vbr[0]=0xBB; gs_vbr[1]=0x00;
+      gc_cbc=0xD0; gs_cbc[0]=0xD0; gs_cbc[1]=0x00;
+      gc_tld=0xA1; gs_tld[0]=0xA1; gs_tld[1]=0x00;
+      break;
+   case 1149:
+      gc_exc=0x4F; gs_exc[0]=0x4F; gs_exc[1]=0x00;
+      gc_hsh=0x7B; gs_hsh[0]=0x7B; gs_hsh[1]=0x00;
+      gc_dlr=0x5B; gs_dlr[0]=0x5B; gs_dlr[1]=0x00;
+      gc_ats=0xAC; gs_ats[0]=0xAC; gs_ats[1]=0x00;
+      gc_sbo=0xAE; gs_sbo[0]=0xAE; gs_sbo[1]=0x00;
+      gc_bsl=0xBE; gs_bsl[0]=0xBE; gs_bsl[1]=0x00;
+      gc_sbc=0x9E; gs_sbc[0]=0x9E; gs_sbc[1]=0x00;
+      gc_crt=0xEC; gs_crt[0]=0xEC; gs_crt[1]=0x00;
+      gc_grv=0x8C; gs_grv[0]=0x8C; gs_grv[1]=0x00;
+      gc_cbo=0x8E; gs_cbo[0]=0x8E; gs_cbo[1]=0x00;
+      gc_vbr=0xBB; gs_vbr[0]=0xBB; gs_vbr[1]=0x00;
+      gc_cbc=0x9C; gs_cbc[0]=0x9C; gs_cbc[1]=0x00;
+      gc_tld=0xCC; gs_tld[0]=0xCC; gs_tld[1]=0x00;
+      break;
+   case 1153:
+      gc_exc=0x4F; gs_exc[0]=0x4F; gs_exc[1]=0x00;
+      gc_hsh=0x7B; gs_hsh[0]=0x7B; gs_hsh[1]=0x00;
+      gc_dlr=0x5B; gs_dlr[0]=0x5B; gs_dlr[1]=0x00;
+      gc_ats=0x7C; gs_ats[0]=0x7C; gs_ats[1]=0x00;
+      gc_sbo=0x4A; gs_sbo[0]=0x4A; gs_sbo[1]=0x00;
+      gc_bsl=0xE0; gs_bsl[0]=0xE0; gs_bsl[1]=0x00;
+      gc_sbc=0x5A; gs_sbc[0]=0x5A; gs_sbc[1]=0x00;
+      gc_crt=0x5F; gs_crt[0]=0x5F; gs_crt[1]=0x00;
+      gc_grv=0x79; gs_grv[0]=0x79; gs_grv[1]=0x00;
+      gc_cbo=0xC0; gs_cbo[0]=0xC0; gs_cbo[1]=0x00;
+      gc_vbr=0x6A; gs_vbr[0]=0x6A; gs_vbr[1]=0x00;
+      gc_cbc=0xD0; gs_cbc[0]=0xD0; gs_cbc[1]=0x00;
+      gc_tld=0xA1; gs_tld[0]=0xA1; gs_tld[1]=0x00;
+      break;
+   case 1154:
+      gc_exc=0x4F; gs_exc[0]=0x4F; gs_exc[1]=0x00;
+      gc_hsh=0x7B; gs_hsh[0]=0x7B; gs_hsh[1]=0x00;
+      gc_dlr=0x5B; gs_dlr[0]=0x5B; gs_dlr[1]=0x00;
+      gc_ats=0x7C; gs_ats[0]=0x7C; gs_ats[1]=0x00;
+      gc_sbo=0x4A; gs_sbo[0]=0x4A; gs_sbo[1]=0x00;
+      gc_bsl=0xE0; gs_bsl[0]=0xE0; gs_bsl[1]=0x00;
+      gc_sbc=0x5A; gs_sbc[0]=0x5A; gs_sbc[1]=0x00;
+      gc_crt=0x5F; gs_crt[0]=0x5F; gs_crt[1]=0x00;
+      gc_grv=0x79; gs_grv[0]=0x79; gs_grv[1]=0x00;
+      gc_cbo=0xC0; gs_cbo[0]=0xC0; gs_cbo[1]=0x00;
+      gc_vbr=0x6A; gs_vbr[0]=0x6A; gs_vbr[1]=0x00;
+      gc_cbc=0xD0; gs_cbc[0]=0xD0; gs_cbc[1]=0x00;
+      gc_tld=0xA1; gs_tld[0]=0xA1; gs_tld[1]=0x00;
+      break;
+   case 1156:
+      gc_exc=0x5A; gs_exc[0]=0x5A; gs_exc[1]=0x00;
+      gc_hsh=0x7B; gs_hsh[0]=0x7B; gs_hsh[1]=0x00;
+      gc_dlr=0x5B; gs_dlr[0]=0x5B; gs_dlr[1]=0x00;
+      gc_ats=0x7C; gs_ats[0]=0x7C; gs_ats[1]=0x00;
+      gc_sbo=0xBA; gs_sbo[0]=0xBA; gs_sbo[1]=0x00;
+      gc_bsl=0xE0; gs_bsl[0]=0xE0; gs_bsl[1]=0x00;
+      gc_sbc=0xBB; gs_sbc[0]=0xBB; gs_sbc[1]=0x00;
+      gc_crt=0xB0; gs_crt[0]=0xB0; gs_crt[1]=0x00;
+      gc_grv=0x79; gs_grv[0]=0x79; gs_grv[1]=0x00;
+      gc_cbo=0xC0; gs_cbo[0]=0xC0; gs_cbo[1]=0x00;
+      gc_vbr=0x4F; gs_vbr[0]=0x4F; gs_vbr[1]=0x00;
+      gc_cbc=0xD0; gs_cbc[0]=0xD0; gs_cbc[1]=0x00;
+      gc_tld=0xA1; gs_tld[0]=0xA1; gs_tld[1]=0x00;
+      break;
+   case 1122:
+      gc_exc=0x4F; gs_exc[0]=0x4F; gs_exc[1]=0x00;
+      gc_hsh=0x63; gs_hsh[0]=0x63; gs_hsh[1]=0x00;
+      gc_dlr=0x67; gs_dlr[0]=0x67; gs_dlr[1]=0x00;
+      gc_ats=0xEC; gs_ats[0]=0xEC; gs_ats[1]=0x00;
+      gc_sbo=0xB5; gs_sbo[0]=0xB5; gs_sbo[1]=0x00;
+      gc_bsl=0x71; gs_bsl[0]=0x71; gs_bsl[1]=0x00;
+      gc_sbc=0x9F; gs_sbc[0]=0x9F; gs_sbc[1]=0x00;
+      gc_crt=0x5F; gs_crt[0]=0x5F; gs_crt[1]=0x00;
+      gc_grv=0x51; gs_grv[0]=0x51; gs_grv[1]=0x00;
+      gc_cbo=0x43; gs_cbo[0]=0x43; gs_cbo[1]=0x00;
+      gc_vbr=0xBB; gs_vbr[0]=0xBB; gs_vbr[1]=0x00;
+      gc_cbc=0x47; gs_cbc[0]=0x47; gs_cbc[1]=0x00;
+      gc_tld=0xDC; gs_tld[0]=0xDC; gs_tld[1]=0x00;
+      break;
+   case 1047:
+      gc_exc=0x5A; gs_exc[0]=0x5A; gs_exc[1]=0x00;
+      gc_hsh=0x7B; gs_hsh[0]=0x7B; gs_hsh[1]=0x00;
+      gc_dlr=0x5B; gs_dlr[0]=0x5B; gs_dlr[1]=0x00;
+      gc_ats=0x7C; gs_ats[0]=0x7C; gs_ats[1]=0x00;
+      gc_sbo=0xAD; gs_sbo[0]=0xAD; gs_sbo[1]=0x00;
+      gc_bsl=0xE0; gs_bsl[0]=0xE0; gs_bsl[1]=0x00;
+      gc_sbc=0xBD; gs_sbc[0]=0xBD; gs_sbc[1]=0x00;
+      gc_crt=0x5F; gs_crt[0]=0x5F; gs_crt[1]=0x00;
+      gc_grv=0x79; gs_grv[0]=0x79; gs_grv[1]=0x00;
+      gc_cbo=0xC0; gs_cbo[0]=0xC0; gs_cbo[1]=0x00;
+      gc_vbr=0x4F; gs_vbr[0]=0x4F; gs_vbr[1]=0x00;
+      gc_cbc=0xD0; gs_cbc[0]=0xD0; gs_cbc[1]=0x00;
+      gc_tld=0xA1; gs_tld[0]=0xA1; gs_tld[1]=0x00;
+      break;
+   default:
+      gc_exc='!'; gs_exc[0]='!'; gs_exc[1]=0x00;/*nodiac*/
+      gc_hsh='#'; gs_hsh[0]='#'; gs_hsh[1]=0x00;/*nodiac*/
+      gc_dlr='$'; gs_dlr[0]='$'; gs_dlr[1]=0x00;/*nodiac*/
+      gc_ats='@'; gs_ats[0]='@'; gs_ats[1]=0x00;/*nodiac*/
+      gc_sbo='['; gs_sbo[0]='['; gs_sbo[1]=0x00;/*nodiac*/
+      gc_bsl='\\'; gs_bsl[0]='\\'; gs_bsl[1]=0x00;/*nodiac*/
+      gc_sbc=']'; gs_sbc[0]=']'; gs_sbc[1]=0x00;/*nodiac*/
+      gc_crt='^'; gs_crt[0]='^'; gs_crt[1]=0x00;/*nodiac*/
+      gc_grv='`'; gs_grv[0]='`'; gs_grv[1]=0x00;/*nodiac*/
+      gc_cbo='{'; gs_cbo[0]='{'; gs_cbo[1]=0x00;/*nodiac*/
+      gc_vbr='|'; gs_vbr[0]='|'; gs_vbr[1]=0x00;/*nodiac*/
+      gc_cbc='}'; gs_cbc[0]='}'; gs_cbc[1]=0x00;/*nodiac*/
+      gc_tld='~'; gs_tld[0]='~'; gs_tld[1]=0x00;/*nodiac*/
+      break;
+   }
+   gs_svb[0]='=';
+   gs_svb[1]=gs_vbr[0];
+   gs_svb[2]=0x00;
+   gs_sbs[0]='/';
+   gs_sbs[1]=gs_bsl[0];
+   gs_sbs[2]=0x00;
+   gs_idt[0]='-';
+   gs_idt[1]='-';
+   gs_idt[2]=gs_vbr[0];
+   gs_idt[3]=0x00;
+   return(*p);
+}
+
+static char* init_string(char* p) {
+   init_char(&gc_exc);
+   return(p);
+}
+
+#  define C_EXC               ((gc_exc)?gc_exc:init_char(&gc_exc))
+#  define C_HSH               ((gc_hsh)?gc_hsh:init_char(&gc_hsh))
+#  define C_DLR               ((gc_dlr)?gc_dlr:init_char(&gc_dlr))
+#  define C_ATS               ((gc_ats)?gc_ats:init_char(&gc_ats))
+#  define C_SBO               ((gc_sbo)?gc_sbo:init_char(&gc_sbo))
+#  define C_BSL               ((gc_bsl)?gc_bsl:init_char(&gc_bsl))
+#  define C_SBC               ((gc_sbc)?gc_sbc:init_char(&gc_sbc))
+#  define C_CRT               ((gc_sbo)?gc_crt:init_char(&gc_crt))
+#  define C_GRV               ((gc_grv)?gc_grv:init_char(&gc_grv))
+#  define C_CBO               ((gc_cbo)?gc_cbo:init_char(&gc_cbo))
+#  define C_VBR               ((gc_vbr)?gc_vbr:init_char(&gc_vbr))
+#  define C_CBC               ((gc_cbc)?gc_cbc:init_char(&gc_cbc))
+#  define C_TLD               ((gc_tld)?gc_tld:init_char(&gc_tld))
+#  define S_EXC               ((gs_exc[0])?gs_exc:init_string(gs_exc))
+#  define S_HSH               ((gs_hsh[0])?gs_hsh:init_string(gs_hsh))
+#  define S_DLR               ((gs_dlr[0])?gs_dlr:init_string(gs_dlr))
+#  define S_ATS               ((gs_ats[0])?gs_ats:init_string(gs_ats))
+#  define S_SBO               ((gs_sbo[0])?gs_sbo:init_string(gs_sbo))
+#  define S_BSL               ((gs_bsl[0])?gs_bsl:init_string(gs_bsl))
+#  define S_SBC               ((gs_sbc[0])?gs_sbc:init_string(gs_sbc))
+#  define S_CRT               ((gs_sbo[0])?gs_crt:init_string(gs_crt))
+#  define S_GRV               ((gs_grv[0])?gs_grv:init_string(gs_grv))
+#  define S_CBO               ((gs_cbo[0])?gs_cbo:init_string(gs_cbo))
+#  define S_VBR               ((gs_vbr[0])?gs_vbr:init_string(gs_vbr))
+#  define S_CBC               ((gs_cbc[0])?gs_cbc:init_string(gs_cbc))
+#  define S_TLD               ((gs_tld[0])?gs_tld:init_string(gs_tld))
+#  define S_SVB               ((gs_svb[0])?gs_svb:init_string(gs_svb))
+#  define S_SBS               ((gs_sbs[0])?gs_sbs:init_string(gs_sbs))
+#  define S_IDT               ((gs_idt[0])?gs_idt:init_string(gs_idt))
+
+
+#  define esnprintf           ebcdic_snprintf
+#  define esprintf            ebcdic_sprintf
+#  define efprintf            ebcdic_fprintf
+
+#else
+
+#  define C_EXC              '!' /*nodiac*/
+#  define C_HSH              '#' /*nodiac*/
+#  define C_DLR              '$' /*nodiac*/
+#  define C_ATS              '@' /*nodiac*/
+#  define C_SBO              '[' /*nodiac*/
+#  define C_BSL              '\\'/*nodiac*/
+#  define C_SBC              ']' /*nodiac*/
+#  define C_CRT              '^' /*nodiac*/
+#  define C_GRV              '`' /*nodiac*/
+#  define C_CBO              '{' /*nodiac*/
+#  define C_VBR              '|' /*nodiac*/
+#  define C_CBC              '}' /*nodiac*/
+#  define C_TLD              '~' /*nodiac*/
+#  define S_EXC              "!" /*nodiac*/
+#  define S_HSH              "#" /*nodiac*/
+#  define S_DLR              "$" /*nodiac*/
+#  define S_ATS              "@" /*nodiac*/
+#  define S_SBO              "[" /*nodiac*/
+#  define S_BSL              "\\"/*nodiac*/
+#  define S_SBC              "]" /*nodiac*/
+#  define S_CRT              "^" /*nodiac*/
+#  define S_GRV              "`" /*nodiac*/
+#  define S_CBO              "{" /*nodiac*/
+#  define S_VBR              "|" /*nodiac*/
+#  define S_CBC              "}" /*nodiac*/
+#  define S_TLD              "~" /*nodiac*/
+#  define S_SVB              "=|" /*nodiac*/
+#  define S_SBS              "/\\" /*nodiac*/
+#  define S_IDT              "--|" /*nodiac*/
+
+#  define esnprintf          snprintf
+#  define esprintf           sprintf
+#  define efprintf           fprintf
+
+#endif
+
+/**********************************************************************/
 
 #endif /* INC_CLEPUTL_H */
 
