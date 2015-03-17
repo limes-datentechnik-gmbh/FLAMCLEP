@@ -19,10 +19,10 @@ are used in the grammar but will never be part of or own tokens.
 
 If a binary entry for a string is possible and no classification is
 done it is taken as a binary string in local character set 
-representation (c) without zero termination. This default can be
+representation (c) without null termination. This default can be
 changed. In this case the help message for this argument should be
 described the default interpretation of the binary string. For binary
-strings it is still possible to enter a zero terminated string, but
+strings it is still possible to enter a null-terminated string, but
 then the prefix *s* must be used. If no binary entry is feasible, only
-a zero terminated string in local character representation (s) can be
+a null-terminated string in local character representation (s) can be
 built and taken per default.

@@ -91,7 +91,7 @@ Below, you can find a possibly incomplete list of FLAMCLE feature:
  * * Support for many data types, like:
  *   * Number (decimal, hexadecimal, octal, binary and time)
  *   * Float (decimal in all variants)
- *   * String (binary text/ASCII/EBCDIC/HEX or zero terminated)
+ *   * String (binary text/ASCII/EBCDIC/HEX or null-terminated)
  *   * Object (Structure)
  *   * Overlay (Union)
  *   * Array (List (realized as simplified notation))
@@ -228,12 +228,12 @@ Lexemes (regular expressions) for argument list or parameter file:
     --| FLOAT     ([+|-]  [ :digit:]+.[:digit:]+e|E[:digit:]+) | (decimal(default))
     --| flt       ([+|-]0d[ :digit:]+.[:digit:]+e|E[:digit:]+)            (decimal)
     --| STRING         ''' [:print:]* ''' |          (default (if binary c else s))
-    --| str       [s|S]''' [:print:]* ''' |                (zero terminated string)
+    --| str       [s|S]''' [:print:]* ''' |                (null-terminated string)
     --| str       [c|C]''' [:print:]* ''' |  (binary string in local character set)
     --| str       [a|A]''' [:print:]* ''' |                (binary string in ASCII)
     --| str       [e|E]''' [:print:]* ''' |               (binary string in EBCDIC)
     --| str       [x|X]''' [:print:]* ''' |         (binary string in hex notation)
-    --| SUPPLEMENT     '"' [:print:]* '"' |   (zero terminated string (properties))
+    --| SUPPLEMENT     '"' [:print:]* '"' |   (null-terminated string (properties))
 
 Grammar for command line
 ------------------------
@@ -306,15 +306,15 @@ For compilation the defines below must be set:
 *
 * @param l level of visible hierarchy in the first 2 numbers of the string
 *          the number can later be used to better visualize the hierarchy
-* @param s size of the provided string buffer (including space for zero termination)
+* @param s size of the provided string buffer (including space for null termination)
 * @param b buffer for the version string
-*          must contain a zero terminated string
+*          must contain a null-terminated string
 *          the version string will be concatenated
 *          the size including the 0-byte is the limit
 *          if (strlen(b)==s-1) then more space is required for the complete version string
 *          a good size for the version string is 256 byte
 *
-* @return pointer to a zero terminated version string (return(b))
+* @return pointer to a null-terminated version string (return(b))
 */
 extern const char* pcCleVersion(const int l, const int s, char* b);
 
@@ -325,15 +325,15 @@ extern const char* pcCleVersion(const int l, const int s, char* b);
 *
 * @param l level of visible hierarchy in the first 2 numbers of the string
 *          the number can later be used to better visualize the hierarchy
-* @param s size of the provided string buffer (including space for zero termination)
+* @param s size of the provided string buffer (including space for null termination)
 * @param b buffer for the about string
-*          must contain a zero terminated string
+*          must contain a null-terminated string
 *          the about string will be concatenated
 *          the size including the 0-byte is the limit
 *          if (strlen(b)==s-1) then more space is required for the complete about string
 *          a good size for the about string is 1024 byte
 *
-* @return pointer to a zero terminated about string (return(b))
+* @return pointer to a null-terminated about string (return(b))
 */
 extern const char* pcCleAbout(const int l, const int s, char* b);
 
@@ -497,7 +497,7 @@ typedef const char* (*tpfMsg)(const int siRsn);
  * \b pfFin  Pointer to the finish function for cleanup (free memory, close files in parameter structure)\n
  * \b uiFlg  Flag to indicate a hidden (==0) or visible (!=0) command,
  *           For correct numbering, put hidden commands to the end of the table\n
- * \b pcMan  Pointer to a zero terminated string for a detailed description of this command
+ * \b pcMan  Pointer to a null-terminated string for a detailed description of this command
  *           (in ASCIDOC format, content behind .DESCRIPTION, mainly simply some paragraphs plus .OPTIONS and/or.EXAMPLES)
  *           It is recommended to use a header file with a define for this long string - converted on EBCDIC systems)\n
  * \b pcHlp  String for a short context sensitive help to this command (converted on EBCDIC systems)\n
@@ -537,7 +537,7 @@ typedef struct CleCommand {
  *  *fin* Pointer to the finalization function to clean up the parameter structure (see tpfFin)\n
  *  *flg* Flag to indicate a hidden (==0) or visible (!=0) command,
  *        For correct numbering, put hidden commands to the end of the table\n
- *  *man* Pointer to a zero terminated string for a detailed description of this command.
+ *  *man* Pointer to a null-terminated string for a detailed description of this command.
  *        (in ASCIDOC format, content behind .DESCRIPTION, mainly simply some paragraphs plus .OPTIONS and/or .EXAMPLES)
  *        It is recommended to use a header file with a define for this long string)\n
  *  *hlp* String for a short context sensitive help to this command\n

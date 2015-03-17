@@ -209,19 +209,19 @@ Lexeme
          ([+|-]0t(yyyy/mm/tt.hh:mm:ss) |                  relative or absolute time\n
     FLT  ([+|-]  [ :digit:]+.[:digit:]+e|E[:digit:]+) |\n
          ([+|-]0d[ :digit:]+.[:digit:]+e|E[:digit:]+)\n
-    STR       ''' [:print:]* ''' |     string with zero termination (local character set)\n
-         [s|S]''' [:print:]* ''' |     string with zero termination (local character set)\n
-         [c|C]''' [:print:]* ''' |     string in local character set (no zero termination)\n
+    STR       ''' [:print:]* ''' |     string with null termination (local character set)\n
+         [s|S]''' [:print:]* ''' |     string with null termination (local character set)\n
+         [c|C]''' [:print:]* ''' |     string in local character set (no null termination)\n
          [x|X]''' [:print:]* ''' |     binary hexadecimal\n
-         [a|A]''' [:print:]* ''' |     binary ascii (no zero termination)\n
-         [e|E]''' [:print:]* ''' |     binary ebcdic (no zero termination)\n
+         [a|A]''' [:print:]* ''' |     binary ascii (no null termination)\n
+         [e|E]''' [:print:]* ''' |     binary ebcdic (no null termination)\n
          Strings can contain two '' to represent one '\n
          Strings can also be enclosed in " instead of '\n"
          Strings can directly start behind a '=' without enclosing '/"\n
             In this case the string ends at the next separator or operator\n
             and keywords are preferred. To use keywords, separators or\n
             operators in strings, enclosing quotes are required\n
-    SUP       '"' [:print:]* '"' |     string with zero termination (local character set) for supplement syntax (properties)\n
+    SUP       '"' [:print:]* '"' |     string with null termination (local character set) for supplement syntax (properties)\n
          Supplements can contain two "" to represent one "\n
          Supplements can also be enclosed in ' instead of "\n"
 
@@ -390,15 +390,15 @@ For compilation the defines below must be set:
  *
  * @param l Level of visible hierarchy in the first 2 numbers of the string
  *          the number can later be used to better visualize the hierarchy
- * @param s Size of the provided string buffer (including space for zero termination)
+ * @param s Size of the provided string buffer (including space for null termination)
  * @param b Buffer for the version string.
- *          Must contain a zero terminated string.
+ *          Must contain a null-terminated string.
  *          The version string will be concatenated.
  *          The size including the 0-byte is the limit.
  *          If (strlen(b)==s-1) then more space is required for the complete version string.
  *          A good size for the version string is 128 byte.
  *
- * @return Pointer to a zero terminated version string (return(b))
+ * @return Pointer to a null-terminated version string (return(b))
  */
 extern const char* pcClpVersion(const int l, const int s, char* b);
 
@@ -409,15 +409,15 @@ extern const char* pcClpVersion(const int l, const int s, char* b);
  *
  * @param l Level of visible hierarchy in the first 2 numbers of the string
  *          the number can later be used to better visualize the hierarchy
- * @param s Size of the provided string buffer (including space for zero termination)
+ * @param s Size of the provided string buffer (including space for null termination)
  * @param b Buffer for the about string.
- *          Must contain a zero terminated string.
+ *          Must contain a null-terminated string.
  *          The about string will be concatenated.
  *          The size including the 0-byte is the limit.
  *          If (strlen(b)==s-1) then more space is required for the complete about string.
  *          A good size for the about string is 512 byte.
  *
- * @return pointer to a zero terminated about string (return(b))
+ * @return pointer to a null-terminated about string (return(b))
  */
 extern const char* pcClpAbout(const int l, const int s, char* b);
 
@@ -461,7 +461,7 @@ extern const char* pcClpAbout(const int l, const int s, char* b);
 #define CLPTYP_NUMBER            2
 /** CLPTYP_FLOATN Floating point number (32 or 64 bit) */
 #define CLPTYP_FLOATN            3
-/** CLPTYP_STRING String literal (binary (HEX, ASCII, EBCDIC, CHARS) or zero terminated (default)) */
+/** CLPTYP_STRING String literal (binary (HEX, ASCII, EBCDIC, CHARS) or null-terminated (default)) */
 #define CLPTYP_STRING            4
 /** CLPTYP_OBJECT Object (KEYWORD(parameter_list)) can contain arbitrary list of other types */
 #define CLPTYP_OBJECT            5
@@ -487,7 +487,7 @@ extern const char* pcClpAbout(const int l, const int s, char* b);
 #define CLPFLG_SEL               0x00000010UL
 /** CLPFLG_FIX This argument has a fixed length (only useful for strings if a typedef defines a fixed length per element, else set internally) */
 #define CLPFLG_FIX               0x00000020UL
-/** CLPFLG_BIN This argument can contain binary data without zero termination (length must be known or determined with a link) */
+/** CLPFLG_BIN This argument can contain binary data without null termination (length must be known or determined with a link) */
 #define CLPFLG_BIN               0x00000040UL
 /** CLPFLG_DMY If set the parameter is not visible, meaning it is a dummy */
 #define CLPFLG_DMY               0x00000080UL
@@ -497,7 +497,7 @@ extern const char* pcClpAbout(const int l, const int s, char* b);
 #define CLPFLG_OID               0x00000200UL
 /** CLPFLG_ELN This link will be filled by the calculated length of a element (fixed types == data size, packed types == data length) */
 #define CLPFLG_ELN               0x00001000UL
-/** CLPFLG_SLN This link will be filled by the calculated string length for a element (only for zero terminated strings) */
+/** CLPFLG_SLN This link will be filled by the calculated string length for a element (only for null-terminated strings) */
 #define CLPFLG_SLN               0x00002000UL
 /** CLPFLG_TLN This link will be filled by the calculated total length for the argument (sum of all element lengths) */
 #define CLPFLG_TLN               0x00004000UL
@@ -535,7 +535,7 @@ typedef struct ClpArgument {
  /** Type of this parameter (CLPTYP_xxxxxx)\n
  *           The type will be displayed in context sensitive help messages (TYPE: type_name)*/
    int                           siTyp;
-   /** Pointer to a zero terminated key word for this parameter (:alpha:[:alnum:|'-'|'_']*) */
+   /** Pointer to a null-terminated key word for this parameter (:alpha:[:alnum:|'-'|'_']*) */
    const char*                   pcKyw;
    /** Pointer to another key word to define an alias (:alpha:[:alnum:|'-'|'_']*) */
    const char*                   pcAli;
@@ -592,33 +592,33 @@ typedef struct ClpArgument {
 
 /** defines a number literal with the command line keyword *kyw* and the value *dat*
  *
- *  *man* Pointer to a zero terminated string for a detailed description of this constant
+ *  *man* Pointer to a null-terminated string for a detailed description of this constant
  *        (in ASCIIDOC format, content behind .DESCRIPTION, mainly simply some paragraphs)
  *        Can be a NULL pointer or empty string to produce a bullet list.
  *        It is recommended to use a header file with a define for this long string\n
- *  *hlp* Pointer to a zero terminated string for context sensitive help for this constant
+ *  *hlp* Pointer to a null-terminated string for context sensitive help for this constant
  *        (also used as head line or in bullet list in documentation generation).\n
  */
 #define CLPCONTAB_NUMBER(kyw,dat,man,hlp)       {CLPTYP_NUMBER,(kyw),NULL,0,0,  0  ,0,0,CLPFLG_CON           ,NULL,NULL,(man),(hlp),(dat), 0.0 ,NULL       },
 
 /** defines a number literal with the command line keyword *kyw* and the value *dat*
  *
- *  *man* Pointer to a zero terminated string for a detailed description of this constant
+ *  *man* Pointer to a null-terminated string for a detailed description of this constant
  *        (in ASCIIDOC format, content behind .DESCRIPTION, mainly simply some paragraphs)
  *        Can be a NULL pointer or empty string to produce a bullet list.
  *        It is recommended to use a header file with a define for this long string\n
- *  *hlp* Pointer to a zero terminated string for context sensitive help for this constant
+ *  *hlp* Pointer to a null-terminated string for context sensitive help for this constant
  *        (also used as head line or in bullet list in documentation generation).\n
  */
 #define CLPCONTAB_FLOATN(kyw,dat,man,hlp)       {CLPTYP_FLOATN,(kyw),NULL,0,0,  0  ,0,0,CLPFLG_CON           ,NULL,NULL,(man),(hlp),  0  ,(dat),NULL       },
 
 /** defines a floating point literal with the command line keyword *kyw* and the value *dat*
  *
- *  *man* Pointer to a zero terminated string for a detailed description of this constant
+ *  *man* Pointer to a null-terminated string for a detailed description of this constant
  *        (in ASCIIDOC format, content behind .DESCRIPTION, mainly simply some paragraphs)
  *        Can be a NULL pointer or empty string to produce a bullet list.
  *        It is recommended to use a header file with a define for this long string\n
- *  *hlp* Pointer to a zero terminated string for context sensitive help for this constant
+ *  *hlp* Pointer to a null-terminated string for context sensitive help for this constant
  *        (also used as head line or in bullet list in documentation generation).\n
  */
 #define CLPCONTAB_STRING(kyw,dat,man,hlp)       {CLPTYP_STRING,(kyw),NULL,0,0,  0  ,0,0,CLPFLG_CON           ,NULL,NULL,(man),(hlp),  0  , 0.0 ,(U08*)(dat)},
@@ -626,11 +626,11 @@ typedef struct ClpArgument {
 /** defines a string literal with the command line keyword *kyw* and the value *dat*
  *
  *  *siz* Size of the string value
- *  *man* Pointer to a zero terminated string for a detailed description of this constant
+ *  *man* Pointer to a null-terminated string for a detailed description of this constant
  *        (in ASCIIDOC format, content behind .DESCRIPTION, mainly simply some paragraphs)
  *        Can be a NULL pointer or empty string to produce a bullet list.
  *        It is recommended to use a header file with a define for this long string)\n
- *  *hlp* Pointer to a zero terminated string for context sensitive help for this constant
+ *  *hlp* Pointer to a null-terminated string for context sensitive help for this constant
  *        (also used as head line or in bullet list in documentation generation).\n
  */
 #define CLPCONTAB_BINARY(kyw,dat,siz,man,hlp)   {CLPTYP_STRING,(kyw),NULL,0,0,(siz),0,0,CLPFLG_CON|CLPFLG_BIN,NULL,NULL,(man),(hlp),  0  , 0.0 ,(U08*)(dat)},
@@ -729,9 +729,9 @@ extern void* pvClpOpen(
  * to the CLP structure. You must use the same CLP handle for property and command line parsing.
  *
  * @param[in]  pvHdl Pointer to the corresponding handle created with \a pvClpOpen
- * @param[in]  pcSrc Pointer to a zero terminated string containing the source name for the property list
+ * @param[in]  pcSrc Pointer to a null-terminated string containing the source name for the property list
  *                   Property list are mainly taken from a file. It is useful to provide this file name for error printing
- * @param[in]  pcPro Pointer to a zero terminated string containing the property list for parsing
+ * @param[in]  pcPro Pointer to a null-terminated string containing the property list for parsing
  * @param[in]  isChk Boolean to enable (TRUE) or disable (FALSE) validation of the root in path
  *             (if FALSE then other properties are ignored, if TRUE then other properties are not possible)
  * @param[out] ppLst Pointer to the parsed parameter list (NULL = no list provided) in the CLP handle
@@ -751,9 +751,9 @@ extern int siClpParsePro(
  * The function parses the command line and returns OK or the error code and error position (byte offset)
  *
  * @param[in]  pvHdl Pointer to the corresponding handle created with \a pvClpOpen
- * @param[in]  pcSrc Pointer to a zero terminated string containing the source name for the command line
+ * @param[in]  pcSrc Pointer to a null-terminated string containing the source name for the command line
  *                   If the command line taken from a file it is useful to provide this file name for error printing else use NULL.
- * @param[in]  pcCmd Pointer to a zero terminated string containing the command for parsing
+ * @param[in]  pcCmd Pointer to a null-terminated string containing the command for parsing
  * @param[in]  isChk Boolean to enable (TRUE) or disable (FALSE) validation of minimum number of entries
  * @param[out] piOid If this pointer is set and the main table is an overlay the corresponding object identifier is returned
  * @param[out] ppLst Pointer to the parsed parameter list (NULL = no list provided) in the CLP handle

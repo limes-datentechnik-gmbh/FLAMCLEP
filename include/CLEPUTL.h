@@ -202,7 +202,7 @@ extern int win_snprintf(char *buffer, size_t size, const char *format, ...);
  * Return the current user id.
  * @param size    size of the buffer
  * @param buffer  pointer to the buffer
- * @return        pointer to the buffer containing the current user id (zero terminated)
+ * @return        pointer to the buffer containing the current user id (null-terminated)
  */
 extern char* userid(const int size, char* buffer);
 
@@ -211,7 +211,7 @@ extern char* userid(const int size, char* buffer);
  * @param flag    if true then slash/backslash are added
  * @param size    size of the string buffer
  * @param buffer  pointer to the buffer
- * @return        pointer to the buffer containing the current home directory (zero terminated)
+ * @return        pointer to the buffer containing the current home directory (null-terminated)
  */
 extern char* homedir(const int flag, const int size, char* buffer);
 
@@ -382,7 +382,7 @@ extern int arry2str(char* array[], const int count, const char* separ, const int
  * @param[in]  s2 string 2 to compare
  * @param[in]  n  If c!=0 then minimum else maximum amount of character to compare  (0=disabled)
  * @param[in]  c  Character where the compare stops or -1 for keyword syntax
- * @param[in]  f  If true only compare up to zero termination or stop char if false (normal compare) including zero termination or stop char
+ * @param[in]  f  If true only compare up to null termination or stop char if false (normal compare) including null termination or stop char
  *
  * @return signed integer with 0 for equal and !=0 for different
  */

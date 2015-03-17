@@ -2133,7 +2133,7 @@ extern int siClpLexem(
    fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," FLOAT     ([+|-]  [ :digit:]+.[:digit:]+e|E[:digit:]+) | (decimal(default))\n");
    fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," flt       ([+|-]0d[ :digit:]+.[:digit:]+e|E[:digit:]+)            (decimal)\n");
    fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," STRING         ''' [:print:]* ''' |          (default (if binary c else s))\n");
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," str       [s|S]''' [:print:]* ''' |                (zero terminated string)\n");
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," str       [s|S]''' [:print:]* ''' |                (null-terminated string)\n");
    fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," str       [c|C]''' [:print:]* ''' |  (binary string in local character set)\n");
    fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," str       [a|A]''' [:print:]* ''' |                (binary string in ASCII)\n");
    fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," str       [e|E]''' [:print:]* ''' |               (binary string in EBCDIC)\n");
@@ -2144,7 +2144,7 @@ extern int siClpLexem(
    fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"              In this case the string ends at the next separator or operator\n");
    fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"              and keywords are preferred. To use keywords, separators or    \n");
    fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"              operators in strings, enclosing quotes are required.          \n");
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," SUPPLEMENT     '\"' [:print:]* '\"' |   (zero terminated string (properties))\n");
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," SUPPLEMENT     '\"' [:print:]* '\"' |   (null-terminated string (properties))\n");
    fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"           Supplements can contain two \"\" to represent one \"                \n");
    fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"           Supplements can also be enclosed in ' instead of \"               \n");
    return(CLP_OK);
@@ -3598,7 +3598,7 @@ static int siClpBldLit(
             if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-LITERAL-HEX(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
                                     fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),isPrnLen(psArg,l2));
          } else {
-            return CLPERR(psHdl,CLPERR_SEM,"String literal (%c(%s)) for '%s.%s' is binary (only zero terminated character string permitted)",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+            return CLPERR(psHdl,CLPERR_SEM,"String literal (%c(%s)) for '%s.%s' is binary (only null-terminated character string permitted)",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
          }
          break;
       case 'a':
@@ -3614,7 +3614,7 @@ static int siClpBldLit(
             if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-LITERAL-ASC(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
                                     fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),isPrnLen(psArg,l2));
          } else {
-            return CLPERR(psHdl,CLPERR_SEM,"String literal (%c(%s)) for '%s.%s' is binary (only zero terminated character string permitted)",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+            return CLPERR(psHdl,CLPERR_SEM,"String literal (%c(%s)) for '%s.%s' is binary (only null-terminated character string permitted)",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
          }
          break;
       case 'e':
@@ -3630,7 +3630,7 @@ static int siClpBldLit(
             if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-LITERAL-EBC(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
                                     fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),isPrnLen(psArg,l2));
          } else {
-            return CLPERR(psHdl,CLPERR_SEM,"String literal (%c(%s)) for '%s.%s' is binary (only zero terminated character string permitted)",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+            return CLPERR(psHdl,CLPERR_SEM,"String literal (%c(%s)) for '%s.%s' is binary (only null-terminated character string permitted)",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
          }
          break;
       case 'c':
@@ -3643,7 +3643,7 @@ static int siClpBldLit(
             if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-LITERAL-CHR(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
                                     fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),isPrnLen(psArg,l2));
          } else {
-            return CLPERR(psHdl,CLPERR_SEM,"String literal (%c(%s)) for '%s.%s' is binary (only zero terminated character string permitted)",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+            return CLPERR(psHdl,CLPERR_SEM,"String literal (%c(%s)) for '%s.%s' is binary (only null-terminated character string permitted)",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
          }
          break;
       case 's':
@@ -3720,8 +3720,8 @@ static int siClpBldLit(
          CLPERRADD(psHdl,1,"x - for conversion from hex to bin%s","");
          CLPERRADD(psHdl,1,"a - for conversion in ASCII%s","");
          CLPERRADD(psHdl,1,"e - for conversion in EBCDIC%s","");
-         CLPERRADD(psHdl,1,"c - for no conversion (normal character string without zero termination)%s","");
-         CLPERRADD(psHdl,1,"x - s - normal character string with zero termination%s","");
+         CLPERRADD(psHdl,1,"c - for no conversion (normal character string without null termination)%s","");
+         CLPERRADD(psHdl,1,"x - s - normal character string with null termination%s","");
          return(CLPERR_LEX);
       }
 
@@ -3883,7 +3883,7 @@ static int siClpBldCon(
    case CLPTYP_STRING:
       if (!CLPISS_BIN(psArg->psStd->uiFlg)) {
          if (CLPISS_BIN(psVal->psStd->uiFlg)) {
-            return CLPERR(psHdl,CLPERR_SEM,"String constant '%s' for '%s.%s' is binary (only zero terminated character string permitted)",psVal->psStd->pcKyw,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+            return CLPERR(psHdl,CLPERR_SEM,"String constant '%s' for '%s.%s' is binary (only null-terminated character string permitted)",psVal->psStd->pcKyw,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
          }
       }
       if (CLPISS_FIX(psArg->psStd->uiFlg)) {
