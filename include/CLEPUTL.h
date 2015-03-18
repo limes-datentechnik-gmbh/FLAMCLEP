@@ -177,11 +177,10 @@ extern const char* mapl2c(unsigned isEBCDIC);
 /**
  * Map environment variable LANG to CCSID
  * @param pcLang   string containing the value of the environment variable LANG
- * @param uiLen    length of string vaulue
  * @param isEbcdic if true returns EBCDIC code pages else ASCII
  * @return NULL in case of an error or pointer to a static string containing the CCSID
  */
-extern const char* lng2ccsd(const char* pcLang, unsigned uiLen, unsigned isEbcdic);
+extern const char* lng2ccsd(const char* pcLang, unsigned isEbcdic);
 
 /**
  * Map CCSID in encoding string
