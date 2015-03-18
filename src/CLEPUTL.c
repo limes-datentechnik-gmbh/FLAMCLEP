@@ -996,7 +996,15 @@ extern void rplenvar(char* name,const size_t size,const char opn, const char cls
 }
 
 extern char* mapfil(char* file,int size) {
+#ifdef __HOST__
+   if (ISPATHNAME(file)) {
+      rplchar(file,size,C_TLD,"<HOME>");
+   } else {
+      rplchar(file,size,C_TLD,"<SYSUID>");
+   }
+#else
    rplchar(file,size,C_TLD,"<HOME>");
+#endif
    rplenvar(file,size,'<','>');
    for (char* p=file;*p;p++) {
 #ifdef __WIN__
