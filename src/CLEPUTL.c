@@ -1009,8 +1009,6 @@ extern char* mapfil(char* file,int size) {
    for (char* p=file;*p;p++) {
 #ifdef __WIN__
       if (*p=='/') *p=C_BSL;
-#else
-      if (*p==C_BSL) *p='/';
 #endif
    }
    return(file);
