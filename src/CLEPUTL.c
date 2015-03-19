@@ -42,24 +42,24 @@
 
 #ifdef __EBCDIC__
 
-inline vdRplDiac(char* str) {
-   for (char* p=str; *p; p++) {
-      switch (*p) {
-      case '!' : *p=C_EXC; break;/*nodiac*/
-      case '$' : *p=C_DLR; break;/*nodiac*/
-      case '#' : *p=C_HSH; break;/*nodiac*/
-      case '@' : *p=C_ATS; break;/*nodiac*/
-      case '[' : *p=C_SBO; break;/*nodiac*/
-      case '\\': *p=C_BSL; break;/*nodiac*/
-      case ']' : *p=C_SBC; break;/*nodiac*/
-      case '^' : *p=C_CRT; break;/*nodiac*/
-      case '`' : *p=C_GRV; break;/*nodiac*/
-      case '{' : *p=C_CBO; break;/*nodiac*/
-      case '|' : *p=C_VBR; break;/*nodiac*/
-      case '}' : *p=C_CBC; break;/*nodiac*/
-      case '~' : *p=C_TLD; break;/*nodiac*/
-      }
-   }
+#define RPLDIAC(str) {                            \
+   for (char* p=(str); *p; p++) {                 \
+      switch (*p) {                               \
+      case '!' : *p=C_EXC; break;/*nodiac*/       \
+      case '$' : *p=C_DLR; break;/*nodiac*/       \
+      case '#' : *p=C_HSH; break;/*nodiac*/       \
+      case '@' : *p=C_ATS; break;/*nodiac*/       \
+      case '[' : *p=C_SBO; break;/*nodiac*/       \
+      case '\\': *p=C_BSL; break;/*nodiac*/       \
+      case ']' : *p=C_SBC; break;/*nodiac*/       \
+      case '^' : *p=C_CRT; break;/*nodiac*/       \
+      case '`' : *p=C_GRV; break;/*nodiac*/       \
+      case '{' : *p=C_CBO; break;/*nodiac*/       \
+      case '|' : *p=C_VBR; break;/*nodiac*/       \
+      case '}' : *p=C_CBC; break;/*nodiac*/       \
+      case '~' : *p=C_TLD; break;/*nodiac*/       \
+      }                                           \
+   }                                              \
 }
 
 extern int ebcdic_snprintf(char* string, size_t size, const char* format, ...) {
@@ -69,7 +69,7 @@ extern int ebcdic_snprintf(char* string, size_t size, const char* format, ...) {
    va_start(argv, format);
    r = vsnprintf(string, size, format, argv);
    va_end(argv);
-   vdRplDiac(string);
+   RPLDIAC(string);
    return(r);
 }
 
@@ -80,7 +80,7 @@ extern int ebcdic_sprintf(char* string, const char* format, ...) {
    va_start(argv, format);
    r = vsprintf(string, format, argv);
    va_end(argv);
-   vdRplDiac(string);
+   RPLDIAC(string);
    return(r);
 }
 
@@ -106,7 +106,7 @@ extern int ebcdic_fprintf(FILE* file, const char* format, ...) {
    }
    va_end(argv);
    if (r>0) {
-      vdRplDiac(temp);
+      RPLDIAC(temp);
       r=fprintf(file,"%s",temp);
    }
    free(temp);
