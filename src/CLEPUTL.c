@@ -105,8 +105,8 @@ extern int ebcdic_fprintf(FILE* file, const char* format, ...) {
       r=vsnprintf(temp,size,format,argv);
    }
    va_end(argv);
-   vdRplDiac(temp);
    if (r>0) {
+      vdRplDiac(temp);
       r=fprintf(file,"%s",temp);
    }
    free(temp);
