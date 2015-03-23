@@ -1137,7 +1137,7 @@ EVALUATE:
                      efprintf(pfOut,"[.path]=filename [NONBR]\n");
                   }
                }
-               fprintf(pfOut,"%s %s GENDOCU filename [NONBR]\n",pcDep,argv[0]);
+               fprintf(pfOut,"%s %s GENDOCU filename %cNONBR%c\n",pcDep,argv[0],C_SBO,C_SBC);
                ERROR(CLERTC_CMD);
             }
          }
@@ -1516,7 +1516,8 @@ EVALUATE:
                   fprintf(pfOut,"%s %s SETPROP %s=filename\n",pcDep,argv[0],psTab[i].pcKyw);
                }
             }
-            fprintf(pfOut,"File name was not specified. To delete a property file from the list, please use the function DELPROP [command]\n");
+            fprintf(pfOut,"File name was not specified.\n"
+                          "To delete a property file from the list, please use the function DELPROP %ccommand%c\n",C_SBO,C_SBC);
             ERROR(CLERTC_CMD);
          }
          siErr=siCnfSet(psCnf,pfOut,acCnf,pcFil,TRUE);
@@ -2507,8 +2508,8 @@ static void vdPrnStaticSyntax(
       }
    }
    fprintf(pfOut,"\n");
-   fprintf(pfOut,"%s%s %s [OWNER=oid] command \"... argument list ...\"\n",pcDep,pcDep,pcPgm);
-   fprintf(pfOut,"%s%s %s [OWNER=oid] command=\" parameter file name \"\n",pcDep,pcDep,pcPgm);
+   fprintf(pfOut,"%s%s %s %cOWNER=oid%c command \"... argument list ...\"\n",pcDep,pcDep,pcPgm,C_SBO,C_SBC);
+   fprintf(pfOut,"%s%s %s %cOWNER=oid%c command=\" parameter file name \"\n",pcDep,pcDep,pcPgm,C_SBO,C_SBC);
    fprintf(pfOut,"%s Built-in functions:\n",pcDep);
    fprintf(pfOut,"%s%s %s ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",SYN_CLE_SYNTAX  );
    fprintf(pfOut,"%s%s %s ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",SYN_CLE_HELP    );

@@ -93,12 +93,13 @@
  * 1.1.43: fix null pointer references
  * 1.1.44: Code page specific interpretation of punctuation characters on EBCDIC systems
  * 1.1.45: Replace unnecessary strlen()
+ * 1.1.46: Change "###SECRET###" in "***SECRET***" to eliminate dia-critical characters
 **/
 
-#define CLP_VSN_STR       "1.1.45"
+#define CLP_VSN_STR       "1.1.46"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        1
-#define CLP_VSN_REVISION       45
+#define CLP_VSN_REVISION       46
 
 /* Definition der Flag-Makros *****************************************/
 
@@ -2151,7 +2152,7 @@ extern int siClpLexem(
 }
 
 #define isPrintF(p)   (((p)!=NULL)?(CLPISS_PWD((p)->psStd->uiFlg)==FALSE):(TRUE))
-#define isPrnLex(p,l) (isPrintF(p)?(l):("###SECRET###"))
+#define isPrnLex(p,l) (isPrintF(p)?(l):("***SECRET***"))
 static int siClpScnNat(
    void*                         pvHdl,
    FILE*                         pfErr,
@@ -3172,7 +3173,7 @@ static int siClpPrsKywLst(
 
 #define isPrnInt(p,v) (CLPISS_PWD(p->psStd->uiFlg)?((I64)0):(v))
 #define isPrnFlt(p,v) (CLPISS_PWD(p->psStd->uiFlg)?((F64)0.0):(v))
-#define isPrnStr(p,v) (CLPISS_PWD(p->psStd->uiFlg)?("###SECRET###"):(v))
+#define isPrnStr(p,v) (CLPISS_PWD(p->psStd->uiFlg)?("***SECRET***"):(v))
 #define isPrnLen(p,v) (CLPISS_PWD(p->psStd->uiFlg)?((int)0):(v))
 
 static int siClpBldPro(
@@ -3905,7 +3906,7 @@ static int siClpBldCon(
                fprintf(psHdl->pfBld,"%s BUILD-CONSTANT-STR(PTR=%p CNT=%d LEN=%d RST=%d)%s='",
                        fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw);
                if (CLPISS_PWD(psArg->psStd->uiFlg)) {
-                  fprintf(psHdl->pfBld,"###SECRET###");
+                  fprintf(psHdl->pfBld,"***SECRET***");
                } else {
                   for (k=0;k<siEln;k++) {
                      if (isprint(pcArg[k])) fprintf(psHdl->pfBld,"%c",pcArg[k]); else fprintf(psHdl->pfBld,"%cx%2.2X",C_BSL,(unsigned int)pcArg[k]);
@@ -3941,7 +3942,7 @@ static int siClpBldCon(
                fprintf(psHdl->pfBld,"%s BUILD-CONSTANT-STR(PTR=%p CNT=%d LEN=%d RST=%d)%s='",
                        fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw);
                if (CLPISS_PWD(psArg->psStd->uiFlg)) {
-                  fprintf(psHdl->pfBld,"###SECRET###");
+                  fprintf(psHdl->pfBld,"***SECRET***");
                } else {
                   for (k=0;k<siEln;k++) {
                      if (isprint(pcArg[k])) fprintf(psHdl->pfBld,"%c",pcArg[k]); else fprintf(psHdl->pfBld,"%cx%2.2X",C_BSL,(unsigned int)pcArg[k]);
@@ -3968,7 +3969,7 @@ static int siClpBldCon(
                   fprintf(psHdl->pfBld,"%s BUILD-CONSTANT-STR(PTR=%p CNT=%d LEN=%d RST=%d)%s='",
                           fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw);
                   if (CLPISS_PWD(psArg->psStd->uiFlg)) {
-                     fprintf(psHdl->pfBld,"###SECRET###");
+                     fprintf(psHdl->pfBld,"***SECRET***");
                   } else {
                      for (k=0;k<siEln;k++) {
                         if (isprint(pcArg[k])) fprintf(psHdl->pfBld,"%c",pcArg[k]); else fprintf(psHdl->pfBld,"%cx%2.2X",C_BSL,(unsigned int)pcArg[k]);
