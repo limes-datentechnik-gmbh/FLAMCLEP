@@ -94,6 +94,7 @@
  * 1.1.44: Code page specific interpretation of punctuation characters on EBCDIC systems
  * 1.1.45: Replace unnecessary strlen()
  * 1.1.46: Change "###SECRET###" in "***SECRET***" to eliminate dia-critical characters
+ * 1.1.47: Make qualifier for commands variable in ClpDocu
 **/
 
 #define CLP_VSN_STR       "1.1.46"
@@ -1145,6 +1146,7 @@ extern int siClpDocu(
    FILE*                         pfDoc,
    const char*                   pcPat,
    const char*                   pcNum,
+   const char*                   pcCmd,
    const int                     isDep,
    const int                     isMan,
    const int                     isNbr)
@@ -1175,7 +1177,7 @@ extern int siClpDocu(
    psHdl->acPre[0]=EOS;
    strcpy(psHdl->acSrc,":DOCU:");
 
-   if (pcNum!=NULL && strlen(pcNum)<100) {
+   if (pcNum!=NULL && strlen(pcNum)<100 && pcCmd!=NULL) {
       if (pcPat!=NULL && *pcPat) {
          if (strxcmp(psHdl->isCas,psHdl->pcCmd,pcPat,l,0,FALSE)==0) {
             if (strlen(pcPat)>l && pcPat[l]!='.') {
@@ -1393,11 +1395,11 @@ extern int siClpDocu(
          fprintf(pfDoc,"limes datentechnik(r) gmbh (www.flam.de)\n\n");
       } else {
          if (isNbr) {
-            fprintf(pfDoc,   "%s COMMAND '%s'\n",pcNum,psHdl->pcCmd);
+            fprintf(pfDoc,   "%s %s '%s'\n",pcNum,pcCmd,psHdl->pcCmd);
             l=strlen(pcNum)+strlen(psHdl->pcCmd)+11;
             for (i=0;i<l;i++) fprintf(pfDoc,"%c",C_TLD); fprintf(pfDoc,"\n\n");
          } else {
-            fprintf(pfDoc,   "COMMAND '%s'\n",psHdl->pcCmd);
+            fprintf(pfDoc,   "%s '%s'\n",pcCmd,psHdl->pcCmd);
             l=strlen(psHdl->pcCmd)+10;
             for (i=0;i<l;i++) fprintf(pfDoc,"%c",C_TLD); fprintf(pfDoc,"\n\n");
          }
@@ -1419,14 +1421,14 @@ extern int siClpDocu(
          } else {
             fprintf(pfDoc,"No detailed description available for this command.\n\n");
          }
-         fprintf(pfDoc,   "indexterm:%cCommand %s%c\n\n\n",C_SBO,psHdl->pcCmd,C_SBC);
+         fprintf(pfDoc,   "indexterm:%c%s %s%c\n\n\n",C_SBO,pcCmd,psHdl->pcCmd,C_SBC);
          if (isDep) {
             siPos=siClpPrnDoc(pvHdl,pfDoc,0,isNbr,pcNum,NULL,psTab);
             if (siPos<0) return(siPos);
          }
       }
    } else {
-      return CLPERR(psHdl,CLPERR_INT,"No valid initial number string for head lines (%s)",psHdl->pcCmd);
+      return CLPERR(psHdl,CLPERR_INT,"No valid initial number or command string for head lines (%s)",psHdl->pcCmd);
    }
    return(CLP_OK);
 }
