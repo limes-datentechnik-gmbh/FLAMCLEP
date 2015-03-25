@@ -104,11 +104,12 @@
  *         Add new built in function to print out error code messages
  * 1.1.42: Code page specific interpretation of punctuation characters on EBCDIC systems
  * 1.1.43: Replace unnecessary strlen()
+ * 1.1.44: Define command qualifier for ClpDocu("COMMAND")
  */
-#define CLE_VSN_STR       "1.1.43"
+#define CLE_VSN_STR       "1.1.44"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        1
-#define CLE_VSN_REVISION       43
+#define CLE_VSN_REVISION       44
 
 /* Definition der Konstanten ******************************************/
 #define CLEMAX_CNFLEN            1023
@@ -1159,7 +1160,7 @@ EVALUATE:
                   siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isPfl,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg);
                   if (siErr) ERROR(siErr);
                   snprintf(acNum,sizeof(acNum),"2.%d.",i+1);
-                  siErr=siClpDocu(pvHdl,pfDoc,pcCmd,acNum,TRUE,FALSE,isNbr);
+                  siErr=siClpDocu(pvHdl,pfDoc,pcCmd,acNum,"COMMAND",TRUE,FALSE,isNbr);
                   if (siErr<0) {
                      fprintf(pfOut,"Creation of documentation file (%s) failed (%d - %s)\n",acFil,errno,strerror(errno));
                      ERROR(CLERTC_SYN);
@@ -1188,7 +1189,7 @@ EVALUATE:
                      }
                      snprintf(acNum,sizeof(acNum),"2.%d.",i+1);
                      sprintf(pcPat,"%s.%s",pcDef,pcCmd);
-                     siErr=siClpDocu(pvHdl,pfDoc,pcPat,acNum,TRUE,FALSE,isNbr);
+                     siErr=siClpDocu(pvHdl,pfDoc,pcPat,acNum,"COMMAND",TRUE,FALSE,isNbr);
                      if (siErr<0) {
                         fprintf(pfOut,"Creation of documentation file (%s) failed (%d - %s)\n",acFil,errno,strerror(errno));
                         free(pcPat);
@@ -1237,7 +1238,7 @@ EVALUATE:
                   siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isPfl,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg);
                   if (siErr) ERROR(siErr);
                   snprintf(acNum,sizeof(acNum),"3.%d.",i+1);
-                  siErr=siClpDocu(pvHdl,pfDoc,psTab[i].pcKyw,acNum,TRUE,FALSE,isNbr);
+                  siErr=siClpDocu(pvHdl,pfDoc,psTab[i].pcKyw,acNum,"COMMAND",TRUE,FALSE,isNbr);
                   if (siErr<0) {
                      fprintf(pfOut,"Creation of documentation file (%s) failed (%d - %s)\n",acFil,errno,strerror(errno));
                      vdClpClose(pvHdl); pvHdl=NULL;
@@ -2612,7 +2613,7 @@ static void vdPrnCommandManpage(
 {
    char                    acNum[CLEMAX_NUMLEN];
    snprintf(acNum,sizeof(acNum),"3.%d.",siInd+1);
-   siClpDocu(pvHdl,pfOut,pcCmd,acNum,FALSE,isMan,isNbr);
+   siClpDocu(pvHdl,pfOut,pcCmd,acNum,"COMMAND",FALSE,isMan,isNbr);
 }
 
 static void vdPrnProperties(
