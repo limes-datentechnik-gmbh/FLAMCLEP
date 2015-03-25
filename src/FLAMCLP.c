@@ -1400,7 +1400,7 @@ extern int siClpDocu(
             for (i=0;i<l;i++) fprintf(pfDoc,"%c",C_TLD); fprintf(pfDoc,"\n\n");
          } else {
             fprintf(pfDoc,   "%s '%s'\n",pcCmd,psHdl->pcCmd);
-            l=strlen(psHdl->pcCmd)+10;
+            l=strlen(pcCmd)+strlen(psHdl->pcCmd)+3;
             for (i=0;i<l;i++) fprintf(pfDoc,"%c",C_TLD); fprintf(pfDoc,"\n\n");
          }
          fprintf(pfDoc,   ".SYNOPSIS\n\n");
