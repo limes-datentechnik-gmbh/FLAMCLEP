@@ -1396,7 +1396,7 @@ extern int siClpDocu(
       } else {
          if (isNbr) {
             fprintf(pfDoc,   "%s %s '%s'\n",pcNum,pcCmd,psHdl->pcCmd);
-            l=strlen(pcNum)+strlen(psHdl->pcCmd)+11;
+            l=strlen(pcNum)+strlen(pcCmd)+strlen(psHdl->pcCmd)+11;
             for (i=0;i<l;i++) fprintf(pfDoc,"%c",C_TLD); fprintf(pfDoc,"\n\n");
          } else {
             fprintf(pfDoc,   "%s '%s'\n",pcCmd,psHdl->pcCmd);
