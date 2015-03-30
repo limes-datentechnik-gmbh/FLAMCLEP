@@ -117,8 +117,8 @@ extern int ebcdic_fprintf(FILE* file, const char* format, ...) {
 
 #ifdef __WIN__
 #define _WIN32_IE 0x5000
-#include <shlobj.h>
 #include <windows.h>
+#include <shlobj.h>
 extern char* userid(const int size, char* buffer) {
    DWORD tmp=size;
    buffer[0]=0x00;
