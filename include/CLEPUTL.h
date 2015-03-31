@@ -72,6 +72,7 @@ extern int win_snprintf(char *buffer, size_t size, const char *format, ...);
 #  define UNSETENV(name)      unsetenv((name))
 #endif
 
+#define isStr(c) (isprint(c) || (c)==C_TLD  || (c)==C_DLR || (c)==C_ATS || (c)==C_BSL || (c)==C_CRT || (c)==C_EXC)
 #define isKyw(c) (isalnum(c) || (c)=='_' || (c)=='-')
 
 #define ISDDNAME(p)     (toupper((p)[0])=='D' && toupper((p)[1])=='D' && (p)[2]==':')

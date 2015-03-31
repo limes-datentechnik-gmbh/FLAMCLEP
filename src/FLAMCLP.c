@@ -95,12 +95,13 @@
  * 1.1.45: Replace unnecessary strlen()
  * 1.1.46: Change "###SECRET###" in "***SECRET***" to eliminate dia-critical characters
  * 1.1.47: Make qualifier for commands variable in ClpDocu
+ * 1.1.48: Support dia-critical characters in string lexems (add new macro isStr())
 **/
 
-#define CLP_VSN_STR       "1.1.46"
+#define CLP_VSN_STR       "1.1.48"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        1
-#define CLP_VSN_REVISION       46
+#define CLP_VSN_REVISION       48
 
 /* Definition der Flag-Makros *****************************************/
 
@@ -2345,7 +2346,7 @@ static int siClpScnNat(
          *pcLex=EOS;
          if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(KYW)-LEXEM(%s)\n",pcHlp);
          return(CLPTOK_KYW);
-      } else if (uiTok==CLPTOK_STR && isprint((*ppCur)[0]) && (*ppCur)[0]!='(' && (*ppCur)[0]!=')' && (*ppCur)[0]!=C_SBO && (*ppCur)[0]!=C_SBC) {/*required string*/
+      } else if (uiTok==CLPTOK_STR && isStr((*ppCur)[0]) && (*ppCur)[0]!='(' && (*ppCur)[0]!=')' && (*ppCur)[0]!=C_SBO && (*ppCur)[0]!=C_SBC) {/*required string*/
          char*             pcKyw;
          *pcLex='d'; pcLex++;
          *pcLex='\''; pcLex++;
@@ -2389,7 +2390,7 @@ static int siClpScnNat(
                return(CLPTOK_KYW);
             }
          }
-         while ((*ppCur)[0]!=EOS && isprint((*ppCur)[0]) && (*ppCur)[0]!=' ' && (*ppCur)[0]!=',' && (*ppCur)[0]!='(' && (*ppCur)[0]!=')' && (*ppCur)[0]!=C_SBO && (*ppCur)[0]!=C_SBC &&  pcLex<pcEnd) {
+         while ((*ppCur)[0]!=EOS && isStr((*ppCur)[0]) && (*ppCur)[0]!=' ' && (*ppCur)[0]!=',' && (*ppCur)[0]!='(' && (*ppCur)[0]!=')' && (*ppCur)[0]!=C_SBO && (*ppCur)[0]!=C_SBC &&  pcLex<pcEnd) {
             *pcLex=*(*ppCur);
             pcLex++; (*ppCur)++;
          }
