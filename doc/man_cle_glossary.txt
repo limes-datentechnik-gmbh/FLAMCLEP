@@ -14,7 +14,7 @@ BATCH::
    Batch processing is execution of a series of programs ("jobs") on a
    computer without manual intervention.
 BUILT-IN FUNCTIONS::
-...The command line processor CLP provides a number of functions built-
+   The command line processor CLP provides a number of functions built-
    in that are available to obtain extensive syntax information, help
    messages, manual pages and documentation. There are additional built-
    in functions that can be used for owner, property and trace manage-
