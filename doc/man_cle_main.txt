@@ -33,7 +33,7 @@ information about the program.
 This is the ${__BUILD__} build version of the FLAMCLEP.
 
 USED ENVIRONMENT VARIABLES
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
  * LANG                     - to determine the CCSID on EBCDIC systems
  * HOME                     - to determine the home directory on UNIX/WIN
@@ -104,7 +104,7 @@ FLCL_ICNV_TO=UTF-8                # "UTF-8" could result in errors
 See <<appendix-properties>> for the current property file content.
 
 FILENAME MAPPING
-^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~
 
 All filenames used by CLEP are additionally mapped based on the rules
 below:
@@ -147,7 +147,7 @@ also be used for file names managed by the commands supported with this
 program.
 
 SPECIAL EBCDIC CODE PAGE SUPPORT
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To interpret commands correctly the punctuation characters below are on
 different code points depending on the EBCDIC CCSID used to enter these
