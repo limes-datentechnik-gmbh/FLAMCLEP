@@ -957,7 +957,7 @@ extern int siClpSyntax(
             return CLPERR(psHdl,CLPERR_SEM,"Path (%s) is not valid",pcPat);
          }
          for (siLev=0,pcPtr=strchr(pcPat,'.');pcPtr!=NULL && siLev<CLPMAX_HDEPTH;pcPtr=strchr(pcPtr+1,'.'),siLev++) {
-            for (pcKyw=pcPtr+1,i=0;pcKyw[i]!=EOS && pcKyw[i]!='.' && i<CLPMAX_LEXLEN;i++) acKyw[i]=pcKyw[i];
+            for (pcKyw=pcPtr+1,i=0;i<CLPMAX_LEXLEN && pcKyw[i]!=EOS && pcKyw[i]!='.';i++) acKyw[i]=pcKyw[i];
             acKyw[i]=EOS;
             siErr=siClpSymFnd(pvHdl,siLev,0,acKyw,psTab,&psArg,NULL);
             if (siErr<0) return(siErr);
@@ -1016,7 +1016,7 @@ extern int siClpHelp(
             return CLPERR(psHdl,CLPERR_SEM,"Path (%s) is not valid",pcPat);
          }
          for (siLev=0,pcPtr=strchr(pcPat,'.');pcPtr!=NULL && siLev<CLPMAX_HDEPTH;pcPtr=strchr(pcPtr+1,'.'),siLev++) {
-            for (pcKyw=pcPtr+1,i=0;pcKyw[i]!=EOS && pcKyw[i]!='.' && i<CLPMAX_LEXLEN;i++) acKyw[i]=pcKyw[i];
+            for (pcKyw=pcPtr+1,i=0;i<CLPMAX_LEXLEN && pcKyw[i]!=EOS && pcKyw[i]!='.';i++) acKyw[i]=pcKyw[i];
             acKyw[i]=EOS;
             siErr=siClpSymFnd(pvHdl,siLev,0,acKyw,psTab,&psArg,NULL);
             if (siErr<0) return(siErr);
@@ -1187,7 +1187,7 @@ extern int siClpDocu(
             if (strlen(pcPat)>l) {
                strcpy(acNum,pcNum);
                for (siLev=0,pcPtr=strchr(pcPat,'.');pcPtr!=NULL && siLev<CLPMAX_HDEPTH;pcPtr=strchr(pcPtr+1,'.'),siLev++) {
-                  for (pcKyw=pcPtr+1,i=0;pcKyw[i]!=EOS && pcKyw[i]!='.' && i<CLPMAX_LEXLEN;i++) acKyw[i]=pcKyw[i];
+                  for (pcKyw=pcPtr+1,i=0;i<CLPMAX_LEXLEN && pcKyw[i]!=EOS && pcKyw[i]!='.';i++) acKyw[i]=pcKyw[i];
                   acKyw[i]=EOS;
                   siErr=siClpSymFnd(pvHdl,siLev,0,acKyw,psTab,&psArg,&siPos);
                   if (siErr<0) return(siErr);
@@ -1471,7 +1471,7 @@ extern int siClpProperties(
             return CLPERR(psHdl,CLPERR_SEM,"Path (%s) is not valid",pcPat);
          }
          for (siLev=0,pcPtr=strchr(pcPat,'.');pcPtr!=NULL && siLev<CLPMAX_HDEPTH;pcPtr=strchr(pcPtr+1,'.'),siLev++) {
-            for (pcKyw=pcPtr+1,i=0;pcKyw[i]!=EOS && pcKyw[i]!='.' && i<CLPMAX_LEXLEN;i++) acKyw[i]=pcKyw[i];
+            for (pcKyw=pcPtr+1,i=0;i<CLPMAX_LEXLEN && pcKyw[i]!=EOS && pcKyw[i]!='.';i++) acKyw[i]=pcKyw[i];
             acKyw[i]=EOS;
             if (pcArg!=NULL) {
                return CLPERR(psHdl,CLPERR_SEM,"Path (%s) contains too many or invalid qualifiers",pcPat);
@@ -3205,7 +3205,7 @@ static int siClpBldPro(
          return CLPERR(psHdl,CLPERR_SEM,"Property path (%s) is not valid",pcPat);
       }
       for (siLev=0,pcPtr=pcPat+l;pcPtr!=NULL && siLev<CLPMAX_HDEPTH;pcPtr=strchr(pcPtr+1,'.'),siLev++) {
-         for (pcKyw=pcPtr+1,i=0;pcKyw[i]!=EOS && pcKyw[i]!='.' && i<CLPMAX_LEXLEN;i++) acKyw[i]=pcKyw[i];
+         for (pcKyw=pcPtr+1,i=0;i<CLPMAX_LEXLEN && pcKyw[i]!=EOS && pcKyw[i]!='.';i++) acKyw[i]=pcKyw[i];
          acKyw[i]=EOS;
          siErr=siClpSymFnd(pvHdl,siLev,0,acKyw,psTab,&psArg,NULL);
          if (siErr<0) return(siErr);
@@ -3903,7 +3903,7 @@ static int siClpBldCon(
             }
             memcpy(pcArg,pcVal,psVal->psFix->siSiz);
             memset(pcArg+psVal->psFix->siSiz,0,psArg->psFix->siSiz-psVal->psFix->siSiz);
-            for (siSln=0;pcArg[siSln]!=EOS && siSln<psArg->psFix->siSiz;siSln++);
+            for (siSln=0;siSln<psArg->psFix->siSiz && pcArg[siSln]!=EOS;siSln++);
             siEln=psVal->psFix->siSiz;
             if (psHdl->pfBld!=NULL) {
                fprintf(psHdl->pfBld,"%s BUILD-CONSTANT-STR(PTR=%p CNT=%d LEN=%d RST=%d)%s='",
@@ -3935,7 +3935,7 @@ static int siClpBldCon(
          pcVal=(char*)psVal->psVar->pvDat;
          memcpy(pcArg,pcVal,psVal->psVar->siLen);
          if (psVal->psFix->psEln==NULL) {
-            for (siSln=0;pcArg[siSln]!=EOS && siSln<psArg->psFix->siSiz;siSln++);
+            for (siSln=0;siSln<psArg->psFix->siSiz && pcArg[siSln]!=EOS;siSln++);
             if (CLPISS_BIN(psVal->psStd->uiFlg)) {
                siEln=psVal->psVar->siLen;
             } else {
@@ -3967,7 +3967,7 @@ static int siClpBldCon(
                default:
                   return CLPERR(psHdl,CLPERR_SIZ,"Size (%d) for the constant value '%s' of '%s.%s' is not 1, 2, 4 or 8)",psVal->psFix->psEln->psFix->siSiz,psVal->psFix->psEln->psStd->pcKyw,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
                }
-               for (siSln=0;pcArg[siSln]!=EOS && siSln<siEln;siSln++);
+               for (siSln=0;siSln<siEln && pcArg[siSln]!=EOS;siSln++);
                if (psHdl->pfBld!=NULL) {
                   fprintf(psHdl->pfBld,"%s BUILD-CONSTANT-STR(PTR=%p CNT=%d LEN=%d RST=%d)%s='",
                           fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw);

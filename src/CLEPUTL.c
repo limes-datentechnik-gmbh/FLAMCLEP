@@ -64,7 +64,6 @@
 
 extern int ebcdic_snprintf(char* string, size_t size, const char* format, ...) {
    va_list  argv;
-   char*    p;
    int      r;
    va_start(argv, format);
    r = vsnprintf(string, size, format, argv);
@@ -75,7 +74,6 @@ extern int ebcdic_snprintf(char* string, size_t size, const char* format, ...) {
 
 extern int ebcdic_sprintf(char* string, const char* format, ...) {
    va_list  argv;
-   char*    p;
    int      r;
    va_start(argv, format);
    r = vsprintf(string, format, argv);
@@ -89,7 +87,6 @@ extern int ebcdic_fprintf(FILE* file, const char* format, ...) {
    char*    help;
    char*    temp;
    size_t   size=1024;
-   char*    p;
    int      r;
    temp=(char*)malloc(size);
    if (temp==NULL) return(0);

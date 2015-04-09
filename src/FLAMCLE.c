@@ -452,7 +452,7 @@ extern int siCleExecute(
    if (psTab==NULL || argc==0 || argv==NULL || pcPgm==NULL || pcHlp==NULL || pfOut==NULL || pcDep==NULL || pcOpt==NULL || pcEnt==NULL ||
        *pcPgm==0 || *pcHlp==0 || strlen(pcPgm)>CLEMAX_PGMLEN) return(CLERTC_FAT);
 
-   for (i=0;pcPgm[i] && i<(sizeof(acPgm)-1);i++) acPgm[i]=toupper(pcPgm[i]);
+   for (i=0;i<(sizeof(acPgm)-1) && pcPgm[i];i++) acPgm[i]=toupper(pcPgm[i]);
    acPgm[i]=0;
 #ifdef __HOST__
    pfTmp=fopen("DD:STDENV","r");
@@ -496,7 +496,7 @@ extern int siCleExecute(
 #ifdef __HOST__
       {
          strcpy(acCnf,"<SYSUID>.");
-         for (j=strlen(acCnf),i=0;pcPgm[i] && i<8;i++) {
+         for (j=strlen(acCnf),i=0;i<8 && pcPgm[i];i++) {
             if (isalnum(pcPgm[i])) {
                acCnf[j]=toupper(pcPgm[i]);
                j++;
@@ -2089,21 +2089,21 @@ static int siClePropertyFinish(
          {
             int  j=9;
             strcpy(acEnv,"<SYSUID>.");
-            for (i=0;pcOwn[i] && i<8;i++) {
+            for (i=0;i<8 && pcOwn[i];i++) {
                if (isalnum(pcOwn[i])) {
                   acEnv[j]=toupper(pcOwn[i]);
                   j++;
                }
             }
             if (i) acEnv[j]='.'; j++;
-            for (i=0;pcPgm[i] && i<8;i++) {
+            for (i=0;i<8 && pcPgm[i];i++) {
                if (isalnum(pcPgm[i])) {
                   acEnv[j]=toupper(pcPgm[i]);
                   j++;
                }
             }
             if (i) acEnv[j]='.'; j++;
-            for (i=0;pcCmd[i] && i<8;i++) {
+            for (i=0;i<8 && pcCmd[i];i++) {
                if (isalnum(pcCmd[i])) {
                   acEnv[j]=toupper(pcCmd[i]);
                   j++;
