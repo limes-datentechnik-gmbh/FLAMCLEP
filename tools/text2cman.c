@@ -51,6 +51,7 @@ int main(int argc, char* argv[])
         char stringName[512];
         char* prefix = "";
         int isCommentBlock = 0;
+        int linecount = 0, startcomment;
 
         while ((n = getopt(argc, argv, "o:p:q")) != -1) {
                 switch (n) {
@@ -77,6 +78,7 @@ int main(int argc, char* argv[])
                 }
         }
         for (j=optind ; j < argc ; j++) {
+                linecount = 0;
                 inputName = argv[j];
                 if (singleFiles) {
                         n = strlen(inputName);
@@ -122,20 +124,24 @@ int main(int argc, char* argv[])
 
                 if (NULL == fgets(linebuf, sizeof(linebuf), inFile))
                         return -1;
+                linecount++;
                 n = strlen(linebuf);
                 if (n > 2 && strncmp("(1)\n", &(linebuf[n-4]),4) == 0) {
                     if (NULL == fgets(linebuf, sizeof(linebuf), inFile))
                             return -1;
+                    linecount++;
                     n = strlen(linebuf);
                     if (strncmp("===", linebuf, 3) != 0)
                         fprintf(stderr, "WARNING unexpected start of file %s\n", inputName);
                     if (NULL == fgets(linebuf, sizeof(linebuf), inFile))
                             return -1;
+                    linecount++;
                     n = strlen(linebuf);
                 }
                 while (n <= 2) {
                     if (NULL == fgets(linebuf, sizeof(linebuf), inFile))
                             return -1;
+                    linecount++;
                     n = strlen(linebuf);
                     if (n > 2 && linebuf[0] != '\n' && linebuf[0] != '\r')
                         break;
@@ -144,6 +150,8 @@ int main(int argc, char* argv[])
                 while (1) {
                         if (n>=4 && strncmp(linebuf,"////", 4)==0) {
                            isCommentBlock=isCommentBlock?0:1;
+                           if (isCommentBlock)
+                              startcomment = linecount;
                         }
                         if (!isCommentBlock && !(n>=2 && strncmp(linebuf,"//", 2)==0)) {
                            pageName[0] = '"';
@@ -180,6 +188,7 @@ int main(int argc, char* argv[])
                         }
                         if (NULL == fgets(linebuf, sizeof(linebuf), inFile))
                                 break;
+                        linecount++;
                         n = strlen(linebuf);
                 }
                 fclose(inFile);
@@ -188,6 +197,10 @@ int main(int argc, char* argv[])
                 if (singleFiles) {
                         fclose(outFile);
                         outFile = NULL;
+                }
+                if (isCommentBlock) {
+                   fprintf(stderr, "%s:%d:1: Error: Unclosed comment block. Comment blocks must be closed by \"////\" on the start of a line!\n", inputName, startcomment);
+                   return -1;
                 }
         }
         if (!singleFiles)
