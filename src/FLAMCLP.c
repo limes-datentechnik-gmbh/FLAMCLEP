@@ -96,12 +96,13 @@
  * 1.1.46: Change "###SECRET###" in "***SECRET***" to eliminate dia-critical characters
  * 1.1.47: Make qualifier for commands variable in ClpDocu
  * 1.1.48: Support dia-critical characters in string lexems (add new macro isStr())
+ * 1.1.49: Fix issue 684: correct length in error messages (longer then n)
 **/
 
-#define CLP_VSN_STR       "1.1.48"
+#define CLP_VSN_STR       "1.1.49"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        1
-#define CLP_VSN_REVISION       48
+#define CLP_VSN_REVISION       49
 
 /* Definition der Flag-Makros *****************************************/
 
@@ -3592,7 +3593,7 @@ static int siClpBldLit(
                return CLPERR(psHdl,CLPERR_LEX,"Length of hexadecimal string (%c(%s)) for '%s.%s' is not a multiple of 2",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
             }
             if ((l1/2)>l0) {
-               return CLPERR(psHdl,CLPERR_LEX,"Hexadecimal string (%c(%s)) of '%s.%s' is longer than %d",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,l0);
+               return CLPERR(psHdl,CLPERR_LEX,"Hexadecimal string (%c(%s)) of '%s.%s' is longer than %d",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,2*l0);
             }
             l2=hex2bin(pcVal+2,(U08*)psArg->psVar->pvPtr,l1);
             if (l2!=l1/2) {
@@ -3652,7 +3653,7 @@ static int siClpBldLit(
          break;
       case 's':
          if (l1+1>l0) {
-            return CLPERR(psHdl,CLPERR_LEX,"Character string (%c(%s)) of '%s.%s' is longer than %d",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,l0);
+            return CLPERR(psHdl,CLPERR_LEX,"Character string (%c(%s)) of '%s.%s' is longer than %d",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,l0-1);
          }
          memcpy(psArg->psVar->pvPtr,pcVal+2,l1);
          ((char*)psArg->psVar->pvPtr)[l1]=EOS;
@@ -3667,7 +3668,7 @@ static int siClpBldLit(
                   return CLPERR(psHdl,CLPERR_LEX,"Length of hexadecimal string (%c(%s)) for '%s.%s' is not a multiple of 2",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
                }
                if ((l1/2)>l0) {
-                  return CLPERR(psHdl,CLPERR_LEX,"Hexadecimal string (%c(%s)) of '%s.%s' is longer than %d",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,l0);
+                  return CLPERR(psHdl,CLPERR_LEX,"Hexadecimal string (%c(%s)) of '%s.%s' is longer than %d",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,2*l0);
                }
                l2=hex2bin(pcVal+2,(U08*)psArg->psVar->pvPtr,l1);
                if (l2!=l1/2) {
@@ -3709,7 +3710,7 @@ static int siClpBldLit(
             }
          } else {
             if (l1+1>l0) {
-               return CLPERR(psHdl,CLPERR_LEX,"Character string (%c(%s)) of '%s.%s' is longer than %d",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,l0);
+               return CLPERR(psHdl,CLPERR_LEX,"Character string (%c(%s)) of '%s.%s' is longer than %d",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,l0-1);
             }
             memcpy(psArg->psVar->pvPtr,pcVal+2,l1);
             ((char*)psArg->psVar->pvPtr)[l1]=EOS;
