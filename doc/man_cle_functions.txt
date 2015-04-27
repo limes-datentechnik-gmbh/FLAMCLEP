@@ -5,12 +5,3 @@ messages, manual pages and documentation.
 Other built-in functions can be used for owner, property, environment
 and trace management. All built-in functions have the purpose to
 simplify handling of powerful and sometimes complex commands.
-
-The command line executer gets the program name (for example "flcl" for
-frankenstein limes command line) as parameter. Means the description of
-the built-in functions don't know the final program name which use the 
-FLAMCLEP to handle a command line interpretation. Based on this in the
-description of the built-in function the variable program name are 
-propagated in a neutral form called 'program'. The 'program' qualifier
-must be replaced by the real program name (flcl) to use the examples and
-syntax correctly.

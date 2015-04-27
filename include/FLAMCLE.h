@@ -108,6 +108,8 @@ Below, you can find a possibly incomplete list of FLAMCLE feature:
  * * File name mapping and DD:NAME support (see man_cle_main.txt)
  * * Return/condition/exit code and reason code handling
  * * On EBCDIC systems we use a code page specific interpretation of punctuation characters (<pre>!$#@[\]^`{|}~</pre>) dependent on the environment variable LANG
+ * * Extensive manual page management including replacement of owner (&{OWN}) and program name (&{PGM})
+ * * * Own tool to generate description strings from text files including replacement of constant definitions (${__VERSION__})
 
 Built-in Functions
 ------------------
@@ -499,7 +501,9 @@ typedef const char* (*tpfMsg)(const int siRsn);
  *           For correct numbering, put hidden commands to the end of the table\n
  * \b pcMan  Pointer to a null-terminated string for a detailed description of this command
  *           (in ASCIDOC format, content behind .DESCRIPTION, mainly simply some paragraphs plus .OPTIONS and/or.EXAMPLES)
- *           It is recommended to use a header file with a define for this long string - converted on EBCDIC systems)\n
+ *           It is recommended to use a header file with a define for this long string.
+ *           "&{OWN}" and "&{PGM}" are replaced with the current owner and program name.
+ *           The resulting text is converted on EBCDIC systems)\n
  * \b pcHlp  String for a short context sensitive help to this command (converted on EBCDIC systems)\n
  */
 typedef struct CleCommand {

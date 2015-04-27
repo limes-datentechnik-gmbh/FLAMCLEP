@@ -4,14 +4,14 @@ the configuration data including the corresponding file will be deleted.
 
 The configuration file name can be defined by the environment variable:
 
-   program_CONFIG_FILE=config.file.name
+   &{PGM}_CONFIG_FILE=config.file.name
    
 This can be used to work with a global configuration file. If this
 location not defined, then the configuration file are stored on
 distributed systems in the current home directory under the file
 name:
 
-   .program.config
+   .&{pgm}.config
    
 If no home directory defined  for the current user (this case is very
 improbable), then the working directory is used.
@@ -21,13 +21,13 @@ defined, CLE looks first in the working and then in the home directory.
 This enables you to prefer a property file, by coping it to the current 
 working directory.
 
-On mainframes as default the data set name 'SYSUID.program.CONFIG' is
+On mainframes as default the data set name 'SYSUID.&{PGM}.CONFIG' is
 used. SYSUID as high level qualifier is a kind of replacement for the
 current home directory on distributed system in this case.
 
 .EXAMPLES
 
 -----------------------------------------------------------------------
-   :> program CONFIG
-   :> program CONFIG CLEAR
+   :> &{PGM} CONFIG
+   :> &{PGM} CONFIG CLEAR
 -----------------------------------------------------------------------

@@ -254,6 +254,57 @@ extern char* homedir(int flag, const int size, char* buffer) {
 #  define ATS_CHR "@" /*nodiac*/
 #endif
 
+extern void fprintm(FILE* file,const char* own, const char* pgm, const char* man, const int flg) {
+   const char* hlp=strstr(man,"&{"); /*nodiac*/;
+   while (hlp!=NULL) {
+      int prc=hlp-man;
+      efprintf(file,"%.*s",prc,man);
+      man+=prc;
+      if (strncmp(hlp,"&{OWN}",6)==0) { /*nodiac*/
+         for (const char* p=own;*p;p++) fprintf(file,"%c",toupper(*p));
+         man+=6;
+      } else if (strncmp(hlp,"&{own}",6)==0) { /*nodiac*/
+         for (const char* p=pgm;*p;p++) fprintf(file,"%c",tolower(*p));
+         man+=6;
+      } else if (strncmp(hlp,"&{Own}",6)==0) { /*nodiac*/
+         fprintf(file,"%c",toupper(*own));
+         for (const char* p=pgm+1;*p;p++) fprintf(file,"%c",tolower(*p));
+         man+=6;
+      } else if (strncmp(hlp,"&{oWn}",6)==0) { /*nodiac*/
+         fprintf(file,"%s",own);
+         man+=6;
+      } else if (strncmp(hlp,"&{PGM}",6)==0) { /*nodiac*/
+         for (const char* p=pgm;*p;p++) fprintf(file,"%c",toupper(*p));
+         man+=6;
+      } else if (strncmp(hlp,"&{pgm}",6)==0) { /*nodiac*/
+         for (const char* p=pgm;*p;p++) fprintf(file,"%c",tolower(*p));
+         man+=6;
+      } else if (strncmp(hlp,"&{Pgm}",6)==0) { /*nodiac*/
+         fprintf(file,"%c",toupper(*pgm));
+         for (const char* p=pgm+1;*p;p++) fprintf(file,"%c",tolower(*p));
+         man+=6;
+      } else if (strncmp(hlp,"&{pGm}",6)==0) { /*nodiac*/
+         fprintf(file,"%s",pgm);
+         man+=6;
+      } else {
+         const char* nxt=strchr(hlp,'}'); /*nodiac*/
+         if (nxt!=NULL) {
+            man=nxt+1;
+         } else {
+            while (*man) man++;
+         }
+      }
+      hlp=strstr(man,"&{"); /*nodiac*/
+   }
+   if (flg==FALSE) {
+      efprintf(file,"%s\n",man);
+   } else if (flg==TRUE){
+      efprintf(file,"%s\n\n",man);
+   } else {
+      efprintf(file,"%s",man);
+   }
+}
+
 extern const char* mapl2c(unsigned isEBCDIC) {
    const char* pcPtr=NULL;
    const char* pcEnv=GETENV("LANG");

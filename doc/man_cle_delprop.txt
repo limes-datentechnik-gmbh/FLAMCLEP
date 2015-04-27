@@ -12,6 +12,6 @@ See <<appendix-properties>> for the current property file content.
 .EXAMPLES
 
 -----------------------------------------------------------------------
-   :> program DELPROP
-   :> program DELPROP command
+   :> &{PGM} DELPROP
+   :> &{PGM} DELPROP command
 -----------------------------------------------------------------------

@@ -21,19 +21,19 @@ included in double quotation marks. The examples below show all possible
 command entries for the type object:
 
 -----------------------------------------------------------------------
-program command temp() dummy='str'
-program command(temp() dummy='str')
-program command "temp() dummy='str'"
-program "command(temp() dummy='str')"
+   :> &{PGM} command temp() dummy='str'
+   :> &{PGM} command(temp() dummy='str')
+   :> &{PGM} command "temp() dummy='str'"
+   :> &{PGM} "command(temp() dummy='str')"
 -----------------------------------------------------------------------
 
 For a command of type overlay it looks like:
 
 -----------------------------------------------------------------------
-program command temp()
-program command.temp()
-program command "temp()"
-program "command.temp()"
+   :> &{PGM} command temp()
+   :> &{PGM} command.temp()
+   :> &{PGM} command "temp()"
+   :> &{PGM} "command.temp()"
 -----------------------------------------------------------------------
 
 In a parameter file you can start with a dot for an overlay or

@@ -97,12 +97,13 @@
  * 1.1.47: Make qualifier for commands variable in ClpDocu
  * 1.1.48: Support dia-critical characters in string lexems (add new macro isStr())
  * 1.1.49: Fix issue 684: correct length in error messages (longer then n)
+ * 1.1.50: Support replacment of &{OWN} and &{PGM} in man pages
 **/
 
-#define CLP_VSN_STR       "1.1.49"
+#define CLP_VSN_STR       "1.1.50"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        1
-#define CLP_VSN_REVISION       49
+#define CLP_VSN_REVISION       50
 
 /* Definition der Flag-Makros *****************************************/
 
@@ -1043,7 +1044,7 @@ extern int siClpHelp(
                   fprintf(psHdl->pfHlp,"DESCRIPTION\n");
                   fprintf(psHdl->pfHlp,"-----------\n");
                   if (psHdl->pcMan!=NULL && *psHdl->pcMan) {
-                     efprintf(psHdl->pfHlp,"%s\n",psHdl->pcMan);
+                     fprintm(psHdl->pfHlp,psHdl->pcOwn,psHdl->pcPgm,psHdl->pcMan,FALSE);
                   } else {
                      fprintf(psHdl->pfHlp,"No detailed description available for this command.\n\n");
                   }
@@ -1099,7 +1100,7 @@ extern int siClpHelp(
                   fprintf(psHdl->pfHlp, "DESCRIPTION\n");
                   fprintf(psHdl->pfHlp, "-----------\n");
                   if (psArg->psFix->pcMan!=NULL && *psArg->psFix->pcMan) {
-                     efprintf(psHdl->pfHlp,"%s\n",psArg->psFix->pcMan);
+                     fprintm(psHdl->pfHlp,psHdl->pcOwn,psHdl->pcPgm,psArg->psFix->pcMan,FALSE);
                   } else {
                      fprintf(psHdl->pfHlp,"No detailed description available for this argument.\n\n");
                   }
@@ -1131,7 +1132,7 @@ extern int siClpHelp(
          fprintf(psHdl->pfHlp,"DESCRIPTION\n");
          fprintf(psHdl->pfHlp,"-----------\n");
          if (psHdl->pcMan!=NULL && *psHdl->pcMan) {
-            efprintf(psHdl->pfHlp,"%s\n",psHdl->pcMan);
+            fprintm(psHdl->pfHlp,psHdl->pcOwn,psHdl->pcPgm,psHdl->pcMan,FALSE);
          } else {
             fprintf(psHdl->pfHlp,"No detailed description available for this command.\n\n");
          }
@@ -1232,7 +1233,7 @@ extern int siClpDocu(
                         fprintf(pfDoc, "DESCRIPTION\n");
                         fprintf(pfDoc, "-----------\n\n");
                         if (psArg->psFix->pcMan!=NULL && *psArg->psFix->pcMan) {
-                           efprintf(pfDoc,"%s\n\n",psArg->psFix->pcMan);
+                           fprintm(pfDoc,psHdl->pcOwn,psHdl->pcPgm,psArg->psFix->pcMan,TRUE);
                         } else {
                            fprintf(pfDoc,"No detailed description available for this argument.\n\n");
                         }
@@ -1264,7 +1265,7 @@ extern int siClpDocu(
                         if (siErr<0) return(siErr);
                         fprintf(pfDoc,".DESCRIPTION\n\n");
                         if (psArg->psFix->pcMan!=NULL && *psArg->psFix->pcMan) {
-                           efprintf(pfDoc,"%s\n\n",psArg->psFix->pcMan);
+                           fprintm(pfDoc,psHdl->pcOwn,psHdl->pcPgm,psArg->psFix->pcMan,TRUE);
                         } else {
                            fprintf(pfDoc,"No detailed description available for this argument.\n\n");
                         }
@@ -1308,7 +1309,7 @@ extern int siClpDocu(
                         fprintf(pfDoc, "DESCRIPTION\n");
                         fprintf(pfDoc, "-----------\n\n");
                         if (psArg->psFix->pcMan!=NULL && *psArg->psFix->pcMan) {
-                           efprintf(pfDoc,"%s\n\n",psArg->psFix->pcMan);
+                           fprintm(pfDoc,psHdl->pcOwn,psHdl->pcPgm,psArg->psFix->pcMan,TRUE);
                         } else {
                            fprintf(pfDoc,"No detailed description available for this constant.\n\n");
                         }
@@ -1335,7 +1336,7 @@ extern int siClpDocu(
                         if (siErr<0) return(siErr);
                         fprintf(pfDoc,".DESCRIPTION\n\n");
                         if (psArg->psFix->pcMan!=NULL && *psArg->psFix->pcMan) {
-                           efprintf(pfDoc,"%s\n\n",psArg->psFix->pcMan);
+                           fprintm(pfDoc,psHdl->pcOwn,psHdl->pcPgm,psArg->psFix->pcMan,TRUE);
                         } else {
                            fprintf(pfDoc,"No detailed description available for this constant.\n\n");
                         }
@@ -1388,7 +1389,7 @@ extern int siClpDocu(
          fprintf(pfDoc,   "DESCRIPTION\n");
          fprintf(pfDoc,   "-----------\n\n");
          if (psHdl->pcMan!=NULL && *psHdl->pcMan) {
-            efprintf(pfDoc,"%s\n\n",psHdl->pcMan);
+            fprintm(pfDoc,psHdl->pcOwn,psHdl->pcPgm,psHdl->pcMan,TRUE);
          } else {
             fprintf(pfDoc,"No detailed description available for this command.\n\n");
          }
@@ -1419,7 +1420,7 @@ extern int siClpDocu(
          if (siErr<0) return(siErr);
          fprintf(pfDoc,   ".DESCRIPTION\n\n");
          if (psHdl->pcMan!=NULL && *psHdl->pcMan) {
-            efprintf(pfDoc,"%s\n\n",psHdl->pcMan);
+            fprintm(pfDoc,psHdl->pcOwn,psHdl->pcPgm,psHdl->pcMan,TRUE);
          } else {
             fprintf(pfDoc,"No detailed description available for this command.\n\n");
          }
@@ -5191,7 +5192,7 @@ static int siClpPrnDoc(
                   fprintf(pfDoc, "SYNTAX: %s\n",apMan[m]->psStd->pcKyw);
                   fprintf(pfDoc, "-----------------------------------------------------------------------\n\n");
                   fprintf(pfDoc, ".DESCRIPTION\n\n");
-                  efprintf(pfDoc,"%s\n\n",apMan[m]->psFix->pcMan);
+                  fprintm(pfDoc,psHdl->pcOwn,psHdl->pcPgm,apMan[m]->psFix->pcMan,TRUE);
                   fprintf(pfDoc,"indexterm:%cConstant %s%c\n\n\n",C_SBO,apMan[m]->psStd->pcKyw,C_CBC);
                   k++;
                }
@@ -5238,7 +5239,7 @@ static int siClpPrnDoc(
                fprintf(pfDoc, "-----------------------------------------------------------------------\n\n");
                fprintf(pfDoc, ".DESCRIPTION\n\n");
                if (apMan[m]->psFix->pcMan!=NULL && *apMan[m]->psFix->pcMan) {
-                  efprintf(pfDoc,"%s\n\n",apMan[m]->psFix->pcMan);
+                  fprintm(pfDoc,psHdl->pcOwn,psHdl->pcPgm,apMan[m]->psFix->pcMan,TRUE);
                } else {
                   fprintf(pfDoc,"No detailed description available for this argument.\n\n");
                }
@@ -5283,7 +5284,7 @@ static int siClpPrnPro(
             if (psHlp->psFix->pcDft!=NULL && *psHlp->psFix->pcDft) {
                if ((isMan || (!CLPISS_CMD(psHlp->psStd->uiFlg))) && psHlp->psFix->pcMan!=NULL && *psHlp->psFix->pcMan) {
                   fprintf(pfOut,"\n%c DESCRIPTION for %s.%s.%s.%s:\n",C_HSH,psHdl->pcOwn,psHdl->pcPgm,fpcPat(pvHdl,siLev),psHlp->psStd->pcKyw);
-                  efprintf(pfOut,"%s",psHlp->psFix->pcMan);
+                  fprintm(pfOut,psHdl->pcOwn,psHdl->pcPgm,psHlp->psFix->pcMan,2);
                   fprintf(pfOut," %c\n",C_HSH);
                   isMan=TRUE;
                } else {
@@ -5296,7 +5297,7 @@ static int siClpPrnPro(
                if (isSet==FALSE) {
                   if ((isMan || (!CLPISS_CMD(psHlp->psStd->uiFlg))) && psHlp->psFix->pcMan!=NULL && *psHlp->psFix->pcMan) {
                      fprintf(pfOut,"\n%c DESCRIPTION for %s.%s.%s.%s:\n",C_HSH,psHdl->pcOwn,psHdl->pcPgm,fpcPat(pvHdl,siLev),psHlp->psStd->pcKyw);
-                     efprintf(pfOut,"%s",psHlp->psFix->pcMan);
+                     fprintm(pfOut,psHdl->pcOwn,psHdl->pcPgm,psHlp->psFix->pcMan,2);
                      fprintf(pfOut," %c\n",C_HSH);
                      isMan=TRUE;
                   } else {

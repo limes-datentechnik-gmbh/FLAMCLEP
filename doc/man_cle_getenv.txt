@@ -7,5 +7,5 @@ are placed in the environment table of the process.
 .EXAMPLES
 
 -----------------------------------------------------------------------
-   :> program GETENV
+   :> &{PGM} GETENV
 -----------------------------------------------------------------------

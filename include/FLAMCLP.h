@@ -89,7 +89,14 @@ enforce the pure acceptance of predefined keywords.
 For each argument or constant you must define a keyword and a short
 help message. If you state additionally a detailed description, then
 this argument gets an own chapter in the generative documentation, a
-manual page will be available and extensive help is displayed.
+manual page will be available and extensive help is displayed. The
+description string can contain &{OWN} for the current owner or &{PGM}
+for the current program name (upper case, in small letter (pgm) is lower
+case is the first letter big and all other small (Pgm) then title case
+and is the middle letter big an the two other small (pGm) then the original
+string is used). All other content inside of &{...} are ignored. This
+can be used for example to insert comments in the source of the manual
+page.
 
 For each argument you can define a default value and use the property
 parser or environment variables to overwrite it again. The default value
@@ -169,7 +176,7 @@ syntax and help function. Additionally, you can use a very powerful
 function to generate single manual pages or complete user manuals,
 You can make use of the supported grammar and regular expressions
 (lexems). Provided manual pages must be in ASCIIDOC and will be converted
-on EBCDIC systems  from the compile code page in the local code page.
+on EBCDIC systems from the compile code page in the local code page.
 
 Only ClpParseCmd() uses the pvDat pointer. All other functions only work
 on the symbol table. This means if you don't use ClpParseCmd() the pointer
@@ -571,8 +578,10 @@ typedef struct ClpArgument {
    const char*                   pcDft;
    /** Pointer to a zero-terminated string for a detailed description of this argument (in ASCIIDOC format, content
     *  behind .DESCRIPTION, mainly simply some paragraphs). Can be a NULL pointer or empty string for constant definition
-    *  or simple arguments. It is recommended to use a header file with a define for this long string (mainly for objects
-    *  and overlays - converted on EBCDIC systems)*/
+    *  or simple arguments. It is recommended to use a header file with a define for this long string (required for objects
+    *  and overlays). If the substrings "&{OWN}" or "&{PGM}" found, then these strings are replaced with the current
+    *  owner or program name, all other content between "&{" and "}" are ignored (comment).
+    *  The resulting text is converted on EBCDIC systems)*/
    const char*                   pcMan;
    /** Pointer to a zero-terminated string for context sensitive help to this argument. Also used as headline in
     * documentation generation. For this only alnum, blank, dot, comma, hyphen and parenthesis are used. At every other

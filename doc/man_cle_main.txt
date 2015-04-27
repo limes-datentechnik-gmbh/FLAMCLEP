@@ -38,22 +38,22 @@ USED ENVIRONMENT VARIABLES
  * LANG                     - to determine the CCSID on EBCDIC systems
  * HOME                     - to determine the home directory on UNIX/WIN
  * USER                     - to determine the current user id on UNIX/WIN 
- * program_CONFIG_FILE      - the configuration filename (default is '$HOME/.flcl.config' on UNIX/WIN or '&SYSUID..FLCL.CONFIG' on mainframes)
- * program_DEFAULT_OWNER_ID - the default owner ID (default is 'de.limes')
- * owner_program_command_PROPERTY_FILENAME - To overrule default property file names
- * path_argument            - to overrule the hard coded default property value
+ * &{PGM}_CONFIG_FILE - the configuration filename (default is '$HOME/.&{pgm}.config' on UNIX/WIN or '&SYSUID..&{PGM}.CONFIG' on mainframes)
+ * &{PGM}_DEFAULT_OWNER_ID - the default owner ID (default is '&{oWn}')
+ * &{OWN}_&{PGM}_command_PROPERTY_FILENAME - To overrule default property file names
+ * path_argument - to overrule the hard coded default property value
  
 Environment variables can be set from the system or in the program
 configuration file with the build-in function 'SETENV'. Especially on
 mainframe systems the configuration file is an easy way to define
 environment variables. Additional on host the DD name STDENV is
-supported. The DD:STDENV allows you to define the program_CONFIG_FILE,
-program_DEFAULT_OWNER_ID, LANG and other environment variables for
-example direct in your JCL (FLCL is a sample program name):
+supported. The DD:STDENV allows you to define the &{PGM}_CONFIG_FILE,
+&{PGM}_DEFAULT_OWNER_ID, LANG and other environment variables for
+example direct in your JCL:
 
 -----------------------------------------------------------------------
  //STDENV   DD *
- FLCL_CONFIG_FILE=GLOBAL.FLCL.CONFIG
+ &{PGM}_CONFIG_FILE=GLOBAL.&{PGM}.CONFIG
  LANG=de_DE.IBM-1141
  HOME=/u/hugo
  USER=hugo
@@ -186,5 +186,5 @@ such strings are encoded in the correct system code page, but we can not
 guaranty this.
 
 On ASCII/UTF-8 platforms a miss interpretation of punctuation characters 
-smaller thne 128 is not possible. On such platforms the LANG variable is
+smaller then 128 is not possible. On such platforms the LANG variable is
 not used for command interpretation or printouts.

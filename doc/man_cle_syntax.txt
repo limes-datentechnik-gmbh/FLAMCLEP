@@ -26,9 +26,9 @@ Structured print out is used.
 .EXAMPLES
 
 -----------------------------------------------------------------------
-   :> program SYNTAX
-   :> program SYNTAX command
-   :> program SYNTAX command ALL
-   :> program SYNTAX command.para
-   :> program SYNTAX command.para ALL
+   :> &{PGM} SYNTAX
+   :> &{PGM} SYNTAX command
+   :> &{PGM} SYNTAX command ALL
+   :> &{PGM} SYNTAX command.para
+   :> &{PGM} SYNTAX command.para ALL
 -----------------------------------------------------------------------

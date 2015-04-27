@@ -14,7 +14,7 @@ and filename.
 .EXAMPLES
 
 -----------------------------------------------------------------------
-   :> program TRACE FILE=filename
-   :> program TRACE ON
-   :> program TRACE OFF
+   :> &{PGM} TRACE FILE=filename
+   :> &{PGM} TRACE ON
+   :> &{PGM} TRACE OFF
 -----------------------------------------------------------------------

@@ -39,12 +39,12 @@ or parameter and the next level of arguments including the aliases.
 .EXAMPLES
 
 -----------------------------------------------------------------------
-   :> program HELP
-   :> program HELP MAN
-   :> program HELP command
-   :> program HELP command MAN
-   :> program HELP command ALL
-   :> program HELP command.para
-   :> program HELP command.para MAN
-   :> program HELP command.para ALL
+   :> &{PGM} HELP
+   :> &{PGM} HELP MAN
+   :> &{PGM} HELP command
+   :> &{PGM} HELP command MAN
+   :> &{PGM} HELP command ALL
+   :> &{PGM} HELP command.para
+   :> &{PGM} HELP command.para MAN
+   :> &{PGM} HELP command.para ALL
 -----------------------------------------------------------------------

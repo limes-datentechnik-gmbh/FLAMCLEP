@@ -11,6 +11,6 @@ and value.
 .EXAMPLES
 
 -----------------------------------------------------------------------
-   :> program SETENV LANG=DE_DE.IBM-1141
-   :> program SETENV LANG=DE_DE.UTF-8
+   :> &{PGM} SETENV LANG=DE_DE.IBM-1141
+   :> &{PGM} SETENV LANG=DE_DE.UTF-8
 -----------------------------------------------------------------------

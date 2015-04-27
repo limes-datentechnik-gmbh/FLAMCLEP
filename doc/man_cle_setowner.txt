@@ -7,5 +7,5 @@ can be used for environment, client and other purposes.
 .EXAMPLES
 
 -----------------------------------------------------------------------
-   :> program SETOWNER com.company
+   :> &{PGM} SETOWNER com.company
 -----------------------------------------------------------------------

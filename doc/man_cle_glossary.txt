@@ -27,7 +27,7 @@ CHANGING OF PROPERTIES::
    command. If no command specific property file is activated, a
    property file is generated (see GENPROP), updated and activated (see
    SETPROP).
-   :> program CHGPROP command [path[=value]]*
+   :> &{PGM} CHGPROP command [path[=value]]*
 CLEP::
    Command line executor and parser
 CLEP-ABOUT::
@@ -101,8 +101,8 @@ DELETING OF PROPERTY FILE::
    delete the general property file. Using this command with a specific
    command name you can delete the specific property file from the
    configuration data but only for the current owner.
-   :> program DELPROP
-   :> program DELPROP command
+   :> &{PGM} DELPROP
+   :> &{PGM} DELPROP command
 GEN::
    Generate
 GENERATION OF PROPERTY FILE::

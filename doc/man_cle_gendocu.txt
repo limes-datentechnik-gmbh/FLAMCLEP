@@ -19,7 +19,7 @@ and filename.
 .EXAMPLES
 
 -----------------------------------------------------------------------
-   :> program GENDOCU program.manual.txt NONBR
-   :> program GENDOCU command=command.manual.txt
-   :> program GENDOCU command.argument=argument.manual.txt
+   :> &{PGM} GENDOCU &{pgm}.manual.txt NONBR
+   :> &{PGM} GENDOCU command=command.manual.txt
+   :> &{PGM} GENDOCU command.argument=argument.manual.txt
 -----------------------------------------------------------------------

@@ -122,6 +122,15 @@ extern char* homedir(const int flag, const int size, char* buffer);
  * @return        amount of characters printed (0 are mainly a error)
  */
 extern int snprintc(char* buffer,const size_t size,const char* format,...);
+/**
+ * Prints manpages to a file and replace OWN and PGM entires
+ * @param file    pointer to the file
+ * @param own     owner name for replacement (&{OWN})
+ * @param pgm     program name for replacement (&{PGM})
+ * @param man     manpage to print, which can contain &{PGM} and &{OWN}
+ * @param flg     true to put an additional '\n' at the end
+ */
+extern void fprintm(FILE* file,const char* own, const char* pgm, const char* man, const int flg);
 
 /**
  * Works like strncpy but ensure 0 termination.
