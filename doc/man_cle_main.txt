@@ -40,7 +40,7 @@ USED ENVIRONMENT VARIABLES
  * USER                     - to determine the current user id on UNIX/WIN 
  * &{PGM}_CONFIG_FILE - the configuration filename (default is '$HOME/.&{pgm}.config' on UNIX/WIN or '&SYSUID..&{PGM}.CONFIG' on mainframes)
  * &{PGM}_DEFAULT_OWNER_ID - the default owner ID (default is '&{oWn}')
- * &{OWN}_&{PGM}_command_PROPERTY_FILENAME - To overrule default property file names
+ * owner_&{PGM}_command_PROPERTY_FILENAME - To overrule default property file names
  * path_argument - to overrule the hard coded default property value
  
 Environment variables can be set from the system or in the program
