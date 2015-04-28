@@ -660,11 +660,11 @@ EVALUATE:
          fprintf(pfOut,"\n");
          fprintf(pfOut,"Return/condition/exit codes of the executable\n");
          fprintf(pfOut,"---------------------------------------------\n\n");
-         fprintm(pfOut,pcOwn,pcPgm,MAN_CLE_APPENDIX_RETURNCODES,FALSE);
+         fprintm(pfOut,pcOwn,pcPgm,MAN_CLE_APPENDIX_RETURNCODES,1);
          if (pfMsg!=NULL) {
             fprintf(pfOut,"Reason codes of the different commands\n");
             fprintf(pfOut,"--------------------------------------\n\n");
-            fprintm(pfOut,pcOwn,pcPgm,MAN_CLE_APPENDIX_REASONCODES,FALSE);
+            fprintm(pfOut,pcOwn,pcPgm,MAN_CLE_APPENDIX_REASONCODES,1);
             for (i=1,m=pfMsg(i);m!=NULL;i++,m=pfMsg(i)) {
                if (*m) fprintf(pfOut," * %d - %s\n",i,m);
             }
@@ -777,7 +777,7 @@ EVALUATE:
          if (argc==3) {
             if (strxcmp(isCas,argv[2],"MAN",0,0,FALSE)==0 || strxcmp(isCas,argv[2],"-MAN",0,0,FALSE)==0 || strxcmp(isCas,argv[2],"--MAN",0,0,FALSE)==0) {
                fprintf(pfOut,"Help for program '%s':\n",pcPgm);
-               fprintm(pfOut,pcOwn,pcPgm,pcMan,FALSE);
+               fprintm(pfOut,pcOwn,pcPgm,pcMan,1);
                ERROR(CLERTC_OK);
             } else siDep=1;
          } else if (argc==4) {
@@ -1205,7 +1205,7 @@ EVALUATE:
             }
          } else {
             if (pcCov!=NULL && *pcCov) {
-               fprintm(pfDoc,pcOwn,pcPgm,pcCov,TRUE);
+               fprintm(pfDoc,pcOwn,pcPgm,pcCov,2);
             } else {
                snprintf(acNum,sizeof(acNum),"'%s' - User Manual",acPgm); l=strlen(acNum); fprintf(pfDoc,"%s\n",acNum);
                for (i=0;i<l;i++) fprintf(pfDoc,"="); fprintf(pfDoc,"\n");
@@ -1219,7 +1219,7 @@ EVALUATE:
                fprintf(pfDoc,"COMMAND LINE PROCESSOR\n");
                fprintf(pfDoc,"----------------------\n\n");
             }
-            fprintm(pfDoc,pcOwn,pcPgm,MAN_CLE_MAIN,TRUE);
+            fprintm(pfDoc,pcOwn,pcPgm,MAN_CLE_MAIN,2);
             efprintf(pfDoc,"indexterm:[Command line processor]\n\n\n");
 
             vdCleManProgram(pfDoc,psTab,acOwn,pcPgm,pcHlp,pcMan,pcDep,pcOpt,FALSE,isNbr);
@@ -1231,7 +1231,7 @@ EVALUATE:
                snprintf(acNum,sizeof(acNum),"Available commands"); l=strlen(acNum); fprintf(pfDoc,"%s\n",acNum);
                for (i=0;i<l;i++) fprintf(pfDoc,"-"); fprintf(pfDoc,"\n\n");
             }
-            fprintm(pfDoc,pcOwn,pcPgm,MAN_CLE_COMMANDS,TRUE);
+            fprintm(pfDoc,pcOwn,pcPgm,MAN_CLE_COMMANDS,2);
             efprintf(pfDoc,"indexterm:[Available commands]\n\n\n");
 
             for (i=0;psTab[i].pcKyw!=NULL;i++) {
@@ -1256,7 +1256,7 @@ EVALUATE:
                snprintf(acNum,sizeof(acNum),"Available built-in functions"); l=strlen(acNum); fprintf(pfDoc,"%s\n",acNum);
                for (i=0;i<l;i++) fprintf(pfDoc,"-"); fprintf(pfDoc,"\n\n");
             }
-            fprintm(pfDoc,pcOwn,pcPgm,MAN_CLE_FUNCTIONS,TRUE);
+            fprintm(pfDoc,pcOwn,pcPgm,MAN_CLE_FUNCTIONS,2);
             efprintf(pfDoc,"indexterm:[Available built-in functions]\n\n\n");
 
             vdCleManFunction(pfDoc,S_TLD,"4.1" ,"SYNTAX"  ,HLP_CLE_SYNTAX  ,acOwn,pcPgm,SYN_CLE_SYNTAX  ,MAN_CLE_SYNTAX  ,FALSE,isNbr);
@@ -1289,7 +1289,7 @@ EVALUATE:
             efprintf(pfDoc,"[appendix]\n");
             fprintf(pfDoc,"LEXEM\n");
             fprintf(pfDoc,"-----\n\n");
-            fprintm(pfDoc,pcOwn,pcPgm,MAN_CLE_APPENDIX_LEXEM,FALSE);
+            fprintm(pfDoc,pcOwn,pcPgm,MAN_CLE_APPENDIX_LEXEM,1);
             fprintf(pfDoc,"------------------------------------------------------------------------\n");
             fprintf(pfDoc,"Lexemes (regular expressions) for argument list or parameter file\n");
             siErr=siClpLexem(pvHdl,pfDoc); s++;
@@ -1304,7 +1304,7 @@ EVALUATE:
             efprintf(pfDoc,"[appendix]\n");
             fprintf(pfDoc,"GRAMMAR\n");
             fprintf(pfDoc,"-------\n\n");
-            fprintm(pfDoc,pcOwn,pcPgm,MAN_CLE_APPENDIX_GRAMMAR,FALSE);
+            fprintm(pfDoc,pcOwn,pcPgm,MAN_CLE_APPENDIX_GRAMMAR,1);
             fprintf(pfDoc,"------------------------------------------------------------------------\n");
             fprintf(pfDoc,"Grammar for argument list, parameter file or property file\n");
             siErr=siClpGrammar(pvHdl,pfDoc); s++;
@@ -1322,7 +1322,7 @@ EVALUATE:
             efprintf(pfDoc,"[appendix]\n");
             fprintf(pfDoc,"PROPERTIES\n");
             fprintf(pfDoc,"----------\n\n");
-            fprintm(pfDoc,pcOwn,pcPgm,MAN_CLE_APPENDIX_PROPERTIES,FALSE);
+            fprintm(pfDoc,pcOwn,pcPgm,MAN_CLE_APPENDIX_PROPERTIES,1);
             fprintf(pfDoc,"------------------------------------------------------------------------\n");
             fprintf(pfDoc,"\n%c Property file for: %s.%s %c\n\n",C_HSH,acOwn,pcPgm,C_HSH);
             efprintf(pfDoc,"%s",HLP_CLE_PROPFIL);
@@ -1344,7 +1344,7 @@ EVALUATE:
             efprintf(pfDoc,"[appendix]\n");
             fprintf(pfDoc,"RETURN CODES\n");
             fprintf(pfDoc,"------------\n\n");
-            fprintm(pfDoc,pcOwn,pcPgm,MAN_CLE_APPENDIX_RETURNCODES,FALSE);
+            fprintm(pfDoc,pcOwn,pcPgm,MAN_CLE_APPENDIX_RETURNCODES,1);
             efprintf(pfDoc,"indexterm:[Appendix Returncodes]\n\n\n");
 
             if (pfMsg!=NULL) {
@@ -1352,7 +1352,7 @@ EVALUATE:
                efprintf(pfDoc,"[appendix]\n");
                fprintf(pfDoc,"REASON CODES\n");
                fprintf(pfDoc,"------------\n\n");
-               fprintm(pfDoc,pcOwn,pcPgm,MAN_CLE_APPENDIX_REASONCODES,FALSE);
+               fprintm(pfDoc,pcOwn,pcPgm,MAN_CLE_APPENDIX_REASONCODES,1);
                for (i=1,m=pfMsg(i);m!=NULL;i++,m=pfMsg(i)) {
                   if (*m) fprintf(pfDoc," * %d - %s\n",i,m);
                }
@@ -1364,7 +1364,7 @@ EVALUATE:
                efprintf(pfDoc,"[appendix]\n");
                fprintf(pfDoc,"VERSION\n");
                fprintf(pfDoc,"-------\n\n");
-               fprintm(pfDoc,pcOwn,pcPgm,MAN_CLE_APPENDIX_VERSION,FALSE);
+               fprintm(pfDoc,pcOwn,pcPgm,MAN_CLE_APPENDIX_VERSION,1);
                fprintf(pfDoc,"------------------------------------------------------------------------\n");
                fprintf(pfDoc,"%s",pcVsn); s++;
                fprintf(pfDoc,"------------------------------------------------------------------------\n\n");
@@ -1376,7 +1376,7 @@ EVALUATE:
                efprintf(pfDoc,"[appendix]\n");
                fprintf(pfDoc,"ABOUT\n");
                fprintf(pfDoc,"-----\n\n");
-               fprintm(pfDoc,pcOwn,pcPgm,MAN_CLE_APPENDIX_ABOUT,FALSE);
+               fprintm(pfDoc,pcOwn,pcPgm,MAN_CLE_APPENDIX_ABOUT,1);
                fprintf(pfDoc,"------------------------------------------------------------------------\n");
                fprintf(pfDoc,"%s",pcAbo); s++;
                fprintf(pfDoc,"------------------------------------------------------------------------\n\n");
@@ -1387,8 +1387,8 @@ EVALUATE:
                efprintf(pfDoc,"[glossary]\n");
                fprintf(pfDoc,"GLOSSARY\n");
                fprintf(pfDoc,"--------\n\n");
-               fprintm(pfDoc,pcOwn,pcPgm,MAN_CLE_GLOSSARY,FALSE);
-               fprintm(pfDoc,pcOwn,pcPgm,pcGls,TRUE);
+               fprintm(pfDoc,pcOwn,pcPgm,MAN_CLE_GLOSSARY,1);
+               fprintm(pfDoc,pcOwn,pcPgm,pcGls,2);
                efprintf(pfDoc,"indexterm:[Glossary]\n\n\n");
             }
 
@@ -1398,7 +1398,7 @@ EVALUATE:
 
             if (pcFin!=NULL && *pcFin) {
                efprintf(pfDoc,"\n\n");
-               fprintm(pfDoc,pcOwn,pcPgm,pcFin,TRUE);
+               fprintm(pfDoc,pcOwn,pcPgm,pcFin,2);
             } else {
                efprintf(pfDoc,"\n\n");
                efprintf(pfDoc,"[colophon]\n");
@@ -2346,7 +2346,7 @@ static void vdCleManProgram(
       fprintf(pfOut, "DESCRIPTION\n");
       fprintf(pfOut, "-----------\n\n");
       if (pcMan!=NULL && *pcMan) {
-         fprintm(pfOut,pcOwn,pcPgm,pcMan,TRUE);
+         fprintm(pfOut,pcOwn,pcPgm,pcMan,2);
       } else {
          fprintf(pfOut,"No detailed description available for this program.\n\n");
       }
@@ -2395,7 +2395,7 @@ static void vdCleManProgram(
          for (i=0;i<11;i++) fprintf(pfOut,"%c",C_TLD); fprintf(pfOut,"\n\n");
       }
       if (pcMan!=NULL && *pcMan) {
-         fprintm(pfOut,pcOwn,pcPgm,pcMan,TRUE);
+         fprintm(pfOut,pcOwn,pcPgm,pcMan,2);
       } else {
          fprintf(pfOut,"No detailed description available for this program.\n\n");
       }
@@ -2407,7 +2407,7 @@ static void vdCleManProgram(
          fprintf(pfOut,"SYNTAX\n");
          for (i=0;i<6;i++) fprintf(pfOut,"%c",C_TLD); fprintf(pfOut,"\n\n");
       }
-      fprintm(pfOut,pcOwn,pcPgm,MAN_CLE_MAIN_SYNTAX,FALSE);
+      fprintm(pfOut,pcOwn,pcPgm,MAN_CLE_MAIN_SYNTAX,1);
       fprintf(pfOut,"------------------------------------------------------------------------\n");
       fprintf(pfOut,"Syntax for program '%s':\n",pcPgm);
       vdPrnStaticSyntax(pfOut,psTab,pcPgm,pcDep,pcSep);
@@ -2421,7 +2421,7 @@ static void vdCleManProgram(
          fprintf(pfOut,"HELP\n");
          for (i=0;i<4;i++) fprintf(pfOut,"%c",C_TLD); fprintf(pfOut,"\n\n");
       }
-      fprintm(pfOut,pcOwn,pcPgm,MAN_CLE_MAIN_HELP,FALSE);
+      fprintm(pfOut,pcOwn,pcPgm,MAN_CLE_MAIN_HELP,1);
       fprintf(pfOut,"------------------------------------------------------------------------\n");
       fprintf(pfOut,"Help for program '%s':\n",pcPgm);
       vdPrnStaticHelp(pfOut,psTab,pcPgm,FALSE,pcDep);
@@ -2469,7 +2469,7 @@ static void vdCleManFunction(
       fprintf(pfOut, "-----------------------------------------------------------------------\n\n");
       fprintf(pfOut, "DESCRIPTION\n");
       fprintf(pfOut, "-----------\n\n");
-      fprintm(pfOut,pcOwn,pcPgm,pcMan,TRUE);
+      fprintm(pfOut,pcOwn,pcPgm,pcMan,2);
       fprintf(pfOut, "AUTHOR\n------\n\n");
       fprintf(pfOut, "limes datentechnik(r) gmbh (www.flam.de)\n\n");
    } else {
@@ -2490,7 +2490,7 @@ static void vdCleManFunction(
       fprintf(pfOut, "SYNTAX: :> %s %s\n",pcPgm,pcSyn);
       fprintf(pfOut, "-----------------------------------------------------------------------\n\n");
       fprintf(pfOut, ".DESCRIPTION\n\n");
-      fprintm(pfOut,pcOwn,pcPgm,pcMan,TRUE);
+      fprintm(pfOut,pcOwn,pcPgm,pcMan,2);
       fprintf(pfOut,"indexterm:%cBuilt-in function %s%c\n\n\n",C_SBO,pcFct,C_SBC);
    }
 }
