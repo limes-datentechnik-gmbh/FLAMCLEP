@@ -128,9 +128,9 @@ extern int snprintc(char* buffer,const size_t size,const char* format,...);
  * @param own     owner name for replacement (&{OWN})
  * @param pgm     program name for replacement (&{PGM})
  * @param man     manpage to print, which can contain &{PGM} and &{OWN}
- * @param flg     true to put an additional '\n' at the end
+ * @param cnt     amount of '\n' added to man page (0,1,2 (>2=2))
  */
-extern void fprintm(FILE* file,const char* own, const char* pgm, const char* man, const int flg);
+extern void fprintm(FILE* file,const char* own, const char* pgm, const char* man, const int cnt);
 
 /**
  * Works like strncpy but ensure 0 termination.

@@ -254,7 +254,6 @@ extern char* homedir(int flag, const int size, char* buffer) {
 #  define ATS_CHR "@" /*nodiac*/
 #endif
 
-//TODO: doxgen anpassen
 extern void fprintm(FILE* file,const char* own, const char* pgm, const char* man, const int cnt) {
    char*       hlp;
    char*       ptr;
