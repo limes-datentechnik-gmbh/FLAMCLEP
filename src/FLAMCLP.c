@@ -97,13 +97,14 @@
  * 1.1.47: Make qualifier for commands variable in ClpDocu
  * 1.1.48: Support dia-critical characters in string lexems (add new macro isStr())
  * 1.1.49: Fix issue 684: correct length in error messages (longer then n)
- * 1.1.50: Support replacment of &{OWN} and &{PGM} in man pages
+ * 1.1.50: Support replacement of &{OWN} and &{PGM} in man pages
+ * 1.1.51: Fix cut & paste error at syntax  error print out
 **/
 
-#define CLP_VSN_STR       "1.1.50"
+#define CLP_VSN_STR       "1.1.51"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        1
-#define CLP_VSN_REVISION       50
+#define CLP_VSN_REVISION       51
 
 /* Definition der Flag-Makros *****************************************/
 
@@ -655,21 +656,21 @@ static int CLPERR(TsHdl* psHdl,int siErr, char* pcMsg, ...) {
       fprintf(psHdl->pfErr,"\n");
       if (psHdl->pcSrc!=NULL && psHdl->pcRow!=NULL && psHdl->pcOld!=NULL && psHdl->pcCur!=NULL && (psHdl->pcCur>psHdl->pcSrc || psHdl->acLst[0] || psHdl->siRow)) {
          if (strcmp(psHdl->acSrc,CLPSRC_CMD)==0) {
-            fprintf(psHdl->pfErr,"%s Cause: Row=%d Column=%d from command line\n",                fpcPre(psHdl,1),psHdl->siRow,psHdl->siCol);
+            fprintf(psHdl->pfErr,"%s Cause: Row=%d Column=%d from command line\n",                  fpcPre(psHdl,1),psHdl->siRow,psHdl->siCol);
          } else if (strcmp(psHdl->acSrc,CLPSRC_PRO)==0) {
-            fprintf(psHdl->pfErr,"%s Cause: Row=%d Column=%d from property list\n",               fpcPre(psHdl,1),psHdl->siRow,psHdl->siCol);
+            fprintf(psHdl->pfErr,"%s Cause: Row=%d Column=%d from property list\n",                 fpcPre(psHdl,1),psHdl->siRow,psHdl->siCol);
          } else if (strncmp(psHdl->acSrc,CLPSRC_ENV,strlen(CLPSRC_ENV))==0) {
-            fprintf(psHdl->pfErr,"%s Cause: Row=%d Column=%d from environment variable %s\n",     fpcPre(psHdl,1),psHdl->siRow,psHdl->siCol,psHdl->acSrc+strlen(CLPSRC_ENV));
+            fprintf(psHdl->pfErr,"%s Cause: Row=%d Column=%d from environment variable '%s'\n",     fpcPre(psHdl,1),psHdl->siRow,psHdl->siCol,psHdl->acSrc+strlen(CLPSRC_ENV));
          } else if (strncmp(psHdl->acSrc,CLPSRC_DEF,strlen(CLPSRC_DEF))==0) {
-            fprintf(psHdl->pfErr,"%s Cause: Row=%d Column=%d from default value of argument %s\n",fpcPre(psHdl,1),psHdl->siRow,psHdl->siCol,psHdl->acSrc+strlen(CLPSRC_DEF));
+            fprintf(psHdl->pfErr,"%s Cause: Row=%d Column=%d from default value of argument '%s'\n",fpcPre(psHdl,1),psHdl->siRow,psHdl->siCol,psHdl->acSrc+strlen(CLPSRC_DEF));
          } else if (strncmp(psHdl->acSrc,CLPSRC_PRF,strlen(CLPSRC_PRF))==0) {
-            fprintf(psHdl->pfErr,"%s Cause: Row=%d Column=%d supplement from property file %s\n", fpcPre(psHdl,1),psHdl->siRow,psHdl->siCol,psHdl->acSrc+strlen(CLPSRC_PRF));
-         } else if (strncmp(psHdl->acSrc,CLPSRC_PRF,strlen(CLPSRC_PAF))==0) {
-            fprintf(psHdl->pfErr,"%s Cause: Row=%d Column=%d from parameter file %s\n",           fpcPre(psHdl,1),psHdl->siRow,psHdl->siCol,psHdl->acSrc+strlen(CLPSRC_PRF));
-         } else if (strncmp(psHdl->acSrc,CLPSRC_PRF,strlen(CLPSRC_CMF))==0) {
-            fprintf(psHdl->pfErr,"%s Cause: Row=%d Column=%d from command file %s\n",             fpcPre(psHdl,1),psHdl->siRow,psHdl->siCol,psHdl->acSrc+strlen(CLPSRC_PRF));
+            fprintf(psHdl->pfErr,"%s Cause: Row=%d Column=%d supplement from property file '%s'\n", fpcPre(psHdl,1),psHdl->siRow,psHdl->siCol,psHdl->acSrc+strlen(CLPSRC_PRF));
+         } else if (strncmp(psHdl->acSrc,CLPSRC_PAF,strlen(CLPSRC_PAF))==0) {
+            fprintf(psHdl->pfErr,"%s Cause: Row=%d Column=%d from parameter file '%s'\n",           fpcPre(psHdl,1),psHdl->siRow,psHdl->siCol,psHdl->acSrc+strlen(CLPSRC_PAF));
+         } else if (strncmp(psHdl->acSrc,CLPSRC_CMF,strlen(CLPSRC_CMF))==0) {
+            fprintf(psHdl->pfErr,"%s Cause: Row=%d Column=%d from command file '%s'\n",             fpcPre(psHdl,1),psHdl->siRow,psHdl->siCol,psHdl->acSrc+strlen(CLPSRC_CMF));
          } else {
-            fprintf(psHdl->pfErr,"%s Cause: Row=%d Column=%d in file %s\n",                       fpcPre(psHdl,1),psHdl->siRow,psHdl->siCol,psHdl->acSrc);
+            fprintf(psHdl->pfErr,"%s Cause: Row=%d Column=%d in file '%s'\n",                       fpcPre(psHdl,1),psHdl->siRow,psHdl->siCol,psHdl->acSrc);
          }
          fprintf(psHdl->pfErr,"%s \"",fpcPre(psHdl,1));
          for (p=psHdl->pcRow;!iscntrl(*p);p++) fprintf(psHdl->pfErr,"%c",*p);
