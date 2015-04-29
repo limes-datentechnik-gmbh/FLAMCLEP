@@ -105,12 +105,13 @@
  * 1.1.42: Code page specific interpretation of punctuation characters on EBCDIC systems
  * 1.1.43: Replace unnecessary strlen()
  * 1.1.44: Define command qualifier for ClpDocu("COMMAND")
- * 1.1.45: Support replacment of &{OWN} and &{PGM} in man pages
+ * 1.1.45: Support replacement of &{OWN} and &{PGM} in man pages
+ * 1.1.46: Support MAXCC parameter for command execution
  */
-#define CLE_VSN_STR       "1.1.45"
+#define CLE_VSN_STR       "1.1.46"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        1
-#define CLE_VSN_REVISION       45
+#define CLE_VSN_REVISION       46
 
 /* Definition der Konstanten ******************************************/
 #define CLEMAX_CNFLEN            1023
@@ -1904,11 +1905,16 @@ EVALUATE:
       fprintf(pfOut,"%s %s CONFIG CLEAR\n",pcDep,argv[0]);
       ERROR(CLERTC_CMD);
    } else {
+      int siMaxCC=0x0FFFFFFF;
       if (strxcmp(isCas,argv[1],"OWNER=",6,0,FALSE)==0) {
          snprintf(acOwn,sizeof(acOwn),"%s",&argv[1][6]);
          fprintf(pfOut,"Use owner: '%s'\n",acOwn);
          for (i=1;i<argc;i++) argv[i]=argv[i+1];
          argc--;
+      }
+      if (strxcmp(isCas,argv[argc-1],"MAXCC=",6,0,FALSE)==0) {
+          siMaxCC=atoi(&argv[argc-1][6]);
+          argc--;
       }
       if (argc>1) {
          for (i=0;psTab[i].pcKyw!=NULL;i++) {
@@ -1921,14 +1927,14 @@ EVALUATE:
                char*                         pcTls=NULL;
                char*                         pcLst=NULL;
                siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isPfl,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg);
-               if (siErr) ERROR(siErr);
+               if (siErr) ERROR(((siErr>siMaxCC)?siMaxCC:siErr));
                siErr=siCleGetCommand(pvHdl,pfOut,pcDep,psTab[i].pcKyw,argc,argv,acFil,&pcCmd);
-               if (siErr) ERROR(siErr);
+               if (siErr) ERROR(((siErr>siMaxCC)?siMaxCC:siErr));
                siErr=siClpParseCmd(pvHdl,acFil,pcCmd,TRUE,psTab[i].piOid,&pcTls);
                if (siErr<0) {
                   fprintf(pfOut,"Command line parser for command '%s' failed\n",psTab[i].pcKyw);
                   if (pcCmd!=NULL) free(pcCmd);
-                  ERROR(CLERTC_SYN);
+                  ERROR(((CLERTC_SYN>siMaxCC)?siMaxCC:CLERTC_SYN));
                }
                if (pcTls!=NULL) {
                   pcLst=(char*)malloc(strlen(pcTls)+1);
@@ -1946,7 +1952,7 @@ EVALUATE:
                   }
                   if (pcCmd!=NULL) free(pcCmd);
                   if (pcLst!=NULL) free(pcLst);
-                  ERROR(CLERTC_MAP);
+                  ERROR(((CLERTC_MAP>siMaxCC)?siMaxCC:CLERTC_MAP));
                }
                siErr=psTab[i].pfRun(pfOut,pfTrc,acOwn,pcPgm,pcVsn,pcAbo,pcLic,psTab[i].pcKyw,pcCmd,pcLst,psTab[i].pvPar,&isWrn);
                if (pcCmd!=NULL) free(pcCmd);
@@ -1959,7 +1965,7 @@ EVALUATE:
                         fprintf(pfOut,"Run of command '%s' ends with warning (Return code: %d / Reason code: %d)\n",psTab[i].pcKyw,CLERTC_WRN,siErr);
                      }
                      psTab[i].pfFin(pfOut,pfTrc,psTab[i].pvPar);
-                     ERROR(CLERTC_WRN);
+                     ERROR(((CLERTC_WRN>siMaxCC)?siMaxCC:CLERTC_WRN));
                   } else {
                      if (pfMsg!=NULL && (pcMsg=pfMsg(siErr))!=NULL) {
                         fprintf(pfOut,"Run of command '%s' failed (Return code: %d / Reason code: %d (%s))\n",psTab[i].pcKyw,CLERTC_RUN,siErr,pcMsg);
@@ -1967,7 +1973,7 @@ EVALUATE:
                         fprintf(pfOut,"Run of command '%s' failed (Return code: %d / Reason code: %d)\n",psTab[i].pcKyw,CLERTC_RUN,siErr);
                      }
                      psTab[i].pfFin(pfOut,pfTrc,psTab[i].pvPar);
-                     ERROR(CLERTC_RUN);
+                     ERROR(((CLERTC_RUN>siMaxCC)?siMaxCC:CLERTC_RUN));
                   }
                }
                siErr=psTab[i].pfFin(pfOut,pfTrc,psTab[i].pvPar);
@@ -1977,7 +1983,7 @@ EVALUATE:
                   } else {
                      fprintf(pfOut,"Finish/cleanup for command '%s' failed (Return code: %d / Reason code: %d)\n",psTab[i].pcKyw,CLERTC_FIN,siErr);
                   }
-                  ERROR(CLERTC_FIN);
+                  ERROR(((CLERTC_FIN>siMaxCC)?siMaxCC:CLERTC_FIN));
                }
                ERROR(CLERTC_OK);
             }
@@ -1987,7 +1993,7 @@ EVALUATE:
          ppArg=malloc((argc+1)*sizeof(*ppArg));
          if (ppArg == NULL) {
             fprintf(pfOut,"Memory allocation for argument list to run the default command '%s' failed\n",pcDef);
-            ERROR(CLERTC_SYS);
+            ERROR(((CLERTC_SYS>siMaxCC)?siMaxCC:CLERTC_SYS));
          }
          for (i=argc;i>1;i--) ppArg[i]=argv[i-1];
          ppArg[0]=argv[0]; ppArg[1]=(char*)pcDef; argc++; argv=ppArg;
@@ -1995,7 +2001,7 @@ EVALUATE:
       }
       fprintf(pfOut,"Command or built-in function '%s' not supported\n",argv[1]);
       vdPrnStaticSyntax(pfOut,psTab,argv[0],pcDep,pcOpt);
-      ERROR(CLERTC_CMD);
+      ERROR(((CLERTC_CMD>siMaxCC)?siMaxCC:CLERTC_CMD));
    }
 }
 #undef ERROR
@@ -2512,8 +2518,8 @@ static void vdPrnStaticSyntax(
       }
    }
    fprintf(pfOut,"\n");
-   fprintf(pfOut,"%s%s %s %cOWNER=oid%c command \"... argument list ...\"\n",pcDep,pcDep,pcPgm,C_SBO,C_SBC);
-   fprintf(pfOut,"%s%s %s %cOWNER=oid%c command=\" parameter file name \"\n",pcDep,pcDep,pcPgm,C_SBO,C_SBC);
+   fprintf(pfOut,"%s%s %s %cOWNER=oid%c command \"... argument list ...\" %cMAXCC=num%c\n",pcDep,pcDep,pcPgm,C_SBO,C_SBC,C_SBO,C_SBC);
+   fprintf(pfOut,"%s%s %s %cOWNER=oid%c command=\" parameter file name \" %cMAXCC=num%c\n",pcDep,pcDep,pcPgm,C_SBO,C_SBC,C_SBO,C_SBC);
    fprintf(pfOut,"%s Built-in functions:\n",pcDep);
    fprintf(pfOut,"%s%s %s ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",SYN_CLE_SYNTAX  );
    fprintf(pfOut,"%s%s %s ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",SYN_CLE_HELP    );
@@ -2751,8 +2757,8 @@ static int siCleGetCommand(
       fprintf(pfOut,"No blank space ' ', equal sign '=', dot '.' or bracket '(' behind '%s'\n",pcFct);
       fprintf(pfOut,"Please use a blank space to define an argument list or an equal sign for a parameter file\n");
       fprintf(pfOut,"Syntax for command '%s' not valid\n",pcFct);
-      fprintf(pfOut,"%s %s %cOWNER=oid%c %s \"... argument list ...\"\n",pcDep,argv[0],C_SBO,C_SBC,pcFct);
-      fprintf(pfOut,"%s %s %cOWNER=oid%c %s=\" parameter file name \"\n",pcDep,argv[0],C_SBO,C_SBC,pcFct);
+      fprintf(pfOut,"%s %s %cOWNER=oid%c %s \"... argument list ...\" %cMAXCC=num%c\n",pcDep,argv[0],C_SBO,C_SBC,pcFct,C_SBO,C_SBC);
+      fprintf(pfOut,"%s %s %cOWNER=oid%c %s=\" parameter file name \" %cMAXCC=num%c\n",pcDep,argv[0],C_SBO,C_SBC,pcFct,C_SBO,C_SBC);
       fprintf(pfOut,"Please use '%s SYNTAX %s%c.path%c' for more information\n",argv[0],pcFct,C_SBO,C_SBC);
       return(CLERTC_CMD);
    }

@@ -110,6 +110,7 @@ Below, you can find a possibly incomplete list of FLAMCLE feature:
  * * On EBCDIC systems we use a code page specific interpretation of punctuation characters (<pre>!$#@[\]^`{|}~</pre>) dependent on the environment variable LANG
  * * Extensive manual page management including replacement of owner (&{OWN}) and program name (&{PGM})
  * * * Own tool to generate description strings from text files including replacement of constant definitions (${__VERSION__})
+ * * Definition of maximum condition code (MAXCC) for command execution
 
 Built-in Functions
 ------------------
