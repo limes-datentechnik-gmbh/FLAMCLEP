@@ -87,16 +87,15 @@ selections. A feature is useful in order to define keywords for values
 enforce the pure acceptance of predefined keywords.
 
 For each argument or constant you must define a keyword and a short
-help message. If you state additionally a detailed description, then
-this argument gets an own chapter in the generative documentation, a
-manual page will be available and extensive help is displayed. The
-description string can contain &{OWN} for the current owner or &{PGM}
-for the current program name (upper case, in small letter (pgm) is lower
-case is the first letter big and all other small (Pgm) then title case
-and is the middle letter big an the two other small (pGm) then the original
-string is used). All other content inside of &{...} are ignored. This
-can be used for example to insert comments in the source of the manual
-page.
+help message. If you provide a detailed description, then this argument
+becomes an own chapter in the generated documentation, a manual page
+will be available and extensive help is displayed. The description
+string can contain &{OWN} for the current owner or &{PGM} for the
+current program name. The letter case of the replacement string depends
+and the letter case of the keyword: PGM = upper case, pgm = lower case,
+Pgm = title case, pGm = original string. All other content inside of
+&{...} is ignored. This can be used, for example, to insert comments
+into the source of the manual page.
 
 For each argument you can define a default value and use the property
 parser or environment variables to overwrite it again. The default value
@@ -579,8 +578,8 @@ typedef struct ClpArgument {
    /** Pointer to a zero-terminated string for a detailed description of this argument (in ASCIIDOC format, content
     *  behind .DESCRIPTION, mainly simply some paragraphs). Can be a NULL pointer or empty string for constant definition
     *  or simple arguments. It is recommended to use a header file with a define for this long string (required for objects
-    *  and overlays). If the substrings "&{OWN}" or "&{PGM}" found, then these strings are replaced with the current
-    *  owner or program name, all other content between "&{" and "}" are ignored (comment).
+    *  and overlays). All occurrences of "&{OWN}" or "&{PGM}" (that all their case variations) are replaced with the current
+    *  owner or program name, respectively. All other content between "&{" and "}" is ignored (comment).
     *  The resulting text is converted on EBCDIC systems)*/
    const char*                   pcMan;
    /** Pointer to a zero-terminated string for context sensitive help to this argument. Also used as headline in

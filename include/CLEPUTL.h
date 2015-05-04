@@ -98,7 +98,7 @@ extern int win_snprintf(char *buffer, size_t size, const char *format, ...);
 /**********************************************************************/
 
 /**
- * Return the current user id.
+ * Returns the current user id.
  * @param size    size of the buffer
  * @param buffer  pointer to the buffer
  * @return        pointer to the buffer containing the current user id (null-terminated)
@@ -106,7 +106,7 @@ extern int win_snprintf(char *buffer, size_t size, const char *format, ...);
 extern char* userid(const int size, char* buffer);
 
 /**
- * Return the current home directory.
+ * Returns the current home directory.
  * @param flag    if true then slash/backslash are added
  * @param size    size of the string buffer
  * @param buffer  pointer to the buffer
@@ -115,15 +115,16 @@ extern char* userid(const int size, char* buffer);
 extern char* homedir(const int flag, const int size, char* buffer);
 
 /**
- * Works like snprintf but concatenate the format string to the buffer.
+ * Works like snprintf but concatenates the format string to the buffer.
  * @param buffer  pointer to the string buffer
  * @param size    size of the string buffer
  * @param format  format string
  * @return        amount of characters printed (0 are mainly a error)
  */
 extern int snprintc(char* buffer,const size_t size,const char* format,...);
+
 /**
- * Prints manpages to a file and replace OWN and PGM entires
+ * Prints man pages to a file, inserting owner and program name into placeholders
  * @param file    pointer to the file
  * @param own     owner name for replacement (&{OWN})
  * @param pgm     program name for replacement (&{PGM})
@@ -133,7 +134,7 @@ extern int snprintc(char* buffer,const size_t size,const char* format,...);
 extern void fprintm(FILE* file,const char* own, const char* pgm, const char* man, const int cnt);
 
 /**
- * Works like strncpy but ensure 0 termination.
+ * Works like strncpy but ensures null-termination.
  * @param dest    pointer to destination string
  * @param src     pointer to source string
  * @param n       size of memory available for buffer
@@ -142,7 +143,7 @@ extern void fprintm(FILE* file,const char* own, const char* pgm, const char* man
 extern char* strxcpy(char *dest, const char *src, size_t n);
 
 /**
- * Replace each occurrence of char in name by value
+ * Replaces each occurrence of char in name by value
  * @param name string for replacement
  * @param size size of replacement string
  * @param chr  character for replacement

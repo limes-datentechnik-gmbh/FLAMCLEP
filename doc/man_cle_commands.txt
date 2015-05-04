@@ -40,8 +40,8 @@ synopsis.
 To run commands under different owners, the owner id can be defined in
 front of the command.
 
-For job control the maximum condition code (MAXCC=num) of the command
-execution can optionally defined as the last parameter for each command.
+For job control, the maximum condition code (MAXCC=num) of the command
+execution can optionally be set as the last parameter for each command.
 
 ------------------------------------------------------------------------
 &{pgm} [OWNER=oid] command "... argument list ..." [MAXCC=num]
