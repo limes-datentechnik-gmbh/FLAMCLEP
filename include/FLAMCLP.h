@@ -532,6 +532,77 @@ extern const char* pcClpAbout(const int l, const int s, char* b);
 #define CLPSRC_PAF               ":parameter file:"
 
 /**
+* Symbol table walk operations
+*/
+#define CLPSYM_NON               0
+#define CLPSYM_ROT               1
+#define CLPSYM_OLD               2
+#define CLPSYM_NXT               3
+#define CLPSYM_BAK               4
+#define CLPSYM_DEP               5
+#define CLPSYM_HIH               6
+#define CLPSYM_ALI               10
+#define CLPSYM_CNT               20
+#define CLPSYM_ELN               21
+#define CLPSYM_LNK               22
+#define CLPSYM_OID               23
+#define CLPSYM_SLN               24
+#define CLPSYM_TLN               25
+
+/**
+ * @brief Defines a entry for symbol table walk
+ */
+typedef struct ClpSymWlk {
+   const char*                   pcKyw;
+   const char*                   pcAli;
+   unsigned long                 uiFlg;
+   const char*                   pcDft;
+   const char*                   pcMan;
+   const char*                   pcHlp;
+   int                           siMin;
+   int                           siMax;
+   int                           siSiz;
+   int                           siOid;
+}TsClpSymWlk;
+
+/**
+ * @brief Defines a entry for symbol table update
+ */
+typedef struct ClpSymUpd {
+   const char*                   pcPro;
+}TsClpSymUpd;
+
+/**
+ * Symbol table walk
+ *
+ * The function can be use to read the symbol table of CLP
+ *
+ * @param[in]  pvHdl Pointer to the corresponding handle created with \a pvClpOpen
+ * @param[in]  siOpr Operation on symbol table
+ * @param[out] psSym Entry to read values from symbol table
+ *
+ * @return signed integer with 0 for end of list, > 0 for the type or < 0 an error code (CLPERR_xxxxxx)
+ */
+extern int siClpSymbolTableWalk(
+   void*                         pvHdl,
+   const int                     siOpr,
+   TsClpSymWlk*                  psSym);
+
+/**
+ * Symbol table update
+ *
+ * The function can be use to update values for symbol table entries
+ *
+ * @param[in]  pvHdl Pointer to the corresponding handle created with \a pvClpOpen
+ * @param[out] psSym Entry to read values from symbol table
+ *
+ * @return signed integer with CLP_OK(0) or an error code (CLPERR_xxxxxx)
+ */
+extern int siClpSymbolTableUpdate(
+   void*                         pvHdl,
+   TsClpSymUpd*                  psSym);
+
+/**
  * @brief Defines a table of arguments
  *
  * To simplify the definition of the corresponding data structures and argument tables it is recommended to use the

@@ -99,12 +99,13 @@
  * 1.1.49: Fix issue 684: correct length in error messages (longer then n)
  * 1.1.50: Support replacement of &{OWN} and &{PGM} in man pages
  * 1.1.51: Fix cut & paste error at syntax  error print out
+ * 1.1.52: Add symbol table walk and update functions
 **/
 
-#define CLP_VSN_STR       "1.1.51"
+#define CLP_VSN_STR       "1.1.52"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        1
-#define CLP_VSN_REVISION       51
+#define CLP_VSN_REVISION       52
 
 /* Definition der Flag-Makros *****************************************/
 
@@ -273,7 +274,9 @@ typedef struct Hdl {
    int                           siTok;
    char                          acLex[CLPMAX_LEXSIZ];
    char                          acSrc[CLPMAX_LEXSIZ];
+   TsSym*                        psTab;
    TsSym*                        psSym;
+   TsSym*                        psOld;
    void*                         pvDat;
    FILE*                         pfHlp;
    FILE*                         pfErr;
@@ -807,7 +810,9 @@ extern void* pvClpOpen(
          psHdl->siTok=CLPTOK_INI;
          psHdl->acLex[0]=EOS;
          psHdl->pvDat=pvDat;
+         psHdl->psTab=NULL;
          psHdl->psSym=NULL;
+         psHdl->psOld=NULL;
          psHdl->isChk=FALSE;
          if (pfHlp==NULL) psHdl->pfHlp=stderr; else psHdl->pfHlp=pfHlp;
          psHdl->pfErr=pfErr;
@@ -818,10 +823,10 @@ extern void* pvClpOpen(
          psHdl->pcDep=pcDep;
          psHdl->pcOpt=pcOpt;
          psHdl->pcEnt=pcEnt;
-         siErr=siClpSymIni(psHdl,0,NULL,psTab,NULL,&psHdl->psSym);
-         if (siErr<0) { vdClpSymDel(psHdl->psSym); free(psHdl); return(NULL); }
-         siErr=siClpSymCal(psHdl,0,NULL,psHdl->psSym);
-         if (siErr<0) { vdClpSymDel(psHdl->psSym); free(psHdl); return(NULL); }
+         siErr=siClpSymIni(psHdl,0,NULL,psTab,NULL,&psHdl->psTab);
+         if (siErr<0) { vdClpSymDel(psHdl->psTab); free(psHdl); return(NULL); }
+         siErr=siClpSymCal(psHdl,0,NULL,psHdl->psTab);
+         if (siErr<0) { vdClpSymDel(psHdl->psTab); free(psHdl); return(NULL); }
          vdClpSymTrc(psHdl);
          if (psErr!=NULL) {
             psErr->pcMsg=psHdl->acMsg;
@@ -864,7 +869,7 @@ extern int siClpParsePro(
       if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"PROPERTY-PARSER-BEGIN\n");
       psHdl->siTok=siClpScnSrc(pvHdl,0,NULL);
       if (psHdl->siTok<0) return(psHdl->siTok);
-      siCnt=siClpPrsProLst(pvHdl,psHdl->psSym);
+      siCnt=siClpPrsProLst(pvHdl,psHdl->psTab);
       if (siCnt<0) return(siCnt);
       if (psHdl->siTok==CLPTOK_END) {
          psHdl->siTok=CLPTOK_INI;
@@ -910,7 +915,7 @@ extern int siClpParseCmd(
       if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"COMMAND-PARSER-BEGIN\n");
       psHdl->siTok=siClpScnSrc(pvHdl,0,NULL);
       if (psHdl->siTok<0) return(psHdl->siTok);
-      siCnt=siClpPrsMain(pvHdl,psHdl->psSym,piOid);
+      siCnt=siClpPrsMain(pvHdl,psHdl->psTab,piOid);
       if (siCnt<0) return (siCnt);
       if (psHdl->siTok==CLPTOK_END) {
          psHdl->siTok=CLPTOK_INI;
@@ -933,7 +938,7 @@ extern int siClpSyntax(
    const char*                   pcPat)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
-   TsSym*                        psTab=psHdl->psSym;
+   TsSym*                        psTab=psHdl->psTab;
    TsSym*                        psArg=NULL;
    char*                         pcPtr=NULL;
    char*                         pcKyw=NULL;
@@ -977,7 +982,7 @@ extern int siClpSyntax(
          return CLPERR(psHdl,CLPERR_SEM,"Root of path (%s) does not match root of handle (%s)",pcPat,psHdl->pcCmd);
       }
    } else {
-      siErr=siClpPrnCmd(pvHdl,psHdl->pfHlp,0,0,siDep,NULL,psHdl->psSym,isSkr,isMin);
+      siErr=siClpPrnCmd(pvHdl,psHdl->pfHlp,0,0,siDep,NULL,psHdl->psTab,isSkr,isMin);
       if (siErr<0) return (siErr);
    }
    if (isSkr) fprintf(psHdl->pfHlp,"\n");
@@ -992,7 +997,7 @@ extern int siClpHelp(
    const int                     isMan)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
-   TsSym*                        psTab=psHdl->psSym;
+   TsSym*                        psTab=psHdl->psTab;
    TsSym*                        psArg=NULL;
    char*                         pcPtr=NULL;
    char*                         pcKyw=NULL;
@@ -1039,7 +1044,7 @@ extern int siClpHelp(
                      fprintf(psHdl->pfHlp,"TYPE:   OBJECT\n");
                   }
                   fprintf(psHdl->pfHlp,   "SYNTAX: :> %s ",psHdl->pcPgm);
-                  siErr=siClpPrnCmd(pvHdl,psHdl->pfHlp,0,0,1,NULL,psHdl->psSym,FALSE,FALSE);
+                  siErr=siClpPrnCmd(pvHdl,psHdl->pfHlp,0,0,1,NULL,psHdl->psTab,FALSE,FALSE);
                   if (siErr<0) return(siErr);
                   fprintf(psHdl->pfHlp,"\n\n");
                   fprintf(psHdl->pfHlp,"DESCRIPTION\n");
@@ -1127,7 +1132,7 @@ extern int siClpHelp(
             fprintf(psHdl->pfHlp,"TYPE:   OBJECT\n");
          }
          fprintf(psHdl->pfHlp,   "SYNTAX: :> %s ",psHdl->pcPgm);
-         siErr=siClpPrnCmd(pvHdl,psHdl->pfHlp,0,0,1,NULL,psHdl->psSym,FALSE,FALSE);
+         siErr=siClpPrnCmd(pvHdl,psHdl->pfHlp,0,0,1,NULL,psHdl->psTab,FALSE,FALSE);
          fprintf(psHdl->pfHlp,"\n\n");
          if (siErr<0) return(siErr);
          fprintf(psHdl->pfHlp,"DESCRIPTION\n");
@@ -1156,7 +1161,7 @@ extern int siClpDocu(
    const int                     isNbr)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
-   TsSym*                        psTab=psHdl->psSym;
+   TsSym*                        psTab=psHdl->psTab;
    TsSym*                        psArg=NULL;
    char*                         pcPtr=NULL;
    char*                         pcKyw=NULL;
@@ -1384,7 +1389,7 @@ extern int siClpDocu(
          } else {
             fprintf(pfDoc,"TYPE:   OBJECT\n");
          }
-         fprintf(pfDoc,   "SYNTAX: :> %s ",psHdl->pcPgm); siErr=siClpPrnCmd(pvHdl,pfDoc,0,0,1,NULL,psHdl->psSym,FALSE,FALSE); fprintf(pfDoc,"\n");
+         fprintf(pfDoc,   "SYNTAX: :> %s ",psHdl->pcPgm); siErr=siClpPrnCmd(pvHdl,pfDoc,0,0,1,NULL,psHdl->psTab,FALSE,FALSE); fprintf(pfDoc,"\n");
          fprintf(pfDoc,   "-----------------------------------------------------------------------\n\n");
          if (siErr<0) return(siErr);
          fprintf(pfDoc,   "DESCRIPTION\n");
@@ -1416,7 +1421,7 @@ extern int siClpDocu(
          } else {
             fprintf(pfDoc,"TYPE:   OBJECT\n");
          }
-         fprintf(pfDoc,   "SYNTAX: :> %s ",psHdl->pcPgm); siErr=siClpPrnCmd(pvHdl,pfDoc,0,0,1,NULL,psHdl->psSym,FALSE,FALSE); fprintf(pfDoc,"\n");
+         fprintf(pfDoc,   "SYNTAX: :> %s ",psHdl->pcPgm); siErr=siClpPrnCmd(pvHdl,pfDoc,0,0,1,NULL,psHdl->psTab,FALSE,FALSE); fprintf(pfDoc,"\n");
          fprintf(pfDoc,   "-----------------------------------------------------------------------\n\n");
          if (siErr<0) return(siErr);
          fprintf(pfDoc,   ".DESCRIPTION\n\n");
@@ -1445,7 +1450,7 @@ extern int siClpProperties(
    FILE*                         pfOut)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
-   TsSym*                        psTab=psHdl->psSym;
+   TsSym*                        psTab=psHdl->psTab;
    TsSym*                        psArg=NULL;
    char*                         pcPtr=NULL;
    char*                         pcKyw=NULL;
@@ -1501,12 +1506,70 @@ extern int siClpProperties(
    return(CLP_OK);
 }
 
+
+extern int siClpSymbolTableWalk(
+   void*                         pvHdl,
+   const int                     siOpr,
+   TsClpSymWlk*                  psSym)
+{
+   TsHdl*                        psHdl=(TsHdl*)pvHdl;
+   psHdl->psOld=psHdl->psSym;
+   switch (siOpr) {
+   case CLPSYM_ROT: psHdl->psSym=psHdl->psTab;               break;
+   case CLPSYM_OLD: psHdl->psSym=psHdl->psOld;               break;
+   case CLPSYM_NXT: psHdl->psSym=psHdl->psSym->psNxt;        break;
+   case CLPSYM_BAK: psHdl->psSym=psHdl->psSym->psBak;        break;
+   case CLPSYM_DEP: psHdl->psSym=psHdl->psSym->psDep;        break;
+   case CLPSYM_HIH: psHdl->psSym=psHdl->psSym->psHih;        break;
+   case CLPSYM_ALI: psHdl->psSym=psHdl->psSym->psStd->psAli; break;
+   case CLPSYM_CNT: psHdl->psSym=psHdl->psSym->psFix->psCnt; break;
+   case CLPSYM_ELN: psHdl->psSym=psHdl->psSym->psFix->psEln; break;
+   case CLPSYM_LNK: psHdl->psSym=psHdl->psSym->psFix->psLnk; break;
+   case CLPSYM_OID: psHdl->psSym=psHdl->psSym->psFix->psOid; break;
+   case CLPSYM_SLN: psHdl->psSym=psHdl->psSym->psFix->psSln; break;
+   case CLPSYM_TLN: psHdl->psSym=psHdl->psSym->psFix->psTln; break;
+   default: return CLPERR(psHdl,CLPERR_PAR,"Operation (%d) for symbol table walk not supported",siOpr);
+   }
+   if (psHdl->psSym!=NULL) {
+      psSym->pcKyw=psHdl->psSym->psStd->pcKyw;
+      psSym->pcAli=psHdl->psSym->psStd->pcAli;
+      psSym->uiFlg=psHdl->psSym->psStd->uiFlg;
+      psSym->pcDft=psHdl->psSym->psFix->pcDft;
+      psSym->pcMan=psHdl->psSym->psFix->pcMan;
+      psSym->pcHlp=psHdl->psSym->psFix->pcHlp;
+      psSym->siMin=psHdl->psSym->psFix->siMin;
+      psSym->siMax=psHdl->psSym->psFix->siMax;
+      psSym->siSiz=psHdl->psSym->psFix->siSiz;
+      psSym->siOid=psHdl->psSym->psFix->siOid;
+      return(psHdl->psSym->psFix->siTyp);
+   } else {
+      psHdl->psSym=psHdl->psOld;
+      memset(psSym,0,sizeof(TsClpSymWlk));
+      return(0);
+   }
+}
+
+extern int siClpSymbolTableUpdate(
+   void*                         pvHdl,
+   TsClpSymUpd*                  psSym)
+{
+   TsHdl*                        psHdl=(TsHdl*)pvHdl;
+   if (psSym->pcPro!=NULL) {
+      if (strlen(psSym->pcPro)>=sizeof(psHdl->psSym->psFix->acPro)) {
+         return CLPERR(psHdl,CLPERR_SIZ,"Update of property field failed (string (%d) to long (%d))",(int)strlen(psSym->pcPro),(int)sizeof(psHdl->psSym->psFix->acPro));
+      }
+      strcpy(psHdl->psSym->psFix->acPro,psSym->pcPro);
+      psHdl->psSym->psFix->pcDft=psHdl->psSym->psFix->acPro;
+   }
+   return(CLP_OK);
+}
+
 extern void vdClpClose(
    void*                         pvHdl)
 {
    if (pvHdl!=NULL) {
       TsHdl*                     psHdl=(TsHdl*)pvHdl;
-      vdClpSymDel(psHdl->psSym);
+      vdClpSymDel(psHdl->psTab);
       free(pvHdl);
    }
 }
@@ -2074,7 +2137,7 @@ static void vdClpSymTrc(
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    if (psHdl->pfSym!=NULL) {
       fprintf(psHdl->pfSym,"BEGIN-SYMBOL-TABLE-TRACE\n");
-      vdClpSymPrn(pvHdl,0,psHdl->psSym);
+      vdClpSymPrn(pvHdl,0,psHdl->psTab);
       fprintf(psHdl->pfSym,"END-SYMBOL-TABLE-TRACE\n");
       fflush(psHdl->pfSym);
    }
@@ -3189,7 +3252,7 @@ static int siClpBldPro(
    const int                     siRow)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
-   TsSym*                        psTab=psHdl->psSym;
+   TsSym*                        psTab=psHdl->psTab;
    TsSym*                        psArg=NULL;
    const char*                   pcPtr=NULL;
    const char*                   pcKyw=NULL;
