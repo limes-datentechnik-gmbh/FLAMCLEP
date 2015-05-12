@@ -520,6 +520,31 @@ extern const char* pcClpAbout(const int l, const int s, char* b);
 /** CLPFLG_PWD This flag will ensure that the clear value only put to the data structure but not traced, logged or given away elsewhere */
 #define CLPFLG_PWD               0x01000000UL
 
+/* Definition of CLPFLG macros ****************************************/
+
+#define CLPISS_ALI(flg)          ((flg)&CLPFLG_ALI)
+#define CLPISS_CON(flg)          ((flg)&CLPFLG_CON)
+#define CLPISS_CMD(flg)          ((flg)&CLPFLG_CMD)
+#define CLPISS_PRO(flg)          ((flg)&CLPFLG_PRO)
+#define CLPISS_DMY(flg)          ((flg)&CLPFLG_DMY)
+#define CLPISS_SEL(flg)          ((flg)&CLPFLG_SEL)
+#define CLPISS_FIX(flg)          ((flg)&CLPFLG_FIX)
+#define CLPISS_BIN(flg)          ((flg)&CLPFLG_BIN)
+#define CLPISS_CNT(flg)          ((flg)&CLPFLG_CNT)
+#define CLPISS_OID(flg)          ((flg)&CLPFLG_OID)
+#define CLPISS_ELN(flg)          ((flg)&CLPFLG_ELN)
+#define CLPISS_SLN(flg)          ((flg)&CLPFLG_SLN)
+#define CLPISS_TLN(flg)          ((flg)&CLPFLG_TLN)
+#define CLPISS_DEF(flg)          ((flg)&CLPFLG_DEF)
+#define CLPISS_PWD(flg)          ((flg)&CLPFLG_PWD)
+#define CLPISS_CHR(flg)          ((flg)&CLPFLG_CHR)
+#define CLPISS_ASC(flg)          ((flg)&CLPFLG_ASC)
+#define CLPISS_EBC(flg)          ((flg)&CLPFLG_EBC)
+#define CLPISS_HEX(flg)          ((flg)&CLPFLG_HEX)
+#define CLPISS_LNK(flg)          (CLPISS_CNT(flg) ||  CLPISS_OID(flg) ||  CLPISS_ELN(flg) || CLPISS_SLN(flg) ||  CLPISS_TLN(flg))
+#define CLPISS_ARG(flg)          ((!CLPISS_LNK(flg)) && (!CLPISS_CON(flg)) && (!CLPISS_ALI(flg)))
+#define CLPISS_ENT(flg)          ((!CLPISS_LNK(flg)) && (!CLPISS_ALI(flg)))
+
 /**
 * Default source strings
 */
@@ -559,10 +584,13 @@ typedef struct ClpSymWlk {
    const char*                   pcDft;
    const char*                   pcMan;
    const char*                   pcHlp;
+   const char*                   pcPat;
+   int                           siTyp;
    int                           siMin;
    int                           siMax;
    int                           siSiz;
    int                           siOid;
+   int                           isDep;
 }TsClpSymWlk;
 
 /**

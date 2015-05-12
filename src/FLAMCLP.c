@@ -107,30 +107,6 @@
 #define CLP_VSN_MINOR        1
 #define CLP_VSN_REVISION       52
 
-/* Definition der Flag-Makros *****************************************/
-
-#define CLPISS_ALI(flg)          ((flg)&CLPFLG_ALI)
-#define CLPISS_CON(flg)          ((flg)&CLPFLG_CON)
-#define CLPISS_CMD(flg)          ((flg)&CLPFLG_CMD)
-#define CLPISS_PRO(flg)          ((flg)&CLPFLG_PRO)
-#define CLPISS_DMY(flg)          ((flg)&CLPFLG_DMY)
-#define CLPISS_SEL(flg)          ((flg)&CLPFLG_SEL)
-#define CLPISS_FIX(flg)          ((flg)&CLPFLG_FIX)
-#define CLPISS_BIN(flg)          ((flg)&CLPFLG_BIN)
-#define CLPISS_CNT(flg)          ((flg)&CLPFLG_CNT)
-#define CLPISS_OID(flg)          ((flg)&CLPFLG_OID)
-#define CLPISS_ELN(flg)          ((flg)&CLPFLG_ELN)
-#define CLPISS_SLN(flg)          ((flg)&CLPFLG_SLN)
-#define CLPISS_TLN(flg)          ((flg)&CLPFLG_TLN)
-#define CLPISS_DEF(flg)          ((flg)&CLPFLG_DEF)
-#define CLPISS_PWD(flg)          ((flg)&CLPFLG_PWD)
-#define CLPISS_CHR(flg)          ((flg)&CLPFLG_CHR)
-#define CLPISS_ASC(flg)          ((flg)&CLPFLG_ASC)
-#define CLPISS_EBC(flg)          ((flg)&CLPFLG_EBC)
-#define CLPISS_HEX(flg)          ((flg)&CLPFLG_HEX)
-#define CLPISS_LNK(flg)          (CLPISS_CNT(flg) ||  CLPISS_OID(flg) ||  CLPISS_ELN(flg) || CLPISS_SLN(flg) ||  CLPISS_TLN(flg))
-#define CLPISS_ARG(flg)          ((!CLPISS_LNK(flg)) && (!CLPISS_CON(flg)) && (!CLPISS_ALI(flg)))
-
 /* Definition der Konstanten ******************************************/
 
 #define CLPMAX_TABCNT            256
@@ -219,6 +195,7 @@ typedef struct Fix {
    const char*                   pcMan;
    const char*                   pcHlp;
    char                          acPro[CLPMAX_LEXSIZ];
+   char                          acPat[CLPMAX_PATSIZ];
    int                           siTyp;
    int                           siMin;
    int                           siMax;
@@ -1506,7 +1483,6 @@ extern int siClpProperties(
    return(CLP_OK);
 }
 
-
 extern int siClpSymbolTableWalk(
    void*                         pvHdl,
    const int                     siOpr,
@@ -1537,10 +1513,13 @@ extern int siClpSymbolTableWalk(
       psSym->pcDft=psHdl->psSym->psFix->pcDft;
       psSym->pcMan=psHdl->psSym->psFix->pcMan;
       psSym->pcHlp=psHdl->psSym->psFix->pcHlp;
+      psSym->pcPat=psHdl->psSym->psFix->acPat;
+      psSym->siMin=psHdl->psSym->psFix->siTyp;
       psSym->siMin=psHdl->psSym->psFix->siMin;
       psSym->siMax=psHdl->psSym->psFix->siMax;
       psSym->siSiz=psHdl->psSym->psFix->siSiz;
       psSym->siOid=psHdl->psSym->psFix->siOid;
+      psSym->isDep=(psHdl->psSym->psDep!=NULL)?TRUE:FALSE;
       return(psHdl->psSym->psFix->siTyp);
    } else {
       psHdl->psSym=psHdl->psOld;
@@ -1841,6 +1820,12 @@ static TsSym* psClpSymIns(
    }
    psSym->psDep=NULL;
    psSym->psHih=psHih;
+
+   if (psHih!=NULL) {
+      snprintf(psSym->psFix->acPat,CLPMAX_PATLEN,"%s.%s",psHih->psFix->acPat,psHih->psStd->pcKyw);
+   } else {
+      if (psHdl->pcCmd!=NULL) snprintf(psSym->psFix->acPat,CLPMAX_PATLEN,"%s",psHdl->pcCmd); else psSym->psFix->acPat[0]=EOS;
+   }
 
    return(psSym);
 }
@@ -5408,7 +5393,7 @@ static char* fpcPat(
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    int                           i;
-   if (psHdl->pcCmd!=NULL) strcpy(psHdl->acPat,psHdl->pcCmd); else psHdl->acPat[0]=EOS;
+   if (psHdl->pcCmd!=NULL) snprintf(psHdl->acPat,CLPMAX_PATLEN,"%s",psHdl->pcCmd); else psHdl->acPat[0]=EOS;
    for (i=0;i<(siLev);i++) {
       if (strlen(psHdl->acPat)+1+strlen(psHdl->apPat[i]->psStd->pcKyw)<CLPMAX_PATLEN) {
          strcat(psHdl->acPat,"."); strcat(psHdl->acPat,psHdl->apPat[i]->psStd->pcKyw);
