@@ -520,30 +520,31 @@ extern const char* pcClpAbout(const int l, const int s, char* b);
 /** CLPFLG_PWD This flag will ensure that the clear value only put to the data structure but not traced, logged or given away elsewhere */
 #define CLPFLG_PWD               0x01000000UL
 
-/* Definition of CLPFLG macros ****************************************/
-
-#define CLPISS_ALI(flg)          ((flg)&CLPFLG_ALI)
-#define CLPISS_CON(flg)          ((flg)&CLPFLG_CON)
-#define CLPISS_CMD(flg)          ((flg)&CLPFLG_CMD)
-#define CLPISS_PRO(flg)          ((flg)&CLPFLG_PRO)
-#define CLPISS_DMY(flg)          ((flg)&CLPFLG_DMY)
-#define CLPISS_SEL(flg)          ((flg)&CLPFLG_SEL)
-#define CLPISS_FIX(flg)          ((flg)&CLPFLG_FIX)
-#define CLPISS_BIN(flg)          ((flg)&CLPFLG_BIN)
-#define CLPISS_CNT(flg)          ((flg)&CLPFLG_CNT)
-#define CLPISS_OID(flg)          ((flg)&CLPFLG_OID)
-#define CLPISS_ELN(flg)          ((flg)&CLPFLG_ELN)
-#define CLPISS_SLN(flg)          ((flg)&CLPFLG_SLN)
-#define CLPISS_TLN(flg)          ((flg)&CLPFLG_TLN)
-#define CLPISS_DEF(flg)          ((flg)&CLPFLG_DEF)
-#define CLPISS_PWD(flg)          ((flg)&CLPFLG_PWD)
-#define CLPISS_CHR(flg)          ((flg)&CLPFLG_CHR)
-#define CLPISS_ASC(flg)          ((flg)&CLPFLG_ASC)
-#define CLPISS_EBC(flg)          ((flg)&CLPFLG_EBC)
-#define CLPISS_HEX(flg)          ((flg)&CLPFLG_HEX)
-#define CLPISS_LNK(flg)          (CLPISS_CNT(flg) ||  CLPISS_OID(flg) ||  CLPISS_ELN(flg) || CLPISS_SLN(flg) ||  CLPISS_TLN(flg))
-#define CLPISS_ARG(flg)          ((!CLPISS_LNK(flg)) && (!CLPISS_CON(flg)) && (!CLPISS_ALI(flg)))
-#define CLPISS_ENT(flg)          ((!CLPISS_LNK(flg)) && (!CLPISS_ALI(flg)))
+/**
+ *  Definition of CLPFLG macros
+ */
+#define CLPISF_ALI(flg)          ((flg)&CLPFLG_ALI)
+#define CLPISF_CON(flg)          ((flg)&CLPFLG_CON)
+#define CLPISF_CMD(flg)          ((flg)&CLPFLG_CMD)
+#define CLPISF_PRO(flg)          ((flg)&CLPFLG_PRO)
+#define CLPISF_DMY(flg)          ((flg)&CLPFLG_DMY)
+#define CLPISF_SEL(flg)          ((flg)&CLPFLG_SEL)
+#define CLPISF_FIX(flg)          ((flg)&CLPFLG_FIX)
+#define CLPISF_BIN(flg)          ((flg)&CLPFLG_BIN)
+#define CLPISF_CNT(flg)          ((flg)&CLPFLG_CNT)
+#define CLPISF_OID(flg)          ((flg)&CLPFLG_OID)
+#define CLPISF_ELN(flg)          ((flg)&CLPFLG_ELN)
+#define CLPISF_SLN(flg)          ((flg)&CLPFLG_SLN)
+#define CLPISF_TLN(flg)          ((flg)&CLPFLG_TLN)
+#define CLPISF_DEF(flg)          ((flg)&CLPFLG_DEF)
+#define CLPISF_PWD(flg)          ((flg)&CLPFLG_PWD)
+#define CLPISF_CHR(flg)          ((flg)&CLPFLG_CHR)
+#define CLPISF_ASC(flg)          ((flg)&CLPFLG_ASC)
+#define CLPISF_EBC(flg)          ((flg)&CLPFLG_EBC)
+#define CLPISF_HEX(flg)          ((flg)&CLPFLG_HEX)
+#define CLPISF_LNK(flg)          (CLPISF_CNT(flg) ||  CLPISF_OID(flg) ||  CLPISF_ELN(flg) || CLPISF_SLN(flg) ||  CLPISF_TLN(flg))
+#define CLPISF_ARG(flg)          ((!CLPISF_LNK(flg)) && (!CLPISF_CON(flg)) && (!CLPISF_ALI(flg)))
+#define CLPISF_ENT(flg)          ((!CLPISF_LNK(flg)) && (!CLPISF_ALI(flg)))
 
 /**
 * Default source strings
@@ -559,44 +560,89 @@ extern const char* pcClpAbout(const int l, const int s, char* b);
 /**
 * Symbol table walk operations
 */
-#define CLPSYM_NON               0
-#define CLPSYM_ROT               1
-#define CLPSYM_OLD               2
-#define CLPSYM_NXT               3
-#define CLPSYM_BAK               4
-#define CLPSYM_DEP               5
-#define CLPSYM_HIH               6
-#define CLPSYM_ALI               10
-#define CLPSYM_CNT               20
-#define CLPSYM_ELN               21
-#define CLPSYM_LNK               22
-#define CLPSYM_OID               23
-#define CLPSYM_SLN               24
-#define CLPSYM_TLN               25
+/** CLPSYM_NON No operation done */
+#define CLPSYM_NON               0x00000000
+/** CLPSYM_ROT Go to symbol table root */
+#define CLPSYM_ROT               0x00000001
+/** CLPSYM_OLD Go to at last used symbol */
+#define CLPSYM_OLD               0x00000002
+/** CLPSYM_NXT Go to the next symbol in the list */
+#define CLPSYM_NXT               0x00000004
+/** CLPSYM_BAK Go to the previous symbol in the list */
+#define CLPSYM_BAK               0x00000008
+/** CLPSYM_DEP Go to the deeper level in the tree */
+#define CLPSYM_DEP               0x00000010
+/** CLPSYM_HIH Go to the higher level in the tree */
+#define CLPSYM_HIH               0x00000020
+/** CLPSYM_ALI Go to the alias symbol */
+#define CLPSYM_ALI               0x00000100
+/** CLPSYM_CNT Go to the counter symbol */
+#define CLPSYM_CNT               0x00001000
+/** CLPSYM_LNK Go to the entry link symbol */
+#define CLPSYM_LNK               0x00004000
+/** CLPSYM_OID Go to the entry object identifier symbol */
+#define CLPSYM_OID               0x00008000
+/** CLPSYM_ELN Go to the element length symbol */
+#define CLPSYM_ELN               0x00002000
+/** CLPSYM_SLN Go to the string length symbol */
+#define CLPSYM_SLN               0x00010000
+/** CLPSYM_SLN Go to the total length symbol */
+#define CLPSYM_TLN               0x00020000
+
+/**
+ *  Definition of CLPSYM macros
+ */
+#define CLPISS_ROT(flg)          ((flg)&CLPFLG_ROT)
+#define CLPISS_OLD(flg)          ((flg)&CLPFLG_OLD)
+#define CLPISS_NXT(flg)          ((flg)&CLPFLG_NXT)
+#define CLPISS_BAK(flg)          ((flg)&CLPFLG_BAK)
+#define CLPISS_DEP(flg)          ((flg)&CLPFLG_DEP)
+#define CLPISS_HIH(flg)          ((flg)&CLPFLG_HIH)
+#define CLPISS_ALI(flg)          ((flg)&CLPFLG_ALI)
+#define CLPISS_CNT(flg)          ((flg)&CLPFLG_CNT)
+#define CLPISS_ELN(flg)          ((flg)&CLPFLG_ELN)
+#define CLPISS_LNK(flg)          ((flg)&CLPFLG_LNK)
+#define CLPISS_OID(flg)          ((flg)&CLPFLG_OID)
+#define CLPISS_SLN(flg)          ((flg)&CLPFLG_SLN)
+#define CLPISS_TLN(flg)          ((flg)&CLPFLG_TLN)
 
 /**
  * @brief Defines a entry for symbol table walk
  */
 typedef struct ClpSymWlk {
+   /** Pointer to the key word */
    const char*                   pcKyw;
+   /** Pointer to the alias */
    const char*                   pcAli;
+   /** Flag value */
    unsigned long                 uiFlg;
+   /** Pointer to the default supplement string */
    const char*                   pcDft;
+   /** Pointer to the manual page (description) */
    const char*                   pcMan;
+   /** Pointer to the help message */
    const char*                   pcHlp;
+   /** Pointer to the path */
    const char*                   pcPat;
+   /** Type of the symbol */
    int                           siTyp;
+   /** Minimum a mount of entries */
    int                           siMin;
+   /** Minimum a mount of entries */
    int                           siMax;
+   /** Size of the symbol */
    int                           siSiz;
+   /** Object identifier for the symbol */
    int                           siOid;
-   int                           isDep;
+   /** Bitmask for possible operations */
+   int                           uiOpr;
 }TsClpSymWlk;
 
 /**
  * @brief Defines a entry for symbol table update
  */
 typedef struct ClpSymUpd {
+   /** Pointer to a property supplement string replacing the current default value */
    const char*                   pcPro;
 }TsClpSymUpd;
 
