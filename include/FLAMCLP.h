@@ -592,19 +592,19 @@ extern const char* pcClpAbout(const int l, const int s, char* b);
 /**
  *  Definition of CLPSYM macros
  */
-#define CLPISS_ROT(flg)          ((flg)&CLPFLG_ROT)
-#define CLPISS_OLD(flg)          ((flg)&CLPFLG_OLD)
-#define CLPISS_NXT(flg)          ((flg)&CLPFLG_NXT)
-#define CLPISS_BAK(flg)          ((flg)&CLPFLG_BAK)
-#define CLPISS_DEP(flg)          ((flg)&CLPFLG_DEP)
-#define CLPISS_HIH(flg)          ((flg)&CLPFLG_HIH)
-#define CLPISS_ALI(flg)          ((flg)&CLPFLG_ALI)
-#define CLPISS_CNT(flg)          ((flg)&CLPFLG_CNT)
-#define CLPISS_ELN(flg)          ((flg)&CLPFLG_ELN)
-#define CLPISS_LNK(flg)          ((flg)&CLPFLG_LNK)
-#define CLPISS_OID(flg)          ((flg)&CLPFLG_OID)
-#define CLPISS_SLN(flg)          ((flg)&CLPFLG_SLN)
-#define CLPISS_TLN(flg)          ((flg)&CLPFLG_TLN)
+#define CLPISS_ROT(flg)          ((flg)&CLPSYM_ROT)
+#define CLPISS_OLD(flg)          ((flg)&CLPSYM_OLD)
+#define CLPISS_NXT(flg)          ((flg)&CLPSYM_NXT)
+#define CLPISS_BAK(flg)          ((flg)&CLPSYM_BAK)
+#define CLPISS_DEP(flg)          ((flg)&CLPSYM_DEP)
+#define CLPISS_HIH(flg)          ((flg)&CLPSYM_HIH)
+#define CLPISS_ALI(flg)          ((flg)&CLPSYM_ALI)
+#define CLPISS_CNT(flg)          ((flg)&CLPSYM_CNT)
+#define CLPISS_ELN(flg)          ((flg)&CLPSYM_ELN)
+#define CLPISS_LNK(flg)          ((flg)&CLPSYM_LNK)
+#define CLPISS_OID(flg)          ((flg)&CLPSYM_OID)
+#define CLPISS_SLN(flg)          ((flg)&CLPSYM_SLN)
+#define CLPISS_TLN(flg)          ((flg)&CLPSYM_TLN)
 
 /**
  * @brief Defines a entry for symbol table walk
