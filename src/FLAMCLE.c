@@ -2647,21 +2647,21 @@ static int siCleGetProperties(
 {
    int                     siErr,siSiz=0;
    char*                   pcHlp=NULL;
-   char                    acRot[CLEMAX_PATSIZ];
+   char                    acRoot[CLEMAX_PATSIZ];
 
    pcFil[0]=EOS;
    if (strlen(pcOwn)+strlen(pcPgm)+strlen(pcFct)+2>=CLEMAX_PATLEN) {
-      fprintf(pfOut,"Rot (%s.%s.%s) is too long (>=%d)\n",pcOwn,pcPgm,pcFct,CLEMAX_PATLEN);
+      fprintf(pfOut,"Root (%s.%s.%s) is too long (>=%d)\n",pcOwn,pcPgm,pcFct,CLEMAX_PATLEN);
       return(CLERTC_CMD);
    }
-   snprintf(acRot,sizeof(acRot),"%s.%s.%s.property.file",pcOwn,pcPgm,pcFct);
-   pcHlp=pcCnfGet(psCnf,acRot);
+   snprintf(acRoot,sizeof(acRoot),"%s.%s.%s.property.file",pcOwn,pcPgm,pcFct);
+   pcHlp=pcCnfGet(psCnf,acRoot);
    if (pcHlp==NULL) {
-      snprintf(acRot,sizeof(acRot),"%s.%s.property.file",pcOwn,pcPgm);
-      pcHlp=pcCnfGet(psCnf,acRot);
+      snprintf(acRoot,sizeof(acRoot),"%s.%s.property.file",pcOwn,pcPgm);
+      pcHlp=pcCnfGet(psCnf,acRoot);
       if (pcHlp==NULL) {
-         snprintf(acRot,sizeof(acRot),"%s.property.file",pcOwn);
-         pcHlp=pcCnfGet(psCnf,acRot);
+         snprintf(acRoot,sizeof(acRoot),"%s.property.file",pcOwn);
+         pcHlp=pcCnfGet(psCnf,acRoot);
          if (pcHlp==NULL) {
             *piFlg=0;
             return(CLERTC_OK);

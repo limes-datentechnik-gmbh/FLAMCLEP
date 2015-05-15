@@ -45,9 +45,9 @@
 /** defines a skalar (single value) with the command line keyword *kyw* and the member name *nam*
  *
  *  *typ* is the C type of the member\n
- *  *atyp* is one of the CLPTYP_* macros.\n
  *  *min* can be 0 or 1 for a skalar and determines if this argument is optional(0) or required(1)\n
  *  *max* is unused for skalar values.\n
+ *  *atyp* is one of the CLPTYP_* macros.\n
  *  *flg* is an OR-ed list of the flag macros CLPFLG_* which define various parsing options.\n
  *  *oid* is a unique id value used for this argument.\n
  *  *tab* is NULL or a pointer to another argument table describing the object, overlay or selection.\n

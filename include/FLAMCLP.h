@@ -823,7 +823,7 @@ typedef struct ClpError {
  *
  * The function uses the argument table and corresponding structure and creates the handle for the command line parser (FLAMCLP)
  *
- * @param[in]  isCas Boolean to enable case sensitive parsing of keywords (recommended is FLASE)
+ * @param[in]  isCas Boolean to enable case sensitive parsing of keywords (recommended is FALSE)
  * @param[in]  isPfl Boolean to enable parameter files per object and overlay (recommended is TRUE)
  * @param[in]  siMkl Integer defining the minimal key word length (siMkl<=0 --> full length, no auto abbreviation)
  * @param[in]  pcOwn String constant containing the owner name for the root in the path ("de.limes")
