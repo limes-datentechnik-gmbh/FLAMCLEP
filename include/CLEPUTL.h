@@ -179,7 +179,7 @@ extern char* mapfil(char* file,int size);
  * @param flag if true data set names (only host) are enclosed in apostrophes (requires full qualified data set names)
  * @return pointer to format string for fopen()
  */
-extern char* cpmapfil(char* dest, int size,const char* source,const int operation, const int binary, const int seek,const int flag);
+extern char* cpmapfil(char* dest, int size,const char* source,const int operation, const int binary, const int seek, const int flag);
 
 /**
  * Map environment variable LANG to CCSID
@@ -255,7 +255,7 @@ extern unsigned int chr2ebc(
  * @param filename The path and name of the file to read
  * @param buf A pointer to a buffer, may be a pointer to NULL
  * @param bufsize The size of buf
- * @param format The forat string for the file (must start with 'r' otherwise ignored)
+ * @param format The format string for the file (must start with 'r' otherwise ignored)
  * @return A positive value indicates the number of bytes read and copied into buf.
  *         A negative value indicates an error, in which case the content of buf is undefined.
  *         Error codes:
