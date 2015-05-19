@@ -118,8 +118,8 @@
 #define CLEMAX_CNFSIZ            1024
 #define CLEMAX_FILLEN            1023
 #define CLEMAX_FILSIZ            1024
-#define CLEMAX_MODLEN            31
-#define CLEMAX_MODSIZ            32
+#define CLEMAX_MODLEN            63
+#define CLEMAX_MODSIZ            64
 #define CLEMAX_PGMLEN            63
 #define CLEMAX_PGMSIZ            64
 #define CLEMAX_NUMLEN            1023
@@ -555,7 +555,7 @@ extern int siCleExecute(
       snprintf(acCnf,sizeof(acCnf),"%s.%s.trace.file",acOwn,pcPgm);
       pcCnf=pcCnfGet(psCnf,acCnf);
       if (pcCnf!=NULL && *pcCnf) {
-         snprintf(acMod,sizeof(acMod),"w%s",cpmapfil(acFil,sizeof(acFil),pcCnf,TRUE));
+         snprintf(acMod,sizeof(acMod),"%s",cpmapfil(acFil,sizeof(acFil),pcCnf,2,FALSE,FALSE,TRUE));
          pfTrh=fopen(acFil,acMod);
          if (pfTrh==NULL) {
             fprintf(pfOut,"Open of trace file (\"%s\",\"%s\") failed\n",acFil,acMod);
@@ -893,7 +893,7 @@ EVALUATE:
          if (pcFil!=NULL) {
             *((char*)pcFil)=EOS; pcFil++; pcCmd=argv[2];
             isMan=TRUE;
-            snprintf(acMod,sizeof(acMod),"w%s",cpmapfil(acFil,sizeof(acFil),pcFil,TRUE));
+            snprintf(acMod,sizeof(acMod),"%s",cpmapfil(acFil,sizeof(acFil),pcFil,2,FALSE,FALSE,TRUE));
             pfDoc=fopen(acFil,acMod);
             if (pfDoc==NULL) {
                fprintf(pfOut,"Open of manual page file (\"%s\",\"%s\") failed (%d - %s)\n",acFil,acMod,errno,strerror(errno));
@@ -1102,7 +1102,7 @@ EVALUATE:
 
          pcFil=argv[2];
          isMan=TRUE;
-         snprintf(acMod,sizeof(acMod),"w%s",cpmapfil(acFil,sizeof(acFil),pcFil,TRUE));
+         snprintf(acMod,sizeof(acMod),"%s",cpmapfil(acFil,sizeof(acFil),pcFil,2,FALSE,FALSE,TRUE));
          pfDoc=fopen(acFil,acMod);
          if (pfDoc==NULL) {
             fprintf(pfOut,"Open of manual page file (\"%s\",\"%s\") failed (%d - %s)\n",acFil,acMod,errno,strerror(errno));
@@ -1150,7 +1150,7 @@ EVALUATE:
          } else {
             pcFil=argv[2]; pcCmd=NULL;
          }
-         snprintf(acMod,sizeof(acMod),"w%s",cpmapfil(acFil,sizeof(acFil),pcFil,TRUE));
+         snprintf(acMod,sizeof(acMod),"%s",cpmapfil(acFil,sizeof(acFil),pcFil,2,FALSE,FALSE,TRUE));
          pfDoc=fopen(acFil,acMod);
          if (pfDoc==NULL) {
             fprintf(pfOut,"Open of documentation file (\"%s\",\"%s\") failed (%d - %s)\n",acFil,acMod,errno,strerror(errno));
@@ -1432,7 +1432,7 @@ EVALUATE:
          } else {
             pcFil=argv[2]; pcCmd=NULL;
          }
-         snprintf(acMod,sizeof(acMod),"w%s",cpmapfil(acFil,sizeof(acFil),pcFil,TRUE));
+         snprintf(acMod,sizeof(acMod),"%s",cpmapfil(acFil,sizeof(acFil),pcFil,2,FALSE,FALSE,TRUE));
          pfPro=fopen(acFil,acMod);
          if (pfPro==NULL) {
             fprintf(pfOut,"Open of property file (\"%s\",\"%s\") failed (%d-%s)\n",acFil,acMod,errno,strerror(errno));
@@ -2132,7 +2132,7 @@ static int siClePropertyFinish(
          pcFil=acEnv;
       }
    }
-   snprintf(acMod,sizeof(acMod),"w%s",cpmapfil(acFil,sizeof(acFil),pcFil,TRUE));
+   snprintf(acMod,sizeof(acMod),"%s",cpmapfil(acFil,sizeof(acFil),pcFil,2,FALSE,FALSE,TRUE));
    pfPro=fopen(acFil,acMod);
    if (pfPro==NULL) {
       fprintf(pfOut,"Cannot open the property file (\"%s\",\"%s\") for write operation (%d-%s)\n",acFil,acMod,errno,strerror(errno));
@@ -2668,8 +2668,7 @@ static int siCleGetProperties(
          } else *piFlg=1;
       } else *piFlg=2;
    } else *piFlg=3;
-   cpmapfil(pcFil,CLEMAX_FILSIZ,pcHlp,TRUE);
-   siErr=file2str(pcFil,ppPro,&siSiz);
+   siErr=file2str(pcFil,ppPro,&siSiz,cpmapfil(pcFil,CLEMAX_FILSIZ,pcHlp,1,FALSE,FALSE,TRUE));
    if (siErr<0) {
       if (*ppPro!=NULL) { free(*ppPro); *ppPro=NULL; }
       switch(siErr) {
@@ -2740,8 +2739,7 @@ static int siCleGetCommand(
          fprintf(pfOut,"Parameter file name is too long (more than %d bytes)\n",CLEMAX_FILLEN);
          return(CLERTC_CMD);
       }
-      cpmapfil(pcFil,CLEMAX_FILSIZ,argv[1]+l+1,TRUE);
-      siErr=file2str(pcFil,ppCmd,&siSiz);
+      siErr=file2str(pcFil,ppCmd,&siSiz,cpmapfil(pcFil,CLEMAX_FILSIZ,argv[1]+l+1,1,FALSE,FALSE,TRUE));
       if (siErr<0) {
          if (*ppCmd!=NULL) { free(*ppCmd); *ppCmd=NULL; }
          switch(siErr) {
@@ -2790,8 +2788,8 @@ static TsCnfHdl* psCnfOpn(
    psHdl->psLst=NULL;
    if (pcPgm!=NULL) snprintf(psHdl->acPgm,sizeof(psHdl->acPgm),"%s",pcPgm);
    if (pcFil==NULL || *pcFil==0) return(psHdl);
-   snprintf(psHdl->acMod,sizeof(psHdl->acMod),"w%s",cpmapfil(psHdl->acFil,sizeof(psHdl->acFil),pcFil,TRUE));
-   pfFil=fopen(psHdl->acFil,"r");
+   snprintf(psHdl->acMod,sizeof(psHdl->acMod),"%s",cpmapfil(psHdl->acFil,sizeof(psHdl->acFil),pcFil,2,FALSE,FALSE,TRUE));
+   pfFil=fopen(psHdl->acFil,cpmapfil(psHdl->acFil,sizeof(psHdl->acFil),pcFil,1,FALSE,FALSE,TRUE));
    if (pfFil==NULL && (errno==2 || errno==49 || errno==129)) return(psHdl);
    if (pfFil==NULL) {
       if (pfOut!=NULL) fprintf(pfOut,"Cannot open the configuration file (\"%s\",\"r\") for read operation (%d - %s)\n",psHdl->acFil,errno,strerror(errno));

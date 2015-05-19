@@ -173,10 +173,13 @@ extern char* mapfil(char* file,int size);
  * @param dest string for replacement
  * @param size size of replacement string
  * @param source original string
+ * @param operation defines read (1), write (2) or append (3)
+ * @param binary if true binary operation mode is used
+ * @param seek if true fseek/ftell() can be used for the file
  * @param flag if true data set names (only host) are enclosed in apostrophes (requires full qualified data set names)
- * @return pointer to string which must be concatenated to the format string for fopen at write operation ("w/wb/a/...")
+ * @return pointer to format string for fopen()
  */
-extern char* cpmapfil(char* dest, int size,const char* source,const int flag);
+extern char* cpmapfil(char* dest, int size,const char* source,const int operation, const int binary, const int seek,const int flag);
 
 /**
  * Map environment variable LANG to CCSID
@@ -252,6 +255,7 @@ extern unsigned int chr2ebc(
  * @param filename The path and name of the file to read
  * @param buf A pointer to a buffer, may be a pointer to NULL
  * @param bufsize The size of buf
+ * @param format The forat string for the file (must start with 'r' otherwise ignored)
  * @return A positive value indicates the number of bytes read and copied into buf.
  *         A negative value indicates an error, in which case the content of buf is undefined.
  *         Error codes:
@@ -261,7 +265,7 @@ extern unsigned int chr2ebc(
  *         * -4: realloc() failed
  *         * -5: file read error
  */
-extern int file2str(const char* filename, char** buf, int* bufsize);
+extern int file2str(const char* filename, char** buf, int* bufsize, const char* format);
 
 /**
  * Takes an array of null-terminated strings and concatenates all strings

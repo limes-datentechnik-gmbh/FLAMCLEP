@@ -1056,30 +1056,94 @@ extern char* mapfil(char* file,int size) {
 }
 
 #ifdef __HOST__
-extern char* cpmapfil(char* dest, int size,const char* source,const int flag) {
-   if (ISPATHNAME(source) || source[0]=='\'') {
+extern char* cpmapfil(char* dest, int size,const char* source,const int operation, const int binary, const int seek,const int flag) {
+   if (ISPATHNAME(source) || ISDDNAME(source) || source[0]=='\'') {
       snprintf(dest,size,"%s",source);
-      mapfil(dest,size);
-      return("");
-   } else if (ISDDNAME(source)) {
-      snprintf(dest,size,"%s",source);
-      mapfil(dest,size);
-      return(", recfm=*");
    } else {
       if (flag) {
          snprintf(dest,size,"'%s'",source);
       } else {
          snprintf(dest,size,"%s",source);
       }
-      mapfil(dest,size);
-      return("");
+   }
+   mapfil(dest,size);
+   switch (operation) {
+   case 1:
+      if (binary) {
+         if (seek) {
+            return("rb, byteseek, abend=recover");
+         } else {
+            return("rb, noseek, abend=recover");
+         }
+      } else {
+         if (seek) {
+            return("r, byteseek, abend=recover");
+         } else {
+            return("r, noseek, abend=recover");
+         }
+      }
+      break;
+   case 2:
+      if (binary) {
+         if (seek) {
+            return("wb, byteseek, abend=recover, recfm=*");
+         } else {
+            return("wb, noseek, abend=recover, recfm=*");
+         }
+      } else {
+         if (seek) {
+            return("w, byteseek, abend=recover, recfm=*");
+         } else {
+            return("w, noseek, abend=recover, recfm=*");
+         }
+      }
+      break;
+   case 3:
+      if (binary) {
+         if (seek) {
+            return("ab, byteseek, abend=recover, recfm=*");
+         } else {
+            return("ab, noseek, abend=recover, recfm=*");
+         }
+      } else {
+         if (seek) {
+            return("a, byteseek, abend=recover, recfm=*");
+         } else {
+            return("a, noseek, abend=recover, recfm=*");
+         }
+      }
+      break;
+   default: return(NULL);
    }
 }
 #else
-extern char* cpmapfil(char* dest, int size,const char* source,const int flag) {
+extern char* cpmapfil(char* dest, int size,const char* source,const int operation, const int binary, const int seek,const int flag) {
    snprintf(dest,size,"%s",source);
    mapfil(dest,size);
-   return("");
+   switch (operation) {
+   case 1:
+      if (binary) {
+         return("rb");
+      } else {
+         return("r");
+      }
+      break;
+   case 2:
+      if (binary) {
+         return("wb");
+      } else {
+         return("w");
+      }
+      break;
+   case 3:
+      if (binary) {
+         return("ab");
+      } else {
+         return("a");
+      }
+      break;
+   default: return(NULL);
+   }
 }
 #endif
 
@@ -1435,7 +1499,7 @@ extern unsigned int chr2ebc(
    return(i);
 }
 
-extern int file2str(const char* filename, char** buf, int* bufsize) {
+extern int file2str(const char* filename, char** buf, int* bufsize, const char* format) {
    int siLen=0, siHlp;
    char* pcHlp;
    FILE* pfFile=NULL;
@@ -1447,7 +1511,11 @@ extern int file2str(const char* filename, char** buf, int* bufsize) {
       *bufsize=0;
 
    errno=0;
-   pfFile=fopen(filename, "r");
+   if (format!=NULL && format[0]=='r') {
+      pfFile=fopen(filename, format);
+   } else {
+      pfFile=fopen(filename, "r");
+   }
    if (pfFile == NULL) {
       return -2; // fopen failed
    }
