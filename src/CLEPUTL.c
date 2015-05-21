@@ -1071,57 +1071,45 @@ extern char* cpmapfil(char* dest, int size,const char* source,const int operatio
    case 1:
       if (binary) {
          if (seek) {
-//            return("rb, byteseek, abend=recover");TODO:
-            return("rb, byteseek");
+            return("rb, byteseek, abend=recover");
          } else {
-//            return("rb, noseek, abend=recover");TODO:
-            return("rb, noseek");
+            return("rb, noseek, abend=recover");
          }
       } else {
          if (seek) {
-//            return("r, byteseek, abend=recover");TODO:
-            return("r, byteseek");
+            return("r, byteseek, abend=recover");
          } else {
-//            return("r, noseek, abend=recover");TODO:
-            return("r, noseek");
+            return("r, noseek, abend=recover");
          }
       }
       break;
    case 2:
       if (binary) {
          if (seek) {
-//            return("wb, byteseek, abend=recover, recfm=*");TODO:
-            return("wb, byteseek recfm=*");
+            return("wb, byteseek, abend=recover, recfm=*");
          } else {
-//            return("wb, noseek, abend=recover, recfm=*");TODO:
-            return("wb, noseek, recfm=*");
+            return("wb, noseek, abend=recover, recfm=*");
          }
       } else {
          if (seek) {
-//            return("w, byteseek, abend=recover, recfm=*");TODO:
-            return("w, byteseek, recfm=*");
+            return("w, byteseek, abend=recover, recfm=*");
          } else {
-//            return("w, noseek, abend=recover, recfm=*");TODO:
-            return("w, noseek, recfm=*");
+            return("w, noseek, abend=recover, recfm=*");
          }
       }
       break;
    case 3:
       if (binary) {
          if (seek) {
-//            return("ab, byteseek, abend=recover, recfm=*");TODO:
-            return("ab, byteseek, recfm=*");
+            return("ab, byteseek, abend=recover, recfm=*");
          } else {
-//            return("ab, noseek, abend=recover, recfm=*");TODO:
-            return("ab, noseek, recfm=*");
+            return("ab, noseek, abend=recover, recfm=*");
          }
       } else {
          if (seek) {
-//            return("a, byteseek, abend=recover, recfm=*");TODO:
-            return("a, byteseek, recfm=*");
+            return("a, byteseek, abend=recover, recfm=*");
          } else {
-//            return("a, noseek, abend=recover, recfm=*");TODO:
-            return("a, noseek, recfm=*");
+            return("a, noseek, abend=recover, recfm=*");
          }
       }
       break;
