@@ -1484,12 +1484,12 @@ extern int siClpProperties(
 
 extern int siClpSymbolTableWalk(
    void*                         pvHdl,
-   const int                     siOpr,
+   const unsigned long           uiOpr,
    TsClpSymWlk*                  psSym)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    psHdl->psOld=psHdl->psSym;
-   switch (siOpr) {
+   switch (uiOpr) {
    case CLPSYM_ROT: psHdl->psSym=psHdl->psTab;               break;
    case CLPSYM_OLD: psHdl->psSym=psHdl->psOld;               break;
    case CLPSYM_NXT: psHdl->psSym=psHdl->psSym->psNxt;        break;
@@ -1503,7 +1503,7 @@ extern int siClpSymbolTableWalk(
    case CLPSYM_OID: psHdl->psSym=psHdl->psSym->psFix->psOid; break;
    case CLPSYM_SLN: psHdl->psSym=psHdl->psSym->psFix->psSln; break;
    case CLPSYM_TLN: psHdl->psSym=psHdl->psSym->psFix->psTln; break;
-   default: return CLPERR(psHdl,CLPERR_PAR,"Operation (%d) for symbol table walk not supported",siOpr);
+   default: return CLPERR(psHdl,CLPERR_PAR,"Operation (%ul) for symbol table walk not supported",uiOpr);
    }
    if (psHdl->psSym!=NULL) {
       TsSym*               apTmp[CLPMAX_HDEPTH];

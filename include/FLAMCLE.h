@@ -498,7 +498,7 @@ typedef const char* (*tpfMsg)(const int siRsn);
  * \b pfRun  Pointer to the executed function (use the mapped parameter structure to execute the command
  *           (for logging the function name, original command line and parsed argument list and other values are also provided))\n
  * \b pfFin  Pointer to the finish function for cleanup (free memory, close files in parameter structure)\n
- * \b uiFlg  Flag to indicate a hidden (==0) or visible (!=0) command,
+ * \b siFlg  Flag to indicate a hidden (==0) or visible (!=0) command,
  *           For correct numbering, put hidden commands to the end of the table\n
  * \b pcMan  Pointer to a null-terminated string for a detailed description of this command
  *           (in ASCIDOC format, content behind .DESCRIPTION, mainly simply some paragraphs plus .OPTIONS and/or.EXAMPLES)

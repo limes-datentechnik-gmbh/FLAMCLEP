@@ -561,33 +561,33 @@ extern const char* pcClpAbout(const int l, const int s, char* b);
 * Symbol table walk operations
 */
 /** CLPSYM_NON No operation done */
-#define CLPSYM_NON               0x00000000
+#define CLPSYM_NON               0x00000000UL
 /** CLPSYM_ROT Go to symbol table root */
-#define CLPSYM_ROT               0x00000001
+#define CLPSYM_ROT               0x00000001UL
 /** CLPSYM_OLD Go to at last used symbol */
-#define CLPSYM_OLD               0x00000002
+#define CLPSYM_OLD               0x00000002UL
 /** CLPSYM_NXT Go to the next symbol in the list */
-#define CLPSYM_NXT               0x00000004
+#define CLPSYM_NXT               0x00000004UL
 /** CLPSYM_BAK Go to the previous symbol in the list */
-#define CLPSYM_BAK               0x00000008
+#define CLPSYM_BAK               0x00000008UL
 /** CLPSYM_DEP Go to the deeper level in the tree */
-#define CLPSYM_DEP               0x00000010
+#define CLPSYM_DEP               0x00000010UL
 /** CLPSYM_HIH Go to the higher level in the tree */
-#define CLPSYM_HIH               0x00000020
+#define CLPSYM_HIH               0x00000020UL
 /** CLPSYM_ALI Go to the alias symbol */
-#define CLPSYM_ALI               0x00000100
+#define CLPSYM_ALI               0x00000100UL
 /** CLPSYM_CNT Go to the counter symbol */
-#define CLPSYM_CNT               0x00001000
+#define CLPSYM_CNT               0x00001000UL
 /** CLPSYM_LNK Go to the entry link symbol */
-#define CLPSYM_LNK               0x00004000
+#define CLPSYM_LNK               0x00004000UL
 /** CLPSYM_OID Go to the entry object identifier symbol */
-#define CLPSYM_OID               0x00008000
+#define CLPSYM_OID               0x00008000UL
 /** CLPSYM_ELN Go to the element length symbol */
-#define CLPSYM_ELN               0x00002000
+#define CLPSYM_ELN               0x00002000UL
 /** CLPSYM_SLN Go to the string length symbol */
-#define CLPSYM_SLN               0x00010000
+#define CLPSYM_SLN               0x00010000UL
 /** CLPSYM_SLN Go to the total length symbol */
-#define CLPSYM_TLN               0x00020000
+#define CLPSYM_TLN               0x00020000UL
 
 /**
  *  Definition of CLPSYM macros
@@ -635,7 +635,7 @@ typedef struct ClpSymWlk {
    /** Object identifier for the symbol */
    int                           siOid;
    /** Bitmask for possible operations */
-   int                           uiOpr;
+   unsigned long                 uiOpr;
 }TsClpSymWlk;
 
 /**
@@ -652,14 +652,14 @@ typedef struct ClpSymUpd {
  * The function can be use to read the symbol table of CLP
  *
  * @param[in]  pvHdl Pointer to the corresponding handle created with \a pvClpOpen
- * @param[in]  siOpr Operation on symbol table
+ * @param[in]  uiOpr Operation on symbol table
  * @param[out] psSym Entry to read values from symbol table
  *
  * @return signed integer with 0 for end of list, > 0 for the type or < 0 an error code (CLPERR_xxxxxx)
  */
 extern int siClpSymbolTableWalk(
    void*                         pvHdl,
-   const int                     siOpr,
+   const unsigned long           uiOpr,
    TsClpSymWlk*                  psSym);
 
 /**
