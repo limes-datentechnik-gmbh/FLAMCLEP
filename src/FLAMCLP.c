@@ -1490,19 +1490,19 @@ extern int siClpSymbolTableWalk(
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    psHdl->psOld=psHdl->psSym;
    switch (uiOpr) {
-   case CLPSYM_ROT: psHdl->psSym=psHdl->psTab;               break;
-   case CLPSYM_OLD: psHdl->psSym=psHdl->psOld;               break;
-   case CLPSYM_NXT: psHdl->psSym=psHdl->psSym->psNxt;        break;
-   case CLPSYM_BAK: psHdl->psSym=psHdl->psSym->psBak;        break;
-   case CLPSYM_DEP: psHdl->psSym=psHdl->psSym->psDep;        break;
-   case CLPSYM_HIH: psHdl->psSym=psHdl->psSym->psHih;        break;
-   case CLPSYM_ALI: psHdl->psSym=psHdl->psSym->psStd->psAli; break;
-   case CLPSYM_CNT: psHdl->psSym=psHdl->psSym->psFix->psCnt; break;
-   case CLPSYM_ELN: psHdl->psSym=psHdl->psSym->psFix->psEln; break;
-   case CLPSYM_LNK: psHdl->psSym=psHdl->psSym->psFix->psLnk; break;
-   case CLPSYM_OID: psHdl->psSym=psHdl->psSym->psFix->psOid; break;
-   case CLPSYM_SLN: psHdl->psSym=psHdl->psSym->psFix->psSln; break;
-   case CLPSYM_TLN: psHdl->psSym=psHdl->psSym->psFix->psTln; break;
+   case CLPSYM_ROOT:  psHdl->psSym = psHdl->psTab;               break;
+   case CLPSYM_OLD:   psHdl->psSym = psHdl->psOld;               break;
+   case CLPSYM_NEXT:  psHdl->psSym = psHdl->psSym->psNxt;        break;
+   case CLPSYM_BACK:  psHdl->psSym = psHdl->psSym->psBak;        break;
+   case CLPSYM_DEP:   psHdl->psSym = psHdl->psSym->psDep;        break;
+   case CLPSYM_HIH:   psHdl->psSym = psHdl->psSym->psHih;        break;
+   case CLPSYM_ALIAS: psHdl->psSym = psHdl->psSym->psStd->psAli; break;
+   case CLPSYM_COUNT: psHdl->psSym = psHdl->psSym->psFix->psCnt; break;
+   case CLPSYM_ELN:   psHdl->psSym = psHdl->psSym->psFix->psEln; break;
+   case CLPSYM_LINK:  psHdl->psSym = psHdl->psSym->psFix->psLnk; break;
+   case CLPSYM_OID:   psHdl->psSym = psHdl->psSym->psFix->psOid; break;
+   case CLPSYM_SLN:   psHdl->psSym = psHdl->psSym->psFix->psSln; break;
+   case CLPSYM_TLN:   psHdl->psSym = psHdl->psSym->psFix->psTln; break;
    default: return CLPERR(psHdl,CLPERR_PAR,"Operation (%ul) for symbol table walk not supported",uiOpr);
    }
    if (psHdl->psSym!=NULL) {
@@ -1535,16 +1535,16 @@ extern int siClpSymbolTableWalk(
       psSym->siOid=psHdl->psSym->psFix->siOid;
       psSym->siTyp=psHdl->psSym->psFix->siTyp;
       psSym->uiOpr=0;
-      psSym->uiOpr|=(psHdl->psTab!=NULL)?CLPSYM_ROT:0;
+      psSym->uiOpr|=(psHdl->psTab!=NULL)?CLPSYM_ROOT:0;
       psSym->uiOpr|=(psHdl->psOld!=NULL)?CLPSYM_OLD:0;
-      psSym->uiOpr|=(psHdl->psSym->psNxt!=NULL)?CLPSYM_NXT:0;
-      psSym->uiOpr|=(psHdl->psSym->psBak!=NULL)?CLPSYM_BAK:0;
+      psSym->uiOpr|=(psHdl->psSym->psNxt!=NULL)?CLPSYM_NEXT:0;
+      psSym->uiOpr|=(psHdl->psSym->psBak!=NULL)?CLPSYM_BACK:0;
       psSym->uiOpr|=(psHdl->psSym->psDep!=NULL)?CLPSYM_DEP:0;
       psSym->uiOpr|=(psHdl->psSym->psHih!=NULL)?CLPSYM_HIH:0;
-      psSym->uiOpr|=(psHdl->psSym->psStd->psAli!=NULL)?CLPSYM_ALI:0;
-      psSym->uiOpr|=(psHdl->psSym->psFix->psCnt!=NULL)?CLPSYM_CNT:0;
+      psSym->uiOpr|=(psHdl->psSym->psStd->psAli!=NULL)?CLPSYM_ALIAS:0;
+      psSym->uiOpr|=(psHdl->psSym->psFix->psCnt!=NULL)?CLPSYM_COUNT:0;
       psSym->uiOpr|=(psHdl->psSym->psFix->psEln!=NULL)?CLPSYM_ELN:0;
-      psSym->uiOpr|=(psHdl->psSym->psFix->psLnk!=NULL)?CLPSYM_LNK:0;
+      psSym->uiOpr|=(psHdl->psSym->psFix->psLnk!=NULL)?CLPSYM_LINK:0;
       psSym->uiOpr|=(psHdl->psSym->psFix->psOid!=NULL)?CLPSYM_OID:0;
       psSym->uiOpr|=(psHdl->psSym->psFix->psSln!=NULL)?CLPSYM_SLN:0;
       psSym->uiOpr|=(psHdl->psSym->psFix->psTln!=NULL)?CLPSYM_TLN:0;

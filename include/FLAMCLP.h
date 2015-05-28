@@ -562,24 +562,25 @@ extern const char* pcClpAbout(const int l, const int s, char* b);
 */
 /** CLPSYM_NON No operation done */
 #define CLPSYM_NON               0x00000000UL
-/** CLPSYM_ROT Go to symbol table root */
-#define CLPSYM_ROT               0x00000001UL
+/** CLPSYM_ROOT Go to symbol table root */
+#define CLPSYM_ROOT              0x00000001UL
 /** CLPSYM_OLD Go to at last used symbol */
 #define CLPSYM_OLD               0x00000002UL
-/** CLPSYM_NXT Go to the next symbol in the list */
-#define CLPSYM_NXT               0x00000004UL
-/** CLPSYM_BAK Go to the previous symbol in the list */
-#define CLPSYM_BAK               0x00000008UL
+/** CLPSYM_NEXT Go to the next symbol in the list */
+#define CLPSYM_NEXT              0x00000004UL
+/** CLPSYM_BACK Go to the previous symbol in the list */
+#define CLPSYM_BACK              0x00000008UL
 /** CLPSYM_DEP Go to the deeper level in the tree */
 #define CLPSYM_DEP               0x00000010UL
 /** CLPSYM_HIH Go to the higher level in the tree */
 #define CLPSYM_HIH               0x00000020UL
-/** CLPSYM_ALI Go to the alias symbol */
-#define CLPSYM_ALI               0x00000100UL
-/** CLPSYM_CNT Go to the counter symbol */
-#define CLPSYM_CNT               0x00001000UL
-/** CLPSYM_LNK Go to the entry link symbol */
-#define CLPSYM_LNK               0x00004000UL
+/** CLPSYM_ALIAS Go to the alias symbol */
+#define CLPSYM_ALIAS             0x00000100UL
+/** CLPSYM_COUNT Go to the counter symbol */
+#define CLPSYM_COUNT             0x00001000UL
+/** CLPSYM_LINK Go to the entry link symbol */
+#define CLPSYM_LINK              0x00004000UL
+
 /** CLPSYM_OID Go to the entry object identifier symbol */
 #define CLPSYM_OID               0x00008000UL
 /** CLPSYM_ELN Go to the element length symbol */
@@ -592,16 +593,16 @@ extern const char* pcClpAbout(const int l, const int s, char* b);
 /**
  *  Definition of CLPSYM macros
  */
-#define CLPISS_ROT(flg)          ((flg)&CLPSYM_ROT)
+#define CLPISS_ROOT(flg)         ((flg)&CLPSYM_ROOT)
 #define CLPISS_OLD(flg)          ((flg)&CLPSYM_OLD)
-#define CLPISS_NXT(flg)          ((flg)&CLPSYM_NXT)
-#define CLPISS_BAK(flg)          ((flg)&CLPSYM_BAK)
+#define CLPISS_NEXT(flg)         ((flg)&CLPSYM_NEXT)
+#define CLPISS_BACK(flg)         ((flg)&CLPSYM_BACK)
 #define CLPISS_DEP(flg)          ((flg)&CLPSYM_DEP)
 #define CLPISS_HIH(flg)          ((flg)&CLPSYM_HIH)
-#define CLPISS_ALI(flg)          ((flg)&CLPSYM_ALI)
-#define CLPISS_CNT(flg)          ((flg)&CLPSYM_CNT)
+#define CLPISS_ALIAS(flg)        ((flg)&CLPSYM_ALIAS)
+#define CLPISS_COUNT(flg)        ((flg)&CLPSYM_COUNT)
 #define CLPISS_ELN(flg)          ((flg)&CLPSYM_ELN)
-#define CLPISS_LNK(flg)          ((flg)&CLPSYM_LNK)
+#define CLPISS_LINK(flg)         ((flg)&CLPSYM_LINK)
 #define CLPISS_OID(flg)          ((flg)&CLPSYM_OID)
 #define CLPISS_SLN(flg)          ((flg)&CLPSYM_SLN)
 #define CLPISS_TLN(flg)          ((flg)&CLPSYM_TLN)
@@ -626,9 +627,9 @@ typedef struct ClpSymWlk {
    const char*                   pcPat;
    /** Type of the symbol */
    int                           siTyp;
-   /** Minimum a mount of entries */
+   /** Minimum number of entries */
    int                           siMin;
-   /** Minimum a mount of entries */
+   /** Maximum number of entries */
    int                           siMax;
    /** Size of the symbol */
    int                           siSiz;
