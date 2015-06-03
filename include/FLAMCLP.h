@@ -517,7 +517,7 @@ extern const char* pcClpAbout(const int l, const int s, char* b);
 #define CLPFLG_SLN               0x00002000UL
 /** CLPFLG_TLN This link will be filled by the calculated total length for the argument (sum of all element lengths) */
 #define CLPFLG_TLN               0x00004000UL
-/** CLPFLG_DEF This flag enable to use the OID as default for numbers is no value assigned (only the keyword used (syntax extension))*/
+/** CLPFLG_DEF This flag enables to use the OID as default for numbers if no value is assigned (only the keyword is used (syntax extension))*/
 #define CLPFLG_DEF               0x00008000UL
 /** CLPFLG_CHR This flag will ensure that a binary string are interpreted by default as local character string (DEFAULT) */
 #define CLPFLG_CHR               0x00010000UL
