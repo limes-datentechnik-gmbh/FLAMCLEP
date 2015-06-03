@@ -100,12 +100,13 @@
  * 1.1.50: Support replacement of &{OWN} and &{PGM} in man pages
  * 1.1.51: Fix cut & paste error at syntax  error print out
  * 1.1.52: Add symbol table walk and update functions
+ * 1.1.53: Change flag (isSet) to method (siMtd) to better define property printing
 **/
 
-#define CLP_VSN_STR       "1.1.52"
+#define CLP_VSN_STR       "1.1.53"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        1
-#define CLP_VSN_REVISION       52
+#define CLP_VSN_REVISION       53
 
 /* Definition der Konstanten ******************************************/
 
@@ -1420,7 +1421,7 @@ extern int siClpDocu(
 
 extern int siClpProperties(
    void*                         pvHdl,
-   const int                     isSet,
+   const int                     siMtd,
    const int                     siDep,
    const char*                   pcPat,
    FILE*                         pfOut)
@@ -1470,13 +1471,13 @@ extern int siClpProperties(
             }
          }
          if (pcArg!=NULL) siLev--;
-         siErr=siClpPrnPro(pvHdl,pfOut,FALSE,isSet,siLev,siLev+siDep,psTab,pcArg);
+         siErr=siClpPrnPro(pvHdl,pfOut,FALSE,siMtd,siLev,siLev+siDep,psTab,pcArg);
          if (siErr<0) return(siErr);
       } else {
          return CLPERR(psHdl,CLPERR_SEM,"Root of path (%s) does not match root of handle (%s)",pcPat,psHdl->pcCmd);
       }
    } else {
-      siErr=siClpPrnPro(pvHdl,pfOut,FALSE,isSet,0,siDep,psTab,NULL);
+      siErr=siClpPrnPro(pvHdl,pfOut,FALSE,siMtd,0,siDep,psTab,NULL);
       if (siErr<0) return(siErr);
    }
    return(CLP_OK);
@@ -1562,6 +1563,9 @@ extern int siClpSymbolTableUpdate(
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    if (psSym->pcPro!=NULL) {
+      if (CLPISF_ARG(psHdl->psSym->psStd->uiFlg)) {
+         return CLPERR(psHdl,CLPERR_SIZ,"Update of property field failed (symbol (%s) is not a argument)",psHdl->psSym->psStd->pcKyw);
+      }
       if (strlen(psSym->pcPro)>=sizeof(psHdl->psSym->psFix->acPro)) {
          return CLPERR(psHdl,CLPERR_SIZ,"Update of property field failed (string (%d) to long (%d))",(int)strlen(psSym->pcPro),(int)sizeof(psHdl->psSym->psFix->acPro));
       }
@@ -5336,7 +5340,7 @@ static int siClpPrnPro(
    void*                         pvHdl,
    FILE*                         pfOut,
    int                           isMan,
-   const int                     isSet,
+   const int                     siMtd,
    const int                     siLev,
    const int                     siDep,
    const TsSym*                  psTab,
@@ -5367,10 +5371,10 @@ static int siClpPrnPro(
                   if (isMan) fprintf(pfOut,"\n");
                   isMan=FALSE;
                }
-               fprintf(pfOut,"%s.%s.%s.%s=\"%s\" ",psHdl->pcOwn,psHdl->pcPgm,fpcPat(pvHdl,siLev),psHlp->psStd->pcKyw,psHlp->psFix->pcDft);
+               fprintf(pfOut," %s.%s.%s.%s=\"%s\" ",psHdl->pcOwn,psHdl->pcPgm,fpcPat(pvHdl,siLev),psHlp->psStd->pcKyw,psHlp->psFix->pcDft);
                efprintf(pfOut,"# TYPE: %s HELP: %s #\n",apClpTyp[psHlp->psFix->siTyp],psHlp->psFix->pcHlp);
             } else {
-               if (isSet==FALSE) {
+               if (siMtd==CLPPRO_MTD_ALL || siMtd==CLPPRO_MTD_CMT) {
                   if ((isMan || (!CLPISF_CMD(psHlp->psStd->uiFlg))) && psHlp->psFix->pcMan!=NULL && *psHlp->psFix->pcMan) {
                      fprintf(pfOut,"\n%c DESCRIPTION for %s.%s.%s.%s:\n",C_HSH,psHdl->pcOwn,psHdl->pcPgm,fpcPat(pvHdl,siLev),psHlp->psStd->pcKyw);
                      fprintm(pfOut,psHdl->pcOwn,psHdl->pcPgm,psHlp->psFix->pcMan,0);
@@ -5380,7 +5384,11 @@ static int siClpPrnPro(
                      if (isMan) fprintf(pfOut,"\n");
                      isMan=FALSE;
                   }
-                  fprintf(pfOut, "%s.%s.%s.%s=\"\" ",psHdl->pcOwn,psHdl->pcPgm,fpcPat(pvHdl,siLev),psHlp->psStd->pcKyw);
+                  if (siMtd==CLPPRO_MTD_CMT) {
+                     fprintf(pfOut, ";%s.%s.%s.%s=\"\" ",psHdl->pcOwn,psHdl->pcPgm,fpcPat(pvHdl,siLev),psHlp->psStd->pcKyw);
+                  } else {
+                     fprintf(pfOut, " %s.%s.%s.%s=\"\" ",psHdl->pcOwn,psHdl->pcPgm,fpcPat(pvHdl,siLev),psHlp->psStd->pcKyw);
+                  }
                   efprintf(pfOut,"# TYPE: %s HELP: %s #\n",apClpTyp[psHlp->psFix->siTyp],psHlp->psFix->pcHlp);
                }
             }
@@ -5388,7 +5396,7 @@ static int siClpPrnPro(
             if (psHlp->psDep!=NULL) {
                if (psHlp->psFix->siTyp==CLPTYP_OBJECT || psHlp->psFix->siTyp==CLPTYP_OVRLAY) {
                   psHdl->apPat[siLev]=psHlp;
-                  siErr=siClpPrnPro(pvHdl,pfOut,isMan,isSet,siLev+1,siDep,psHlp->psDep,NULL);
+                  siErr=siClpPrnPro(pvHdl,pfOut,isMan,siMtd,siLev+1,siDep,psHlp->psDep,NULL);
                   if (siErr<0) return(siErr);
                }
             }

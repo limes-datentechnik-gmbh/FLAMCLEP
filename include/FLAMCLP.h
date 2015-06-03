@@ -477,6 +477,16 @@ extern const char* pcClpAbout(const int l, const int s, char* b);
 #define CLPTYP_XALIAS           -1
 
 /**
+ * Method for property printing
+ */
+/** CLPPRO_MTD_ALL All properties are printed */
+#define CLPPRO_MTD_ALL           0
+/** CLPPRO_MTD_SET Only defined properties are printed */
+#define CLPPRO_MTD_SET           1
+/** CLPPRO_MTD_CMT All properties are printed, but not defined properties are line comments */
+#define CLPPRO_MTD_CMT           2
+
+/**
 * Flags for command line parsing
 */
 /** CLPFLG_NON To define no special flags */
@@ -1021,7 +1031,7 @@ extern int siClpDocu(
  * The function produces a property list with the current default values
  *
  * @param[in]  pvHdl Pointer to the corresponding handle created with \a pvClpOpen
- * @param[in]  isSet If true only already defined else all properties are printed
+ * @param[in]  siMtd Method for property printing (0-ALL, 1-Defined, 2-All but not defined as comment)
  * @param[in]  siDep Depth of next levels to print (1-One Level, 2-Two Level, ..., <9-All)
  * @param[in]  pcPat Path (root.input...) to limit the amount of properties
  * @param[in]  pfPro File pointer to write the property list (if NULL then pfHlp of FLAMCLP is used)
@@ -1030,7 +1040,7 @@ extern int siClpDocu(
  */
 extern int siClpProperties(
    void*                         pvHdl,
-   const int                     isSet,
+   const int                     siMtd,
    const int                     siDep,
    const char*                   pcPat,
    FILE*                         pfPro);

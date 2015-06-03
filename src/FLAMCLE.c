@@ -107,11 +107,12 @@
  * 1.1.44: Define command qualifier for ClpDocu("COMMAND")
  * 1.1.45: Support replacement of &{OWN} and &{PGM} in man pages
  * 1.1.46: Support MAXCC parameter for command execution
+ * 1.1.47: Print undefined/empty properties as comment
  */
-#define CLE_VSN_STR       "1.1.46"
+#define CLE_VSN_STR       "1.1.47"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        1
-#define CLE_VSN_REVISION       46
+#define CLE_VSN_REVISION       47
 
 /* Definition der Konstanten ******************************************/
 #define CLEMAX_CNFLEN            1023
@@ -1331,7 +1332,7 @@ EVALUATE:
                siErr=siClePropertyInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,
                                        psTab[i].piOid,psTab[i].psTab,isCas,isPfl,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,acHlp,&siFil,pfMsg);
                if (siErr) ERROR(siErr);
-               siErr=siClpProperties(pvHdl,FALSE,10,psTab[i].pcKyw,pfDoc);
+               siErr=siClpProperties(pvHdl,CLPPRO_MTD_ALL,10,psTab[i].pcKyw,pfDoc);
                vdClpClose(pvHdl); pvHdl=NULL;
             }
             fprintf(pfDoc,"------------------------------------------------------------------------\n\n");
@@ -1447,7 +1448,7 @@ EVALUATE:
                siErr=siClePropertyInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,
                                        psTab[i].piOid,psTab[i].psTab,isCas,isPfl,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,acHlp,&siFil,pfMsg);
                if (siErr) ERROR(siErr);
-               siErr=siClpProperties(pvHdl,FALSE,10,psTab[i].pcKyw,pfPro);
+               siErr=siClpProperties(pvHdl,CLPPRO_MTD_CMT,10,psTab[i].pcKyw,pfPro);
                vdClpClose(pvHdl); pvHdl=NULL;
             }
             if (siErr<0) {
@@ -1463,7 +1464,7 @@ EVALUATE:
                   siErr=siClePropertyInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,
                                           psTab[i].piOid,psTab[i].psTab,isCas,isPfl,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,acHlp,&siFil,pfMsg);
                   if (siErr) ERROR(siErr);
-                  siErr=siClpProperties(pvHdl,FALSE,10,psTab[i].pcKyw,pfPro);
+                  siErr=siClpProperties(pvHdl,CLPPRO_MTD_CMT,10,psTab[i].pcKyw,pfPro);
                   vdClpClose(pvHdl); pvHdl=NULL;
                   if (siErr<0) {
                      fprintf(pfOut,"Write property file (%s) for command '%s' failed (%d-%s)\n",acFil,pcCmd,errno,strerror(errno));
@@ -2140,7 +2141,7 @@ static int siClePropertyFinish(
       return(CLERTC_SYS);
    }
 
-   siErr=siClpProperties(pvHdl,FALSE,10,pcCmd,pfPro);
+   siErr=siClpProperties(pvHdl,CLPPRO_MTD_CMT,10,pcCmd,pfPro);
    if (siErr<0) {
       fprintf(pfOut,"Write property file (%s) for command '%s' failed (%d-%s)\n",acFil,pcCmd,errno,strerror(errno));
       vdClpClose(pvHdl); fclose(pfPro); return(CLERTC_SYN);
@@ -2631,7 +2632,7 @@ static void vdPrnProperties(
    const int               isSet,
    const int               siDep)
 {
-   siClpProperties(pvHdl,isSet,siDep,pcPat,NULL);
+   siClpProperties(pvHdl,CLPPRO_MTD_SET,siDep,pcPat,NULL);
 }
 
 static int siCleGetProperties(
