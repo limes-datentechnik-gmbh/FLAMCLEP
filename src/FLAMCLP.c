@@ -1563,7 +1563,7 @@ extern int siClpSymbolTableUpdate(
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    if (psSym->pcPro!=NULL) {
-      if (CLPISF_ARG(psHdl->psSym->psStd->uiFlg)) {
+      if (!CLPISF_ARG(psHdl->psSym->psStd->uiFlg)) {
          return CLPERR(psHdl,CLPERR_SIZ,"Update of property field failed (symbol (%s) is not a argument)",psHdl->psSym->psStd->pcKyw);
       }
       if (strlen(psSym->pcPro)>=sizeof(psHdl->psSym->psFix->acPro)) {
