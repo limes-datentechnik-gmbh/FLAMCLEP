@@ -498,39 +498,39 @@ extern int siCleExecute(
    if (pcCnf==NULL) {
 #ifdef __HOST__
       {
-         strcpy(acCnf,"<SYSUID>.");
-         for (j=strlen(acCnf),i=0;i<8 && pcPgm[i];i++) {
+         strcpy(acFil,"<SYSUID>.");
+         for (j=strlen(acFil),i=0;i<8 && pcPgm[i];i++) {
             if (isalnum(pcPgm[i])) {
-               acCnf[j]=toupper(pcPgm[i]);
+               acFil[j]=toupper(pcPgm[i]);
                j++;
             }
          }
-         strcpy(&acCnf[j],".CONFIG");
+         strcpy(&acFil[j],".CONFIG");
       }
 #else
       if (acHom[0]) {
-         snprintf(acCnf,sizeof(acCnf),".%s.config",pcPgm);
-         pfTmp=fopen(acCnf,"r");
+         snprintf(acFil,sizeof(acFil),".%s.config",pcPgm);
+         pfTmp=fopen(acFil,"r");
          if (pfTmp==NULL) {
-            snprintf(acCnf,sizeof(acCnf),"%s.%s.config",acHom,pcPgm);
-            for (i=0;acCnf[i];i++) acCnf[i]=tolower(acCnf[i]);
-            fprintf(pfOut,"Use default configuration file (%s) in home directory\n",acCnf);
+            snprintf(acFil,sizeof(acFil),"%s.%s.config",acHom,pcPgm);
+            for (i=0;acFil[i];i++) acFil[i]=tolower(acFil[i]);
+            fprintf(pfOut,"Use default configuration file (%s) in home directory\n",acFil);
          } else {
             fclose(pfTmp);
-            for (i=0;acCnf[i];i++) acCnf[i]=tolower(acCnf[i]);
-            fprintf(pfOut,"Use existing configuration file (%s) in working directory\n",acCnf);
+            for (i=0;acFil[i];i++) acFil[i]=tolower(acFil[i]);
+            fprintf(pfOut,"Use existing configuration file (%s) in working directory\n",acFil);
          }
       } else {
-         snprintf(acCnf,sizeof(acCnf),".%s.config",pcPgm);
-         for (i=0;acCnf[i];i++) acCnf[i]=tolower(acCnf[i]);
-         fprintf(pfOut,"Use default configuration file (%s) in working directory\n",acCnf);
+         snprintf(acFil,sizeof(acFil),".%s.config",pcPgm);
+         for (i=0;acFil[i];i++) acFil[i]=tolower(acFil[i]);
+         fprintf(pfOut,"Use default configuration file (%s) in working directory\n",acFil);
       }
 #endif
-      pcCnf=acCnf;
    } else {
       fprintf(pfOut,"Use configuration file (%s) defined by environment variable (%s)\n",pcCnf,acCnf);
+      snprintf(acFil,sizeof(acFil),"%s",pcCnf);
    }
-   psCnf=psCnfOpn(pfOut,isCas,pcPgm,pcCnf);
+   psCnf=psCnfOpn(pfOut,isCas,pcPgm,acFil);
    if (psCnf==NULL) return(CLERTC_CFG);
 
    snprintf(acCnf,sizeof(acCnf),"%s.owner.id",pcPgm);
@@ -2094,7 +2094,10 @@ static int siClePropertyFinish(
       snprintf(acEnv,sizeof(acEnv),"%s_%s_%s_PROPERTY_FILENAME",pcOwn,pcPgm,pcCmd);
       for (i=0;acEnv[i];i++) acEnv[i]=toupper(acEnv[i]);
       pcFil=GETENV(acEnv);
-      if (pcFil==NULL) {
+      if (pcFil!=NULL && *pcFil) {
+         snprintf(acEnv,sizeof(acEnv),"%s",pcFil);
+         pcFil=acEnv;
+      } else {
 #ifdef __HOST__
          {
             int  j=9;
