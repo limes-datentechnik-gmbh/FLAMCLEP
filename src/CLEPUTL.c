@@ -28,8 +28,6 @@
  **********************************************************************/
 
 /*Standard-Includes                                                   */
-//#define _UNIX03_WITHDRAWN
-//#define _POSIX_SOURCE
 #include <stdio.h>
 #include <errno.h>
 #include <ctype.h>
