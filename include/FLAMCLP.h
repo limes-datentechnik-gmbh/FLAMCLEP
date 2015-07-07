@@ -56,19 +56,23 @@ same keyword for linking eventually with a calculated value of that
 argument. For example, if you define an array of numbers then you can
 define a link to determine the amount of entered numbers or for an
 overlay you can link the corresponding object identifier to determine
-which of the arguments are chosen by the user. You can also get the
-string length and other features. The kind of link is defined over the
-flags field. There are a lot of other flags supported beside links, for
-example the PWD flag, which tells CLP that this value are only clear in
-the data structure but always obfuscated in logs, traces and other
-printouts to keep the value secret. Another flag can be used for numbers.
-With CLPFLG_DEF you can activate a extension of the syntax. If this flag
-used for a number then the object identifier is assigned as value if no
-assignment done for this number. Means with this extended syntax you can
-define a switch, which you can assign a number. This is useful for example
-to activate a feature with a default value by using only the key word and
-the user can change the default value by an optional assignment of another
-value.
+which of the arguments are chosen by the user. If You define overlays of
+overlays an additional dimension for each level is used. In this case
+you must define an array for this link and You get the child (lnk[0])
+before the parent (lnk[1]) written in the CLP structure.
+
+You can also get the string length and other features. The kind of link
+is defined over the flags field. There are a lot of other flags supported
+beside links, for example the PWD flag, which tells CLP that this value
+are only clear in the data structure but always obfuscated in logs, traces
+and other printouts to keep the value secret. Another flag can be used
+for numbers. With CLPFLG_DEF you can activate a extension of the syntax.
+If this flag used for a number then the object identifier is assigned as
+value if no assignment done for this number. Means with this extended
+syntax you can define a switch, which you can assign a number. This is
+useful for example to activate a feature with a default value by using
+only the key word and the user can change the default value by an optional
+assignment of another value.
 
 The FLAMCLP also supports aliases. An alias points to another argument
 and is only an additional keyword that can be used.

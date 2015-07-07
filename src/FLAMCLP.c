@@ -101,12 +101,13 @@
  * 1.1.51: Fix cut & paste error at syntax  error print out
  * 1.1.52: Add symbol table walk and update functions
  * 1.1.53: Change flag (isSet) to method (siMtd) to better define property printing
+ * 1.1.54: Support links in overlay of overlays
 **/
 
-#define CLP_VSN_STR       "1.1.53"
+#define CLP_VSN_STR       "1.1.54"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        1
-#define CLP_VSN_REVISION       53
+#define CLP_VSN_REVISION       54
 
 /* Definition der Konstanten ******************************************/
 
@@ -1946,6 +1947,72 @@ static int siClpSymIni(
    return(CLP_OK);
 }
 
+static void vdClpSymLnkCnt(
+   TsSym*            psSym,
+   TsSym*            psLnk)
+{
+   TsSym*            psSon;
+   for (psSon=psSym->psDep; psSon!=NULL; psSon=psSon->psNxt) {
+      if (psSon->psFix->siTyp==CLPTYP_OVRLAY) {
+         psSon->psFix->psCnt=psLnk;
+         vdClpSymLnkCnt(psSon,psLnk);
+      }
+   }
+}
+
+static void vdClpSymLnkOid(
+   TsSym*            psSym,
+   TsSym*            psLnk)
+{
+   TsSym*            psSon;
+   for (psSon=psSym->psDep; psSon!=NULL; psSon=psSon->psNxt) {
+      if (psSon->psFix->siTyp==CLPTYP_OVRLAY) {
+         psSon->psFix->psOid=psLnk;
+         vdClpSymLnkOid(psSon,psLnk);
+      }
+   }
+}
+
+
+static void vdClpSymLnkEln(
+   TsSym*            psSym,
+   TsSym*            psLnk)
+{
+   TsSym*            psSon;
+   for (psSon=psSym->psDep; psSon!=NULL; psSon=psSon->psNxt) {
+      if (psSon->psFix->siTyp==CLPTYP_OVRLAY) {
+         psSon->psFix->psEln=psLnk;
+         vdClpSymLnkEln(psSon,psLnk);
+      }
+   }
+}
+
+static void vdClpSymLnkSln(
+   TsSym*            psSym,
+   TsSym*            psLnk)
+{
+   TsSym*            psSon;
+   for (psSon=psSym->psDep; psSon!=NULL; psSon=psSon->psNxt) {
+      if (psSon->psFix->siTyp==CLPTYP_OVRLAY) {
+         psSon->psFix->psSln=psLnk;
+         vdClpSymLnkSln(psSon,psLnk);
+      }
+   }
+}
+
+static void vdClpSymLnkTln(
+   TsSym*            psSym,
+   TsSym*            psLnk)
+{
+   TsSym*            psSon;
+   for (psSon=psSym->psDep; psSon!=NULL; psSon=psSon->psNxt) {
+      if (psSon->psFix->siTyp==CLPTYP_OVRLAY) {
+         psSon->psFix->psTln=psLnk;
+         vdClpSymLnkTln(psSon,psLnk);
+      }
+   }
+}
+
 static int siClpSymCal(
    void*                         pvHdl,
    int                           siLev,
@@ -1980,18 +2047,33 @@ static int siClpSymCal(
                psSym->psFix->psLnk=psHlp; h++;
                if (CLPISF_CNT(psSym->psStd->uiFlg)) {
                   psHlp->psFix->psCnt=psSym; k++;
+                  if (psHlp->psFix->siTyp==CLPTYP_OVRLAY) {
+                     vdClpSymLnkCnt(psHlp,psSym);
+                  }
                }
                if (CLPISF_OID(psSym->psStd->uiFlg)) {
                   psHlp->psFix->psOid=psSym; k++;
+                  if (psHlp->psFix->siTyp==CLPTYP_OVRLAY) {
+                     vdClpSymLnkOid(psHlp,psSym);
+                  }
                }
                if (CLPISF_ELN(psSym->psStd->uiFlg)) {
                   psHlp->psFix->psEln=psSym; k++;
+                  if (psHlp->psFix->siTyp==CLPTYP_OVRLAY) {
+                     vdClpSymLnkEln(psHlp,psSym);
+                  }
                }
                if (CLPISF_SLN(psSym->psStd->uiFlg)) {
                   psHlp->psFix->psSln=psSym; k++;
+                  if (psHlp->psFix->siTyp==CLPTYP_OVRLAY) {
+                     vdClpSymLnkSln(psHlp,psSym);
+                  }
                }
                if (CLPISF_TLN(psSym->psStd->uiFlg)) {
                   psHlp->psFix->psTln=psSym; k++;
+                  if (psHlp->psFix->siTyp==CLPTYP_OVRLAY) {
+                     vdClpSymLnkTln(psHlp,psSym);
+                  }
                }
             }
          }
