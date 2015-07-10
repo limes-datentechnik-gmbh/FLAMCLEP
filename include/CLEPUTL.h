@@ -182,6 +182,15 @@ extern char* mapfil(char* file,int size);
 extern char* cpmapfil(char* dest, int size,const char* source,const int operation, const int binary, const int seek, const int flag);
 
 /**
+ * Determines the system default CCSID by querying nl_langinfo() (POSIX) or GetCPInfoEx() (Windows).
+ * If none of both are available or no valid CCSID can be determined,
+ * mapl2c() is called. If it also fails to determine the system default CSSID,
+ * the CCSID for US-ASCII (ASCII platforms) or IBM-1047 (EBCDIC platforms) is returned.
+ * @return A supported CCSID > 0
+ */
+extern unsigned int sysccsid();
+
+/**
  * Map environment variable LANG to CCSID
  * @param isEBCDIC if true returns EBCDIC code pages else ASCII
  * @return NULL in case of an error or pointer to a static string containing the CCSID

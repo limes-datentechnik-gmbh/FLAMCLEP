@@ -35,6 +35,13 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <limits.h>
+#include <locale.h>
+#ifdef __UNIX__
+#include <langinfo.h>
+#endif
+#ifdef __WIN__
+#include <windows.h>
+#endif
 
 #include "CLEPUTL.h"
 
@@ -296,6 +303,44 @@ extern void fprintm(FILE* file,const char* own, const char* pgm, const char* man
       hlp=strstr(ptr,"&{"); /*nodiac*/
    }
    efprintf(file,"%s",ptr);
+}
+
+extern unsigned int sysccsid() {
+   unsigned int ccsid = 0;
+   const char* charset;
+#ifdef __UNIX__
+
+   // From man page:
+   // On startup of the main program, the portable "C" locale is selected
+   // as default.
+   setlocale(LC_ALL, "");
+
+   charset = nl_langinfo(CODESET);
+   ccsid = mapcdstr(charset);
+#elif defined(__WIN__)
+   static CPINFOEX info;
+
+   if (GetCPInfoEx(CP_ACP, 0, &info) && mapccsid(info.CodePage) != NULL) {
+      // We got a supported CCSID => return it
+      return info.CodePage;
+   }
+#endif
+
+   if (ccsid == 0) {
+      // fallback to LANG variable
+      charset = mapl2c(' ' == 0x40);
+      ccsid = mapcdstr(charset);
+
+      if (ccsid == 0) {
+         // fallback to platform default (aka. we don't know any better)
+         if (' ' == 0x40)
+            return 1047; // IBM-1047
+         else
+            return 367;  // US-ASCII
+      }
+   }
+
+   return ccsid;
 }
 
 extern const char* mapl2c(unsigned isEBCDIC) {
