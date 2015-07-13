@@ -1,46 +1,44 @@
-Below you can find the return codes of the program. These values are
-also called completion codes and returned at program termination.
+The return codes of the program are also called completion codes and returned
+at program termination.
 This content is printed on the screen with the built-in function
 'ERRORS'.
 
  * 0  - command line, command syntax, mapping, execution and finish of the command was successful
  * 2  - command line, command syntax, mapping, execution was successful but cleanup of the command failed (may not happened)
- * 4  - command line, command syntax and mapping was successful but execution of the command returns with a warning
- * 8  - command line, command syntax and mapping was successful but execution of the command returns with an error
+ * 4  - command line, command syntax and mapping was successful but execution of the command returned with a warning
+ * 8  - command line, command syntax and mapping was successful but execution of the command returned with an error
  * 12 - command line and command syntax was OK but mapping of the parameter for command execution failed
  * 16 - command line was OK but command syntax was wrong (error from command line parser)
- * 20 - command line it self was wrong (please use built-in function "SYNTAX" for more information)
+ * 20 - command string was wrong (please use built-in function "SYNTAX" for more information)
  * 24 - initialization of the parameter structure for the command failed (may not happened)
- * 28 - configuration is wrong (determination of configuration data failed, configuration file is damaged)
+ * 28 - configuration is wrong (determination of configuration data failed, configuration file might be damaged)
  * 32 - table error (something within the predefined tables is wrong (internal error))
  * 36 - system error (e.g. memory allocation failed)
  * 40 - access control or license error
  * 44 - interface error (e.g. parameter pointer equals NULL (only at call of subprogram interface))
  * 64 - fatal error (basic things are damaged)
  
-The command line is interpreted by CLE the command syntax it self by
-CLP. For example:
+The command line is interpreted by CLE the command string by CLP. For example:
  
 ------------------------------------------------------------------------
 
  :> flcl conv "read.file='test.txt' write.flam(file='test.adc')"
-    |    |     |-- the command string are compiled by CLP
-    |    |     |   and this can result in a syntax error 
+    |    |     |-- the command string is compiled by CLP
+    |    |     |   and might result in a syntax error
     |    |-- conv is part of the command line
     |-- flcl is part of the command line
  
  :> flcl conv=para.txt
     |    |    |-- para.txt is part of the command line, but the content
-    |    |        of para.txt can result in a syntax error of CLP 
+    |    |        of para.txt might contain a CLP syntax error
     |    |-- conv is part of the command line
     |-- flcl is part of the command line
     
 ------------------------------------------------------------------------ 
  
-A command execution (run) can result in a return code of 0 on success,
-a warning represent by value 4 or an error with value 8. If the command
-execution was successful (return code 0) then a return code of 2
-indicates that a call to the finish function failed. Such a fail of the
-finish function is not recognizable if the run function (command execution)
-returns with a warning or an error. All completion codes greater then 8
+A command execution (run) will return 0 on success, 4 if a warning occurs
+and 8 in case of an error. If the command execution was successful (return code 0)
+a return code of 2 indicates that a call to the finish function failed.
+Such a fail of the finish function is not recognizable if the run function (command execution)
+returns with a warning or an error. All completion codes bigger than 8
 indicate an error before command execution.
