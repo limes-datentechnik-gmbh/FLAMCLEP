@@ -1351,6 +1351,7 @@ EVALUATE:
             fprintf(pfDoc,"RETURN CODES\n");
             fprintf(pfDoc,"------------\n\n");
             fprintm(pfDoc,pcOwn,pcPgm,MAN_CLE_APPENDIX_RETURNCODES,1);
+            if (pcScc!=NULL && *pcScc) fprintm(pfOut,pcOwn,pcPgm,pcScc,1);
             efprintf(pfDoc,"indexterm:[Appendix Returncodes]\n\n\n");
 
             if (pfMsg!=NULL) {
