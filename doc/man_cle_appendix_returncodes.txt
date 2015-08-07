@@ -16,7 +16,7 @@ with the built-in function 'ERRORS'.
  * 40 - access control or license error
  * 44 - interface error (e.g. parameter pointer equals NULL (only at call of subprogram interface))
  * 64 - fatal error (basic things are damaged)
- *>64 - special condition codes for job control
+ * >64 - special condition codes from the command for job control
  
 The command line is interpreted by CLE the command string by CLP. For example:
  
@@ -36,11 +36,11 @@ The command line is interpreted by CLE the command string by CLP. For example:
     
 ------------------------------------------------------------------------ 
  
-A command execution (run) will return 0 on success, 4 if a warning occurs
-and 8 in case of an error. In some cases special condition codes greater
+A command execution (run) will return 0 on success, 4 if a warning
+occurs, 8 in case of an error or special condition codes greater
 then 64 can be returned. If the command execution was successful (return code 0)
 a return code of 2 indicates that a call to the finish function failed.
 Such a fail of the finish function is not recognizable if the run
 function (command execution) returns with a warning or an error. All
 completion codes bigger than 8 and smaller or equal to 64 indicate an
-error before command execution.
+error in front of the command execution.
