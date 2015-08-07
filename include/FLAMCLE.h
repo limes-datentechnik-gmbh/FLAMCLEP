@@ -429,6 +429,7 @@ typedef int (*tpfMap)(
  * @param[in]  pcLst Current list of parsed arguments (given from FLAMCLP, could be NULL or empty)
  * @param[in]  pvPar Pointer to the filled parameter for the run of the subprogram
  * @param[out] piWrn Pointer to an integer which is true if the given reason code only a warning
+ * @param[out] piScc Pointer to an integer containing a special condition code (if greater CLERTC_MAX(64) then used instead of CLERTC_RUN(8))
  *
  * @return     Reason code (!=0) for termination or warning, 0 for success
  */
@@ -444,7 +445,8 @@ typedef int (*tpfRun)(
    const char*                   pcCmd,
    const char*                   pcLst,
    const void*                   pvPar,
-   int*                          piWrn);
+   int*                          piWrn,
+   int*                          piScc);
 
 /**
  * Type definition for the fin function
@@ -603,6 +605,7 @@ typedef struct CleCommand {
  * @param[in]  pcGls Glossary for documentation generation (in ASCIIDOC format (term:: explanation) - converted on EBCDIC systems),
  *             if NULL then no glossary are generated, if "" then only the FLAMCLP glossary is added)
  * @param[in]  pcFin Final pages for documentation generation (colophon, copyright, closing aso. in ASCIIDOC format - converted on EBCDIC systems)
+ * @param[in]  pcScc String for explanation of special condition codes if not NULL then used by built-in function ERRORS (converted on EBCDIC systems)
  * @param[in]  pcDef Default command or built-in function, which is executed if the first keyword (argv[1]) don't match (if NULL then no default)
  * @param[in]  pfMsg Pointer to a function which prints a message for an reason code (use to generate the corresponding appendix)\n
  *
@@ -621,6 +624,7 @@ typedef struct CleCommand {
  * 40 - access control or license error\n
  * 44 - interface error (parameter pointer equals to NULL or something like this)\n
  * 64 - fatal error (basic things are damaged)\n
+ *>64 - Special condition code for job control
  */
 extern int siCleExecute(
    const TsCleCommand*           psTab,
@@ -644,6 +648,7 @@ extern int siCleExecute(
    const char*                   pcCov,
    const char*                   pcGls,
    const char*                   pcFin,
+   const char*                   pcScc,
    const char*                   pcDef,
    tpfMsg                        pfMsg);
 

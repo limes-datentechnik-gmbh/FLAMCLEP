@@ -108,11 +108,12 @@
  * 1.1.45: Support replacement of &{OWN} and &{PGM} in man pages
  * 1.1.46: Support MAXCC parameter for command execution
  * 1.1.47: Print undefined/empty properties as comment
+ * 1.1.48: Add support for special condition codes (SCC)
  */
-#define CLE_VSN_STR       "1.1.47"
+#define CLE_VSN_STR       "1.1.48"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        1
-#define CLE_VSN_REVISION       47
+#define CLE_VSN_REVISION       48
 
 /* Definition der Konstanten ******************************************/
 #define CLEMAX_CNFLEN            1023
@@ -424,6 +425,7 @@ extern int siCleExecute(
    const char*                   pcCov,
    const char*                   pcGls,
    const char*                   pcFin,
+   const char*                   pcScc,
    const char*                   pcDef,
    tpfMsg                        pfMsg)
 {
@@ -448,6 +450,7 @@ extern int siCleExecute(
    char                          acHom[CLEMAX_FILSIZ]="";
    char*                         pcTmp=NULL;
    int                           isWrn=FALSE;
+   int                           siScc=0;
    const char*                   m;
 
    homedir(TRUE,sizeof(acHom),acHom);
@@ -663,6 +666,7 @@ EVALUATE:
          fprintf(pfOut,"Return/condition/exit codes of the executable\n");
          fprintf(pfOut,"---------------------------------------------\n\n");
          fprintm(pfOut,pcOwn,pcPgm,MAN_CLE_APPENDIX_RETURNCODES,1);
+         if (pcScc!=NULL && *pcScc) fprintm(pfOut,pcOwn,pcPgm,pcScc,1);
          if (pfMsg!=NULL) {
             fprintf(pfOut,"Reason codes of the different commands\n");
             fprintf(pfOut,"--------------------------------------\n\n");
@@ -1955,7 +1959,7 @@ EVALUATE:
                   if (pcLst!=NULL) free(pcLst);
                   ERROR(((CLERTC_MAP>siMaxCC)?siMaxCC:CLERTC_MAP));
                }
-               siErr=psTab[i].pfRun(pfOut,pfTrc,acOwn,pcPgm,pcVsn,pcAbo,pcLic,psTab[i].pcKyw,pcCmd,pcLst,psTab[i].pvPar,&isWrn);
+               siErr=psTab[i].pfRun(pfOut,pfTrc,acOwn,pcPgm,pcVsn,pcAbo,pcLic,psTab[i].pcKyw,pcCmd,pcLst,psTab[i].pvPar,&isWrn,&siScc);
                if (pcCmd!=NULL) free(pcCmd);
                if (pcLst!=NULL) free(pcLst);
                if (siErr) {
@@ -1974,7 +1978,11 @@ EVALUATE:
                         fprintf(pfOut,"Run of command '%s' failed (Return code: %d / Reason code: %d)\n",psTab[i].pcKyw,CLERTC_RUN,siErr);
                      }
                      psTab[i].pfFin(pfOut,pfTrc,psTab[i].pvPar);
-                     ERROR(((CLERTC_RUN>siMaxCC)?siMaxCC:CLERTC_RUN));
+                     if (siScc>CLERTC_MAX) {
+                        ERROR(((siScc     >siMaxCC)?siMaxCC:siScc));
+                     } else {
+                        ERROR(((CLERTC_RUN>siMaxCC)?siMaxCC:CLERTC_RUN));
+                     }
                   }
                }
                siErr=psTab[i].pfFin(pfOut,pfTrc,psTab[i].pvPar);

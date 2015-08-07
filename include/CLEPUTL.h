@@ -94,6 +94,7 @@ extern int win_snprintf(char *buffer, size_t size, const char *format, ...);
 #define CLERTC_ACS            40
 #define CLERTC_ITF            44
 #define CLERTC_FAT            64
+#define CLERTC_MAX            64
 
 /**********************************************************************/
 
