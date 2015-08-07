@@ -111,6 +111,7 @@ Below, you can find a possibly incomplete list of FLAMCLE feature:
  * * Extensive manual page management including replacement of owner (&{OWN}) and program name (&{PGM})
  * * * Own tool to generate description strings from text files including replacement of constant definitions (${__VERSION__})
  * * Definition of maximum condition code (MAXCC) for command execution
+ * * Special condition code handling (incl. description for manual and built-in function ERRORS)
 
 Built-in Functions
 ------------------
