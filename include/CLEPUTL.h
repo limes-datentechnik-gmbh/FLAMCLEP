@@ -162,12 +162,21 @@ extern void rplchar(char* name,const size_t size,const char chr, const char* val
 extern void rplenvar(char* name,size_t size,const char opn, const char cls);
 
 /**
- * Replace '~' with "<HOME>" and all environment variables enclosed with '<' and '>'
+ * Replace '~' with "<HOME>" and all environment variables enclosed with '<' and '>' to build a file name
  * @param file string for replacement
  * @param size size of replacement string
  * @return pointer to file
  */
 extern char* mapfil(char* file,int size);
+
+/**
+ * Replace '!' with ENVID, '~' with "<SYSUID>", '^' with <OWNERID> and all environment variables enclosed with '<' and '> to build a key label'
+ * @param label string for replacement
+ * @param size size of replacement string
+ * @return pointer to label
+ */
+extern char* maplab(char* label,int size);
+
 
 /**
  * Replace '~' with "<HOME>" and all environment variables enclosed with '<' and '>'

@@ -1090,12 +1090,20 @@ extern char* mapfil(char* file,int size) {
    rplchar(file,size,C_TLD,"<HOME>");
 #endif
    rplenvar(file,size,'<','>');
-   for (char* p=file;*p;p++) {
 #ifdef __WIN__
+   for (char* p=file;*p;p++) {
       if (*p=='/') *p=C_BSL;
-#endif
    }
+#endif
    return(file);
+}
+
+extern char* maplab(char* label,int size) {
+   rplchar(label,size,C_EXC,"<ENVID>");
+   rplchar(label,size,C_TLD,"<SYSUID>");
+   rplchar(label,size,C_CRT,"<OWNERID>");
+   rplenvar(label,size,'<','>');
+   return(label);
 }
 
 #ifdef __HOST__
