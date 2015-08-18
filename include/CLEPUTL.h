@@ -170,7 +170,7 @@ extern void rplenvar(char* name,size_t size,const char opn, const char cls);
 extern char* mapfil(char* file,int size);
 
 /**
- * Replace '!' with ENVID, '~' with "<SYSUID>", '^' with <OWNERID> and all environment variables enclosed with '<' and '> to build a key label'
+ * Replace '!' with ENVID, '~' with "<SYSUID>", '^' with "<OWNERID>" and all environment variables enclosed with '<' and '> to build a key label'
  * @param label string for replacement
  * @param size size of replacement string
  * @return pointer to label
