@@ -109,11 +109,12 @@
  * 1.1.46: Support MAXCC parameter for command execution
  * 1.1.47: Print undefined/empty properties as comment
  * 1.1.48: Add support for special condition codes (SCC)
+ * 1.1.49: Set owner id as environment variable if not already defined
  */
-#define CLE_VSN_STR       "1.1.48"
+#define CLE_VSN_STR       "1.1.49"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        1
-#define CLE_VSN_REVISION       48
+#define CLE_VSN_REVISION       49
 
 /* Definition der Konstanten ******************************************/
 #define CLEMAX_CNFLEN            1023
@@ -451,6 +452,7 @@ extern int siCleExecute(
    char*                         pcTmp=NULL;
    int                           isWrn=FALSE;
    int                           siScc=0;
+   int                           isEnvOwn;
    const char*                   m;
 
    homedir(TRUE,sizeof(acHom),acHom);
@@ -552,6 +554,20 @@ extern int siCleExecute(
 #else
    siCnfPutEnv(psCnf,acOwn,pcPgm);
 #endif
+
+   pcCnf=GETENV("OWNERID");
+   if (pcCnf==NULL || *pcCnf==0x00) {
+      if (SETENV("OWNERID",acOwn)) {
+         fprintf(pfOut,"Put variable (%s=%s) to environment failed (%d - %s)\n","OWNERID",acOwn,errno,strerror(errno));
+         return(CLERTC_SYS);
+      } else {
+         fprintf(pfOut,"Put variable (%s=%s) to environment was successful\n","OWNERID",acOwn);
+      }
+      isEnvOwn=TRUE;
+   } else {
+      fprintf(pfOut,"Environment variable OWNERID already defined (%s)\n",acOwn);
+      isEnvOwn=FALSE;
+   }
 
    snprintf(acCnf,sizeof(acCnf),"%s.%s.trace",acOwn,pcPgm);
    pcCnf=pcCnfGet(psCnf,acCnf);
@@ -1914,7 +1930,15 @@ EVALUATE:
       int siMaxCC=0x0FFFFFFF;
       if (strxcmp(isCas,argv[1],"OWNER=",6,0,FALSE)==0) {
          snprintf(acOwn,sizeof(acOwn),"%s",&argv[1][6]);
-         fprintf(pfOut,"Use owner: '%s'\n",acOwn);
+         if (isEnvOwn) {
+            if (SETENV("OWNERID",acOwn)) {
+               fprintf(pfOut,"Use owner: '%s' (set as environment variable failed (%d - %s))\n",acOwn,errno,strerror(errno));
+            } else {
+               fprintf(pfOut,"Use owner: '%s' (set as environment variable was successful)\n",acOwn);
+            }
+         } else {
+            fprintf(pfOut,"Use owner: '%s' (environment was variable already defined)\n",acOwn);
+         }
          for (i=1;i<argc;i++) argv[i]=argv[i+1];
          argc--;
       }

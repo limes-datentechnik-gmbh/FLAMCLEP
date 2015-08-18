@@ -37,7 +37,8 @@ USED ENVIRONMENT VARIABLES
 
  * LANG                     - to determine the CCSID on EBCDIC systems
  * HOME                     - to determine the home directory on UNIX/WIN
- * USER                     - to determine the current user id on UNIX/WIN 
+ * USER                     - to determine the current user id on UNIX/WIN
+ * OWNERID                  - used for current owner if not already defined  
  * &{PGM}_CONFIG_FILE - the configuration filename (default is '$HOME/.&{pgm}.config' on UNIX/WIN or '&SYSUID..&{PGM}.CONFIG' on mainframes)
  * &{PGM}_DEFAULT_OWNER_ID - the default owner ID (default is '&{oWn}')
  * owner_&{PGM}_command_PROPERTY_FILENAME - To overrule default property file names
@@ -111,8 +112,8 @@ below:
 
  * The tilde character (`~`) is replaced with the string "<HOME>"
  * Each value enclosed with angle brackets (`<>`) are replaced with the
-   corresponding environment variable. If the environment variable not
-   defined the replacements below are still possible:
+   corresponding environment variable (`<OWNERID>`). If the environment
+   variable not defined the replacements below are still possible:
  ** <SYSUID> - Current user id in upper case
  ** <USER>   - Current user id (case sensitive)
  ** <CUSER>  - Current user id in upper case == <SYSUID>
