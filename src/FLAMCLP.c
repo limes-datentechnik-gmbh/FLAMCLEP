@@ -3377,7 +3377,7 @@ static int siClpBldPro(
          siErr=siClpSymFnd(pvHdl,siLev,0,acKyw,psTab,&psArg,NULL);
          if (siErr<0) return(siErr);
          psHdl->apPat[siLev]=psArg;
-         if (psArg!=NULL) psTab=psArg->psDep; else psTab==NULL;
+         if (psArg!=NULL) psTab=psArg->psDep; else psTab=NULL;
       }
       if (psArg!=NULL) {
          if (CLPISF_ARG(psArg->psStd->uiFlg) || CLPISF_ALI(psArg->psStd->uiFlg)) {
