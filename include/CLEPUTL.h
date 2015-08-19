@@ -61,8 +61,6 @@
 #ifdef __WIN__
 extern int win_setenv(const char* name, const char* value);
 extern int win_unsetenv(const char* name);
-extern int win_snprintf(char *buffer, size_t size, const char *format, ...);
-#  define snprintf            win_snprintf
 #  define GETENV(name)        getenv((name))
 #  define SETENV(name, value) win_setenv((name), (value))
 #  define UNSETENV(name)      win_unsetenv((name))

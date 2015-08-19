@@ -166,18 +166,6 @@ extern int win_unsetenv(const char* name)
   return rc;
 }
 
-extern int win_snprintf(char* buffer,size_t size,const char* format,...)
-{
-   va_list  argv;
-   int      r;
-   va_start(argv, format);
-   r = vsnprintf(buffer, size, format, argv);
-   va_end(argv);
-   if (size && (r<0 || r >= (int)(size-1)))
-      *(buffer+size-1) = 0;
-   return(r);
-}
-
 #else
 #include <unistd.h>
 #include <sys/types.h>
