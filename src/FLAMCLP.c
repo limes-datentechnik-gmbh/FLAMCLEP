@@ -2321,6 +2321,9 @@ extern int siClpLexem(
 
 #define isPrintF(p)   (((p)!=NULL)?(CLPISF_PWD((p)->psStd->uiFlg)==FALSE):(TRUE))
 #define isPrnLex(p,l) (isPrintF(p)?(l):("***SECRET***"))
+#define isPrintF2(p)   (CLPISF_PWD((p)->psStd->uiFlg)==FALSE)
+#define isPrnLex2(p,l) (isPrintF2(p)?(l):("***SECRET***"))
+
 static int siClpScnNat(
    void*                         pvHdl,
    FILE*                         pfErr,
@@ -3368,13 +3371,13 @@ static int siClpBldPro(
       if (pcPat[l]!='.') {
          return CLPERR(psHdl,CLPERR_SEM,"Property path (%s) is not valid",pcPat);
       }
-      for (siLev=0,pcPtr=pcPat+l;pcPtr!=NULL && siLev<CLPMAX_HDEPTH;pcPtr=strchr(pcPtr+1,'.'),siLev++) {
+      for (siLev=0,pcPtr=pcPat+l;pcPtr!=NULL && siLev<CLPMAX_HDEPTH && psTab!=NULL;pcPtr=strchr(pcPtr+1,'.'),siLev++) {
          for (pcKyw=pcPtr+1,i=0;i<CLPMAX_LEXLEN && pcKyw[i]!=EOS && pcKyw[i]!='.';i++) acKyw[i]=pcKyw[i];
          acKyw[i]=EOS;
          siErr=siClpSymFnd(pvHdl,siLev,0,acKyw,psTab,&psArg,NULL);
          if (siErr<0) return(siErr);
          psHdl->apPat[siLev]=psArg;
-         psTab=psArg->psDep;
+         if (psArg!=NULL) psTab=psArg->psDep; else psTab==NULL;
       }
       if (psArg!=NULL) {
          if (CLPISF_ARG(psArg->psStd->uiFlg) || CLPISF_ALI(psArg->psStd->uiFlg)) {
@@ -3383,7 +3386,7 @@ static int siClpBldPro(
             strcpy(psArg->psFix->acSrc,psHdl->acSrc);
             psArg->psFix->siRow=siRow;
             if (strlen(psHdl->acLst) + strlen(pcPat) + strlen(pcPro) + 8 < CLPMAX_LSTLEN) {
-               sprintf(&psHdl->acLst[strlen(psHdl->acLst)],"%s=\"%s\"\n",pcPat,isPrnLex(psArg,pcPro));
+               sprintf(&psHdl->acLst[strlen(psHdl->acLst)],"%s=\"%s\"\n",pcPat,isPrnLex2(psArg,pcPro));
             }
             if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"BUILD-PROPERTY %s=\"%s\"\n",pcPat,isPrnStr(psArg,pcPro));
          } else {
