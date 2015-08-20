@@ -1179,7 +1179,7 @@ extern char* cpmapfil(char* dest, int size,const char* source,const int operatio
 }
 #endif
 
-extern int rpltpl(char* string,int size,const char* template,const char* values) {
+extern char* rpltpl(char* string,int size,const char* template,const char* values) {
    char*       s;
    char*       e;
    const char* t;
@@ -1200,13 +1200,8 @@ extern int rpltpl(char* string,int size,const char* template,const char* values)
          s[0]=t[0]; s++;
       }
    }
-   if (s<e) {
-      s[0]=0x00;
-      return(s-string);
-   } else {
-      *(e-1)=0x00;
-      return(-1);
-   }
+   if (s<e) s[0]=0x00; else *(e-1)=0x00;
+   return(string);
 }
 
 extern char* maplab(char* label,int size) {
@@ -1217,10 +1212,10 @@ extern char* maplab(char* label,int size) {
    return(label);
 }
 
-extern int cpmaplab(char* label, int size,const char* template, const char* values) {
-   int r=rpltpl(label,size,template,values);
+extern char* cpmaplab(char* label, int size,const char* template, const char* values) {
+   rpltpl(label,size,template,values);
    maplab(label,size);
-   return(r);
+   return(label);
 }
 
 /* implementation of the external functions ***********************************/

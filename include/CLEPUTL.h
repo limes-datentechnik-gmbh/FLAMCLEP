@@ -189,25 +189,24 @@ extern char* maplab(char* label,int size);
 extern char* cpmapfil(char* dest, int size,const char* source,const int operation, const int binary, const int seek, const int flag);
 
 /**
- * Replace %x in a template string with the values (x:%s) in the value string
+ * Replace n-times %x in a template string with the values (x:%s) in the value string, where x can each printable character
  * @param string string for replacement
  * @param size size of replacement string
  * @param template template string
  * @param values value string
- * @return -1 if error or length of the label string
+ * @return pointer to label
  */
-extern int rpltpl(char* string,int size,const char* template,const char* values);
+extern char* rpltpl(char* string,int size,const char* template,const char* values);
 
 /**
- * Use rpltpl() and maplab() to build key labels
+ * Use rpltpl() and maplab() to build key label names, based on key label templates
  * @param label string for replacement
  * @param size size of replacement string
  * @param template key label template (with %x)
  * @param values value string for replacement (x:%s\n)
- * @return -1 if error or length of the label string
+ * @return pointer to string
  */
-extern int cpmaplab(char* label, int size,const char* template, const char* values);
-
+extern char* cpmaplab(char* label, int size,const char* template, const char* values);
 
 /**
  * Determines the system default CCSID by querying nl_langinfo() (POSIX) or GetCPInfoEx() (Windows).
