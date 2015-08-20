@@ -1183,7 +1183,7 @@ extern char* rpltpl(char* string,int size,const char* templ,const char* values) 
    char*       s;
    char*       e;
    const char* t;
-   for (s=string,e=string+size,t=templ;t[0] && s<e;t++) {
+   for (s=string,e=string+(size-1),t=templ;t[0] && s<e;t++) {
       if (t[0]=='%' && t[1]=='%') {
          s[0]='%'; s++; t++;
       } else if ((t[0]=='%' && t[1])) {
@@ -1200,7 +1200,7 @@ extern char* rpltpl(char* string,int size,const char* templ,const char* values) 
          s[0]=t[0]; s++;
       }
    }
-   if (s<e) s[0]=0x00; else *(e-1)=0x00;
+   if (s<e) s[0]=0x00; else e[0]=0x00;
    return(string);
 }
 
