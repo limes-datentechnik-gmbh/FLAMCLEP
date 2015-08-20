@@ -175,7 +175,6 @@ extern char* mapfil(char* file,int size);
  */
 extern char* maplab(char* label,int size);
 
-
 /**
  * Replace '~' with "<HOME>" and all environment variables enclosed with '<' and '>'
  * @param dest string for replacement
@@ -188,6 +187,27 @@ extern char* maplab(char* label,int size);
  * @return pointer to format string for fopen()
  */
 extern char* cpmapfil(char* dest, int size,const char* source,const int operation, const int binary, const int seek, const int flag);
+
+/**
+ * Replace %x in a template string with the values (x:%s) in the value string
+ * @param string string for replacement
+ * @param size size of replacement string
+ * @param template template string
+ * @param values value string
+ * @return -1 if error or length of the label string
+ */
+extern int rpltpl(char* string,int size,const char* template,const char* values);
+
+/**
+ * Use rpltpl() and maplab() to build key labels
+ * @param label string for replacement
+ * @param size size of replacement string
+ * @param template key label template (with %x)
+ * @param values value string for replacement (x:%s\n)
+ * @return -1 if error or length of the label string
+ */
+extern int cpmaplab(char* label, int size,const char* template, const char* values);
+
 
 /**
  * Determines the system default CCSID by querying nl_langinfo() (POSIX) or GetCPInfoEx() (Windows).

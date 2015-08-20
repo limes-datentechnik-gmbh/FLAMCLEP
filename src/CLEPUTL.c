@@ -1087,14 +1087,6 @@ extern char* mapfil(char* file,int size) {
    return(file);
 }
 
-extern char* maplab(char* label,int size) {
-   rplchar(label,size,C_EXC,"<ENVID>");
-   rplchar(label,size,C_TLD,"<SYSUID>");
-   rplchar(label,size,C_CRT,"<OWNERID>");
-   rplenvar(label,size,'<','>');
-   return(label);
-}
-
 #ifdef __HOST__
 extern char* cpmapfil(char* dest, int size,const char* source,const int operation, const int binary, const int seek,const int flag) {
    if (ISPATHNAME(source) || ISDDNAME(source) || source[0]=='\'') {
@@ -1186,6 +1178,50 @@ extern char* cpmapfil(char* dest, int size,const char* source,const int operatio
    }
 }
 #endif
+
+extern int rpltpl(char* string,int size,const char* template,const char* values) {
+   char*       s;
+   char*       e;
+   const char* t;
+   for (s=string,e=string+size,t=template;t[0] && s<e;t++) {
+      if (t[0]=='%' && t[1]=='%') {
+         s[0]='%'; s++; t++;
+      } else if ((t[0]=='%' && t[1])) {
+         for (const char* v=values;v[0];v++) {
+            if (v[0]==t[1] && v[1]==':') {
+               for (v+=2;v[0] && v[0]!='\n' && s<e;v++) {
+                  s[0]=v[0]; s++;
+               }
+               break;
+            }
+         }
+         t++;
+      } else {
+         s[0]=t[0]; s++;
+      }
+   }
+   if (s<e) {
+      s[0]=0x00;
+      return(s-string);
+   } else {
+      *(e-1)=0x00;
+      return(-1);
+   }
+}
+
+extern char* maplab(char* label,int size) {
+   rplchar(label,size,C_EXC,"<ENVID>");
+   rplchar(label,size,C_TLD,"<SYSUID>");
+   rplchar(label,size,C_CRT,"<OWNERID>");
+   rplenvar(label,size,'<','>');
+   return(label);
+}
+
+extern int cpmaplab(char* label, int size,const char* template, const char* values) {
+   int r=rpltpl(label,size,template,values);
+   maplab(label,size);
+   return(r);
+}
 
 /* implementation of the external functions ***********************************/
 
