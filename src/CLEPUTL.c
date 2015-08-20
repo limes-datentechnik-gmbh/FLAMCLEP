@@ -1179,11 +1179,11 @@ extern char* cpmapfil(char* dest, int size,const char* source,const int operatio
 }
 #endif
 
-extern char* rpltpl(char* string,int size,const char* template,const char* values) {
+extern char* rpltpl(char* string,int size,const char* templ,const char* values) {
    char*       s;
    char*       e;
    const char* t;
-   for (s=string,e=string+size,t=template;t[0] && s<e;t++) {
+   for (s=string,e=string+size,t=templ;t[0] && s<e;t++) {
       if (t[0]=='%' && t[1]=='%') {
          s[0]='%'; s++; t++;
       } else if ((t[0]=='%' && t[1])) {
@@ -1212,8 +1212,8 @@ extern char* maplab(char* label,int size) {
    return(label);
 }
 
-extern char* cpmaplab(char* label, int size,const char* template, const char* values) {
-   rpltpl(label,size,template,values);
+extern char* cpmaplab(char* label, int size,const char* templ, const char* values) {
+   rpltpl(label,size,templ,values);
    maplab(label,size);
    return(label);
 }
