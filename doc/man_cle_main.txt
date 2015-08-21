@@ -35,10 +35,11 @@ This is the ${__BUILD__} build version of the FLAMCLEP.
 USED ENVIRONMENT VARIABLES
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
- * LANG                     - to determine the CCSID on EBCDIC systems
- * HOME                     - to determine the home directory on UNIX/WIN
- * USER                     - to determine the current user id on UNIX/WIN
- * OWNERID                  - used for current owner if not already defined  
+ * LANG    - to determine the CCSID on EBCDIC systems
+ * HOME    - to determine the home directory on UNIX/WIN
+ * USER    - to determine the current user id on UNIX/WIN
+ * ENVID   - for the current environment qualifier (D/T/P) if key label template mapping used (default is 'T')
+ * OWNERID - used for current owner if not already defined
  * &{PGM}_CONFIG_FILE - the configuration filename (default is '$HOME/.&{pgm}.config' on UNIX/WIN or '&SYSUID..&{PGM}.CONFIG' on mainframes)
  * &{PGM}_DEFAULT_OWNER_ID - the default owner ID (default is '&{oWn}')
  * owner_&{PGM}_command_PROPERTY_FILENAME - To overrule default property file names
@@ -58,6 +59,7 @@ example direct in your JCL:
  LANG=de_DE.IBM-1141
  HOME=/u/hugo
  USER=hugo
+ ENVID=T
  /*
 -----------------------------------------------------------------------
 
