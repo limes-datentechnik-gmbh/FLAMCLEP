@@ -559,13 +559,20 @@ extern int siCleExecute(
    if (pcCnf==NULL || *pcCnf==0x00) {
       if (SETENV("OWNERID",acOwn)) {
          fprintf(pfOut,"Put variable (%s=%s) to environment failed (%d - %s)\n","OWNERID",acOwn,errno,strerror(errno));
-         return(CLERTC_SYS);
       } else {
-         fprintf(pfOut,"Put variable (%s=%s) to environment was successful\n","OWNERID",acOwn);
+         if (strcmp(acOwn,GETENV("OWNERID"))) {
+            fprintf(pfOut,"Put variable (%s=%s) to environment failed (strcmp(%s,GETENV(%s)))\n","OWNERID",acOwn,acOwn,"OWNERID");
+         } else {
+#ifdef __DEBUG__
+            fprintf(pfOut,"Put variable (%s=%s) to environment was successful\n","OWNERID",acOwn);
+#endif
+         }
       }
       isEnvOwn=TRUE;
    } else {
+#ifdef __DEBUG__
       fprintf(pfOut,"Environment variable OWNERID already defined (%s)\n",acOwn);
+#endif
       isEnvOwn=FALSE;
    }
 
