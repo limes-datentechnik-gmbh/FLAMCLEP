@@ -1016,7 +1016,8 @@ extern void rplenvar(char* name,const size_t size,const char opn, const char cls
             strncpy(h,c+1,size-1);
             h[size-1]=0;
             v=GETENV(b+1);
-            if (v!=NULL && *v) {
+            if (v!=NULL) {
+               for (p=v+strlen(v);p>v && isspace(*(p-1));p--) *(p-1)=0x00;
                if (strlen(a)+strlen(v)<size) strcat(a,v);
                if (strlen(a)+strlen(h)<size) strcat(a,h);
                a=b+strlen(v);
@@ -1057,8 +1058,7 @@ extern void rplenvar(char* name,const size_t size,const char opn, const char cls
                if (strlen(a)+strlen(h)<size) strcat(a,h);
                a=b+strlen(v);
             } else {
-               strcat(a,h);
-               a=b;
+               b[0]=opn; c[0]=cls; a=c+1;
             }
          } else {
             a=b+1;
@@ -1066,6 +1066,31 @@ extern void rplenvar(char* name,const size_t size,const char opn, const char cls
       }
       e=a+strlen(name);
    }
+}
+
+extern char* rpltpl(char* string,int size,const char* templ,const char* values) {
+   char*       s;
+   char*       e;
+   const char* t;
+   for (s=string,e=string+(size-1),t=templ;t[0] && s<e;t++) {
+      if (t[0]=='%' && t[1]=='%') {
+         s[0]='%'; s++; t++;
+      } else if ((t[0]=='%' && t[1])) {
+         for (const char* v=values;v[0];v++) {
+            if (v[0]==t[1] && v[1]==':') {
+               for (v+=2;v[0] && v[0]!='\n' && s<e;v++) {
+                  s[0]=v[0]; s++;
+               }
+               break;
+            }
+         }
+         t++;
+      } else {
+         s[0]=t[0]; s++;
+      }
+   }
+   if (s<e) s[0]=0x00; else e[0]=0x00;
+   return(string);
 }
 
 extern char* mapfil(char* file,int size) {
@@ -1178,31 +1203,6 @@ extern char* cpmapfil(char* dest, int size,const char* source,const int operatio
    }
 }
 #endif
-
-extern char* rpltpl(char* string,int size,const char* templ,const char* values) {
-   char*       s;
-   char*       e;
-   const char* t;
-   for (s=string,e=string+(size-1),t=templ;t[0] && s<e;t++) {
-      if (t[0]=='%' && t[1]=='%') {
-         s[0]='%'; s++; t++;
-      } else if ((t[0]=='%' && t[1])) {
-         for (const char* v=values;v[0];v++) {
-            if (v[0]==t[1] && v[1]==':') {
-               for (v+=2;v[0] && v[0]!='\n' && s<e;v++) {
-                  s[0]=v[0]; s++;
-               }
-               break;
-            }
-         }
-         t++;
-      } else {
-         s[0]=t[0]; s++;
-      }
-   }
-   if (s<e) s[0]=0x00; else e[0]=0x00;
-   return(string);
-}
 
 extern char* maplab(char* label,int size) {
    rplchar(label,size,C_EXC,"<ENVID>");
