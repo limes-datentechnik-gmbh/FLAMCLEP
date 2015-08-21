@@ -231,6 +231,11 @@ extern char* homedir(int flag, const int size, char* buffer) {
 }
 #endif
 
+extern char* envid(const int size, char* buffer) {
+   snprintf(buffer,size,"T");
+   return(buffer);
+}
+
 /**********************************************************************/
 
 #ifdef __EBCDIC__
@@ -1054,6 +1059,16 @@ extern void rplenvar(char* name,const size_t size,const char opn, const char cls
                   *v = toupper(*v);
                   for(p=v+1; *p ;p++) *p = tolower(*p);
                }
+               if (strlen(a)+strlen(v)<size) strcat(a,v);
+               if (strlen(a)+strlen(h)<size) strcat(a,h);
+               a=b+strlen(v);
+            } else if (strcmp(b+1,"OWNERID")==0) {
+               v=userid(size,x);
+               if (strlen(a)+strlen(v)<size) strcat(a,v);
+               if (strlen(a)+strlen(h)<size) strcat(a,h);
+               a=b+strlen(v);
+            } else if (strcmp(b+1,"ENVID")==0) {
+               v=envid(size,x);
                if (strlen(a)+strlen(v)<size) strcat(a,v);
                if (strlen(a)+strlen(h)<size) strcat(a,h);
                a=b+strlen(v);
