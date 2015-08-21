@@ -1001,6 +1001,7 @@ extern void rplchar(char* name,const size_t size,const char c, const char* value
 
 extern void rplenvar(char* name,const size_t size,const char opn, const char cls)
 {
+   int         la,lv;
    char        h[size];
    char        x[size];
    char*       a=name;
@@ -1021,11 +1022,14 @@ extern void rplenvar(char* name,const size_t size,const char opn, const char cls
             strncpy(h,c+1,size-1);
             h[size-1]=0;
             v=GETENV(b+1);
-            if (v!=NULL) {
-               for (p=v+strlen(v);p>v && isspace(*(p-1));p--) *(p-1)=0x00;
-               if (strlen(a)+strlen(v)<size) strcat(a,v);
+            if (v!=NULL && *v) {
+               for (la=strlen(a),lv=strlen(v);lv>0 && isspace(v[lv-1]);lv--);
+               if (la+lv<size) {
+                  memcpy(a+la,v,lv);
+                  a[la+lv]=0x00;
+               }
                if (strlen(a)+strlen(h)<size) strcat(a,h);
-               a=b+strlen(v);
+               a=b+lv;
             } else if (strcmp(b+1,"HOME")==0) {
                v=homedir(FALSE,size,x);
                if (strlen(a)+strlen(v)<size) strcat(a,v);
