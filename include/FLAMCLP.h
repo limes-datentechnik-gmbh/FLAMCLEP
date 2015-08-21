@@ -841,7 +841,7 @@ typedef struct ClpError {
  * @param[in]  isCas Boolean to enable case sensitive parsing of keywords (recommended is FALSE)
  * @param[in]  isPfl Boolean to enable parameter files per object and overlay (recommended is TRUE)
  * @param[in]  siMkl Integer defining the minimal key word length (siMkl<=0 --> full length, no auto abbreviation)
- * @param[in]  pcOwn String constant containing the owner name for the root in the path ("de.limes")
+ * @param[in]  pcOwn String constant containing the owner name for the root in the path ("limes")
  * @param[in]  pcPgm String constant containing the program name for the root in the path ("flcl")
  * @param[in]  pcCmd String constant containing the command name for the root in the path ("CONV")
  * @param[in]  pcMan String constant containing the manual page for this command (converted on EBCDIC systems)

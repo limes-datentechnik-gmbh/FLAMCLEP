@@ -206,7 +206,7 @@ Sample program
           CLETAB_CLS
        };
 
-       return(siCleExecute(asCmdTab,argc,argv,"de.limes","flcl",FALSE,0,stderr,stdout,
+       return(siCleExecute(asCmdTab,argc,argv,"limes","flcl",FALSE,0,stderr,stdout,
                            "--|","/",pcFlclVersion(),pcFlclAbout(),"TEST-LICENSE",
                            "Frankenstein Limes(R) Command Line for FLUC, FLAM and FLIES",
                            MAN_FLCL_MAIN,MAN_FLCL_COV,MAN_FLCL_GLS,MAN_FLCL_FIN,"CONV",pcFlmErrors));

@@ -309,7 +309,7 @@ int main(int argc, char * argv[])
       l=fread(acBuf,1,sizeof(acBuf),pfPar);
       fclose(pfPar);
       acBuf[l]=EOS;
-      pvHdl=pvClpOpen(FALSE,TRUE,1,"de.limes","CLPTST","MAIN","man-page","help-msg",FALSE,asMainArgTab,&stMain,stderr,stderr,NULL,NULL,NULL,NULL,"-->","/",",",NULL);
+      pvHdl=pvClpOpen(FALSE,TRUE,1,"limes","CLPTST","MAIN","man-page","help-msg",FALSE,asMainArgTab,&stMain,stderr,stderr,NULL,NULL,NULL,NULL,"-->","/",",",NULL);
       if (pvHdl!=NULL) {
          fprintf(stderr,"SYNTAX required:\n"); siClpSyntax(pvHdl,FALSE,FALSE,10,NULL); fprintf(stderr,"\n");
          fprintf(stderr,"SYNTAX optional:\n"); siClpSyntax(pvHdl,TRUE,TRUE,10,NULL); fprintf(stderr,"\n");
