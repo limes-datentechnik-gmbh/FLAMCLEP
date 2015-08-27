@@ -2,12 +2,12 @@ This command line parser provides a list of commands and some
 built-in functions, please use 'MANPAGE', 'HELP' and 'SYNTAX' to get
 extensive information about these capabilities.
 
-Additional You can use the build-in function 'GENDOCU' to generate a
-complete or parts of the user manual.
+Additionally the build-in function 'GENDOCU' to generate a complete or
+parts of the user manual can be used.
 
 To read the parameter of a command, a compiler (command line processor
 CLP) is applied. To see the regular expressions (lexems) and the
-corresponding grammar, please use the build in functions 'LEXEM' and
+corresponding grammar, please use the built-in functions 'LEXEM' and
 'GRAMMAR'.
 
 The return/condition/exit codes of the executable and the reason codes
@@ -18,16 +18,15 @@ for the meaning of the used return and reason codes.
 
 The command line executer (CLE) uses an owner management in order to
 separate the settings for different clients and a property management
-for each command. If problems occur, you can activate a trace and
-manage all configuration settings.
+for each command. If problems occur, a trace might be activated.
 
-For each command execution you can define the owner and environment
-variables which are managed over the configuration file.
+For each command execution the owner and environment variables can be
+defined in the configuration file.
 
-The default trace file is 'stdout'. If you activate the trace before a
+The default trace file is 'stdout'. If the trace is activated before a
 trace file is defined, the trace will be printed on the screen.
 
-Last but not least you can determine license, version and other
+Last but not least it is possible to view the license, version and other
 information about the program.
 
 This is the ${__BUILD__} build version of the FLAMCLEP.
@@ -46,12 +45,11 @@ USED ENVIRONMENT VARIABLES
  * path_argument - to overrule the hard coded default property value
  
 Environment variables can be set from the system or in the program
-configuration file with the build-in function 'SETENV'. Especially on
+configuration file with the build-in function 'SETENV'. Particularly on
 mainframe systems the configuration file is an easy way to define
-environment variables. Additional on host the DD name STDENV is
-supported. The DD:STDENV allows you to define the &{PGM}_CONFIG_FILE,
-&{PGM}_DEFAULT_OWNER_ID, LANG and other environment variables for
-example direct in your JCL:
+environment variables. Additionally on host the DD name STDENV is
+supported. The DD:STDENV allows to define the &{PGM}_CONFIG_FILE,
+&{PGM}_DEFAULT_OWNER_ID, LANG and other environment variables in JCL:
 
 -----------------------------------------------------------------------
  //STDENV   DD *
@@ -64,24 +62,24 @@ example direct in your JCL:
 -----------------------------------------------------------------------
 
 Often it will be useful to have a dedicated environment per user on
-mainframes. In such case it makes sense to define the environment in a
-dedicated file for each user.
+mainframes. In such a case it makes sense to define the environment in
+a dedicated file for each user.
 
 -----------------------------------------------------------------------
  //STDENV   DD DSN=USER.ENVIR(&SYSUID.), DSP=SHR
 -----------------------------------------------------------------------
 
-Beside all the environment variables managed by CLE you can also set all
-properties as environment variables to overrule the hard coded default
-values with CLP. If a property defined as environment variable and over
-a property file, then the value in the property file overrules the
-settings over the environment. The environment variable name for each
-property are builded by the rules below:
+Beside all the environment variables managed by CLE it is possible to
+set all properties as environment variables to overrule the hard coded
+default values with CLP. If a property is defined as environment variable
+and in a property file, then the value in the property file overrules the
+setting in the environment. The environment variable name for each
+property is build by the rules below:
 
  * convert all letters to upper case
  * replace all dots (`.`) by underline (`_`)
 
-To get a list and help for all properties pleas use the built-in
+To get a list and help for all properties please use the built-in
 function 'GENPROP' to generate property files. The properties can be
 defined per owner, per program and general. The owner specific
 definition overrules the program specific definition and the program
@@ -96,8 +94,8 @@ The value string behind the sign (including the comment) will be used as
 supplement for the command line processor. Aliases are not supported in
 this case. You can only define properties for the main argument. If a
 string must be enclosed with apostrophe, please don't use double
-quotation marks, because these are used additional if a new property
-file build based on the environment settings. 
+quotation marks, because these are used in addition if a new property
+file is build based on the environment settings.
 
 -----------------------------------------------------------------------
 FLCL_ICNV_FROM='IBM-1141'         # this is the best solution 
@@ -134,18 +132,18 @@ below:
  ** If apostrophes are not used the SYSUID is prefixed as HLQ
  * Normal file names on other platforms could be relative
  
-*ATTENTION:* If a requested environment variable not defined, the
-replacement is done with a empty string. This could result in a
+*ATTENTION:* If a requested environment variable is not defined, the
+replacement is done with the empty string. This can result in
 unexpected behavior.
 
 To use a "<" or "~" as a part of a filename the character must be
 specified twice.
 
-Beside this rules you can also use the replacement technologies of your
-shell, but on some platforms $HOME, $USER or something like this are not
-available, for such cases the possibilities above are implemented.
+Beside this rules the replacement technologies of your shell can be used,
+but on some platforms $HOME, $USER or something similar might not
+be available, for such cases the possibilities above are implemented.
 
-This file name mapping is provided over the library CLEPUTL and should
+This file name mapping is provided by the library CLEPUTL and should
 also be used for file names managed by the commands supported with this
 program.
 
@@ -163,8 +161,7 @@ values.
 These critical characters are interpreted dependent on the environment
 variable LANG. If the environment variable LANG is not defined then the
 compilation default CCSID (f.e. IBM-1047 on USS and IBM1141 on ZOS) is
-used. Below you can find the current list of supported CCSIDs on EBCDIC
-systems.
+used. Below is the current list of supported CCSIDs on EBCDIC systems.
 
 ------------------------------------------------------------------------
    SUPPORTED EBCDIC CODE PAGES FOR COMMAND ENTRY:
@@ -175,19 +172,19 @@ systems.
       "IBM-500","IBM-273","IBM-037","IBM-875","IBM-424"
 ------------------------------------------------------------------------
 
-You can define the code page explicit (LANG=de_DE.IBM-1141) or only the
+You can define the code page explicitly (LANG=de_DE.IBM-1141) or only the
 language code (LANG=de_DE, LANG=C). If only the language code defined
 then the CCSID is derived from the language code (DE=IBM-1141,
 US=IBM-1047, C=IBM-1047, ...).
 
-If it possible these critical characters are also converted for print
+If possible, these critical characters are also converted for print
 outs. At output it is not possible to convert anything correctly,
 because some strings for print out are coming from other sources (like
 system messages and others). Only all known literals are converted, for
-unknown variables such a conversion is not possible and CLEP expect that
-such strings are encoded in the correct system code page, but we can not
-guaranty this.
+unknown variables such a conversion is not possible and CLEP expects that
+such strings are encoded in the correct system code page, but there is no
+guaranty for this.
 
-On ASCII/UTF-8 platforms a miss interpretation of punctuation characters 
+On ASCII/UTF-8 platforms a miss-interpretation of punctuation characters
 smaller then 128 is not possible. On such platforms the LANG variable is
 not used for command interpretation or printouts.

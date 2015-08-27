@@ -1,5 +1,5 @@
 The actual configuration list with owner id, property file names trace
-setting, environment variables and more are shown. With the option CLEAR
+setting, environment variables and more is shown. With the option CLEAR
 the configuration data including the corresponding file will be deleted.
 
 The configuration file name can be defined by the environment variable:
@@ -7,23 +7,22 @@ The configuration file name can be defined by the environment variable:
    &{PGM}_CONFIG_FILE=config.file.name
    
 This can be used to work with a global configuration file. If this
-location not defined, then the configuration file are stored on
-distributed systems in the current home directory under the file
-name:
+location is not defined, the configuration file is stored in the
+home directory with the name:
 
    .&{pgm}.config
-   
-If no home directory defined  for the current user (this case is very
-improbable), then the working directory is used.
 
-To read the configuration file and the environment variable above is not
-defined, CLE looks first in the working and then in the home directory.
-This enables you to prefer a property file, by coping it to the current 
-working directory.
+If no home directory is defined for the current user (this case is very
+improbable), the working directory is used.
 
-On mainframes as default the data set name 'SYSUID.&{PGM}.CONFIG' is
-used. SYSUID as high level qualifier is a kind of replacement for the
-current home directory on distributed system in this case.
+To read the configuration file when the environment variable above is not
+defined, CLE first looks in the working and then in the home directory.
+This makes it possible to prefer a property file, by copying it to the
+current working directory.
+
+On mainframes the data set name 'SYSUID.&{PGM}.CONFIG' is used as default.
+SYSUID as high level qualifier is a kind of replacement for the
+current home directory in other operating systems in this way.
 
 .EXAMPLES
 
