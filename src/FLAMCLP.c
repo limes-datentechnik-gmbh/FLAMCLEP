@@ -102,12 +102,13 @@
  * 1.1.52: Add symbol table walk and update functions
  * 1.1.53: Change flag (isSet) to method (siMtd) to better define property printing
  * 1.1.54: Support links in overlay of overlays
+ * 1.1.55: Fix CLEP lexical error message "Character ('%c') not valid"
 **/
 
-#define CLP_VSN_STR       "1.1.54"
+#define CLP_VSN_STR       "1.1.55"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        1
-#define CLP_VSN_REVISION       54
+#define CLP_VSN_REVISION       55
 
 /* Definition der Konstanten ******************************************/
 
@@ -2782,7 +2783,7 @@ static int siClpScnNat(
          return(CLPTOK_SBC);
       } else { /*lexical error*/
          pcLex[0]=EOS; (*ppCur)++;
-         return CLPERR(psHdl,CLPERR_LEX,"Character ('%c') not valid%s",*((*ppCur)-1));
+         return CLPERR(psHdl,CLPERR_LEX,"Character ('%c') not valid",*((*ppCur)-1));
       }
    }
 }
