@@ -236,6 +236,18 @@ extern char* envid(const int size, char* buffer) {
    return(buffer);
 }
 
+extern char* safe_getenv(const char* name, char* buffer, size_t bufsiz) {
+   char* env;
+   if (buffer!=NULL) {
+      env = GETENV(name);
+      if(env!=NULL)
+         snprintf(buffer, bufsiz, "%s", env);
+      else
+         return NULL;
+   }
+   return buffer;
+}
+
 /**********************************************************************/
 
 #ifdef __EBCDIC__

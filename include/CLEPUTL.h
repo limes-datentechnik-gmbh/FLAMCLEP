@@ -114,6 +114,17 @@ extern char* userid(const int size, char* buffer);
 extern char* homedir(const int flag, const int size, char* buffer);
 
 /**
+ * Gets an environment variable and stores it in the provided buffer. If
+ * the buffer is not large enough, the variable value is truncated.
+ * @param name Name of the environment variable
+ * @param buffer Pointer to the buffer for the variable value
+ * @param bufsiz Size of the buffer
+ * @return If bufsiz > 0, returns the buffer pointer which contains a null-terminated string
+ *         or NULL (variable does not exist). If bufsiz == 0, buffer is returned unmodified.
+ */
+extern char* safe_getenv(const char* name, char* buffer, size_t bufsiz);
+
+/**
  * Works like snprintf but concatenates the format string to the buffer.
  * @param buffer  pointer to the string buffer
  * @param size    size of the string buffer
