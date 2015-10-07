@@ -1293,7 +1293,7 @@ extern int snprintc(char* buffer,size_t size,const char* format,...)
       if (r >= size-h-1)
          *(buffer+size-1) = 0;
 #endif
-      return(r);
+      return(h+r);
    } else
      return (0);
 }
