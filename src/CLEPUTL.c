@@ -1281,6 +1281,20 @@ extern char* strxcpy(char *dest, const char *src, size_t n)
    return dest;
 }
 
+extern int printd(char* buffer,size_t size,const char* format,...)
+{
+#ifdef __DEBUG__
+   int r;
+   va_list  argv;
+   va_start(argv, format);
+   r=vprintf ( format, argv );
+   va_end(argv);
+   return r;
+#else
+   return 0;
+#endif
+}
+
 extern int snprintc(char* buffer,size_t size,const char* format,...)
 {
    va_list  argv;
