@@ -1281,7 +1281,7 @@ extern char* strxcpy(char *dest, const char *src, size_t n)
    return dest;
 }
 
-extern int printd(char* buffer,size_t size,const char* format,...)
+extern int printd(const char* format,...)
 {
 #ifdef __DEBUG__
    int r;

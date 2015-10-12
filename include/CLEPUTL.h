@@ -130,7 +130,7 @@ extern char* safe_getenv(const char* name, char* buffer, size_t bufsiz);
  * @param format  format string
  * @return        amount of characters printed (0 are mainly a error)
  */
-extern int printd(char* buffer,size_t size,const char* format,...);
+extern int printd(const char* format,...);
 /**
  * Works like snprintf but concatenates the format string to the buffer.
  * @param buffer  pointer to the string buffer
