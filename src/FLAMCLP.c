@@ -3678,7 +3678,7 @@ static int siClpBldLit(
       default: return CLPERR(psHdl,CLPERR_SEM,"Base (%c) of number literal (%s.%s=%s) not supported",pcVal[0],fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,isPrnStr(psArg,pcVal+1));
       }
       if (errno || *pcHlp) {
-         return CLPERR(psHdl,CLPERR_SEM,"Number (%s) of '%s.%s' can't be converted to a 64 bit value (rest: %s)",isPrnStr(psArg,pcVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,isPrnStr(psArg,pcHlp));
+         return CLPERR(psHdl,CLPERR_SEM,"Number (%s) of '%s.%s' cannot be converted to a 64 bit value (rest: %s)",isPrnStr(psArg,pcVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,isPrnStr(psArg,pcHlp));
       }
       switch (psArg->psFix->siSiz) {
       case 1:
@@ -3729,7 +3729,7 @@ static int siClpBldLit(
       default: return CLPERR(psHdl,CLPERR_SEM,"Base (%c) of floating point literal (%s.%s=%s) not supported",pcVal[0],fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,isPrnStr(psArg,pcVal+1));
       }
       if (errno || *pcHlp) {
-         return CLPERR(psHdl,CLPERR_SEM,"Floating number (%s) of '%s.%s' can't be converted to a valid 64 bit value (rest: %s)",isPrnStr(psArg,pcVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,pcHlp);
+         return CLPERR(psHdl,CLPERR_SEM,"Floating number (%s) of '%s.%s' cannot be converted to a valid 64 bit value (rest: %s)",isPrnStr(psArg,pcVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,pcHlp);
       }
       switch (psArg->psFix->siSiz) {
       case 4:
@@ -3764,7 +3764,7 @@ static int siClpBldLit(
             }
             l2=hex2bin(pcVal+2,(U08*)psArg->psVar->pvPtr,l1);
             if (l2!=l1/2) {
-               return CLPERR(psHdl,CLPERR_SEM,"Hexadecimal string (%c(%s)) of '%s.%s' can't be converted from hex to bin",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+               return CLPERR(psHdl,CLPERR_SEM,"Hexadecimal string (%c(%s)) of '%s.%s' cannot be converted from hex to bin",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
             }
             siSln=l2;
             if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-LITERAL-HEX(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
@@ -3780,7 +3780,7 @@ static int siClpBldLit(
             }
             l2=chr2asc(pcVal+2,(C08*)psArg->psVar->pvPtr,l1);
             if (l2!=l1) {
-               return CLPERR(psHdl,CLPERR_SEM,"ASCII string (%c(%s)) of '%s.%s' can't be converted to ASCII",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+               return CLPERR(psHdl,CLPERR_SEM,"ASCII string (%c(%s)) of '%s.%s' cannot be converted to ASCII",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
             }
             siSln=l1;
             if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-LITERAL-ASC(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
@@ -3796,7 +3796,7 @@ static int siClpBldLit(
             }
             l2=chr2ebc(pcVal+2,(C08*)psArg->psVar->pvPtr,l1);
             if (l2!=l1) {
-               return CLPERR(psHdl,CLPERR_SEM,"EBCDIC string (%c(%s)) of '%s.%s' can't be converted to EBCDIC",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+               return CLPERR(psHdl,CLPERR_SEM,"EBCDIC string (%c(%s)) of '%s.%s' cannot be converted to EBCDIC",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
             }
             siSln=l1;
             if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-LITERAL-EBC(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
@@ -3839,7 +3839,7 @@ static int siClpBldLit(
                }
                l2=hex2bin(pcVal+2,(U08*)psArg->psVar->pvPtr,l1);
                if (l2!=l1/2) {
-                  return CLPERR(psHdl,CLPERR_SEM,"Hexadecimal string (%c(%s)) of '%s.%s' can't be converted from hex to bin",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+                  return CLPERR(psHdl,CLPERR_SEM,"Hexadecimal string (%c(%s)) of '%s.%s' cannot be converted from hex to bin",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
                }
                siSln=l2;
                if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-LITERAL-HEX(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
@@ -3850,7 +3850,7 @@ static int siClpBldLit(
                }
                l2=chr2asc(pcVal+2,(C08*)psArg->psVar->pvPtr,l1);
                if (l2!=l1) {
-                  return CLPERR(psHdl,CLPERR_SEM,"ASCII string (%c(%s)) of '%s.%s' can't be converted to ASCII",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+                  return CLPERR(psHdl,CLPERR_SEM,"ASCII string (%c(%s)) of '%s.%s' cannot be converted to ASCII",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
                }
                siSln=l1;
                if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-LITERAL-ASC(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
@@ -3861,7 +3861,7 @@ static int siClpBldLit(
                }
                l2=chr2ebc(pcVal+2,(C08*)psArg->psVar->pvPtr,l1);
                if (l2!=l1) {
-                  return CLPERR(psHdl,CLPERR_SEM,"EBCDIC string (%c(%s)) of '%s.%s' can't be converted to EBCDIC",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+                  return CLPERR(psHdl,CLPERR_SEM,"EBCDIC string (%c(%s)) of '%s.%s' cannot be converted to EBCDIC",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
                }
                siSln=l1;
                if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-LITERAL-EBC(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
