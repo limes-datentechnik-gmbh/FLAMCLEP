@@ -1733,7 +1733,6 @@ extern int arry2str(char* array[], const int count, const char* separ, const int
    return 0;
 }
 
-// TODO: add parameter docu
 extern int strxcmp(
    const int            ca,
    const char*          s1,
