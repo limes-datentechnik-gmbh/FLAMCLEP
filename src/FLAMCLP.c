@@ -2085,7 +2085,7 @@ static int siClpSymCal(
             return CLPERR(psHdl,CLPERR_TAB,"Link for keyword '%s.%s' is not unique",fpcPat(pvHdl,siLev),psSym->psStd->pcKyw);
          }
          if (k>1) {
-            return CLPERR(psHdl,CLPERR_TAB,"More then one link defined for keyword '%s.%s'",fpcPat(pvHdl,siLev),psSym->psStd->pcKyw);
+            return CLPERR(psHdl,CLPERR_TAB,"More than one link defined for keyword '%s.%s'",fpcPat(pvHdl,siLev),psSym->psStd->pcKyw);
          }
          if (k==0) {
             return CLPERR(psHdl,CLPERR_TAB,"Link for keyword '%s.%s' was not assigned",fpcPat(pvHdl,siLev),psSym->psStd->pcKyw);

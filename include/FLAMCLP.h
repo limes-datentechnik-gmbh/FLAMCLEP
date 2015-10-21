@@ -280,7 +280,7 @@ Grammar for command line
 
 A list of objects requires parenthesis to enclose the arguments. Only
 for one object of a certain level you can omit the round brackets. If
-you want define more then one object of a certain level you must use
+you want define more than one object of a certain level you must use
 parenthesis to separate the objects from each other. In parameter files
 the command string for an overlay can be start with a dot '.' or not.
 The same is valid for the parenthesis '(...)' of an object.
