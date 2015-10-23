@@ -186,5 +186,5 @@ such strings are encoded in the correct system code page, but there is no
 guaranty for this.
 
 On ASCII/UTF-8 platforms a miss-interpretation of punctuation characters
-smaller then 128 is not possible. On such platforms the LANG variable is
+smaller than 128 is not possible. On such platforms the LANG variable is
 not used for command interpretation or printouts.
