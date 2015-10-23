@@ -515,23 +515,23 @@ extern const char* pcClpAbout(const int l, const int s, char* b);
 #define CLPFLG_CNT               0x00000100UL
 /** CLPFLG_OID This link will be filled by the object identifier (OID) of the chosen argument (useful for overlays) */
 #define CLPFLG_OID               0x00000200UL
-/** CLPFLG_ELN This link will be filled by the calculated length of a element (fixed types == data size, packed types == data length) */
+/** CLPFLG_ELN This link will be filled by the calculated length of an element (fixed types == data size, packed types == data length) */
 #define CLPFLG_ELN               0x00001000UL
-/** CLPFLG_SLN This link will be filled by the calculated string length for a element (only for null-terminated strings) */
+/** CLPFLG_SLN This link will be filled by the calculated string length for an element (only for null-terminated strings) */
 #define CLPFLG_SLN               0x00002000UL
 /** CLPFLG_TLN This link will be filled by the calculated total length for the argument (sum of all element lengths) */
 #define CLPFLG_TLN               0x00004000UL
 /** CLPFLG_DEF This flag enables to use the OID as default for numbers if no value is assigned (only the keyword is used (syntax extension))*/
 #define CLPFLG_DEF               0x00008000UL
-/** CLPFLG_CHR This flag will ensure that a binary string are interpreted by default as local character string (DEFAULT) */
+/** CLPFLG_ASC This flag will set the default method of interpretation of a binary string to local character string (DEFAULT)*/
 #define CLPFLG_CHR               0x00010000UL
-/** CLPFLG_ASC This flag will ensure that a binary string are interpreted by default as ASCII character string*/
+/** CLPFLG_ASC This flag will set the default method of interpretation of a binary string to ASCII*/
 #define CLPFLG_ASC               0x00020000UL
-/** CLPFLG_EBC This flag will ensure that a binary string are interpreted by default as EBCDIC character string*/
+/** CLPFLG_ASC This flag will set the default method of interpretation of a binary string to EBCDIC*/
 #define CLPFLG_EBC               0x00040000UL
-/** CLPFLG_HEX This flag will ensure that a binary string are interpreted by default as hexadecimal character string*/
+/** CLPFLG_ASC This flag will set the default method of interpretation of a binary string to hexadecimal*/
 #define CLPFLG_HEX               0x00080000UL
-/** CLPFLG_PWD This flag will ensure that the clear value only put to the data structure but not traced, logged or given away elsewhere */
+/** CLPFLG_PWD This flag will ensure that the clear value is only put into the data structure but not traced, logged or given away elsewhere */
 #define CLPFLG_PWD               0x01000000UL
 
 /**
