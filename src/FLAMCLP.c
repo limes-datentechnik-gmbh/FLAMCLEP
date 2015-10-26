@@ -103,12 +103,13 @@
  * 1.1.53: Change flag (isSet) to method (siMtd) to better define property printing
  * 1.1.54: Support links in overlay of overlays
  * 1.1.55: Fix CLEP lexical error message "Character ('%c') not valid"
+ * 1.1.56: Fix build scan issue: Access to field 'psDep' results in a dereference of a null pointer (loaded from variable 'psArg')
 **/
 
-#define CLP_VSN_STR       "1.1.55"
+#define CLP_VSN_STR       "1.1.56"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        1
-#define CLP_VSN_REVISION       55
+#define CLP_VSN_REVISION       56
 
 /* Definition der Konstanten ******************************************/
 
@@ -3253,6 +3254,9 @@ static int siClpPrsVal(
    char                          acVal[CLPMAX_LEXSIZ];
    strcpy(acVal,psHdl->acLex);
    if (psHdl->siTok==CLPTOK_KYW) {
+      if (psArg==NULL) { // fix build scan issue
+         return CLPERR(psHdl,CLPERR_INT,"Parameter (psArg) is NULL (file %s, function=%s, line %d)",__FUNCTION__,__LINE__,__FILE__);
+      }
       psHdl->apPat[siLev]=psArg;
       siInd=siClpSymFnd(pvHdl,siLev+1,siPos,acVal,psArg->psDep,&psVal,NULL);
       if (siInd<0) return(siInd);
