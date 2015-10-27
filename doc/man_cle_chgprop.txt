@@ -44,8 +44,8 @@ used as default directory to save the property files. On mainframes
 SYSUID is used for the first level qualifier, to represent the
 "home directory".
 
-Property files are managed per owner: This means updates are only done
-for the current owner.
+Property files are managed per owner: This means that updates are only
+done for the current owner.
 
 To delete a property you can simply specify the path without the root
 and with out a sign.   

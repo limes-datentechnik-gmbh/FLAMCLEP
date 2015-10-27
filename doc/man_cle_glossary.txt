@@ -120,7 +120,7 @@ HELP::
    information which shall help the user to run the program. The CLP
    help function makes extensive information about each parameter
    available for the user which is adjustable on the command line.
-   By this means you get a structured list of arguments:
+   By this means that you get a structured list of arguments:
    * keyword           - the keyword for the argument
    * (TYPE: ...)       - the type of this argument
    * help message      - the short help text

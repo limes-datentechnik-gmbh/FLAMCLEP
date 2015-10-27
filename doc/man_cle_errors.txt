@@ -10,9 +10,10 @@ structure, to close all files and free all the allocated memory. If one
 of these steps fails, then a corresponding return (condition/exit) code
 is given back from the executable. Only the command execution can result
 in a error (return code 8) or in a warning (return code 4). The command
-it self must return a reason code for such a warning or error. Means the
-return (condition/exit) code can be used to control the batch processing.
-The reason code gives more information about the error or warning.
+it self must return a reason code for such a warning or error. This
+means that the return (condition/exit) code can be used to control the
+batch processing. The reason code gives more information about the error
+or warning.
 
 See <<appendix-returncodes>> and <<appendix-reasoncodes>> for an
 explanation and the output of this command.

@@ -68,7 +68,7 @@ are only clear in the data structure but always obfuscated in logs, traces
 and other printouts to keep the value secret. Another flag can be used
 for numbers. With CLPFLG_DEF you can activate a extension of the syntax.
 If this flag used for a number then the object identifier is assigned as
-value if no assignment done for this number. Means with this extended
+value if no assignment done for this number. This means that with this extended
 syntax you can define a switch, which you can assign a number. This is
 useful for example to activate a feature with a default value by using
 only the key word and the user can change the default value by an optional
@@ -122,7 +122,7 @@ With the CLP flags CMD (for command) and PRO (property) you can define if
 a parameter is only visible in the command line or property file. These
 flags have no influence of property or command line parsing. It only
 reflects the online help/syntax and docu/property generation. This means
-you can still use such a parameter in the property file or in the command
+that you can still use such a parameter in the property file or in the command
 line, but it is not directly visible to the user. If the flags CMD and
 PRO are not set then the parameter will be visible in both areas. With
 the flag DMY (for dummy) you can enforce that this parameter is not
@@ -148,7 +148,7 @@ command line results from a file or argc/argv.
 
 If the isPfl (is parameter file) flag TRUE: For objects and overlays you
 can use the assignment letter '=' to define a parameter file containing
-the command string for this object or overlay. Means for each object or
+the command string for this object or overlay. This means that for each object or
 overlay a dedicated parameter file can be used. The parameter file must
 contain a command string which syntax is valid for the certain object or
 overlay. CLP open the file with format string "r". To use DD names on

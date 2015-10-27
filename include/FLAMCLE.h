@@ -378,10 +378,10 @@ typedef int (*tpfIni)(
  * definitions can easily managed in a file. Over the command line the
  * user define the file name and the mapping function open this file
  * read the definition, allocates the memory and stores the definition
- * in the parameter structure. Means the user defines the file name, but
- * the executed subprogram gets the content of this file. Such things
- * are realized over a real mapping between the parsed values and the
- * needed arguments.
+ * in the parameter structure. This means that the user defines the file
+ * name, but the executed subprogram gets the content of this file. Such
+ * things are realized over a real mapping between the parsed values and
+ * the needed arguments.
  *
  * For overlay based commands the pointer to the object identifier is
  * provided (taken from siCleExecute). This integer can then be used to

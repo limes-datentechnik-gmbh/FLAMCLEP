@@ -2,8 +2,8 @@ Without a command the current global property file is deleted from the
 configuration data. A command specific property file can be deleted
 from the configuration data when the command name is given.
 
-Property files are managed per owner, this means delete is only done
-for the current owner.
+Property files are managed per owner, this means that delete is only
+done for the current owner.
 
 We recommend to work only with command specific property files.
 

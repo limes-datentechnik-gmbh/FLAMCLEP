@@ -14,7 +14,7 @@ used:
  * :xdigit: - all hexadecimal numbers [[0-9]|[a-f||[A-F]]
 
 All comments and separators are ignored by the scanner and not passed
-with the token to the parser. This means the separators (SEP)
+with the token to the parser. This means that the separators (SEP)
 are used in the grammar but will never be part of or own tokens.
 
 If a binary entry for a string is possible and no classification is
@@ -25,4 +25,4 @@ described the default interpretation of the binary string. For binary
 strings it is still possible to enter a null-terminated string, but
 then the prefix *s* must be used. If no binary entry is feasible, only
 a null-terminated string in local character representation (s) can be
-built and taken per default.
+built and taken by default.
