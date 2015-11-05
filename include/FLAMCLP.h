@@ -34,14 +34,22 @@ Description
 The command line parser (FLAMCLP) is a complier which reads a command
 string using the lexems and grammar below to fill a structure with the
 corresponding values given in this line. The FLAMCLP works only in memory
-(except parameter files are used for objects or overlays) and the syntax
-and semantic will be defined by a tree of tables. Such a table can
-represent an object (struct) or an overlay (union). Each argument in
-such a table can be a object or overlay again in using another table for
-this type. Basic types are switches, numbers, floats or strings. With
-each argument you can define the required minimum and possible maximum
-amount of occurrences. This means that each argument can be an array and
-arrays are implemented as simplified notations.
+(except parameter files are used for objects or overlays or string files
+for strings) and the syntax and semantic will be defined by a tree of
+tables. Such a table can represent an object (struct) or an overlay (union).
+Each argument in such a table can be a object or overlay again in using
+another table for this type. Basic types are switches, numbers, floats
+or strings. With each argument you can define the required minimum and
+possible maximum amount of occurrences. This means that each argument
+can be an array and arrays are implemented as simplified notations.
+
+For object and overlays you can provide parameter files (OBJECT=filename)
+containing the parameter string in the corresponding syntax syntax for
+these object or overlay.
+
+To handle passwords and passphrase more secure, you can provide a filename
+as string (PASSWD=f'filename'), which contains the corresponding string
+value. This prevents for example passwords from logging.
 
 The FLAMCLP uses these tables as symbol tables to define the syntax and
 semantic of a command. The same table provides the offset used to
@@ -225,6 +233,7 @@ Lexeme
          [x|X]''' [:print:]* ''' |     binary hexadecimal\n
          [a|A]''' [:print:]* ''' |     binary ascii (no null termination)\n
          [e|E]''' [:print:]* ''' |     binary ebcdic (no null termination)\n
+         [f|F]''' [:print:]* ''' |     read string from file (for passwords)\n
          Strings can contain two '' to represent one '\n
          Strings can also be enclosed in " instead of '\n"
          Strings can directly start behind a '=' without enclosing '/"\n

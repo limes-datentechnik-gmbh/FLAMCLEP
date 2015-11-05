@@ -104,12 +104,13 @@
  * 1.1.54: Support links in overlay of overlays
  * 1.1.55: Fix CLEP lexical error message "Character ('%c') not valid"
  * 1.1.56: Fix build scan issue: Access to field 'psDep' results in a dereference of a null pointer (loaded from variable 'psArg')
+ * 1.1.57: Support filename type for strings to read passwords from files (f'pwdfile.txt') - string file support
 **/
 
-#define CLP_VSN_STR       "1.1.56"
+#define CLP_VSN_STR       "1.1.57"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        1
-#define CLP_VSN_REVISION       56
+#define CLP_VSN_REVISION       57
 
 /* Definition der Konstanten ******************************************/
 
@@ -655,26 +656,28 @@ static int CLPERR(TsHdl* psHdl,int siErr, char* pcMsg, ...) {
          } else {
             fprintf(psHdl->pfErr,"%s Cause: Row=%d Column=%d in file '%s'\n",                       fpcPre(psHdl,1),psHdl->siRow,psHdl->siCol,psHdl->acSrc);
          }
-         fprintf(psHdl->pfErr,"%s \"",fpcPre(psHdl,1));
-         for (p=psHdl->pcRow;!iscntrl(*p);p++) fprintf(psHdl->pfErr,"%c",*p);
-         fprintf(psHdl->pfErr,"\"\n");
-         if (psHdl->pcCur==psHdl->pcRow) {
-            fprintf(psHdl->pfErr,"%s %c",fpcPre(psHdl,1),C_CRT);
-         } else {
-            fprintf(psHdl->pfErr,"%s  ",fpcPre(psHdl,1));
-         }
-         for (p=psHdl->pcRow;!iscntrl(*p);p++) {
-            if (p>=psHdl->pcOld && p<psHdl->pcCur) {
-               f=TRUE;
-               fprintf(psHdl->pfErr,"%c",C_CRT);
+         if (psHdl->pcRow!=NULL) {
+            fprintf(psHdl->pfErr,"%s \"",fpcPre(psHdl,1));
+            for (p=psHdl->pcRow;!iscntrl(*p);p++) fprintf(psHdl->pfErr,"%c",*p);
+            fprintf(psHdl->pfErr,"\"\n");
+            if (psHdl->pcCur==psHdl->pcRow) {
+               fprintf(psHdl->pfErr,"%s %c",fpcPre(psHdl,1),C_CRT);
             } else {
-               fprintf(psHdl->pfErr," ");
+               fprintf(psHdl->pfErr,"%s  ",fpcPre(psHdl,1));
             }
-         }
-         if (f) {
-            fprintf(psHdl->pfErr," \n");
-         } else {
-            fprintf(psHdl->pfErr,"%c\n",C_CRT);
+            for (p=psHdl->pcRow;!iscntrl(*p);p++) {
+               if (p>=psHdl->pcOld && p<psHdl->pcCur) {
+                  f=TRUE;
+                  fprintf(psHdl->pfErr,"%c",C_CRT);
+               } else {
+                  fprintf(psHdl->pfErr," ");
+               }
+            }
+            if (f) {
+               fprintf(psHdl->pfErr," \n");
+            } else {
+               fprintf(psHdl->pfErr,"%c\n",C_CRT);
+            }
          }
          l=strlen(psHdl->acLst);
          if (l>1) {
@@ -2309,6 +2312,7 @@ extern int siClpLexem(
    fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," str       [a|A]''' [:print:]* ''' |                (binary string in ASCII)\n");
    fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," str       [e|E]''' [:print:]* ''' |               (binary string in EBCDIC)\n");
    fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," str       [x|X]''' [:print:]* ''' |         (binary string in hex notation)\n");
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," str       [f|F]''' [:print:]* ''' | (read string from file (for passwords))\n");
    fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"           Strings can contain two '' to represent one '                    \n");
    fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"           Strings can also be enclosed in \" instead of '                   \n");
    fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"           Strings can directly start behind a '=' without enclosing '/\"    \n");
@@ -2455,8 +2459,8 @@ static int siClpScnNat(
             if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(STR)-LEXEM(%s)\n",isPrnLex(psArg,pcHlp));
             return(CLPTOK_STR);
          }
-      } else if ((tolower((*ppCur)[0])=='x' || tolower((*ppCur)[0])=='a' ||tolower((*ppCur)[0])=='e' ||
-                  tolower((*ppCur)[0])=='c' || tolower((*ppCur)[0])=='s') && (*ppCur)[1]==STRCHR) {/*defined string '...'*/
+      } else if ((tolower((*ppCur)[0])=='x' || tolower((*ppCur)[0])=='a' || tolower((*ppCur)[0])=='e' ||
+                  tolower((*ppCur)[0])=='c' || tolower((*ppCur)[0])=='s' || tolower((*ppCur)[0])=='f') && (*ppCur)[1]==STRCHR) {/*defined string '...'*/
          *pcLex=tolower(*(*ppCur)); pcLex++;
          *pcLex='\''; pcLex++;
          (*ppCur)+=2;
@@ -2479,8 +2483,8 @@ static int siClpScnNat(
          (*ppCur)++;
          if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(STR)-LEXEM(%s)\n",isPrnLex(psArg,pcHlp));
          return(CLPTOK_STR);
-      } else if ((tolower((*ppCur)[0])=='x' || tolower((*ppCur)[0])=='a' ||tolower((*ppCur)[0])=='e' ||
-                  tolower((*ppCur)[0])=='c' || tolower((*ppCur)[0])=='s') && (*ppCur)[1]==SPMCHR) {/*defined string "..."*/
+      } else if ((tolower((*ppCur)[0])=='x' || tolower((*ppCur)[0])=='a' || tolower((*ppCur)[0])=='e' ||
+                  tolower((*ppCur)[0])=='c' || tolower((*ppCur)[0])=='s' || tolower((*ppCur)[0])=='f') && (*ppCur)[1]==SPMCHR) {/*defined string "..."*/
          *pcLex=tolower(*(*ppCur)); pcLex++;
          *pcLex='\''; pcLex++;
          (*ppCur)+=2;
@@ -3832,6 +3836,58 @@ static int siClpBldLit(
          if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-LITERAL-STR(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
                                  fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),isPrnLen(psArg,l2));
          break;
+      case 'f':
+      {
+         int                           siTok;
+         int                           siRow;
+         int                           siSiz=0;
+         char*                         pcDat=NULL;
+         const char*                   pcCur;
+         const char*                   pcSrc;
+         const char*                   pcOld;
+         const char*                   pcRow;
+         char                          acSrc[CLPMAX_LEXSIZ]="";
+         char                          acLex[CLPMAX_LEXSIZ]="";
+         char                          acFil[L_filnam]="";
+         siErr=file2str(acFil,&pcDat,&siSiz,cpmapfil(acFil,sizeof(acFil),pcVal+2,1,FALSE,FALSE,TRUE));
+         if (siErr<0) {
+            switch(siErr) {
+            case -1: siErr=CLPERR(psHdl,CLPERR_INT,"Illegal parameters passed to file2str() (Bug)%s","");break;
+            case -2: siErr=CLPERR(psHdl,CLPERR_SYS,"Open of string file (%s) failed (%d - %s)",acFil,errno,strerror(errno));break;
+            case -3: siErr=CLPERR(psHdl,CLPERR_SEM,"String file (%s) is too big (integer overflow)",acFil);break;
+            case -4: siErr=CLPERR(psHdl,CLPERR_MEM,"Allocation of memory for string file (%s) failed",acFil);break;
+            case -5: siErr=CLPERR(psHdl,CLPERR_SYS,"Read of string file (%s) failed (%d - %s)",acFil,errno,strerror(errno));break;
+            default: siErr=CLPERR(psHdl,CLPERR_SYS,"An unknown error occurred while reading string file (%s)",acFil);break;
+            }
+            if (pcDat!=NULL) free(pcDat);
+            return(siErr);
+         }
+         if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"STRING-FILE-BEGIN(%s)\n",acFil);
+         strcpy(acSrc,psHdl->acSrc); strcpy(psHdl->acSrc,acFil);
+         pcCur=psHdl->pcCur; psHdl->pcCur=pcDat;
+         pcSrc=psHdl->pcSrc; psHdl->pcSrc=pcDat;
+         pcOld=psHdl->pcOld; psHdl->pcOld=pcDat;
+         pcRow=psHdl->pcRow; psHdl->pcRow=pcDat;
+         siRow=psHdl->siRow; psHdl->siRow=1;
+         siTok=siClpScnNat(pvHdl,psHdl->pfErr,psHdl->pfScn,&psHdl->pcCur,acLex,CLPTOK_STR,psArg);
+         if (siTok<0) return(siTok);
+         if (siTok!=CLPTOK_STR) {
+            siErr=CLPERR(psHdl,CLPERR_SYN,"The token (%s(%s)) is not allowed in a string file (%c(%s)) of '%s.%s'",apClpTok[siTok],acLex,pcVal[0],pcVal+2,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+            free(pcDat);
+            return(siErr);
+         }
+         if (acLex[0]=='f') {
+            siErr=CLPERR(psHdl,CLPERR_SYN,"Define a string file (%c(%s)) in a string file (%c(%s)) is not allowed (%s.%s)",acLex[0],acLex+2,pcVal[0],pcVal+2,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+            free(pcDat);
+            return(siErr);
+         }
+         siErr=siClpBldLit(pvHdl,siLev,siPos,siTyp,psArg,acLex);
+         strcpy(psHdl->acSrc,acSrc);
+         psHdl->pcCur=pcCur; psHdl->pcSrc=pcSrc; psHdl->pcOld=pcOld; psHdl->pcRow=pcRow; psHdl->siRow=siRow;
+         if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"STRING-FILE-END(%s)\n",acFil);
+         free(pcDat);
+         return(siErr);
+      }
       case 'd':
          if (CLPISF_BIN(psArg->psStd->uiFlg)) {
             if (CLPISF_HEX(psArg->psStd->uiFlg)) {
@@ -3897,7 +3953,8 @@ static int siClpBldLit(
          CLPERRADD(psHdl,1,"a - for conversion in ASCII%s","");
          CLPERRADD(psHdl,1,"e - for conversion in EBCDIC%s","");
          CLPERRADD(psHdl,1,"c - for no conversion (normal character string without null termination)%s","");
-         CLPERRADD(psHdl,1,"x - s - normal character string with null termination%s","");
+         CLPERRADD(psHdl,1,"s - normal character string with null termination%s","");
+         CLPERRADD(psHdl,1,"f - use file content as string%s","");
          return(CLPERR_LEX);
       }
 
@@ -4660,7 +4717,12 @@ static int siClpSetDefault(
                if (siErr<0) return(siErr);
             }
             break;
-         default: return CLPERR(psHdl,CLPERR_SYN,"Token (%s) not allowed in default / property definition (%s) for argument '%s.%s'",apClpTok[siTok],isPrnStr(psArg,psArg->psFix->pcDft),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+         default:
+            if (siTok<0) {
+               return(siTok);
+            } else {
+               return CLPERR(psHdl,CLPERR_SYN,"Token (%s) not allowed in default / property definition (%s) for argument '%s.%s'",apClpTok[siTok],isPrnStr(psArg,psArg->psFix->pcDft),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+            }
          }
       }
       strcpy(psHdl->acSrc,acSrc);
