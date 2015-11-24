@@ -740,6 +740,7 @@ extern const char* mapccsid(const unsigned int uiCcsId){
    case   425: return("IBM-425");
    case   437: return("IBM-437");
    case   500: return("IBM-500");
+   case   646: return("US-ASCII");
    case   808: return("ISO8859-5");
    case   813: return("ISO8859-7");
    case   819: return("ISO8859-1");
