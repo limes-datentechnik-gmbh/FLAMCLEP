@@ -41,28 +41,42 @@ Below, you can find a possibly incomplete list of FLAMCLE feature:
 
  * * Support of an unlimited amount of commands
  * * Support of hidden commands (not documented)
+ * * Support of a default command (optional)
  * * Includes a lot of useful built-in functions
  * * Simple owner management to differentiate configurations
  * * The logical program name can be freely defined
+ * * Different view for property and command line parsing
  * * Case sensitive or in-sensitive command line interpretation
  * * Output file can be defined (stdout, stderr, or a real file)
  * * Complete trace file management for FLAMCLP and commands
  * * The look and feel can be defined freely
  * * Syntax, help and manpage support for program, commands and arguments
  * * Extensive documentation generation in ASCIIDOC format for the user manual
- * * Powerful property file management (generation, activation, ...)
+ * * Powerful property file management (generation, activation, update, ...)
  * * Simple configuration data management (own environment variables)
  * * Automatic keyword shortening for arguments
  * * Support for many data types, like:
  *   * Number (decimal, hexadecimal, octal, binary and time)
  *   * Float (decimal in all variants)
- *   * String (binary text/ASCII/EBCDIC/HEX or zero terminated)
- *   * Object (Structure)
- *   * Overlay (Union)
+ *   * String (binary text/ASCII/EBCDIC/HEX or from a file (for passwords))
+ *   * Object (Structure) with parameter file support
+ *   * Overlay (Union) with parameter file support
  *   * Array (List (realized as simplified notation))
  * * Support of constant definitions used as selection of values over keywords
  * * Internal calculated values are available as link (amount of values in an array, length of a string, object identifier in overlays, ...)
  * * The main table for a command can be defined as object or overlay
  * * Keyword, help message and detailed description can be freely defined for the program, each command, argument or constant definition
  * * Aliases for each argument can also be defined and are handled as options for the same value.
- * * Available and usable on each platform including WIN, UNIX, MAC, ZOS, VSE, ...
+ * * Available and usable on each platform including WIN, UNIX, USS, ZOS, ...
+ * * Support of STDENV as DD name for environment variables on mainframes
+ * * Support property definitions over environment variables to overrule hard coded default properties
+ * * Keywords (commands, built-in functions, ON, OFF, ALL, DEPTH1, ...) can start optional with "-" or "--"
+ * * Support for parameter files per command, object or overlay
+ * * File name mapping and DD:NAME support (see man_cle_main.txt)
+ * * Return/condition/exit code and reason code handling
+ * * On EBCDIC systems we use a code page specific interpretation of punctuation characters (<pre>!$#@[\]^`{|}~</pre>) dependent on the environment variable LANG
+ * * Extensive manual page management including replacement of owner (&{OWN}) and program name (&{PGM})
+ * * * Own tool to generate description strings from text files including replacement of constant definitions (${__VERSION__})
+ * * Definition of maximum condition code (MAXCC) for command execution
+ * * Special condition code handling (incl. description for manual and built-in function ERRORS)
+ * * Strings can be read from files to increase protection and prevent logging of passwords

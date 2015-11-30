@@ -91,9 +91,9 @@ Below, you can find a possibly incomplete list of FLAMCLE feature:
  * * Support for many data types, like:
  *   * Number (decimal, hexadecimal, octal, binary and time)
  *   * Float (decimal in all variants)
- *   * String (binary text/ASCII/EBCDIC/HEX or null-terminated)
- *   * Object (Structure)
- *   * Overlay (Union)
+ *   * String (binary text/ASCII/EBCDIC/HEX or from a file (for passwords))
+ *   * Object (Structure) with parameter file support
+ *   * Overlay (Union) with parameter file support
  *   * Array (List (realized as simplified notation))
  * * Support of constant definitions used as selection of values over keywords
  * * Internal calculated values are available as link (amount of values in an array, length of a string, object identifier in overlays, ...)
@@ -112,6 +112,7 @@ Below, you can find a possibly incomplete list of FLAMCLE feature:
  * * * Own tool to generate description strings from text files including replacement of constant definitions (${__VERSION__})
  * * Definition of maximum condition code (MAXCC) for command execution
  * * Special condition code handling (incl. description for manual and built-in function ERRORS)
+ * * Strings can be read from files to increase protection and prevent logging of passwords
 
 Built-in Functions
 ------------------
