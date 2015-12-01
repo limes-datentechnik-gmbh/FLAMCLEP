@@ -1529,6 +1529,7 @@ extern int siClpSymbolTableWalk(
          i--;
       }
       psSym->pcPat=psHdl->acPat;
+      psSym->siKwl=psHdl->psSym->psStd->siKwl;
       psSym->pcKyw=psHdl->psSym->psStd->pcKyw;
       psSym->pcAli=psHdl->psSym->psStd->pcAli;
       psSym->uiFlg=psHdl->psSym->psStd->uiFlg;

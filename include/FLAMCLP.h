@@ -654,6 +654,8 @@ typedef struct ClpSymWlk {
    int                           siMin;
    /** Maximum number of entries */
    int                           siMax;
+   /** Minimum length of keyword string to make it unique (maximal abbreviation) */
+   int                           siKwl;
    /** Size of the symbol */
    int                           siSiz;
    /** Object identifier for the symbol */
