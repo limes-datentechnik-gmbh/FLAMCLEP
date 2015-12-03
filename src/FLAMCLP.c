@@ -105,12 +105,13 @@
  * 1.1.55: Fix CLEP lexical error message "Character ('%c') not valid"
  * 1.1.56: Fix build scan issue: Access to field 'psDep' results in a dereference of a null pointer (loaded from variable 'psArg')
  * 1.1.57: Support filename type for strings to read passwords from files (f'pwdfile.txt') - string file support
+ * 1.1.58: Print time string for time entry in parased parameter list
 **/
 
-#define CLP_VSN_STR       "1.1.57"
+#define CLP_VSN_STR       "1.1.58"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        1
-#define CLP_VSN_REVISION       57
+#define CLP_VSN_REVISION       58
 
 /* Definition der Konstanten ******************************************/
 
@@ -3985,7 +3986,11 @@ static int siClpBldLit(
 
    pcHlp=fpcPat(pvHdl,siLev);
    if (strlen(psHdl->acLst) + strlen(pcHlp) + strlen(psArg->psStd->pcKyw) + strlen(pcVal) + 4 < CLPMAX_LSTLEN) {
-      sprintf(&psHdl->acLst[strlen(psHdl->acLst)],"%s.%s=%s\n",pcHlp,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal));
+      if (siTyp==CLPTYP_NUMBER && pcVal[0]=='t') {
+         sprintf(&psHdl->acLst[strlen(psHdl->acLst)],"%s.%s=%s(%s)\n",pcHlp,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),cstime(siVal,NULL));
+      } else {
+         sprintf(&psHdl->acLst[strlen(psHdl->acLst)],"%s.%s=%s\n",pcHlp,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal));
+      }
    }
 
    siErr=siClpBldLnk(pvHdl,siLev,siPos,psArg->psVar->siCnt,psArg->psFix->psCnt,FALSE);
