@@ -36,6 +36,7 @@
 #include <stdarg.h>
 #include <limits.h>
 #include <locale.h>
+#include <time.h>
 #ifdef __UNIX__
 #include <langinfo.h>
 #endif
@@ -1839,6 +1840,14 @@ extern int strxcmp(
          return(d);
       }
    }
+}
+
+extern char* cstime(unsigned long long t, char* p) {
+   static char    acBuf[20];
+   char*          pcStr=(p!=NULL)?p:acBuf;
+   time_t         h=(t)?(time_t)t:time(NULL);
+   strftime(pcStr,sizeof(acBuf),"%Y-%m-%d %H:%M:%S",localtime(&h));
+   return(pcStr);
 }
 
 /**********************************************************************/

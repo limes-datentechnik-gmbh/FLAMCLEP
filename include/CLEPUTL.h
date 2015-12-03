@@ -360,6 +360,21 @@ extern int strxcmp(
    const int                     c,
    const int                     f);
 
+/**
+ * Build time string
+ *
+ * Convert a time integer to a 20 byte time string of form YYYY-MM-DD HH:MM:SS.
+ *
+ * @param[in]  t  time in seconds since 1970 or 0 for current time
+ * @param[in]  p  NULL to return a static variable or a pointer where the 20 bytes are copied in
+ *
+ * @return pointer to the time string
+ */
+
+#define CSTIME_BUFSIZ   24
+
+extern char* cstime(unsigned long long t, char* p);
+
 /**********************************************************************/
 
 #ifdef __EBCDIC__
