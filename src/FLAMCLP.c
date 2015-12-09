@@ -105,13 +105,14 @@
  * 1.1.55: Fix CLEP lexical error message "Character ('%c') not valid"
  * 1.1.56: Fix build scan issue: Access to field 'psDep' results in a dereference of a null pointer (loaded from variable 'psArg')
  * 1.1.57: Support filename type for strings to read passwords from files (f'pwdfile.txt') - string file support
- * 1.1.58: Print time string for time entry in parased parameter list
+ * 1.1.58: Print time string for time entry in parsed parameter list
+ * 1.1.59: Support shorted time entries (0t2015, 0t2015/04/01, 0t2015/04/02.23:13)
 **/
 
-#define CLP_VSN_STR       "1.1.58"
+#define CLP_VSN_STR       "1.1.59"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        1
-#define CLP_VSN_REVISION       58
+#define CLP_VSN_REVISION       59
 
 /* Definition der Konstanten ******************************************/
 
@@ -2607,109 +2608,102 @@ static int siClpScnNat(
                (*ppCur)++; pcLex++;
             }
             *pcLex=EOS;
+            tm.tm_year=strtol(pcHlp+2,NULL,10);
             if ((*ppCur)[0]=='/' && isdigit((*ppCur)[1])) {
-               tm.tm_year=strtol(pcHlp+2,NULL,10);
-               pcLex=pcHlp+2;
-               (*ppCur)++;
+               pcLex=pcHlp+2; (*ppCur)++;
                while (isdigit(*(*ppCur)) && pcLex<pcEnd) {
                   *pcLex=*(*ppCur);
                   (*ppCur)++; pcLex++;
                }
                *pcLex=EOS;
+               tm.tm_mon=strtol(pcHlp+2,NULL,10);
                if ((*ppCur)[0]=='/' && isdigit((*ppCur)[1])) {
-                  tm.tm_mon=strtol(pcHlp+2,NULL,10);
-                  pcLex=pcHlp+2;
-                  (*ppCur)++;
+                  pcLex=pcHlp+2; (*ppCur)++;
                   while (isdigit(*(*ppCur)) && pcLex<pcEnd) {
                      *pcLex=*(*ppCur);
                      (*ppCur)++; pcLex++;
                   }
                   *pcLex=EOS;
+                  tm.tm_mday=strtol(pcHlp+2,NULL,10);
                   if ((*ppCur)[0]=='.' && isdigit((*ppCur)[1])) {
-                     tm.tm_mday=strtol(pcHlp+2,NULL,10);
-                     pcLex=pcHlp+2;
-                     (*ppCur)++;
+                     pcLex=pcHlp+2; (*ppCur)++;
                      while (isdigit(*(*ppCur)) && pcLex<pcEnd) {
                         *pcLex=*(*ppCur);
                         (*ppCur)++; pcLex++;
                      }
                      *pcLex=EOS;
+                     tm.tm_hour=strtol(pcHlp+2,NULL,10);
                      if ((*ppCur)[0]==':' && isdigit((*ppCur)[1])) {
-                        tm.tm_hour=strtol(pcHlp+2,NULL,10);
-                        pcLex=pcHlp+2;
-                        (*ppCur)++;
+                        pcLex=pcHlp+2; (*ppCur)++;
                         while (isdigit(*(*ppCur)) && pcLex<pcEnd) {
                            *pcLex=*(*ppCur);
                            (*ppCur)++; pcLex++;
                         }
                         *pcLex=EOS;
+                        tm.tm_min=strtol(pcHlp+2,NULL,10);
                         if ((*ppCur)[0]==':' && isdigit((*ppCur)[1])) {
-                           tm.tm_min=strtol(pcHlp+2,NULL,10);
-                           pcLex=pcHlp+2;
-                           (*ppCur)++;
+                           pcLex=pcHlp+2; (*ppCur)++;
                            while (isdigit(*(*ppCur)) && pcLex<pcEnd) {
                               *pcLex=*(*ppCur);
                               (*ppCur)++; pcLex++;
                            }
                            *pcLex=EOS;
                            tm.tm_sec=strtol(pcHlp+2,NULL,10);
-                           if (pcHlp[1]=='+') {
-                              t=time(NULL);
-                              if (t==-1) {
-                                 return CLPERR(psHdl,CLPERR_SYS,"Determine the current time is not possible%s","");
-                              }
-                              /*Fix the hour*/
-                              tm.tm_hour++;
-                              tmAkt=gmtime((time_t*)&t);
-                              tmAkt->tm_year +=tm.tm_year;
-                              tmAkt->tm_mon  +=tm.tm_mon;
-                              tmAkt->tm_mday +=tm.tm_mday;
-                              tmAkt->tm_hour +=tm.tm_hour;
-                              tmAkt->tm_min  +=tm.tm_min;
-                              tmAkt->tm_sec  +=tm.tm_sec;
-                              t=mktime(tmAkt);
-                              if (t==-1) {
-                                 return CLPERR(psHdl,CLPERR_LEX,"The calculated time value (0t%4.4d/%2.2d/%2.2d.%2.2d:%2.2d:%2.2d) cannot be converted to a number",
-                                                                tmAkt->tm_year+1900,tmAkt->tm_mon+1,tmAkt->tm_mday,tmAkt->tm_hour,tmAkt->tm_min,tmAkt->tm_sec);
-                              }
-                           } else if (pcHlp[1]=='-') {
-                              t=time(NULL);
-                              if (t==-1) {
-                                 return CLPERR(psHdl,CLPERR_SYS,"Determine the current time is not possible%s","");
-                              }
-                              /*Fix the hour*/
-                              tm.tm_hour--;
-                              tmAkt=gmtime((time_t*)&t);
-                              tmAkt->tm_year -=tm.tm_year;
-                              tmAkt->tm_mon  -=tm.tm_mon;
-                              tmAkt->tm_mday -=tm.tm_mday;
-                              tmAkt->tm_hour -=tm.tm_hour;
-                              tmAkt->tm_min  -=tm.tm_min;
-                              tmAkt->tm_sec  -=tm.tm_sec;
-
-                              t=mktime(tmAkt);
-                              if (t==-1) {
-                                 return CLPERR(psHdl,CLPERR_LEX,"The calculated time value (0t%4.4d/%2.2d/%2.2d.%2.2d:%2.2d:%2.2d) cannot be converted to a number",
-                                                                tmAkt->tm_year+1900,tmAkt->tm_mon+1,tmAkt->tm_mday,tmAkt->tm_hour,tmAkt->tm_min,tmAkt->tm_sec);
-                              }
-                           } else {
-                              tm.tm_year-=1900;
-                              tm.tm_mon-=1;
-                              t=mktime(&tm);
-                              if (t==-1) {
-                                 return CLPERR(psHdl,CLPERR_LEX,"The given time value (0t%4.4d/%2.2d/%2.2d.%2.2d:%2.2d:%2.2d) cannot be converted to a number",
-                                                                tm.tm_year+1900,tm.tm_mon+1,tm.tm_mday,tm.tm_hour,tm.tm_min,tm.tm_sec);
-                              }
-                           }
-                           pcHlp[1]=' ';
-                           sprintf(pcHlp+2,"%"PRIu64"",t);
-                           if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(NUM)-LEXEM(%s)\n",isPrnLex(psArg,pcHlp));
-                           return(CLPTOK_NUM);
-                        } else return CLPERR(psHdl,CLPERR_LEX,"Character ':' expected to separate minute from second%s","");
-                     } else return CLPERR(psHdl,CLPERR_LEX,"Character ':' expected to separate hour from minute%s","");
-                  } else return CLPERR(psHdl,CLPERR_LEX,"Character '.' expected to separate day from hour%s","");
-               } else return CLPERR(psHdl,CLPERR_LEX,"Character '/' expected to separate month from day%s","");
-            } else return CLPERR(psHdl,CLPERR_LEX,"Character '/' expected to separate year from month%s","");
+                        }
+                     }
+                  }
+               }
+            }
+            if (pcHlp[1]=='+') {
+               t=time(NULL);
+               if (t==-1) {
+                  return CLPERR(psHdl,CLPERR_SYS,"Determine the current time is not possible%s","");
+               }
+               tm.tm_hour++;/*Fix the hour*/
+               tmAkt=gmtime((time_t*)&t);
+               tmAkt->tm_year +=tm.tm_year;
+               tmAkt->tm_mon  +=tm.tm_mon;
+               tmAkt->tm_mday +=tm.tm_mday;
+               tmAkt->tm_hour +=tm.tm_hour;
+               tmAkt->tm_min  +=tm.tm_min;
+               tmAkt->tm_sec  +=tm.tm_sec;
+               t=mktime(tmAkt);
+               if (t==-1) {
+                  return CLPERR(psHdl,CLPERR_LEX,"The calculated time value (0t%4.4d/%2.2d/%2.2d.%2.2d:%2.2d:%2.2d) cannot be converted to a number",
+                                                 tmAkt->tm_year+1900,tmAkt->tm_mon+1,tmAkt->tm_mday,tmAkt->tm_hour,tmAkt->tm_min,tmAkt->tm_sec);
+               }
+            } else if (pcHlp[1]=='-') {
+               t=time(NULL);
+               if (t==-1) {
+                  return CLPERR(psHdl,CLPERR_SYS,"Determine the current time is not possible%s","");
+               }
+               tm.tm_hour--;/*Fix the hour*/
+               tmAkt=gmtime((time_t*)&t);
+               tmAkt->tm_year -=tm.tm_year;
+               tmAkt->tm_mon  -=tm.tm_mon;
+               tmAkt->tm_mday -=tm.tm_mday;
+               tmAkt->tm_hour -=tm.tm_hour;
+               tmAkt->tm_min  -=tm.tm_min;
+               tmAkt->tm_sec  -=tm.tm_sec;
+               t=mktime(tmAkt);
+               if (t==-1) {
+                  return CLPERR(psHdl,CLPERR_LEX,"The calculated time value (0t%4.4d/%2.2d/%2.2d.%2.2d:%2.2d:%2.2d) cannot be converted to a number",
+                                                 tmAkt->tm_year+1900,tmAkt->tm_mon+1,tmAkt->tm_mday,tmAkt->tm_hour,tmAkt->tm_min,tmAkt->tm_sec);
+               }
+            } else {
+               if (tm.tm_year>=1900) tm.tm_year-=1900;
+               if (tm.tm_mon >=   1) tm.tm_mon-=1;
+               if (tm.tm_mday ==  0) tm.tm_mday++;
+               t=mktime(&tm);
+               if (t==-1) {
+                  return CLPERR(psHdl,CLPERR_LEX,"The given time value (0t%4.4d/%2.2d/%2.2d.%2.2d:%2.2d:%2.2d) cannot be converted to a number",
+                                                 tm.tm_year+1900,tm.tm_mon+1,tm.tm_mday,tm.tm_hour,tm.tm_min,tm.tm_sec);
+               }
+            }
+            pcHlp[1]=' ';
+            sprintf(pcHlp+2,"%"PRIu64"",t);
+            if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(NUM)-LEXEM(%s)\n",isPrnLex(psArg,pcHlp));
+            return(CLPTOK_NUM);
          } else {
             while (isdigit(*(*ppCur)) && pcLex<pcEnd) {
                *pcLex=*(*ppCur);
