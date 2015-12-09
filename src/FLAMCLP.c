@@ -2699,6 +2699,7 @@ static int siClpScnNat(
                   return CLPERR(psHdl,CLPERR_LEX,"The given time value (0t%4.4d/%2.2d/%2.2d.%2.2d:%2.2d:%2.2d) cannot be converted to a number",
                                                  tm.tm_year+1900,tm.tm_mon+1,tm.tm_mday,tm.tm_hour,tm.tm_min,tm.tm_sec);
                }
+               if (tm.tm_isdst==1) t-=60*60;//correct daylight saving time
             }
             pcHlp[1]=' ';
             sprintf(pcHlp+2,"%"PRIu64"",t);
