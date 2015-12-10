@@ -107,12 +107,13 @@
  * 1.1.57: Support filename type for strings to read passwords from files (f'pwdfile.txt') - string file support
  * 1.1.58: Print time string for time entry in parsed parameter list
  * 1.1.59: Support shorted time entries (0t2015, 0t2015/04/01, 0t2015/04/02.23:13)
+ * 1.1.60: Fix wrong hour at time entry if daylight saving time used
 **/
 
-#define CLP_VSN_STR       "1.1.59"
+#define CLP_VSN_STR       "1.1.60"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        1
-#define CLP_VSN_REVISION       59
+#define CLP_VSN_REVISION       60
 
 /* Definition der Konstanten ******************************************/
 
@@ -2659,7 +2660,6 @@ static int siClpScnNat(
                if (t==-1) {
                   return CLPERR(psHdl,CLPERR_SYS,"Determine the current time is not possible%s","");
                }
-               tm.tm_hour++;/*Fix the hour*/
                tmAkt=gmtime((time_t*)&t);
                tmAkt->tm_year +=tm.tm_year;
                tmAkt->tm_mon  +=tm.tm_mon;
@@ -2672,12 +2672,12 @@ static int siClpScnNat(
                   return CLPERR(psHdl,CLPERR_LEX,"The calculated time value (0t%4.4d/%2.2d/%2.2d.%2.2d:%2.2d:%2.2d) cannot be converted to a number",
                                                  tmAkt->tm_year+1900,tmAkt->tm_mon+1,tmAkt->tm_mday,tmAkt->tm_hour,tmAkt->tm_min,tmAkt->tm_sec);
                }
+               if (tmAkt->tm_isdst==0) t+=60*60;//correct daylight saving time
             } else if (pcHlp[1]=='-') {
                t=time(NULL);
                if (t==-1) {
                   return CLPERR(psHdl,CLPERR_SYS,"Determine the current time is not possible%s","");
                }
-               tm.tm_hour--;/*Fix the hour*/
                tmAkt=gmtime((time_t*)&t);
                tmAkt->tm_year -=tm.tm_year;
                tmAkt->tm_mon  -=tm.tm_mon;
@@ -2690,6 +2690,7 @@ static int siClpScnNat(
                   return CLPERR(psHdl,CLPERR_LEX,"The calculated time value (0t%4.4d/%2.2d/%2.2d.%2.2d:%2.2d:%2.2d) cannot be converted to a number",
                                                  tmAkt->tm_year+1900,tmAkt->tm_mon+1,tmAkt->tm_mday,tmAkt->tm_hour,tmAkt->tm_min,tmAkt->tm_sec);
                }
+               if (tmAkt->tm_isdst==0) t+=60*60;//correct daylight saving time
             } else {
                if (tm.tm_year>=1900) tm.tm_year-=1900;
                if (tm.tm_mon >=   1) tm.tm_mon-=1;
