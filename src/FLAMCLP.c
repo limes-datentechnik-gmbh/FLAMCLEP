@@ -781,6 +781,7 @@ extern void* pvClpOpen(
    TsClpError*                   psErr)
 {
    TsHdl*                        psHdl=NULL;
+   char*                         pcLoc=NULL;
    int                           siErr;
    if (pcOwn!=NULL && pcPgm!=NULL && pcCmd!=NULL && psTab!=NULL) {
       psHdl=(TsHdl*)calloc(1,sizeof(TsHdl));
@@ -824,7 +825,10 @@ extern void* pvClpOpen(
             psErr->piRow=&psHdl->siRow;
             psErr->piCol=&psHdl->siCol;
          }
-         snprintf(psHdl->acLoc,sizeof(psHdl->acLoc),"%s",setlocale(LC_NUMERIC, NULL));
+         pcLoc=setlocale(LC_NUMERIC, NULL);
+         if (pcLoc!=NULL && *pcLoc) {
+            snprintf(psHdl->acLoc,sizeof(psHdl->acLoc),"%s",pcLoc);
+         }
          setlocale(LC_NUMERIC, "C");
       }
    }
