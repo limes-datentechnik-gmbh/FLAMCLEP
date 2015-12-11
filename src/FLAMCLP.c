@@ -40,6 +40,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <locale.h>
 
 #include "CLEPUTL.h"
 /* Include der Schnittstelle ******************************************/
@@ -108,12 +109,13 @@
  * 1.1.58: Print time string for time entry in parsed parameter list
  * 1.1.59: Support shorted time entries (0t2015, 0t2015/04/01, 0t2015/04/02.23:13)
  * 1.1.60: Fix wrong hour at time entry if daylight saving time used
+ * 1.1.61: Define "C" as locale for strtod() functions, to interpret floating point numbers correctly
 **/
 
-#define CLP_VSN_STR       "1.1.60"
+#define CLP_VSN_STR       "1.1.61"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        1
-#define CLP_VSN_REVISION       60
+#define CLP_VSN_REVISION       61
 
 /* Definition der Konstanten ******************************************/
 
@@ -129,6 +131,8 @@
 #define CLPMAX_LSTSIZ            65536
 #define CLPMAX_MSGLEN            1023
 #define CLPMAX_MSGSIZ            1024
+#define CLPMAX_LOCSIZ            128
+#define CLPMAX_LOCLEN            127
 
 #define CLPTOK_INI               0
 #define CLPTOK_END               1
@@ -276,8 +280,8 @@ typedef struct Hdl {
    int                           siRow;
    int                           siCol;
    int                           siErr;
+   char                          acLoc[CLPMAX_LOCSIZ];
 } TsHdl;
-
 
 /* Deklaration der internen Funktionen ********************************/
 
@@ -820,6 +824,8 @@ extern void* pvClpOpen(
             psErr->piRow=&psHdl->siRow;
             psErr->piCol=&psHdl->siCol;
          }
+         snprintf(psHdl->acLoc,sizeof(psHdl->acLoc),"%s",setlocale(LC_NUMERIC, NULL));
+         setlocale(LC_NUMERIC, "C");
       }
    }
    return((void*)psHdl);
@@ -1590,6 +1596,7 @@ extern void vdClpClose(
 {
    if (pvHdl!=NULL) {
       TsHdl*                     psHdl=(TsHdl*)pvHdl;
+      setlocale(LC_NUMERIC, psHdl->acLoc);
       vdClpSymDel(psHdl->psTab);
       free(pvHdl);
    }
