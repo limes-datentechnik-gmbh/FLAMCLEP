@@ -93,7 +93,7 @@ extern int ebcdic_fprintf(FILE* file, const char* format, ...) {
    char*    help;
    char*    temp;
    size_t   size=65536;
-   int      r;
+   int      r=0;
    temp=(char*)malloc(size);
    if (temp==NULL) return(0);
    *temp='\0';
