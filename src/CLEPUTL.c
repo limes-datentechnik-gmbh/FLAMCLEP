@@ -988,7 +988,7 @@ extern const char* mapccsid(const unsigned int uiCcsId){
 
 /**********************************************************************/
 
-extern void rplchar(char* name,const size_t size,const char c, const char* value)
+static void rplchar(char* name,const size_t size,const char c, const char* value)
 {
    char        h[size];
    char*       a=name;
@@ -1013,7 +1013,7 @@ extern void rplchar(char* name,const size_t size,const char c, const char* value
    }
 }
 
-extern void rplenvar(char* name,const size_t size,const char opn, const char cls)
+static void rplenvar(char* name,const size_t size,const char opn, const char cls)
 {
    int         la,lv;
    char        h[size];
@@ -1101,7 +1101,7 @@ extern void rplenvar(char* name,const size_t size,const char opn, const char cls
    }
 }
 
-extern char* rpltpl(char* string,int size,const char* templ,const char* values) {
+static char* rpltpl(char* string,int size,const char* templ,const char* values) {
    char*       s;
    char*       e;
    const char* t;

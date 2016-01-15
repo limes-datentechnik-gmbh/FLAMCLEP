@@ -160,24 +160,6 @@ extern void fprintm(FILE* file,const char* own, const char* pgm, const char* man
 extern char* strxcpy(char *dest, const char *src, size_t n);
 
 /**
- * Replaces each occurrence of char in name by value
- * @param name string for replacement
- * @param size size of replacement string
- * @param chr  character for replacement
- * @param value value for replacement
- */
-extern void rplchar(char* name,const size_t size,const char chr, const char* value);
-
-/**
- * Replace environment variables in a string
- * @param name string for replacement
- * @param size size of replacement string
- * @param opn  character to start enclosing of envar
- * @param cls  character for end of enclosing of envar
- */
-extern void rplenvar(char* name,size_t size,const char opn, const char cls);
-
-/**
  * Replace '~' with "<HOME>" and all environment variables enclosed with '<' and '>' to build a file name
  * @param file string for replacement
  * @param size size of replacement string
@@ -205,16 +187,6 @@ extern char* maplab(char* label,int size);
  * @return pointer to format string for fopen()
  */
 extern char* cpmapfil(char* dest, int size,const char* source,const int operation, const int binary, const int seek, const int flag);
-
-/**
- * Replace n-times %x in a template string with the values (x:%s) in the value string, where x can each printable character
- * @param string string for replacement
- * @param size size of replacement string
- * @param templ template string
- * @param values value string
- * @return pointer to label
- */
-extern char* rpltpl(char* string,int size,const char* templ,const char* values);
 
 /**
  * Use rpltpl() and maplab() to build key label names, based on key label templates
