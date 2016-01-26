@@ -3108,5 +3108,66 @@ static void vdCnfCls(
    }
 }
 
+
+extern int siCleParseString(
+   const int                     uiErr,
+   char*                         pcErr,
+   const int                     isCas,
+   const int                     isPfl,
+   const int                     siMkl,
+   const char*                   pcOwn,
+   const char*                   pcPgm,
+   const char*                   pcCmd,
+   const char*                   pcMan,
+   const char*                   pcHlp,
+   const int                     isOvl,
+   const char*                   pcStr,
+   const TsClpArgument*          psTab,
+   const char*                   pcDep,
+   const char*                   pcOpt,
+   const char*                   pcEnt,
+   int*                          piMod,
+   void*                         pvDat)
+{
+   int                     siErr=0;
+   void*                   pvHdl=NULL;
+   FILE*                   pfTmp=NULL;
+   TsClpError              stErr;
+   char                    acBuffer[4096];
+#ifdef __HOST__
+   C08                     acTmpNam[64];
+   snprintf(acTmpNam,sizeof(acTmpNam),"CLPTEMP.P%7.7d",((unsigned int)getpid())%10000000);
+   pfTmp=fopen(acTmpNam,"wb+,type=memory");
+#else
+   pfTmp=tmpfile();
+#endif
+
+   pvHdl=pvClpOpen(FALSE,TRUE,siMkl,pcOwn,pcPgm,pcCmd,pcMan,pcHlp,isOvl,
+                   psTab,pvDat,pfTmp,pfTmp,NULL,NULL,NULL,NULL,
+                   pcDep,pcOpt,pcEnt,&stErr);
+   if (pvHdl==NULL) {
+      snprintf(pcErr,uiErr,"CTX-MESSAGE : Open of string parser for command '%s' failed\n",pcCmd);
+      if (pfTmp!=NULL) {rewind(pfTmp); fread(acBuffer+strlen(acBuffer),1,sizeof(acBuffer)-(strlen(acBuffer)+1),pfTmp); fclose(pfTmp);}
+      return -1;
+   }
+   siErr=siClpParseCmd(pvHdl,NULL,pcStr,TRUE,(int*)piMod,NULL);
+   if (siErr<0) {
+      snprintf(pcErr,uiErr,
+            "CTX-MESSAGE : Parsing of string for command '%s' failed\n"
+            "CLP-STRING  : %s\n"
+            "CLP-ERROR   : %d - %s\n"
+            "CLP-MESSAGE : %s\n"
+            "CLP-SOURCE  : %s (ROW: %d COL: %d)\n",
+            pcCmd,pcStr,siErr,pcClpError(siErr),stErr.pcMsg,
+            stErr.pcSrc,*stErr.piRow,*stErr.piCol);
+      if (pfTmp!=NULL) {rewind(pfTmp); fread(acBuffer+strlen(acBuffer),1,sizeof(acBuffer)-(strlen(acBuffer)+1),pfTmp); fclose(pfTmp);}
+      vdClpClose(pvHdl);
+      return siErr;
+   }
+   if (pfTmp!=NULL) fclose(pfTmp);
+   vdClpClose(pvHdl);
+   return 0;
+}
+
 /**********************************************************************/
 
