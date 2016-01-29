@@ -659,6 +659,8 @@ typedef struct CleAppendix {
  * @param[in]  pcScc String for explanation of special condition codes if not NULL then used by built-in function ERRORS (converted on EBCDIC systems)
  * @param[in]  pcDef Default command or built-in function, which is executed if the first keyword (argv[1]) don't match (if NULL then no default)
  * @param[in]  pfMsg Pointer to a function which prints a message for an reason code (use to generate the corresponding appendix)\n
+ * @param[in]  pcApx Optional description if appendix A used for other CLP string (in ASCIIDOC format (term:: explanation) - converted on EBCDIC systems),
+ *             if NULL or empty then no description is generated, the parameter is only used if psApx below set
  * @param[in]  psApx Pointer to the table with other CLP strings to print as appendix (optional could be NULL)
  *
  * @return signed integer with the condition codes below:\n
@@ -703,6 +705,7 @@ extern int siCleExecute(
    const char*                   pcScc,
    const char*                   pcDef,
    tpfMsg                        pfMsg,
+   const char*                   pcApx,
    const TsCleAppendix*          psApx);
 
 

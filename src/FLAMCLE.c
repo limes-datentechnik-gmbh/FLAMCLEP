@@ -430,6 +430,7 @@ extern int siCleExecute(
    const char*                   pcScc,
    const char*                   pcDef,
    tpfMsg                        pfMsg,
+   const char*                   pcApx,
    const TsCleAppendix*          psApx)
 {
    int                           i,j,l,s,siErr,siDep,siCnt,isSet=0;
@@ -1320,6 +1321,7 @@ EVALUATE:
                efprintf(pfDoc,"[appendix]\n");
                fprintf(pfDoc,"OTHER CLP STRINGS\n");
                fprintf(pfDoc,"-----------------\n\n");
+               if (pcApx!=NULL && *pcApx) fprintm(pfDoc,pcOwn,pcPgm,pcApx,1);
                for (i=0;psApx[i].pcHdl!=NULL;i++) {
                   pvHdl=pvClpOpen(isCas,isPfl,siMkl,acOwn,psApx[i].pcRot,psApx[i].pcKyw,psApx[i].pcMan,psApx[i].pcHlp,psApx[i].isOvl,psApx[i].psTab,NULL,pfOut,pfOut,pfTrc,pfTrc,pfTrc,pfTrc,pcDep,pcOpt,pcEnt,NULL);
                   if (pvHdl==NULL) {
