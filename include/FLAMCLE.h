@@ -526,6 +526,35 @@ typedef struct CleCommand {
    const char*                   pcHlp;
 } TsCleCommand;
 
+/**
+ * \struct TsCleAppendix
+ *
+ * This structure is used to define a table of CLP strings add as appendix to the generated documentation\n
+ *
+ * Its members are:
+ * \par
+ * \b pcRot  Pointer to the root key word for this string (:alpha:[:alnum:|'-'|'_']*)\n
+ * \b pcKyw  Pointer to the key word for this string (:alpha:[:alnum:|'-'|'_']*)\n
+ * \b pcHdl  Pointer to the headline for the sub chapter for this CLP string (:alpha:[:alnum:|'-'|'_']*)\n
+ * \b psTab  Pointer to the main argument table for this CLP string\n
+ * \b pcMan  Pointer to a null-terminated string for a detailed description for this CLP string
+ *           (in ASCIDOC format, content behind .DESCRIPTION, mainly simply some paragraphs plus .OPTIONS and/or.EXAMPLES)
+ *           It is recommended to use a header file with a define for this long string.
+ *           "&{OWN}" and "&{PGM}" are replaced with the current owner and program name.
+ *           The resulting text is converted on EBCDIC systems)\n
+ * \b pcHlp  String for a short context sensitive help for this CLP string (converted on EBCDIC systems)\n
+ * \b isOvl  True if provided table must be interpreted as overlay else as object\n
+ */
+typedef struct CleAppendix {
+   const char*                   pcRot;
+   const char*                   pcKyw;
+   const char*                   pcHdl;
+   const TsClpArgument*          psTab;
+   const char*                   pcMan;
+   const char*                   pcHlp;
+   const int                     isOvl;
+} TsCleAppendix;
+
 /** Starts a table with command definitions
  *
  *  *nam* Name of this table\n
@@ -556,6 +585,26 @@ typedef struct CleCommand {
 /** Ends a table with constant definitions
  */
 #define CLETAB_CLS                                                    { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0   , NULL, NULL}
+
+/** Starts a table with appendix definitions
+ *
+ *  *nam* Name of this table\n
+ */
+#define CLEAPX_OPN(nam)               TsCleAppendix nam[]
+
+/** defines a appendix for the object or overlay *kyw* of the root *rot* with the headline of *hdl* for a certain CLP string
+ *
+ *  *tab* Pointer to the main table for this CLP string.\n
+ *  *man* Pointer to a null-terminated string for a detailed description for this CLP string.
+ *        (in ASCIDOC format, content behind .DESCRIPTION, mainly simply some paragraphs plus .OPTIONS and/or .EXAMPLES)
+ *        It is recommended to use a header file with a define for this long string)\n
+ *  *hlp* String for a short context sensitive help for this CLP string\n
+ */
+#define CLETAB_APX(rot,kyw,hdl,tab,man,hlp,ovl)   {(rot),(kyw),(hdl),(tab),(man),(hlp),(ovl)},
+
+/** Ends a table with appendix definitions
+ */
+#define CLEAPX_CLS                    { NULL, NULL, NULL, NULL, 0}
 
 /**
  * Execute command line
@@ -610,6 +659,7 @@ typedef struct CleCommand {
  * @param[in]  pcScc String for explanation of special condition codes if not NULL then used by built-in function ERRORS (converted on EBCDIC systems)
  * @param[in]  pcDef Default command or built-in function, which is executed if the first keyword (argv[1]) don't match (if NULL then no default)
  * @param[in]  pfMsg Pointer to a function which prints a message for an reason code (use to generate the corresponding appendix)\n
+ * @param[in]  psApx Pointer to the table with other CLP strings to print as appendix (optional could be NULL)
  *
  * @return signed integer with the condition codes below:\n
  * 0  - command line, command syntax, mapping, execution and finish of the command was successful\n
@@ -652,7 +702,8 @@ extern int siCleExecute(
    const char*                   pcFin,
    const char*                   pcScc,
    const char*                   pcDef,
-   tpfMsg                        pfMsg);
+   tpfMsg                        pfMsg,
+   const TsCleAppendix*          psApx);
 
 
  extern int siCleParseString(

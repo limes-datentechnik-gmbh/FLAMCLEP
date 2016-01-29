@@ -110,11 +110,12 @@
  * 1.1.47: Print undefined/empty properties as comment
  * 1.1.48: Add support for special condition codes (SCC)
  * 1.1.49: Set owner id as environment variable if not already defined
+ * 1.1.50: Support appendix for other CLP strings in docu generation
  */
-#define CLE_VSN_STR       "1.1.49"
+#define CLE_VSN_STR       "1.1.50"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        1
-#define CLE_VSN_REVISION       49
+#define CLE_VSN_REVISION       50
 
 /* Definition der Konstanten ******************************************/
 #define CLEMAX_CNFLEN            1023
@@ -428,7 +429,8 @@ extern int siCleExecute(
    const char*                   pcFin,
    const char*                   pcScc,
    const char*                   pcDef,
-   tpfMsg                        pfMsg)
+   tpfMsg                        pfMsg,
+   const TsCleAppendix*          psApx)
 {
    int                           i,j,l,s,siErr,siDep,siCnt,isSet=0;
    TsCnfHdl*                     psCnf;
@@ -1312,6 +1314,31 @@ EVALUATE:
             vdCleManFunction(pfDoc,S_TLD,"4.22","ERRORS"  ,HLP_CLE_ERRORS  ,acOwn,pcPgm,SYN_CLE_ERRORS  ,MAN_CLE_ERRORS  ,FALSE,isNbr);
 
             s=1;
+
+            if (psApx!=NULL) {
+               efprintf(pfDoc,"[[appendix-clp-strings]]\n");
+               efprintf(pfDoc,"[appendix]\n");
+               fprintf(pfDoc,"OTHER CLP STRINGS\n");
+               fprintf(pfDoc,"-----------------\n\n");
+               for (i=0;psApx[i].pcHdl!=NULL;i++) {
+                  pvHdl=pvClpOpen(isCas,isPfl,siMkl,acOwn,psApx[i].pcRot,psApx[i].pcKyw,psApx[i].pcMan,psApx[i].pcHlp,psApx[i].isOvl,psApx[i].psTab,NULL,pfOut,pfOut,pfTrc,pfTrc,pfTrc,pfTrc,pcDep,pcOpt,pcEnt,NULL);
+                  if (pvHdl==NULL) {
+                     fprintf(pfOut,"Open of parser for CLP string appendix '%s' failed\n",pcCmd);
+                     return(CLERTC_TAB);
+                  }
+                  snprintf(acNum,sizeof(acNum),"A.%d.",i+1);
+                  siErr=siClpDocu(pvHdl,pfDoc,psApx[i].pcHdl,acNum,"Appendix",TRUE,FALSE,isNbr);
+                  if (siErr<0) {
+                     fprintf(pfOut,"Creation of documentation file (%s) failed (%d - %s)\n",acFil,errno,strerror(errno));
+                     vdClpClose(pvHdl); pvHdl=NULL;
+                     ERROR(CLERTC_SYN);
+                  }
+                  vdClpClose(pvHdl); pvHdl=NULL;
+               }
+               efprintf(pfDoc,"indexterm:[Appendix CLP Strings]\n\n\n");
+               s++;
+            }
+
             siErr=siCleSimpleInit(pfOut,isPfl,pcDep,pcOpt,pcEnt,&pvHdl);
             if (siErr) ERROR(siErr);
             efprintf(pfDoc,"[[appendix-lexem]]\n");
