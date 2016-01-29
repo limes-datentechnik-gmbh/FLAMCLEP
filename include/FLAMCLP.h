@@ -1021,6 +1021,7 @@ extern int siClpHelp(
  * @param[in]  pvHdl Pointer to the corresponding handle created with \a pvClpOpen
  * @param[in]  pfDoc File handle used to write the documentation in ASCIIDOC format
  * @param[in]  pcPat Path (root.input...) to limit documentation certain level
+ * @param[in]  pcHdl Head line (optional, replacement for command in the first level)
  * @param[in]  pcNum Leading number for table of contents ("1.2." used or not used depend on isNbr, NULL pointer cause an error)
  * @param[in]  pcCmd Qualifier for command head line (Recommended: "COMMAND" NULL pointer cause an error)
  * @param[in]  isDep If TRUE then all deeper parts are printed if FALSE then not.
@@ -1034,6 +1035,7 @@ extern int siClpDocu(
    void*                         pvHdl,
    FILE*                         pfDoc,
    const char*                   pcPat,
+   const char*                   pcHdl,
    const char*                   pcNum,
    const char*                   pcCmd,
    const int                     isDep,

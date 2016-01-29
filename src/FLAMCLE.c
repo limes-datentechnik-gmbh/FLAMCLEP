@@ -1192,7 +1192,7 @@ EVALUATE:
                   siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isPfl,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg);
                   if (siErr) ERROR(siErr);
                   snprintf(acNum,sizeof(acNum),"2.%d.",i+1);
-                  siErr=siClpDocu(pvHdl,pfDoc,pcCmd,acNum,"COMMAND",TRUE,FALSE,isNbr);
+                  siErr=siClpDocu(pvHdl,pfDoc,pcCmd,NULL,acNum,"COMMAND",TRUE,FALSE,isNbr);
                   if (siErr<0) {
                      fprintf(pfOut,"Creation of documentation file (%s) failed (%d - %s)\n",acFil,errno,strerror(errno));
                      ERROR(CLERTC_SYN);
@@ -1221,7 +1221,7 @@ EVALUATE:
                      }
                      snprintf(acNum,sizeof(acNum),"2.%d.",i+1);
                      sprintf(pcPat,"%s.%s",pcDef,pcCmd);
-                     siErr=siClpDocu(pvHdl,pfDoc,pcPat,acNum,"COMMAND",TRUE,FALSE,isNbr);
+                     siErr=siClpDocu(pvHdl,pfDoc,pcPat,NULL,acNum,"COMMAND",TRUE,FALSE,isNbr);
                      if (siErr<0) {
                         fprintf(pfOut,"Creation of documentation file (%s) failed (%d - %s)\n",acFil,errno,strerror(errno));
                         free(pcPat);
@@ -1270,7 +1270,7 @@ EVALUATE:
                   siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isPfl,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg);
                   if (siErr) ERROR(siErr);
                   snprintf(acNum,sizeof(acNum),"3.%d.",i+1);
-                  siErr=siClpDocu(pvHdl,pfDoc,psTab[i].pcKyw,acNum,"COMMAND",TRUE,FALSE,isNbr);
+                  siErr=siClpDocu(pvHdl,pfDoc,psTab[i].pcKyw,NULL,acNum,"COMMAND",TRUE,FALSE,isNbr);
                   if (siErr<0) {
                      fprintf(pfOut,"Creation of documentation file (%s) failed (%d - %s)\n",acFil,errno,strerror(errno));
                      vdClpClose(pvHdl); pvHdl=NULL;
@@ -1327,7 +1327,7 @@ EVALUATE:
                      return(CLERTC_TAB);
                   }
                   snprintf(acNum,sizeof(acNum),"A.%d.",i+1);
-                  siErr=siClpDocu(pvHdl,pfDoc,psApx[i].pcHdl,acNum,"Appendix",TRUE,FALSE,isNbr);
+                  siErr=siClpDocu(pvHdl,pfDoc,psApx[i].pcKyw,psApx[i].pcHdl,acNum,"Appendix",TRUE,FALSE,isNbr);
                   if (siErr<0) {
                      fprintf(pfOut,"Creation of documentation file (%s) failed (%d - %s)\n",acFil,errno,strerror(errno));
                      vdClpClose(pvHdl); pvHdl=NULL;
@@ -2693,7 +2693,7 @@ static void vdPrnCommandManpage(
 {
    char                    acNum[CLEMAX_NUMLEN];
    snprintf(acNum,sizeof(acNum),"3.%d.",siInd+1);
-   siClpDocu(pvHdl,pfOut,pcCmd,acNum,"COMMAND",FALSE,isMan,isNbr);
+   siClpDocu(pvHdl,pfOut,pcCmd,NULL,acNum,"COMMAND",FALSE,isMan,isNbr);
 }
 
 static void vdPrnProperties(

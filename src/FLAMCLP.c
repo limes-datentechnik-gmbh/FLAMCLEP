@@ -109,13 +109,13 @@
  * 1.1.58: Print time string for time entry in parsed parameter list
  * 1.1.59: Support shorted time entries (0t2015, 0t2015/04/01, 0t2015/04/02.23:13)
  * 1.1.60: Fix wrong hour at time entry if daylight saving time used
- * 1.1.61: Define "C" as locale for strtod() functions, to interpret floating point numbers correctly
+ * 1.1.62: Support optional headline in the first level of docu generation
 **/
 
-#define CLP_VSN_STR       "1.1.61"
+#define CLP_VSN_STR       "1.1.62"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        1
-#define CLP_VSN_REVISION       61
+#define CLP_VSN_REVISION       62
 
 /* Definition der Konstanten ******************************************/
 
@@ -1150,6 +1150,7 @@ extern int siClpDocu(
    void*                         pvHdl,
    FILE*                         pfDoc,
    const char*                   pcPat,
+   const char*                   pcHdl,
    const char*                   pcNum,
    const char*                   pcCmd,
    const int                     isDep,
@@ -1163,6 +1164,7 @@ extern int siClpDocu(
    char*                         pcKyw=NULL;
    char                          acKyw[CLPMAX_LEXSIZ];
    int                           siErr=0,siLev,siPos,i;
+   const char*                   pcSta=(pcHdl!=NULL&&*pcHdl)?pcHdl:psHdl->pcCmd;
    int                           l=strlen(psHdl->pcCmd);
    char                          acNum[CLPMAX_PRESIZ];
    char                          acHlp[CLPMAX_PRESIZ];
@@ -1360,11 +1362,11 @@ extern int siClpDocu(
          if (psHdl->pcPgm!=NULL && *psHdl->pcPgm) {
              for (p=psHdl->pcPgm;*p;p++) fprintf(pfDoc,"%c",tolower(*p));
              fprintf(pfDoc,".");
-             l=strlen(psHdl->pcPgm)+strlen(psHdl->pcCmd)+4;
+             l=strlen(psHdl->pcPgm)+strlen(pcSta)+4;
          } else {
-             l=strlen(psHdl->pcCmd)+3;
+             l=strlen(pcSta)+3;
          }
-         for (p=psHdl->pcCmd;*p;p++) fprintf(pfDoc,"%c",tolower(*p));
+         for (p=pcSta;*p;p++) fprintf(pfDoc,"%c",tolower(*p));
          fprintf(pfDoc,   "(1)\n");
          for (i=0;i<l;i++) fprintf(pfDoc,"="); fprintf(pfDoc,"\n");
          fprintf(pfDoc,   ":doctype: manpage\n\n");
@@ -1374,7 +1376,7 @@ extern int siClpDocu(
              for (p=psHdl->pcPgm;*p;p++) fprintf(pfDoc,"%c",tolower(*p));
              fprintf(pfDoc,".");
          }
-         for (p=psHdl->pcCmd;*p;p++) fprintf(pfDoc,"%c",tolower(*p));
+         for (p=pcSta;*p;p++) fprintf(pfDoc,"%c",tolower(*p));
          efprintf(pfDoc,  " - `%s`\n\n",psHdl->pcHlp);
          fprintf(pfDoc,   "SYNOPSIS\n");
          fprintf(pfDoc,   "--------\n\n");
@@ -1400,12 +1402,12 @@ extern int siClpDocu(
          fprintf(pfDoc,"limes datentechnik(r) gmbh (www.flam.de)\n\n");
       } else {
          if (isNbr) {
-            fprintf(pfDoc,   "%s %s '%s'\n",pcNum,pcCmd,psHdl->pcCmd);
-            l=strlen(pcNum)+strlen(pcCmd)+strlen(psHdl->pcCmd)+4;
+            fprintf(pfDoc,   "%s %s '%s'\n",pcNum,pcCmd,pcSta);
+            l=strlen(pcNum)+strlen(pcCmd)+strlen(pcSta)+4;
             for (i=0;i<l;i++) fprintf(pfDoc,"%c",C_TLD); fprintf(pfDoc,"\n\n");
          } else {
-            fprintf(pfDoc,   "%s '%s'\n",pcCmd,psHdl->pcCmd);
-            l=strlen(pcCmd)+strlen(psHdl->pcCmd)+3;
+            fprintf(pfDoc,   "%s '%s'\n",pcCmd,pcSta);
+            l=strlen(pcCmd)+strlen(pcSta)+3;
             for (i=0;i<l;i++) fprintf(pfDoc,"%c",C_TLD); fprintf(pfDoc,"\n\n");
          }
          fprintf(pfDoc,   ".SYNOPSIS\n\n");
@@ -1426,7 +1428,7 @@ extern int siClpDocu(
          } else {
             fprintf(pfDoc,"No detailed description available for this command.\n\n");
          }
-         fprintf(pfDoc,   "indexterm:%c%s %s%c\n\n\n",C_SBO,pcCmd,psHdl->pcCmd,C_SBC);
+         fprintf(pfDoc,   "indexterm:%c%s %s%c\n\n\n",C_SBO,pcCmd,pcSta,C_SBC);
          if (isDep) {
             siPos=siClpPrnDoc(pvHdl,pfDoc,0,isNbr,pcNum,NULL,psTab);
             if (siPos<0) return(siPos);
