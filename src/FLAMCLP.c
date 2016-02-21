@@ -110,12 +110,13 @@
  * 1.1.59: Support shorted time entries (0t2015, 0t2015/04/01, 0t2015/04/02.23:13)
  * 1.1.60: Fix wrong hour at time entry if daylight saving time used
  * 1.1.62: Support optional headline in the first level of docu generation
+ * 1.1.63: Accept decimal number as a float if it is a integer and the expected type is float
 **/
 
-#define CLP_VSN_STR       "1.1.62"
+#define CLP_VSN_STR       "1.1.63"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        1
-#define CLP_VSN_REVISION       62
+#define CLP_VSN_REVISION       63
 
 /* Definition der Konstanten ******************************************/
 
@@ -2771,7 +2772,7 @@ static int siClpScnNat(
          } else {
             *pcLex=EOS;
             if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(NUM)-LEXEM(%s)\n",isPrnLex(psArg,pcHlp));
-            return(CLPTOK_NUM);
+            return((uiTok==CLPTOK_FLT)?CLPTOK_FLT:CLPTOK_NUM);
          }
       } else if (*(*ppCur)=='=') { /*sign*/
          pcLex[0]='='; pcLex[1]=EOS; (*ppCur)++;
