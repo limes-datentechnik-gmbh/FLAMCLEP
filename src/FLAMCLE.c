@@ -1325,7 +1325,7 @@ EVALUATE:
                for (i=0;psApx[i].pcHdl!=NULL;i++) {
                   pvHdl=pvClpOpen(isCas,isPfl,siMkl,acOwn,psApx[i].pcRot,psApx[i].pcKyw,psApx[i].pcMan,psApx[i].pcHlp,psApx[i].isOvl,psApx[i].psTab,NULL,pfOut,pfOut,pfTrc,pfTrc,pfTrc,pfTrc,pcDep,pcOpt,pcEnt,NULL);
                   if (pvHdl==NULL) {
-                     fprintf(pfOut,"Open of parser for CLP string appendix '%s' failed\n",pcCmd);
+                     fprintf(pfOut,"Open of parser for CLP string of appendix '%s' failed\n",psApx[i].pcRot);
                      return(CLERTC_TAB);
                   }
                   snprintf(acNum,sizeof(acNum),"A.%d.",i+1);
