@@ -160,7 +160,7 @@ values.
 
 These critical characters are interpreted dependent on the environment
 variable LANG. If the environment variable LANG is not defined then the
-compilation default CCSID (f.e. IBM-1047 on USS and IBM1141 on ZOS) is
+compilation default CCSID (e.g. IBM-1047 on USS and IBM1141 on ZOS) is
 used. Below is the current list of supported CCSIDs on EBCDIC systems.
 
 ------------------------------------------------------------------------
