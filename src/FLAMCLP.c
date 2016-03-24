@@ -111,12 +111,13 @@
  * 1.1.60: Fix wrong hour at time entry if daylight saving time used
  * 1.1.62: Support optional headline in the first level of docu generation
  * 1.1.63: Accept decimal number as a float if it is a integer and the expected type is float
+ * 1.1.64: Make acPro and acSrc dynamic to reduce memory consumption of symbol table
 **/
 
-#define CLP_VSN_STR       "1.1.63"
+#define CLP_VSN_STR       "1.1.64"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        1
-#define CLP_VSN_REVISION       63
+#define CLP_VSN_REVISION       64
 
 /* Definition der Konstanten ******************************************/
 
@@ -207,7 +208,7 @@ typedef struct Fix {
    const char*                   pcDft;
    const char*                   pcMan;
    const char*                   pcHlp;
-   char                          acPro[CLPMAX_LEXSIZ];
+   char*                         pcPro;
    int                           siTyp;
    int                           siMin;
    int                           siMax;
@@ -220,7 +221,7 @@ typedef struct Fix {
    struct Sym*                   psEln;
    struct Sym*                   psSln;
    struct Sym*                   psTln;
-   char                          acSrc[CLPMAX_LEXSIZ];
+   char*                         pcSrc;
    int                           siRow;
 }TsFix;
 
@@ -1585,15 +1586,18 @@ extern int siClpSymbolTableUpdate(
    TsClpSymUpd*                  psSym)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
+   C08*                          pcHlp;
    if (psSym->pcPro!=NULL) {
       if (!CLPISF_ARG(psHdl->psSym->psStd->uiFlg)) {
          return CLPERR(psHdl,CLPERR_SIZ,"Update of property field failed (symbol (%s) is not a argument)",psHdl->psSym->psStd->pcKyw);
       }
-      if (strlen(psSym->pcPro)>=sizeof(psHdl->psSym->psFix->acPro)) {
-         return CLPERR(psHdl,CLPERR_SIZ,"Update of property field failed (string (%d) to long (%d))",(int)strlen(psSym->pcPro),(int)sizeof(psHdl->psSym->psFix->acPro));
+      pcHlp=realloc(psHdl->psSym->psFix->pcPro,strlen(psSym->pcPro)+1);
+      if (pcHlp==NULL) {
+         return CLPERR(psHdl,CLPERR_SIZ,"Update of property field failed (string (%d(%s)) to long)",(int)strlen(psSym->pcPro),psSym->pcPro);
       }
-      strcpy(psHdl->psSym->psFix->acPro,psSym->pcPro);
-      psHdl->psSym->psFix->pcDft=psHdl->psSym->psFix->acPro;
+      psHdl->psSym->psFix->pcPro=pcHlp;
+      strcpy(psHdl->psSym->psFix->pcPro,psSym->pcPro);
+      psHdl->psSym->psFix->pcDft=psHdl->psSym->psFix->pcPro;
    }
    return(CLP_OK);
 }
@@ -1624,10 +1628,14 @@ static char* get_env(char* var,const size_t size,const char* fmtstr, ...)
 }
 
 #undef  ERROR
-#define ERROR(s) if (s!=NULL) {\
-      if (s->psStd!=NULL) { free(s->psStd); s->psStd=NULL; }\
-      if (s->psFix!=NULL) { free(s->psFix); s->psFix=NULL; }\
-      if (s->psVar!=NULL) { free(s->psVar); s->psVar=NULL; }\
+#define ERROR(s) if (s!=NULL) {                                                     \
+      if (s->psStd!=NULL) { free(s->psStd); s->psStd=NULL; }                        \
+      if (s->psFix!=NULL) {                                                         \
+         if (s->psFix->pcPro!=NULL) { free(s->psFix->pcPro); s->psFix->pcPro=NULL; }\
+         if (s->psFix->pcSrc!=NULL) { free(s->psFix->pcSrc); s->psFix->pcSrc=NULL; }\
+         free(s->psFix); s->psFix=NULL;                                             \
+      }                                                                             \
+      if (s->psVar!=NULL) { free(s->psVar); s->psVar=NULL; }                        \
       free(s); } return(NULL);
 
 static TsSym* psClpSymIns(
@@ -1677,14 +1685,30 @@ static TsSym* psClpSymIns(
       }
    }
    if (pcEnv!=NULL && *pcEnv) {
-      snprintf(psSym->psFix->acPro,sizeof(psSym->psFix->acPro),"%s",pcEnv);
-      psSym->psFix->pcDft=psSym->psFix->acPro;
-      snprintf(psSym->psFix->acSrc,sizeof(psSym->psFix->acSrc),"%s%s",CLPSRC_ENV,acVar);
+      psSym->psFix->pcPro=malloc(strlen(pcEnv)+1);
+      if (psSym->psFix->pcPro==NULL) {
+         CLPERR(psHdl,CLPERR_MEM,"Allocation of memory for symbol element property '%s.%s' failed",fpcPat(pvHdl,siLev),psArg->pcKyw);
+         ERROR(psSym);
+      }
+      strcpy(psSym->psFix->pcPro,pcEnv);
+      psSym->psFix->pcDft=psSym->psFix->pcPro;
+      psSym->psFix->pcSrc=malloc(strlen(CLPSRC_ENV)+strlen(acVar)+1);
+      if (psSym->psFix->pcSrc==NULL) {
+         CLPERR(psHdl,CLPERR_MEM,"Allocation of memory for symbol element source '%s.%s' failed",fpcPat(pvHdl,siLev),psArg->pcKyw);
+         ERROR(psSym);
+      }
+      sprintf(psSym->psFix->pcSrc,"%s%s",CLPSRC_ENV,acVar);
       psSym->psFix->siRow=1;
    } else {
       psSym->psFix->pcDft=psArg->pcDft;
-      if (psArg->pcDft) {
-         snprintf(psSym->psFix->acSrc,sizeof(psSym->psFix->acSrc),"%s%s.%s",CLPSRC_DEF,fpcPat(pvHdl,siLev),psArg->pcKyw);
+      if (psArg->pcDft!=NULL) {
+         char* pcPat=fpcPat(pvHdl,siLev);
+         psSym->psFix->pcSrc=malloc(strlen(CLPSRC_DEF)+strlen(pcPat)+strlen(psArg->pcKyw)+2);
+         if (psSym->psFix->pcSrc==NULL) {
+            CLPERR(psHdl,CLPERR_MEM,"Allocation of memory for symbol element source '%s.%s' failed",fpcPat(pvHdl,siLev),psArg->pcKyw);
+            ERROR(psSym);
+         }
+         sprintf(psSym->psFix->pcSrc,"%s%s.%s",CLPSRC_DEF,pcPat,psArg->pcKyw);
          psSym->psFix->siRow=1;
       }
    }
@@ -2280,6 +2304,8 @@ static void vdClpSymDel(
          psHlp->psVar=NULL;
       }
       if (!CLPISF_ALI(psHlp->psStd->uiFlg) && psHlp->psFix!=NULL) {
+         if (psHlp->psFix->pcPro!=NULL) free(psHlp->psFix->pcPro);
+         if (psHlp->psFix->pcSrc!=NULL) free(psHlp->psFix->pcSrc);
          memset(psHlp->psFix,0,sizeof(TsFix));
          free(psHlp->psFix);
          psHlp->psFix=NULL;
@@ -3402,9 +3428,19 @@ static int siClpBldPro(
       }
       if (psArg!=NULL) {
          if (CLPISF_ARG(psArg->psStd->uiFlg) || CLPISF_ALI(psArg->psStd->uiFlg)) {
-            strcpy(psArg->psFix->acPro,pcPro);
-            psArg->psFix->pcDft=psArg->psFix->acPro;
-            strcpy(psArg->psFix->acSrc,psHdl->acSrc);
+            C08* pcHlp=realloc(psArg->psFix->pcPro,strlen(pcPro)+1);
+            if (pcHlp==NULL) {
+               return CLPERR(psHdl,CLPERR_SIZ,"Build of property field failed (string (%d(%s)) to long)",(int)strlen(pcPro),pcPro);
+            }
+            psArg->psFix->pcPro=pcHlp;
+            strcpy(psArg->psFix->pcPro,pcPro);
+            psArg->psFix->pcDft=psArg->psFix->pcPro;
+            pcHlp=realloc(psArg->psFix->pcSrc,strlen(psHdl->acSrc)+1);
+            if (pcHlp==NULL) {
+               return CLPERR(psHdl,CLPERR_SIZ,"Build of source field failed (string (%d(%s)) to long)",(int)strlen(psHdl->acSrc),psHdl->acSrc);
+            }
+            psArg->psFix->pcSrc=pcHlp;
+            strcpy(psArg->psFix->pcSrc,psHdl->acSrc);
             psArg->psFix->siRow=siRow;
             if (strlen(psHdl->acLst) + strlen(pcPat) + strlen(pcPro) + 8 < CLPMAX_LSTLEN) {
                sprintf(&psHdl->acLst[strlen(psHdl->acLst)],"%s=\"%s\"\n",pcPat,isPrnLex2(psArg,pcPro));
@@ -4675,7 +4711,7 @@ static int siClpSetDefault(
 
    if (CLPISF_ARG(psArg->psStd->uiFlg) && psArg->psVar->siCnt==0 && psArg->psFix->pcDft!=NULL && strlen(psArg->psFix->pcDft)) {
       if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"SUPPLEMENT-LIST-PARSER-BEGIN(%s.%s=%s)\n",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,psArg->psFix->pcDft);
-      strcpy(acSrc,psHdl->acSrc); strcpy(psHdl->acSrc,psArg->psFix->acSrc);
+      strcpy(acSrc,psHdl->acSrc); snprintf(psHdl->acSrc,sizeof(psHdl->acSrc),"%s",psArg->psFix->pcSrc);
       pcCur=psHdl->pcCur; psHdl->pcCur=psArg->psFix->pcDft;
       pcSrc=psHdl->pcSrc; psHdl->pcSrc=psArg->psFix->pcDft;
       pcOld=psHdl->pcOld; psHdl->pcOld=psArg->psFix->pcDft;
