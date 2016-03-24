@@ -112,6 +112,7 @@
  * 1.1.62: Support optional headline in the first level of docu generation
  * 1.1.63: Accept decimal number as a float if it is a integer and the expected type is float
  * 1.1.64: Make acPro and acSrc dynamic to reduce memory consumption of symbol table
+ * 1.1.65: Support also grave (` - 0x60) to enclose strings
 **/
 
 #define CLP_VSN_STR       "1.1.64"
@@ -2332,6 +2333,7 @@ static void vdClpSymDel(
    #define STRCHR '\''
    #define SPMCHR '\"'
 #endif
+   #define ALTCHR C_GRV
 
 extern int siClpLexem(
    void*                         pvHdl,
@@ -2358,14 +2360,14 @@ extern int siClpLexem(
    fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," str       [x|X]''' [:print:]* ''' |         (binary string in hex notation)\n");
    fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," str       [f|F]''' [:print:]* ''' | (read string from file (for passwords))\n");
    fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"           Strings can contain two '' to represent one '                    \n");
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"           Strings can also be enclosed in \" instead of '                   \n");
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"           Strings can also be enclosed in \" or %c instead of '              \n",ALTCHR);
    fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"           Strings can directly start behind a '=' without enclosing '/\"    \n");
    fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"              In this case the string ends at the next separator or operator\n");
    fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"              and keywords are preferred. To use keywords, separators or    \n");
    fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"              operators in strings, enclosing quotes are required.          \n");
    fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," SUPPLEMENT     '\"' [:print:]* '\"' |   (null-terminated string (properties))\n");
    fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"           Supplements can contain two \"\" to represent one \"                \n");
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"           Supplements can also be enclosed in ' instead of \"               \n");
+   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"           Supplements can also be enclosed in ' or %c instead of \"          \n",ALTCHR);
    return(CLP_OK);
 }
 
@@ -2503,6 +2505,42 @@ static int siClpScnNat(
             if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(STR)-LEXEM(%s)\n",isPrnLex(psArg,pcHlp));
             return(CLPTOK_STR);
          }
+      } else if ((*ppCur)[0]==ALTCHR) {/*alternate string*/
+         char* pcSup;
+         *pcLex='d'; pcLex++;
+         *pcLex='\''; pcLex++;
+         pcSup=pcLex;
+         (*ppCur)++;
+         while ((*ppCur)[0]!=EOS && ((*ppCur)[0]!=ALTCHR || ((*ppCur)[0]==ALTCHR && (*ppCur)[1]==ALTCHR)) &&  pcLex<pcEnd) {
+            *pcLex=*(*ppCur); pcLex++;
+            if (*(*ppCur)=='\n') {
+               (*ppCur)++;
+               psHdl->siRow++;
+               psHdl->pcRow=(*ppCur);
+            } else if ((*ppCur)[0]==ALTCHR) {
+               (*ppCur)+=2;
+            } else {
+               (*ppCur)++;
+            }
+         }
+         *pcLex=EOS;
+         if (*(*ppCur)!=ALTCHR) {
+            return CLPERR(psHdl,CLPERR_LEX,"String literal / supplement string not terminated with '%c'",ALTCHR);
+         }
+         (*ppCur)++;
+         if (uiTok==CLPTOK_SUP) {
+            char* p1=pcHlp;
+            char* p2=pcSup;
+            while (*p2) {
+               *p1++=*p2++;
+            }
+            *p1=EOS;
+            if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(SUP)-LEXEM(%s)\n",isPrnLex(psArg,pcHlp));
+            return(CLPTOK_SUP);
+         } else {
+            if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(STR)-LEXEM(%s)\n",isPrnLex(psArg,pcHlp));
+            return(CLPTOK_STR);
+         }
       } else if ((tolower((*ppCur)[0])=='x' || tolower((*ppCur)[0])=='a' || tolower((*ppCur)[0])=='e' ||
                   tolower((*ppCur)[0])=='c' || tolower((*ppCur)[0])=='s' || tolower((*ppCur)[0])=='f') && (*ppCur)[1]==STRCHR) {/*defined string '...'*/
          *pcLex=tolower(*(*ppCur)); pcLex++;
@@ -2547,6 +2585,30 @@ static int siClpScnNat(
          *pcLex=EOS;
          if (*(*ppCur)!=SPMCHR) {
             return CLPERR(psHdl,CLPERR_LEX,"String literal not terminated with '%c'",SPMCHR);
+         }
+         (*ppCur)++;
+         if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(STR)-LEXEM(%s)\n",isPrnLex(psArg,pcHlp));
+         return(CLPTOK_STR);
+      } else if ((tolower((*ppCur)[0])=='x' || tolower((*ppCur)[0])=='a' || tolower((*ppCur)[0])=='e' ||
+                  tolower((*ppCur)[0])=='c' || tolower((*ppCur)[0])=='s' || tolower((*ppCur)[0])=='f') && (*ppCur)[1]==ALTCHR) {/*defined string "..."*/
+         *pcLex=tolower(*(*ppCur)); pcLex++;
+         *pcLex='\''; pcLex++;
+         (*ppCur)+=2;
+         while ((*ppCur)[0]!=EOS && ((*ppCur)[0]!=ALTCHR || ((*ppCur)[0]==ALTCHR && (*ppCur)[1]==ALTCHR)) &&  pcLex<pcEnd) {
+            *pcLex=*(*ppCur); pcLex++;
+            if (*(*ppCur)=='\n') {
+               (*ppCur)++;
+               psHdl->siRow++;
+               psHdl->pcRow=(*ppCur);
+            } else if ((*ppCur)[0]==ALTCHR) {
+               (*ppCur)+=2;
+            } else {
+               (*ppCur)++;
+            }
+         }
+         *pcLex=EOS;
+         if (*(*ppCur)!=ALTCHR) {
+            return CLPERR(psHdl,CLPERR_LEX,"String literal not terminated with '%c'",ALTCHR);
          }
          (*ppCur)++;
          if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(STR)-LEXEM(%s)\n",isPrnLex(psArg,pcHlp));
