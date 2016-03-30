@@ -166,8 +166,10 @@ int main(int argc, char* argv[])
                                       pageName[k++] = '"';
                                    } else if (linebuf[i] == '$' && linebuf[i+1] == '{') { /* skip variables */
                                        pageName[k++] = '"';
+                                       pageName[k++] = ' ';
                                        for (i+=2 ; i < n ; i++) {
                                            if (linebuf[i] == '}') {
+                                               pageName[k++] = ' ';
                                                pageName[k++] = '"';
                                                break;
                                            }
