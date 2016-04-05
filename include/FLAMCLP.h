@@ -503,45 +503,45 @@ extern const char* pcClpAbout(const int l, const int s, char* b);
 * Flags for command line parsing
 */
 /** CLPFLG_NON To define no special flags */
-#define CLPFLG_NON               0x00000000UL
+#define CLPFLG_NON               0x00000000U
 /** CLPFLG_ALI This parameter is an alias for another argument (set by macros) */
-#define CLPFLG_ALI               0x00000001UL
+#define CLPFLG_ALI               0x00000001U
 /** CLPFLG_CON This parameter is a constant definition (no argument, no link, no alias (set by macros)) */
-#define CLPFLG_CON               0x00000002UL
+#define CLPFLG_CON               0x00000002U
 /** CLPFLG_CMD If set the parameter is only used within the command line (command line only) */
-#define CLPFLG_CMD               0x00000004UL
+#define CLPFLG_CMD               0x00000004U
 /** CLPFLG_PRO If set the parameter is only used within the property file (property file only) */
-#define CLPFLG_PRO               0x00000008UL
+#define CLPFLG_PRO               0x00000008U
 /** CLPFLG_SEL If set only the predefined constants over the corresponding key words can be selected (useful to define selections) */
-#define CLPFLG_SEL               0x00000010UL
+#define CLPFLG_SEL               0x00000010U
 /** CLPFLG_FIX This argument has a fixed length (only useful for strings if a typedef defines a fixed length per element, else set internally) */
-#define CLPFLG_FIX               0x00000020UL
+#define CLPFLG_FIX               0x00000020U
 /** CLPFLG_BIN This argument can contain binary data without null termination (length must be known or determined with a link) */
-#define CLPFLG_BIN               0x00000040UL
+#define CLPFLG_BIN               0x00000040U
 /** CLPFLG_DMY If set the parameter is not visible, meaning it is a dummy */
-#define CLPFLG_DMY               0x00000080UL
+#define CLPFLG_DMY               0x00000080U
 /** CLPFLG_CNT This link will be filled by the calculated amount of elements (useful for arrays) */
-#define CLPFLG_CNT               0x00000100UL
+#define CLPFLG_CNT               0x00000100U
 /** CLPFLG_OID This link will be filled by the object identifier (OID) of the chosen argument (useful for overlays) */
-#define CLPFLG_OID               0x00000200UL
+#define CLPFLG_OID               0x00000200U
 /** CLPFLG_ELN This link will be filled by the calculated length of an element (fixed types == data size, packed types == data length) */
-#define CLPFLG_ELN               0x00001000UL
+#define CLPFLG_ELN               0x00001000U
 /** CLPFLG_SLN This link will be filled by the calculated string length for an element (only for null-terminated strings) */
-#define CLPFLG_SLN               0x00002000UL
+#define CLPFLG_SLN               0x00002000U
 /** CLPFLG_TLN This link will be filled by the calculated total length for the argument (sum of all element lengths) */
-#define CLPFLG_TLN               0x00004000UL
+#define CLPFLG_TLN               0x00004000U
 /** CLPFLG_DEF This flag enables to use the OID as default for numbers if no value is assigned (only the keyword is used (syntax extension))*/
-#define CLPFLG_DEF               0x00008000UL
+#define CLPFLG_DEF               0x00008000U
 /** CLPFLG_ASC This flag will set the default method of interpretation of a binary string to local character string (DEFAULT)*/
-#define CLPFLG_CHR               0x00010000UL
+#define CLPFLG_CHR               0x00010000U
 /** CLPFLG_ASC This flag will set the default method of interpretation of a binary string to ASCII*/
-#define CLPFLG_ASC               0x00020000UL
+#define CLPFLG_ASC               0x00020000U
 /** CLPFLG_ASC This flag will set the default method of interpretation of a binary string to EBCDIC*/
-#define CLPFLG_EBC               0x00040000UL
+#define CLPFLG_EBC               0x00040000U
 /** CLPFLG_ASC This flag will set the default method of interpretation of a binary string to hexadecimal*/
-#define CLPFLG_HEX               0x00080000UL
+#define CLPFLG_HEX               0x00080000U
 /** CLPFLG_PWD This flag will ensure that the clear value is only put into the data structure but not traced, logged or given away elsewhere */
-#define CLPFLG_PWD               0x01000000UL
+#define CLPFLG_PWD               0x01000000U
 
 /**
  *  Definition of CLPFLG macros
@@ -584,34 +584,34 @@ extern const char* pcClpAbout(const int l, const int s, char* b);
 * Symbol table walk operations
 */
 /** CLPSYM_NON No operation done */
-#define CLPSYM_NON               0x00000000UL
+#define CLPSYM_NON               0x00000000U
 /** CLPSYM_ROOT Go to symbol table root */
-#define CLPSYM_ROOT              0x00000001UL
+#define CLPSYM_ROOT              0x00000001U
 /** CLPSYM_OLD Go to at last used symbol */
-#define CLPSYM_OLD               0x00000002UL
+#define CLPSYM_OLD               0x00000002U
 /** CLPSYM_NEXT Go to the next symbol in the list */
-#define CLPSYM_NEXT              0x00000004UL
+#define CLPSYM_NEXT              0x00000004U
 /** CLPSYM_BACK Go to the previous symbol in the list */
-#define CLPSYM_BACK              0x00000008UL
+#define CLPSYM_BACK              0x00000008U
 /** CLPSYM_DEP Go to the deeper level in the tree */
-#define CLPSYM_DEP               0x00000010UL
+#define CLPSYM_DEP               0x00000010U
 /** CLPSYM_HIH Go to the higher level in the tree */
-#define CLPSYM_HIH               0x00000020UL
+#define CLPSYM_HIH               0x00000020U
 /** CLPSYM_ALIAS Go to the alias symbol */
-#define CLPSYM_ALIAS             0x00000100UL
+#define CLPSYM_ALIAS             0x00000100U
 /** CLPSYM_COUNT Go to the counter symbol */
-#define CLPSYM_COUNT             0x00001000UL
+#define CLPSYM_COUNT             0x00001000U
 /** CLPSYM_LINK Go to the entry link symbol */
-#define CLPSYM_LINK              0x00004000UL
+#define CLPSYM_LINK              0x00004000U
 
 /** CLPSYM_OID Go to the entry object identifier symbol */
-#define CLPSYM_OID               0x00008000UL
+#define CLPSYM_OID               0x00008000U
 /** CLPSYM_ELN Go to the element length symbol */
-#define CLPSYM_ELN               0x00002000UL
+#define CLPSYM_ELN               0x00002000U
 /** CLPSYM_SLN Go to the string length symbol */
-#define CLPSYM_SLN               0x00010000UL
+#define CLPSYM_SLN               0x00010000U
 /** CLPSYM_SLN Go to the total length symbol */
-#define CLPSYM_TLN               0x00020000UL
+#define CLPSYM_TLN               0x00020000U
 
 /**
  *  Definition of CLPSYM macros
