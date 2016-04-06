@@ -205,7 +205,7 @@ extern char* cpmaplab(char* label, int size,const char* templ, const char* value
  * the CCSID for US-ASCII (ASCII platforms) or IBM-1047 (EBCDIC platforms) is returned.
  * @return A supported CCSID > 0
  */
-extern unsigned int sysccsid();
+extern unsigned int sysccsid(void);
 
 /**
  * Map environment variable LANG to CCSID
