@@ -639,7 +639,7 @@ typedef struct ClpSymWlk {
    /** Pointer to the alias */
    const char*                   pcAli;
    /** Flag value */
-   unsigned long                 uiFlg;
+   unsigned int                  uiFlg;
    /** Pointer to the default supplement string */
    const char*                   pcDft;
    /** Pointer to the manual page (description) */
@@ -661,7 +661,7 @@ typedef struct ClpSymWlk {
    /** Object identifier for the symbol */
    int                           siOid;
    /** Bitmask for possible operations */
-   unsigned long                 uiOpr;
+   unsigned int                  uiOpr;
 }TsClpSymWlk;
 
 /**
@@ -685,7 +685,7 @@ typedef struct ClpSymUpd {
  */
 extern int siClpSymbolTableWalk(
    void*                         pvHdl,
-   const unsigned long           uiOpr,
+   const unsigned int            uiOpr,
    TsClpSymWlk*                  psSym);
 
 /**
@@ -728,7 +728,7 @@ typedef struct ClpArgument {
    /** Unique integer value representing the argument (object identifier, used in overlays or for switches) */
    int                           siOid;
    /** Flag value which can be assigned with CLPFLG_SEL/CON/FIX/CNT/SEN/ELN/TLN/OID/ALI to define different characteristics */
-   unsigned long                 uiFlg;
+   unsigned int                  uiFlg;
    /** Pointer to another parameter table for CLPTYP_OBJECT and CLPTYP_OVRLAY describing these structures
     *  for CLPTYP_NUMBER, CLPTYP_FLOATN or CLPTYP_STRING to define selections (constant definitions) */
    struct ClpArgument*           psTab;

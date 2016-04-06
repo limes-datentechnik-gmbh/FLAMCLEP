@@ -198,7 +198,7 @@ static const char* pcClpErr(int siErr) {
 typedef struct Std {
    const char*                   pcKyw;
    const char*                   pcAli;
-   unsigned long                 uiFlg;
+   unsigned int                  uiFlg;
    struct Sym*                   psAli;
    int                           siKwl;
    int                           siLev;
@@ -560,8 +560,8 @@ static void vdClpPrnArg(
    const int                     siTyp,
    const char*                   pcHlp,
    const char*                   pcDft,
-   const int                     isSel,
-   const int                     isCon);
+   const unsigned int            isSel,
+   const unsigned int            isCon);
 
 static void vdClpPrnArgTab(
    void*                         pvHdl,
@@ -1509,7 +1509,7 @@ extern int siClpProperties(
 
 extern int siClpSymbolTableWalk(
    void*                         pvHdl,
-   const unsigned long           uiOpr,
+   const unsigned int            uiOpr,
    TsClpSymWlk*                  psSym)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
@@ -1594,7 +1594,7 @@ extern int siClpSymbolTableUpdate(
       }
       pcHlp=realloc(psHdl->psSym->psFix->pcPro,strlen(psSym->pcPro)+1);
       if (pcHlp==NULL) {
-         return CLPERR(psHdl,CLPERR_SIZ,"Update of property field failed (string (%d(%s)) to long)",(int)strlen(psSym->pcPro),psSym->pcPro);
+         return CLPERR(psHdl,CLPERR_SIZ,"Update of property field failed (string (%d(%s)) too long)",(int)strlen(psSym->pcPro),psSym->pcPro);
       }
       psHdl->psSym->psFix->pcPro=pcHlp;
       strcpy(psHdl->psSym->psFix->pcPro,psSym->pcPro);
@@ -2267,7 +2267,7 @@ static void vdClpSymPrn(
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    TsSym*                        psHlp=psSym;
    while (psHlp!=NULL) {
-      efprintf(psHdl->pfSym,"%s %3.3d - %s (KWL=%d TYP=%s MIN=%d MAX=%d SIZ=%d OFS=%d OID=%d FLG=%8.8lX (NXT=%p BAK=%p DEP=%p HIH=%p ALI=%p CNT=%p OID=%p ELN=%p SLN=%p TLN=%p LNK=%p)) - %s\n",
+      efprintf(psHdl->pfSym,"%s %3.3d - %s (KWL=%d TYP=%s MIN=%d MAX=%d SIZ=%d OFS=%d OID=%d FLG=%8.8X (NXT=%p BAK=%p DEP=%p HIH=%p ALI=%p CNT=%p OID=%p ELN=%p SLN=%p TLN=%p LNK=%p)) - %s\n",
             fpcPre(pvHdl,siLev),psHlp->psStd->siPos+1,psHlp->psStd->pcKyw,psHlp->psStd->siKwl,apClpTyp[psHlp->psFix->siTyp],psHlp->psFix->siMin,psHlp->psFix->siMax,psHlp->psFix->siSiz,
             psHlp->psFix->siOfs,psHlp->psFix->siOid,psHlp->psStd->uiFlg,psHlp->psNxt,psHlp->psBak,psHlp->psDep,psHlp->psHih,psHlp->psStd->psAli,psHlp->psFix->psCnt,psHlp->psFix->psOid,
             psHlp->psFix->psEln,psHlp->psFix->psSln,psHlp->psFix->psTln,psHlp->psFix->psLnk,psHlp->psFix->pcHlp);
@@ -3492,14 +3492,14 @@ static int siClpBldPro(
          if (CLPISF_ARG(psArg->psStd->uiFlg) || CLPISF_ALI(psArg->psStd->uiFlg)) {
             C08* pcHlp=realloc(psArg->psFix->pcPro,strlen(pcPro)+1);
             if (pcHlp==NULL) {
-               return CLPERR(psHdl,CLPERR_SIZ,"Build of property field failed (string (%d(%s)) to long)",(int)strlen(pcPro),pcPro);
+               return CLPERR(psHdl,CLPERR_SIZ,"Build of property field failed (string (%d(%s)) too long)",(int)strlen(pcPro),pcPro);
             }
             psArg->psFix->pcPro=pcHlp;
             strcpy(psArg->psFix->pcPro,pcPro);
             psArg->psFix->pcDft=psArg->psFix->pcPro;
             pcHlp=realloc(psArg->psFix->pcSrc,strlen(psHdl->acSrc)+1);
             if (pcHlp==NULL) {
-               return CLPERR(psHdl,CLPERR_SIZ,"Build of source field failed (string (%d(%s)) to long)",(int)strlen(psHdl->acSrc),psHdl->acSrc);
+               return CLPERR(psHdl,CLPERR_SIZ,"Build of source field failed (string (%d(%s)) too long)",(int)strlen(psHdl->acSrc),psHdl->acSrc);
             }
             psArg->psFix->pcSrc=pcHlp;
             strcpy(psArg->psFix->pcSrc,psHdl->acSrc);
@@ -4858,8 +4858,8 @@ static void vdClpPrnArg(
    const int                     siTyp,
    const char*                   pcHlp,
    const char*                   pcDft,
-   const int                     isSel,
-   const int                     isCon)
+   const unsigned int            isSel,
+   const unsigned int            isCon)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    char*                         p=fpcPre(pvHdl,siLev);
