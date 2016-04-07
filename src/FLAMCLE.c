@@ -43,6 +43,10 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <errno.h>
+#ifdef __HOST__
+#include <unistd.h>
+#endif
+
 
 /* Include eigener Bibliotheken  **************************************/
 
