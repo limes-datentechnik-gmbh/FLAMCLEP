@@ -312,7 +312,7 @@ extern void fprintm(FILE* file,const char* own, const char* pgm, const char* man
    efprintf(file,"%s",ptr);
 }
 
-extern unsigned int sysccsid() {
+extern unsigned int sysccsid(void) {
    unsigned int ccsid = 0;
    const char* charset;
 #ifdef __UNIX__
