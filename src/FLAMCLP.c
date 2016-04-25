@@ -1528,7 +1528,7 @@ extern int siClpSymbolTableWalk(
    case CLPSYM_OID:   psHdl->psSym = psHdl->psSym->psFix->psOid; break;
    case CLPSYM_SLN:   psHdl->psSym = psHdl->psSym->psFix->psSln; break;
    case CLPSYM_TLN:   psHdl->psSym = psHdl->psSym->psFix->psTln; break;
-   default: return CLPERR(psHdl,CLPERR_PAR,"Operation (%ul) for symbol table walk not supported",uiOpr);
+   default: return CLPERR(psHdl,CLPERR_PAR,"Operation (%u) for symbol table walk not supported",uiOpr);
    }
    if (psHdl->psSym!=NULL) {
       TsSym*               apTmp[CLPMAX_HDEPTH];
