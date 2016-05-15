@@ -1244,7 +1244,8 @@ EVALUATE:
                fprintm(pfDoc,pcOwn,pcPgm,pcCov,2);
             } else {
                snprintf(acNum,sizeof(acNum),"'%s' - User Manual",acPgm); l=strlen(acNum); fprintf(pfDoc,"%s\n",acNum);
-               for (i=0;i<l;i++) fprintf(pfDoc,"="); fprintf(pfDoc,"\n");
+               for (i=0;i<l;i++) fprintf(pfDoc,"=");
+               fprintf(pfDoc,"\n");
                fprintf(pfDoc,":doctype: book\n\n");
             }
             efprintf(pfDoc,"[[command-line-processor]]\n");
@@ -1262,10 +1263,12 @@ EVALUATE:
 
             if (isNbr) {
                snprintf(acNum,sizeof(acNum),"3. Available commands"); l=strlen(acNum); fprintf(pfDoc,"%s\n",acNum);
-               for (i=0;i<l;i++) fprintf(pfDoc,"-"); fprintf(pfDoc,"\n\n");
+               for (i=0;i<l;i++) fprintf(pfDoc,"-");
+               fprintf(pfDoc,"\n\n");
             } else {
                snprintf(acNum,sizeof(acNum),"Available commands"); l=strlen(acNum); fprintf(pfDoc,"%s\n",acNum);
-               for (i=0;i<l;i++) fprintf(pfDoc,"-"); fprintf(pfDoc,"\n\n");
+               for (i=0;i<l;i++) fprintf(pfDoc,"-");
+               fprintf(pfDoc,"\n\n");
             }
             fprintm(pfDoc,pcOwn,pcPgm,MAN_CLE_COMMANDS,2);
             efprintf(pfDoc,"indexterm:[Available commands]\n\n\n");
@@ -1287,10 +1290,12 @@ EVALUATE:
 
             if (isNbr) {
                snprintf(acNum,sizeof(acNum),"4. Available built-in functions"); l=strlen(acNum); fprintf(pfDoc,"%s\n",acNum);
-               for (i=0;i<l;i++) fprintf(pfDoc,"-"); fprintf(pfDoc,"\n\n");
+               for (i=0;i<l;i++) fprintf(pfDoc,"-");
+               fprintf(pfDoc,"\n\n");
             } else {
                snprintf(acNum,sizeof(acNum),"Available built-in functions"); l=strlen(acNum); fprintf(pfDoc,"%s\n",acNum);
-               for (i=0;i<l;i++) fprintf(pfDoc,"-"); fprintf(pfDoc,"\n\n");
+               for (i=0;i<l;i++) fprintf(pfDoc,"-");
+               fprintf(pfDoc,"\n\n");
             }
             fprintm(pfDoc,pcOwn,pcPgm,MAN_CLE_FUNCTIONS,2);
             efprintf(pfDoc,"indexterm:[Available built-in functions]\n\n\n");
@@ -2451,15 +2456,19 @@ static void vdCleManProgram(
       if (isNbr) {
          fprintf(pfOut,"2. PROGRAM '%s'\n",pcPgm);
          l=strlen(pcPgm)+13;
-         for (i=0;i<l;i++) fprintf(pfOut,"%c",'-'); fprintf(pfOut,"\n\n");
+         for (i=0;i<l;i++) fprintf(pfOut,"%c",'-');
+         fprintf(pfOut,"\n\n");
          fprintf(pfOut,"2.1. SYNOPSIS\n");
-         for (i=0;i<13;i++) fprintf(pfOut,"%c",C_TLD); fprintf(pfOut,"\n\n");
+         for (i=0;i<13;i++) fprintf(pfOut,"%c",C_TLD);
+         fprintf(pfOut,"\n\n");
       } else {
          fprintf(pfOut,"PROGRAM '%s'\n",pcPgm);
          l=strlen(pcPgm)+10;
-         for (i=0;i<l;i++) fprintf(pfOut,"%c",'-'); fprintf(pfOut,"\n\n");
+         for (i=0;i<l;i++) fprintf(pfOut,"%c",'-');
+         fprintf(pfOut,"\n\n");
          fprintf(pfOut,"SYNOPSIS\n");
-         for (i=0;i<8;i++) fprintf(pfOut,"%c",C_TLD); fprintf(pfOut,"\n\n");
+         for (i=0;i<8;i++) fprintf(pfOut,"%c",C_TLD);
+         fprintf(pfOut,"\n\n");
       }
       fprintf(pfOut, "-----------------------------------------------------------------------\n");
       efprintf(pfOut,"HELP:   %s\n",pcHlp);
@@ -2471,11 +2480,13 @@ static void vdCleManProgram(
 
       if (isNbr) {
          fprintf(pfOut,"2.2. DESCRIPTION\n");
-         for (i=0;i<16;i++) fprintf(pfOut,"%c",C_TLD); fprintf(pfOut,"\n\n");
+         for (i=0;i<16;i++) fprintf(pfOut,"%c",C_TLD);
+         fprintf(pfOut,"\n\n");
 
       } else {
          fprintf(pfOut,"DESCRIPTION\n");
-         for (i=0;i<11;i++) fprintf(pfOut,"%c",C_TLD); fprintf(pfOut,"\n\n");
+         for (i=0;i<11;i++) fprintf(pfOut,"%c",C_TLD);
+         fprintf(pfOut,"\n\n");
       }
       if (pcMan!=NULL && *pcMan) {
          fprintm(pfOut,pcOwn,pcPgm,pcMan,2);
@@ -2485,10 +2496,12 @@ static void vdCleManProgram(
       fprintf(pfOut,"indexterm:%cDescription for program %s%c\n\n\n",C_SBO,pcPgm,C_SBC);
       if (isNbr) {
          fprintf(pfOut,"2.3. SYNTAX\n");
-         for (i=0;i<12;i++) fprintf(pfOut,"%c",C_TLD); fprintf(pfOut,"\n\n");
+         for (i=0;i<12;i++) fprintf(pfOut,"%c",C_TLD);
+         fprintf(pfOut,"\n\n");
       } else {
          fprintf(pfOut,"SYNTAX\n");
-         for (i=0;i<6;i++) fprintf(pfOut,"%c",C_TLD); fprintf(pfOut,"\n\n");
+         for (i=0;i<6;i++) fprintf(pfOut,"%c",C_TLD);
+         fprintf(pfOut,"\n\n");
       }
       fprintm(pfOut,pcOwn,pcPgm,MAN_CLE_MAIN_SYNTAX,1);
       fprintf(pfOut,"------------------------------------------------------------------------\n");
@@ -2499,10 +2512,12 @@ static void vdCleManProgram(
 
       if (isNbr) {
          fprintf(pfOut,"2.4. HELP\n");
-         for (i=0;i<9;i++) fprintf(pfOut,"%c",C_TLD); fprintf(pfOut,"\n\n");
+         for (i=0;i<9;i++) fprintf(pfOut,"%c",C_TLD);
+         fprintf(pfOut,"\n\n");
       } else {
          fprintf(pfOut,"HELP\n");
-         for (i=0;i<4;i++) fprintf(pfOut,"%c",C_TLD); fprintf(pfOut,"\n\n");
+         for (i=0;i<4;i++) fprintf(pfOut,"%c",C_TLD);
+         fprintf(pfOut,"\n\n");
       }
       fprintm(pfOut,pcOwn,pcPgm,MAN_CLE_MAIN_HELP,1);
       fprintf(pfOut,"------------------------------------------------------------------------\n");
@@ -2559,11 +2574,13 @@ static void vdCleManFunction(
       if (isNbr) {
          fprintf(pfOut,"%s FUNCTION '%s'\n",pcNum,pcFct);
          l=strlen(pcNum)+strlen(pcFct)+12;
-         for (i=0;i<l;i++) fprintf(pfOut,"%s",pcLev); fprintf(pfOut,"\n\n");
+         for (i=0;i<l;i++) fprintf(pfOut,"%s",pcLev);
+         fprintf(pfOut,"\n\n");
       } else {
          fprintf(pfOut,"FUNCTION '%s'\n",pcFct);
          l=strlen(pcFct)+11;
-         for (i=0;i<l;i++) fprintf(pfOut,"%s",pcLev); fprintf(pfOut,"\n\n");
+         for (i=0;i<l;i++) fprintf(pfOut,"%s",pcLev);
+         fprintf(pfOut,"\n\n");
       }
       fprintf(pfOut, ".SYNOPSIS\n\n");
       fprintf(pfOut, "-----------------------------------------------------------------------\n");
