@@ -1217,7 +1217,8 @@ extern int siClpDocu(
                         }
                         for (p=fpcPat(pvHdl,siLev);*p;p++) fprintf(pfDoc,"%c",tolower(*p));
                         fprintf(pfDoc,"(3)\n");
-                        for (i=0;i<l;i++) fprintf(pfDoc,"="); fprintf(pfDoc,"\n");
+                        for (i=0;i<l;i++) fprintf(pfDoc,"=");
+                        fprintf(pfDoc,"\n");
                         fprintf(pfDoc, ":doctype: manpage\n\n");
                         fprintf(pfDoc, "NAME\n");
                         fprintf(pfDoc, "----\n\n");
@@ -1256,11 +1257,13 @@ extern int siClpDocu(
                         if (isNbr) {
                            fprintf(pfDoc,"%s %s '%s'\n",acNum,acArg,psArg->psStd->pcKyw);
                            l=strlen(acNum)+strlen(acArg)+strlen(psArg->psStd->pcKyw)+4;
-                           for (i=0;i<l;i++) fprintf(pfDoc,"%c",C_CRT); fprintf(pfDoc,"\n\n");
+                           for (i=0;i<l;i++) fprintf(pfDoc,"%c",C_CRT);
+                           fprintf(pfDoc,"\n\n");
                         } else {
                            fprintf(pfDoc,"%s '%s'\n",acArg,psArg->psStd->pcKyw);
                            l=strlen(acArg)+strlen(psArg->psStd->pcKyw)+3;
-                           for (i=0;i<l;i++) fprintf(pfDoc,"%c",C_CRT); fprintf(pfDoc,"\n\n");
+                           for (i=0;i<l;i++) fprintf(pfDoc,"%c",C_CRT);
+                           fprintf(pfDoc,"\n\n");
                         }
                         fprintf(pfDoc, ".SYNOPSIS\n\n");
                         fprintf(pfDoc, "-----------------------------------------------------------------------\n");
@@ -1293,7 +1296,8 @@ extern int siClpDocu(
                         }
                         for(p=fpcPat(pvHdl,siLev);*p;p++) fprintf(pfDoc,"%c",tolower(*p));
                         fprintf(pfDoc,"(3)\n");
-                        for (i=0;i<l;i++) fprintf(pfDoc,"="); fprintf(pfDoc,"\n");
+                        for (i=0;i<l;i++) fprintf(pfDoc,"=");
+                        fprintf(pfDoc,"\n");
                         fprintf(pfDoc, ":doctype: manpage\n\n");
                         fprintf(pfDoc, "NAME\n");
                         fprintf(pfDoc, "----\n\n");
@@ -1327,11 +1331,13 @@ extern int siClpDocu(
                         if (isNbr) {
                            fprintf(pfDoc,"%s CONSTANT '%s'\n",acNum,psArg->psStd->pcKyw);
                            l=strlen(acNum)+strlen(psArg->psStd->pcKyw)+12;
-                           for (i=0;i<l;i++) fprintf(pfDoc,"+"); fprintf(pfDoc,"\n\n");
+                           for (i=0;i<l;i++) fprintf(pfDoc,"+");
+                           fprintf(pfDoc,"\n\n");
                         } else {
                            fprintf(pfDoc,"CONSTANT '%s'\n",psArg->psStd->pcKyw);
                            l=strlen(psArg->psStd->pcKyw)+11;
-                           for (i=0;i<l;i++) fprintf(pfDoc,"+"); fprintf(pfDoc,"\n\n");
+                           for (i=0;i<l;i++) fprintf(pfDoc,"+");
+                           fprintf(pfDoc,"\n\n");
                         }
                         fprintf(pfDoc, ".SYNOPSIS\n\n");
                         fprintf(pfDoc, "-----------------------------------------------------------------------\n");
@@ -1371,7 +1377,8 @@ extern int siClpDocu(
          }
          for (p=pcSta;*p;p++) fprintf(pfDoc,"%c",tolower(*p));
          fprintf(pfDoc,   "(1)\n");
-         for (i=0;i<l;i++) fprintf(pfDoc,"="); fprintf(pfDoc,"\n");
+         for (i=0;i<l;i++) fprintf(pfDoc,"=");
+         fprintf(pfDoc,"\n");
          fprintf(pfDoc,   ":doctype: manpage\n\n");
          fprintf(pfDoc,   "NAME\n");
          fprintf(pfDoc,   "----\n\n");
@@ -1407,11 +1414,13 @@ extern int siClpDocu(
          if (isNbr) {
             fprintf(pfDoc,   "%s %s '%s'\n",pcNum,pcCmd,pcSta);
             l=strlen(pcNum)+strlen(pcCmd)+strlen(pcSta)+4;
-            for (i=0;i<l;i++) fprintf(pfDoc,"%c",C_TLD); fprintf(pfDoc,"\n\n");
+            for (i=0;i<l;i++) fprintf(pfDoc,"%c",C_TLD);
+            fprintf(pfDoc,"\n\n");
          } else {
             fprintf(pfDoc,   "%s '%s'\n",pcCmd,pcSta);
             l=strlen(pcCmd)+strlen(pcSta)+3;
-            for (i=0;i<l;i++) fprintf(pfDoc,"%c",C_TLD); fprintf(pfDoc,"\n\n");
+            for (i=0;i<l;i++) fprintf(pfDoc,"%c",C_TLD);
+            fprintf(pfDoc,"\n\n");
          }
          fprintf(pfDoc,   ".SYNOPSIS\n\n");
          fprintf(pfDoc,   "-----------------------------------------------------------------------\n");
@@ -5524,11 +5533,13 @@ static int siClpPrnDoc(
                   if (isNbr) {
                      fprintf(pfDoc,"%s CONSTANT '%s'\n",acNum,apMan[m]->psStd->pcKyw);
                      l=strlen(acNum)+strlen(apMan[m]->psStd->pcKyw)+12;
-                     for (i=0;i<l;i++) fprintf(pfDoc,"+"); fprintf(pfDoc,"\n\n");
+                     for (i=0;i<l;i++) fprintf(pfDoc,"+");
+                     fprintf(pfDoc,"\n\n");
                   } else {
                      fprintf(pfDoc,"CONSTANT '%s'\n",apMan[m]->psStd->pcKyw);
                      l=strlen(apMan[m]->psStd->pcKyw)+11;
-                     for (i=0;i<l;i++) fprintf(pfDoc,"+"); fprintf(pfDoc,"\n\n");
+                     for (i=0;i<l;i++) fprintf(pfDoc,"+");
+                     fprintf(pfDoc,"\n\n");
                   }
                   fprintf(pfDoc, ".SYNOPSIS\n\n");
                   fprintf(pfDoc, "-----------------------------------------------------------------------\n");
@@ -5567,11 +5578,13 @@ static int siClpPrnDoc(
                if (isNbr) {
                   fprintf(pfDoc,"%s %s '%s'\n",acNum,acArg,apMan[m]->psStd->pcKyw);
                   l=strlen(acNum)+strlen(acArg)+strlen(apMan[m]->psStd->pcKyw)+4;
-                  for (i=0;i<l;i++) fprintf(pfDoc,"%c",C_CRT); fprintf(pfDoc,"\n\n");
+                  for (i=0;i<l;i++) fprintf(pfDoc,"%c",C_CRT);
+                  fprintf(pfDoc,"\n\n");
                } else {
                   fprintf(pfDoc,"%s '%s'\n",acArg,apMan[m]->psStd->pcKyw);
                   l=strlen(acArg)+strlen(apMan[m]->psStd->pcKyw)+3;
-                  for (i=0;i<l;i++) fprintf(pfDoc,"%c",C_CRT); fprintf(pfDoc,"\n\n");
+                  for (i=0;i<l;i++) fprintf(pfDoc,"%c",C_CRT);
+                  fprintf(pfDoc,"\n\n");
                }
                fprintf(pfDoc, ".SYNOPSIS\n\n");
                fprintf(pfDoc, "-----------------------------------------------------------------------\n");
