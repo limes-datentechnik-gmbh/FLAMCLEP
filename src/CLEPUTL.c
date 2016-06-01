@@ -1026,17 +1026,18 @@ static void rplchar(char* name,const size_t size,const char c, const char* value
 
 static void rplenvar(char* name,const size_t size,const char opn, const char cls)
 {
-   int         la,lv;
+   int         lv;
    char        h[size];
    char        x[size];
    char*       a=name;
-   char*       e=a+strlen(name);
    char*       b;
    char*       c;
    char*       v;
    char*       p;
+   int         match;
+   int         catlen;
 
-   for (b=strchr(a,opn);a<e && b!=NULL;b=strchr(a,opn)) {
+   for (b=strchr(a,opn); b!=NULL ;b=strchr(a,opn)) {
       if (b[1]==opn) {
          for (p=b;*p;p++) p[0]=p[1];
          a=b+1;
@@ -1046,69 +1047,61 @@ static void rplenvar(char* name,const size_t size,const char opn, const char cls
             b[0]=c[0]=0;
             strncpy(h,c+1,size-1);
             h[size-1]=0;
+            match = 1;
             v=GETENV(b+1);
             if (v!=NULL && *v) {
-               for (la=strlen(a),lv=strlen(v);lv>0 && isspace(v[lv-1]);lv--);
-               if (la+lv<size) {
-                  memcpy(a+la,v,lv);
-                  a[la+lv]=0x00;
-               }
-               if (strlen(a)+strlen(h)<size) strcat(a,h);
-               a=b+lv;
+               for (lv=strlen(v);lv>0 && isspace(v[lv-1]);lv--);
+               lv = (lv < size) ? lv : size-1;
+               memcpy(x, v, lv);
+               x[lv] = 0;
+               v = x;
             } else if (strcmp(b+1,"HOME")==0) {
                v=homedir(FALSE,size,x);
-               if (strlen(a)+strlen(v)<size) strcat(a,v);
-               if (strlen(a)+strlen(h)<size) strcat(a,h);
-               a=b+strlen(v);
             } else if (strcmp(b+1,"USER")==0) {
                v=userid(size,x);
-               if (strlen(a)+strlen(v)<size) strcat(a,v);
-               if (strlen(a)+strlen(h)<size) strcat(a,h);
-               a=b+strlen(v);
             } else if (strcmp(b+1,"SYSUID")==0) {
                v=userid(size,x);
-               if (strlen(a)+strlen(v)<size) strcat(a,v);
-               if (strlen(a)+strlen(h)<size) strcat(a,h);
-               a=b+strlen(v);
             } else if (strcmp(b+1,"CUSER")==0) {
                v=userid(size,x);
                for(p=v; *p ;p++) *p = toupper(*p);
-               if (strlen(a)+strlen(v)<size) strcat(a,v);
-               if (strlen(a)+strlen(h)<size) strcat(a,h);
-               a=b+strlen(v);
             } else if (strcmp(b+1,"cuser")==0) {
                v=userid(size,x);
                for(p=v; *p ;p++) *p = tolower(*p);
-               if (strlen(a)+strlen(v)<size) strcat(a,v);
-               if (strlen(a)+strlen(h)<size) strcat(a,h);
-               a=b+strlen(v);
             } else if (strcmp(b+1,"Cuser")==0) {
                v=userid(size,x);
                if (*v) {
                   *v = toupper(*v);
                   for(p=v+1; *p ;p++) *p = tolower(*p);
                }
-               if (strlen(a)+strlen(v)<size) strcat(a,v);
-               if (strlen(a)+strlen(h)<size) strcat(a,h);
-               a=b+strlen(v);
             } else if (strcmp(b+1,"OWNERID")==0) {
                v=userid(size,x);
-               if (strlen(a)+strlen(v)<size) strcat(a,v);
-               if (strlen(a)+strlen(h)<size) strcat(a,h);
-               a=b+strlen(v);
             } else if (strcmp(b+1,"ENVID")==0) {
                v=envid(size,x);
-               if (strlen(a)+strlen(v)<size) strcat(a,v);
-               if (strlen(a)+strlen(h)<size) strcat(a,h);
-               a=b+strlen(v);
             } else {
                b[0]=opn; c[0]=cls; a=c+1;
+               match = 0;
+            }
+            if (match) {
+               catlen = size - strlen(name) - 1;
+               if (catlen > 0)
+                  strncat(a, v, catlen);
+               else
+                  catlen = 0;
+               if (strlen(v) >= catlen)
+                  name[size-1] = 0;
+               catlen = size - strlen(name) - 1;
+               if (catlen > 0)
+                  strncat(a, h, catlen);
+               else
+                  catlen = 0;
+               if (strlen(h) >= catlen)
+                  name[size-1] = 0;
+               a=b+strlen(v);
             }
          } else {
             a=b+1;
          }
       }
-      e=a+strlen(name);
    }
 }
 
