@@ -992,12 +992,12 @@ static void rplchar(char* name,const size_t size,const char c, const char* value
 {
    char        h[size];
    char*       a=name;
-   char*       e=a+strlen(name);
    const char* v=value;
    char*       b;
    char*       p;
+   int         catlen;
 
-   for (b=strchr(a,c);a<e && b!=NULL;b=strchr(a,c)) {
+   for (b=strchr(a,c); b!=NULL ;b=strchr(a,c)) {
       if (b[1]==c) {
          for (p=b;*p;p++) p[0]=p[1];
          a=b+1;
@@ -1005,11 +1005,22 @@ static void rplchar(char* name,const size_t size,const char c, const char* value
          b[0]=0;
          strncpy(h,b+1,size-1);
          h[size-1]=0;
-         if (strlen(a)+strlen(v)<size) strcat(a,v);
-         if (strlen(a)+strlen(h)<size) strcat(a,h);
+         catlen = size - strlen(name) - 1;
+         if (catlen > 0)
+               strncat(a, v, catlen);
+         else
+               catlen = 0;
+         if (strlen(v) >= catlen)
+               name[size-1] = 0;
+         catlen = size - strlen(name) - 1;
+         if (catlen > 0)
+               strncat(a, h, catlen);
+         else
+               catlen = 0;
+         if (strlen(h) >= catlen)
+               name[size-1] = 0;
          a=b+strlen(v);
       }
-      e=a+strlen(name);
    }
 }
 
