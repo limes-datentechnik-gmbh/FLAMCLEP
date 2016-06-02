@@ -1130,16 +1130,87 @@ static char* rpltpl(char* string,int size,const char* templ,const char* values) 
    return(string);
 }
 
-extern char* mapfil(char* file,int size) {
-#ifdef __HOST__
-   if (ISPATHNAME(file)) {
-      rplchar(file,size,C_TLD,"<HOME>");
-   } else {
-      rplchar(file,size,C_TLD,"<SYSUID>");
-   }
-#else
-   rplchar(file,size,C_TLD,"<HOME>");
-#endif
+static const char* mapprefix(char* file, int size)
+{
+    char *p1,*p2;
+# ifdef __HOST__
+    if (file[0]=='/' && file[1]=='/' && file[2]=='D' && file[3]=='S' && file[4]==':') {
+       for (p1=file,p2=file+5 ; *p2 ; p1++,p2++) {
+          *p1 = *p2;
+       }
+       *p1 = 0;
+    } else if (file[0]=='/' && file[1]=='/' && file[2]=='D' && file[3]=='D' && file[4]==':') {
+       for (p1=file,p2=file+2 ; *p2 ; p1++,p2++) {
+          *p1 = *p2;
+       }
+       *p1 = 0;
+    } else if (file[0]=='/' && file[1]=='/' && file[2]=='\'') {
+       for (p1=file,p2=file+3 ; *p2 && *p2!='\'' ; p1++,p2++) {
+          *p1 = *p2;
+       }
+       *p1 = 0;
+    } else if (file[0]=='/' && file[1]=='/') {
+       file[0] = C_TLD;
+       if (ISPATHNAME(file)) {
+          file[1] = '/';
+          return "<HOME>";
+       } else {
+          file[1] = '.';
+          return "<SYSUID>";
+       }
+    }
+    if (ISPATHNAME(file)) {
+       return "<HOME>";
+    } else {
+       return "<SYSUID>";
+    }
+# elif __USS__
+    if (file[0]=='/' && file[1]=='/' && file[2]=='D' && file[3]=='S' && file[4]==':') {
+       file[2] = '\'';
+       for (p1=file+3,p2=file+5 ; *p2 ; p1++,p2++) {
+          *p1 = *p2;
+       }
+       *p1++ = '\'';
+       *p1 = 0;
+       return "<SYSUID>";
+    } else if (file[0]=='/' && file[1]=='/' && file[2]=='D' && file[3]=='D' && file[4]==':') {
+       return "<SYSUID>";
+    } else if (file[0]=='/' && file[1]=='/' && file[2]=='\'') {
+       return "<SYSUID>";
+    } else if (file[0]=='/' && file[1]=='/') {
+       return "<SYSUID>";
+    }
+    return "<HOME>";
+# else
+    char h[size];
+    if (file[0]=='/' && file[1]=='/' && file[2]=='D' && file[3]=='S' && file[4]==':') {
+       return "<SYSUID>";
+    } else if (file[0]=='/' && file[1]=='/' && file[2]=='D' && file[3]=='D' && file[4]==':') {
+       return "<SYSUID>";
+    } else if (file[0]=='/' && file[1]=='/' && file[2]=='\'') { // insert DS:
+       strcpy(h,file+3);
+       file[2] = 'D'; file[3] = 'S'; file[4] = ':';
+       for (p1=file+5,p2=h ; *p2 && *p2!='\'' ; p1++,p2++) {
+          *p1 = *p2;
+       }
+       *p1 = 0;
+       return "<SYSUID>";
+    } else if (file[0]=='/' && file[1]=='/') { // insert DS:~.
+       strcpy(h,file+2);
+       file[2] = 'D'; file[3] = 'S'; file[4] = ':'; file[5]=C_TLD; file[6]='.';
+       for (p1=file+7,p2=h ; *p2 && *p2!='\'' ; p1++,p2++) {
+          *p1 = *p2;
+       }
+       *p1 = 0;
+       return "<SYSUID>";
+    }
+    return "<HOME>";
+# endif
+}
+
+extern char* mapfil(char* file,int size)
+{
+   rplchar(file,size,C_TLD,mapprefix(file,size));
    rplenvar(file,size,'<','>');
 #ifdef __WIN__
    for (char* p=file;*p;p++) {
