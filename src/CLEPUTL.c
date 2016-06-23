@@ -1212,11 +1212,6 @@ extern char* mapfil(char* file,int size)
 {
    rplchar(file,size,C_TLD,mapprefix(file,size));
    rplenvar(file,size,'<','>');
-#ifdef __WIN__
-   for (char* p=file;*p;p++) {
-      if (*p=='/') *p=C_BSL;
-   }
-#endif
    return(file);
 }
 
