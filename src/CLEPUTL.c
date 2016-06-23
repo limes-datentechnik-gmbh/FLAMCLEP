@@ -1917,7 +1917,7 @@ extern int strxcmp(
    }
 }
 
-extern char* cstime(unsigned long long t, char* p) {
+extern char* cstime(signed long long t, char* p) {
    static char    acBuf[20];
    char*          pcStr=(p!=NULL)?p:acBuf;
    time_t         h=(t)?(time_t)t:time(NULL);

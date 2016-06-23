@@ -345,7 +345,7 @@ extern int strxcmp(
 
 #define CSTIME_BUFSIZ   24
 
-extern char* cstime(unsigned long long t, char* p);
+extern char* cstime(signed long long t, char* p);
 
 /**********************************************************************/
 
