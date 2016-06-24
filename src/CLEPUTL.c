@@ -1217,7 +1217,7 @@ extern char* mapfil(char* file,int size)
 
 #ifdef __HOST__
 extern char* cpmapfil(char* dest, int size,const char* source,const int operation, const int binary, const int seek,const int flag) {
-   if (ISPATHNAME(source) || ISDDNAME(source) || source[0]=='\'') {
+   if (ISPATHNAME(source) || ISDDNAME(source) || source[0]=='\'' || source[0]==':') {
       snprintf(dest,size,"%s",source);
    } else {
       if (flag) {
