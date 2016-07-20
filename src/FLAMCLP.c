@@ -113,12 +113,13 @@
  * 1.1.63: Accept decimal number as a float if it is a integer and the expected type is float
  * 1.1.64: Make acPro and acSrc dynamic to reduce memory consumption of symbol table
  * 1.1.65: Support also grave (` - 0x60) to enclose strings
+ * 1.1.66: Add new flag bit to separate default from defined properties
 **/
 
-#define CLP_VSN_STR       "1.1.64"
+#define CLP_VSN_STR       "1.1.66"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        1
-#define CLP_VSN_REVISION       64
+#define CLP_VSN_REVISION       66
 
 /* Definition der Konstanten ******************************************/
 
@@ -1608,6 +1609,7 @@ extern int siClpSymbolTableUpdate(
       psHdl->psSym->psFix->pcPro=pcHlp;
       strcpy(psHdl->psSym->psFix->pcPro,psSym->pcPro);
       psHdl->psSym->psFix->pcDft=psHdl->psSym->psFix->pcPro;
+      psHdl->psSym->psStd->uiFlg|=CLPFLG_PDF;
    }
    return(CLP_OK);
 }

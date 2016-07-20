@@ -540,6 +540,8 @@ extern const char* pcClpAbout(const int l, const int s, char* b);
 #define CLPFLG_EBC               0x00040000U
 /** CLPFLG_ASC This flag will set the default method of interpretation of a binary string to hexadecimal*/
 #define CLPFLG_HEX               0x00080000U
+/** CLPFLG_PDF This flag will be set if a property value was defined from outside, it will be FALSE if the property value was hard coded in the tables */
+#define CLPFLG_PDF               0x00100000U
 /** CLPFLG_PWD This flag will ensure that the clear value is only put into the data structure but not traced, logged or given away elsewhere */
 #define CLPFLG_PWD               0x01000000U
 
@@ -565,6 +567,7 @@ extern const char* pcClpAbout(const int l, const int s, char* b);
 #define CLPISF_ASC(flg)          ((flg)&CLPFLG_ASC)
 #define CLPISF_EBC(flg)          ((flg)&CLPFLG_EBC)
 #define CLPISF_HEX(flg)          ((flg)&CLPFLG_HEX)
+#define CLPISF_PDF(flg)          ((flg)&CLPFLG_PDF)
 #define CLPISF_LNK(flg)          (CLPISF_CNT(flg) ||  CLPISF_OID(flg) ||  CLPISF_ELN(flg) || CLPISF_SLN(flg) ||  CLPISF_TLN(flg))
 #define CLPISF_ARG(flg)          ((!CLPISF_LNK(flg)) && (!CLPISF_CON(flg)) && (!CLPISF_ALI(flg)))
 #define CLPISF_ENT(flg)          ((!CLPISF_LNK(flg)) && (!CLPISF_ALI(flg)))
