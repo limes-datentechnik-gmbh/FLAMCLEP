@@ -1288,6 +1288,36 @@ extern char* cpmapfil(char* dest, int size,const char* source,const int operatio
          }
       }
       break;
+   case 5:
+      if (binary) {
+         if (seek) {
+            return("rb+, byteseek, abend=recover");
+         } else {
+            return("rb+, noseek, abend=recover");
+         }
+      } else {
+         if (seek) {
+            return("r+, byteseek, abend=recover");
+         } else {
+            return("r+, noseek, abend=recover");
+         }
+      }
+      break;
+   case 6:
+      if (binary) {
+         if (seek) {
+            return("wb+, byteseek, abend=recover, recfm=*");
+         } else {
+            return("wb+, noseek, abend=recover, recfm=*");
+         }
+      } else {
+         if (seek) {
+            return("w+, byteseek, abend=recover, recfm=*");
+         } else {
+            return("w+, noseek, abend=recover, recfm=*");
+         }
+      }
+      break;
    default: return(NULL);
    }
 }
@@ -1322,6 +1352,20 @@ extern char* cpmapfil(char* dest, int size,const char* source,const int operatio
          return("ab+");
       } else {
          return("a+");
+      }
+      break;
+   case 5:
+      if (binary) {
+         return("rb+");
+      } else {
+         return("r+");
+      }
+      break;
+   case 6:
+      if (binary) {
+         return("wb+");
+      } else {
+         return("w+");
       }
       break;
    default: return(NULL);
