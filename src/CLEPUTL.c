@@ -33,6 +33,7 @@
 #include <ctype.h>
 #include <string.h>
 #include <stdlib.h>
+#include <string.h>
 #include <stdarg.h>
 #include <limits.h>
 #include <locale.h>
@@ -1216,160 +1217,113 @@ extern char* mapfil(char* file,int size)
 }
 
 #ifdef __HOST__
-extern char* cpmapfil(char* dest, int size,const char* source,const int operation, const int binary, const int seek,const int flag) {
+extern char* cpmapfil(char* dest, int size,const char* source) {
    if (ISPATHNAME(source) || ISDDNAME(source) || source[0]=='\'' || source[0]==':') {
       snprintf(dest,size,"%s",source);
    } else {
-      if (flag) {
-         snprintf(dest,size,"'%s'",source);
-      } else {
-         snprintf(dest,size,"%s",source);
-      }
+      snprintf(dest,size,"'%s'",source);
    }
-   mapfil(dest,size);
-   switch (operation) {
-   case 1:
-      if (binary) {
-         if (seek) {
-            return("rb, byteseek, abend=recover");
-         } else {
-            return("rb, noseek, abend=recover");
-         }
-      } else {
-         if (seek) {
-            return("r, byteseek, abend=recover");
-         } else {
-            return("r, noseek, abend=recover");
-         }
-      }
-      break;
-   case 2:
-      if (binary) {
-         if (seek) {
-            return("wb, byteseek, abend=recover, recfm=*");
-         } else {
-            return("wb, noseek, abend=recover, recfm=*");
-         }
-      } else {
-         if (seek) {
-            return("w, byteseek, abend=recover, recfm=*");
-         } else {
-            return("w, noseek, abend=recover, recfm=*");
-         }
-      }
-      break;
-   case 3:
-      if (binary) {
-         if (seek) {
-            return("ab, byteseek, abend=recover, recfm=*");
-         } else {
-            return("ab, noseek, abend=recover, recfm=*");
-         }
-      } else {
-         if (seek) {
-            return("a, byteseek, abend=recover, recfm=*");
-         } else {
-            return("a, noseek, abend=recover, recfm=*");
-         }
-      }
-      break;
-   case 4:
-      if (binary) {
-         if (seek) {
-            return("ab+, byteseek, abend=recover, recfm=*");
-         } else {
-            return("ab+, noseek, abend=recover, recfm=*");
-         }
-      } else {
-         if (seek) {
-            return("a+, byteseek, abend=recover, recfm=*");
-         } else {
-            return("a+, noseek, abend=recover, recfm=*");
-         }
-      }
-      break;
-   case 5:
-      if (binary) {
-         if (seek) {
-            return("rb+, byteseek, abend=recover");
-         } else {
-            return("rb+, noseek, abend=recover");
-         }
-      } else {
-         if (seek) {
-            return("r+, byteseek, abend=recover");
-         } else {
-            return("r+, noseek, abend=recover");
-         }
-      }
-      break;
-   case 6:
-      if (binary) {
-         if (seek) {
-            return("wb+, byteseek, abend=recover, recfm=*");
-         } else {
-            return("wb+, noseek, abend=recover, recfm=*");
-         }
-      } else {
-         if (seek) {
-            return("w+, byteseek, abend=recover, recfm=*");
-         } else {
-            return("w+, noseek, abend=recover, recfm=*");
-         }
-      }
-      break;
-   default: return(NULL);
+   return mapfil(dest,size);
+}
+
+extern char* filemode(const char* mode) {
+   if(mode==NULL) return NULL;
+
+   if(strcmp(mode,"r")==0){
+      return "r, noseek, abend=recover";
    }
+   if(strcmp(mode,"rb")==0){
+      return "rb, noseek, abend=recover";
+   }
+   if(strcmp(mode,"rb+")==0){
+      return "rb+, noseek, abend=recover";
+   }
+   if(strcmp(mode,"rs")==0){
+      return "r, byteseek, abend=recover";
+   }
+   if(strcmp(mode,"rbs")==0){
+      return "rb, byteseek, abend=recover";
+   }
+   if(strcmp(mode,"rbs+")==0){
+      return "rb+, byteseek, abend=recover";
+   }
+
+   if(strcmp(mode,"w")==0){
+      return "w, noseek, abend=recover, recfm=*";
+   }
+   if(strcmp(mode,"wb")==0){
+      return "wb, noseek, abend=recover, recfm=*";
+   }
+   if(strcmp(mode,"wb+")==0){
+      return "wb+, noseek, abend=recover, recfm=*";
+   }
+   if(strcmp(mode,"ws")==0){
+      return "w, byteseek, abend=recover, recfm=*";
+   }
+   if(strcmp(mode,"wbs")==0){
+      return "wb, byteseek, abend=recover, recfm=*";
+   }
+   if(strcmp(mode,"wbs+")==0){
+      return "wb+, byteseek, abend=recover, recfm=*";
+   }
+
+   if(strcmp(mode,"a")==0){
+      return "a, noseek, abend=recover, recfm=*";
+   }
+   if(strcmp(mode,"ab")==0){
+      return "ab, noseek, abend=recover, recfm=*";
+   }
+   if(strcmp(mode,"ab+")==0){
+      return "ab+, noseek, abend=recover, recfm=*";
+   }
+   if(strcmp(mode,"as")==0){
+      return "a, byteseek, abend=recover, recfm=*";
+   }
+   if(strcmp(mode,"abs")==0){
+      return "ab, byteseek, abend=recover, recfm=*";
+   }
+   if(strcmp(mode,"abs+")==0){
+      return "ab+, byteseek, abend=recover, recfm=*";
+   }
+   return NULL;
 }
 #else
-extern char* cpmapfil(char* dest, int size,const char* source,const int operation, const int binary, const int seek,const int flag) {
+extern char* cpmapfil(char* dest, int size,const char* source) {
    snprintf(dest,size,"%s",source);
-   mapfil(dest,size);
-   switch (operation) {
-   case 1:
-      if (binary) {
-         return("rb");
-      } else {
-         return("r");
-      }
-      break;
-   case 2:
-      if (binary) {
-         return("wb");
-      } else {
-         return("w");
-      }
-      break;
-   case 3:
-      if (binary) {
-         return("ab");
-      } else {
-         return("a");
-      }
-      break;
-   case 4:
-      if (binary) {
-         return("ab+");
-      } else {
-         return("a+");
-      }
-      break;
-   case 5:
-      if (binary) {
-         return("rb+");
-      } else {
-         return("r+");
-      }
-      break;
-   case 6:
-      if (binary) {
-         return("wb+");
-      } else {
-         return("w+");
-      }
-      break;
-   default: return(NULL);
+   return mapfil(dest,size);
+}
+
+extern char* filemode(const char* mode) {
+   if(mode==NULL) return NULL;
+
+   if(strcmp(mode,"r")==0 || strcmp(mode,"rs")==0){
+      return "r";
    }
+   if(strcmp(mode,"rb")==0 || strcmp(mode,"rbs")==0){
+      return "rb";
+   }
+   if(strcmp(mode,"rb+")==0 || strcmp(mode,"rbs+")==0){
+      return "rb+";
+   }
+   if(strcmp(mode,"w")==0 || strcmp(mode,"ws")==0){
+      return "w";
+   }
+   if(strcmp(mode,"wb")==0 || strcmp(mode,"wbs")==0){
+      return "wb";
+   }
+   if(strcmp(mode,"wb+")==0 || strcmp(mode,"wbs+")==0){
+      return "wb+";
+   }
+   if(strcmp(mode,"a")==0 || strcmp(mode,"as")==0){
+      return "a";
+   }
+   if(strcmp(mode,"ab")==0 || strcmp(mode,"abs")==0){
+      return "ab";
+   }
+   if(strcmp(mode,"ab+")==0 || strcmp(mode,"abs+")==0){
+      return "ab+";
+   }
+   return NULL;
 }
 #endif
 

@@ -3091,7 +3091,7 @@ static int siClpPrsFil(
    if (psHdl->siTok!=CLPTOK_STR) {
       return CLPERR(psHdl,CLPERR_SYN,"After object/overlay assignment '%s.%s=' parameter file ('filename') expected",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
    }
-   siErr=file2str(acFil,&pcPar,&siSiz,cpmapfil(acFil,sizeof(acFil),psHdl->acLex+2,1,FALSE,FALSE,TRUE));
+   siErr=file2str(cpmapfil(acFil,sizeof(acFil),psHdl->acLex+2),&pcPar,&siSiz,filemode("r"));
    if (siErr<0) {
       switch(siErr) {
       case -1: siErr=CLPERR(psHdl,CLPERR_INT,"Illegal parameters passed to file2str() (Bug)%s","");break;
@@ -3970,7 +3970,7 @@ static int siClpBldLit(
          char                          acSrc[CLPMAX_LEXSIZ]="";
          char                          acLex[CLPMAX_LEXSIZ]="";
          char                          acFil[L_filnam]="";
-         siErr=file2str(acFil,&pcDat,&siSiz,cpmapfil(acFil,sizeof(acFil),pcVal+2,1,FALSE,FALSE,TRUE));
+         siErr=file2str(cpmapfil(acFil,sizeof(acFil),pcVal+2),&pcDat,&siSiz,filemode("r"));
          if (siErr<0) {
             switch(siErr) {
             case -1: siErr=CLPERR(psHdl,CLPERR_INT,"Illegal parameters passed to file2str() (Bug)%s","");break;

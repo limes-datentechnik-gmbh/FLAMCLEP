@@ -180,13 +180,16 @@ extern char* maplab(char* label,int size);
  * @param dest string for replacement
  * @param size size of replacement string
  * @param source original string
- * @param operation defines read (1), write (2) or append (3)
- * @param binary if true binary operation mode is used
- * @param seek if true fseek/ftell() can be used for the file
- * @param flag if true data set names (only host) are enclosed in apostrophes (requires full qualified data set names)
  * @return pointer to format string for fopen()
  */
-extern char* cpmapfil(char* dest, int size,const char* source,const int operation, const int binary, const int seek, const int flag);
+extern char* cpmapfil(char* dest, int size,const char* source);
+
+/**
+ * set the right mode for fopen, private extension use 's' for fopen with seek
+ * @param mode for fopen
+ * @return mapped mode
+ */
+extern char* filemode(const char* mode);
 
 /**
  * Use rpltpl() and maplab() to build key label names, based on key label templates
