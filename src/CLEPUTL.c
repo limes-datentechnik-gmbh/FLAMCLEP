@@ -1230,60 +1230,60 @@ extern char* filemode(const char* mode) {
    if(mode==NULL) return NULL;
 
    if(strcmp(mode,"r")==0){
-      return "r, noseek, abend=recover";
+      return "r, noseek, samethread, abend=recover";
    }
    if(strcmp(mode,"rb")==0){
-      return "rb, noseek, abend=recover";
+      return "rb, noseek, samethread, abend=recover";
    }
    if(strcmp(mode,"rb+")==0){
-      return "rb+, noseek, abend=recover";
+      return "rb+, noseek, samethread, abend=recover";
    }
    if(strcmp(mode,"rs")==0){
-      return "r, byteseek, abend=recover";
+      return "r, byteseek, samethread, abend=recover";
    }
    if(strcmp(mode,"rbs")==0){
-      return "rb, byteseek, abend=recover";
+      return "rb, byteseek, samethread, abend=recover";
    }
    if(strcmp(mode,"rbs+")==0){
-      return "rb+, byteseek, abend=recover";
+      return "rb+, byteseek, samethread, abend=recover";
    }
 
    if(strcmp(mode,"w")==0){
-      return "w, noseek, abend=recover, recfm=*";
+      return "w, noseek, samethread, abend=recover, recfm=*";
    }
    if(strcmp(mode,"wb")==0){
-      return "wb, noseek, abend=recover, recfm=*";
+      return "wb, noseek, samethread, abend=recover, recfm=*";
    }
    if(strcmp(mode,"wb+")==0){
-      return "wb+, noseek, abend=recover, recfm=*";
+      return "wb+, noseek, samethread, abend=recover, recfm=*";
    }
    if(strcmp(mode,"ws")==0){
-      return "w, byteseek, abend=recover, recfm=*";
+      return "w, byteseek, samethread, abend=recover, recfm=*";
    }
    if(strcmp(mode,"wbs")==0){
-      return "wb, byteseek, abend=recover, recfm=*";
+      return "wb, byteseek, samethread, abend=recover, recfm=*";
    }
    if(strcmp(mode,"wbs+")==0){
-      return "wb+, byteseek, abend=recover, recfm=*";
+      return "wb+, byteseek, samethread, abend=recover, recfm=*";
    }
 
    if(strcmp(mode,"a")==0){
-      return "a, noseek, abend=recover, recfm=*";
+      return "a, noseek, samethread, abend=recover, recfm=*";
    }
    if(strcmp(mode,"ab")==0){
-      return "ab, noseek, abend=recover, recfm=*";
+      return "ab, noseek, samethread, abend=recover, recfm=*";
    }
    if(strcmp(mode,"ab+")==0){
-      return "ab+, noseek, abend=recover, recfm=*";
+      return "ab+, noseek, samethread, abend=recover, recfm=*";
    }
    if(strcmp(mode,"as")==0){
-      return "a, byteseek, abend=recover, recfm=*";
+      return "a, byteseek, samethread, abend=recover, recfm=*";
    }
    if(strcmp(mode,"abs")==0){
-      return "ab, byteseek, abend=recover, recfm=*";
+      return "ab, byteseek, samethread, abend=recover, recfm=*";
    }
    if(strcmp(mode,"abs+")==0){
-      return "ab+, byteseek, abend=recover, recfm=*";
+      return "ab+, byteseek, samethread, abend=recover, recfm=*";
    }
    return NULL;
 }
