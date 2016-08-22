@@ -1288,9 +1288,9 @@ extern char* filemode(const char* mode) {
    return NULL;
 }
 #else
-extern char* cpmapfil(char* dest, int size,const char* source) {
+extern char* cpmapfil(char* dest, int size,const char* source, int toUpper) {
    snprintf(dest,size,"%s",source);
-   return mapfil(dest,size);
+   return mapfil(dest,size,toUpper);
 }
 
 extern char* filemode(const char* mode) {
@@ -1327,11 +1327,16 @@ extern char* filemode(const char* mode) {
 }
 #endif
 
-extern char* maplab(char* label,int size) {
+extern char* maplab(char* label,int size, int toUpper) {
    rplchar(label,size,C_EXC,"<ENVID>");
    rplchar(label,size,C_TLD,"<SYSUID>");
    rplchar(label,size,C_CRT,"<OWNERID>");
    rplenvar(label,size,'<','>');
+   if(toUpper){
+      for(int i=0,l=strlen(label);i<l;i++){
+         label[i] = toupper(label[i]);
+      }
+   }
    return(label);
 }
 
