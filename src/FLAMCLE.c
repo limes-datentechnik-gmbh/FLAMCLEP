@@ -115,11 +115,12 @@
  * 1.1.48: Add support for special condition codes (SCC)
  * 1.1.49: Set owner id as environment variable if not already defined
  * 1.1.50: Support appendix for other CLP strings in docu generation
+ * 1.1.51: Allow empty parameter lists for commands
  */
-#define CLE_VSN_STR       "1.1.50"
+#define CLE_VSN_STR       "1.1.51"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        1
-#define CLE_VSN_REVISION       50
+#define CLE_VSN_REVISION       51
 
 /* Definition der Konstanten ******************************************/
 #define CLEMAX_CNFLEN            1023
@@ -2782,15 +2783,6 @@ static int siCleGetCommand(
    int                     siErr,siSiz=0;
    int                     l=strlen(pcFct);
    pcFil[0]=EOS;
-   if (argc==2 && argv[1][l]!='=' && argv[1][l]!='.' && argv[1][l]!='(') {
-      fprintf(pfOut,"Argument list (\"...\") for command '%s' missing\n",pcFct);
-      fprintf(pfOut,"Syntax for command '%s' not valid\n",pcFct);
-      fprintf(pfOut,"%s %s \"",pcDep,argv[0]);
-      siClpSyntax(pvHdl,FALSE,FALSE,1,NULL);
-      fprintf(pfOut,"\"\n");
-      fprintf(pfOut,"Please use '%s SYNTAX %s%c.path%c' for more information\n",argv[0],pcFct,C_SBO,C_SBC);
-      return(CLERTC_CMD);
-   }
    if (argv[1][l]==EOS) {
       siErr=arry2str(argv+2,argc-2," ",1,ppCmd,&siSiz);
       if (siErr<0) {
