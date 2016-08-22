@@ -1288,9 +1288,9 @@ extern char* filemode(const char* mode) {
    return NULL;
 }
 #else
-extern char* cpmapfil(char* dest, int size,const char* source, int toUpper) {
+extern char* cpmapfil(char* dest, int size,const char* source) {
    snprintf(dest,size,"%s",source);
-   return mapfil(dest,size,toUpper);
+   return mapfil(dest,size);
 }
 
 extern char* filemode(const char* mode) {
@@ -1340,9 +1340,9 @@ extern char* maplab(char* label,int size, int toUpper) {
    return(label);
 }
 
-extern char* cpmaplab(char* label, int size,const char* templ, const char* values) {
+extern char* cpmaplab(char* label, int size,const char* templ, const char* values, int toUpper) {
    rpltpl(label,size,templ,values);
-   maplab(label,size);
+   maplab(label,size,toUpper);
    return(label);
 }
 

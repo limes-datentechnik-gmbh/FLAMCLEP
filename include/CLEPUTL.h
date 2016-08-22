@@ -181,10 +181,9 @@ extern char* maplab(char* label,int size, int toUpper);
  * @param dest string for replacement
  * @param size size of replacement string
  * @param source original string
- * @param flag for mapping label to upper
  * @return pointer to format string for fopen()
  */
-extern char* cpmapfil(char* dest, int size,const char* source, int toUpper);
+extern char* cpmapfil(char* dest, int size,const char* source);
 
 /**
  * set the right mode for fopen, private extension use 's' for fopen with seek
@@ -199,9 +198,10 @@ extern char* filemode(const char* mode);
  * @param size size of replacement string
  * @param templ key label template (with %x)
  * @param values value string for replacement (x:%s\n)
+ * @param flag for mapping label to upper
  * @return pointer to string
  */
-extern char* cpmaplab(char* label, int size,const char* templ, const char* values);
+extern char* cpmaplab(char* label, int size,const char* templ, const char* values, int toUpper);
 
 /**
  * Determines the system default CCSID by querying nl_langinfo() (POSIX) or GetCPInfoEx() (Windows).
