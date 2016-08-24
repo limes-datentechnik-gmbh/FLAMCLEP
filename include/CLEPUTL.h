@@ -171,7 +171,7 @@ extern char* mapfil(char* file,int size);
  * Replace '!' with ENVID, '~' with "<SYSUID>", '^' with "<OWNERID>" and all environment variables enclosed with '<' and '> to build a key label'
  * @param label string for replacement
  * @param size size of replacement string
- * @param flag for mapping label to upper
+ * @param toUpper for mapping label to upper
  * @return pointer to label
  */
 extern char* maplab(char* label,int size, int toUpper);
@@ -198,7 +198,7 @@ extern char* filemode(const char* mode);
  * @param size size of replacement string
  * @param templ key label template (with %x)
  * @param values value string for replacement (x:%s\n)
- * @param flag for mapping label to upper
+ * @param toUpper for mapping label to upper
  * @return pointer to string
  */
 extern char* cpmaplab(char* label, int size,const char* templ, const char* values, int toUpper);
