@@ -43,7 +43,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <errno.h>
-#ifdef __HOST__
+#ifndef __WIN__
 #include <unistd.h>
 #endif
 
@@ -95,7 +95,7 @@
  * 1.1.30: fix memory leaks found with memchecker
  * 1.1.31: Support definition of the owner per run of a command
  * 1.1.32: Support DD names for write operation (log, trace, docs, ...)
- * 1.1.33: Use setenv() instead of putenv() for DD:STDENV on __HOST__
+ * 1.1.33: Use setenv() instead of putenv() for DD:STDENV on z/OS
  * 1.1.34: Use snprintf() instead of sprintf() for static array strings
  * 1.1.35: Support file name mapping (+/<Cuser>)
  * 1.1.36: Introduce SET/GETENV() macros
@@ -469,7 +469,7 @@ extern int siCleExecute(
 
    for (i=0;i<(sizeof(acPgm)-1) && pcPgm[i];i++) acPgm[i]=toupper(pcPgm[i]);
    acPgm[i]=0;
-#ifdef __HOST__
+#if defined(__ZOS__) || defined(__USS__)
    pfTmp=fopen("DD:STDENV","r");
    if (pfTmp!=NULL) {
       memset(acCnf,0,sizeof(acCnf));
@@ -508,7 +508,7 @@ extern int siCleExecute(
    snprintf(acCnf,sizeof(acCnf),"%s_CONFIG_FILE",acPgm);
    pcCnf=GETENV(acCnf);
    if (pcCnf==NULL) {
-#ifdef __HOST__
+#ifdef __ZOS__
       {
          strcpy(acFil,"<SYSUID>.");
          for (j=strlen(acFil),i=0;i<8 && pcPgm[i];i++) {
@@ -2170,7 +2170,7 @@ static int siClePropertyFinish(
          snprintf(acEnv,sizeof(acEnv),"%s",pcFil);
          pcFil=acEnv;
       } else {
-#ifdef __HOST__
+#ifdef __ZOS__
          {
             int  j=9;
             strcpy(acEnv,"<SYSUID>.");
@@ -3168,7 +3168,7 @@ extern int siCleParseString(
    FILE*                   pfTmp=NULL;
    TsClpError              stErr;
    char                    acBuffer[4096];
-#ifdef __HOST__
+#ifdef __ZOS__
    C08                     acTmpNam[64];
    snprintf(acTmpNam,sizeof(acTmpNam),"CLPTEMP.P%7.7d",((unsigned int)getpid())%10000000);
    pfTmp=fopen(acTmpNam,"wb+,type=memory");

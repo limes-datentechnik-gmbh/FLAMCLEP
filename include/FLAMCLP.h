@@ -315,7 +315,8 @@ For compilation the defines below must be set:
     __DEBUG__        for a debug build
     __RELEASE__      for a release build
     __WIN__          for WINDOWS platforms
-    __HOST__         for mainframe platforms
+    __ZOS__          for ZOS mainframe platforms
+    __USS__          for unix system services (USS) on ZOS mainframe platforms
     __BUILDNR__      to define the build number (integer, default is 0)
     __BUILD__        to define the build string ("debug", "release", "alpha", ...)
     __HOSTSHORTING__ to short function names to 8 character for mainframes
@@ -328,7 +329,6 @@ For compilation the defines below must be set:
 
 #ifndef INC_CLP_H
 #define INC_CLP_H
-
 
 #ifdef __HOSTSHORTING__
    #define pcClpVersion          FLCLPVSN

@@ -2336,15 +2336,9 @@ static void vdClpSymDel(
 
 /* Scanner ************************************************************/
 
-/*now difference between host and open world anymore */
-#ifdef __HOST__
-   #define STRCHR '\''
-   #define SPMCHR '\"'
-#else
-   #define STRCHR '\''
-   #define SPMCHR '\"'
-#endif
-   #define ALTCHR C_GRV
+#define STRCHR '\''
+#define SPMCHR '\"'
+#define ALTCHR C_GRV
 
 extern int siClpLexem(
    void*                         pvHdl,

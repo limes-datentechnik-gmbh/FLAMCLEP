@@ -1134,7 +1134,7 @@ static char* rpltpl(char* string,int size,const char* templ,const char* values) 
 static const char* mapprefix(char* file, int size)
 {
     char *p1,*p2;
-# ifdef __HOST__
+# ifdef __ZOS__
     if (file[0]=='/' && file[1]=='/' && file[2]=='D' && file[3]=='S' && file[4]==':') {
        for (p1=file,p2=file+5 ; *p2 ; p1++,p2++) {
           *p1 = *p2;
@@ -1216,7 +1216,7 @@ extern char* mapfil(char* file,int size)
    return(file);
 }
 
-#ifdef __HOST__
+#ifdef __ZOS__
 extern char* cpmapfil(char* dest, int size,const char* source) {
    if (ISPATHNAME(source) || ISDDNAME(source) || source[0]=='\'' || source[0]==':') {
       snprintf(dest,size,"%s",source);
