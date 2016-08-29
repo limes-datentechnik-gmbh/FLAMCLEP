@@ -205,7 +205,7 @@ static void printAllTypes(
    const char*    pcPfx,
    TsAllTypes*    psDat)
 {
-   char           acPre[1025]="";
+   char           acPre[1025]={0};
    int            i,j,k;
    printf("%s.siSwitch=%d\n",pcPfx,(int)psDat->siSwitch);
    sprintf(acPre,"%s.stNumTypes",pcPfx);
@@ -240,7 +240,7 @@ static void printOverlay(
    TuOverlay*     psDat,
    const int      siOid)
 {
-   char           acPre[1025]="";
+   char           acPre[1025]={0};
    switch (siOid) {
    case 1: printf("%s.siSwt=%d\n",pcPfx,(int)psDat->siSwt);break;
    case 2: printf("%s.acStr=\'%s\'\n",pcPfx, psDat->acStr);break;
@@ -263,7 +263,7 @@ static void printTst(
    const char*    pcPfx,
    TsTst*         psDat)
 {
-   char           acPre[1025]="";
+   char           acPre[1025]={0};
    int            i;
    sprintf(acPre,"%s.stNumTypes"   ,pcPfx);
    printNumTypes(acPre,&psDat->stNum);
@@ -283,7 +283,7 @@ static void printTst(
 static void printMain(
    TsMain*         psDat)
 {
-   char           acPre[1025]="";
+   char           acPre[1025]={0};
    sprintf(acPre,"Main.stInp");
    printTst(acPre,&psDat->stInp);
    sprintf(acPre,"Main.stOut");

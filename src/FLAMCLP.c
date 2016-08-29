@@ -3961,9 +3961,9 @@ static int siClpBldLit(
          const char*                   pcSrc;
          const char*                   pcOld;
          const char*                   pcRow;
-         char                          acSrc[CLPMAX_LEXSIZ]="";
-         char                          acLex[CLPMAX_LEXSIZ]="";
-         char                          acFil[L_filnam]="";
+         char                          acSrc[CLPMAX_LEXSIZ]={0};
+         char                          acLex[CLPMAX_LEXSIZ]={0};
+         char                          acFil[L_filnam]={0};
          siErr=file2str(cpmapfil(acFil,sizeof(acFil),pcVal+2),&pcDat,&siSiz,filemode("r"));
          if (siErr<0) {
             switch(siErr) {

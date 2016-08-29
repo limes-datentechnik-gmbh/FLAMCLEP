@@ -124,7 +124,7 @@ extern char* userid(const int size, char* buffer) {
    return(buffer);
 }
 extern char* homedir(int flag, const int size, char* buffer) {
-   char path[MAX_PATH+1]="";
+   char path[MAX_PATH+1]={0};
    buffer[0]=0x00;
    if (SHGetFolderPath(NULL,CSIDL_PROFILE,NULL,0,path)==S_OK) {
       if (flag) {
@@ -198,7 +198,7 @@ extern char* homedir(int flag, const int size, char* buffer) {
             snprintf(buffer,size,"%s",uP->pw_dir);
          }
       } else {
-         char acUsr[64]="";
+         char acUsr[64]={0};
          userid(sizeof(acUsr),acUsr);
          if (acUsr[0]) {
 #ifdef __ZOS__

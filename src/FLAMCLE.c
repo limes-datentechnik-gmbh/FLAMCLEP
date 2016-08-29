@@ -455,7 +455,7 @@ extern int siCleExecute(
    char                          acFil[CLEMAX_FILSIZ];
    char                          acHlp[CLEMAX_FILSIZ];
    int                           siFil=0;
-   char                          acHom[CLEMAX_FILSIZ]="";
+   char                          acHom[CLEMAX_FILSIZ]={0};
    char*                         pcTmp=NULL;
    int                           isWrn=FALSE;
    int                           siScc=0;
@@ -1605,7 +1605,7 @@ EVALUATE:
       if (argc>=3) {
          for (i=0;psTab[i].pcKyw!=NULL;i++) {
             if (strxcmp(isCas,argv[2],psTab[i].pcKyw,0,0,FALSE)==0) {
-               char acPro[CLEMAX_PATSIZ]="";
+               char acPro[CLEMAX_PATSIZ]={0};
                for (j=3;j<argc;j++) {
                   if (strlen(acPro)+strlen(argv[j])+strlen(acOwn)+strlen(pcPgm)+strlen(psTab[i].pcKyw)+8>CLEMAX_PATSIZ) {
                      fprintf(pfOut,"Argument list is too long\n");
@@ -1639,7 +1639,7 @@ EVALUATE:
       if (pcDef!=NULL && *pcDef) {
          for (i=0;psTab[i].pcKyw!=NULL;i++) {
             if (strxcmp(isCas,pcDef,psTab[i].pcKyw,0,0,FALSE)==0) {
-               char acPro[CLEMAX_PATSIZ]="";
+               char acPro[CLEMAX_PATSIZ]={0};
                for (j=2;j<argc;j++) {
                   if (strlen(acPro)+strlen(argv[j])+strlen(acOwn)+strlen(pcPgm)+strlen(psTab[i].pcKyw)+5>CLEMAX_PATSIZ) {
                      fprintf(pfOut,"Argument list is too long\n");
