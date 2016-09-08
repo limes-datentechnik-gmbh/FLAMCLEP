@@ -1362,7 +1362,7 @@ extern int printd(const char* format,...)
    int r;
    va_list  argv;
    va_start(argv, format);
-   r=vprintf ( format, argv );
+   r=vfprintf (stderr, format, argv );
    va_end(argv);
    return r;
 #else
