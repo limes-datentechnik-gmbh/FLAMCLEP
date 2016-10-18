@@ -114,12 +114,13 @@
  * 1.1.64: Make acPro and acSrc dynamic to reduce memory consumption of symbol table
  * 1.1.65: Support also grave (` - 0x60) to enclose strings
  * 1.1.66: Add new flag bit to separate default from defined properties
+ * 1.1.67: Correct type of variable t to time_t to get correct time on z/OS
 **/
 
-#define CLP_VSN_STR       "1.1.66"
+#define CLP_VSN_STR       "1.1.67"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        1
-#define CLP_VSN_REVISION       66
+#define CLP_VSN_REVISION       67
 
 /* Definition der Konstanten ******************************************/
 
@@ -2393,7 +2394,7 @@ static int siClpScnNat(
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    char*                         pcEnd=pcLex+CLPMAX_LEXLEN;
    char*                         pcHlp=pcLex;
-   U64                           t;
+   time_t                        t;
    struct tm                     tm;
    struct tm                     *tmAkt;
 
@@ -2767,7 +2768,7 @@ static int siClpScnNat(
                if (t==-1) {
                   return CLPERR(psHdl,CLPERR_SYS,"Determine the current time is not possible%s","");
                }
-               tmAkt=gmtime((time_t*)&t);
+               tmAkt=gmtime(&t);
                tmAkt->tm_year +=tm.tm_year;
                tmAkt->tm_mon  +=tm.tm_mon;
                tmAkt->tm_mday +=tm.tm_mday;
@@ -2785,7 +2786,7 @@ static int siClpScnNat(
                if (t==-1) {
                   return CLPERR(psHdl,CLPERR_SYS,"Determine the current time is not possible%s","");
                }
-               tmAkt=gmtime((time_t*)&t);
+               tmAkt=gmtime(&t);
                tmAkt->tm_year -=tm.tm_year;
                tmAkt->tm_mon  -=tm.tm_mon;
                tmAkt->tm_mday -=tm.tm_mday;
@@ -2810,7 +2811,7 @@ static int siClpScnNat(
                if (tm.tm_isdst==1) t-=60*60;//correct daylight saving time
             }
             pcHlp[1]=' ';
-            sprintf(pcHlp+2,"%"PRIu64"",t);
+            sprintf(pcHlp+2,"%"PRIu64"",(U64)t);
             if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(NUM)-LEXEM(%s)\n",isPrnLex(psArg,pcHlp));
             return(CLPTOK_NUM);
          } else {
