@@ -539,7 +539,7 @@ extern int siCleExecute(
       }
 #endif
    } else {
-      fprintf(pfOut,"Use configuration file (%s) defined by environment variable (%s)\n",pcCnf,acCnf);
+      fprintf(pfOut,"Using configuration file (%s) defined by environment variable (%s)\n",pcCnf,acCnf);
       snprintf(acFil,sizeof(acFil),"%s",pcCnf);
    }
    psCnf=psCnfOpn(pfOut,isCas,pcPgm,acFil);
