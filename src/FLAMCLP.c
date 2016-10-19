@@ -2780,7 +2780,7 @@ static int siClpScnNat(
                   return CLPERR(psHdl,CLPERR_LEX,"The calculated time value (0t%4.4d/%2.2d/%2.2d.%2.2d:%2.2d:%2.2d) cannot be converted to a number",
                                                  tmAkt->tm_year+1900,tmAkt->tm_mon+1,tmAkt->tm_mday,tmAkt->tm_hour,tmAkt->tm_min,tmAkt->tm_sec);
                }
-               if (tmAkt->tm_isdst==0) t+=60*60;//correct daylight saving time
+               if (tmAkt->tm_isdst>0) t+=60*60;//correct daylight saving time
             } else if (pcHlp[1]=='-') {
                t=time(NULL);
                if (t==-1) {
@@ -2798,7 +2798,7 @@ static int siClpScnNat(
                   return CLPERR(psHdl,CLPERR_LEX,"The calculated time value (0t%4.4d/%2.2d/%2.2d.%2.2d:%2.2d:%2.2d) cannot be converted to a number",
                                                  tmAkt->tm_year+1900,tmAkt->tm_mon+1,tmAkt->tm_mday,tmAkt->tm_hour,tmAkt->tm_min,tmAkt->tm_sec);
                }
-               if (tmAkt->tm_isdst==0) t+=60*60;//correct daylight saving time
+               if (tmAkt->tm_isdst>0) t+=60*60;//correct daylight saving time
             } else {
                if (tm.tm_year>=1900) tm.tm_year-=1900;
                if (tm.tm_mon >=   1) tm.tm_mon-=1;
@@ -2808,7 +2808,7 @@ static int siClpScnNat(
                   return CLPERR(psHdl,CLPERR_LEX,"The given time value (0t%4.4d/%2.2d/%2.2d.%2.2d:%2.2d:%2.2d) cannot be converted to a number",
                                                  tm.tm_year+1900,tm.tm_mon+1,tm.tm_mday,tm.tm_hour,tm.tm_min,tm.tm_sec);
                }
-               if (tm.tm_isdst==1) t-=60*60;//correct daylight saving time
+               if (tm.tm_isdst>0) t-=60*60;//correct daylight saving time
             }
             pcHlp[1]=' ';
             sprintf(pcHlp+2,"%"PRIu64"",(U64)t);
