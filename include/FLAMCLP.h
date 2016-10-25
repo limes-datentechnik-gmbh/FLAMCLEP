@@ -67,7 +67,9 @@ overlay you can link the corresponding object identifier to determine
 which of the arguments are chosen by the user. If You define overlays of
 overlays an additional dimension for each level is used. In this case
 you must define an array for this link and You get the child (lnk[0])
-before the parent (lnk[1]) written in the CLP structure.
+before the parent (lnk[1]) written in the CLP structure. If the OID is
+0, then it will not be add to the array. This is useful if the OIDs of
+the children are already unique.
 
 You can also get the string length and other features. The kind of link
 is defined over the flags field. There are a lot of other flags supported

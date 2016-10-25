@@ -116,12 +116,13 @@
  * 1.1.66: Add new flag bit to separate default from defined properties
  * 1.1.67: Correct type of variable t to time_t to get correct time on z/OS
  * 1.1.68: Correct relative time entry (use localtime() instead of gmtime() for mktime())
+ * 1.1.69: Don't add OID to array of OIDs if overlay of overlay used if OID==0
 **/
 
-#define CLP_VSN_STR       "1.1.68"
+#define CLP_VSN_STR       "1.1.69"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        1
-#define CLP_VSN_REVISION       68
+#define CLP_VSN_REVISION       69
 
 /* Definition der Konstanten ******************************************/
 
