@@ -3673,8 +3673,10 @@ static int siClpBldSwt(
    if (siErr<0) return(siErr);
    siErr=siClpBldLnk(pvHdl,siLev,siPos,psArg->psVar->siLen,psArg->psFix->psTln,FALSE);
    if (siErr<0) return(siErr);
-   siErr=siClpBldLnk(pvHdl,siLev,siPos,psArg->psFix->siOid,psArg->psFix->psOid,TRUE);
-   if (siErr<0) return(siErr);
+   if(psArg->psFix->siOid){
+      siErr=siClpBldLnk(pvHdl,siLev,siPos,psArg->psFix->siOid,psArg->psFix->psOid,TRUE);
+      if (siErr<0) return(siErr);
+   }
    return(psArg->psFix->siTyp);
 }
 
@@ -3751,8 +3753,10 @@ static int siClpBldNum(
    if (siErr<0) return(siErr);
    siErr=siClpBldLnk(pvHdl,siLev,siPos,psArg->psVar->siLen,psArg->psFix->psTln,FALSE);
    if (siErr<0) return(siErr);
-   siErr=siClpBldLnk(pvHdl,siLev,siPos,psArg->psFix->siOid,psArg->psFix->psOid,TRUE);
-   if (siErr<0) return(siErr);
+   if(psArg->psFix->siOid){
+      siErr=siClpBldLnk(pvHdl,siLev,siPos,psArg->psFix->siOid,psArg->psFix->psOid,TRUE);
+      if (siErr<0) return(siErr);
+   }
    return(psArg->psFix->siTyp);
 }
 
@@ -4110,8 +4114,10 @@ static int siClpBldLit(
    if (siErr<0) return(siErr);
    siErr=siClpBldLnk(pvHdl,siLev,siPos,psArg->psVar->siLen,psArg->psFix->psTln,FALSE);
    if (siErr<0) return(siErr);
-   siErr=siClpBldLnk(pvHdl,siLev,siPos,psArg->psFix->siOid,psArg->psFix->psOid,TRUE);
-   if (siErr<0) return(siErr);
+   if(psArg->psFix->siOid){
+      siErr=siClpBldLnk(pvHdl,siLev,siPos,psArg->psFix->siOid,psArg->psFix->psOid,TRUE);
+      if (siErr<0) return(siErr);
+   }
    return(psArg->psFix->siTyp);
 }
 
@@ -4356,8 +4362,10 @@ static int siClpBldCon(
    if (siErr<0) return(siErr);
    siErr=siClpBldLnk(pvHdl,siLev,siPos,psArg->psVar->siLen,psArg->psFix->psTln,FALSE);
    if (siErr<0) return(siErr);
-   siErr=siClpBldLnk(pvHdl,siLev,siPos,psArg->psFix->siOid,psArg->psFix->psOid,TRUE);
-   if (siErr<0) return(siErr);
+   if(psArg->psFix->siOid){
+      siErr=siClpBldLnk(pvHdl,siLev,siPos,psArg->psFix->siOid,psArg->psFix->psOid,TRUE);
+      if (siErr<0) return(siErr);
+   }
    return(psArg->psFix->siTyp);
 }
 
@@ -4635,8 +4643,10 @@ static int siClpFinObj(
    if (siErr<0) return(siErr);
    siErr=siClpBldLnk(pvHdl,siLev,siPos,psArg->psVar->siLen,psArg->psFix->psTln,FALSE);
    if (siErr<0) return(siErr);
-   siErr=siClpBldLnk(pvHdl,siLev,siPos,psArg->psFix->siOid,psArg->psFix->psOid,TRUE);
-   if (siErr<0) return(siErr);
+   if(psArg->psFix->siOid){
+      siErr=siClpBldLnk(pvHdl,siLev,siPos,psArg->psFix->siOid,psArg->psFix->psOid,TRUE);
+      if (siErr<0) return(siErr);
+   }
    return(psArg->psFix->siTyp);
 }
 
@@ -4751,8 +4761,10 @@ static int siClpFinOvl(
    if (siErr<0) return(siErr);
    siErr=siClpBldLnk(pvHdl,siLev,siPos,psArg->psVar->siLen,psArg->psFix->psTln,FALSE);
    if (siErr<0) return(siErr);
-   siErr=siClpBldLnk(pvHdl,siLev,siPos,siOid,psArg->psFix->psOid,TRUE);
-   if (siErr<0) return(siErr);
+   if(siOid){
+      siErr=siClpBldLnk(pvHdl,siLev,siPos,siOid,psArg->psFix->psOid,TRUE);
+      if (siErr<0) return(siErr);
+   }
    return(psArg->psFix->siTyp);
 }
 
