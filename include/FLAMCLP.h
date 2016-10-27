@@ -972,6 +972,19 @@ extern int siClpSyntax(
    const int                     siDep,
    const char*                   pcPat);
 
+
+/**
+ * Give help message for given path
+ *
+ * @param[in]  pvHdl Pointer to the corresponding handle created with \a pvClpOpen
+ * @param[in]  pcPat Path (root.input...) to limit help to a certain level
+ *
+ * @return string to message or emty message if error
+ */
+extern const char* pcClpInfo(
+   void*                         pvHdl,
+   const char*                   pcPat);
+
 /**
  * Print help for command line syntax
  *

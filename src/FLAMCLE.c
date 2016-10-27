@@ -116,11 +116,12 @@
  * 1.1.49: Set owner id as environment variable if not already defined
  * 1.1.50: Support appendix for other CLP strings in docu generation
  * 1.1.51: Allow empty parameter lists for commands
+ * 1.1.52: Improve help output (print help message for path)
  */
-#define CLE_VSN_STR       "1.1.51"
+#define CLE_VSN_STR       "1.1.52"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        1
-#define CLE_VSN_REVISION       51
+#define CLE_VSN_REVISION       52
 
 /* Definition der Konstanten ******************************************/
 #define CLEMAX_CNFLEN            1023
@@ -865,9 +866,9 @@ EVALUATE:
                siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isPfl,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg);
                if (siErr) ERROR(siErr);
                if (strlen(argv[2])==strlen(psTab[i].pcKyw)) {
-                  fprintf(pfOut,"Help for command '%s':\n",argv[2]);
+                  fprintf(pfOut,"Help for command '%s': %s\n",argv[2],psTab[i].pcHlp);
                } else {
-                  fprintf(pfOut,"Help for argument '%s':\n",argv[2]);
+                  fprintf(pfOut,"Help for argument '%s': %s\n",argv[2],pcClpInfo(pvHdl,argv[2]));
                }
                vdPrnCommandHelp(pvHdl,argv[2],siDep,siDep>9,TRUE);
                if (siDep==0) {
@@ -892,7 +893,7 @@ EVALUATE:
                      ERROR(siErr);
                   }
                   sprintf(pcPat,"%s.%s",psTab[i].pcKyw,argv[2]);
-                  fprintf(pfOut,"Help for argument '%s':\n",pcPat);
+                  fprintf(pfOut,"Help for argument '%s': %s\n",pcPat,pcClpInfo(pvHdl,pcPat));
                   vdPrnCommandHelp(pvHdl,pcPat,siDep,siDep>9,TRUE);
                   if (siDep==0) {
                      fprintf(pfOut,"ARGUMENTS\n");

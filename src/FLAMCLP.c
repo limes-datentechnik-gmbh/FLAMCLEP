@@ -117,12 +117,13 @@
  * 1.1.67: Correct type of variable t to time_t to get correct time on z/OS
  * 1.1.68: Correct relative time entry (use localtime() instead of gmtime() for mktime())
  * 1.1.69: Don't add OID to array of OIDs if overlay of overlay used if OID==0
+ * 1.1.70: Add info function to print help message for a path
 **/
 
-#define CLP_VSN_STR       "1.1.69"
+#define CLP_VSN_STR       "1.1.70"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        1
-#define CLP_VSN_REVISION       69
+#define CLP_VSN_REVISION       70
 
 /* Definition der Konstanten ******************************************/
 
@@ -990,6 +991,51 @@ extern int siClpSyntax(
    }
    if (isSkr) fprintf(psHdl->pfHlp,"\n");
    return(CLP_OK);
+}
+
+
+extern const char* pcClpInfo(
+   void*                         pvHdl,
+   const char*                   pcPat)
+{
+   TsHdl*                        psHdl=(TsHdl*)pvHdl;
+   TsSym*                        psTab=psHdl->psTab;
+   TsSym*                        psArg=NULL;
+   char*                         pcPtr=NULL;
+   char*                         pcKyw=NULL;
+   char                          acKyw[CLPMAX_LEXSIZ];
+   int                           siErr,siLev,i;
+   int                           l=strlen(psHdl->pcCmd);
+
+   psHdl->pcSrc=NULL;
+   psHdl->pcCur=NULL;
+   psHdl->pcOld=NULL;
+   psHdl->pcRow=NULL;
+   psHdl->siCol=0;
+   psHdl->siRow=0;
+   psHdl->acLex[0]=EOS;
+   psHdl->acMsg[0]=EOS;
+   psHdl->acLst[0]=EOS;
+   psHdl->acPat[0]=EOS;
+   psHdl->acPre[0]=EOS;
+   strcpy(psHdl->acSrc,":INFO:");
+
+   if (pcPat!=NULL && *pcPat) {
+      if (strxcmp(psHdl->isCas,psHdl->pcCmd,pcPat,l,0,FALSE)==0) {
+         if (strlen(pcPat)<=l || pcPat[l]=='.') {
+            for (siLev=0,pcPtr=strchr(pcPat,'.');pcPtr!=NULL && siLev<CLPMAX_HDEPTH;pcPtr=strchr(pcPtr+1,'.'),siLev++) {
+               for (pcKyw=pcPtr+1,i=0;i<CLPMAX_LEXLEN && pcKyw[i]!=EOS && pcKyw[i]!='.';i++) acKyw[i]=pcKyw[i];
+               acKyw[i]=EOS;
+               siErr=siClpSymFnd(pvHdl,siLev,0,acKyw,psTab,&psArg,NULL);
+               if (siErr<0) return("");
+               psHdl->apPat[siLev]=psArg;
+               psTab=psArg->psDep;
+            }
+            if (psArg!=NULL) return(psArg->psFix->pcHlp);
+         }
+      }
+   }
+   return("");
 }
 
 extern int siClpHelp(
