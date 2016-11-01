@@ -117,11 +117,12 @@
  * 1.1.50: Support appendix for other CLP strings in docu generation
  * 1.1.51: Allow empty parameter lists for commands
  * 1.1.52: Improve help output (print help message for path)
+ * 1.1.53: Fix typo by generating of indexterm
  */
-#define CLE_VSN_STR       "1.1.52"
+#define CLE_VSN_STR       "1.1.53"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        1
-#define CLE_VSN_REVISION       52
+#define CLE_VSN_REVISION       53
 
 /* Definition der Konstanten ******************************************/
 #define CLEMAX_CNFLEN            1023
