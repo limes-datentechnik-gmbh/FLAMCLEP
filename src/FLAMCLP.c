@@ -5606,7 +5606,7 @@ static int siClpPrnDoc(
                   fprintf(pfDoc, "-----------------------------------------------------------------------\n\n");
                   fprintf(pfDoc, ".DESCRIPTION\n\n");
                   fprintm(pfDoc,psHdl->pcOwn,psHdl->pcPgm,apMan[m]->psFix->pcMan,2);
-                  fprintf(pfDoc,"indexterm:%cConstant %s%c\n\n\n",C_SBO,apMan[m]->psStd->pcKyw,C_CBC);
+                  fprintf(pfDoc,"indexterm:%cConstant %s%c\n\n\n",C_SBO,apMan[m]->psStd->pcKyw,C_SBC);
                   k++;
                }
             }
