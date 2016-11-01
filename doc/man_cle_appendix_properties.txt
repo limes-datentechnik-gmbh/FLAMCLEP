@@ -1,5 +1,11 @@
-Below you can see the properties. This content can be written to
-the global property file with the built-in function 'GENPROP'.
+All properties can be written to a global property file with the
+built-in function:
+
+   'GENPROP filename'.
+   
+A property file for a certain command can be generated with:
+
+   'GENPROP command=filename'
 
 The first comment shows the valid root path for the property file. A
 property file can contain properties for more than one root path. The
@@ -41,3 +47,7 @@ property.
 If a description for a property argument is available which is not a
 part of the user manual this description is written as comment in
 front of the corresponding property definition.
+
+Below you can see the documentation of all parameter which are only
+available as property followed by all defined default properties
+in form of a sample property file for all available commands.

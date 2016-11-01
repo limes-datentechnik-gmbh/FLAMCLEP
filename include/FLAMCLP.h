@@ -494,12 +494,14 @@ extern const char* pcClpAbout(const int l, const int s, char* b);
 /**
  * Method for property printing
  */
-/** CLPPRO_MTD_ALL All properties are printed */
+/** CLPPRO_MTD_ALL All properties are printed (manual pages added as comment) */
 #define CLPPRO_MTD_ALL           0
-/** CLPPRO_MTD_SET Only defined properties are printed */
+/** CLPPRO_MTD_SET Only defined properties are printed (no manual pages used) */
 #define CLPPRO_MTD_SET           1
 /** CLPPRO_MTD_CMT All properties are printed, but not defined properties are line comments */
 #define CLPPRO_MTD_CMT           2
+/** CLPPRO_MTD_DOC All property only parameter are printed as documentation */
+#define CLPPRO_MTD_DOC           3
 
 /**
 * Flags for command line parsing

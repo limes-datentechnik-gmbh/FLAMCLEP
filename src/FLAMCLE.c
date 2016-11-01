@@ -117,11 +117,12 @@
  * 1.1.50: Support appendix for other CLP strings in docu generation
  * 1.1.51: Allow empty parameter lists for commands
  * 1.1.52: Improve help output (print help message for path)
+ * 1.1.53: Redesign appendix properties
  */
-#define CLE_VSN_STR       "1.1.52"
+#define CLE_VSN_STR       "1.1.53"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        1
-#define CLE_VSN_REVISION       52
+#define CLE_VSN_REVISION       53
 
 /* Definition der Konstanten ******************************************/
 #define CLEMAX_CNFLEN            1023
@@ -1387,22 +1388,48 @@ EVALUATE:
             fprintf(pfDoc,"PROPERTIES\n");
             fprintf(pfDoc,"----------\n\n");
             fprintm(pfDoc,pcOwn,pcPgm,MAN_CLE_APPENDIX_PROPERTIES,1);
+
+            fprintf(pfDoc ,"REMAINING DOCUMENTATION\n");
+            efprintf(pfDoc,"~~~~~~~~~~~~~~~~~~~~~~~\n\n");
+            fprintf(pfDoc,"Below you can find the documentation for all parameter which are only\n"
+                          "available over the property definitions. These parameters are not a part\n"
+                          "of the description for each command above. This list is generated and\n"
+                          "can be empty. In this case all parameter are available over the\n"
+                          "command line. If a manual page available a description in other case\n"
+                          "the help message is printed.\n\n");
+            for (siErr=CLP_OK, i=0;psTab[i].pcKyw!=NULL && siErr==CLP_OK;i++) {
+               siErr=siClePropertyInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,
+                                       psTab[i].piOid,psTab[i].psTab,isCas,isPfl,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,acHlp,&siFil,pfMsg);
+               if (siErr) ERROR(siErr);
+               siErr=siClpProperties(pvHdl,CLPPRO_MTD_DOC,10,psTab[i].pcKyw,pfDoc);
+               vdClpClose(pvHdl); pvHdl=NULL;
+            }
+            if (siErr<0) {
+               fprintf(pfOut,"Creation of documentation file (%s) failed (%d - %s)\n",acFil,errno,strerror(errno));
+               ERROR(CLERTC_SYN);
+            }
+
+            fprintf(pfDoc ,"PREDEFINED DEFAULTS\n");
+            efprintf(pfDoc,"~~~~~~~~~~~~~~~~~~~\n\n");
+            fprintf(pfDoc,"Below you can find a sample property file which contains all predefined\n"
+                          "default values for all supported commands when this documentation was\n"
+                          "created.\n\n");
             fprintf(pfDoc,"------------------------------------------------------------------------\n");
-            fprintf(pfDoc,"\n%c Property file for: %s.%s %c\n\n",C_HSH,acOwn,pcPgm,C_HSH);
+            fprintf(pfDoc,"\n%c Property file for: %s.%s %c\n",C_HSH,acOwn,pcPgm,C_HSH);
             efprintf(pfDoc,"%s",HLP_CLE_PROPFIL);
             for (siErr=CLP_OK, i=0;psTab[i].pcKyw!=NULL && siErr==CLP_OK;i++) {
                siErr=siClePropertyInit(psTab[i].pfIni,psTab[i].pvClp,acOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,
                                        psTab[i].piOid,psTab[i].psTab,isCas,isPfl,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,acHlp,&siFil,pfMsg);
                if (siErr) ERROR(siErr);
-               siErr=siClpProperties(pvHdl,CLPPRO_MTD_ALL,10,psTab[i].pcKyw,pfDoc);
+               siErr=siClpProperties(pvHdl,CLPPRO_MTD_SET,10,psTab[i].pcKyw,pfDoc);
                vdClpClose(pvHdl); pvHdl=NULL;
             }
             fprintf(pfDoc,"------------------------------------------------------------------------\n\n");
-            efprintf(pfDoc,"indexterm:[Appendix Properties]\n\n\n");
             if (siErr<0) {
                fprintf(pfOut,"Creation of documentation file (%s) failed (%d - %s)\n",acFil,errno,strerror(errno));
                ERROR(CLERTC_SYN);
             }
+            efprintf(pfDoc,"indexterm:[Appendix Properties]\n\n\n");
 
             efprintf(pfDoc,"[[appendix-returncodes]]\n");
             efprintf(pfDoc,"[appendix]\n");
