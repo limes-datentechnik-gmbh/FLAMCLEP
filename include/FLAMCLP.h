@@ -536,13 +536,13 @@ extern const char* pcClpAbout(const int l, const int s, char* b);
 #define CLPFLG_TLN               0x00004000U
 /** CLPFLG_DEF This flag enables to use the OID as default for numbers if no value is assigned (only the keyword is used (syntax extension))*/
 #define CLPFLG_DEF               0x00008000U
-/** CLPFLG_ASC This flag will set the default method of interpretation of a binary string to local character string (DEFAULT)*/
+/** CLPFLG_CHR This flag will set the default method of interpretation of a binary string to local character string (DEFAULT)*/
 #define CLPFLG_CHR               0x00010000U
 /** CLPFLG_ASC This flag will set the default method of interpretation of a binary string to ASCII*/
 #define CLPFLG_ASC               0x00020000U
-/** CLPFLG_ASC This flag will set the default method of interpretation of a binary string to EBCDIC*/
+/** CLPFLG_EBC This flag will set the default method of interpretation of a binary string to EBCDIC*/
 #define CLPFLG_EBC               0x00040000U
-/** CLPFLG_ASC This flag will set the default method of interpretation of a binary string to hexadecimal*/
+/** CLPFLG_HEX This flag will set the default method of interpretation of a binary string to hexadecimal*/
 #define CLPFLG_HEX               0x00080000U
 /** CLPFLG_PDF This flag will be set if a property value was defined from outside, it will be FALSE if the property value was hard coded in the tables */
 #define CLPFLG_PDF               0x00100000U
