@@ -1251,6 +1251,9 @@ extern char* filemode(const char* mode) {
    if(strcmp(mode,"w")==0){
       return "w, noseek, samethread, abend=recover, recfm=*";
    }
+   if(strcmp(mode,"w+")==0){
+      return "w+, noseek, samethread, abend=recover, recfm=*";
+   }
    if(strcmp(mode,"wb")==0){
       return "wb, noseek, samethread, abend=recover, recfm=*";
    }
