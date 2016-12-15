@@ -1308,6 +1308,9 @@ extern char* filemode(const char* mode) {
    if(strcmp(mode,"w")==0 || strcmp(mode,"ws")==0){
       return "w";
    }
+   if(strcmp(mode,"w+")==0 || strcmp(mode,"ws+")==0){
+      return "w+";
+   }
    if(strcmp(mode,"wb")==0 || strcmp(mode,"wbs")==0){
       return "wb";
    }
