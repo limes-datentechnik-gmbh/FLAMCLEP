@@ -119,12 +119,13 @@
  * 1.1.69: Don't add OID to array of OIDs if overlay of overlay used if OID==0
  * 1.1.70: Add info function to print help message for a path
  * 1.1.71: Add CLPPRO_MTD_DOC for property print out
+ * 1.1.72: Don't print if print file NULL
 **/
 
-#define CLP_VSN_STR       "1.1.71"
+#define CLP_VSN_STR       "1.1.72"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        1
-#define CLP_VSN_REVISION       71
+#define CLP_VSN_REVISION       72
 
 /* Definition der Konstanten ******************************************/
 
@@ -990,7 +991,7 @@ extern int siClpSyntax(
       siErr=siClpPrnCmd(pvHdl,psHdl->pfHlp,0,0,siDep,NULL,psHdl->psTab,isSkr,isMin);
       if (siErr<0) return (siErr);
    }
-   if (isSkr) fprintf(psHdl->pfHlp,"\n");
+   if (isSkr && psHdl->pfHlp!=NULL) fprintf(psHdl->pfHlp,"\n");
    return(CLP_OK);
 }
 
@@ -1068,133 +1069,135 @@ extern int siClpHelp(
    psHdl->acPre[0]=EOS;
    strcpy(psHdl->acSrc,":HELP:");
 
-   if (pcPat!=NULL && *pcPat) {
-      if (strxcmp(psHdl->isCas,psHdl->pcCmd,pcPat,l,0,FALSE)==0) {
-         if (strlen(pcPat)>l && pcPat[l]!='.') {
-            return CLPERR(psHdl,CLPERR_SEM,"Path (%s) is not valid",pcPat);
-         }
-         for (siLev=0,pcPtr=strchr(pcPat,'.');pcPtr!=NULL && siLev<CLPMAX_HDEPTH;pcPtr=strchr(pcPtr+1,'.'),siLev++) {
-            for (pcKyw=pcPtr+1,i=0;i<CLPMAX_LEXLEN && pcKyw[i]!=EOS && pcKyw[i]!='.';i++) acKyw[i]=pcKyw[i];
-            acKyw[i]=EOS;
-            siErr=siClpSymFnd(pvHdl,siLev,0,acKyw,psTab,&psArg,NULL);
-            if (siErr<0) return(siErr);
-            psHdl->apPat[siLev]=psArg;
-            psTab=psArg->psDep;
-         }
-         if (psTab!=NULL) {
-            if (siDep==0) {
-               if (psArg==NULL) {
-                  fprintf(psHdl->pfHlp,   "SYNOPSIS\n");
-                  fprintf(psHdl->pfHlp,   "--------\n");
-                  efprintf(psHdl->pfHlp,  "HELP:   %s\n",psHdl->pcHlp);
-                  fprintf(psHdl->pfHlp,   "PATH:   %s.%s\n",psHdl->pcOwn,psHdl->pcPgm);
-                  if (psHdl->isOvl) {
-                     fprintf(psHdl->pfHlp,"TYPE:   OVERLAY\n");
-                  } else {
-                     fprintf(psHdl->pfHlp,"TYPE:   OBJECT\n");
-                  }
-                  fprintf(psHdl->pfHlp,   "SYNTAX: :> %s ",psHdl->pcPgm);
-                  siErr=siClpPrnCmd(pvHdl,psHdl->pfHlp,0,0,1,NULL,psHdl->psTab,FALSE,FALSE);
-                  if (siErr<0) return(siErr);
-                  fprintf(psHdl->pfHlp,"\n\n");
-                  fprintf(psHdl->pfHlp,"DESCRIPTION\n");
-                  fprintf(psHdl->pfHlp,"-----------\n");
-                  if (psHdl->pcMan!=NULL && *psHdl->pcMan) {
-                     fprintm(psHdl->pfHlp,psHdl->pcOwn,psHdl->pcPgm,psHdl->pcMan,1);
-                  } else {
-                     fprintf(psHdl->pfHlp,"No detailed description available for this command.\n\n");
-                  }
-               } else {
-                  fprintf(psHdl->pfHlp, "SYNOPSIS\n");
-                  fprintf(psHdl->pfHlp, "--------\n");
-                  efprintf(psHdl->pfHlp,"HELP:   %s\n",psArg->psFix->pcHlp);
-                  fprintf(psHdl->pfHlp, "PATH:   %s\n",fpcPat(pvHdl,siLev-1));
-                  fprintf(psHdl->pfHlp, "TYPE:   %s\n",apClpTyp[psArg->psFix->siTyp]);
-                  fprintf(psHdl->pfHlp, "SYNTAX: ");
-                  siErr=siClpPrnSyn(pvHdl,psHdl->pfHlp,FALSE,siLev-1,psArg);
-                  fprintf(psHdl->pfHlp,"\n\n");
-                  if (siErr<0) return(siErr);
-                  fprintf(psHdl->pfHlp, "DESCRIPTION\n");
-                  fprintf(psHdl->pfHlp, "-----------\n");
-                  if (psArg->psFix->pcMan!=NULL && *psArg->psFix->pcMan) {
-                     efprintf(psHdl->pfHlp,"%s\n",psArg->psFix->pcMan);
-                  } else {
-                     fprintf(psHdl->pfHlp,"No detailed description available for this argument.\n\n");
-                  }
-               }
-            } else {
-               if (psArg!=NULL) {
-                  if (psArg->psFix->siTyp==CLPTYP_OBJECT || psArg->psFix->siTyp==CLPTYP_OVRLAY) {
-                     siErr=siClpPrnHlp(pvHdl,psHdl->pfHlp,isAli,siLev,siLev+siDep,-1,psTab,FALSE);
-                     if (siErr<0) return(siErr);
-                  } else {
-                     if (CLPISF_SEL(psArg->psStd->uiFlg)) {
-                        siErr=siClpPrnHlp(pvHdl,psHdl->pfHlp,isAli,siLev,siLev+siDep,psArg->psFix->siTyp,psTab,FALSE);
-                        if (siErr<0) return(siErr);
+   if (psHdl->pfHlp!=NULL) {
+      if (pcPat!=NULL && *pcPat) {
+         if (strxcmp(psHdl->isCas,psHdl->pcCmd,pcPat,l,0,FALSE)==0) {
+            if (strlen(pcPat)>l && pcPat[l]!='.') {
+               return CLPERR(psHdl,CLPERR_SEM,"Path (%s) is not valid",pcPat);
+            }
+            for (siLev=0,pcPtr=strchr(pcPat,'.');pcPtr!=NULL && siLev<CLPMAX_HDEPTH;pcPtr=strchr(pcPtr+1,'.'),siLev++) {
+               for (pcKyw=pcPtr+1,i=0;i<CLPMAX_LEXLEN && pcKyw[i]!=EOS && pcKyw[i]!='.';i++) acKyw[i]=pcKyw[i];
+               acKyw[i]=EOS;
+               siErr=siClpSymFnd(pvHdl,siLev,0,acKyw,psTab,&psArg,NULL);
+               if (siErr<0) return(siErr);
+               psHdl->apPat[siLev]=psArg;
+               psTab=psArg->psDep;
+            }
+            if (psTab!=NULL) {
+               if (siDep==0) {
+                  if (psArg==NULL) {
+                     fprintf(psHdl->pfHlp,   "SYNOPSIS\n");
+                     fprintf(psHdl->pfHlp,   "--------\n");
+                     efprintf(psHdl->pfHlp,  "HELP:   %s\n",psHdl->pcHlp);
+                     fprintf(psHdl->pfHlp,   "PATH:   %s.%s\n",psHdl->pcOwn,psHdl->pcPgm);
+                     if (psHdl->isOvl) {
+                        fprintf(psHdl->pfHlp,"TYPE:   OVERLAY\n");
                      } else {
-                        siErr=siClpPrnHlp(pvHdl,psHdl->pfHlp,isAli,siLev,siLev+siDep,psArg->psFix->siTyp,psTab,TRUE);
-                        if (siErr<0) return(siErr);
+                        fprintf(psHdl->pfHlp,"TYPE:   OBJECT\n");
+                     }
+                     fprintf(psHdl->pfHlp,   "SYNTAX: :> %s ",psHdl->pcPgm);
+                     siErr=siClpPrnCmd(pvHdl,psHdl->pfHlp,0,0,1,NULL,psHdl->psTab,FALSE,FALSE);
+                     if (siErr<0) return(siErr);
+                     fprintf(psHdl->pfHlp,"\n\n");
+                     fprintf(psHdl->pfHlp,"DESCRIPTION\n");
+                     fprintf(psHdl->pfHlp,"-----------\n");
+                     if (psHdl->pcMan!=NULL && *psHdl->pcMan) {
+                        fprintm(psHdl->pfHlp,psHdl->pcOwn,psHdl->pcPgm,psHdl->pcMan,1);
+                     } else {
+                        fprintf(psHdl->pfHlp,"No detailed description available for this command.\n\n");
+                     }
+                  } else {
+                     fprintf(psHdl->pfHlp, "SYNOPSIS\n");
+                     fprintf(psHdl->pfHlp, "--------\n");
+                     efprintf(psHdl->pfHlp,"HELP:   %s\n",psArg->psFix->pcHlp);
+                     fprintf(psHdl->pfHlp, "PATH:   %s\n",fpcPat(pvHdl,siLev-1));
+                     fprintf(psHdl->pfHlp, "TYPE:   %s\n",apClpTyp[psArg->psFix->siTyp]);
+                     fprintf(psHdl->pfHlp, "SYNTAX: ");
+                     siErr=siClpPrnSyn(pvHdl,psHdl->pfHlp,FALSE,siLev-1,psArg);
+                     fprintf(psHdl->pfHlp,"\n\n");
+                     if (siErr<0) return(siErr);
+                     fprintf(psHdl->pfHlp, "DESCRIPTION\n");
+                     fprintf(psHdl->pfHlp, "-----------\n");
+                     if (psArg->psFix->pcMan!=NULL && *psArg->psFix->pcMan) {
+                        efprintf(psHdl->pfHlp,"%s\n",psArg->psFix->pcMan);
+                     } else {
+                        fprintf(psHdl->pfHlp,"No detailed description available for this argument.\n\n");
                      }
                   }
                } else {
-                  siErr=siClpPrnHlp(pvHdl,psHdl->pfHlp,isAli,siLev,siLev+siDep,-1,psTab,FALSE);
-                  if (siErr<0) return(siErr);
+                  if (psArg!=NULL) {
+                     if (psArg->psFix->siTyp==CLPTYP_OBJECT || psArg->psFix->siTyp==CLPTYP_OVRLAY) {
+                        siErr=siClpPrnHlp(pvHdl,psHdl->pfHlp,isAli,siLev,siLev+siDep,-1,psTab,FALSE);
+                        if (siErr<0) return(siErr);
+                     } else {
+                        if (CLPISF_SEL(psArg->psStd->uiFlg)) {
+                           siErr=siClpPrnHlp(pvHdl,psHdl->pfHlp,isAli,siLev,siLev+siDep,psArg->psFix->siTyp,psTab,FALSE);
+                           if (siErr<0) return(siErr);
+                        } else {
+                           siErr=siClpPrnHlp(pvHdl,psHdl->pfHlp,isAli,siLev,siLev+siDep,psArg->psFix->siTyp,psTab,TRUE);
+                           if (siErr<0) return(siErr);
+                        }
+                     }
+                  } else {
+                     siErr=siClpPrnHlp(pvHdl,psHdl->pfHlp,isAli,siLev,siLev+siDep,-1,psTab,FALSE);
+                     if (siErr<0) return(siErr);
+                  }
                }
-            }
-         } else {
-            if (isMan) {
-               if (psArg!=NULL) {
-                  fprintf(psHdl->pfHlp, "SYNOPSIS\n");
-                  fprintf(psHdl->pfHlp, "--------\n");
-                  efprintf(psHdl->pfHlp,"HELP:   %s\n",psArg->psFix->pcHlp);
-                  fprintf(psHdl->pfHlp, "PATH:   %s\n",fpcPat(pvHdl,siLev-1));
-                  fprintf(psHdl->pfHlp, "TYPE:   %s\n",apClpTyp[psArg->psFix->siTyp]);
-                  fprintf(psHdl->pfHlp, "SYNTAX: ");
-                  siErr=siClpPrnSyn(pvHdl,psHdl->pfHlp,FALSE,siLev-1,psArg);
-                  fprintf(psHdl->pfHlp, "\n\n");
-                  if (siErr<0) return(siErr);
-                  fprintf(psHdl->pfHlp, "DESCRIPTION\n");
-                  fprintf(psHdl->pfHlp, "-----------\n");
-                  if (psArg->psFix->pcMan!=NULL && *psArg->psFix->pcMan) {
-                     fprintm(psHdl->pfHlp,psHdl->pcOwn,psHdl->pcPgm,psArg->psFix->pcMan,1);
+            } else {
+               if (isMan) {
+                  if (psArg!=NULL) {
+                     fprintf(psHdl->pfHlp, "SYNOPSIS\n");
+                     fprintf(psHdl->pfHlp, "--------\n");
+                     efprintf(psHdl->pfHlp,"HELP:   %s\n",psArg->psFix->pcHlp);
+                     fprintf(psHdl->pfHlp, "PATH:   %s\n",fpcPat(pvHdl,siLev-1));
+                     fprintf(psHdl->pfHlp, "TYPE:   %s\n",apClpTyp[psArg->psFix->siTyp]);
+                     fprintf(psHdl->pfHlp, "SYNTAX: ");
+                     siErr=siClpPrnSyn(pvHdl,psHdl->pfHlp,FALSE,siLev-1,psArg);
+                     fprintf(psHdl->pfHlp, "\n\n");
+                     if (siErr<0) return(siErr);
+                     fprintf(psHdl->pfHlp, "DESCRIPTION\n");
+                     fprintf(psHdl->pfHlp, "-----------\n");
+                     if (psArg->psFix->pcMan!=NULL && *psArg->psFix->pcMan) {
+                        fprintm(psHdl->pfHlp,psHdl->pcOwn,psHdl->pcPgm,psArg->psFix->pcMan,1);
+                     } else {
+                        fprintf(psHdl->pfHlp,"No detailed description available for this argument.\n\n");
+                     }
                   } else {
                      fprintf(psHdl->pfHlp,"No detailed description available for this argument.\n\n");
                   }
                } else {
-                  fprintf(psHdl->pfHlp,"No detailed description available for this argument.\n\n");
+                  fprintf(psHdl->pfHlp,"No further arguments available.\n");
                }
-            } else {
-               fprintf(psHdl->pfHlp,"No further arguments available.\n");
             }
+         } else {
+            return CLPERR(psHdl,CLPERR_SEM,"Root of path (%s) does not match root of handle (%s)",pcPat,psHdl->pcCmd);
          }
       } else {
-         return CLPERR(psHdl,CLPERR_SEM,"Root of path (%s) does not match root of handle (%s)",pcPat,psHdl->pcCmd);
-      }
-   } else {
-      if (siDep==0) {
-         fprintf(psHdl->pfHlp,   "SYNOPSIS\n");
-         fprintf(psHdl->pfHlp,   "--------\n");
-         efprintf(psHdl->pfHlp,  "HELP:   %s\n",psHdl->pcHlp);
-         fprintf(psHdl->pfHlp,   "PATH:   %s.%s\n",psHdl->pcOwn,psHdl->pcPgm);
-         if (psHdl->isOvl) {
-            fprintf(psHdl->pfHlp,"TYPE:   OVERLAY\n");
+         if (siDep==0) {
+            fprintf(psHdl->pfHlp,   "SYNOPSIS\n");
+            fprintf(psHdl->pfHlp,   "--------\n");
+            efprintf(psHdl->pfHlp,  "HELP:   %s\n",psHdl->pcHlp);
+            fprintf(psHdl->pfHlp,   "PATH:   %s.%s\n",psHdl->pcOwn,psHdl->pcPgm);
+            if (psHdl->isOvl) {
+               fprintf(psHdl->pfHlp,"TYPE:   OVERLAY\n");
+            } else {
+               fprintf(psHdl->pfHlp,"TYPE:   OBJECT\n");
+            }
+            fprintf(psHdl->pfHlp,   "SYNTAX: :> %s ",psHdl->pcPgm);
+            siErr=siClpPrnCmd(pvHdl,psHdl->pfHlp,0,0,1,NULL,psHdl->psTab,FALSE,FALSE);
+            fprintf(psHdl->pfHlp,"\n\n");
+            if (siErr<0) return(siErr);
+            fprintf(psHdl->pfHlp,"DESCRIPTION\n");
+            fprintf(psHdl->pfHlp,"-----------\n");
+            if (psHdl->pcMan!=NULL && *psHdl->pcMan) {
+               fprintm(psHdl->pfHlp,psHdl->pcOwn,psHdl->pcPgm,psHdl->pcMan,1);
+            } else {
+               fprintf(psHdl->pfHlp,"No detailed description available for this command.\n\n");
+            }
          } else {
-            fprintf(psHdl->pfHlp,"TYPE:   OBJECT\n");
+            siErr=siClpPrnHlp(pvHdl,psHdl->pfHlp,isAli,0,siDep,-1,psTab,FALSE);
+            if (siErr<0) return(siErr);
          }
-         fprintf(psHdl->pfHlp,   "SYNTAX: :> %s ",psHdl->pcPgm);
-         siErr=siClpPrnCmd(pvHdl,psHdl->pfHlp,0,0,1,NULL,psHdl->psTab,FALSE,FALSE);
-         fprintf(psHdl->pfHlp,"\n\n");
-         if (siErr<0) return(siErr);
-         fprintf(psHdl->pfHlp,"DESCRIPTION\n");
-         fprintf(psHdl->pfHlp,"-----------\n");
-         if (psHdl->pcMan!=NULL && *psHdl->pcMan) {
-            fprintm(psHdl->pfHlp,psHdl->pcOwn,psHdl->pcPgm,psHdl->pcMan,1);
-         } else {
-            fprintf(psHdl->pfHlp,"No detailed description available for this command.\n\n");
-         }
-      } else {
-         siErr=siClpPrnHlp(pvHdl,psHdl->pfHlp,isAli,0,siDep,-1,psTab,FALSE);
-         if (siErr<0) return(siErr);
       }
    }
    return(CLP_OK);
@@ -1239,262 +1242,264 @@ extern int siClpDocu(
    strcpy(psHdl->acSrc,":DOCU:");
 
    if (pcNum!=NULL && strlen(pcNum)<100 && pcCmd!=NULL) {
-      if (pcPat!=NULL && *pcPat) {
-         if (strxcmp(psHdl->isCas,psHdl->pcCmd,pcPat,l,0,FALSE)==0) {
-            if (strlen(pcPat)>l && pcPat[l]!='.') {
-               return CLPERR(psHdl,CLPERR_SEM,"Path (%s) is not valid",pcPat);
-            }
-            if (strlen(pcPat)>l) {
-               strcpy(acNum,pcNum);
-               for (siLev=0,pcPtr=strchr(pcPat,'.');pcPtr!=NULL && siLev<CLPMAX_HDEPTH;pcPtr=strchr(pcPtr+1,'.'),siLev++) {
-                  for (pcKyw=pcPtr+1,i=0;i<CLPMAX_LEXLEN && pcKyw[i]!=EOS && pcKyw[i]!='.';i++) acKyw[i]=pcKyw[i];
-                  acKyw[i]=EOS;
-                  siErr=siClpSymFnd(pvHdl,siLev,0,acKyw,psTab,&psArg,&siPos);
-                  if (siErr<0) return(siErr);
-                  psHdl->apPat[siLev]=psArg;
-                  psTab=psArg->psDep;
-                  snprintf(acHlp,sizeof(acHlp),"%s%d.",acNum,siPos+1);
-                  strcpy(acNum,acHlp);
+      if (pfDoc!=NULL) {
+         if (pcPat!=NULL && *pcPat) {
+            if (strxcmp(psHdl->isCas,psHdl->pcCmd,pcPat,l,0,FALSE)==0) {
+               if (strlen(pcPat)>l && pcPat[l]!='.') {
+                  return CLPERR(psHdl,CLPERR_SEM,"Path (%s) is not valid",pcPat);
                }
-               if (psArg!=NULL) {
-                  if (CLPISF_ARG(psArg->psStd->uiFlg)) {
-                     if (isMan) {
-                        if (psHdl->pcPgm!=NULL && *psHdl->pcPgm) {
-                           for (p=psHdl->pcPgm;*p;p++) fprintf(pfDoc,"%c",tolower(*p));
-                           fprintf(pfDoc,".");
-                           l=strlen(psHdl->pcPgm)+strlen(fpcPat(pvHdl,siLev))+4;
-                        } else {
-                           l=strlen(fpcPat(pvHdl,siLev))+3;
-                        }
-                        for (p=fpcPat(pvHdl,siLev);*p;p++) fprintf(pfDoc,"%c",tolower(*p));
-                        fprintf(pfDoc,"(3)\n");
-                        for (i=0;i<l;i++) fprintf(pfDoc,"=");
-                        fprintf(pfDoc,"\n");
-                        fprintf(pfDoc, ":doctype: manpage\n\n");
-                        fprintf(pfDoc, "NAME\n");
-                        fprintf(pfDoc, "----\n\n");
-                        if (psHdl->pcPgm!=NULL && *psHdl->pcPgm) {
-                           for (p=psHdl->pcPgm;*p;p++) fprintf(pfDoc,"%c",tolower(*p));
-                           fprintf(pfDoc,".");
+               if (strlen(pcPat)>l) {
+                  strcpy(acNum,pcNum);
+                  for (siLev=0,pcPtr=strchr(pcPat,'.');pcPtr!=NULL && siLev<CLPMAX_HDEPTH;pcPtr=strchr(pcPtr+1,'.'),siLev++) {
+                     for (pcKyw=pcPtr+1,i=0;i<CLPMAX_LEXLEN && pcKyw[i]!=EOS && pcKyw[i]!='.';i++) acKyw[i]=pcKyw[i];
+                     acKyw[i]=EOS;
+                     siErr=siClpSymFnd(pvHdl,siLev,0,acKyw,psTab,&psArg,&siPos);
+                     if (siErr<0) return(siErr);
+                     psHdl->apPat[siLev]=psArg;
+                     psTab=psArg->psDep;
+                     snprintf(acHlp,sizeof(acHlp),"%s%d.",acNum,siPos+1);
+                     strcpy(acNum,acHlp);
+                  }
+                  if (psArg!=NULL) {
+                     if (CLPISF_ARG(psArg->psStd->uiFlg)) {
+                        if (isMan) {
+                           if (psHdl->pcPgm!=NULL && *psHdl->pcPgm) {
+                              for (p=psHdl->pcPgm;*p;p++) fprintf(pfDoc,"%c",tolower(*p));
+                              fprintf(pfDoc,".");
+                              l=strlen(psHdl->pcPgm)+strlen(fpcPat(pvHdl,siLev))+4;
+                           } else {
+                              l=strlen(fpcPat(pvHdl,siLev))+3;
+                           }
                            for (p=fpcPat(pvHdl,siLev);*p;p++) fprintf(pfDoc,"%c",tolower(*p));
-                        } else {
-                            vdClpPrnAli(pfDoc,", ",psArg);
-                        }
-                        efprintf(pfDoc," - `%s`\n\n",psArg->psFix->pcHlp);
-                        fprintf(pfDoc, "SYNOPSIS\n");
-                        fprintf(pfDoc, "--------\n\n");
-                        fprintf(pfDoc, "-----------------------------------------------------------------------\n");
-                        fprintf(pfDoc, "PATH:   %s\n",fpcPat(pvHdl,siLev-1));
-                        fprintf(pfDoc, "TYPE:   %s\n",apClpTyp[psArg->psFix->siTyp]);
-                        fprintf(pfDoc, "SYNTAX: "); siErr=siClpPrnSyn(pvHdl,pfDoc,FALSE,siLev-1,psArg); fprintf(pfDoc,"\n");
-                        fprintf(pfDoc, "-----------------------------------------------------------------------\n\n");
-                        if (siErr<0) return(siErr);
-                        fprintf(pfDoc, "DESCRIPTION\n");
-                        fprintf(pfDoc, "-----------\n\n");
-                        if (psArg->psFix->pcMan!=NULL && *psArg->psFix->pcMan) {
-                           fprintm(pfDoc,psHdl->pcOwn,psHdl->pcPgm,psArg->psFix->pcMan,2);
-                        } else {
-                           fprintf(pfDoc,"No detailed description available for this argument.\n\n");
-                        }
-                        fprintf(pfDoc, "AUTHOR\n");
-                        fprintf(pfDoc, "------\n\n");
-                        fprintf(pfDoc, "limes datentechnik(r) gmbh (www.flam.de)\n\n");
-                     } else {
-                        switch (psArg->psFix->siTyp){
-                        case CLPTYP_OBJECT:strcpy(acArg,"OBJECT");break;
-                        case CLPTYP_OVRLAY:strcpy(acArg,"OVERLAY");break;
-                        default           :strcpy(acArg,"PARAMETER");break;
-                        }
-                        if (isNbr) {
-                           fprintf(pfDoc,"%s %s '%s'\n",acNum,acArg,psArg->psStd->pcKyw);
-                           l=strlen(acNum)+strlen(acArg)+strlen(psArg->psStd->pcKyw)+4;
-                           for (i=0;i<l;i++) fprintf(pfDoc,"%c",C_CRT);
-                           fprintf(pfDoc,"\n\n");
-                        } else {
-                           fprintf(pfDoc,"%s '%s'\n",acArg,psArg->psStd->pcKyw);
-                           l=strlen(acArg)+strlen(psArg->psStd->pcKyw)+3;
-                           for (i=0;i<l;i++) fprintf(pfDoc,"%c",C_CRT);
-                           fprintf(pfDoc,"\n\n");
-                        }
-                        fprintf(pfDoc, ".SYNOPSIS\n\n");
-                        fprintf(pfDoc, "-----------------------------------------------------------------------\n");
-                        efprintf(pfDoc,"HELP:   %s\n",psArg->psFix->pcHlp);
-                        fprintf(pfDoc, "PATH:   %s\n",fpcPat(pvHdl,siLev-1));
-                        fprintf(pfDoc, "TYPE:   %s\n",apClpTyp[psArg->psFix->siTyp]);
-                        fprintf(pfDoc, "SYNTAX: "); siErr=siClpPrnSyn(pvHdl,pfDoc,FALSE,siLev-1,psArg); fprintf(pfDoc,"\n");
-                        fprintf(pfDoc, "-----------------------------------------------------------------------\n\n");
-                        if (siErr<0) return(siErr);
-                        fprintf(pfDoc,".DESCRIPTION\n\n");
-                        if (psArg->psFix->pcMan!=NULL && *psArg->psFix->pcMan) {
-                           fprintm(pfDoc,psHdl->pcOwn,psHdl->pcPgm,psArg->psFix->pcMan,2);
-                        } else {
-                           fprintf(pfDoc,"No detailed description available for this argument.\n\n");
-                        }
-                        fprintf(pfDoc,"indexterm:%cArgument %s%c\n\n\n",C_SBO,psArg->psStd->pcKyw,C_SBC);
-                        if (isDep) {
-                           siErr=siClpPrnDoc(pvHdl,pfDoc,siLev,isNbr,acNum,psArg,psTab);
+                           fprintf(pfDoc,"(3)\n");
+                           for (i=0;i<l;i++) fprintf(pfDoc,"=");
+                           fprintf(pfDoc,"\n");
+                           fprintf(pfDoc, ":doctype: manpage\n\n");
+                           fprintf(pfDoc, "NAME\n");
+                           fprintf(pfDoc, "----\n\n");
+                           if (psHdl->pcPgm!=NULL && *psHdl->pcPgm) {
+                              for (p=psHdl->pcPgm;*p;p++) fprintf(pfDoc,"%c",tolower(*p));
+                              fprintf(pfDoc,".");
+                              for (p=fpcPat(pvHdl,siLev);*p;p++) fprintf(pfDoc,"%c",tolower(*p));
+                           } else {
+                               vdClpPrnAli(pfDoc,", ",psArg);
+                           }
+                           efprintf(pfDoc," - `%s`\n\n",psArg->psFix->pcHlp);
+                           fprintf(pfDoc, "SYNOPSIS\n");
+                           fprintf(pfDoc, "--------\n\n");
+                           fprintf(pfDoc, "-----------------------------------------------------------------------\n");
+                           fprintf(pfDoc, "PATH:   %s\n",fpcPat(pvHdl,siLev-1));
+                           fprintf(pfDoc, "TYPE:   %s\n",apClpTyp[psArg->psFix->siTyp]);
+                           fprintf(pfDoc, "SYNTAX: "); siErr=siClpPrnSyn(pvHdl,pfDoc,FALSE,siLev-1,psArg); fprintf(pfDoc,"\n");
+                           fprintf(pfDoc, "-----------------------------------------------------------------------\n\n");
                            if (siErr<0) return(siErr);
-                        }
-                     }
-                  } else if (CLPISF_CON(psArg->psStd->uiFlg)) {
-                     if (isMan) {
-                        if (psHdl->pcPgm!=NULL && *psHdl->pcPgm) {
-                           for (p=psHdl->pcPgm;*p;p++) fprintf(pfDoc,"%c",tolower(*p));
-                           fprintf(pfDoc,".");
-                           l=strlen(psHdl->pcPgm)+strlen(fpcPat(pvHdl,siLev))+4;
+                           fprintf(pfDoc, "DESCRIPTION\n");
+                           fprintf(pfDoc, "-----------\n\n");
+                           if (psArg->psFix->pcMan!=NULL && *psArg->psFix->pcMan) {
+                              fprintm(pfDoc,psHdl->pcOwn,psHdl->pcPgm,psArg->psFix->pcMan,2);
+                           } else {
+                              fprintf(pfDoc,"No detailed description available for this argument.\n\n");
+                           }
+                           fprintf(pfDoc, "AUTHOR\n");
+                           fprintf(pfDoc, "------\n\n");
+                           fprintf(pfDoc, "limes datentechnik(r) gmbh (www.flam.de)\n\n");
                         } else {
-                           l=strlen(fpcPat(pvHdl,siLev))+3;
+                           switch (psArg->psFix->siTyp){
+                           case CLPTYP_OBJECT:strcpy(acArg,"OBJECT");break;
+                           case CLPTYP_OVRLAY:strcpy(acArg,"OVERLAY");break;
+                           default           :strcpy(acArg,"PARAMETER");break;
+                           }
+                           if (isNbr) {
+                              fprintf(pfDoc,"%s %s '%s'\n",acNum,acArg,psArg->psStd->pcKyw);
+                              l=strlen(acNum)+strlen(acArg)+strlen(psArg->psStd->pcKyw)+4;
+                              for (i=0;i<l;i++) fprintf(pfDoc,"%c",C_CRT);
+                              fprintf(pfDoc,"\n\n");
+                           } else {
+                              fprintf(pfDoc,"%s '%s'\n",acArg,psArg->psStd->pcKyw);
+                              l=strlen(acArg)+strlen(psArg->psStd->pcKyw)+3;
+                              for (i=0;i<l;i++) fprintf(pfDoc,"%c",C_CRT);
+                              fprintf(pfDoc,"\n\n");
+                           }
+                           fprintf(pfDoc, ".SYNOPSIS\n\n");
+                           fprintf(pfDoc, "-----------------------------------------------------------------------\n");
+                           efprintf(pfDoc,"HELP:   %s\n",psArg->psFix->pcHlp);
+                           fprintf(pfDoc, "PATH:   %s\n",fpcPat(pvHdl,siLev-1));
+                           fprintf(pfDoc, "TYPE:   %s\n",apClpTyp[psArg->psFix->siTyp]);
+                           fprintf(pfDoc, "SYNTAX: "); siErr=siClpPrnSyn(pvHdl,pfDoc,FALSE,siLev-1,psArg); fprintf(pfDoc,"\n");
+                           fprintf(pfDoc, "-----------------------------------------------------------------------\n\n");
+                           if (siErr<0) return(siErr);
+                           fprintf(pfDoc,".DESCRIPTION\n\n");
+                           if (psArg->psFix->pcMan!=NULL && *psArg->psFix->pcMan) {
+                              fprintm(pfDoc,psHdl->pcOwn,psHdl->pcPgm,psArg->psFix->pcMan,2);
+                           } else {
+                              fprintf(pfDoc,"No detailed description available for this argument.\n\n");
+                           }
+                           fprintf(pfDoc,"indexterm:%cArgument %s%c\n\n\n",C_SBO,psArg->psStd->pcKyw,C_SBC);
+                           if (isDep) {
+                              siErr=siClpPrnDoc(pvHdl,pfDoc,siLev,isNbr,acNum,psArg,psTab);
+                              if (siErr<0) return(siErr);
+                           }
                         }
-                        for(p=fpcPat(pvHdl,siLev);*p;p++) fprintf(pfDoc,"%c",tolower(*p));
-                        fprintf(pfDoc,"(3)\n");
-                        for (i=0;i<l;i++) fprintf(pfDoc,"=");
-                        fprintf(pfDoc,"\n");
-                        fprintf(pfDoc, ":doctype: manpage\n\n");
-                        fprintf(pfDoc, "NAME\n");
-                        fprintf(pfDoc, "----\n\n");
-                        if (psHdl->pcPgm!=NULL && *psHdl->pcPgm) {
-                           for (p=psHdl->pcPgm;*p;p++) fprintf(pfDoc,"%c",tolower(*p));
-                           fprintf(pfDoc,".");
-                           for (p=fpcPat(pvHdl,siLev);*p;p++) fprintf(pfDoc,"%c",tolower(*p));
+                     } else if (CLPISF_CON(psArg->psStd->uiFlg)) {
+                        if (isMan) {
+                           if (psHdl->pcPgm!=NULL && *psHdl->pcPgm) {
+                              for (p=psHdl->pcPgm;*p;p++) fprintf(pfDoc,"%c",tolower(*p));
+                              fprintf(pfDoc,".");
+                              l=strlen(psHdl->pcPgm)+strlen(fpcPat(pvHdl,siLev))+4;
+                           } else {
+                              l=strlen(fpcPat(pvHdl,siLev))+3;
+                           }
+                           for(p=fpcPat(pvHdl,siLev);*p;p++) fprintf(pfDoc,"%c",tolower(*p));
+                           fprintf(pfDoc,"(3)\n");
+                           for (i=0;i<l;i++) fprintf(pfDoc,"=");
+                           fprintf(pfDoc,"\n");
+                           fprintf(pfDoc, ":doctype: manpage\n\n");
+                           fprintf(pfDoc, "NAME\n");
+                           fprintf(pfDoc, "----\n\n");
+                           if (psHdl->pcPgm!=NULL && *psHdl->pcPgm) {
+                              for (p=psHdl->pcPgm;*p;p++) fprintf(pfDoc,"%c",tolower(*p));
+                              fprintf(pfDoc,".");
+                              for (p=fpcPat(pvHdl,siLev);*p;p++) fprintf(pfDoc,"%c",tolower(*p));
+                           } else {
+                              for (p=psArg->psStd->pcKyw;*p;p++) fprintf(pfDoc,"%c",tolower(*p));
+                           }
+                           efprintf(pfDoc," - `%s`\n\n",psArg->psFix->pcHlp);
+                           fprintf(pfDoc, "SYNOPSIS\n");
+                           fprintf(pfDoc, "--------\n\n");
+                           fprintf(pfDoc, "-----------------------------------------------------------------------\n");
+                           fprintf(pfDoc, "PATH:   %s\n",fpcPat(pvHdl,siLev-1));
+                           fprintf(pfDoc, "TYPE:   %s\n",apClpTyp[psArg->psFix->siTyp]);
+                           fprintf(pfDoc, "SYNTAX: %s\n",psArg->psStd->pcKyw);
+                           fprintf(pfDoc, "-----------------------------------------------------------------------\n\n");
+                           if (siErr<0) return(siErr);
+                           fprintf(pfDoc, "DESCRIPTION\n");
+                           fprintf(pfDoc, "-----------\n\n");
+                           if (psArg->psFix->pcMan!=NULL && *psArg->psFix->pcMan) {
+                              fprintm(pfDoc,psHdl->pcOwn,psHdl->pcPgm,psArg->psFix->pcMan,2);
+                           } else {
+                              fprintf(pfDoc,"No detailed description available for this constant.\n\n");
+                           }
+                           fprintf(pfDoc, "AUTHOR\n");
+                           fprintf(pfDoc, "------\n\n");
+                           fprintf(pfDoc, "limes datentechnik(r) gmbh (www.flam.de)\n\n");
                         } else {
-                           for (p=psArg->psStd->pcKyw;*p;p++) fprintf(pfDoc,"%c",tolower(*p));
+                           if (isNbr) {
+                              fprintf(pfDoc,"%s CONSTANT '%s'\n",acNum,psArg->psStd->pcKyw);
+                              l=strlen(acNum)+strlen(psArg->psStd->pcKyw)+12;
+                              for (i=0;i<l;i++) fprintf(pfDoc,"+");
+                              fprintf(pfDoc,"\n\n");
+                           } else {
+                              fprintf(pfDoc,"CONSTANT '%s'\n",psArg->psStd->pcKyw);
+                              l=strlen(psArg->psStd->pcKyw)+11;
+                              for (i=0;i<l;i++) fprintf(pfDoc,"+");
+                              fprintf(pfDoc,"\n\n");
+                           }
+                           fprintf(pfDoc, ".SYNOPSIS\n\n");
+                           fprintf(pfDoc, "-----------------------------------------------------------------------\n");
+                           efprintf(pfDoc,"HELP:   %s\n",psArg->psFix->pcHlp);
+                           fprintf(pfDoc, "PATH:   %s\n",fpcPat(pvHdl,siLev-1));
+                           fprintf(pfDoc, "TYPE:   %s\n",apClpTyp[psArg->psFix->siTyp]);
+                           fprintf(pfDoc, "SYNTAX: %s\n",psArg->psStd->pcKyw);
+                           fprintf(pfDoc, "-----------------------------------------------------------------------\n\n");
+                           if (siErr<0) return(siErr);
+                           fprintf(pfDoc,".DESCRIPTION\n\n");
+                           if (psArg->psFix->pcMan!=NULL && *psArg->psFix->pcMan) {
+                              fprintm(pfDoc,psHdl->pcOwn,psHdl->pcPgm,psArg->psFix->pcMan,2);
+                           } else {
+                              fprintf(pfDoc,"No detailed description available for this constant.\n\n");
+                           }
+                           fprintf(pfDoc,"indexterm:%cConstant %s%c\n\n\n",C_SBO,psArg->psStd->pcKyw,C_SBC);
                         }
-                        efprintf(pfDoc," - `%s`\n\n",psArg->psFix->pcHlp);
-                        fprintf(pfDoc, "SYNOPSIS\n");
-                        fprintf(pfDoc, "--------\n\n");
-                        fprintf(pfDoc, "-----------------------------------------------------------------------\n");
-                        fprintf(pfDoc, "PATH:   %s\n",fpcPat(pvHdl,siLev-1));
-                        fprintf(pfDoc, "TYPE:   %s\n",apClpTyp[psArg->psFix->siTyp]);
-                        fprintf(pfDoc, "SYNTAX: %s\n",psArg->psStd->pcKyw);
-                        fprintf(pfDoc, "-----------------------------------------------------------------------\n\n");
-                        if (siErr<0) return(siErr);
-                        fprintf(pfDoc, "DESCRIPTION\n");
-                        fprintf(pfDoc, "-----------\n\n");
-                        if (psArg->psFix->pcMan!=NULL && *psArg->psFix->pcMan) {
-                           fprintm(pfDoc,psHdl->pcOwn,psHdl->pcPgm,psArg->psFix->pcMan,2);
-                        } else {
-                           fprintf(pfDoc,"No detailed description available for this constant.\n\n");
-                        }
-                        fprintf(pfDoc, "AUTHOR\n");
-                        fprintf(pfDoc, "------\n\n");
-                        fprintf(pfDoc, "limes datentechnik(r) gmbh (www.flam.de)\n\n");
                      } else {
-                        if (isNbr) {
-                           fprintf(pfDoc,"%s CONSTANT '%s'\n",acNum,psArg->psStd->pcKyw);
-                           l=strlen(acNum)+strlen(psArg->psStd->pcKyw)+12;
-                           for (i=0;i<l;i++) fprintf(pfDoc,"+");
-                           fprintf(pfDoc,"\n\n");
-                        } else {
-                           fprintf(pfDoc,"CONSTANT '%s'\n",psArg->psStd->pcKyw);
-                           l=strlen(psArg->psStd->pcKyw)+11;
-                           for (i=0;i<l;i++) fprintf(pfDoc,"+");
-                           fprintf(pfDoc,"\n\n");
-                        }
-                        fprintf(pfDoc, ".SYNOPSIS\n\n");
-                        fprintf(pfDoc, "-----------------------------------------------------------------------\n");
-                        efprintf(pfDoc,"HELP:   %s\n",psArg->psFix->pcHlp);
-                        fprintf(pfDoc, "PATH:   %s\n",fpcPat(pvHdl,siLev-1));
-                        fprintf(pfDoc, "TYPE:   %s\n",apClpTyp[psArg->psFix->siTyp]);
-                        fprintf(pfDoc, "SYNTAX: %s\n",psArg->psStd->pcKyw);
-                        fprintf(pfDoc, "-----------------------------------------------------------------------\n\n");
-                        if (siErr<0) return(siErr);
-                        fprintf(pfDoc,".DESCRIPTION\n\n");
-                        if (psArg->psFix->pcMan!=NULL && *psArg->psFix->pcMan) {
-                           fprintm(pfDoc,psHdl->pcOwn,psHdl->pcPgm,psArg->psFix->pcMan,2);
-                        } else {
-                           fprintf(pfDoc,"No detailed description available for this constant.\n\n");
-                        }
-                        fprintf(pfDoc,"indexterm:%cConstant %s%c\n\n\n",C_SBO,psArg->psStd->pcKyw,C_SBC);
+                        return CLPERR(psHdl,CLPERR_SEM,"Path (%s) contains too many or invalid qualifiers",pcPat);
                      }
                   } else {
                      return CLPERR(psHdl,CLPERR_SEM,"Path (%s) contains too many or invalid qualifiers",pcPat);
                   }
-               } else {
-                  return CLPERR(psHdl,CLPERR_SEM,"Path (%s) contains too many or invalid qualifiers",pcPat);
+                  return(CLP_OK);
                }
-               return(CLP_OK);
+            } else {
+               return CLPERR(psHdl,CLPERR_SEM,"Root of path (%s) does not match root of handle (%s)",pcPat,psHdl->pcCmd);
             }
+         }
+         if (isMan) {
+            if (psHdl->pcPgm!=NULL && *psHdl->pcPgm) {
+                for (p=psHdl->pcPgm;*p;p++) fprintf(pfDoc,"%c",tolower(*p));
+                fprintf(pfDoc,".");
+                l=strlen(psHdl->pcPgm)+strlen(pcSta)+4;
+            } else {
+                l=strlen(pcSta)+3;
+            }
+            for (p=pcSta;*p;p++) fprintf(pfDoc,"%c",tolower(*p));
+            fprintf(pfDoc,   "(1)\n");
+            for (i=0;i<l;i++) fprintf(pfDoc,"=");
+            fprintf(pfDoc,"\n");
+            fprintf(pfDoc,   ":doctype: manpage\n\n");
+            fprintf(pfDoc,   "NAME\n");
+            fprintf(pfDoc,   "----\n\n");
+            if (psHdl->pcPgm!=NULL && strlen(psHdl->pcPgm)) {
+                for (p=psHdl->pcPgm;*p;p++) fprintf(pfDoc,"%c",tolower(*p));
+                fprintf(pfDoc,".");
+            }
+            for (p=pcSta;*p;p++) fprintf(pfDoc,"%c",tolower(*p));
+            efprintf(pfDoc,  " - `%s`\n\n",psHdl->pcHlp);
+            fprintf(pfDoc,   "SYNOPSIS\n");
+            fprintf(pfDoc,   "--------\n\n");
+            fprintf(pfDoc,   "-----------------------------------------------------------------------\n");
+            fprintf(pfDoc,   "PATH:   %s.%s\n",psHdl->pcOwn,psHdl->pcPgm);
+            if (psHdl->isOvl) {
+               fprintf(pfDoc,"TYPE:   OVERLAY\n");
+            } else {
+               fprintf(pfDoc,"TYPE:   OBJECT\n");
+            }
+            fprintf(pfDoc,   "SYNTAX: :> %s ",psHdl->pcPgm); siErr=siClpPrnCmd(pvHdl,pfDoc,0,0,1,NULL,psHdl->psTab,FALSE,FALSE); fprintf(pfDoc,"\n");
+            fprintf(pfDoc,   "-----------------------------------------------------------------------\n\n");
+            if (siErr<0) return(siErr);
+            fprintf(pfDoc,   "DESCRIPTION\n");
+            fprintf(pfDoc,   "-----------\n\n");
+            if (psHdl->pcMan!=NULL && *psHdl->pcMan) {
+               fprintm(pfDoc,psHdl->pcOwn,psHdl->pcPgm,psHdl->pcMan,2);
+            } else {
+               fprintf(pfDoc,"No detailed description available for this command.\n\n");
+            }
+            fprintf(pfDoc,"AUTHOR\n");
+            fprintf(pfDoc,"------\n\n");
+            fprintf(pfDoc,"limes datentechnik(r) gmbh (www.flam.de)\n\n");
          } else {
-            return CLPERR(psHdl,CLPERR_SEM,"Root of path (%s) does not match root of handle (%s)",pcPat,psHdl->pcCmd);
-         }
-      }
-      if (isMan) {
-         if (psHdl->pcPgm!=NULL && *psHdl->pcPgm) {
-             for (p=psHdl->pcPgm;*p;p++) fprintf(pfDoc,"%c",tolower(*p));
-             fprintf(pfDoc,".");
-             l=strlen(psHdl->pcPgm)+strlen(pcSta)+4;
-         } else {
-             l=strlen(pcSta)+3;
-         }
-         for (p=pcSta;*p;p++) fprintf(pfDoc,"%c",tolower(*p));
-         fprintf(pfDoc,   "(1)\n");
-         for (i=0;i<l;i++) fprintf(pfDoc,"=");
-         fprintf(pfDoc,"\n");
-         fprintf(pfDoc,   ":doctype: manpage\n\n");
-         fprintf(pfDoc,   "NAME\n");
-         fprintf(pfDoc,   "----\n\n");
-         if (psHdl->pcPgm!=NULL && strlen(psHdl->pcPgm)) {
-             for (p=psHdl->pcPgm;*p;p++) fprintf(pfDoc,"%c",tolower(*p));
-             fprintf(pfDoc,".");
-         }
-         for (p=pcSta;*p;p++) fprintf(pfDoc,"%c",tolower(*p));
-         efprintf(pfDoc,  " - `%s`\n\n",psHdl->pcHlp);
-         fprintf(pfDoc,   "SYNOPSIS\n");
-         fprintf(pfDoc,   "--------\n\n");
-         fprintf(pfDoc,   "-----------------------------------------------------------------------\n");
-         fprintf(pfDoc,   "PATH:   %s.%s\n",psHdl->pcOwn,psHdl->pcPgm);
-         if (psHdl->isOvl) {
-            fprintf(pfDoc,"TYPE:   OVERLAY\n");
-         } else {
-            fprintf(pfDoc,"TYPE:   OBJECT\n");
-         }
-         fprintf(pfDoc,   "SYNTAX: :> %s ",psHdl->pcPgm); siErr=siClpPrnCmd(pvHdl,pfDoc,0,0,1,NULL,psHdl->psTab,FALSE,FALSE); fprintf(pfDoc,"\n");
-         fprintf(pfDoc,   "-----------------------------------------------------------------------\n\n");
-         if (siErr<0) return(siErr);
-         fprintf(pfDoc,   "DESCRIPTION\n");
-         fprintf(pfDoc,   "-----------\n\n");
-         if (psHdl->pcMan!=NULL && *psHdl->pcMan) {
-            fprintm(pfDoc,psHdl->pcOwn,psHdl->pcPgm,psHdl->pcMan,2);
-         } else {
-            fprintf(pfDoc,"No detailed description available for this command.\n\n");
-         }
-         fprintf(pfDoc,"AUTHOR\n");
-         fprintf(pfDoc,"------\n\n");
-         fprintf(pfDoc,"limes datentechnik(r) gmbh (www.flam.de)\n\n");
-      } else {
-         if (isNbr) {
-            fprintf(pfDoc,   "%s %s '%s'\n",pcNum,pcCmd,pcSta);
-            l=strlen(pcNum)+strlen(pcCmd)+strlen(pcSta)+4;
-            for (i=0;i<l;i++) fprintf(pfDoc,"%c",C_TLD);
-            fprintf(pfDoc,"\n\n");
-         } else {
-            fprintf(pfDoc,   "%s '%s'\n",pcCmd,pcSta);
-            l=strlen(pcCmd)+strlen(pcSta)+3;
-            for (i=0;i<l;i++) fprintf(pfDoc,"%c",C_TLD);
-            fprintf(pfDoc,"\n\n");
-         }
-         fprintf(pfDoc,   ".SYNOPSIS\n\n");
-         fprintf(pfDoc,   "-----------------------------------------------------------------------\n");
-         efprintf(pfDoc,  "HELP:   %s\n",psHdl->pcHlp);
-         fprintf(pfDoc,   "PATH:   %s.%s\n",psHdl->pcOwn,psHdl->pcPgm);
-         if (psHdl->isOvl) {
-            fprintf(pfDoc,"TYPE:   OVERLAY\n");
-         } else {
-            fprintf(pfDoc,"TYPE:   OBJECT\n");
-         }
-         fprintf(pfDoc,   "SYNTAX: :> %s ",psHdl->pcPgm); siErr=siClpPrnCmd(pvHdl,pfDoc,0,0,1,NULL,psHdl->psTab,FALSE,FALSE); fprintf(pfDoc,"\n");
-         fprintf(pfDoc,   "-----------------------------------------------------------------------\n\n");
-         if (siErr<0) return(siErr);
-         fprintf(pfDoc,   ".DESCRIPTION\n\n");
-         if (psHdl->pcMan!=NULL && *psHdl->pcMan) {
-            fprintm(pfDoc,psHdl->pcOwn,psHdl->pcPgm,psHdl->pcMan,2);
-         } else {
-            fprintf(pfDoc,"No detailed description available for this command.\n\n");
-         }
-         fprintf(pfDoc,   "indexterm:%c%s %s%c\n\n\n",C_SBO,pcCmd,pcSta,C_SBC);
-         if (isDep) {
-            siPos=siClpPrnDoc(pvHdl,pfDoc,0,isNbr,pcNum,NULL,psTab);
-            if (siPos<0) return(siPos);
+            if (isNbr) {
+               fprintf(pfDoc,   "%s %s '%s'\n",pcNum,pcCmd,pcSta);
+               l=strlen(pcNum)+strlen(pcCmd)+strlen(pcSta)+4;
+               for (i=0;i<l;i++) fprintf(pfDoc,"%c",C_TLD);
+               fprintf(pfDoc,"\n\n");
+            } else {
+               fprintf(pfDoc,   "%s '%s'\n",pcCmd,pcSta);
+               l=strlen(pcCmd)+strlen(pcSta)+3;
+               for (i=0;i<l;i++) fprintf(pfDoc,"%c",C_TLD);
+               fprintf(pfDoc,"\n\n");
+            }
+            fprintf(pfDoc,   ".SYNOPSIS\n\n");
+            fprintf(pfDoc,   "-----------------------------------------------------------------------\n");
+            efprintf(pfDoc,  "HELP:   %s\n",psHdl->pcHlp);
+            fprintf(pfDoc,   "PATH:   %s.%s\n",psHdl->pcOwn,psHdl->pcPgm);
+            if (psHdl->isOvl) {
+               fprintf(pfDoc,"TYPE:   OVERLAY\n");
+            } else {
+               fprintf(pfDoc,"TYPE:   OBJECT\n");
+            }
+            fprintf(pfDoc,   "SYNTAX: :> %s ",psHdl->pcPgm); siErr=siClpPrnCmd(pvHdl,pfDoc,0,0,1,NULL,psHdl->psTab,FALSE,FALSE); fprintf(pfDoc,"\n");
+            fprintf(pfDoc,   "-----------------------------------------------------------------------\n\n");
+            if (siErr<0) return(siErr);
+            fprintf(pfDoc,   ".DESCRIPTION\n\n");
+            if (psHdl->pcMan!=NULL && *psHdl->pcMan) {
+               fprintm(pfDoc,psHdl->pcOwn,psHdl->pcPgm,psHdl->pcMan,2);
+            } else {
+               fprintf(pfDoc,"No detailed description available for this command.\n\n");
+            }
+            fprintf(pfDoc,   "indexterm:%c%s %s%c\n\n\n",C_SBO,pcCmd,pcSta,C_SBC);
+            if (isDep) {
+               siPos=siClpPrnDoc(pvHdl,pfDoc,0,isNbr,pcNum,NULL,psTab);
+               if (siPos<0) return(siPos);
+            }
          }
       }
    } else {
@@ -1534,35 +1539,37 @@ extern int siClpProperties(
    strcpy(psHdl->acSrc,":PROPERTIES:");
 
    if (pfOut==NULL) pfOut=psHdl->pfHlp;
-   if (pcPat!=NULL && *pcPat) {
-      if (strxcmp(psHdl->isCas,psHdl->pcCmd,pcPat,l,0,FALSE)==0) {
-         if (strlen(pcPat)>l && pcPat[l]!='.') {
-            return CLPERR(psHdl,CLPERR_SEM,"Path (%s) is not valid",pcPat);
-         }
-         for (siLev=0,pcPtr=strchr(pcPat,'.');pcPtr!=NULL && siLev<CLPMAX_HDEPTH;pcPtr=strchr(pcPtr+1,'.'),siLev++) {
-            for (pcKyw=pcPtr+1,i=0;i<CLPMAX_LEXLEN && pcKyw[i]!=EOS && pcKyw[i]!='.';i++) acKyw[i]=pcKyw[i];
-            acKyw[i]=EOS;
-            if (pcArg!=NULL) {
-               return CLPERR(psHdl,CLPERR_SEM,"Path (%s) contains too many or invalid qualifiers",pcPat);
+   if (pfOut!=NULL) {
+      if (pcPat!=NULL && *pcPat) {
+         if (strxcmp(psHdl->isCas,psHdl->pcCmd,pcPat,l,0,FALSE)==0) {
+            if (strlen(pcPat)>l && pcPat[l]!='.') {
+               return CLPERR(psHdl,CLPERR_SEM,"Path (%s) is not valid",pcPat);
             }
-            siErr=siClpSymFnd(pvHdl,siLev,0,acKyw,psTab,&psArg,NULL);
+            for (siLev=0,pcPtr=strchr(pcPat,'.');pcPtr!=NULL && siLev<CLPMAX_HDEPTH;pcPtr=strchr(pcPtr+1,'.'),siLev++) {
+               for (pcKyw=pcPtr+1,i=0;i<CLPMAX_LEXLEN && pcKyw[i]!=EOS && pcKyw[i]!='.';i++) acKyw[i]=pcKyw[i];
+               acKyw[i]=EOS;
+               if (pcArg!=NULL) {
+                  return CLPERR(psHdl,CLPERR_SEM,"Path (%s) contains too many or invalid qualifiers",pcPat);
+               }
+               siErr=siClpSymFnd(pvHdl,siLev,0,acKyw,psTab,&psArg,NULL);
+               if (siErr<0) return(siErr);
+               psHdl->apPat[siLev]=psArg;
+               if (psArg->psDep!=NULL) {
+                  psTab=psArg->psDep;
+               } else {
+                  pcArg=psArg->psStd->pcKyw;
+               }
+            }
+            if (pcArg!=NULL) siLev--;
+            siErr=siClpPrnPro(pvHdl,pfOut,FALSE,siMtd,siLev,siLev+siDep,psTab,pcArg);
             if (siErr<0) return(siErr);
-            psHdl->apPat[siLev]=psArg;
-            if (psArg->psDep!=NULL) {
-               psTab=psArg->psDep;
-            } else {
-               pcArg=psArg->psStd->pcKyw;
-            }
+         } else {
+            return CLPERR(psHdl,CLPERR_SEM,"Root of path (%s) does not match root of handle (%s)",pcPat,psHdl->pcCmd);
          }
-         if (pcArg!=NULL) siLev--;
-         siErr=siClpPrnPro(pvHdl,pfOut,FALSE,siMtd,siLev,siLev+siDep,psTab,pcArg);
-         if (siErr<0) return(siErr);
       } else {
-         return CLPERR(psHdl,CLPERR_SEM,"Root of path (%s) does not match root of handle (%s)",pcPat,psHdl->pcCmd);
+         siErr=siClpPrnPro(pvHdl,pfOut,FALSE,siMtd,0,siDep,psTab,NULL);
+         if (siErr<0) return(siErr);
       }
-   } else {
-      siErr=siClpPrnPro(pvHdl,pfOut,FALSE,siMtd,0,siDep,psTab,NULL);
-      if (siErr<0) return(siErr);
    }
    return(CLP_OK);
 }
@@ -2328,7 +2335,7 @@ static void vdClpSymPrn(
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    TsSym*                        psHlp=psSym;
    while (psHlp!=NULL) {
-      efprintf(psHdl->pfSym,"%s %3.3d - %s (KWL=%d TYP=%s MIN=%d MAX=%d SIZ=%d OFS=%d OID=%d FLG=%8.8X (NXT=%p BAK=%p DEP=%p HIH=%p ALI=%p CNT=%p OID=%p ELN=%p SLN=%p TLN=%p LNK=%p)) - %s\n",
+      if (psHdl->pfSym!=NULL) efprintf(psHdl->pfSym,"%s %3.3d - %s (KWL=%d TYP=%s MIN=%d MAX=%d SIZ=%d OFS=%d OID=%d FLG=%8.8X (NXT=%p BAK=%p DEP=%p HIH=%p ALI=%p CNT=%p OID=%p ELN=%p SLN=%p TLN=%p LNK=%p)) - %s\n",
             fpcPre(pvHdl,siLev),psHlp->psStd->siPos+1,psHlp->psStd->pcKyw,psHlp->psStd->siKwl,apClpTyp[psHlp->psFix->siTyp],psHlp->psFix->siMin,psHlp->psFix->siMax,psHlp->psFix->siSiz,
             psHlp->psFix->siOfs,psHlp->psFix->siOid,psHlp->psStd->uiFlg,psHlp->psNxt,psHlp->psBak,psHlp->psDep,psHlp->psHih,psHlp->psStd->psAli,psHlp->psFix->psCnt,psHlp->psFix->psOid,
             psHlp->psFix->psEln,psHlp->psFix->psSln,psHlp->psFix->psTln,psHlp->psFix->psLnk,psHlp->psFix->pcHlp);
@@ -2394,35 +2401,37 @@ extern int siClpLexem(
    void*                         pvHdl,
    FILE*                         pfOut)
 {
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," COMMENT   '#' [:print:]* '#'                              (will be ignored)\n");
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," LCOMMENT  ';' [:print:]* 'nl'                             (will be ignored)\n");
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," SEPARATOR [:space: | :cntr: | ',']*                  (abbreviated with SEP)\n");
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," OPERATOR  '=' | '.' | '(' | ')' | '[' | ']'  (SGN, DOT, RBO, RBC, SBO, SBC)\n");
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," KEYWORD   ['-'['-']][:alpha:]+[:alnum: | '_' | '-']*    (always predefined)\n");
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," NUMBER    ([+|-]  [ :digit:]+)  |                       (decimal (default))\n");
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," num       ([+|-]0b[ :digit:]+)  |                                  (binary)\n");
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," num       ([+|-]0o[ :digit:]+)  |                                   (octal)\n");
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," num       ([+|-]0d[ :digit:]+)  |                                 (decimal)\n");
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," num       ([+|-]0x[ :xdigit:]+) |                             (hexadecimal)\n");
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," num       ([+|-]0t(yyyy/mm/tt.hh:mm:ss)) |  (relativ (+|-) or absolut time)\n");
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," FLOAT     ([+|-]  [ :digit:]+.[:digit:]+e|E[:digit:]+) | (decimal(default))\n");
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," flt       ([+|-]0d[ :digit:]+.[:digit:]+e|E[:digit:]+)            (decimal)\n");
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," STRING         ''' [:print:]* ''' |          (default (if binary c else s))\n");
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," str       [s|S]''' [:print:]* ''' |                (null-terminated string)\n");
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," str       [c|C]''' [:print:]* ''' |  (binary string in local character set)\n");
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," str       [a|A]''' [:print:]* ''' |                (binary string in ASCII)\n");
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," str       [e|E]''' [:print:]* ''' |               (binary string in EBCDIC)\n");
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," str       [x|X]''' [:print:]* ''' |         (binary string in hex notation)\n");
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," str       [f|F]''' [:print:]* ''' | (read string from file (for passwords))\n");
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"           Strings can contain two '' to represent one '                    \n");
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"           Strings can also be enclosed in \" or %c instead of '              \n",ALTCHR);
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"           Strings can directly start behind a '=' without enclosing '/\"    \n");
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"              In this case the string ends at the next separator or operator\n");
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"              and keywords are preferred. To use keywords, separators or    \n");
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"              operators in strings, enclosing quotes are required.          \n");
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," SUPPLEMENT     '\"' [:print:]* '\"' |   (null-terminated string (properties))\n");
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"           Supplements can contain two \"\" to represent one \"                \n");
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"           Supplements can also be enclosed in ' or %c instead of \"          \n",ALTCHR);
+   if (pfOut!=NULL) {
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," COMMENT   '#' [:print:]* '#'                              (will be ignored)\n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," LCOMMENT  ';' [:print:]* 'nl'                             (will be ignored)\n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," SEPARATOR [:space: | :cntr: | ',']*                  (abbreviated with SEP)\n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," OPERATOR  '=' | '.' | '(' | ')' | '[' | ']'  (SGN, DOT, RBO, RBC, SBO, SBC)\n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," KEYWORD   ['-'['-']][:alpha:]+[:alnum: | '_' | '-']*    (always predefined)\n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," NUMBER    ([+|-]  [ :digit:]+)  |                       (decimal (default))\n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," num       ([+|-]0b[ :digit:]+)  |                                  (binary)\n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," num       ([+|-]0o[ :digit:]+)  |                                   (octal)\n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," num       ([+|-]0d[ :digit:]+)  |                                 (decimal)\n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," num       ([+|-]0x[ :xdigit:]+) |                             (hexadecimal)\n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," num       ([+|-]0t(yyyy/mm/tt.hh:mm:ss)) |  (relativ (+|-) or absolut time)\n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," FLOAT     ([+|-]  [ :digit:]+.[:digit:]+e|E[:digit:]+) | (decimal(default))\n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," flt       ([+|-]0d[ :digit:]+.[:digit:]+e|E[:digit:]+)            (decimal)\n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," STRING         ''' [:print:]* ''' |          (default (if binary c else s))\n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," str       [s|S]''' [:print:]* ''' |                (null-terminated string)\n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," str       [c|C]''' [:print:]* ''' |  (binary string in local character set)\n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," str       [a|A]''' [:print:]* ''' |                (binary string in ASCII)\n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," str       [e|E]''' [:print:]* ''' |               (binary string in EBCDIC)\n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," str       [x|X]''' [:print:]* ''' |         (binary string in hex notation)\n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," str       [f|F]''' [:print:]* ''' | (read string from file (for passwords))\n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"           Strings can contain two '' to represent one '                    \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"           Strings can also be enclosed in \" or %c instead of '              \n",ALTCHR);
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"           Strings can directly start behind a '=' without enclosing '/\"    \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"              In this case the string ends at the next separator or operator\n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"              and keywords are preferred. To use keywords, separators or    \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"              operators in strings, enclosing quotes are required.          \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," SUPPLEMENT     '\"' [:print:]* '\"' |   (null-terminated string (properties))\n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"           Supplements can contain two \"\" to represent one \"                \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"           Supplements can also be enclosed in ' or %c instead of \"          \n",ALTCHR);
+   }
    return(CLP_OK);
 }
 
@@ -2962,43 +2971,45 @@ extern int siClpGrammar(
    void*                         pvHdl,
    FILE*                         pfOut)
 {
-   TsHdl*                        psHdl=(TsHdl*)pvHdl;
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," Command Line Parser                                              \n");
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," command        -> ['('] parameter_list [')']       (main=object) \n");
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  ['.'] parameter                  (main=overlay)\n");
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," parameter_list -> parameter SEP parameter_list                   \n");
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  EMPTY                                          \n");
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," parameter      -> switch | assignment | object | overlay | array \n");
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," switch         -> KEYWORD                                        \n");
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," assignment     -> KEYWORD '=' value                              \n");
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," object         -> KEYWORD ['('] parameter_list [')']             \n");
-if (psHdl->isPfl) {
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  KEYWORD '=' STRING # parameter file #          \n");
-}
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," overlay        -> KEYWORD ['.'] parameter                        \n");
-if (psHdl->isPfl) {
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  KEYWORD '=' STRING # parameter file #          \n");
-}
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," array          -> KEYWORD '[' value_list   ']'                   \n");
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  KEYWORD '[' object_list  ']'                   \n");
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  KEYWORD '[' overlay_list ']'                   \n");
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," value_list     -> value SEP value_list                           \n");
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  EMPTY                                          \n");
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," object_list    -> object SEP object_list                         \n");
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  EMPTY                                          \n");
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," overlay_list   -> overlay SEP overlay_list                       \n");
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  EMPTY                                          \n");
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," value          -> NUMBER | FLOAT | STRING | KEYWORD              \n");
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," A list of objects requires parenthesis to enclose the arguments  \n");
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                                                                  \n");
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," Property File Parser                                             \n");
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," properties     -> property_list                                  \n");
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," property_list  -> property SEP property_list                     \n");
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  EMPTY                                          \n");
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," property       -> keyword_list '=' SUPPLEMENT                    \n");
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," keyword_list   -> KEYWORD '.' keyword_list                       \n");
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  KEYWORD                                        \n");
-   fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," SUPPLEMENT is a string in double quotation marks (\"property\")    \n");
+   if (pfOut!=NULL) {
+      TsHdl*                        psHdl=(TsHdl*)pvHdl;
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," Command Line Parser                                              \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," command        -> ['('] parameter_list [')']       (main=object) \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  ['.'] parameter                  (main=overlay)\n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," parameter_list -> parameter SEP parameter_list                   \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  EMPTY                                          \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," parameter      -> switch | assignment | object | overlay | array \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," switch         -> KEYWORD                                        \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," assignment     -> KEYWORD '=' value                              \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," object         -> KEYWORD ['('] parameter_list [')']             \n");
+   if (psHdl->isPfl) {
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  KEYWORD '=' STRING # parameter file #          \n");
+   }
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," overlay        -> KEYWORD ['.'] parameter                        \n");
+   if (psHdl->isPfl) {
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  KEYWORD '=' STRING # parameter file #          \n");
+   }
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," array          -> KEYWORD '[' value_list   ']'                   \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  KEYWORD '[' object_list  ']'                   \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  KEYWORD '[' overlay_list ']'                   \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," value_list     -> value SEP value_list                           \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  EMPTY                                          \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," object_list    -> object SEP object_list                         \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  EMPTY                                          \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," overlay_list   -> overlay SEP overlay_list                       \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  EMPTY                                          \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," value          -> NUMBER | FLOAT | STRING | KEYWORD              \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," A list of objects requires parenthesis to enclose the arguments  \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                                                                  \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," Property File Parser                                             \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," properties     -> property_list                                  \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," property_list  -> property SEP property_list                     \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  EMPTY                                          \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," property       -> keyword_list '=' SUPPLEMENT                    \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," keyword_list   -> KEYWORD '.' keyword_list                       \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  KEYWORD                                        \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," SUPPLEMENT is a string in double quotation marks (\"property\")    \n");
+   }
    return(CLP_OK);
 }
 
@@ -4978,10 +4989,12 @@ static void vdClpPrnArgTab(
       if (CLPISF_CON(psTab->psStd->uiFlg)) {
          if (siTyp<0) siTyp=psTab->psHih->psFix->siTyp;
          if (CLPISF_SEL(psTab->psHih->psStd->uiFlg)==FALSE) {
-            if (siTyp>=0) {
-               fprintf(pfOut,"%s Enter a value (TYPE: %s) or use one of the keywords below:\n",fpcPre(pvHdl,siLev),apClpTyp[siTyp]);
-            } else {
-               fprintf(pfOut,"%s Enter a value or use one of the keywords below:\n",fpcPre(pvHdl,siLev));
+            if (pfOut!=NULL) {
+               if (siTyp>=0) {
+                  fprintf(pfOut,"%s Enter a value (TYPE: %s) or use one of the keywords below:\n",fpcPre(pvHdl,siLev),apClpTyp[siTyp]);
+               } else {
+                  fprintf(pfOut,"%s Enter a value or use one of the keywords below:\n",fpcPre(pvHdl,siLev));
+               }
             }
          }
       }
@@ -5055,245 +5068,247 @@ static int siClpPrnCmd(
       return CLPERR(psHdl,CLPERR_INT,"Entry '%s.%s' not at beginning of a table",fpcPat(pvHdl,siLev),psTab->psStd->pcKyw);
    }
 
-   if (siLev<siDep || siDep>9) {
-      if (psArg==NULL) {
-         if (psHdl->isOvl) {
-            pcSep=psHdl->pcOpt;
-            if (siCnt==0) {
-               fprintf(pfOut,"%s.%c",psHdl->pcCmd,C_CBO);
-               if (isSkr) k++;
-            }
-         } else {
-            pcSep=psHdl->pcEnt;
-            if (siCnt==0) {
-               fprintf(pfOut,"%s(",psHdl->pcCmd);
-               if (isSkr) k++;
-            }
-         }
-         if (isSkr) k++;
-      } else {
-         if (psArg->psFix->siTyp==CLPTYP_OVRLAY) {
-            pcSep=psHdl->pcOpt;
-            if (siCnt==0) {
-               fprintf(pfOut,"%s.%c",fpcPat(pvHdl,siLev),C_CBO);
-               if (isSkr) k++;
-            }
-         }  else {
-            pcSep=psHdl->pcEnt;
-            if (siCnt==0) {
-               fprintf(pfOut,"%s(",fpcPat(pvHdl,siLev));
-               if (isSkr) k++;
-            }
-         }
-      }
-      for (psHlp=psTab;psHlp!=NULL;psHlp=psHlp->psNxt) {
-         if (CLPISF_CMD(psHlp->psStd->uiFlg) && !CLPISF_LNK(psHlp->psStd->uiFlg) && !CLPISF_ALI(psHlp->psStd->uiFlg)) {
-            if (isSkr) {
-               if (k) fprintf(pfOut,"\n%s ",fpcPre(pvHdl,siLev));
-                 else fprintf(pfOut,"%s "  ,fpcPre(pvHdl,siLev));
-               if (isMin) {
-                  if (psHlp->psFix->siMin) fprintf(pfOut,"%c ",C_EXC); else fprintf(pfOut,"%c ",'?');
+   if (pfOut!=NULL) {
+      if (siLev<siDep || siDep>9) {
+         if (psArg==NULL) {
+            if (psHdl->isOvl) {
+               pcSep=psHdl->pcOpt;
+               if (siCnt==0) {
+                  fprintf(pfOut,"%s.%c",psHdl->pcCmd,C_CBO);
+                  if (isSkr) k++;
                }
             } else {
-               if (k) fprintf(pfOut,"%s",pcSep);
-               if (isMin) {
-                  if (psHlp->psFix->siMin) fprintf(pfOut,"%c",C_EXC); else fprintf(pfOut,"%c",'?');
+               pcSep=psHdl->pcEnt;
+               if (siCnt==0) {
+                  fprintf(pfOut,"%s(",psHdl->pcCmd);
+                  if (isSkr) k++;
                }
             }
-            k++;
-            switch (psHlp->psFix->siTyp) {
-            case CLPTYP_SWITCH:
-               if (psHlp->psFix->siMax==1) {
-                  vdClpPrnAli(pfOut,psHdl->pcOpt,psHlp);
-               } else {
-                  return CLPERR(psHdl,CLPERR_TAB,"Maximum amount of entries (%d) for parameter '%s' not valid",psHlp->psFix->siMax,psHlp->psStd->pcKyw);
+            if (isSkr) k++;
+         } else {
+            if (psArg->psFix->siTyp==CLPTYP_OVRLAY) {
+               pcSep=psHdl->pcOpt;
+               if (siCnt==0) {
+                  fprintf(pfOut,"%s.%c",fpcPat(pvHdl,siLev),C_CBO);
+                  if (isSkr) k++;
                }
-               break;
-            case CLPTYP_NUMBER:
-               if (psHlp->psFix->siMax==1) {
-                  if (CLPISF_SEL(psHlp->psStd->uiFlg)) {
+            }  else {
+               pcSep=psHdl->pcEnt;
+               if (siCnt==0) {
+                  fprintf(pfOut,"%s(",fpcPat(pvHdl,siLev));
+                  if (isSkr) k++;
+               }
+            }
+         }
+         for (psHlp=psTab;psHlp!=NULL;psHlp=psHlp->psNxt) {
+            if (CLPISF_CMD(psHlp->psStd->uiFlg) && !CLPISF_LNK(psHlp->psStd->uiFlg) && !CLPISF_ALI(psHlp->psStd->uiFlg)) {
+               if (isSkr) {
+                  if (k) fprintf(pfOut,"\n%s ",fpcPre(pvHdl,siLev));
+                    else fprintf(pfOut,"%s "  ,fpcPre(pvHdl,siLev));
+                  if (isMin) {
+                     if (psHlp->psFix->siMin) fprintf(pfOut,"%c ",C_EXC); else fprintf(pfOut,"%c ",'?');
+                  }
+               } else {
+                  if (k) fprintf(pfOut,"%s",pcSep);
+                  if (isMin) {
+                     if (psHlp->psFix->siMin) fprintf(pfOut,"%c",C_EXC); else fprintf(pfOut,"%c",'?');
+                  }
+               }
+               k++;
+               switch (psHlp->psFix->siTyp) {
+               case CLPTYP_SWITCH:
+                  if (psHlp->psFix->siMax==1) {
                      vdClpPrnAli(pfOut,psHdl->pcOpt,psHlp);
-                     if (CLPISF_DEF(psHlp->psStd->uiFlg)) {
-                        fprintf(pfOut,"%c%s",C_SBO,CLP_ASSIGNMENT);
-                        vdClpPrnOpt(pfOut,psHdl->pcOpt,psHlp->psFix->siTyp,psHlp->psDep);
-                        fprintf(pfOut,"%c",C_SBC);
-                     } else {
-                        fprintf(pfOut,CLP_ASSIGNMENT);
-                        vdClpPrnOpt(pfOut,psHdl->pcOpt,psHlp->psFix->siTyp,psHlp->psDep);
-                     }
                   } else {
-                     if (psHlp->psDep!=NULL) {
+                     return CLPERR(psHdl,CLPERR_TAB,"Maximum amount of entries (%d) for parameter '%s' not valid",psHlp->psFix->siMax,psHlp->psStd->pcKyw);
+                  }
+                  break;
+               case CLPTYP_NUMBER:
+                  if (psHlp->psFix->siMax==1) {
+                     if (CLPISF_SEL(psHlp->psStd->uiFlg)) {
                         vdClpPrnAli(pfOut,psHdl->pcOpt,psHlp);
                         if (CLPISF_DEF(psHlp->psStd->uiFlg)) {
-                           fprintf(pfOut,"%c%snum%s",C_SBO,CLP_ASSIGNMENT,psHdl->pcOpt);
+                           fprintf(pfOut,"%c%s",C_SBO,CLP_ASSIGNMENT);
                            vdClpPrnOpt(pfOut,psHdl->pcOpt,psHlp->psFix->siTyp,psHlp->psDep);
                            fprintf(pfOut,"%c",C_SBC);
                         } else {
-                           fprintf(pfOut,"%snum%s",CLP_ASSIGNMENT,psHdl->pcOpt);
+                           fprintf(pfOut,CLP_ASSIGNMENT);
                            vdClpPrnOpt(pfOut,psHdl->pcOpt,psHlp->psFix->siTyp,psHlp->psDep);
                         }
                      } else {
-                        vdClpPrnAli(pfOut,psHdl->pcOpt,psHlp);
-                        if (CLPISF_DEF(psHlp->psStd->uiFlg)) {
-                           fprintf(pfOut,"%c%snum%c",C_SBO,CLP_ASSIGNMENT,C_SBC);
+                        if (psHlp->psDep!=NULL) {
+                           vdClpPrnAli(pfOut,psHdl->pcOpt,psHlp);
+                           if (CLPISF_DEF(psHlp->psStd->uiFlg)) {
+                              fprintf(pfOut,"%c%snum%s",C_SBO,CLP_ASSIGNMENT,psHdl->pcOpt);
+                              vdClpPrnOpt(pfOut,psHdl->pcOpt,psHlp->psFix->siTyp,psHlp->psDep);
+                              fprintf(pfOut,"%c",C_SBC);
+                           } else {
+                              fprintf(pfOut,"%snum%s",CLP_ASSIGNMENT,psHdl->pcOpt);
+                              vdClpPrnOpt(pfOut,psHdl->pcOpt,psHlp->psFix->siTyp,psHlp->psDep);
+                           }
                         } else {
-                           fprintf(pfOut,"%snum",CLP_ASSIGNMENT);
+                           vdClpPrnAli(pfOut,psHdl->pcOpt,psHlp);
+                           if (CLPISF_DEF(psHlp->psStd->uiFlg)) {
+                              fprintf(pfOut,"%c%snum%c",C_SBO,CLP_ASSIGNMENT,C_SBC);
+                           } else {
+                              fprintf(pfOut,"%snum",CLP_ASSIGNMENT);
+                           }
                         }
                      }
-                  }
-               } else if (psHlp->psFix->siMax>1) {
-                  if (CLPISF_SEL(psHlp->psStd->uiFlg)) {
-                     vdClpPrnAli(pfOut,psHdl->pcOpt,psHlp);fprintf(pfOut,"%c",C_SBO);
-                     vdClpPrnOpt(pfOut,psHdl->pcOpt,psHlp->psFix->siTyp,psHlp->psDep);
-                     fprintf(pfOut,"...%c",C_SBC);
-                  } else {
-                     if (psHlp->psDep!=NULL) {
-                        vdClpPrnAli(pfOut,psHdl->pcOpt,psHlp);fprintf(pfOut,"%cnum%s",C_SBO,psHdl->pcOpt);
+                  } else if (psHlp->psFix->siMax>1) {
+                     if (CLPISF_SEL(psHlp->psStd->uiFlg)) {
+                        vdClpPrnAli(pfOut,psHdl->pcOpt,psHlp);fprintf(pfOut,"%c",C_SBO);
                         vdClpPrnOpt(pfOut,psHdl->pcOpt,psHlp->psFix->siTyp,psHlp->psDep);
                         fprintf(pfOut,"...%c",C_SBC);
                      } else {
-                        vdClpPrnAli(pfOut,psHdl->pcOpt,psHlp);fprintf(pfOut,"%cnum...%c",C_SBO,C_SBC);
+                        if (psHlp->psDep!=NULL) {
+                           vdClpPrnAli(pfOut,psHdl->pcOpt,psHlp);fprintf(pfOut,"%cnum%s",C_SBO,psHdl->pcOpt);
+                           vdClpPrnOpt(pfOut,psHdl->pcOpt,psHlp->psFix->siTyp,psHlp->psDep);
+                           fprintf(pfOut,"...%c",C_SBC);
+                        } else {
+                           vdClpPrnAli(pfOut,psHdl->pcOpt,psHlp);fprintf(pfOut,"%cnum...%c",C_SBO,C_SBC);
+                        }
                      }
-                  }
-               } else {
-                  return CLPERR(psHdl,CLPERR_TAB,"Maximum amount of entries (%d) for parameter '%s' not valid",psHlp->psFix->siMax,psHlp->psStd->pcKyw);
-               }
-               break;
-            case CLPTYP_FLOATN:
-               if (psHlp->psFix->siMax==1) {
-                  if (CLPISF_SEL(psHlp->psStd->uiFlg)) {
-                     vdClpPrnAli(pfOut,psHdl->pcOpt,psHlp);fprintf(pfOut,CLP_ASSIGNMENT);
-                     vdClpPrnOpt(pfOut,psHdl->pcOpt,psHlp->psFix->siTyp,psHlp->psDep);
                   } else {
-                     if (psHlp->psDep!=NULL) {
-                        vdClpPrnAli(pfOut,psHdl->pcOpt,psHlp);fprintf(pfOut,"%sflt%s",CLP_ASSIGNMENT,psHdl->pcOpt);
+                     return CLPERR(psHdl,CLPERR_TAB,"Maximum amount of entries (%d) for parameter '%s' not valid",psHlp->psFix->siMax,psHlp->psStd->pcKyw);
+                  }
+                  break;
+               case CLPTYP_FLOATN:
+                  if (psHlp->psFix->siMax==1) {
+                     if (CLPISF_SEL(psHlp->psStd->uiFlg)) {
+                        vdClpPrnAli(pfOut,psHdl->pcOpt,psHlp);fprintf(pfOut,CLP_ASSIGNMENT);
                         vdClpPrnOpt(pfOut,psHdl->pcOpt,psHlp->psFix->siTyp,psHlp->psDep);
                      } else {
-                        vdClpPrnAli(pfOut,psHdl->pcOpt,psHlp);fprintf(pfOut,"%sflt",CLP_ASSIGNMENT);
+                        if (psHlp->psDep!=NULL) {
+                           vdClpPrnAli(pfOut,psHdl->pcOpt,psHlp);fprintf(pfOut,"%sflt%s",CLP_ASSIGNMENT,psHdl->pcOpt);
+                           vdClpPrnOpt(pfOut,psHdl->pcOpt,psHlp->psFix->siTyp,psHlp->psDep);
+                        } else {
+                           vdClpPrnAli(pfOut,psHdl->pcOpt,psHlp);fprintf(pfOut,"%sflt",CLP_ASSIGNMENT);
+                        }
                      }
-                  }
-               } else if (psHlp->psFix->siMax>1) {
-                  if (CLPISF_SEL(psHlp->psStd->uiFlg)) {
-                     vdClpPrnAli(pfOut,psHdl->pcOpt,psHlp);fprintf(pfOut,"%c",C_SBO);
-                     vdClpPrnOpt(pfOut,psHdl->pcOpt,psHlp->psFix->siTyp,psHlp->psDep);
-                     fprintf(pfOut,"...%c",C_SBC);
-                  } else {
-                     if (psHlp->psDep!=NULL) {
-                        vdClpPrnAli(pfOut,psHdl->pcOpt,psHlp);fprintf(pfOut,"%cflt%s",C_SBO,psHdl->pcOpt);
-                        vdClpPrnOpt(pfOut,psHdl->pcOpt,psHlp->psFix->siTyp,psHlp->psDep);
-                        fprintf(pfOut,"...%c",C_SBC);
-                     } else {
-                        vdClpPrnAli(pfOut,psHdl->pcOpt,psHlp);fprintf(pfOut,"%cflt...%c",C_SBO,C_SBC);
-                     }
-                  }
-               } else {
-                  return CLPERR(psHdl,CLPERR_TAB,"Maximum amount of entries (%d) for parameter '%s' not valid",psHlp->psFix->siMax,psHlp->psStd->pcKyw);
-               }
-               break;
-            case CLPTYP_STRING:
-               if (CLPISF_BIN(psHlp->psStd->uiFlg)) {
-                  if (CLPISF_HEX(psHlp->psStd->uiFlg)) {
-                     pcHlp="bin-hex";
-                  } else if (CLPISF_ASC(psHlp->psStd->uiFlg)) {
-                     pcHlp="bin-ascii";
-                  } else if (CLPISF_EBC(psHlp->psStd->uiFlg)) {
-                     pcHlp="bin-ebcdic";
-                  } else if (CLPISF_CHR(psHlp->psStd->uiFlg)) {
-                     pcHlp="bin-char";
-                  } else {
-                     pcHlp="bin";
-                  }
-               } else pcHlp="str";
-               if (psHlp->psFix->siMax==1) {
-                  if (CLPISF_SEL(psHlp->psStd->uiFlg)) {
-                     vdClpPrnAli(pfOut,psHdl->pcOpt,psHlp);fprintf(pfOut,CLP_ASSIGNMENT);
-                     vdClpPrnOpt(pfOut,psHdl->pcOpt,psHlp->psFix->siTyp,psHlp->psDep);
-                  } else {
-                     if (psHlp->psDep!=NULL) {
-                        vdClpPrnAli(pfOut,psHdl->pcOpt,psHlp);fprintf(pfOut,"%s'%s'%s",CLP_ASSIGNMENT,pcHlp,psHdl->pcOpt);
-                        vdClpPrnOpt(pfOut,psHdl->pcOpt,psHlp->psFix->siTyp,psHlp->psDep);
-                     } else {
-                        vdClpPrnAli(pfOut,psHdl->pcOpt,psHlp);fprintf(pfOut,"%s'%s'",CLP_ASSIGNMENT,pcHlp);
-                     }
-                  }
-               } else if (psHlp->psFix->siMax>1) {
-                  if (CLPISF_SEL(psHlp->psStd->uiFlg)) {
-                     vdClpPrnAli(pfOut,psHdl->pcOpt,psHlp);fprintf(pfOut,"%c",C_SBO);
-                     vdClpPrnOpt(pfOut,psHdl->pcOpt,psHlp->psFix->siTyp,psHlp->psDep);
-                     fprintf(pfOut,"...%c",C_SBC);
-                  } else {
-                     if (psHlp->psDep!=NULL) {
-                        vdClpPrnAli(pfOut,psHdl->pcOpt,psHlp);fprintf(pfOut,"%c'%s'%s",C_SBO,pcHlp,psHdl->pcOpt);
+                  } else if (psHlp->psFix->siMax>1) {
+                     if (CLPISF_SEL(psHlp->psStd->uiFlg)) {
+                        vdClpPrnAli(pfOut,psHdl->pcOpt,psHlp);fprintf(pfOut,"%c",C_SBO);
                         vdClpPrnOpt(pfOut,psHdl->pcOpt,psHlp->psFix->siTyp,psHlp->psDep);
                         fprintf(pfOut,"...%c",C_SBC);
                      } else {
-                        vdClpPrnAli(pfOut,psHdl->pcOpt,psHlp);fprintf(pfOut,"%c'%s'...%c",C_SBO,pcHlp,C_SBC);
+                        if (psHlp->psDep!=NULL) {
+                           vdClpPrnAli(pfOut,psHdl->pcOpt,psHlp);fprintf(pfOut,"%cflt%s",C_SBO,psHdl->pcOpt);
+                           vdClpPrnOpt(pfOut,psHdl->pcOpt,psHlp->psFix->siTyp,psHlp->psDep);
+                           fprintf(pfOut,"...%c",C_SBC);
+                        } else {
+                           vdClpPrnAli(pfOut,psHdl->pcOpt,psHlp);fprintf(pfOut,"%cflt...%c",C_SBO,C_SBC);
+                        }
                      }
+                  } else {
+                     return CLPERR(psHdl,CLPERR_TAB,"Maximum amount of entries (%d) for parameter '%s' not valid",psHlp->psFix->siMax,psHlp->psStd->pcKyw);
                   }
-               } else {
-                  return CLPERR(psHdl,CLPERR_TAB,"Maximum amount of entries (%d) for parameter '%s' not valid",psHlp->psFix->siMax,psHlp->psStd->pcKyw);
+                  break;
+               case CLPTYP_STRING:
+                  if (CLPISF_BIN(psHlp->psStd->uiFlg)) {
+                     if (CLPISF_HEX(psHlp->psStd->uiFlg)) {
+                        pcHlp="bin-hex";
+                     } else if (CLPISF_ASC(psHlp->psStd->uiFlg)) {
+                        pcHlp="bin-ascii";
+                     } else if (CLPISF_EBC(psHlp->psStd->uiFlg)) {
+                        pcHlp="bin-ebcdic";
+                     } else if (CLPISF_CHR(psHlp->psStd->uiFlg)) {
+                        pcHlp="bin-char";
+                     } else {
+                        pcHlp="bin";
+                     }
+                  } else pcHlp="str";
+                  if (psHlp->psFix->siMax==1) {
+                     if (CLPISF_SEL(psHlp->psStd->uiFlg)) {
+                        vdClpPrnAli(pfOut,psHdl->pcOpt,psHlp);fprintf(pfOut,CLP_ASSIGNMENT);
+                        vdClpPrnOpt(pfOut,psHdl->pcOpt,psHlp->psFix->siTyp,psHlp->psDep);
+                     } else {
+                        if (psHlp->psDep!=NULL) {
+                           vdClpPrnAli(pfOut,psHdl->pcOpt,psHlp);fprintf(pfOut,"%s'%s'%s",CLP_ASSIGNMENT,pcHlp,psHdl->pcOpt);
+                           vdClpPrnOpt(pfOut,psHdl->pcOpt,psHlp->psFix->siTyp,psHlp->psDep);
+                        } else {
+                           vdClpPrnAli(pfOut,psHdl->pcOpt,psHlp);fprintf(pfOut,"%s'%s'",CLP_ASSIGNMENT,pcHlp);
+                        }
+                     }
+                  } else if (psHlp->psFix->siMax>1) {
+                     if (CLPISF_SEL(psHlp->psStd->uiFlg)) {
+                        vdClpPrnAli(pfOut,psHdl->pcOpt,psHlp);fprintf(pfOut,"%c",C_SBO);
+                        vdClpPrnOpt(pfOut,psHdl->pcOpt,psHlp->psFix->siTyp,psHlp->psDep);
+                        fprintf(pfOut,"...%c",C_SBC);
+                     } else {
+                        if (psHlp->psDep!=NULL) {
+                           vdClpPrnAli(pfOut,psHdl->pcOpt,psHlp);fprintf(pfOut,"%c'%s'%s",C_SBO,pcHlp,psHdl->pcOpt);
+                           vdClpPrnOpt(pfOut,psHdl->pcOpt,psHlp->psFix->siTyp,psHlp->psDep);
+                           fprintf(pfOut,"...%c",C_SBC);
+                        } else {
+                           vdClpPrnAli(pfOut,psHdl->pcOpt,psHlp);fprintf(pfOut,"%c'%s'...%c",C_SBO,pcHlp,C_SBC);
+                        }
+                     }
+                  } else {
+                     return CLPERR(psHdl,CLPERR_TAB,"Maximum amount of entries (%d) for parameter '%s' not valid",psHlp->psFix->siMax,psHlp->psStd->pcKyw);
+                  }
+                  break;
+               case CLPTYP_OBJECT:
+                  if (psHlp->psDep==NULL) {
+                     return CLPERR(psHdl,CLPERR_TAB,"Argument table for object '%s' not defined",psHlp->psStd->pcKyw);
+                  }
+                  if (psHlp->psFix->siMax==1) {
+                     vdClpPrnAli(pfOut,psHdl->pcOpt,psHlp); fprintf(pfOut,"(");
+                     if (isSkr && (siLev+1<siDep || siDep>9)) fprintf(pfOut,"\n");
+                     psHdl->apPat[siLev]=psHlp;
+                     siErr=siClpPrnCmd(pvHdl,pfOut,siCnt+1,siLev+1,siDep,psHlp,psHlp->psDep,isSkr,isMin);
+                     if (siErr<0) return(siErr);
+                     fprintf(pfOut,")");
+                  } else if (psHlp->psFix->siMax>1) {
+                     vdClpPrnAli(pfOut,psHdl->pcOpt,psHlp); fprintf(pfOut,"%c(",C_SBO);
+                     if (isSkr && (siLev+1<siDep || siDep>9)) fprintf(pfOut,"\n");
+                     psHdl->apPat[siLev]=psHlp;
+                     siErr=siClpPrnCmd(pvHdl,pfOut,siCnt+1,siLev+1,siDep,psHlp,psHlp->psDep,isSkr,isMin);
+                     if (siErr<0) return(siErr);
+                     fprintf(pfOut,")...%c",C_SBC);
+                  } else {
+                     return CLPERR(psHdl,CLPERR_TAB,"Maximum amount of entries (%d) for parameter '%s' not valid",psHlp->psFix->siMax,psHlp->psStd->pcKyw);
+                  }
+                  break;
+               case CLPTYP_OVRLAY:
+                  if (psHlp->psDep==NULL) {
+                     return CLPERR(psHdl,CLPERR_TAB,"Argument table for object '%s' not defined",psHlp->psStd->pcKyw);
+                  }
+                  if (psHlp->psFix->siMax==1) {
+                     vdClpPrnAli(pfOut,psHdl->pcOpt,psHlp);fprintf(pfOut,".%c",C_CBO);
+                     if (isSkr  && (siLev+1<siDep || siDep>9)) fprintf(pfOut,"\n");
+                     psHdl->apPat[siLev]=psHlp;
+                     siErr=siClpPrnCmd(pvHdl,pfOut,siCnt+1,siLev+1,siDep,psHlp,psHlp->psDep,isSkr,isMin);
+                     if (siErr<0) return(siErr);
+                     fprintf(pfOut,"%c",C_CBC);
+                  } else if (psHlp->psFix->siMax>1) {
+                     vdClpPrnAli(pfOut,psHdl->pcOpt,psHlp);fprintf(pfOut,"%c%c",C_SBO,C_CBO);
+                     if (isSkr && (siLev+1<siDep || siDep>9)) fprintf(pfOut,"\n");
+                     psHdl->apPat[siLev]=psHlp;
+                     siErr=siClpPrnCmd(pvHdl,pfOut,siCnt+1,siLev+1,siDep,psHlp,psHlp->psDep,isSkr,isMin);
+                     if (siErr<0) return(siErr);
+                     fprintf(pfOut,"%c...%c",C_CBC,C_SBC);
+                  } else {
+                     return CLPERR(psHdl,CLPERR_TAB,"Maximum amount of entries (%d) for parameter '%s' not valid",psHlp->psFix->siMax,psHlp->psStd->pcKyw);
+                  }
+                  break;
+               default:
+                  return CLPERR(psHdl,CLPERR_TYP,"Type (%d) of parameter '%s' not supported",psHlp->psFix->siTyp,psHlp->psStd->pcKyw);
                }
-               break;
-            case CLPTYP_OBJECT:
-               if (psHlp->psDep==NULL) {
-                  return CLPERR(psHdl,CLPERR_TAB,"Argument table for object '%s' not defined",psHlp->psStd->pcKyw);
-               }
-               if (psHlp->psFix->siMax==1) {
-                  vdClpPrnAli(pfOut,psHdl->pcOpt,psHlp); fprintf(pfOut,"(");
-                  if (isSkr && (siLev+1<siDep || siDep>9)) fprintf(pfOut,"\n");
-                  psHdl->apPat[siLev]=psHlp;
-                  siErr=siClpPrnCmd(pvHdl,pfOut,siCnt+1,siLev+1,siDep,psHlp,psHlp->psDep,isSkr,isMin);
-                  if (siErr<0) return(siErr);
-                  fprintf(pfOut,")");
-               } else if (psHlp->psFix->siMax>1) {
-                  vdClpPrnAli(pfOut,psHdl->pcOpt,psHlp); fprintf(pfOut,"%c(",C_SBO);
-                  if (isSkr && (siLev+1<siDep || siDep>9)) fprintf(pfOut,"\n");
-                  psHdl->apPat[siLev]=psHlp;
-                  siErr=siClpPrnCmd(pvHdl,pfOut,siCnt+1,siLev+1,siDep,psHlp,psHlp->psDep,isSkr,isMin);
-                  if (siErr<0) return(siErr);
-                  fprintf(pfOut,")...%c",C_SBC);
-               } else {
-                  return CLPERR(psHdl,CLPERR_TAB,"Maximum amount of entries (%d) for parameter '%s' not valid",psHlp->psFix->siMax,psHlp->psStd->pcKyw);
-               }
-               break;
-            case CLPTYP_OVRLAY:
-               if (psHlp->psDep==NULL) {
-                  return CLPERR(psHdl,CLPERR_TAB,"Argument table for object '%s' not defined",psHlp->psStd->pcKyw);
-               }
-               if (psHlp->psFix->siMax==1) {
-                  vdClpPrnAli(pfOut,psHdl->pcOpt,psHlp);fprintf(pfOut,".%c",C_CBO);
-                  if (isSkr  && (siLev+1<siDep || siDep>9)) fprintf(pfOut,"\n");
-                  psHdl->apPat[siLev]=psHlp;
-                  siErr=siClpPrnCmd(pvHdl,pfOut,siCnt+1,siLev+1,siDep,psHlp,psHlp->psDep,isSkr,isMin);
-                  if (siErr<0) return(siErr);
-                  fprintf(pfOut,"%c",C_CBC);
-               } else if (psHlp->psFix->siMax>1) {
-                  vdClpPrnAli(pfOut,psHdl->pcOpt,psHlp);fprintf(pfOut,"%c%c",C_SBO,C_CBO);
-                  if (isSkr && (siLev+1<siDep || siDep>9)) fprintf(pfOut,"\n");
-                  psHdl->apPat[siLev]=psHlp;
-                  siErr=siClpPrnCmd(pvHdl,pfOut,siCnt+1,siLev+1,siDep,psHlp,psHlp->psDep,isSkr,isMin);
-                  if (siErr<0) return(siErr);
-                  fprintf(pfOut,"%c...%c",C_CBC,C_SBC);
-               } else {
-                  return CLPERR(psHdl,CLPERR_TAB,"Maximum amount of entries (%d) for parameter '%s' not valid",psHlp->psFix->siMax,psHlp->psStd->pcKyw);
-               }
-               break;
-            default:
-               return CLPERR(psHdl,CLPERR_TYP,"Type (%d) of parameter '%s' not supported",psHlp->psFix->siTyp,psHlp->psStd->pcKyw);
             }
          }
-      }
-      if (psArg==NULL) {
-         if (psHdl->isOvl) {
-            if (siCnt==0) fprintf(pfOut,"%c",C_CBC);
+         if (psArg==NULL) {
+            if (psHdl->isOvl) {
+               if (siCnt==0) fprintf(pfOut,"%c",C_CBC);
+            } else {
+               if (siCnt==0) fprintf(pfOut,"%c",')');
+            }
          } else {
-            if (siCnt==0) fprintf(pfOut,"%c",')');
-         }
-      } else {
-         if (psArg->psFix->siTyp==CLPTYP_OVRLAY) {
-            if (siCnt==0) fprintf(pfOut,"%c",C_CBC);
-         } else {
-            if (siCnt==0) fprintf(pfOut,"%c",')');
+            if (psArg->psFix->siTyp==CLPTYP_OVRLAY) {
+               if (siCnt==0) fprintf(pfOut,"%c",C_CBC);
+            } else {
+               if (siCnt==0) fprintf(pfOut,"%c",')');
+            }
          }
       }
    }
@@ -5322,35 +5337,37 @@ static int siClpPrnHlp(
       return CLPERR(psHdl,CLPERR_INT,"Entry '%s.%s' not at beginning of a table",fpcPat(pvHdl,siLev),psTab->psStd->pcKyw);
    }
 
-   if (siLev<siDep || siDep>9) {
-      if (isFlg) {
-         if (siTyp>=0) {
-            fprintf(pfOut,"%s Enter a value (TYPE: %s) or use one of the keywords below:\n",fpcPre(pvHdl,siLev),apClpTyp[siTyp]);
-         } else {
-            fprintf(pfOut,"%s Enter a value or use one of the keywords below:\n",fpcPre(pvHdl,siLev));
+   if (pfOut!=NULL) {
+      if (siLev<siDep || siDep>9) {
+         if (isFlg) {
+            if (siTyp>=0) {
+               fprintf(pfOut,"%s Enter a value (TYPE: %s) or use one of the keywords below:\n",fpcPre(pvHdl,siLev),apClpTyp[siTyp]);
+            } else {
+               fprintf(pfOut,"%s Enter a value or use one of the keywords below:\n",fpcPre(pvHdl,siLev));
+            }
          }
-      }
-      for (psHlp=psTab;psHlp!=NULL;psHlp=psHlp->psNxt) {
-         if ((psHlp->psFix->siTyp==siTyp || siTyp<0) && CLPISF_CMD(psHlp->psStd->uiFlg) && !CLPISF_LNK(psHlp->psStd->uiFlg)) {
-            if (!CLPISF_ALI(psHlp->psStd->uiFlg) || (CLPISF_ALI(psHlp->psStd->uiFlg) && isAli)) {
-               vdClpPrnArg(pvHdl,pfOut,siLev,psHlp->psStd->pcKyw,psHlp->psStd->pcAli,psHlp->psStd->siKwl,psHlp->psFix->siTyp,psHlp->psFix->pcHlp,psHlp->psFix->pcDft,
-                           CLPISF_SEL(psHlp->psStd->uiFlg),CLPISF_CON(psHlp->psStd->uiFlg));
-               if (psHlp->psFix->siTyp==CLPTYP_NUMBER && CLPISF_DEF(psHlp->psStd->uiFlg)) {
-                  fprintf(pfOut,"%s If you type the keyword without an assignment of a value, the default (%d) is used\n",fpcPre(pvHdl,siLev+1),psHlp->psFix->siOid);
-               }
-               if (psHlp->psDep!=NULL) {
-                  if (psHlp->psFix->siTyp==CLPTYP_OBJECT || psHlp->psFix->siTyp==CLPTYP_OVRLAY) {
-                     psHdl->apPat[siLev]=psHlp;
-                     siErr=siClpPrnHlp(pvHdl,pfOut,isAli,siLev+1,siDep,-1,psHlp->psDep,FALSE);
-                     if (siErr<0) return(siErr);
-                  } else {
-                     psHdl->apPat[siLev]=psHlp;
-                     if (CLPISF_SEL(psHlp->psStd->uiFlg)) {
-                        siErr=siClpPrnHlp(pvHdl,pfOut,isAli,siLev+1,siDep,psHlp->psFix->siTyp,psHlp->psDep,FALSE);
+         for (psHlp=psTab;psHlp!=NULL;psHlp=psHlp->psNxt) {
+            if ((psHlp->psFix->siTyp==siTyp || siTyp<0) && CLPISF_CMD(psHlp->psStd->uiFlg) && !CLPISF_LNK(psHlp->psStd->uiFlg)) {
+               if (!CLPISF_ALI(psHlp->psStd->uiFlg) || (CLPISF_ALI(psHlp->psStd->uiFlg) && isAli)) {
+                  vdClpPrnArg(pvHdl,pfOut,siLev,psHlp->psStd->pcKyw,psHlp->psStd->pcAli,psHlp->psStd->siKwl,psHlp->psFix->siTyp,psHlp->psFix->pcHlp,psHlp->psFix->pcDft,
+                              CLPISF_SEL(psHlp->psStd->uiFlg),CLPISF_CON(psHlp->psStd->uiFlg));
+                  if (psHlp->psFix->siTyp==CLPTYP_NUMBER && CLPISF_DEF(psHlp->psStd->uiFlg)) {
+                     fprintf(pfOut,"%s If you type the keyword without an assignment of a value, the default (%d) is used\n",fpcPre(pvHdl,siLev+1),psHlp->psFix->siOid);
+                  }
+                  if (psHlp->psDep!=NULL) {
+                     if (psHlp->psFix->siTyp==CLPTYP_OBJECT || psHlp->psFix->siTyp==CLPTYP_OVRLAY) {
+                        psHdl->apPat[siLev]=psHlp;
+                        siErr=siClpPrnHlp(pvHdl,pfOut,isAli,siLev+1,siDep,-1,psHlp->psDep,FALSE);
                         if (siErr<0) return(siErr);
                      } else {
-                        siErr=siClpPrnHlp(pvHdl,pfOut,isAli,siLev+1,siDep,psHlp->psFix->siTyp,psHlp->psDep,TRUE);
-                        if (siErr<0) return(siErr);
+                        psHdl->apPat[siLev]=psHlp;
+                        if (CLPISF_SEL(psHlp->psStd->uiFlg)) {
+                           siErr=siClpPrnHlp(pvHdl,pfOut,isAli,siLev+1,siDep,psHlp->psFix->siTyp,psHlp->psDep,FALSE);
+                           if (siErr<0) return(siErr);
+                        } else {
+                           siErr=siClpPrnHlp(pvHdl,pfOut,isAli,siLev+1,siDep,psHlp->psFix->siTyp,psHlp->psDep,TRUE);
+                           if (siErr<0) return(siErr);
+                        }
                      }
                   }
                }
@@ -5377,149 +5394,150 @@ static int siClpPrnSyn(
       return CLPERR(psHdl,CLPERR_TAB,"Argument not defined%s","");
    }
 
-   if (isPat) {
-      fprintf(pfOut,"%s.",fpcPat(pvHdl,siLev));
+   if (pfOut!=NULL) {
+      if (isPat) {
+         fprintf(pfOut,"%s.",fpcPat(pvHdl,siLev));
+      }
+      switch (psArg->psFix->siTyp) {
+      case CLPTYP_SWITCH:
+         vdClpPrnAli(pfOut,psHdl->pcOpt,psArg);
+         break;
+      case CLPTYP_NUMBER:
+         if (psArg->psFix->siMax==1) {
+            if (CLPISF_SEL(psArg->psStd->uiFlg)) {
+               vdClpPrnAli(pfOut,psHdl->pcOpt,psArg); fprintf(pfOut,CLP_ASSIGNMENT);
+               vdClpPrnOpt(pfOut,psHdl->pcOpt,psArg->psFix->siTyp,psArg->psDep);
+            } else {
+               if (psArg->psDep!=NULL) {
+                  vdClpPrnAli(pfOut,psHdl->pcOpt,psArg);fprintf(pfOut,"%snum%s",CLP_ASSIGNMENT,psHdl->pcOpt);
+                  vdClpPrnOpt(pfOut,psHdl->pcOpt,psArg->psFix->siTyp,psArg->psDep);
+               } else {
+                  vdClpPrnAli(pfOut,psHdl->pcOpt,psArg);fprintf(pfOut,"%snum",CLP_ASSIGNMENT);
+               }
+            }
+         } else {
+            if (CLPISF_SEL(psArg->psStd->uiFlg)) {
+               vdClpPrnAli(pfOut,psHdl->pcOpt,psArg);fprintf(pfOut,"%c",C_SBO);
+               vdClpPrnOpt(pfOut,psHdl->pcOpt,psArg->psFix->siTyp,psArg->psDep);
+               fprintf(pfOut,"...%c",C_SBC);
+            } else {
+               if (psArg->psDep!=NULL) {
+                  vdClpPrnAli(pfOut,psHdl->pcOpt,psArg);fprintf(pfOut,"%cnum%s",C_SBO,psHdl->pcOpt);
+                  vdClpPrnOpt(pfOut,psHdl->pcOpt,psArg->psFix->siTyp,psArg->psDep);
+                  fprintf(pfOut,"...%c",C_SBC);
+               } else {
+                  vdClpPrnAli(pfOut,psHdl->pcOpt,psArg);fprintf(pfOut,"%cnum...%c",C_SBO,C_SBC);
+               }
+            }
+         }
+         break;
+      case CLPTYP_FLOATN:
+         if (psArg->psFix->siMax==1) {
+            if (CLPISF_SEL(psArg->psStd->uiFlg)) {
+               vdClpPrnAli(pfOut,psHdl->pcOpt,psArg);fprintf(pfOut,CLP_ASSIGNMENT);
+               vdClpPrnOpt(pfOut,psHdl->pcOpt,psArg->psFix->siTyp,psArg->psDep);
+            } else {
+               if (psArg->psDep!=NULL) {
+                  vdClpPrnAli(pfOut,psHdl->pcOpt,psArg);fprintf(pfOut,"%sflt%s",CLP_ASSIGNMENT,psHdl->pcOpt);
+                  vdClpPrnOpt(pfOut,psHdl->pcOpt,psArg->psFix->siTyp,psArg->psDep);
+               } else {
+                  vdClpPrnAli(pfOut,psHdl->pcOpt,psArg);fprintf(pfOut,"%sflt",CLP_ASSIGNMENT);
+               }
+            }
+         } else {
+            if (CLPISF_SEL(psArg->psStd->uiFlg)) {
+               vdClpPrnAli(pfOut,psHdl->pcOpt,psArg);fprintf(pfOut,"%c",C_SBO);
+               vdClpPrnOpt(pfOut,psHdl->pcOpt,psArg->psFix->siTyp,psArg->psDep);
+               fprintf(pfOut,"...%c",C_SBC);
+            } else {
+               if (psArg->psDep!=NULL) {
+                  vdClpPrnAli(pfOut,psHdl->pcOpt,psArg);fprintf(pfOut,"%cflt%s",C_SBO,psHdl->pcOpt);
+                  vdClpPrnOpt(pfOut,psHdl->pcOpt,psArg->psFix->siTyp,psArg->psDep);
+                  fprintf(pfOut,"...%c",C_SBC);
+               } else {
+                  vdClpPrnAli(pfOut,psHdl->pcOpt,psArg);fprintf(pfOut,"%cflt...%c",C_SBO,C_SBC);
+               }
+            }
+         }
+         break;
+      case CLPTYP_STRING:
+         if (CLPISF_BIN(psArg->psStd->uiFlg)) {
+            if (CLPISF_HEX(psArg->psStd->uiFlg)) {
+               pcHlp="bin-hex";
+            } else if (CLPISF_ASC(psArg->psStd->uiFlg)) {
+               pcHlp="bin-ascii";
+            } else if (CLPISF_EBC(psArg->psStd->uiFlg)) {
+               pcHlp="bin-ebcdic";
+            } else if (CLPISF_CHR(psArg->psStd->uiFlg)) {
+               pcHlp="bin-char";
+            } else {
+               pcHlp="bin";
+            }
+         } else pcHlp="str";
+         if (psArg->psFix->siMax==1) {
+            if (CLPISF_SEL(psArg->psStd->uiFlg)) {
+               vdClpPrnAli(pfOut,psHdl->pcOpt,psArg);fprintf(pfOut,CLP_ASSIGNMENT);
+               vdClpPrnOpt(pfOut,psHdl->pcOpt,psArg->psFix->siTyp,psArg->psDep);
+            } else {
+               if (psArg->psDep!=NULL) {
+                  vdClpPrnAli(pfOut,psHdl->pcOpt,psArg);fprintf(pfOut,"%s'%s'%s",CLP_ASSIGNMENT,pcHlp,psHdl->pcOpt);
+                  vdClpPrnOpt(pfOut,psHdl->pcOpt,psArg->psFix->siTyp,psArg->psDep);
+               } else {
+                  vdClpPrnAli(pfOut,psHdl->pcOpt,psArg);fprintf(pfOut,"%s'%s'",CLP_ASSIGNMENT,pcHlp);
+               }
+            }
+         } else {
+            if (CLPISF_SEL(psArg->psStd->uiFlg)) {
+               vdClpPrnAli(pfOut,psHdl->pcOpt,psArg);fprintf(pfOut,"%c",C_SBO);
+               vdClpPrnOpt(pfOut,psHdl->pcOpt,psArg->psFix->siTyp,psArg->psDep);
+               fprintf(pfOut,"...%c",C_SBC);
+            } else {
+               if (psArg->psDep!=NULL) {
+                  vdClpPrnAli(pfOut,psHdl->pcOpt,psArg);fprintf(pfOut,"%c'%s'%s",C_SBO,pcHlp,psHdl->pcOpt);
+                  vdClpPrnOpt(pfOut,psHdl->pcOpt,psArg->psFix->siTyp,psArg->psDep);
+                  fprintf(pfOut,"...%c",C_SBC);
+               } else {
+                  vdClpPrnAli(pfOut,psHdl->pcOpt,psArg);fprintf(pfOut,"%c'%s'...%c",C_SBO,pcHlp,C_SBC);
+               }
+            }
+         }
+         break;
+      case CLPTYP_OBJECT:
+         if (psArg->psFix->siMax==1) {
+            vdClpPrnAli(pfOut,psHdl->pcOpt,psArg);
+            fprintf(pfOut,"(");
+            psHdl->apPat[siLev]=psArg;
+            siErr=siClpPrnCmd(pvHdl,pfOut,1,siLev+1,siLev+2,psArg,psArg->psDep,FALSE,FALSE);
+            fprintf(pfOut,")");
+            if (siErr<0) return(siErr);
+         } else {
+            vdClpPrnAli(pfOut,psHdl->pcOpt,psArg);
+            fprintf(pfOut,"%c(",C_SBO);
+            psHdl->apPat[siLev]=psArg;
+            siErr=siClpPrnCmd(pvHdl,pfOut,1,siLev+1,siLev+2,psArg,psArg->psDep,FALSE,FALSE);
+            fprintf(pfOut,")...%c",C_SBC);
+            if (siErr<0) return(siErr);
+         }
+         break;
+      case CLPTYP_OVRLAY:
+         if (psArg->psFix->siMax==1) {
+            vdClpPrnAli(pfOut,psHdl->pcOpt,psArg);
+            fprintf(pfOut,".%c",C_CBO);
+            psHdl->apPat[siLev]=psArg;
+            siErr=siClpPrnCmd(pvHdl,pfOut,1,siLev+1,siLev+2,psArg,psArg->psDep,FALSE,FALSE);
+            fprintf(pfOut,"%c",C_CBC);
+            if (siErr<0) return(siErr);
+         } else {
+            vdClpPrnAli(pfOut,psHdl->pcOpt,psArg);
+            fprintf(pfOut,"%c%c",C_SBO,C_CBO);
+            psHdl->apPat[siLev]=psArg;
+            siErr=siClpPrnCmd(pvHdl,pfOut,1,siLev+1,siLev+2,psArg,psArg->psDep,FALSE,FALSE);
+            fprintf(pfOut,"%c...%c",C_CBC,C_SBC);
+            if (siErr<0) return(siErr);
+         }
+         break;
+      }
    }
-   switch (psArg->psFix->siTyp) {
-   case CLPTYP_SWITCH:
-      vdClpPrnAli(pfOut,psHdl->pcOpt,psArg);
-      break;
-   case CLPTYP_NUMBER:
-      if (psArg->psFix->siMax==1) {
-         if (CLPISF_SEL(psArg->psStd->uiFlg)) {
-            vdClpPrnAli(pfOut,psHdl->pcOpt,psArg); fprintf(pfOut,CLP_ASSIGNMENT);
-            vdClpPrnOpt(pfOut,psHdl->pcOpt,psArg->psFix->siTyp,psArg->psDep);
-         } else {
-            if (psArg->psDep!=NULL) {
-               vdClpPrnAli(pfOut,psHdl->pcOpt,psArg);fprintf(pfOut,"%snum%s",CLP_ASSIGNMENT,psHdl->pcOpt);
-               vdClpPrnOpt(pfOut,psHdl->pcOpt,psArg->psFix->siTyp,psArg->psDep);
-            } else {
-               vdClpPrnAli(pfOut,psHdl->pcOpt,psArg);fprintf(pfOut,"%snum",CLP_ASSIGNMENT);
-            }
-         }
-      } else {
-         if (CLPISF_SEL(psArg->psStd->uiFlg)) {
-            vdClpPrnAli(pfOut,psHdl->pcOpt,psArg);fprintf(pfOut,"%c",C_SBO);
-            vdClpPrnOpt(pfOut,psHdl->pcOpt,psArg->psFix->siTyp,psArg->psDep);
-            fprintf(pfOut,"...%c",C_SBC);
-         } else {
-            if (psArg->psDep!=NULL) {
-               vdClpPrnAli(pfOut,psHdl->pcOpt,psArg);fprintf(pfOut,"%cnum%s",C_SBO,psHdl->pcOpt);
-               vdClpPrnOpt(pfOut,psHdl->pcOpt,psArg->psFix->siTyp,psArg->psDep);
-               fprintf(pfOut,"...%c",C_SBC);
-            } else {
-               vdClpPrnAli(pfOut,psHdl->pcOpt,psArg);fprintf(pfOut,"%cnum...%c",C_SBO,C_SBC);
-            }
-         }
-      }
-      break;
-   case CLPTYP_FLOATN:
-      if (psArg->psFix->siMax==1) {
-         if (CLPISF_SEL(psArg->psStd->uiFlg)) {
-            vdClpPrnAli(pfOut,psHdl->pcOpt,psArg);fprintf(pfOut,CLP_ASSIGNMENT);
-            vdClpPrnOpt(pfOut,psHdl->pcOpt,psArg->psFix->siTyp,psArg->psDep);
-         } else {
-            if (psArg->psDep!=NULL) {
-               vdClpPrnAli(pfOut,psHdl->pcOpt,psArg);fprintf(pfOut,"%sflt%s",CLP_ASSIGNMENT,psHdl->pcOpt);
-               vdClpPrnOpt(pfOut,psHdl->pcOpt,psArg->psFix->siTyp,psArg->psDep);
-            } else {
-               vdClpPrnAli(pfOut,psHdl->pcOpt,psArg);fprintf(pfOut,"%sflt",CLP_ASSIGNMENT);
-            }
-         }
-      } else {
-         if (CLPISF_SEL(psArg->psStd->uiFlg)) {
-            vdClpPrnAli(pfOut,psHdl->pcOpt,psArg);fprintf(pfOut,"%c",C_SBO);
-            vdClpPrnOpt(pfOut,psHdl->pcOpt,psArg->psFix->siTyp,psArg->psDep);
-            fprintf(pfOut,"...%c",C_SBC);
-         } else {
-            if (psArg->psDep!=NULL) {
-               vdClpPrnAli(pfOut,psHdl->pcOpt,psArg);fprintf(pfOut,"%cflt%s",C_SBO,psHdl->pcOpt);
-               vdClpPrnOpt(pfOut,psHdl->pcOpt,psArg->psFix->siTyp,psArg->psDep);
-               fprintf(pfOut,"...%c",C_SBC);
-            } else {
-               vdClpPrnAli(pfOut,psHdl->pcOpt,psArg);fprintf(pfOut,"%cflt...%c",C_SBO,C_SBC);
-            }
-         }
-      }
-      break;
-   case CLPTYP_STRING:
-      if (CLPISF_BIN(psArg->psStd->uiFlg)) {
-         if (CLPISF_HEX(psArg->psStd->uiFlg)) {
-            pcHlp="bin-hex";
-         } else if (CLPISF_ASC(psArg->psStd->uiFlg)) {
-            pcHlp="bin-ascii";
-         } else if (CLPISF_EBC(psArg->psStd->uiFlg)) {
-            pcHlp="bin-ebcdic";
-         } else if (CLPISF_CHR(psArg->psStd->uiFlg)) {
-            pcHlp="bin-char";
-         } else {
-            pcHlp="bin";
-         }
-      } else pcHlp="str";
-      if (psArg->psFix->siMax==1) {
-         if (CLPISF_SEL(psArg->psStd->uiFlg)) {
-            vdClpPrnAli(pfOut,psHdl->pcOpt,psArg);fprintf(pfOut,CLP_ASSIGNMENT);
-            vdClpPrnOpt(pfOut,psHdl->pcOpt,psArg->psFix->siTyp,psArg->psDep);
-         } else {
-            if (psArg->psDep!=NULL) {
-               vdClpPrnAli(pfOut,psHdl->pcOpt,psArg);fprintf(pfOut,"%s'%s'%s",CLP_ASSIGNMENT,pcHlp,psHdl->pcOpt);
-               vdClpPrnOpt(pfOut,psHdl->pcOpt,psArg->psFix->siTyp,psArg->psDep);
-            } else {
-               vdClpPrnAli(pfOut,psHdl->pcOpt,psArg);fprintf(pfOut,"%s'%s'",CLP_ASSIGNMENT,pcHlp);
-            }
-         }
-      } else {
-         if (CLPISF_SEL(psArg->psStd->uiFlg)) {
-            vdClpPrnAli(pfOut,psHdl->pcOpt,psArg);fprintf(pfOut,"%c",C_SBO);
-            vdClpPrnOpt(pfOut,psHdl->pcOpt,psArg->psFix->siTyp,psArg->psDep);
-            fprintf(pfOut,"...%c",C_SBC);
-         } else {
-            if (psArg->psDep!=NULL) {
-               vdClpPrnAli(pfOut,psHdl->pcOpt,psArg);fprintf(pfOut,"%c'%s'%s",C_SBO,pcHlp,psHdl->pcOpt);
-               vdClpPrnOpt(pfOut,psHdl->pcOpt,psArg->psFix->siTyp,psArg->psDep);
-               fprintf(pfOut,"...%c",C_SBC);
-            } else {
-               vdClpPrnAli(pfOut,psHdl->pcOpt,psArg);fprintf(pfOut,"%c'%s'...%c",C_SBO,pcHlp,C_SBC);
-            }
-         }
-      }
-      break;
-   case CLPTYP_OBJECT:
-      if (psArg->psFix->siMax==1) {
-         vdClpPrnAli(pfOut,psHdl->pcOpt,psArg);
-         fprintf(pfOut,"(");
-         psHdl->apPat[siLev]=psArg;
-         siErr=siClpPrnCmd(pvHdl,pfOut,1,siLev+1,siLev+2,psArg,psArg->psDep,FALSE,FALSE);
-         fprintf(pfOut,")");
-         if (siErr<0) return(siErr);
-      } else {
-         vdClpPrnAli(pfOut,psHdl->pcOpt,psArg);
-         fprintf(pfOut,"%c(",C_SBO);
-         psHdl->apPat[siLev]=psArg;
-         siErr=siClpPrnCmd(pvHdl,pfOut,1,siLev+1,siLev+2,psArg,psArg->psDep,FALSE,FALSE);
-         fprintf(pfOut,")...%c",C_SBC);
-         if (siErr<0) return(siErr);
-      }
-      break;
-   case CLPTYP_OVRLAY:
-      if (psArg->psFix->siMax==1) {
-         vdClpPrnAli(pfOut,psHdl->pcOpt,psArg);
-         fprintf(pfOut,".%c",C_CBO);
-         psHdl->apPat[siLev]=psArg;
-         siErr=siClpPrnCmd(pvHdl,pfOut,1,siLev+1,siLev+2,psArg,psArg->psDep,FALSE,FALSE);
-         fprintf(pfOut,"%c",C_CBC);
-         if (siErr<0) return(siErr);
-      } else {
-         vdClpPrnAli(pfOut,psHdl->pcOpt,psArg);
-         fprintf(pfOut,"%c%c",C_SBO,C_CBO);
-         psHdl->apPat[siLev]=psArg;
-         siErr=siClpPrnCmd(pvHdl,pfOut,1,siLev+1,siLev+2,psArg,psArg->psDep,FALSE,FALSE);
-         fprintf(pfOut,"%c...%c",C_CBC,C_SBC);
-         if (siErr<0) return(siErr);
-      }
-      break;
-   }
-
    return(CLP_OK);
 }
 
@@ -5545,7 +5563,7 @@ static int siClpPrnDoc(
    const TsSym*                  apLst[CLPMAX_HDEPTH];
 
 
-   if (psTab!=NULL && pcNum!=NULL) {
+   if (pfDoc!=NULL && psTab!=NULL && pcNum!=NULL) {
       if (psTab->psBak!=NULL) {
          return CLPERR(psHdl,CLPERR_INT,"Entry '%s.%s' not at beginning of a table",fpcPat(pvHdl,siLev),psTab->psStd->pcKyw);
       }
@@ -5693,35 +5711,11 @@ static int siClpPrnPro(
       return CLPERR(psHdl,CLPERR_INT,"Entry '%s.%s' not at beginning of a table",fpcPat(pvHdl,siLev),psTab->psStd->pcKyw);
    }
 
-   if (siLev<siDep || siDep>9) {
-      for (psHlp=psTab;psHlp!=NULL;psHlp=psHlp->psNxt) {
-         if (CLPISF_ARG(psHlp->psStd->uiFlg) && CLPISF_PRO(psHlp->psStd->uiFlg) && (pcArg==NULL || strxcmp(psHdl->isCas,psHlp->psStd->pcKyw,pcArg,0,0,FALSE)==0)) {
-            if (psHlp->psFix->pcDft!=NULL && *psHlp->psFix->pcDft) {
-               if ((isMan || (!CLPISF_CMD(psHlp->psStd->uiFlg))) && psHlp->psFix->pcMan!=NULL && *psHlp->psFix->pcMan) {
-                  if (siMtd==CLPPRO_MTD_DOC) {
-                     fprintf(pfOut,".DESCRIPTION FOR %s.%s.%s.%s: (TYPE: %s) %s\n\n",psHdl->pcOwn,psHdl->pcPgm,fpcPat(pvHdl,siLev),psHlp->psStd->pcKyw,apClpTyp[psHlp->psFix->siTyp],psHlp->psFix->pcHlp);
-                     fprintm(pfOut,psHdl->pcOwn,psHdl->pcPgm,psHlp->psFix->pcMan,0);
-                     fprintf(pfOut," \n");
-                  } else {
-                     fprintf(pfOut,"\n%c DESCRIPTION for %s.%s.%s.%s:\n",C_HSH,psHdl->pcOwn,psHdl->pcPgm,fpcPat(pvHdl,siLev),psHlp->psStd->pcKyw);
-                     fprintm(pfOut,psHdl->pcOwn,psHdl->pcPgm,psHlp->psFix->pcMan,0);
-                     fprintf(pfOut," %c\n",C_HSH);
-                  }
-                  isMan=TRUE;
-               } else {
-                  if (isMan) fprintf(pfOut,"\n");
-                  isMan=FALSE;
-               }
-               if (siMtd==CLPPRO_MTD_DOC) {
-                  if (!CLPISF_CMD(psHlp->psStd->uiFlg)) {
-                     fprintf(pfOut,".HELP FOR %s.%s.%s.%s: (TYPE: %s) %s\n\n",psHdl->pcOwn,psHdl->pcPgm,fpcPat(pvHdl,siLev),psHlp->psStd->pcKyw,apClpTyp[psHlp->psFix->siTyp],psHlp->psFix->pcHlp);
-                  }
-               } else {
-                  fprintf(pfOut," %s.%s.%s.%s=\"%s\" ",psHdl->pcOwn,psHdl->pcPgm,fpcPat(pvHdl,siLev),psHlp->psStd->pcKyw,psHlp->psFix->pcDft);
-                  efprintf(pfOut,"# TYPE: %s HELP: %s #\n",apClpTyp[psHlp->psFix->siTyp],psHlp->psFix->pcHlp);
-               }
-            } else {
-               if (siMtd==CLPPRO_MTD_ALL || siMtd==CLPPRO_MTD_CMT || siMtd==CLPPRO_MTD_DOC) {
+   if (pfOut!=NULL) {
+      if (siLev<siDep || siDep>9) {
+         for (psHlp=psTab;psHlp!=NULL;psHlp=psHlp->psNxt) {
+            if (CLPISF_ARG(psHlp->psStd->uiFlg) && CLPISF_PRO(psHlp->psStd->uiFlg) && (pcArg==NULL || strxcmp(psHdl->isCas,psHlp->psStd->pcKyw,pcArg,0,0,FALSE)==0)) {
+               if (psHlp->psFix->pcDft!=NULL && *psHlp->psFix->pcDft) {
                   if ((isMan || (!CLPISF_CMD(psHlp->psStd->uiFlg))) && psHlp->psFix->pcMan!=NULL && *psHlp->psFix->pcMan) {
                      if (siMtd==CLPPRO_MTD_DOC) {
                         fprintf(pfOut,".DESCRIPTION FOR %s.%s.%s.%s: (TYPE: %s) %s\n\n",psHdl->pcOwn,psHdl->pcPgm,fpcPat(pvHdl,siLev),psHlp->psStd->pcKyw,apClpTyp[psHlp->psFix->siTyp],psHlp->psFix->pcHlp);
@@ -5742,27 +5736,52 @@ static int siClpPrnPro(
                         fprintf(pfOut,".HELP FOR %s.%s.%s.%s: (TYPE: %s) %s\n\n",psHdl->pcOwn,psHdl->pcPgm,fpcPat(pvHdl,siLev),psHlp->psStd->pcKyw,apClpTyp[psHlp->psFix->siTyp],psHlp->psFix->pcHlp);
                      }
                   } else {
-                     if (siMtd==CLPPRO_MTD_CMT) {
-                        fprintf(pfOut, ";%s.%s.%s.%s=\"\" ",psHdl->pcOwn,psHdl->pcPgm,fpcPat(pvHdl,siLev),psHlp->psStd->pcKyw);
-                     } else {
-                        fprintf(pfOut, " %s.%s.%s.%s=\"\" ",psHdl->pcOwn,psHdl->pcPgm,fpcPat(pvHdl,siLev),psHlp->psStd->pcKyw);
-                     }
+                     fprintf(pfOut," %s.%s.%s.%s=\"%s\" ",psHdl->pcOwn,psHdl->pcPgm,fpcPat(pvHdl,siLev),psHlp->psStd->pcKyw,psHlp->psFix->pcDft);
                      efprintf(pfOut,"# TYPE: %s HELP: %s #\n",apClpTyp[psHlp->psFix->siTyp],psHlp->psFix->pcHlp);
                   }
+               } else {
+                  if (siMtd==CLPPRO_MTD_ALL || siMtd==CLPPRO_MTD_CMT || siMtd==CLPPRO_MTD_DOC) {
+                     if ((isMan || (!CLPISF_CMD(psHlp->psStd->uiFlg))) && psHlp->psFix->pcMan!=NULL && *psHlp->psFix->pcMan) {
+                        if (siMtd==CLPPRO_MTD_DOC) {
+                           fprintf(pfOut,".DESCRIPTION FOR %s.%s.%s.%s: (TYPE: %s) %s\n\n",psHdl->pcOwn,psHdl->pcPgm,fpcPat(pvHdl,siLev),psHlp->psStd->pcKyw,apClpTyp[psHlp->psFix->siTyp],psHlp->psFix->pcHlp);
+                           fprintm(pfOut,psHdl->pcOwn,psHdl->pcPgm,psHlp->psFix->pcMan,0);
+                           fprintf(pfOut," \n");
+                        } else {
+                           fprintf(pfOut,"\n%c DESCRIPTION for %s.%s.%s.%s:\n",C_HSH,psHdl->pcOwn,psHdl->pcPgm,fpcPat(pvHdl,siLev),psHlp->psStd->pcKyw);
+                           fprintm(pfOut,psHdl->pcOwn,psHdl->pcPgm,psHlp->psFix->pcMan,0);
+                           fprintf(pfOut," %c\n",C_HSH);
+                        }
+                        isMan=TRUE;
+                     } else {
+                        if (isMan) fprintf(pfOut,"\n");
+                        isMan=FALSE;
+                     }
+                     if (siMtd==CLPPRO_MTD_DOC) {
+                        if (!CLPISF_CMD(psHlp->psStd->uiFlg)) {
+                           fprintf(pfOut,".HELP FOR %s.%s.%s.%s: (TYPE: %s) %s\n\n",psHdl->pcOwn,psHdl->pcPgm,fpcPat(pvHdl,siLev),psHlp->psStd->pcKyw,apClpTyp[psHlp->psFix->siTyp],psHlp->psFix->pcHlp);
+                        }
+                     } else {
+                        if (siMtd==CLPPRO_MTD_CMT) {
+                           fprintf(pfOut, ";%s.%s.%s.%s=\"\" ",psHdl->pcOwn,psHdl->pcPgm,fpcPat(pvHdl,siLev),psHlp->psStd->pcKyw);
+                        } else {
+                           fprintf(pfOut, " %s.%s.%s.%s=\"\" ",psHdl->pcOwn,psHdl->pcPgm,fpcPat(pvHdl,siLev),psHlp->psStd->pcKyw);
+                        }
+                        efprintf(pfOut,"# TYPE: %s HELP: %s #\n",apClpTyp[psHlp->psFix->siTyp],psHlp->psFix->pcHlp);
+                     }
+                  }
                }
-            }
 
-            if (psHlp->psDep!=NULL) {
-               if (psHlp->psFix->siTyp==CLPTYP_OBJECT || psHlp->psFix->siTyp==CLPTYP_OVRLAY) {
-                  psHdl->apPat[siLev]=psHlp;
-                  siErr=siClpPrnPro(pvHdl,pfOut,isMan,siMtd,siLev+1,siDep,psHlp->psDep,NULL);
-                  if (siErr<0) return(siErr);
+               if (psHlp->psDep!=NULL) {
+                  if (psHlp->psFix->siTyp==CLPTYP_OBJECT || psHlp->psFix->siTyp==CLPTYP_OVRLAY) {
+                     psHdl->apPat[siLev]=psHlp;
+                     siErr=siClpPrnPro(pvHdl,pfOut,isMan,siMtd,siLev+1,siDep,psHlp->psDep,NULL);
+                     if (siErr<0) return(siErr);
+                  }
                }
             }
          }
       }
    }
-
    return (CLP_OK);
 }
 
