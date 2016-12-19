@@ -1417,6 +1417,28 @@ extern int srprintc(char** buffer,size_t* size,const size_t expansion,const char
    return(h+r);
 }
 
+extern int srprintf(char** buffer,size_t* size,const size_t expansion,const char* format,...)
+{
+   va_list  argv;
+   int      r;
+   int      s=strlen(format)+expansion+1;
+
+   if ((*size)<s) {
+      char* b=(char*)realloc(*buffer,s);
+      if (b==NULL) return(0);
+      (*buffer)=b;
+      (*size)=s;
+   }
+   va_start(argv, format);
+   r = vsnprintf((*buffer), (*size), format, argv);
+   va_end(argv);
+#ifdef __WIN__ /* ensure 0-termination on plattforms where this is NOT the case. */
+   if (r >= (*size)-1)
+      *buffer[(*size)-1]=0;
+#endif
+   return(r);
+}
+
 extern unsigned int hex2bin(
    const char*          hex,
          unsigned char* bin,
