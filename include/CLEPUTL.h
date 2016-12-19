@@ -141,6 +141,17 @@ extern int printd(const char* format,...);
 extern int snprintc(char* buffer,const size_t size,const char* format,...);
 
 /**
+ * Works like snprintc but does reallocation of the buffer (maximal expansion of the format string is 1023 bytes).
+ * @param buffer  pointer to pointer to the string buffer (is updated, could be NULL at beginning)
+ * @param size    pointer to size of the string buffer (is updated, could be 0 at beginning)
+ * @param expan   maximal expected expansion of the format string (size must be fit strlen(*buffer)+strlen(format)+expansion+1)
+ * @param format  format string
+ * @return        amount of characters printed (0 are mainly a error)
+ */
+extern int srprintc(char** buffer,size_t* size,const size_t expan,const char* format,...);
+
+
+/**
  * Prints man pages to a file, inserting owner and program name into placeholders
  * @param file    pointer to the file
  * @param own     owner name for replacement (&{OWN})

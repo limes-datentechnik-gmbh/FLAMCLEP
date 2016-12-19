@@ -1389,8 +1389,32 @@ extern int snprintc(char* buffer,size_t size,const char* format,...)
          *(buffer+size-1) = 0;
 #endif
       return(h+r);
-   } else
-     return (0);
+   } else {
+      return (0);
+   }
+}
+
+extern int srprintc(char** buffer,size_t* size,const size_t expansion,const char* format,...)
+{
+   va_list  argv;
+   int      r;
+   int      h=(*buffer!=NULL)?strlen(*buffer):0;
+   int      s=h+strlen(format)+expansion+1;
+
+   if ((*size)<s) {
+      char* b=(char*)realloc(*buffer,s);
+      if (b==NULL) return(0);
+      (*buffer)=b;
+      (*size)=s;
+   }
+   va_start(argv, format);
+   r = vsnprintf((*buffer)+h, (*size)-(h+1), format, argv);
+   va_end(argv);
+#ifdef __WIN__ /* ensure 0-termination on plattforms where this is NOT the case. */
+   if (r >= (*size)-(h+1))
+      *buffer[(*size)-1]=0;
+#endif
+   return(h+r);
 }
 
 extern unsigned int hex2bin(
