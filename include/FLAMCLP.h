@@ -86,7 +86,7 @@ assignment of another value.
 
 The FLAMCLP also supports aliases. An alias points to another argument
 and is only an additional keyword that can be used. The maximum length
-of a keyword or alias can not exceed 63 character.
+of a keyword or alias cannot exceed 63 character.
 
 To be compatible with certain shells the features below are implemented.
 
