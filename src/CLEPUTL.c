@@ -1382,12 +1382,9 @@ extern int snprintc(char* buffer,size_t size,const char* format,...)
    int      r, h = strlen(buffer);
    if (size > (h+1)) {
       va_start(argv, format);
-      r = vsnprintf(buffer+h, size-(h+1), format, argv);
+      r = vsnprintf(buffer+h, size-h, format, argv);
       va_end(argv);
-#ifdef __WIN__ /* ensure 0-termination on plattforms where this is NOT the case. */
-      if (r >= size-h-1)
-         *(buffer+size-1) = 0;
-#endif
+      *buffer[(*size)-1]=0;
       return(h+r);
    } else {
       return (0);
@@ -1398,22 +1395,18 @@ extern int srprintc(char** buffer,size_t* size,const size_t expansion,const char
 {
    va_list  argv;
    int      r;
-   int      h=(*buffer!=NULL)?strlen(*buffer):0;
-   int      s=h+strlen(format)+expansion+1;
-
+   size_t   h=(*buffer!=NULL)?strlen(*buffer):0;
+   size_t   s=h+strlen(format)+expansion+1;
    if ((*size)<s) {
-      char* b=(char*)realloc(*buffer,s);
+      char* b=(char*)realloc(*buffer,2*s);
       if (b==NULL) return(0);
       (*buffer)=b;
-      (*size)=s;
+      (*size)=2*s;
    }
    va_start(argv, format);
-   r = vsnprintf((*buffer)+h, (*size)-(h+1), format, argv);
+   r = vsnprintf((*buffer)+h, (*size)-h, format, argv);
    va_end(argv);
-#ifdef __WIN__ /* ensure 0-termination on plattforms where this is NOT the case. */
-   if (r >= (*size)-(h+1))
-      *buffer[(*size)-1]=0;
-#endif
+   *buffer[(*size)-1]=0;
    return(h+r);
 }
 
@@ -1421,21 +1414,17 @@ extern int srprintf(char** buffer,size_t* size,const size_t expansion,const char
 {
    va_list  argv;
    int      r;
-   int      s=strlen(format)+expansion+1;
-
+   size_t   s=strlen(format)+expansion+1;
    if ((*size)<s) {
-      char* b=(char*)realloc(*buffer,s);
+      char* b=(char*)realloc(*buffer,2*s);
       if (b==NULL) return(0);
       (*buffer)=b;
-      (*size)=s;
+      (*size)=2*s;
    }
    va_start(argv, format);
    r = vsnprintf((*buffer), (*size), format, argv);
    va_end(argv);
-#ifdef __WIN__ /* ensure 0-termination on plattforms where this is NOT the case. */
-   if (r >= (*size)-1)
-      *buffer[(*size)-1]=0;
-#endif
+   *buffer[(*size)-1]=0;
    return(r);
 }
 

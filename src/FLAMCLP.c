@@ -148,6 +148,8 @@
 #define CLPMAX_LOCSIZ            128
 #define CLPMAX_LOCLEN            127
 
+#define CLPINI_LSTSIZ            1024
+
 #define CLPTOK_INI               0
 #define CLPTOK_END               1
 #define CLPTOK_KYW               2
@@ -816,7 +818,8 @@ extern void* pvClpOpen(
          psHdl->pcCur=NULL;
          psHdl->pcOld=NULL;
          psHdl->siTok=CLPTOK_INI;
-         psHdl->pcLst=NULL;
+         psHdl->uiLsz=CLPINI_LSTSIZ;
+         psHdl->pcLst=(C08*)calloc(1,psHdl->uiLsz);
          psHdl->pvDat=pvDat;
          psHdl->psTab=NULL;
          psHdl->psSym=NULL;
