@@ -1384,7 +1384,7 @@ extern int snprintc(char* buffer,size_t size,const char* format,...)
       va_start(argv, format);
       r = vsnprintf(buffer+h, size-h, format, argv);
       va_end(argv);
-      *buffer[(*size)-1]=0;
+      buffer[size-1]=0;
       return(h+r);
    } else {
       return (0);
