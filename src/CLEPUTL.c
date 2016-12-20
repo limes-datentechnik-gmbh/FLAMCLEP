@@ -1406,7 +1406,7 @@ extern int srprintc(char** buffer,size_t* size,const size_t expansion,const char
    va_start(argv, format);
    r = vsnprintf((*buffer)+h, (*size)-h, format, argv);
    va_end(argv);
-   *buffer[(*size)-1]=0;
+   (*buffer)[(*size)-1]=0;
    return(h+r);
 }
 
@@ -1424,7 +1424,7 @@ extern int srprintf(char** buffer,size_t* size,const size_t expansion,const char
    va_start(argv, format);
    r = vsnprintf((*buffer), (*size), format, argv);
    va_end(argv);
-   *buffer[(*size)-1]=0;
+   (*buffer)[(*size)-1]=0;
    return(r);
 }
 
