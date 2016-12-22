@@ -1397,11 +1397,12 @@ extern int srprintc(char** buffer,size_t* size,const size_t expansion,const char
    int      r;
    size_t   h=(*buffer!=NULL)?strlen(*buffer):0;
    size_t   s=h+strlen(format)+expansion+1;
-   if ((*size)<s) {
-      char* b=(char*)realloc(*buffer,2*s);
+   if ((*size)<s || *buffer==NULL) {
+      s=(*size>s)?*size:2*s;
+      char* b=(char*)realloc(*buffer,s);
       if (b==NULL) return(0);
       (*buffer)=b;
-      (*size)=2*s;
+      (*size)=s;
    }
    va_start(argv, format);
    r = vsnprintf((*buffer)+h, (*size)-h, format, argv);
@@ -1415,11 +1416,12 @@ extern int srprintf(char** buffer,size_t* size,const size_t expansion,const char
    va_list  argv;
    int      r;
    size_t   s=strlen(format)+expansion+1;
-   if ((*size)<s) {
-      char* b=(char*)realloc(*buffer,2*s);
+   if ((*size)<s || *buffer==NULL) {
+      s=(*size>s)?*size:2*s;
+      char* b=(char*)realloc(*buffer,s);
       if (b==NULL) return(0);
       (*buffer)=b;
-      (*size)=2*s;
+      (*size)=s;
    }
    va_start(argv, format);
    r = vsnprintf((*buffer), (*size), format, argv);
