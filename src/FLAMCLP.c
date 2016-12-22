@@ -880,7 +880,6 @@ extern int siClpParsePro(
    psHdl->pcOld=pcPro;
    psHdl->pcRow=pcPro;
    psHdl->isChk=isChk;
-   if (ppLst!=NULL) *ppLst=psHdl->pcLst;
    psHdl->siRow=1;
    psHdl->siCol=0;
    psHdl->acLex[0]=EOS;
@@ -898,9 +897,16 @@ extern int siClpParsePro(
          psHdl->acLex[0]=EOS;
          psHdl->isChk=FALSE;
          if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"PROPERTY-PARSER-END(CNT=%d)\n",siCnt);
+         if (ppLst!=NULL) *ppLst=psHdl->pcLst;
          return(siCnt);
-      } else return CLPERR(psHdl,CLPERR_SYN,"Last token (%s) of property list is not EOS",apClpTok[psHdl->siTok]);
-   } else return CLPERR(psHdl,CLPERR_SYN,"Initial token (%s) in handle is not valid",apClpTok[psHdl->siTok]);
+      } else {
+         if (ppLst!=NULL) *ppLst=psHdl->pcLst;
+         return CLPERR(psHdl,CLPERR_SYN,"Last token (%s) of property list is not EOS",apClpTok[psHdl->siTok]);
+      }
+   } else {
+      if (ppLst!=NULL) *ppLst=psHdl->pcLst;
+      return CLPERR(psHdl,CLPERR_SYN,"Initial token (%s) in handle is not valid",apClpTok[psHdl->siTok]);
+   }
 }
 
 extern int siClpParseCmd(
@@ -929,7 +935,6 @@ extern int siClpParseCmd(
    psHdl->pcOld=pcCmd;
    psHdl->pcRow=pcCmd;
    psHdl->isChk=isChk;
-   if (ppLst!=NULL) *ppLst=psHdl->pcLst;
    psHdl->siRow=1;
    psHdl->siCol=0;
    psHdl->acLex[0]=EOS;
@@ -947,9 +952,16 @@ extern int siClpParseCmd(
          psHdl->acLex[0]=EOS;
          psHdl->isChk=FALSE;
          if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"COMMAND-PARSER-END(CNT=%d)\n",siCnt);
+         if (ppLst!=NULL) *ppLst=psHdl->pcLst;
          return(siCnt);
-      } else return CLPERR(psHdl,CLPERR_SYN,"Last token (%s) of parameter list is not EOS",apClpTok[psHdl->siTok]);
-   } else return CLPERR(psHdl,CLPERR_SYN,"Initial token (%s) in handle is not valid",apClpTok[psHdl->siTok]);
+      } else {
+         if (ppLst!=NULL) *ppLst=psHdl->pcLst;
+         return CLPERR(psHdl,CLPERR_SYN,"Last token (%s) of parameter list is not EOS",apClpTok[psHdl->siTok]);
+      }
+   } else {
+      if (ppLst!=NULL) *ppLst=psHdl->pcLst;
+      return CLPERR(psHdl,CLPERR_SYN,"Initial token (%s) in handle is not valid",apClpTok[psHdl->siTok]);
+   }
 }
 
 extern int siClpSyntax(
@@ -3579,7 +3591,7 @@ static int siClpBldPro(
          return CLPERR(psHdl,CLPERR_SEM,"Property path (%s) is not valid",pcPat);
       }
       for (siLev=0,pcPtr=pcPat+l;pcPtr!=NULL && siLev<CLPMAX_HDEPTH && psTab!=NULL;pcPtr=strchr(pcPtr+1,'.'),siLev++) {
-         for (pcKyw=pcPtr+1,i=0;i<CLPMAX_LEXLEN && pcKyw[i]!=EOS && pcKyw[i]!='.';i++) acKyw[i]=pcKyw[i];
+         for (pcKyw=pcPtr+1,i=0;i<CLPMAX_KYWLEN && pcKyw[i]!=EOS && pcKyw[i]!='.';i++) acKyw[i]=pcKyw[i];
          acKyw[i]=EOS;
          siErr=siClpSymFnd(pvHdl,siLev,0,acKyw,psTab,&psArg,NULL);
          if (siErr<0) return(siErr);
