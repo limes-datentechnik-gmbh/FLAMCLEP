@@ -121,13 +121,14 @@
  * 1.1.71: Add CLPPRO_MTD_DOC for property print out
  * 1.1.72: Don't print if print file NULL
  * 1.2.73: Make acLst dynamic (pcLst, introduce srprintc)
- * 1.2.74: Separate CLMAX_KYW/SRCSIZ from CLPMAX_LEXSIZ (introduce srprintf, limit key word length to a maximum of 63)
+ * 1.2.74: Separate CLPMAX_KYW/SRCSIZ from CLPMAX_LEXSIZ (introduce srprintf, limit key word length to a maximum of 63)
+ * 1.2.75: Rename pcSrc in pcInp and make source qualifier dynamic
 **/
 
-#define CLP_VSN_STR       "1.2.74"
+#define CLP_VSN_STR       "1.2.75"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        2
-#define CLP_VSN_REVISION       74
+#define CLP_VSN_REVISION       75
 
 /* Definition der Konstanten ******************************************/
 
@@ -137,8 +138,6 @@
 #define CLPMAX_LEXSIZ            1024
 #define CLPMAX_KYWLEN            63
 #define CLPMAX_KYWSIZ            64
-#define CLPMAX_SRCLEN            1023
-#define CLPMAX_SRCSIZ            1024
 #define CLPMAX_PRELEN            1023
 #define CLPMAX_PRESIZ            1024
 #define CLPMAX_PATLEN            1023
@@ -149,6 +148,7 @@
 #define CLPMAX_LOCLEN            127
 
 #define CLPINI_LSTSIZ            1024
+#define CLPINI_SRCSIZ            128
 
 #define CLPTOK_INI               0
 #define CLPTOK_END               1
@@ -263,7 +263,7 @@ typedef struct Hdl {
    const char*                   pcCmd;
    const char*                   pcMan;
    const char*                   pcHlp;
-   const char*                   pcSrc;
+   const char*                   pcInp;
    const char*                   pcCur;
    const char*                   pcOld;
    const char*                   pcDep;
@@ -277,7 +277,8 @@ typedef struct Hdl {
    int                           isPfl;
    int                           siTok;
    char                          acLex[CLPMAX_LEXSIZ];
-   char                          acSrc[CLPMAX_SRCSIZ];
+   size_t                        uiSsz;
+   char*                         pcSrc;
    TsSym*                        psTab;
    TsSym*                        psSym;
    TsSym*                        psOld;
@@ -662,25 +663,25 @@ static int CLPERR(TsHdl* psHdl,int siErr, char* pcMsg, ...) {
       fprintf(psHdl->pfErr,"%s:\n%s ",pcClpErr(siErr),fpcPre(psHdl,0));
       va_start(argv,pcMsg); vfprintf(psHdl->pfErr,pcMsg,argv); va_end(argv);
       fprintf(psHdl->pfErr,"\n");
-      if (psHdl->pcSrc!=NULL && psHdl->pcRow!=NULL && psHdl->pcOld!=NULL && psHdl->pcCur!=NULL && (psHdl->pcCur>psHdl->pcSrc || psHdl->pcLst!=NULL || psHdl->siRow)) {
-         if (strcmp(psHdl->acSrc,CLPSRC_CMD)==0) {
+      if (psHdl->pcSrc!=NULL && psHdl->pcInp!=NULL && psHdl->pcRow!=NULL && psHdl->pcOld!=NULL && psHdl->pcCur!=NULL && (psHdl->pcCur>psHdl->pcInp || psHdl->pcLst!=NULL || psHdl->siRow)) {
+         if (strcmp(psHdl->pcSrc,CLPSRC_CMD)==0) {
             fprintf(psHdl->pfErr,"%s Cause: Row=%d Column=%d from command line\n",                  fpcPre(psHdl,1),psHdl->siRow,psHdl->siCol);
-         } else if (strcmp(psHdl->acSrc,CLPSRC_PRO)==0) {
+         } else if (strcmp(psHdl->pcSrc,CLPSRC_PRO)==0) {
             fprintf(psHdl->pfErr,"%s Cause: Row=%d Column=%d from property list\n",                 fpcPre(psHdl,1),psHdl->siRow,psHdl->siCol);
-         } else if (strncmp(psHdl->acSrc,CLPSRC_ENV,strlen(CLPSRC_ENV))==0) {
-            fprintf(psHdl->pfErr,"%s Cause: Row=%d Column=%d from environment variable '%s'\n",     fpcPre(psHdl,1),psHdl->siRow,psHdl->siCol,psHdl->acSrc+strlen(CLPSRC_ENV));
-         } else if (strncmp(psHdl->acSrc,CLPSRC_DEF,strlen(CLPSRC_DEF))==0) {
-            fprintf(psHdl->pfErr,"%s Cause: Row=%d Column=%d from default value of argument '%s'\n",fpcPre(psHdl,1),psHdl->siRow,psHdl->siCol,psHdl->acSrc+strlen(CLPSRC_DEF));
-         } else if (strncmp(psHdl->acSrc,CLPSRC_PRF,strlen(CLPSRC_PRF))==0) {
-            fprintf(psHdl->pfErr,"%s Cause: Row=%d Column=%d supplement from property file '%s'\n", fpcPre(psHdl,1),psHdl->siRow,psHdl->siCol,psHdl->acSrc+strlen(CLPSRC_PRF));
-         } else if (strncmp(psHdl->acSrc,CLPSRC_PAF,strlen(CLPSRC_PAF))==0) {
-            fprintf(psHdl->pfErr,"%s Cause: Row=%d Column=%d from parameter file '%s'\n",           fpcPre(psHdl,1),psHdl->siRow,psHdl->siCol,psHdl->acSrc+strlen(CLPSRC_PAF));
-         } else if (strncmp(psHdl->acSrc,CLPSRC_SRF,strlen(CLPSRC_SRF))==0) {
-            fprintf(psHdl->pfErr,"%s Cause: Row=%d Column=%d from string file '%s'\n",              fpcPre(psHdl,1),psHdl->siRow,psHdl->siCol,psHdl->acSrc+strlen(CLPSRC_SRF));
-         } else if (strncmp(psHdl->acSrc,CLPSRC_CMF,strlen(CLPSRC_CMF))==0) {
-            fprintf(psHdl->pfErr,"%s Cause: Row=%d Column=%d from command file '%s'\n",             fpcPre(psHdl,1),psHdl->siRow,psHdl->siCol,psHdl->acSrc+strlen(CLPSRC_CMF));
+         } else if (strncmp(psHdl->pcSrc,CLPSRC_ENV,strlen(CLPSRC_ENV))==0) {
+            fprintf(psHdl->pfErr,"%s Cause: Row=%d Column=%d from environment variable '%s'\n",     fpcPre(psHdl,1),psHdl->siRow,psHdl->siCol,psHdl->pcSrc+strlen(CLPSRC_ENV));
+         } else if (strncmp(psHdl->pcSrc,CLPSRC_DEF,strlen(CLPSRC_DEF))==0) {
+            fprintf(psHdl->pfErr,"%s Cause: Row=%d Column=%d from default value of argument '%s'\n",fpcPre(psHdl,1),psHdl->siRow,psHdl->siCol,psHdl->pcSrc+strlen(CLPSRC_DEF));
+         } else if (strncmp(psHdl->pcSrc,CLPSRC_PRF,strlen(CLPSRC_PRF))==0) {
+            fprintf(psHdl->pfErr,"%s Cause: Row=%d Column=%d supplement from property file '%s'\n", fpcPre(psHdl,1),psHdl->siRow,psHdl->siCol,psHdl->pcSrc+strlen(CLPSRC_PRF));
+         } else if (strncmp(psHdl->pcSrc,CLPSRC_PAF,strlen(CLPSRC_PAF))==0) {
+            fprintf(psHdl->pfErr,"%s Cause: Row=%d Column=%d from parameter file '%s'\n",           fpcPre(psHdl,1),psHdl->siRow,psHdl->siCol,psHdl->pcSrc+strlen(CLPSRC_PAF));
+         } else if (strncmp(psHdl->pcSrc,CLPSRC_SRF,strlen(CLPSRC_SRF))==0) {
+            fprintf(psHdl->pfErr,"%s Cause: Row=%d Column=%d from string file '%s'\n",              fpcPre(psHdl,1),psHdl->siRow,psHdl->siCol,psHdl->pcSrc+strlen(CLPSRC_SRF));
+         } else if (strncmp(psHdl->pcSrc,CLPSRC_CMF,strlen(CLPSRC_CMF))==0) {
+            fprintf(psHdl->pfErr,"%s Cause: Row=%d Column=%d from command file '%s'\n",             fpcPre(psHdl,1),psHdl->siRow,psHdl->siCol,psHdl->pcSrc+strlen(CLPSRC_CMF));
          } else {
-            fprintf(psHdl->pfErr,"%s Cause: Row=%d Column=%d in file '%s'\n",                       fpcPre(psHdl,1),psHdl->siRow,psHdl->siCol,psHdl->acSrc);
+            fprintf(psHdl->pfErr,"%s Cause: Row=%d Column=%d in file '%s'\n",                       fpcPre(psHdl,1),psHdl->siRow,psHdl->siCol,psHdl->pcSrc);
          }
          if (psHdl->pcRow!=NULL) {
             fprintf(psHdl->pfErr,"%s \"",fpcPre(psHdl,1));
@@ -814,10 +815,12 @@ extern void* pvClpOpen(
          psHdl->pcMan=pcMan;
          psHdl->pcHlp=pcHlp;
          psHdl->isOvl=isOvl;
-         psHdl->pcSrc=NULL;
+         psHdl->pcInp=NULL;
          psHdl->pcCur=NULL;
          psHdl->pcOld=NULL;
          psHdl->siTok=CLPTOK_INI;
+         psHdl->uiSsz=CLPINI_SRCSIZ;
+         psHdl->pcSrc=(C08*)calloc(1,psHdl->uiSsz);
          psHdl->uiLsz=CLPINI_LSTSIZ;
          psHdl->pcLst=(C08*)calloc(1,psHdl->uiLsz);
          psHdl->pvDat=pvDat;
@@ -841,7 +844,7 @@ extern void* pvClpOpen(
          vdClpSymTrc(psHdl);
          if (psErr!=NULL) {
             psErr->pcMsg=psHdl->acMsg;
-            psErr->pcSrc=psHdl->acSrc;
+            psErr->pcSrc=psHdl->pcSrc;
             psErr->piRow=&psHdl->siRow;
             psErr->piCol=&psHdl->siCol;
          }
@@ -871,11 +874,11 @@ extern int siClpParsePro(
    if (psHdl->pcLst!=NULL) psHdl->pcLst[0]=0x00;
 
    if (pcSrc!=NULL && *pcSrc) {
-      snprintf(psHdl->acSrc,sizeof(psHdl->acSrc),"%s%s",CLPSRC_PRF,pcSrc);
+      srprintf(&psHdl->pcSrc,&psHdl->uiSsz,strlen(CLPSRC_PRF)+strlen(pcSrc),"%s%s",CLPSRC_PRF,pcSrc);
    } else {
-      snprintf(psHdl->acSrc,sizeof(psHdl->acSrc),"%s",CLPSRC_PRO);
+      srprintf(&psHdl->pcSrc,&psHdl->uiSsz,strlen(CLPSRC_PRO),"%s",CLPSRC_PRO);
    }
-   psHdl->pcSrc=pcPro;
+   psHdl->pcInp=pcPro;
    psHdl->pcCur=pcPro;
    psHdl->pcOld=pcPro;
    psHdl->pcRow=pcPro;
@@ -891,7 +894,7 @@ extern int siClpParsePro(
       if (siCnt<0) return(siCnt);
       if (psHdl->siTok==CLPTOK_END) {
          psHdl->siTok=CLPTOK_INI;
-         psHdl->pcSrc=NULL;
+         psHdl->pcInp=NULL;
          psHdl->pcCur=NULL;
          psHdl->pcOld=NULL;
          psHdl->acLex[0]=EOS;
@@ -926,11 +929,11 @@ extern int siClpParseCmd(
    if (psHdl->pcLst!=NULL) psHdl->pcLst[0]=0x00;
 
    if (pcSrc!=NULL && *pcSrc) {
-      snprintf(psHdl->acSrc,sizeof(psHdl->acSrc),"%s%s",CLPSRC_CMF,pcSrc);
+      srprintf(&psHdl->pcSrc,&psHdl->uiSsz,strlen(CLPSRC_CMF)+strlen(pcSrc),"%s%s",CLPSRC_CMF,pcSrc);
    } else {
-      snprintf(psHdl->acSrc,sizeof(psHdl->acSrc),"%s",CLPSRC_CMD);
+      srprintf(&psHdl->pcSrc,&psHdl->uiSsz,strlen(CLPSRC_CMD),"%s",CLPSRC_CMD);
    }
-   psHdl->pcSrc=pcCmd;
+   psHdl->pcInp=pcCmd;
    psHdl->pcCur=pcCmd;
    psHdl->pcOld=pcCmd;
    psHdl->pcRow=pcCmd;
@@ -946,7 +949,7 @@ extern int siClpParseCmd(
       if (siCnt<0) return (siCnt);
       if (psHdl->siTok==CLPTOK_END) {
          psHdl->siTok=CLPTOK_INI;
-         psHdl->pcSrc=NULL;
+         psHdl->pcInp=NULL;
          psHdl->pcCur=NULL;
          psHdl->pcOld=NULL;
          psHdl->acLex[0]=EOS;
@@ -982,7 +985,7 @@ extern int siClpSyntax(
 
    if (psHdl->pcLst!=NULL) psHdl->pcLst[0]=0x00;
 
-   psHdl->pcSrc=NULL;
+   psHdl->pcInp=NULL;
    psHdl->pcCur=NULL;
    psHdl->pcOld=NULL;
    psHdl->pcRow=NULL;
@@ -992,7 +995,7 @@ extern int siClpSyntax(
    psHdl->acMsg[0]=EOS;
    psHdl->acPat[0]=EOS;
    psHdl->acPre[0]=EOS;
-   strcpy(psHdl->acSrc,":SYNTAX:");
+   srprintf(&psHdl->pcSrc,&psHdl->uiSsz,0,":SYNTAX:");
 
    if (pcPat!=NULL && *pcPat) {
       if (strxcmp(psHdl->isCas,psHdl->pcCmd,pcPat,l,0,FALSE)==0) {
@@ -1040,7 +1043,7 @@ extern const char* pcClpInfo(
 
    if (psHdl->pcLst!=NULL) psHdl->pcLst[0]=0x00;
 
-   psHdl->pcSrc=NULL;
+   psHdl->pcInp=NULL;
    psHdl->pcCur=NULL;
    psHdl->pcOld=NULL;
    psHdl->pcRow=NULL;
@@ -1050,7 +1053,7 @@ extern const char* pcClpInfo(
    psHdl->acMsg[0]=EOS;
    psHdl->acPat[0]=EOS;
    psHdl->acPre[0]=EOS;
-   strcpy(psHdl->acSrc,":INFO:");
+   srprintf(&psHdl->pcSrc,&psHdl->uiSsz,0,":INFO:");
 
    if (pcPat!=NULL && *pcPat) {
       if (strxcmp(psHdl->isCas,psHdl->pcCmd,pcPat,l,0,FALSE)==0) {
@@ -1088,7 +1091,7 @@ extern int siClpHelp(
 
    if (psHdl->pcLst!=NULL) psHdl->pcLst[0]=0x00;
 
-   psHdl->pcSrc=NULL;
+   psHdl->pcInp=NULL;
    psHdl->pcCur=NULL;
    psHdl->pcOld=NULL;
    psHdl->pcRow=NULL;
@@ -1098,7 +1101,7 @@ extern int siClpHelp(
    psHdl->acMsg[0]=EOS;
    psHdl->acPat[0]=EOS;
    psHdl->acPre[0]=EOS;
-   strcpy(psHdl->acSrc,":HELP:");
+   srprintf(&psHdl->pcSrc,&psHdl->uiSsz,0,":HELP:");
 
    if (psHdl->pfHlp!=NULL) {
       if (pcPat!=NULL && *pcPat) {
@@ -1261,7 +1264,7 @@ extern int siClpDocu(
 
    if (psHdl->pcLst!=NULL) psHdl->pcLst[0]=0x00;
 
-   psHdl->pcSrc=NULL;
+   psHdl->pcInp=NULL;
    psHdl->pcCur=NULL;
    psHdl->pcOld=NULL;
    psHdl->pcRow=NULL;
@@ -1271,7 +1274,7 @@ extern int siClpDocu(
    psHdl->acMsg[0]=EOS;
    psHdl->acPat[0]=EOS;
    psHdl->acPre[0]=EOS;
-   strcpy(psHdl->acSrc,":DOCU:");
+   srprintf(&psHdl->pcSrc,&psHdl->uiSsz,0,":DOCU:");
 
    if (pcNum!=NULL && strlen(pcNum)<100 && pcCmd!=NULL) {
       if (pfDoc!=NULL) {
@@ -1559,7 +1562,7 @@ extern int siClpProperties(
 
    if (psHdl->pcLst!=NULL) psHdl->pcLst[0]=0x00;
 
-   psHdl->pcSrc=NULL;
+   psHdl->pcInp=NULL;
    psHdl->pcCur=NULL;
    psHdl->pcOld=NULL;
    psHdl->pcRow=NULL;
@@ -1569,7 +1572,7 @@ extern int siClpProperties(
    psHdl->acMsg[0]=EOS;
    psHdl->acPat[0]=EOS;
    psHdl->acPre[0]=EOS;
-   strcpy(psHdl->acSrc,":PROPERTIES:");
+   srprintf(&psHdl->pcSrc,&psHdl->uiSsz,0,":PROPERTIES:");
 
    if (pfOut==NULL) pfOut=psHdl->pfHlp;
    if (pfOut!=NULL) {
@@ -1709,6 +1712,11 @@ extern void vdClpClose(
 {
    if (pvHdl!=NULL) {
       TsHdl*                     psHdl=(TsHdl*)pvHdl;
+      if (psHdl->pcSrc!=NULL) {
+         free(psHdl->pcSrc);
+         psHdl->pcSrc=NULL;
+         psHdl->uiSsz=0;
+      }
       if (psHdl->pcLst!=NULL) {
          free(psHdl->pcLst);
          psHdl->pcLst=NULL;
@@ -3175,12 +3183,12 @@ static int siClpPrsFil(
    TsSym*                        psArg)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
-   char                          acSrc[CLPMAX_SRCSIZ];
-   char                          acFil[CLPMAX_SRCSIZ];
+   char                          acSrc[strlen(psHdl->pcSrc)+1];
+   char                          acFil[L_filnam]={0};
    char*                         pcPar=NULL;
    int                           siRow,siCnt,siErr,siSiz=0;
    const char*                   pcCur;
-   const char*                   pcSrc;
+   const char*                   pcInp;
    const char*                   pcOld;
    const char*                   pcRow;
 
@@ -3205,10 +3213,10 @@ static int siClpPrsFil(
    }
 
    if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"PARAMETER-FILE-PARSER-BEGIN(FILE=%s)\n",acFil);
-   snprintf(acSrc,sizeof(acSrc),"%s",psHdl->acSrc);
-   snprintf(psHdl->acSrc,sizeof(psHdl->acSrc),"%s%s",CLPSRC_PAF,acFil);
+   strcpy(acSrc,psHdl->pcSrc);
+   srprintf(&psHdl->pcSrc,&psHdl->uiSsz,strlen(CLPSRC_PAF)+strlen(acFil),"%s%s",CLPSRC_PAF,acFil);
    pcCur=psHdl->pcCur; psHdl->pcCur=pcPar;
-   pcSrc=psHdl->pcSrc; psHdl->pcSrc=pcPar;
+   pcInp=psHdl->pcInp; psHdl->pcInp=pcPar;
    pcOld=psHdl->pcOld; psHdl->pcOld=pcPar;
    pcRow=psHdl->pcRow; psHdl->pcRow=pcPar;
    siRow=psHdl->siRow; psHdl->siRow=1;
@@ -3252,8 +3260,8 @@ static int siClpPrsFil(
    if (pcPar!=NULL) free(pcPar);
    if (psHdl->siTok==CLPTOK_END) {
       psHdl->acLex[0]=EOS;
-      snprintf(psHdl->acSrc,sizeof(psHdl->acSrc),"%s",acSrc);
-      psHdl->pcCur=pcCur; psHdl->pcSrc=pcSrc; psHdl->pcOld=pcOld; psHdl->pcRow=pcRow; psHdl->siRow=siRow;
+      strcpy(psHdl->pcSrc,acSrc);
+      psHdl->pcCur=pcCur; psHdl->pcInp=pcInp; psHdl->pcOld=pcOld; psHdl->pcRow=pcRow; psHdl->siRow=siRow;
       if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"PARAMETER-FILE-PARSER-END(FILE=%s CNT=%d)\n",acFil,siCnt);
       psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
       if (psHdl->siTok<0) return(psHdl->siTok);
@@ -3607,12 +3615,12 @@ static int siClpBldPro(
             psArg->psFix->pcPro=pcHlp;
             strcpy(psArg->psFix->pcPro,pcPro);
             psArg->psFix->pcDft=psArg->psFix->pcPro;
-            pcHlp=realloc(psArg->psFix->pcSrc,strlen(psHdl->acSrc)+1);
+            pcHlp=realloc(psArg->psFix->pcSrc,strlen(psHdl->pcSrc)+1);
             if (pcHlp==NULL) {
-               return CLPERR(psHdl,CLPERR_SIZ,"Build of source field failed (string (%d(%s)) too long)",(int)strlen(psHdl->acSrc),psHdl->acSrc);
+               return CLPERR(psHdl,CLPERR_SIZ,"Build of source field failed (string (%d(%s)) too long)",(int)strlen(psHdl->pcSrc),psHdl->pcSrc);
             }
             psArg->psFix->pcSrc=pcHlp;
-            strcpy(psArg->psFix->pcSrc,psHdl->acSrc);
+            strcpy(psArg->psFix->pcSrc,psHdl->pcSrc);
             psArg->psFix->siRow=siRow;
             srprintc(&psHdl->pcLst,&psHdl->uiLsz,strlen(pcPat)+strlen(isPrnLex2(psArg,pcPro)),"%s=\"%s\"\n",pcPat,isPrnLex2(psArg,pcPro));
             if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"BUILD-PROPERTY %s=\"%s\"\n",pcPat,isPrnStr(psArg,pcPro));
@@ -4061,12 +4069,12 @@ static int siClpBldLit(
          int                           siSiz=0;
          char*                         pcDat=NULL;
          const char*                   pcCur;
-         const char*                   pcSrc;
+         const char*                   pcInp;
          const char*                   pcOld;
          const char*                   pcRow;
-         char                          acSrc[CLPMAX_SRCSIZ]={0};
+         char                          acSrc[strlen(psHdl->pcSrc)+1];
          char                          acLex[CLPMAX_LEXSIZ]={0};//TODO:
-         char                          acFil[CLPMAX_SRCSIZ]={0};
+         char                          acFil[L_filnam]={0};
          siErr=file2str(cpmapfil(acFil,sizeof(acFil),pcVal+2),&pcDat,&siSiz,filemode("r"));
          if (siErr<0) {
             switch(siErr) {
@@ -4081,10 +4089,10 @@ static int siClpBldLit(
             return(siErr);
          }
          if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"STRING-FILE-BEGIN(%s)\n",acFil);
-         snprintf(acSrc,sizeof(acSrc),"%s",psHdl->acSrc);
-         snprintf(psHdl->acSrc,sizeof(psHdl->acSrc),"%s%s",CLPSRC_SRF,acFil);
+         strcpy(acSrc,psHdl->pcSrc);
+         srprintf(&psHdl->pcSrc,&psHdl->uiSsz,strlen(CLPSRC_SRF)+strlen(acFil),"%s%s",CLPSRC_SRF,acFil);
          pcCur=psHdl->pcCur; psHdl->pcCur=pcDat;
-         pcSrc=psHdl->pcSrc; psHdl->pcSrc=pcDat;
+         pcInp=psHdl->pcInp; psHdl->pcInp=pcDat;
          pcOld=psHdl->pcOld; psHdl->pcOld=pcDat;
          pcRow=psHdl->pcRow; psHdl->pcRow=pcDat;
          siRow=psHdl->siRow; psHdl->siRow=1;
@@ -4101,8 +4109,8 @@ static int siClpBldLit(
             return(siErr);
          }
          siErr=siClpBldLit(pvHdl,siLev,siPos,siTyp,psArg,acLex);
-         snprintf(psHdl->acSrc,sizeof(psHdl->acSrc),"%s",acSrc);
-         psHdl->pcCur=pcCur; psHdl->pcSrc=pcSrc; psHdl->pcOld=pcOld; psHdl->pcRow=pcRow; psHdl->siRow=siRow;
+         strcpy(psHdl->pcSrc,acSrc);
+         psHdl->pcCur=pcCur; psHdl->pcInp=pcInp; psHdl->pcOld=pcOld; psHdl->pcRow=pcRow; psHdl->siRow=siRow;
          if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"STRING-FILE-END(%s)\n",acFil);
          free(pcDat);
          return(siErr);
@@ -4873,19 +4881,19 @@ static int siClpSetDefault(
    TsSym*                        psDep=NULL;
    TsVar                         asSav[CLPMAX_TABCNT];
    char                          acLex[CLPMAX_LEXSIZ];//TODO:
-   char                          acSrc[CLPMAX_SRCSIZ];
+   char                          acSrc[strlen(psHdl->pcSrc)+1];
    int                           siErr,siInd,siTok,siRow;
    const char*                   pcCur;
-   const char*                   pcSrc;
+   const char*                   pcInp;
    const char*                   pcOld;
    const char*                   pcRow;
 
    if (CLPISF_ARG(psArg->psStd->uiFlg) && psArg->psVar->siCnt==0 && psArg->psFix->pcDft!=NULL && strlen(psArg->psFix->pcDft)) {
       if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"SUPPLEMENT-LIST-PARSER-BEGIN(%s.%s=%s)\n",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,psArg->psFix->pcDft);
-      snprintf(acSrc,sizeof(acSrc),"%s",psHdl->acSrc);
-      snprintf(psHdl->acSrc,sizeof(psHdl->acSrc),"%s",psArg->psFix->pcSrc);
+      strcpy(acSrc,psHdl->pcSrc);
+      srprintf(&psHdl->pcSrc,&psHdl->uiSsz,strlen(psArg->psFix->pcSrc),"%s",psArg->psFix->pcSrc);
       pcCur=psHdl->pcCur; psHdl->pcCur=psArg->psFix->pcDft;
-      pcSrc=psHdl->pcSrc; psHdl->pcSrc=psArg->psFix->pcDft;
+      pcInp=psHdl->pcInp; psHdl->pcInp=psArg->psFix->pcDft;
       pcOld=psHdl->pcOld; psHdl->pcOld=psArg->psFix->pcDft;
       pcRow=psHdl->pcRow; psHdl->pcRow=psArg->psFix->pcDft;
       siRow=psHdl->siRow; psHdl->siRow=psArg->psFix->siRow;
@@ -4949,8 +4957,8 @@ static int siClpSetDefault(
             }
          }
       }
-      snprintf(psHdl->acSrc,sizeof(psHdl->acSrc),"%s",acSrc);
-      psHdl->pcCur=pcCur; psHdl->pcSrc=pcSrc; psHdl->pcOld=pcOld; psHdl->pcRow=pcRow; psHdl->siRow=siRow;
+      strcpy(psHdl->pcSrc,acSrc);
+      psHdl->pcCur=pcCur; psHdl->pcInp=pcInp; psHdl->pcOld=pcOld; psHdl->pcRow=pcRow; psHdl->siRow=siRow;
       if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"SUPPLEMENT-LIST-PARSER-END(%s.%s=%s)\n",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,psArg->psFix->pcDft);
    }
    return(CLP_OK);
