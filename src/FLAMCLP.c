@@ -1261,8 +1261,7 @@ extern int siClpDocu(
    int                           siErr=0,siLev,siPos,i;
    const char*                   pcSta=(pcHdl!=NULL&&*pcHdl)?pcHdl:psHdl->pcCmd;
    int                           l=strlen(psHdl->pcCmd);
-   char                          acNum[CLPMAX_PRESIZ];
-   char                          acHlp[CLPMAX_PRESIZ];
+   char                          acNum[strlen(pcNum)+10];
    char                          acArg[20];
    const char*                   p;
 
@@ -1296,8 +1295,7 @@ extern int siClpDocu(
                      if (siErr<0) return(siErr);
                      psHdl->apPat[siLev]=psArg;
                      psTab=psArg->psDep;
-                     snprintf(acHlp,sizeof(acHlp),"%s%d.",acNum,siPos+1);
-                     snprintf(acNum,sizeof(acNum),"%s",acHlp);
+                     snprintc(acNum,sizeof(acNum),"%d.",siPos+1);
                   }
                   if (psArg!=NULL) {
                      if (CLPISF_ARG(psArg->psStd->uiFlg)) {
@@ -5700,7 +5698,7 @@ static int siClpPrnDoc(
    const TsSym*                  psSel;
    int                           siErr,isCon;
    int                           i,k,l,m;
-   char                          acNum[CLPMAX_PRESIZ];
+   char                          acNum[strlen(pcNum)+10];
    char                          acArg[20];
    int                           siMan=0;
    int                           siLst=0;
