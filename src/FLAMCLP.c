@@ -125,12 +125,13 @@
  * 1.2.75: Rename pcSrc in pcInp and make source qualifier dynamic
  * 1.2.76: Make lexem dynamic in length
  * 1.2.77: Make prefix and path dynamic in length
+ * 1.2.78: Make message dynamic in length
 **/
 
-#define CLP_VSN_STR       "1.2.77"
+#define CLP_VSN_STR       "1.2.78"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        2
-#define CLP_VSN_REVISION       77
+#define CLP_VSN_REVISION       78
 
 /* Definition der Konstanten ******************************************/
 
@@ -138,16 +139,15 @@
 #define CLPMAX_HDEPTH            128
 #define CLPMAX_KYWLEN            63
 #define CLPMAX_KYWSIZ            64
-#define CLPMAX_MSGLEN            1023
-#define CLPMAX_MSGSIZ            1024
 #define CLPMAX_LOCSIZ            128
 #define CLPMAX_LOCLEN            127
 
 #define CLPINI_LEXSIZ            1024
 #define CLPINI_LSTSIZ            1024
-#define CLPINI_SRCSIZ            128
-#define CLPINI_PRESIZ            128
-#define CLPINI_PATSIZ            128
+#define CLPINI_SRCSIZ            1024
+#define CLPINI_MSGSIZ            1024
+#define CLPINI_PRESIZ            1024
+#define CLPINI_PATSIZ            1024
 
 #define CLPTOK_INI               0
 #define CLPTOK_END               1
@@ -290,7 +290,8 @@ typedef struct Hdl {
    FILE*                         pfPrs;
    FILE*                         pfBld;
    const TsSym*                  apPat[CLPMAX_HDEPTH];
-   char                          acMsg[CLPMAX_MSGSIZ];
+   size_t                        szMsg;
+   char*                         pcMsg;
    size_t                        szPre;
    char*                         pcPre;
    size_t                        szPat;
@@ -657,16 +658,18 @@ static char* fpcPat(
 
 static int CLPERR(TsHdl* psHdl,int siErr, char* pcMsg, ...) {
    const char*          p;
-   int                  i,l,f=FALSE;
    va_list              argv;
+   int                  i,l,f=FALSE;
+   const char*          pcErr=pcClpErr(siErr);
+   char                 acMsg[1024];
+   va_start(argv,pcMsg); vsnprintf(acMsg,sizeof(acMsg),pcMsg,argv); va_end(argv);
+   srprintf(&psHdl->pcMsg,&psHdl->szMsg,strlen(pcErr)+strlen(acMsg),"%s: %s",pcErr,acMsg);
    psHdl->siErr=siErr;
    if (psHdl->pcRow!=NULL && psHdl->pcOld>=psHdl->pcRow) {
       psHdl->siCol=(int)((psHdl->pcOld-psHdl->pcRow)+1);
    } else psHdl->siCol=0;
    if (psHdl->pfErr!=NULL) {
-      fprintf(psHdl->pfErr,"%s:\n%s ",pcClpErr(siErr),fpcPre(psHdl,0));
-      va_start(argv,pcMsg); vfprintf(psHdl->pfErr,pcMsg,argv); va_end(argv);
-      fprintf(psHdl->pfErr,"\n");
+      fprintf(psHdl->pfErr,"%s:\n%s %s\n",pcErr,fpcPre(psHdl,0),acMsg);
       if (psHdl->pcSrc!=NULL && psHdl->pcInp!=NULL && psHdl->pcRow!=NULL && psHdl->pcOld!=NULL && psHdl->pcCur!=NULL && (psHdl->pcCur>psHdl->pcInp || psHdl->pcLst!=NULL || psHdl->siRow)) {
          if (strcmp(psHdl->pcSrc,CLPSRC_CMD)==0) {
             fprintf(psHdl->pfErr,"%s Cause: Row=%d Column=%d from command line\n",                  fpcPre(psHdl,1),psHdl->siRow,psHdl->siCol);
@@ -723,12 +726,6 @@ static int CLPERR(TsHdl* psHdl,int siErr, char* pcMsg, ...) {
             fprintf(psHdl->pfErr,"\n");
          } else fprintf(psHdl->pfErr,"%s Something is wrong with the first argument\n",fpcPre(psHdl,0));
       }
-   }
-   l=snprintf(psHdl->acMsg,sizeof(psHdl->acMsg),"%s: ",pcClpErr(siErr));
-   if (l>0) {
-      va_start(argv,pcMsg); vsnprintf(psHdl->acMsg+l,CLPMAX_MSGLEN-(l+1),pcMsg,argv); va_end(argv);
-   } else {
-      snprintf(psHdl->acMsg,sizeof(psHdl->acMsg),"%s",pcClpError(siErr));
    }
    return(siErr);
 }
@@ -833,6 +830,8 @@ extern void* pvClpOpen(
          psHdl->pcPat=(C08*)calloc(1,psHdl->szPat);
          psHdl->szLst=CLPINI_LSTSIZ;
          psHdl->pcLst=(C08*)calloc(1,psHdl->szLst);
+         psHdl->szMsg=CLPINI_MSGSIZ;
+         psHdl->pcMsg=(C08*)calloc(1,psHdl->szMsg);
          psHdl->pvDat=pvDat;
          psHdl->psTab=NULL;
          psHdl->psSym=NULL;
@@ -853,8 +852,8 @@ extern void* pvClpOpen(
          if (siErr<0) { vdClpSymDel(psHdl->psTab); free(psHdl); return(NULL); }
          vdClpSymTrc(psHdl);
          if (psErr!=NULL) {
-            psErr->pcMsg=psHdl->acMsg;
-            psErr->pcSrc=psHdl->pcSrc;
+            psErr->ppMsg=(const char**)&psHdl->pcMsg;
+            psErr->ppSrc=(const char**)&psHdl->pcSrc;
             psErr->piRow=&psHdl->siRow;
             psErr->piCol=&psHdl->siCol;
          }
@@ -1002,7 +1001,7 @@ extern int siClpSyntax(
    psHdl->siCol=0;
    psHdl->siRow=0;
    psHdl->pcLex[0]=EOS;
-   psHdl->acMsg[0]=EOS;
+   psHdl->pcMsg[0]=EOS;
    psHdl->pcPat[0]=EOS;
    psHdl->pcPre[0]=EOS;
    srprintf(&psHdl->pcSrc,&psHdl->szSrc,0,":SYNTAX:");
@@ -1060,7 +1059,7 @@ extern const char* pcClpInfo(
    psHdl->siCol=0;
    psHdl->siRow=0;
    psHdl->pcLex[0]=EOS;
-   psHdl->acMsg[0]=EOS;
+   psHdl->pcMsg[0]=EOS;
    psHdl->pcPat[0]=EOS;
    psHdl->pcPre[0]=EOS;
    srprintf(&psHdl->pcSrc,&psHdl->szSrc,0,":INFO:");
@@ -1108,7 +1107,7 @@ extern int siClpHelp(
    psHdl->siCol=0;
    psHdl->siRow=0;
    psHdl->pcLex[0]=EOS;
-   psHdl->acMsg[0]=EOS;
+   psHdl->pcMsg[0]=EOS;
    psHdl->pcPat[0]=EOS;
    psHdl->pcPre[0]=EOS;
    srprintf(&psHdl->pcSrc,&psHdl->szSrc,0,":HELP:");
@@ -1280,7 +1279,7 @@ extern int siClpDocu(
    psHdl->siCol=0;
    psHdl->siRow=0;
    psHdl->pcLex[0]=EOS;
-   psHdl->acMsg[0]=EOS;
+   psHdl->pcMsg[0]=EOS;
    psHdl->pcPat[0]=EOS;
    psHdl->pcPre[0]=EOS;
    srprintf(&psHdl->pcSrc,&psHdl->szSrc,0,":DOCU:");
@@ -1577,7 +1576,7 @@ extern int siClpProperties(
    psHdl->siCol=0;
    psHdl->siRow=0;
    psHdl->pcLex[0]=EOS;
-   psHdl->acMsg[0]=EOS;
+   psHdl->pcMsg[0]=EOS;
    psHdl->pcPat[0]=EOS;
    psHdl->pcPre[0]=EOS;
    srprintf(&psHdl->pcSrc,&psHdl->szSrc,0,":PROPERTIES:");
@@ -1742,6 +1741,11 @@ extern void vdClpClose(
          free(psHdl->pcLst);
          psHdl->pcLst=NULL;
          psHdl->szLst=0;
+      }
+      if (psHdl->pcMsg!=NULL) {
+         free(psHdl->pcMsg);
+         psHdl->pcMsg=NULL;
+         psHdl->szMsg=0;
       }
       setlocale(LC_NUMERIC, psHdl->acLoc);
       vdClpSymDel(psHdl->psTab);

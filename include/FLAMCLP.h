@@ -836,16 +836,16 @@ typedef struct ClpArgument {
  *  The pointers are set by CLP and valid until CLP is closed.
  */
 typedef struct ClpError {
-   /** Points to a zero-terminated string containing the current error message */
-   const char*                   pcMsg;
-   /** Points to a zero-terminated string containing the current source.
+   /** Points to the pointer of a zero-terminated string containing the current error message */
+   const char**                  ppMsg;
+   /** Points to the pointer of a zero-terminated string containing the current source.
     * The initial source can be defined for command line or property file parsing.
     * If the initial source is not defined the constant definitions below are used:
     * * for command line parsing    ":command line:"   see CLPSRC_CMD
     * * for property string parsing ":property list:"  see CLPSRC_PRO
     *
     * If a parameter file assigned and cause of the error *pcSrc* points to this file name*/
-   const char*                   pcSrc;
+   const char**                  ppSrc;
    /** Points to an integer containing the current row for the error in *pcSrc* */
    const int*                    piRow;
    /** Points to an integer containing the current column for the error in *pcSrc* */

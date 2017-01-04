@@ -119,11 +119,12 @@
  * 1.1.52: Improve help output (print help message for path)
  * 1.1.53: Fix typo by generating of indexterm
  * 1.1.54: Redesign appendix properties
+ * 1.2.55: Make error message and source variable in length
  */
-#define CLE_VSN_STR       "1.1.54"
+#define CLE_VSN_STR       "1.1.55"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        1
-#define CLE_VSN_REVISION       54
+#define CLE_VSN_REVISION       55
 
 /* Definition der Konstanten ******************************************/
 #define CLEMAX_CNFLEN            1023
@@ -3221,8 +3222,8 @@ extern int siCleParseString(
             "CLP-ERROR   : %d - %s\n"
             "CLP-MESSAGE : %s\n"
             "CLP-SOURCE  : %s (ROW: %d COL: %d)\n",
-            pcCmd,pcStr,siErr,pcClpError(siErr),stErr.pcMsg,
-            stErr.pcSrc,*stErr.piRow,*stErr.piCol);
+            pcCmd,pcStr,siErr,pcClpError(siErr),
+            *stErr.ppMsg,*stErr.ppSrc,*stErr.piRow,*stErr.piCol);
       if (pfTmp!=NULL) {rewind(pfTmp); fread(acBuffer+strlen(acBuffer),1,sizeof(acBuffer)-(strlen(acBuffer)+1),pfTmp); fclose(pfTmp);}
       vdClpClose(pvHdl);
       return siErr;
