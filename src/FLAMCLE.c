@@ -121,23 +121,28 @@
  * 1.1.54: Redesign appendix properties
  * 1.2.55: Make error message and source variable in length
  * 1.2.56: Make root and property variable in length
+ * 1.2.57: Separate acNum (number) and acHdl (head line)
  */
-#define CLE_VSN_STR       "1.2.56"
+#define CLE_VSN_STR       "1.2.57"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        2
-#define CLE_VSN_REVISION       56
+#define CLE_VSN_REVISION       57
 
 /* Definition der Konstanten ******************************************/
 #define CLEMAX_CNFLEN            1023
 #define CLEMAX_CNFSIZ            1024
+#define CLEMAX_PGMLEN            CLEMAX_CNFLEN
+#define CLEMAX_PGMSIZ            CLEMAX_CNFSIZ
 #define CLEMAX_FILLEN            1023
 #define CLEMAX_FILSIZ            1024
 #define CLEMAX_MODLEN            63
 #define CLEMAX_MODSIZ            64
-#define CLEMAX_PGMLEN            63
-#define CLEMAX_PGMSIZ            64
-#define CLEMAX_NUMLEN            1023
-#define CLEMAX_NUMSIZ            1024
+#define CLEMAX_OWNLEN            63
+#define CLEMAX_OWNSIZ            64
+#define CLEMAX_NUMLEN            15
+#define CLEMAX_NUMSIZ            16
+#define CLEMAX_HDLLEN            1023
+#define CLEMAX_HDLSIZ            1024
 
 #define CLEINI_PROSIZ            1024
 
@@ -156,7 +161,7 @@ typedef struct CnfHdl {
    int                           isCas;
    char                          acFil[CLEMAX_CNFSIZ];
    char                          acMod[CLEMAX_MODSIZ];
-   char                          acPgm[CLEMAX_CNFSIZ];
+   char                          acPgm[CLEMAX_PGMSIZ];
    TsCnfEnt*                     psFst;
    TsCnfEnt*                     psLst;
 }TsCnfHdl;
@@ -449,12 +454,13 @@ extern int siCleExecute(
    char*                         pcCnf;
    const char*                   pcMsg;
    char                          acCnf[CLEMAX_CNFSIZ];
-   char                          acOwn[CLEMAX_CNFSIZ];
+   char                          acOwn[CLEMAX_OWNSIZ];
    char                          acPgm[CLEMAX_PGMSIZ];
    FILE*                         pfTrh=NULL;
    FILE*                         pfTmp=NULL;
    void*                         pvHdl=NULL;
    char                          acNum[CLEMAX_NUMSIZ];
+   char                          acHdl[CLEMAX_HDLSIZ];
    FILE*                         pfDoc=NULL;
    FILE*                         pfPro=NULL;
    char**                        ppArg=NULL;
@@ -1228,7 +1234,7 @@ EVALUATE:
             if (pcCov!=NULL && *pcCov) {
                fprintm(pfDoc,pcOwn,pcPgm,pcCov,2);
             } else {
-               snprintf(acNum,sizeof(acNum),"'%s' - User Manual",acPgm); l=strlen(acNum); fprintf(pfDoc,"%s\n",acNum);
+               snprintf(acHdl,sizeof(acHdl),"'%s' - User Manual",acPgm); l=strlen(acHdl); fprintf(pfDoc,"%s\n",acHdl);
                for (i=0;i<l;i++) fprintf(pfDoc,"=");
                fprintf(pfDoc,"\n");
                fprintf(pfDoc,":doctype: book\n\n");
@@ -1247,11 +1253,11 @@ EVALUATE:
             vdCleManProgram(pfDoc,psTab,acOwn,pcPgm,pcHlp,pcMan,pcDep,pcOpt,FALSE,isNbr);
 
             if (isNbr) {
-               snprintf(acNum,sizeof(acNum),"3. Available commands"); l=strlen(acNum); fprintf(pfDoc,"%s\n",acNum);
+               snprintf(acHdl,sizeof(acHdl),"3. Available commands"); l=strlen(acHdl); fprintf(pfDoc,"%s\n",acHdl);
                for (i=0;i<l;i++) fprintf(pfDoc,"-");
                fprintf(pfDoc,"\n\n");
             } else {
-               snprintf(acNum,sizeof(acNum),"Available commands"); l=strlen(acNum); fprintf(pfDoc,"%s\n",acNum);
+               snprintf(acHdl,sizeof(acHdl),"Available commands"); l=strlen(acHdl); fprintf(pfDoc,"%s\n",acHdl);
                for (i=0;i<l;i++) fprintf(pfDoc,"-");
                fprintf(pfDoc,"\n\n");
             }
@@ -1274,11 +1280,11 @@ EVALUATE:
             }
 
             if (isNbr) {
-               snprintf(acNum,sizeof(acNum),"4. Available built-in functions"); l=strlen(acNum); fprintf(pfDoc,"%s\n",acNum);
+               snprintf(acHdl,sizeof(acHdl),"4. Available built-in functions"); l=strlen(acHdl); fprintf(pfDoc,"%s\n",acHdl);
                for (i=0;i<l;i++) fprintf(pfDoc,"-");
                fprintf(pfDoc,"\n\n");
             } else {
-               snprintf(acNum,sizeof(acNum),"Available built-in functions"); l=strlen(acNum); fprintf(pfDoc,"%s\n",acNum);
+               snprintf(acHdl,sizeof(acHdl),"Available built-in functions"); l=strlen(acHdl); fprintf(pfDoc,"%s\n",acHdl);
                for (i=0;i<l;i++) fprintf(pfDoc,"-");
                fprintf(pfDoc,"\n\n");
             }
@@ -2708,7 +2714,7 @@ static void vdPrnCommandManpage(
    const int               isMan,
    const int               isNbr)
 {
-   char                    acNum[16];
+   char                    acNum[CLEMAX_NUMSIZ];
    snprintf(acNum,sizeof(acNum),"3.%d.",siInd+1);
    siClpDocu(pvHdl,pfOut,pcCmd,NULL,acNum,"COMMAND",FALSE,isMan,isNbr);
 }
