@@ -126,12 +126,13 @@
  * 1.2.76: Make lexem dynamic in length
  * 1.2.77: Make prefix and path dynamic in length
  * 1.2.78: Make message dynamic in length
+ * 1.2.79: Add parameter file support for arrays
 **/
 
-#define CLP_VSN_STR       "1.2.78"
+#define CLP_VSN_STR       "1.2.79"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        2
-#define CLP_VSN_REVISION       78
+#define CLP_VSN_REVISION       79
 
 /* Definition der Konstanten ******************************************/
 
@@ -403,6 +404,7 @@ static int siClpPrsFil(
    void*                         pvHdl,
    const int                     siLev,
    const int                     siPos,
+   const int                     isAry,
    TsSym*                        psArg);
 
 static int siClpPrsObjWob(
@@ -2503,6 +2505,7 @@ extern int siClpLexem(
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," SUPPLEMENT     '\"' [:print:]* '\"' |   (null-terminated string (properties))\n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"           Supplements can contain two \"\" to represent one \"                \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"           Supplements can also be enclosed in ' or %c instead of \"          \n",ALTCHR);
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"           Supplements can also be enclosed in ' or %c instead of \"          \n",ALTCHR);
    }
    return(CLP_OK);
 }
@@ -3104,6 +3107,9 @@ extern int siClpGrammar(
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," array          -> KEYWORD '[' value_list   ']'                   \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  KEYWORD '[' object_list  ']'                   \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  KEYWORD '[' overlay_list ']'                   \n");
+   if (psHdl->isPfl) {
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  KEYWORD '[=' STRING ']' # parameter file #     \n");
+   }
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," value_list     -> value SEP value_list                           \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  EMPTY                                          \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," object_list    -> object SEP object_list                         \n");
@@ -3162,7 +3168,7 @@ static int siClpPrsPar(
       if (psHdl->siTok<0) return(psHdl->siTok);
       if (psHdl->siTok==CLPTOK_SGN) {
          if (psHdl->isPfl && (psArg->psFix->siTyp==CLPTYP_OBJECT || psArg->psFix->siTyp==CLPTYP_OVRLAY)) {
-            return(siClpPrsFil(pvHdl,siLev,siPos,psArg));
+            return(siClpPrsFil(pvHdl,siLev,siPos,FALSE,psArg));
          } else {
             return(siClpPrsSgn(pvHdl,siLev,siPos,psArg));
          }
@@ -3238,6 +3244,7 @@ static int siClpPrsFil(
    void*                         pvHdl,
    const int                     siLev,
    const int                     siPos,
+   const int                     isAry,
    TsSym*                        psArg)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
@@ -3254,7 +3261,7 @@ static int siClpPrsFil(
    psHdl->siTok=siClpScnSrc(pvHdl,CLPTOK_STR,psArg);
    if (psHdl->siTok<0) return(psHdl->siTok);
    if (psHdl->siTok!=CLPTOK_STR) {
-      return CLPERR(psHdl,CLPERR_SYN,"After object/overlay assignment '%s.%s=' parameter file ('filename') expected",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+      return CLPERR(psHdl,CLPERR_SYN,"After object/overlay/array assignment '%s.%s=' parameter file ('filename') expected",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
    }
    siErr=file2str(cpmapfil(acFil,sizeof(acFil),psHdl->pcLex+2),&pcPar,&siSiz,filemode("r"));
    if (siErr<0) {
@@ -3278,54 +3285,77 @@ static int siClpPrsFil(
    pcOld=psHdl->pcOld; psHdl->pcOld=pcPar;
    pcRow=psHdl->pcRow; psHdl->pcRow=pcPar;
    siRow=psHdl->siRow; psHdl->siRow=1;
-   psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
+   psHdl->siTok=(psArg->psFix->siTyp==CLPTYP_STRING)?siClpScnSrc(pvHdl,CLPTOK_STR,psArg):(psArg->psFix->siTyp==CLPTYP_FLOATN)?siClpScnSrc(pvHdl,CLPTOK_FLT,psArg):siClpScnSrc(pvHdl,0,psArg);
    if (psHdl->siTok<0) {
       if (pcPar!=NULL) free(pcPar);
       return(psHdl->siTok);
    }
-   if (psHdl->siTok==CLPTOK_RBO) {
-      siCnt=siClpPrsObj(pvHdl,siLev,siPos,psArg);
+   if (isAry) {
+      switch (psArg->psFix->siTyp) {
+      case CLPTYP_NUMBER: siCnt=siClpPrsValLst(pvHdl,siLev,CLPTOK_NUM,psArg->psFix->siTyp,psArg); break;
+      case CLPTYP_FLOATN: siCnt=siClpPrsValLst(pvHdl,siLev,CLPTOK_FLT,psArg->psFix->siTyp,psArg); break;
+      case CLPTYP_STRING: siCnt=siClpPrsValLst(pvHdl,siLev,CLPTOK_STR,psArg->psFix->siTyp,psArg); break;
+      case CLPTYP_OBJECT: siCnt=siClpPrsObjLst(pvHdl,siLev,psArg); break;
+      case CLPTYP_OVRLAY: siCnt=siClpPrsOvlLst(pvHdl,siLev,psArg); break;
+      default:
+         return CLPERR(psHdl,CLPERR_SEM,"Type (%d) of parameter '%s.%s' is not supported with arrays",psArg->psFix->siTyp,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+      }
       if (siCnt<0) {
          if (pcPar!=NULL) free(pcPar);
          return(siCnt);
       }
-   } else if (psHdl->siTok==CLPTOK_DOT) {
       psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
       if (psHdl->siTok<0) {
          if (pcPar!=NULL) free(pcPar);
          return(psHdl->siTok);
       }
-      siCnt=siClpPrsOvl(pvHdl,siLev,siPos,psArg);
-      if (siCnt<0) {
-         if (pcPar!=NULL) free(pcPar);
-         return(siCnt);
-      }
    } else {
-      if (psArg->psFix->siTyp==CLPTYP_OBJECT) {
-         siCnt=siClpPrsObjWob(pvHdl,siLev,siPos,psArg);
+      if (psHdl->siTok==CLPTOK_RBO) {
+         siCnt=siClpPrsObj(pvHdl,siLev,siPos,psArg);
          if (siCnt<0) {
             if (pcPar!=NULL) free(pcPar);
             return(siCnt);
          }
-      } else {
+      } else if (psHdl->siTok==CLPTOK_DOT) {
+         psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
+         if (psHdl->siTok<0) {
+            if (pcPar!=NULL) free(pcPar);
+            return(psHdl->siTok);
+         }
          siCnt=siClpPrsOvl(pvHdl,siLev,siPos,psArg);
          if (siCnt<0) {
             if (pcPar!=NULL) free(pcPar);
             return(siCnt);
          }
+      } else {
+         if (psArg->psFix->siTyp==CLPTYP_OBJECT) {
+            siCnt=siClpPrsObjWob(pvHdl,siLev,siPos,psArg);
+            if (siCnt<0) {
+               if (pcPar!=NULL) free(pcPar);
+               return(siCnt);
+            }
+         } else {
+            siCnt=siClpPrsOvl(pvHdl,siLev,siPos,psArg);
+            if (siCnt<0) {
+               if (pcPar!=NULL) free(pcPar);
+               return(siCnt);
+            }
+         }
       }
    }
-   if (pcPar!=NULL) free(pcPar);
    if (psHdl->siTok==CLPTOK_END) {
       psHdl->pcLex[0]=EOS;
       strcpy(psHdl->pcSrc,acSrc);
       psHdl->pcCur=pcCur; psHdl->pcInp=pcInp; psHdl->pcOld=pcOld; psHdl->pcRow=pcRow; psHdl->siRow=siRow;
+      if (pcPar!=NULL) free(pcPar);
       if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"PARAMETER-FILE-PARSER-END(FILE=%s CNT=%d)\n",acFil,siCnt);
       psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
       if (psHdl->siTok<0) return(psHdl->siTok);
       return(siCnt);
    } else {
-      return CLPERR(psHdl,CLPERR_SYN,"Last token (%s) of parameter file '%s' is not EOF",apClpTok[psHdl->siTok],acFil);
+      siErr=CLPERR(psHdl,CLPERR_SYN,"Last token (%s) of parameter file '%s' is not EOF",apClpTok[psHdl->siTok],acFil);
+      if (pcPar!=NULL) free(pcPar);
+      return(siErr);
    }
 }
 
@@ -3453,16 +3483,21 @@ static int siClpPrsAry(
    if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d ARY(%s%ctyplst%c)-OPN)\n",fpcPre(pvHdl,siLev),siLev,siPos,psArg->psStd->pcKyw,C_SBO,C_SBC);
    psHdl->siTok=(psArg->psFix->siTyp==CLPTYP_STRING)?siClpScnSrc(pvHdl,CLPTOK_STR,psArg):(psArg->psFix->siTyp==CLPTYP_FLOATN)?siClpScnSrc(pvHdl,CLPTOK_FLT,psArg):siClpScnSrc(pvHdl,0,psArg);
    if (psHdl->siTok<0) return(psHdl->siTok);
-   switch (psArg->psFix->siTyp) {
-   case CLPTYP_NUMBER: siCnt=siClpPrsValLst(pvHdl,siLev,CLPTOK_NUM,psArg->psFix->siTyp,psArg); break;
-   case CLPTYP_FLOATN: siCnt=siClpPrsValLst(pvHdl,siLev,CLPTOK_FLT,psArg->psFix->siTyp,psArg); break;
-   case CLPTYP_STRING: siCnt=siClpPrsValLst(pvHdl,siLev,CLPTOK_STR,psArg->psFix->siTyp,psArg); break;
-   case CLPTYP_OBJECT: siCnt=siClpPrsObjLst(pvHdl,siLev,psArg); break;
-   case CLPTYP_OVRLAY: siCnt=siClpPrsOvlLst(pvHdl,siLev,psArg); break;
-   default:
-      return CLPERR(psHdl,CLPERR_SEM,"Type (%d) of parameter '%s.%s' is not supported with arrays",psArg->psFix->siTyp,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+   if (psHdl->isPfl && psHdl->siTok==CLPTOK_SGN) {
+      siCnt=siClpPrsFil(pvHdl,siLev,siPos,TRUE,psArg);
+      if (siCnt<0) return(siCnt);
+   } else {
+      switch (psArg->psFix->siTyp) {
+      case CLPTYP_NUMBER: siCnt=siClpPrsValLst(pvHdl,siLev,CLPTOK_NUM,psArg->psFix->siTyp,psArg); break;
+      case CLPTYP_FLOATN: siCnt=siClpPrsValLst(pvHdl,siLev,CLPTOK_FLT,psArg->psFix->siTyp,psArg); break;
+      case CLPTYP_STRING: siCnt=siClpPrsValLst(pvHdl,siLev,CLPTOK_STR,psArg->psFix->siTyp,psArg); break;
+      case CLPTYP_OBJECT: siCnt=siClpPrsObjLst(pvHdl,siLev,psArg); break;
+      case CLPTYP_OVRLAY: siCnt=siClpPrsOvlLst(pvHdl,siLev,psArg); break;
+      default:
+         return CLPERR(psHdl,CLPERR_SEM,"Type (%d) of parameter '%s.%s' is not supported with arrays",psArg->psFix->siTyp,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+      }
+      if (siCnt<0) return(siCnt);
    }
-   if (siCnt<0) return(siCnt);
    if (psHdl->siTok==CLPTOK_SBC) {
       psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
       if (psHdl->siTok<0) return(psHdl->siTok);

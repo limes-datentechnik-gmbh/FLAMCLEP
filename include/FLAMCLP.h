@@ -34,18 +34,18 @@ Description
 The command line parser (FLAMCLP) is a complier which reads a command
 string using the lexems and grammar below to fill a structure with the
 corresponding values given in this line. The FLAMCLP works only in memory
-(except parameter files are used for objects or overlays or string files
-for strings) and the syntax and semantic will be defined by a tree of
-tables. Such a table can represent an object (struct) or an overlay (union).
-Each argument in such a table can be a object or overlay again in using
-another table for this type. Basic types are switches, numbers, floats
-or strings. With each argument you can define the required minimum and
-possible maximum amount of occurrences. This means that each argument
-can be an array and arrays are implemented as simplified notations.
+(except parameter files are used for objects or overlays or arrays or
+string files for strings) and the syntax and semantic will be defined by
+a tree of tables. Such a table can represent an object (struct) or an
+overlay (union). Each argument in such a table can be a object or overlay
+again in using another table for this type. Basic types are switches,
+numbers, floats or strings. With each argument you can define the required
+minimum and possible maximum amount of occurrences. This means that each
+argument can be an array and arrays are implemented as simplified notations.
 
-For object and overlays you can provide parameter files (OBJECT=filename)
+For object, overlays and arrays you can provide parameter files (OBJECT='filename')
 containing the parameter string in the corresponding syntax syntax for
-these object or overlay.
+these object, overlay or array (KYW[='filename']).
 
 To handle passwords and passphrase more secure, you can provide a filename
 as string (PASSWD=f'filename'), which contains the corresponding string
@@ -157,13 +157,13 @@ command line. Both property list and command line are provided as zero
 terminated strings. This means that the FLAMCLP does not know whether the
 command line results from a file or argc/argv.
 
-If the isPfl (is parameter file) flag TRUE: For objects and overlays you
-can use the assignment letter '=' to define a parameter file containing
-the command string for this object or overlay. This means that for each object or
-overlay a dedicated parameter file can be used. The parameter file must
-contain a command string which syntax is valid for the certain object or
-overlay. CLP open the file with format string "r". To use DD names on
-mainframes the file name must like "DD:name".
+If the isPfl (is parameter file) flag TRUE: For objects, overlays and arrays
+you can use the assignment letter '=' to define a parameter file containing
+the command string for this object, overlay or aary. This means that for
+each object, overlay or array a dedicated parameter file can be used. The
+parameter file must contain a command string which syntax is valid for the
+certain object, overlay or array. CLP open the file with format string "r".
+To use DD names on mainframes the file name must like "DD:name".
 
 If the flag CLPFLG_PWD is used, string outputs containing passwords will
 result in "###SECRECT###" and float or number outputs in a value of 0.

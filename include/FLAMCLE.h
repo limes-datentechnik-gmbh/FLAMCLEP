@@ -94,7 +94,7 @@ Below, you can find a possibly incomplete list of FLAMCLE feature:
  *   * String (binary text/ASCII/EBCDIC/HEX or from a file (for passwords))
  *   * Object (Structure) with parameter file support
  *   * Overlay (Union) with parameter file support
- *   * Array (List (realized as simplified notation))
+ *   * Array (List (realized as simplified notation) with parameter file support)
  * * Support of constant definitions used as selection of values over keywords
  * * Internal calculated values are available as link (amount of values in an array, length of a string, object identifier in overlays, ...)
  * * The main table for a command can be defined as object or overlay
@@ -104,7 +104,7 @@ Below, you can find a possibly incomplete list of FLAMCLE feature:
  * * Support of STDENV as DD name for environment variables on mainframes
  * * Support property definitions over environment variables to overrule hard coded default properties
  * * Keywords (commands, built-in functions, ON, OFF, ALL, DEPTH1, ...) can start optional with "-" or "--"
- * * Support for parameter files per command, object or overlay
+ * * Support for parameter files per command, object, overlay or array
  * * File name mapping and DD:NAME support (see man_cle_main.txt)
  * * Return/condition/exit code and reason code handling
  * * On EBCDIC systems we use a code page specific interpretation of punctuation characters (<pre>!$#@[\]^`{|}~</pre>) dependent on the environment variable LANG
