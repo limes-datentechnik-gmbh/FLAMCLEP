@@ -127,12 +127,13 @@
  * 1.2.77: Make prefix and path dynamic in length
  * 1.2.78: Make message dynamic in length
  * 1.2.79: Add parameter file support for arrays
+ * 1.2.80: Support command string replacements by environment variables (<HOME>)
 **/
 
-#define CLP_VSN_STR       "1.2.79"
+#define CLP_VSN_STR       "1.2.80"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        2
-#define CLP_VSN_REVISION       79
+#define CLP_VSN_REVISION       80
 
 /* Definition der Konstanten ******************************************/
 
@@ -142,6 +143,7 @@
 #define CLPMAX_KYWSIZ            64
 #define CLPMAX_LOCSIZ            128
 #define CLPMAX_LOCLEN            127
+#define CLPMAX_BUFCNT            32
 
 #define CLPINI_LEXSIZ            1024
 #define CLPINI_LSTSIZ            1024
@@ -275,6 +277,7 @@ typedef struct Hdl {
    int                           isChk;
    int                           isCas;
    int                           isPfl;
+   int                           isEnv;
    int                           siTok;
    size_t                        szLex;
    char*                         pcLex;
@@ -299,6 +302,9 @@ typedef struct Hdl {
    char*                         pcPat;
    size_t                        szLst;
    char*                         pcLst;
+   int                           siBuf;
+   size_t                        pzBuf[CLPMAX_BUFCNT];
+   char*                         apBuf[CLPMAX_BUFCNT];
    int                           siRow;
    int                           siCol;
    int                           siErr;
@@ -783,6 +789,7 @@ extern char* pcClpError(
 extern void* pvClpOpen(
    const int                     isCas,
    const int                     isPfl,
+   const int                     isEnv,
    const int                     siMkl,
    const char*                   pcOwn,
    const char*                   pcPgm,
@@ -805,12 +812,13 @@ extern void* pvClpOpen(
 {
    TsHdl*                        psHdl=NULL;
    char*                         pcLoc=NULL;
-   int                           siErr;
+   int                           siErr,i;
    if (pcOwn!=NULL && pcPgm!=NULL && pcCmd!=NULL && psTab!=NULL) {
       psHdl=(TsHdl*)calloc(1,sizeof(TsHdl));
       if (psHdl!=NULL) {
          psHdl->isCas=isCas;
          psHdl->isPfl=isPfl;
+         psHdl->isEnv=isEnv;
          psHdl->siMkl=siMkl;
          psHdl->pcOwn=pcOwn;
          psHdl->pcPgm=pcPgm;
@@ -834,6 +842,10 @@ extern void* pvClpOpen(
          psHdl->pcLst=(C08*)calloc(1,psHdl->szLst);
          psHdl->szMsg=CLPINI_MSGSIZ;
          psHdl->pcMsg=(C08*)calloc(1,psHdl->szMsg);
+         for (i=0;i<CLPMAX_BUFCNT;i++) {
+            psHdl->pzBuf[i]=0;
+            psHdl->apBuf[i]=NULL;
+         }
          psHdl->pvDat=pvDat;
          psHdl->psTab=NULL;
          psHdl->psSym=NULL;
@@ -1719,6 +1731,7 @@ extern void vdClpClose(
 {
    if (pvHdl!=NULL) {
       TsHdl*                     psHdl=(TsHdl*)pvHdl;
+      int                        i;
       if (psHdl->pcLex!=NULL) {
          free(psHdl->pcLex);
          psHdl->pcLex=NULL;
@@ -1748,6 +1761,13 @@ extern void vdClpClose(
          free(psHdl->pcMsg);
          psHdl->pcMsg=NULL;
          psHdl->szMsg=0;
+      }
+      for (i=0;i<CLPMAX_BUFCNT;i++) {
+         if (psHdl->apBuf[i]!=NULL) {
+            free(psHdl->apBuf[i]);
+            psHdl->apBuf[i]=NULL;
+            psHdl->pzBuf[i]=0;
+         }
       }
       setlocale(LC_NUMERIC, psHdl->acLoc);
       vdClpSymDel(psHdl->psTab);
@@ -2506,6 +2526,7 @@ extern int siClpLexem(
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"           Supplements can contain two \"\" to represent one \"                \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"           Supplements can also be enclosed in ' or %c instead of \"          \n",ALTCHR);
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"           Supplements can also be enclosed in ' or %c instead of \"          \n",ALTCHR);
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," ENVIRONMENT VARIABLES '<'varnam'>' will replaced by the corresponding value  \n");
    }
    return(CLP_OK);
 }
@@ -2546,9 +2567,13 @@ static int siClpScnNat(
    char*                         pcLex=(*ppLex);
    char*                         pcHlp=(*ppLex);
    char*                         pcEnd=(*ppLex)+(*pzLex);
+   const char*                   pcCur=(*ppCur);
+   int                           isEnv=psHdl->isEnv;
+   const char*                   pcEnv;
    time_t                        t;
    struct tm                     tm;
    struct tm                     *tmAkt;
+   char                          acHlp[1024];
 
    while (1) {
       if (*(*ppCur)==EOS) { /*end*/
@@ -2591,6 +2616,62 @@ static int siClpScnNat(
             psHdl->pcRow=(*ppCur);
          }
          psHdl->pcOld=(*ppCur);
+      } else if (isEnv && *(*ppCur)=='<') { /*environment variable replacement*/
+         pcCur=(*ppCur);
+         (*ppCur)++;
+         while ((*ppCur)[0]!=EOS && (*ppCur)[0]!='>') {
+            LEX_REALLOC
+            *pcLex=*(*ppCur); pcLex++;
+            (*ppCur)++;
+         }
+         *pcLex=EOS;
+         if (*(*ppCur)!='>') {
+            return CLPERR(psHdl,CLPERR_LEX,"Environment variable not terminated with '>'");
+         }
+         (*ppCur)++;
+         pcEnv=GETENV(pcHlp);
+         pcLex=(*ppLex);
+         if (pcEnv==NULL) {
+            char* p=NULL;
+            char* v=NULL;
+            if (strcmp(pcHlp,"HOME")==0) {
+               v=homedir(FALSE,sizeof(acHlp),acHlp);
+            } else if (strcmp(pcHlp,"USER")==0) {
+               v=userid(sizeof(acHlp),acHlp);
+            } else if (strcmp(pcHlp,"SYSUID")==0) {
+               v=userid(sizeof(acHlp),acHlp);
+            } else if (strcmp(pcHlp,"CUSER")==0) {
+               v=userid(sizeof(acHlp),acHlp);
+               for(p=(char*)v; *p ;p++) *p = toupper(*p);
+            } else if (strcmp(pcHlp,"cuser")==0) {
+               v=userid(sizeof(acHlp),acHlp);
+               for(p=(char*)v; *p ;p++) *p = tolower(*p);
+            } else if (strcmp(pcHlp,"Cuser")==0) {
+               v=userid(sizeof(acHlp),acHlp);
+               if (*v) {
+                  *v = toupper(*v);
+                  for(p=v+1; *p ;p++) *p = tolower(*p);
+               }
+            }
+            pcEnv=v;
+         }
+         if (pcEnv!=NULL) {
+            size_t l=pcCur-psHdl->pcInp;
+            if (psHdl->siBuf>=CLPMAX_BUFCNT) {
+               return CLPERR(psHdl,CLPERR_LEX,"Environment variable replacement (%s=%s) not possible (more than %d recursions)",pcLex,pcEnv,CLPMAX_BUFCNT);
+            }
+            srprintf(&psHdl->apBuf[psHdl->siBuf],&psHdl->pzBuf[psHdl->siBuf],l+strlen(pcEnv)+strlen((*ppCur)),"%.*s%s%s",l,psHdl->pcInp,pcEnv,(*ppCur));
+            if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-ENVARREP\n%s %s\n%s %s\n",fpcPre(psHdl,0),psHdl->pcInp,fpcPre(psHdl,0),psHdl->apBuf[psHdl->siBuf]);
+            printd("%s CLP-ENVAR-REPLACEMENT\n%s %s\n%s %s\n",psHdl->pcDep,fpcPre(psHdl,1),psHdl->pcInp,fpcPre(psHdl,1),psHdl->apBuf[psHdl->siBuf]);
+            (*ppCur)=psHdl->apBuf[psHdl->siBuf]+l;
+            psHdl->pcInp=psHdl->apBuf[psHdl->siBuf];
+            psHdl->pcOld=psHdl->apBuf[psHdl->siBuf]+(psHdl->pcOld-psHdl->pcInp);
+            psHdl->pcRow=psHdl->apBuf[psHdl->siBuf]+(psHdl->pcRow-psHdl->pcInp);
+            isEnv=TRUE;
+         } else {
+            isEnv=FALSE;
+            (*ppCur)=pcCur;
+         }
       } else if ((*ppCur)[0]==SPMCHR) {/*supplement || simple string*/
          char* pcSup;
          *pcLex= 'd'; pcLex++;
@@ -2791,7 +2872,9 @@ static int siClpScnNat(
          *pcLex=EOS;
          if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(KYW)-LEXEM(%s)\n",pcHlp);
          return(CLPTOK_KYW);
-      } else if (uiTok==CLPTOK_STR && isStr((*ppCur)[0]) && (*ppCur)[0]!='(' && (*ppCur)[0]!=')' && (*ppCur)[0]!=C_SBO && (*ppCur)[0]!=C_SBC) {/*required string*/
+      } else if (uiTok==CLPTOK_STR && isStr((*ppCur)[0]) &&
+                        (*ppCur)[0]!='('    && (*ppCur)[0]!=')'   &&
+                        (*ppCur)[0]!=C_SBO  && (*ppCur)[0]!=C_SBC) {/*required string*/
          char*             pcKyw;
          *pcLex='d'; pcLex++;
          *pcLex='\''; pcLex++;
@@ -2836,7 +2919,9 @@ static int siClpScnNat(
                return(CLPTOK_KYW);
             }
          }
-         while ((*ppCur)[0]!=EOS && isStr((*ppCur)[0]) && (*ppCur)[0]!=' ' && (*ppCur)[0]!=',' && (*ppCur)[0]!='(' && (*ppCur)[0]!=')' && (*ppCur)[0]!=C_SBO && (*ppCur)[0]!=C_SBC) {
+         while ((*ppCur)[0]!=EOS && isStr((*ppCur)[0]) && (*ppCur)[0]!=' ' && (*ppCur)[0]!=',' &&
+                           (*ppCur)[0]!='('    && (*ppCur)[0]!=')'   &&
+                           (*ppCur)[0]!=C_SBO  && (*ppCur)[0]!=C_SBC) {
             LEX_REALLOC
             *pcLex=*(*ppCur);
             pcLex++; (*ppCur)++;
@@ -3285,6 +3370,7 @@ static int siClpPrsFil(
    pcOld=psHdl->pcOld; psHdl->pcOld=pcPar;
    pcRow=psHdl->pcRow; psHdl->pcRow=pcPar;
    siRow=psHdl->siRow; psHdl->siRow=1;
+   psHdl->siBuf++;
    psHdl->siTok=(psArg->psFix->siTyp==CLPTYP_STRING)?siClpScnSrc(pvHdl,CLPTOK_STR,psArg):(psArg->psFix->siTyp==CLPTYP_FLOATN)?siClpScnSrc(pvHdl,CLPTOK_FLT,psArg):siClpScnSrc(pvHdl,0,psArg);
    if (psHdl->siTok<0) {
       if (pcPar!=NULL) free(pcPar);
@@ -3344,6 +3430,7 @@ static int siClpPrsFil(
       }
    }
    if (psHdl->siTok==CLPTOK_END) {
+      psHdl->siBuf--;
       psHdl->pcLex[0]=EOS;
       strcpy(psHdl->pcSrc,acSrc);
       psHdl->pcCur=pcCur; psHdl->pcInp=pcInp; psHdl->pcOld=pcOld; psHdl->pcRow=pcRow; psHdl->siRow=siRow;
@@ -4200,6 +4287,7 @@ static int siClpBldLit(
          pcOld=psHdl->pcOld; psHdl->pcOld=pcDat;
          pcRow=psHdl->pcRow; psHdl->pcRow=pcDat;
          siRow=psHdl->siRow; psHdl->siRow=1;
+         psHdl->siBuf++;
          siTok=siClpScnNat(pvHdl,psHdl->pfErr,psHdl->pfScn,&psHdl->pcCur,&szLex,&pcLex,CLPTOK_STR,psArg);
          if (siTok<0) {
             free(pcLex);
@@ -4218,6 +4306,7 @@ static int siClpBldLit(
             return(siErr);
          }
          siErr=siClpBldLit(pvHdl,siLev,siPos,siTyp,psArg,pcLex);
+         psHdl->siBuf--;
          strcpy(psHdl->pcSrc,acSrc);
          psHdl->pcCur=pcCur; psHdl->pcInp=pcInp; psHdl->pcOld=pcOld; psHdl->pcRow=pcRow; psHdl->siRow=siRow;
          if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"STRING-FILE-END(%s)\n",acFil);
@@ -5008,6 +5097,7 @@ static int siClpSetDefault(
       pcOld=psHdl->pcOld; psHdl->pcOld=psArg->psFix->pcDft;
       pcRow=psHdl->pcRow; psHdl->pcRow=psArg->psFix->pcDft;
       siRow=psHdl->siRow; psHdl->siRow=psArg->psFix->siRow;
+      psHdl->siBuf++;
       for (siTok=siClpScnNat(pvHdl,psHdl->pfErr,psHdl->pfScn,&psHdl->pcCur,&szLex,&pcLex,(psArg->psFix->siTyp==CLPTYP_STRING)?CLPTOK_STR:0,psArg);siTok!=CLPTOK_END;
            siTok=siClpScnNat(pvHdl,psHdl->pfErr,psHdl->pfScn,&psHdl->pcCur,&szLex,&pcLex,(psArg->psFix->siTyp==CLPTYP_STRING)?CLPTOK_STR:0,psArg)) {
          switch(siTok) {
@@ -5111,6 +5201,7 @@ static int siClpSetDefault(
             }
          }
       }
+      psHdl->siBuf--;
       strcpy(psHdl->pcSrc,acSrc);
       psHdl->pcCur=pcCur; psHdl->pcInp=pcInp; psHdl->pcOld=pcOld; psHdl->pcRow=pcRow; psHdl->siRow=siRow;
       if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"SUPPLEMENT-LIST-PARSER-END(%s.%s=%s)\n",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,psArg->psFix->pcDft);

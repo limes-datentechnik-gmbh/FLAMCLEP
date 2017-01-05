@@ -51,6 +51,10 @@ To handle passwords and passphrase more secure, you can provide a filename
 as string (PASSWD=f'filename'), which contains the corresponding string
 value. This prevents for example passwords from logging.
 
+In the command string (everywhere, where the scanner start to read a lexems)
+each value in angle brackets will be transparently replaced by the corresponding
+environment variable, except in strings.
+
 The FLAMCLP uses these tables as symbol tables to define the syntax and
 semantic of a command. The same table provides the offset used to
 store the parsed values. This offset occurs in a real data structure
@@ -860,6 +864,7 @@ typedef struct ClpError {
  *
  * @param[in]  isCas Boolean to enable case sensitive parsing of keywords (recommended is FALSE)
  * @param[in]  isPfl Boolean to enable parameter files per object and overlay (recommended is TRUE)
+ * @param[in]  isEnv Boolean to enable replacement of environment variables (recommended is TRUE)
  * @param[in]  siMkl Integer defining the minimal key word length (siMkl<=0 --> full length, no auto abbreviation)
  * @param[in]  pcOwn String constant containing the owner name for the root in the path ("limes")
  * @param[in]  pcPgm String constant containing the program name for the root in the path ("flcl")
@@ -888,6 +893,7 @@ typedef struct ClpError {
 extern void* pvClpOpen(
    const int                     isCas,
    const int                     isPfl,
+   const int                     isEnv,
    const int                     siMkl,
    const char*                   pcOwn,
    const char*                   pcPgm,

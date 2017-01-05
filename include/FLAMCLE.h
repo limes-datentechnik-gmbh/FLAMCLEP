@@ -87,6 +87,7 @@ Below, you can find a possibly incomplete list of FLAMCLE feature:
  * * Extensive documentation generation in ASCIIDOC format for the user manual
  * * Powerful property file management (generation, activation, update, ...)
  * * Simple configuration data management (own environment variables)
+ * * Environment variable replacement in the command string('<'envar'>')
  * * Automatic keyword shortening for arguments
  * * Support for many data types, like:
  *   * Number (decimal, hexadecimal, octal, binary and time)
@@ -641,7 +642,8 @@ typedef struct CleAppendix {
  * @param[in]  pcOwn Default owner id (owner ids are used to identify properties and other things "com.company")
  * @param[in]  pcPgm Logical program name (can be different from argv[0] and will be used in the root "com.company.program")
  * @param[in]  isCas Switch to enable case sensitive interpretation of the command line (recommended is FLASE)
- * @param[in]  isPfl Switch to enable parameter file support for object and overlays (recommended is TRUE)
+ * @param[in]  isPfl Switch to enable parameter file support for object, overlays and arrays (recommended is TRUE)
+ * @param[in]  isEnv Switch to enable replacement of environment variables (recommended is TRUE)
  * @param[in]  siMkl Integer defining the minimal key word length (siMkl<=0 --> full length, no auto abbreviation)
  * @param[in]  pfOut File pointer for help and error messages (if not defined stderr will be used)
  * @param[in]  pfTrc Default trace file if no trace file is defined with the configuration data management (recommended: NULL, stdout or stderr)
@@ -689,6 +691,7 @@ extern int siCleExecute(
    const char*                   pcPgm,
    const int                     isCas,
    const int                     isPfl,
+   const int                     isEnv,
    const int                     siMkl,
    FILE*                         pfOut,
    FILE*                         pfTrc,
@@ -709,12 +712,12 @@ extern int siCleExecute(
    const char*                   pcApx,
    const TsCleAppendix*          psApx);
 
-
  extern int siCleParseString(
     const int                     uiErr,
     char*                         pcErr,
     const int                     isCas,
     const int                     isPfl,
+    const int                     isEnv,
     const int                     siMkl,
     const char*                   pcOwn,
     const char*                   pcPgm,
