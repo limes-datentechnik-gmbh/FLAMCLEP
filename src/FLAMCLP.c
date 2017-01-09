@@ -128,12 +128,13 @@
  * 1.2.78: Make message dynamic in length
  * 1.2.79: Add parameter file support for arrays
  * 1.2.80: Support command string replacements by environment variables (<HOME>)
+ * 1.2.81: Support constant expression (blksiz=64*KiB)
 **/
 
-#define CLP_VSN_STR       "1.2.80"
+#define CLP_VSN_STR       "1.2.81"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        2
-#define CLP_VSN_REVISION       80
+#define CLP_VSN_REVISION       81
 
 /* Definition der Konstanten ******************************************/
 
@@ -151,6 +152,7 @@
 #define CLPINI_MSGSIZ            1024
 #define CLPINI_PRESIZ            1024
 #define CLPINI_PATSIZ            1024
+#define CLPINI_VALSIZ            128;
 
 #define CLPTOK_INI               0
 #define CLPTOK_END               1
@@ -161,10 +163,19 @@
 #define CLPTOK_SBC               6
 #define CLPTOK_SGN               7
 #define CLPTOK_DOT               8
-#define CLPTOK_STR               9
-#define CLPTOK_NUM               10
-#define CLPTOK_FLT               11
-#define CLPTOK_SUP               12
+#define CLPTOK_ADD               9
+#define CLPTOK_SUB               10
+#define CLPTOK_MUL               11
+#define CLPTOK_DIV               12
+#define CLPTOK_STR               13
+#define CLPTOK_NUM               14
+#define CLPTOK_FLT               15
+#define CLPTOK_SUP               16
+
+#define isPrnInt(p,v) (CLPISF_PWD(p->psStd->uiFlg)?((I64)0):(v))
+#define isPrnFlt(p,v) (CLPISF_PWD(p->psStd->uiFlg)?((F64)0.0):(v))
+#define isPrnStr(p,v) (CLPISF_PWD(p->psStd->uiFlg)?("***SECRET***"):(v))
+#define isPrnLen(p,v) (CLPISF_PWD(p->psStd->uiFlg)?((int)0):(v))
 
 static const char*               apClpTok[]={
       "INI",
@@ -176,6 +187,10 @@ static const char*               apClpTok[]={
       "SQUARED-BRACKET-CLOSE",
       "SIGN",
       "DOT",
+      "ADD",
+      "SUB",
+      "MUL",
+      "DIV",
       "STRING",
       "NUMBER",
       "FLOAT",
@@ -369,6 +384,19 @@ static int siClpScnSrc(
    void*                         pvHdl,
    const int                     uiTok,
    const TsSym*                  psArg);
+
+static int siClpConNat(
+   void*                         pvHdl,
+   FILE*                         pfErr,
+   FILE*                         pfTrc,
+   size_t*                       pzLex,
+   char**                        ppLex,
+   const int                     siTyp);
+
+static int siClpConSrc(
+   void*                         pvHdl,
+   const int                     siTyp,
+   const int                     isChk);
 
 static int siClpPrsMain(
    void*                         pvHdl,
@@ -2499,7 +2527,8 @@ extern int siClpLexem(
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," COMMENT   '#' [:print:]* '#'                              (will be ignored)\n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," LCOMMENT  ';' [:print:]* 'nl'                             (will be ignored)\n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," SEPARATOR [:space: | :cntr: | ',']*                  (abbreviated with SEP)\n");
-      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," OPERATOR  '=' | '.' | '(' | ')' | '[' | ']'  (SGN, DOT, RBO, RBC, SBO, SBC)\n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," OPERATOR1 '=' | '.' | '(' | ')' | '[' | ']'  (SGN, DOT, RBO, RBC, SBO, SBC)\n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," OPERATOR2 '+' | '-' | '*' | '/'                        (ADD, SUB, MUL, DIV)\n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," KEYWORD   ['-'['-']][:alpha:]+[:alnum: | '_' | '-']*    (always predefined)\n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," NUMBER    ([+|-]  [ :digit:]+)  |                       (decimal (default))\n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," num       ([+|-]0b[ :digit:]+)  |                                  (binary)\n");
@@ -2522,6 +2551,19 @@ extern int siClpLexem(
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"              In this case the string ends at the next separator or operator\n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"              and keywords are preferred. To use keywords, separators or    \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"              operators in strings, enclosing quotes are required.          \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                                                                            \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," Constant definitions                                                       \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," NOW       NUMBER - current time in seconds since 1970 (+0t0000)            \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," MINUTE    NUMBER - minute in seconds (60)                                  \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," HOUR      NUMBER - hour in seconds   (60*60)                               \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," DAY       NUMBER - day in seconds    (24*60*60)                            \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," YEAR      NUMBER - year in seconds   (365*24*60*60)                        \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," KiB       NUMBER - kilobyte  (1024)                                        \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," MiB       NUMBER - megabyte  (1024*1024)                                   \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," GiB       NUMBER - gigabyte  (1024*1024*1024)                              \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," TiB       NUMBER - terrabyte (1024*1024*1024*1024)                         \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," PI        FLOAT  - PI (3.14159265359)                                      \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                                                                            \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," SUPPLEMENT     '\"' [:print:]* '\"' |   (null-terminated string (properties))\n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"           Supplements can contain two \"\" to represent one \"                \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"           Supplements can also be enclosed in ' or %c instead of \"          \n",ALTCHR);
@@ -2551,7 +2593,6 @@ extern int siClpLexem(
          pcEnd=(*ppLex)+(*pzLex);\
       }\
    }
-
 
 static int siClpScnNat(
    void*                         pvHdl,
@@ -3108,6 +3149,22 @@ static int siClpScnNat(
          pcLex[0]='.'; pcLex[1]=EOS; (*ppCur)++;
          if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(DOT)-LEXEM(%s)\n",pcHlp);
          return(CLPTOK_DOT);
+      } else if (*(*ppCur)=='+') { /*add*/
+         pcLex[0]='+'; pcLex[1]=EOS; (*ppCur)++;
+         if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(ADD)-LEXEM(%s)\n",pcHlp);
+         return(CLPTOK_ADD);
+      } else if (*(*ppCur)=='-') { /*sub*/
+         pcLex[0]='-'; pcLex[1]=EOS; (*ppCur)++;
+         if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(SUB)-LEXEM(%s)\n",pcHlp);
+         return(CLPTOK_SUB);
+      } else if (*(*ppCur)=='*') { /*mul*/
+         pcLex[0]='*'; pcLex[1]=EOS; (*ppCur)++;
+         if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(MUL)-LEXEM(%s)\n",pcHlp);
+         return(CLPTOK_MUL);
+      } else if (*(*ppCur)=='/') { /*div*/
+         pcLex[0]='/'; pcLex[1]=EOS; (*ppCur)++;
+         if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(DIV)-LEXEM(%s)\n",pcHlp);
+         return(CLPTOK_DIV);
       } else if (*(*ppCur)=='(') { /*round bracket open*/
          pcLex[0]='('; pcLex[1]=EOS; (*ppCur)++;
          if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(RBO)-LEXEM(%s)\n",pcHlp);
@@ -3129,6 +3186,89 @@ static int siClpScnNat(
          return CLPERR(psHdl,CLPERR_LEX,"Character ('%c') not valid",*((*ppCur)-1));
       }
    }
+}
+
+static int siClpConNat(
+   void*                         pvHdl,
+   FILE*                         pfErr,
+   FILE*                         pfTrc,
+   size_t*                       pzLex,
+   char**                        ppLex,
+   const int                     siTyp)
+{
+   TsHdl*                        psHdl=(TsHdl*)pvHdl;
+   if (siTyp==CLPTYP_NUMBER && strxcmp(psHdl->isCas,*ppLex,"NOW",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         srprintf(ppLex,pzLex,24,"d %"PRIu64"",((U64)time(NULL)));
+         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(NUM)-LEXEM(%s)\n",*ppLex);
+      }
+      return(CLPTOK_NUM);
+   } else if (siTyp==CLPTYP_NUMBER && strxcmp(psHdl->isCas,*ppLex,"MINUTE",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         srprintf(ppLex,pzLex,24,"d %"PRIu64"",((U64)60));
+         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(NUM)-LEXEM(%s)\n",*ppLex);
+      }
+      return(CLPTOK_NUM);
+   } else if (siTyp==CLPTYP_NUMBER && strxcmp(psHdl->isCas,*ppLex,"HOUR",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         srprintf(ppLex,pzLex,24,"d %"PRIu64"",((U64)60)*((U64)60));
+         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(NUM)-LEXEM(%s)\n",*ppLex);
+      }
+      return(CLPTOK_NUM);
+   } else if (siTyp==CLPTYP_NUMBER && strxcmp(psHdl->isCas,*ppLex,"DAY",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         srprintf(ppLex,pzLex,24,"d %"PRIu64"",((U64)24)*((U64)60)*((U64)60));
+         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(NUM)-LEXEM(%s)\n",*ppLex);
+      }
+      return(CLPTOK_NUM);
+   } else if (siTyp==CLPTYP_NUMBER && strxcmp(psHdl->isCas,*ppLex,"YEAR",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         srprintf(ppLex,pzLex,24,"d %"PRIu64"",((U64)365)*((U64)24)*((U64)60)*((U64)60));
+         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(NUM)-LEXEM(%s)\n",*ppLex);
+      }
+      return(CLPTOK_NUM);
+   } else if (siTyp==CLPTYP_NUMBER && strxcmp(psHdl->isCas,*ppLex,"KiB",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         srprintf(ppLex,pzLex,24,"d %"PRIu64"",((U64)1024));
+         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(NUM)-LEXEM(%s)\n",*ppLex);
+      }
+      return(CLPTOK_NUM);
+   } else if (siTyp==CLPTYP_NUMBER && strxcmp(psHdl->isCas,*ppLex,"MiB",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         srprintf(ppLex,pzLex,24,"d %"PRIu64"",((U64)1024)*((U64)1024));
+         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(NUM)-LEXEM(%s)\n",*ppLex);
+      }
+      return(CLPTOK_NUM);
+   } else if (siTyp==CLPTYP_NUMBER && strxcmp(psHdl->isCas,*ppLex,"GiB",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         srprintf(ppLex,pzLex,24,"d %"PRIu64"",((U64)1024)*((U64)1024)*((U64)1024));
+         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(NUM)-LEXEM(%s)\n",*ppLex);
+      }
+      return(CLPTOK_NUM);
+   } else if (siTyp==CLPTYP_NUMBER && strxcmp(psHdl->isCas,*ppLex,"TiB",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         srprintf(ppLex,pzLex,24,"d %"PRIu64"",((U64)1024)*((U64)1024)*((U64)1024)*((U64)1024));
+         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(NUM)-LEXEM(%s)\n",*ppLex);
+      }
+      return(CLPTOK_NUM);
+   } else if (siTyp==CLPTYP_FLOATN && strxcmp(psHdl->isCas,*ppLex,"PI",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         srprintf(ppLex,pzLex,24,"d %f",3.14159265359);
+         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(FLT)-LEXEM(%s)\n",*ppLex);
+      }
+      return(CLPTOK_FLT);
+   } else {
+      return(CLPTOK_KYW);
+   }
+}
+
+static int siClpConSrc(
+   void*                         pvHdl,
+   const int                     siTyp,
+   const int                     isChk)
+{
+   TsHdl*                        psHdl=(TsHdl*)pvHdl;
+   return(siClpConNat(pvHdl,psHdl->pfErr,psHdl->pfScn,(isChk)?NULL:&psHdl->szLex,(isChk)?NULL:&psHdl->pcLex,siTyp));
 }
 
 static int siClpScnSrc(
@@ -3157,6 +3297,7 @@ extern int siClpGrammar(
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," parameter      -> switch | assignment | object | overlay | array \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," switch         -> KEYWORD                                        \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," assignment     -> KEYWORD '=' value                              \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  KEYWORD '=' KEYWORD # SELECTION #              \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," object         -> KEYWORD ['('] parameter_list [')']             \n");
    if (psHdl->isPfl) {
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  KEYWORD '=' STRING # parameter file #          \n");
@@ -3177,8 +3318,18 @@ extern int siClpGrammar(
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  EMPTY                                          \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," overlay_list   -> overlay SEP overlay_list                       \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  EMPTY                                          \n");
-      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," value          -> NUMBER | FLOAT | STRING | KEYWORD              \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," A list of objects requires parenthesis to enclose the arguments  \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                                                                  \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," value          -> term '+' value                                 \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  term '-' value                                 \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  term                                           \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," term           -> factor '*' term                                \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  factor '/' term                                \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  factor                                         \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," factor         -> NUMBER | FLOAT | STRING                        \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  CONSTANT                                       \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  '(' value ')'                                  \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," For string only the operator + are implemented as concatenation  \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                                                                  \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," Property File Parser                                             \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," properties     -> property_list                                  \n");
@@ -3617,7 +3768,357 @@ static int siClpPrsOvlLst(
    }
    return(siPos);
 }
+/**********************************************************************/
 
+static int siFromNumber(
+   void*                         pvHdl,
+   const int                     siLev,
+   const int                     siPos,
+   TsSym*                        psArg,
+   const char*                   pcVal,
+   I64*                          piVal)
+{
+   TsHdl*                        psHdl=(TsHdl*)pvHdl;
+   char*                         pcHlp=NULL;
+
+   errno=0;
+   switch (pcVal[0]) {
+   case 'b':*piVal=strtoll(pcVal+1,&pcHlp, 2); break;
+   case 'o':*piVal=strtoll(pcVal+1,&pcHlp, 8); break;
+   case 'd':*piVal=strtoll(pcVal+1,&pcHlp,10); break;
+   case 'x':*piVal=strtoll(pcVal+1,&pcHlp,16); break;
+   case 't':*piVal=strtoll(pcVal+1,&pcHlp,10); break;
+   default: return CLPERR(psHdl,CLPERR_SEM,"Base (%c) of number literal (%s.%s=%s) not supported",pcVal[0],fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,isPrnStr(psArg,pcVal+1));
+   }
+   if (errno || *pcHlp) {
+      return CLPERR(psHdl,CLPERR_SEM,"Number (%s) of '%s.%s' cannot be converted to a 64 bit value (rest: %s)",isPrnStr(psArg,pcVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,isPrnStr(psArg,pcHlp));
+   }
+   return(CLP_OK);
+}
+
+static int siFromFloat(
+   void*                         pvHdl,
+   const int                     siLev,
+   const int                     siPos,
+   TsSym*                        psArg,
+   const char*                   pcVal,
+   double*                       pfVal)
+{
+   TsHdl*                        psHdl=(TsHdl*)pvHdl;
+   char*                         pcHlp=NULL;
+   errno=0;
+   switch (pcVal[0]) {
+   case 'd':*pfVal=strtod(pcVal+1,&pcHlp); break;
+   default: return CLPERR(psHdl,CLPERR_SEM,"Base (%c) of floating point literal (%s.%s=%s) not supported",pcVal[0],fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,isPrnStr(psArg,pcVal+1));
+   }
+   if (errno || *pcHlp) {
+      return CLPERR(psHdl,CLPERR_SEM,"Floating number (%s) of '%s.%s' cannot be converted to a valid 64 bit value (rest: %s)",isPrnStr(psArg,pcVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,pcHlp);
+   }
+   return(CLP_OK);
+}
+
+static int siClpPrsExp(
+   void*                         pvHdl,
+   const int                     siLev,
+   const int                     siPos,
+   const int                     siTok,
+   const int                     siTyp,
+   TsSym*                        psArg,
+   size_t*                       pzVal,
+   char**                        ppVal);
+
+static int siClpPrsFac(
+   void*                         pvHdl,
+   const int                     siLev,
+   const int                     siPos,
+   const int                     siTok,
+   const int                     siTyp,
+   TsSym*                        psArg,
+   size_t*                       pzVal,
+   char**                        ppVal)
+{
+   TsHdl*                        psHdl=(TsHdl*)pvHdl;
+   int                           siErr;
+   switch(psHdl->siTok) {
+   case CLPTOK_NUM:
+   case CLPTOK_FLT:
+   case CLPTOK_STR:
+      srprintf(ppVal,pzVal,strlen(psHdl->pcLex),"%s",psHdl->pcLex);
+      if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d NUM/FLT/STR(%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,psHdl->pcLex);
+      psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
+      if (psHdl->siTok<0) return(psHdl->siTok);
+      return(CLP_OK);
+   case CLPTOK_KYW:
+      psHdl->siTok=siClpConSrc(pvHdl,siTyp,FALSE);
+      if (psHdl->siTok==CLPTOK_KYW) {
+         return CLPERR(psHdl,CLPERR_SYN,"Keyword (%s) not valid in expression of type %s",psHdl->pcLex,apClpTyp[siTyp]);
+      }
+      srprintf(ppVal,pzVal,strlen(psHdl->pcLex),"%s",psHdl->pcLex);
+      if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d KYW-CON(%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,psHdl->pcLex);
+      psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
+      if (psHdl->siTok<0) return(psHdl->siTok);
+      return(CLP_OK);
+   case CLPTOK_RBO:
+      psHdl->siTok=siClpScnSrc(pvHdl,siTok,psArg);
+      if (psHdl->siTok<0) return(psHdl->siTok);
+      siErr=siClpPrsExp(pvHdl,siLev,siPos,siTok,siTyp,psArg,pzVal,ppVal);
+      if (siErr) return(siErr);
+      if (psHdl->siTok==CLPTOK_RBC) {
+         psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
+         if (psHdl->siTok<0) return(psHdl->siTok);
+         return(CLP_OK);
+      } else {
+         return CLPERR(psHdl,CLPERR_SYN,"Character ')' missing (%s)",fpcPat(pvHdl,siLev));
+      }
+   default:
+      return(CLPERR(psHdl,CLPERR_SYN,"After assignment '%s.%s=' number(-123), float(+123.45e78), string('abc') expression expected",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw));
+   }
+}
+
+static int siClpPrsTrm(
+   void*                         pvHdl,
+   const int                     siLev,
+   const int                     siPos,
+   const int                     siTok,
+   const int                     siTyp,
+   TsSym*                        psArg,
+   size_t*                       pzVal,
+   char**                        ppVal)
+{
+   TsHdl*                        psHdl=(TsHdl*)pvHdl;
+   int                           siErr;
+   I64                           siVal1=0;
+   I64                           siVal2=0;
+   F64                           flVal1=0;
+   F64                           flVal2=0;
+   siErr=siClpPrsFac(pvHdl,siLev,siPos,siTok,siTyp,psArg,pzVal,ppVal);
+   if (siErr) return(siErr);
+   if (psHdl->siTok==CLPTOK_MUL) {
+      psHdl->siTok=siClpScnSrc(pvHdl,siTok,psArg);
+      if (psHdl->siTok<0) return(psHdl->siTok);
+      size_t szVal=strlen(psHdl->pcLex)+CLPINI_VALSIZ;
+      char*  pcVal=(char*)calloc(1,szVal);
+      if (pcVal==NULL) return(CLPERR(psHdl,CLPERR_MEM,"Allocation of memory to store expression values failed"));
+      siErr=siClpPrsTrm(pvHdl,siLev,siPos,siTok,siTyp,psArg,&szVal,&pcVal);
+      if (siErr) { free(pcVal); return(siErr); }
+      switch(siTyp) {
+      case CLPTYP_NUMBER:
+         siErr=siFromNumber(pvHdl,siLev,siPos,psArg,*ppVal,&siVal1);
+         if (siErr) { free(pcVal); return(siErr); }
+         siErr=siFromNumber(pvHdl,siLev,siPos,psArg,pcVal,&siVal2);
+         if (siErr) { free(pcVal); return(siErr); }
+         srprintf(ppVal,pzVal,24,"d%"PRIi64"",siVal1*siVal2);
+         break;
+      case CLPTYP_FLOATN:
+         siErr=siFromFloat(pvHdl,siLev,siPos,psArg,*ppVal,&flVal1);
+         if (siErr) { free(pcVal); return(siErr); }
+         siErr=siFromFloat(pvHdl,siLev,siPos,psArg,pcVal,&flVal2);
+         if (siErr) { free(pcVal); return(siErr); }
+         srprintf(ppVal,pzVal,24,"d%f",flVal1*flVal2);
+         break;
+      default:
+         free(pcVal);
+         return CLPERR(psHdl,CLPERR_SEM,"Multiplication not supported for type %s",apClpTyp[siTyp]);
+      }
+      free(pcVal);
+   } else if (psHdl->siTok==CLPTOK_DIV) {
+      psHdl->siTok=siClpScnSrc(pvHdl,siTok,psArg);
+      if (psHdl->siTok<0) return(psHdl->siTok);
+      size_t szVal=strlen(psHdl->pcLex)+CLPINI_VALSIZ;
+      char*  pcVal=(char*)calloc(1,szVal);
+      if (pcVal==NULL) return(CLPERR(psHdl,CLPERR_MEM,"Allocation of memory to store expression values failed"));
+      siErr=siClpPrsTrm(pvHdl,siLev,siPos,siTok,siTyp,psArg,&szVal,&pcVal);
+      if (siErr) { free(pcVal); return(siErr); }
+      switch(siTyp) {
+      case CLPTYP_NUMBER:
+         siErr=siFromNumber(pvHdl,siLev,siPos,psArg,*ppVal,&siVal1);
+         if (siErr) { free(pcVal); return(siErr); }
+         siErr=siFromNumber(pvHdl,siLev,siPos,psArg,pcVal,&siVal2);
+         if (siErr) { free(pcVal); return(siErr); }
+         if (siVal2==0) {
+            free(pcVal);
+            return CLPERR(psHdl,CLPERR_SEM,"Devision by zero",apClpTyp[siTyp]);
+         }
+         srprintf(ppVal,pzVal,24,"d%"PRIi64"",siVal1/siVal2);
+         break;
+      case CLPTYP_FLOATN:
+         siErr=siFromFloat(pvHdl,siLev,siPos,psArg,*ppVal,&flVal1);
+         if (siErr) { free(pcVal); return(siErr); }
+         siErr=siFromFloat(pvHdl,siLev,siPos,psArg,pcVal,&flVal2);
+         if (siErr) { free(pcVal); return(siErr); }
+         if (flVal2==0) {
+            free(pcVal);
+            return CLPERR(psHdl,CLPERR_SEM,"Devision by zero",apClpTyp[siTyp]);
+         }
+         srprintf(ppVal,pzVal,24,"d%f",flVal1/flVal2);
+         break;
+      default:
+         free(pcVal);
+         return CLPERR(psHdl,CLPERR_SEM,"Multiplication not supported for type %s",apClpTyp[siTyp]);
+      }
+      free(pcVal);
+   } else if (psHdl->siTok==CLPTOK_KYW && CLPTOK_KYW!=siClpConSrc(pvHdl,siTyp,TRUE)) {
+      size_t szVal=strlen(psHdl->pcLex)+CLPINI_VALSIZ;
+      char*  pcVal=(char*)calloc(1,szVal);
+      if (pcVal==NULL) return(CLPERR(psHdl,CLPERR_MEM,"Allocation of memory to store expression values failed"));
+      siErr=siClpPrsTrm(pvHdl,siLev,siPos,siTok,siTyp,psArg,&szVal,&pcVal);
+      if (siErr) { free(pcVal); return(siErr); }
+      switch(siTyp) {
+      case CLPTYP_NUMBER:
+         siErr=siFromNumber(pvHdl,siLev,siPos,psArg,*ppVal,&siVal1);
+         if (siErr) { free(pcVal); return(siErr); }
+         siErr=siFromNumber(pvHdl,siLev,siPos,psArg,pcVal,&siVal2);
+         if (siErr) { free(pcVal); return(siErr); }
+         srprintf(ppVal,pzVal,24,"d%"PRIi64"",siVal1*siVal2);
+         break;
+      case CLPTYP_FLOATN:
+         siErr=siFromFloat(pvHdl,siLev,siPos,psArg,*ppVal,&flVal1);
+         if (siErr) { free(pcVal); return(siErr); }
+         siErr=siFromFloat(pvHdl,siLev,siPos,psArg,pcVal,&flVal2);
+         if (siErr) { free(pcVal); return(siErr); }
+         srprintf(ppVal,pzVal,24,"d%f",flVal1*flVal2);
+         break;
+      default:
+         free(pcVal);
+         return CLPERR(psHdl,CLPERR_SEM,"Multiplication not supported for type %s",apClpTyp[siTyp]);
+      }
+      free(pcVal);
+
+   }
+   return(CLP_OK);
+}
+
+static int siClpPrsExp(
+   void*                         pvHdl,
+   const int                     siLev,
+   const int                     siPos,
+   const int                     siTok,
+   const int                     siTyp,
+   TsSym*                        psArg,
+   size_t*                       pzVal,
+   char**                        ppVal)
+{
+   TsHdl*                        psHdl=(TsHdl*)pvHdl;
+   int                           siErr;
+   I64                           siVal1=0;
+   I64                           siVal2=0;
+   F64                           flVal1=0;
+   F64                           flVal2=0;
+   siErr=siClpPrsTrm(pvHdl,siLev,siPos,siTok,siTyp,psArg,pzVal,ppVal);
+   if (siErr) return(siErr);
+   if (psHdl->siTok==CLPTOK_ADD) {
+      psHdl->siTok=siClpScnSrc(pvHdl,siTok,psArg);
+      if (psHdl->siTok<0) return(psHdl->siTok);
+      size_t szVal=strlen(psHdl->pcLex)+CLPINI_VALSIZ;
+      char*  pcVal=(char*)calloc(1,szVal);
+      if (pcVal==NULL) return(CLPERR(psHdl,CLPERR_MEM,"Allocation of memory to store expression values failed"));
+      siErr=siClpPrsExp(pvHdl,siLev,siPos,siTok,siTyp,psArg,&szVal,&pcVal);
+      if (siErr) { free(pcVal); return(siErr); }
+      switch(siTyp) {
+      case CLPTYP_NUMBER:
+         siErr=siFromNumber(pvHdl,siLev,siPos,psArg,*ppVal,&siVal1);
+         if (siErr) { free(pcVal); return(siErr); }
+         siErr=siFromNumber(pvHdl,siLev,siPos,psArg,pcVal,&siVal2);
+         if (siErr) { free(pcVal); return(siErr); }
+         srprintf(ppVal,pzVal,24,"d%"PRIi64"",siVal1+siVal2);
+         break;
+      case CLPTYP_FLOATN:
+         siErr=siFromFloat(pvHdl,siLev,siPos,psArg,*ppVal,&flVal1);
+         if (siErr) { free(pcVal); return(siErr); }
+         siErr=siFromFloat(pvHdl,siLev,siPos,psArg,pcVal,&flVal2);
+         if (siErr) { free(pcVal); return(siErr); }
+         srprintf(ppVal,pzVal,24,"d%f",flVal1+flVal2);
+         break;
+      default:
+         free(pcVal);
+         return CLPERR(psHdl,CLPERR_SEM,"Multiplication not supported for type %s",apClpTyp[siTyp]);
+      }
+      free(pcVal);
+   } else if (psHdl->siTok==CLPTOK_SUB) {
+      psHdl->siTok=siClpScnSrc(pvHdl,siTok,psArg);
+      if (psHdl->siTok<0) return(psHdl->siTok);
+      size_t szVal=strlen(psHdl->pcLex)+CLPINI_VALSIZ;
+      char*  pcVal=(char*)calloc(1,szVal);
+      if (pcVal==NULL) return(CLPERR(psHdl,CLPERR_MEM,"Allocation of memory to store expression values failed"));
+      siErr=siClpPrsExp(pvHdl,siLev,siPos,siTok,siTyp,psArg,&szVal,&pcVal);
+      if (siErr) { free(pcVal); return(siErr); }
+      switch(siTyp) {
+      case CLPTYP_NUMBER:
+         siErr=siFromNumber(pvHdl,siLev,siPos,psArg,*ppVal,&siVal1);
+         if (siErr) { free(pcVal); return(siErr); }
+         siErr=siFromNumber(pvHdl,siLev,siPos,psArg,pcVal,&siVal2);
+         if (siErr) { free(pcVal); return(siErr); }
+         srprintf(ppVal,pzVal,24,"d%"PRIi64"",siVal1+siVal2);
+         break;
+      case CLPTYP_FLOATN:
+         siErr=siFromFloat(pvHdl,siLev,siPos,psArg,*ppVal,&flVal1);
+         if (siErr) { free(pcVal); return(siErr); }
+         siErr=siFromFloat(pvHdl,siLev,siPos,psArg,pcVal,&flVal2);
+         if (siErr) { free(pcVal); return(siErr); }
+         srprintf(ppVal,pzVal,24,"d%f",flVal1+flVal2);
+         break;
+      default:
+         free(pcVal);
+         return CLPERR(psHdl,CLPERR_SEM,"Multiplication not supported for type %s",apClpTyp[siTyp]);
+      }
+      free(pcVal);
+   }
+   return(CLP_OK);
+}
+
+static int siClpPrsVal(
+   void*                         pvHdl,
+   const int                     siLev,
+   const int                     siPos,
+   const int                     siTok,
+   const int                     siTyp,
+   TsSym*                        psArg)
+{
+   TsHdl*                        psHdl=(TsHdl*)pvHdl;
+   int                           siInd;
+   TsSym*                        psVal;
+   size_t                        szVal=strlen(psHdl->pcLex)+CLPINI_VALSIZ;
+   char*                         pcVal=(char*)malloc(szVal);
+   if (pcVal==NULL) return(CLPERR(psHdl,CLPERR_MEM,"Allocation of memory to store expression values failed"));
+   strcpy(pcVal,psHdl->pcLex);
+   psHdl->apPat[siLev]=psArg;
+   if (psHdl->siTok==CLPTOK_KYW) {
+      if (psArg==NULL) { // fix build scan issue
+         free(pcVal);
+         return CLPERR(psHdl,CLPERR_INT,"Parameter (psArg) is NULL (file %s, function=%s, line %d)",__FUNCTION__,__LINE__,__FILE__);
+      }
+      psHdl->apPat[siLev]=psArg;
+      siInd=siClpSymFnd(pvHdl,siLev+1,siPos,pcVal,psArg->psDep,&psVal,NULL);
+      if (siInd>=0) {
+         free(pcVal);
+         psHdl->siTok=siClpScnSrc(pvHdl,siTok,psArg);
+         if (psHdl->siTok<0) return(psHdl->siTok);
+         if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d KYW(%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,pcVal);
+         return(siClpBldCon(pvHdl,siLev,siPos,psArg,psVal));
+      } else if (siInd==CLPERR_SEM) {
+         siInd=siClpPrsExp(pvHdl,siLev+1,siPos,siTok,siTyp,psArg,&szVal,&pcVal);
+         if (siInd<0) {
+            free(pcVal);
+            return(siInd);
+         }
+      } else {
+         free(pcVal);
+         return(siInd);
+      }
+   } else {
+      siInd=siClpPrsExp(pvHdl,siLev+1,siPos,siTok,siTyp,psArg,&szVal,&pcVal);
+      if (siInd<0) {
+         free(pcVal);
+         return(siInd);
+      }
+   }
+   if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d LIT(%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,isPrnLex(psArg,pcVal));
+   siInd=siClpBldLit(pvHdl,siLev,siPos,siTyp,psArg,pcVal);
+   free(pcVal);
+   return(siInd);
+}
+
+/*TODO: muss weg
 static int siClpPrsVal(
    void*                         pvHdl,
    const int                     siLev,
@@ -3649,6 +4150,7 @@ static int siClpPrsVal(
       return(siClpBldLit(pvHdl,siLev,siPos,siTyp,psArg,acVal));
    }
 }
+*/
 
 /**********************************************************************/
 
@@ -3736,11 +4238,6 @@ static int siClpPrsKywLst(
 }
 
 /**********************************************************************/
-
-#define isPrnInt(p,v) (CLPISF_PWD(p->psStd->uiFlg)?((I64)0):(v))
-#define isPrnFlt(p,v) (CLPISF_PWD(p->psStd->uiFlg)?((F64)0.0):(v))
-#define isPrnStr(p,v) (CLPISF_PWD(p->psStd->uiFlg)?("***SECRET***"):(v))
-#define isPrnLen(p,v) (CLPISF_PWD(p->psStd->uiFlg)?((int)0):(v))
 
 static int siClpBldPro(
    void*                         pvHdl,
