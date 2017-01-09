@@ -181,6 +181,15 @@ extern void fprintm(FILE* file,const char* own, const char* pgm, const char* man
 extern char* strxcpy(char *dest, const char *src, size_t n);
 
 /**
+ * Get environment variable and handle HOME, USER, CUSEr, Cuser, cuser, OWNER, ENVID if not defined
+ * @param name environment variable name
+ * @param size size of string
+ * @param string string containing the value for the corresponding environment variable
+ * @return pointer to string
+ */
+extern char* getenvar(const char* name,size_t size,char* string);
+
+/**
  * Replace '~' with "<HOME>" and all environment variables enclosed with '<' and '>' to build a file name
  * @param file string for replacement
  * @param size size of replacement string

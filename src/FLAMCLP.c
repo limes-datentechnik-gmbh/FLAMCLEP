@@ -2629,32 +2629,8 @@ static int siClpScnNat(
             return CLPERR(psHdl,CLPERR_LEX,"Environment variable not terminated with '>'");
          }
          (*ppCur)++;
-         pcEnv=GETENV(pcHlp);
+         pcEnv=getenvar(pcHlp,sizeof(acHlp),acHlp);
          pcLex=(*ppLex);
-         if (pcEnv==NULL) {
-            char* p=NULL;
-            char* v=NULL;
-            if (strcmp(pcHlp,"HOME")==0) {
-               v=homedir(FALSE,sizeof(acHlp),acHlp);
-            } else if (strcmp(pcHlp,"USER")==0) {
-               v=userid(sizeof(acHlp),acHlp);
-            } else if (strcmp(pcHlp,"SYSUID")==0) {
-               v=userid(sizeof(acHlp),acHlp);
-            } else if (strcmp(pcHlp,"CUSER")==0) {
-               v=userid(sizeof(acHlp),acHlp);
-               for(p=(char*)v; *p ;p++) *p = toupper(*p);
-            } else if (strcmp(pcHlp,"cuser")==0) {
-               v=userid(sizeof(acHlp),acHlp);
-               for(p=(char*)v; *p ;p++) *p = tolower(*p);
-            } else if (strcmp(pcHlp,"Cuser")==0) {
-               v=userid(sizeof(acHlp),acHlp);
-               if (*v) {
-                  *v = toupper(*v);
-                  for(p=v+1; *p ;p++) *p = tolower(*p);
-               }
-            }
-            pcEnv=v;
-         }
          if (pcEnv!=NULL) {
             size_t l=pcCur-psHdl->pcInp;
             if (psHdl->siBuf>=CLPMAX_BUFCNT) {

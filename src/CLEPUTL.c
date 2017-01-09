@@ -1025,9 +1025,49 @@ static void rplchar(char* name,const size_t size,const char c, const char* value
    }
 }
 
+extern char* getenvar(const char* name,size_t size,char* string)
+{
+   const char* v=GETENV(name);
+   if (v!=NULL && *v) {
+      size_t lv=strlen(v);
+      while(lv>0 && isspace(v[lv-1])) {
+         lv--;
+      }
+      lv = (lv < size) ? lv : size-1;
+      memcpy(string, v, lv);
+      string[lv] = 0;
+      return(string);
+   } else if (strcmp(name,"HOME")==0) {
+      return(homedir(FALSE,size,string));
+   } else if (strcmp(name,"USER")==0) {
+      return(userid(size,string));
+   } else if (strcmp(name,"SYSUID")==0) {
+      return(userid(size,string));
+   } else if (strcmp(name,"CUSER")==0) {
+      userid(size,string);
+      for(char* p=string;p!=NULL && *p ;p++) *p = toupper(*p);
+      return(string);
+   } else if (strcmp(name,"cuser")==0) {
+      userid(size,string);
+      for(char* p=string;p!=NULL &&  *p ;p++) *p = tolower(*p);
+      return(string);
+   } else if (strcmp(name,"Cuser")==0) {
+      userid(size,string);
+      if (string!=NULL && *string) {
+         *string = toupper(*string);
+         for(char* p=string+1; *p ;p++) *p = tolower(*p);
+      }
+      return(string);
+   } else if (strcmp(name,"OWNERID")==0) {
+      return(userid(size,string));
+   } else if (strcmp(name,"ENVID")==0) {
+      return(envid(size,string));
+   } else {
+      return(NULL);
+   }
+}
 static void rplenvar(char* name,const size_t size,const char opn, const char cls)
 {
-   int         lv;
    char        h[size];
    char        x[size];
    char*       a=name;
@@ -1049,36 +1089,8 @@ static void rplenvar(char* name,const size_t size,const char opn, const char cls
             strncpy(h,c+1,size-1);
             h[size-1]=0;
             match = 1;
-            v=GETENV(b+1);
-            if (v!=NULL && *v) {
-               for (lv=strlen(v);lv>0 && isspace(v[lv-1]);lv--);
-               lv = (lv < size) ? lv : size-1;
-               memcpy(x, v, lv);
-               x[lv] = 0;
-               v = x;
-            } else if (strcmp(b+1,"HOME")==0) {
-               v=homedir(FALSE,size,x);
-            } else if (strcmp(b+1,"USER")==0) {
-               v=userid(size,x);
-            } else if (strcmp(b+1,"SYSUID")==0) {
-               v=userid(size,x);
-            } else if (strcmp(b+1,"CUSER")==0) {
-               v=userid(size,x);
-               for(p=v; *p ;p++) *p = toupper(*p);
-            } else if (strcmp(b+1,"cuser")==0) {
-               v=userid(size,x);
-               for(p=v; *p ;p++) *p = tolower(*p);
-            } else if (strcmp(b+1,"Cuser")==0) {
-               v=userid(size,x);
-               if (*v) {
-                  *v = toupper(*v);
-                  for(p=v+1; *p ;p++) *p = tolower(*p);
-               }
-            } else if (strcmp(b+1,"OWNERID")==0) {
-               v=userid(size,x);
-            } else if (strcmp(b+1,"ENVID")==0) {
-               v=envid(size,x);
-            } else {
+            v=getenvar(b+1,size,x);
+            if (v==NULL) {
                b[0]=opn; c[0]=cls; a=c+1;
                match = 0;
             }
