@@ -3268,7 +3268,7 @@ static int siClpConSrc(
    const int                     isChk)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
-   return(siClpConNat(pvHdl,psHdl->pfErr,psHdl->pfScn,(isChk)?NULL:&psHdl->szLex,(isChk)?NULL:&psHdl->pcLex,siTyp));
+   return(siClpConNat(pvHdl,psHdl->pfErr,psHdl->pfScn,(isChk)?NULL:&psHdl->szLex,&psHdl->pcLex,siTyp));
 }
 
 static int siClpScnSrc(
