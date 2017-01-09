@@ -184,7 +184,7 @@ extern char* strxcpy(char *dest, const char *src, size_t n);
  * Get environment variable and handle HOME, USER, CUSEr, Cuser, cuser, OWNER, ENVID if not defined
  * @param name environment variable name
  * @param size size of string
- * @param string string containing the value for the corresponding environment variable
+ * @param string containing the value for the corresponding environment variable
  * @return pointer to string
  */
 extern char* getenvar(const char* name,size_t size,char* string);
