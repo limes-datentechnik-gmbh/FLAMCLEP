@@ -3440,16 +3440,11 @@ static int siClpPrsSgn(
    TsSym*                        psArg)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
+   int                           siTok=(psArg->psFix->siTyp==CLPTYP_STRING)?CLPTOK_STR:(psArg->psFix->siTyp==CLPTYP_FLOATN)?CLPTOK_FLT:0;
    if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d SGN(%s=val)\n",fpcPre(pvHdl,siLev),siLev,siPos,psArg->psStd->pcKyw);
-   psHdl->siTok=(psArg->psFix->siTyp==CLPTYP_STRING)?siClpScnSrc(pvHdl,CLPTOK_STR,psArg):(psArg->psFix->siTyp==CLPTYP_FLOATN)?siClpScnSrc(pvHdl,CLPTOK_FLT,psArg):siClpScnSrc(pvHdl,0,psArg);
+   psHdl->siTok=siClpScnSrc(pvHdl,siTok,psArg);
    if (psHdl->siTok<0) return(psHdl->siTok);
-   switch (psHdl->siTok) {
-   case CLPTOK_NUM: return(siClpPrsVal(pvHdl,siLev,siPos,0,CLPTYP_NUMBER,psArg));
-   case CLPTOK_FLT: return(siClpPrsVal(pvHdl,siLev,siPos,0,CLPTYP_FLOATN,psArg));
-   case CLPTOK_STR: return(siClpPrsVal(pvHdl,siLev,siPos,0,CLPTYP_STRING,psArg));
-   case CLPTOK_KYW: return(siClpPrsVal(pvHdl,siLev,siPos,0,psArg->psFix->siTyp,psArg));
-   default:         return(CLPERR(psHdl,CLPERR_SYN,"After assignment '%s.%s=' number(-123), float(+123.45e78), string('abc') or keyword (MODE) expected",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw));
-   }
+   return(siClpPrsVal(pvHdl,siLev,siPos,siTok,psArg->psFix->siTyp,psArg));
 }
 
 static int siClpPrsFil(
@@ -4048,6 +4043,32 @@ static int siClpPrsExp(
          if (siErr) { free(pcVal); return(siErr); }
          siErr=siFromNumber(pvHdl,siLev,siPos,psArg,pcVal,&siVal2);
          if (siErr) { free(pcVal); return(siErr); }
+         srprintf(ppVal,pzVal,24,"d%"PRIi64"",siVal1-siVal2);
+         break;
+      case CLPTYP_FLOATN:
+         siErr=siFromFloat(pvHdl,siLev,siPos,psArg,*ppVal,&flVal1);
+         if (siErr) { free(pcVal); return(siErr); }
+         siErr=siFromFloat(pvHdl,siLev,siPos,psArg,pcVal,&flVal2);
+         if (siErr) { free(pcVal); return(siErr); }
+         srprintf(ppVal,pzVal,24,"d%f",flVal1-flVal2);
+         break;
+      default:
+         free(pcVal);
+         return CLPERR(psHdl,CLPERR_SEM,"Multiplication not supported for type %s",apClpTyp[siTyp]);
+      }
+      free(pcVal);
+   } else if (psHdl->siTok==CLPTOK_NUM || psHdl->siTok==CLPTOK_FLT) {
+      size_t szVal=strlen(psHdl->pcLex)+CLPINI_VALSIZ;
+      char*  pcVal=(char*)calloc(1,szVal);
+      if (pcVal==NULL) return(CLPERR(psHdl,CLPERR_MEM,"Allocation of memory to store expression values failed"));
+      siErr=siClpPrsExp(pvHdl,siLev,siPos,siTok,siTyp,psArg,&szVal,&pcVal);
+      if (siErr) { free(pcVal); return(siErr); }
+      switch(siTyp) {
+      case CLPTYP_NUMBER:
+         siErr=siFromNumber(pvHdl,siLev,siPos,psArg,*ppVal,&siVal1);
+         if (siErr) { free(pcVal); return(siErr); }
+         siErr=siFromNumber(pvHdl,siLev,siPos,psArg,pcVal,&siVal2);
+         if (siErr) { free(pcVal); return(siErr); }
          srprintf(ppVal,pzVal,24,"d%"PRIi64"",siVal1+siVal2);
          break;
       case CLPTYP_FLOATN:
@@ -4117,40 +4138,6 @@ static int siClpPrsVal(
    free(pcVal);
    return(siInd);
 }
-
-/*TODO: muss weg
-static int siClpPrsVal(
-   void*                         pvHdl,
-   const int                     siLev,
-   const int                     siPos,
-   const int                     siTok,
-   const int                     siTyp,
-   TsSym*                        psArg)
-{
-   TsHdl*                        psHdl=(TsHdl*)pvHdl;
-   int                           siInd;
-   TsSym*                        psVal;
-   char                          acVal[strlen(psHdl->pcLex)+1];
-   strcpy(acVal,psHdl->pcLex);
-   if (psHdl->siTok==CLPTOK_KYW) {
-      if (psArg==NULL) { // fix build scan issue
-         return CLPERR(psHdl,CLPERR_INT,"Parameter (psArg) is NULL (file %s, function=%s, line %d)",__FUNCTION__,__LINE__,__FILE__);
-      }
-      psHdl->apPat[siLev]=psArg;
-      siInd=siClpSymFnd(pvHdl,siLev+1,siPos,acVal,psArg->psDep,&psVal,NULL);
-      if (siInd<0) return(siInd);
-      psHdl->siTok=siClpScnSrc(pvHdl,siTok,psArg);
-      if (psHdl->siTok<0) return(psHdl->siTok);
-      if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d KYW(%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,acVal);
-      return(siClpBldCon(pvHdl,siLev,siPos,psArg,psVal));
-   } else {
-      psHdl->siTok=siClpScnSrc(pvHdl,siTok,psArg);
-      if (psHdl->siTok<0) return(psHdl->siTok);
-      if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d LIT(%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,isPrnLex(psArg,acVal));
-      return(siClpBldLit(pvHdl,siLev,siPos,siTyp,psArg,acVal));
-   }
-}
-*/
 
 /**********************************************************************/
 
