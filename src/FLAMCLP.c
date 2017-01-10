@@ -3951,8 +3951,9 @@ static int siClpPrsExp(
          break;
       case CLPTYP_STRING:
          if ((*ppVal)[0]==pcVal[0]) {
+            if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d ADD-STR(%s+",fpcPre(pvHdl,siLev),siLev,siPos,*ppVal);
             srprintc(ppVal,pzVal,strlen(pcVal),"%s",pcVal+2);
-            if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d ADD-STR(%s=%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,pcVal,*ppVal);
+            if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s=%s))\n",pcVal,*ppVal);
          } else {
             free(pcVal);
             return(CLPERR(psHdl,CLPERR_SEM,"Cannot concatenate different types (%c <> %c) of strings",(*ppVal)[0],pcVal[0]));
