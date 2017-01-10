@@ -2598,17 +2598,19 @@ extern int siClpLexem(
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"              and keywords are preferred. To use keywords, separators or    \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"              operators in strings, enclosing quotes are required.          \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                                                                            \n");
-      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," Constant definitions                                                       \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," Constant definitions (can be used in value expressions)                    \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," NOW       NUMBER - current time in seconds since 1970 (+0t0000)            \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," MINUTE    NUMBER - minute in seconds (60)                                  \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," HOUR      NUMBER - hour in seconds   (60*60)                               \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," DAY       NUMBER - day in seconds    (24*60*60)                            \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," YEAR      NUMBER - year in seconds   (365*24*60*60)                        \n");
-      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," KiB       NUMBER - kilobyte  (1024)                                        \n");
-      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," MiB       NUMBER - megabyte  (1024*1024)                                   \n");
-      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," GiB       NUMBER - gigabyte  (1024*1024*1024)                              \n");
-      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," TiB       NUMBER - terrabyte (1024*1024*1024*1024)                         \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," KiB       NUMBER - kilobyte          (1024)                                \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," MiB       NUMBER - megabyte          (1024*1024)                           \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," GiB       NUMBER - gigabyte          (1024*1024*1024)                      \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," TiB       NUMBER - terrabyte         (1024*1024*1024*1024)                 \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," PI        FLOAT  - PI (3.14159265359)                                      \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," LCTIME    STRING - current local time in format YYYYMMTT.HHMMSS            \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," GMTIME    STRING - current Greenwich mean time in format YYYYMMTT.HHMMSS   \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                                                                            \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," SUPPLEMENT     '\"' [:print:]* '\"' |   (null-terminated string (properties))\n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"           Supplements can contain two \"\" to represent one \"                \n");
@@ -2650,6 +2652,7 @@ static int siClpConNat(
    const int                     siTyp)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
+
    if ((siTyp==CLPTYP_NUMBER || siTyp==-1) && strxcmp(psHdl->isCas,*ppLex,"NOW",0,0,FALSE)==0) {
       if (pzLex!=NULL) {
          srprintf(ppLex,pzLex,24,"d %"PRIu64"",psHdl->uiNow);
@@ -2710,6 +2713,24 @@ static int siClpConNat(
          if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(FLT)-LEXEM(%s)\n",*ppLex);
       }
       return(CLPTOK_FLT);
+   } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,*ppLex,"LCTIME",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         char   acBuf[20];
+         time_t h=psHdl->uiNow;
+         strftime(acBuf,sizeof(acBuf),"%Y%m%d.%H%M%S",localtime(&h));
+         srprintf(ppLex,pzLex,strlen(acBuf),"d'%s",acBuf);
+         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(STR)-LEXEM(%s)\n",*ppLex);
+      }
+      return(CLPTOK_STR);
+   } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,*ppLex,"GMTIME",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         char   acBuf[20];
+         time_t h=psHdl->uiNow;
+         strftime(acBuf,sizeof(acBuf),"%Y%m%d.%H%M%S",gmtime(&h));
+         srprintf(ppLex,pzLex,strlen(acBuf),"d'%s",acBuf);
+         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(STR)-LEXEM(%s)\n",*ppLex);
+      }
+      return(CLPTOK_STR);
    } else {
       return(CLPTOK_KYW);
    }
@@ -2925,8 +2946,7 @@ static int siClpScnNat(
                   }
                }
             }
-
-            if (f) {
+            if (f || CLPTOK_KYW!=siClpConNat(pvHdl,pfErr,pfTrc,NULL,&pcKyw,CLPTYP_STRING)) {
                char* p1=pcHlp;
                char* p2=pcKyw;
                while (*p2) {
@@ -4045,7 +4065,7 @@ static int siClpPrsVal(
    if (pcVal==NULL) return(CLPERR(psHdl,CLPERR_MEM,"Allocation of memory to store expression values failed"));
    strcpy(pcVal,psHdl->pcLex);
    psHdl->apPat[siLev]=psArg;
-   if (psHdl->siTok==CLPTOK_KYW) {
+   if (psHdl->siTok==CLPTOK_KYW) { // TODO: move to factor with check of selection flag
       if (psArg==NULL) { // fix build scan issue
          free(pcVal);
          return CLPERR(psHdl,CLPERR_INT,"Parameter (psArg) is NULL (file %s, function=%s, line %d)",__FUNCTION__,__LINE__,__FILE__);
