@@ -3587,7 +3587,6 @@ static int siClpPrsValLst(
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    int                           siErr,siPos=0;
-   printd("----------> %s<>%s\n",apClpTok[psHdl->siTok],apClpTok[siTok]);
    while (psHdl->siTok==siTok || psHdl->siTok==CLPTOK_KYW || psHdl->siTok==CLPTOK_RBO) {
       siErr=siClpPrsVal(pvHdl,siLev,siPos,psArg);
       if (siErr<0) return(siErr);
