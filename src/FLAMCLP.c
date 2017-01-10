@@ -2394,6 +2394,51 @@ static int siClpSymCal(
    return(CLP_OK);
 }
 
+static int siClpFndSym(
+   void*                         pvHdl,
+   const int                     siLev,
+   const int                     siPos,
+   const char*                   pcKyw,
+   const TsSym*                  psTab,
+   TsSym**                       ppArg,
+   int*                          piElm)
+{
+   TsHdl*                        psHdl=(TsHdl*)pvHdl;
+   const TsSym*                  psHlp=NULL;
+   int                           i,j,k,e;
+   *ppArg=NULL;
+   if (psTab==NULL) {
+      return(CLPERR_SYN);
+   }
+   if (psTab->psBak!=NULL) {
+      return(CLPERR_INT);
+   }
+   for (e=i=0,psHlp=psTab;psHlp!=NULL;psHlp=psHlp->psNxt,i++) {
+      if (!CLPISF_LNK(psHlp->psStd->uiFlg)) {
+         if (psHdl->isCas) {
+            for (k=j=0;pcKyw[j]!=EOS;j++) {
+               if (pcKyw[j]!=psHlp->psStd->pcKyw[j]) k++;
+            }
+         } else {
+            for (k=j=0;pcKyw[j]!=EOS;j++) {
+               if (toupper(pcKyw[j])!=toupper(psHlp->psStd->pcKyw[j])) k++;
+            }
+         }
+         if (k==0 && j>=psHlp->psStd->siKwl) {
+            if (piElm!=NULL) (*piElm)=e;
+            *ppArg=(TsSym*)psHlp;
+            return(i);
+         }
+         if (piElm!=NULL) {
+            if (CLPISF_ARG(psHlp->psStd->uiFlg) || CLPISF_CON(psHlp->psStd->uiFlg)) {
+               e++;
+            }
+         }
+      }
+   }
+   return(CLPERR_SEM);
+}
+
 static int siClpSymFnd(
    void*                         pvHdl,
    const int                     siLev,
@@ -2592,6 +2637,80 @@ extern int siClpLexem(
       }\
    }
 
+static int siClpConNat(
+   void*                         pvHdl,
+   FILE*                         pfErr,
+   FILE*                         pfTrc,
+   size_t*                       pzLex,
+   char**                        ppLex,
+   const int                     siTyp)
+{
+   TsHdl*                        psHdl=(TsHdl*)pvHdl;
+   if ((siTyp==CLPTYP_NUMBER || siTyp==-1) && strxcmp(psHdl->isCas,*ppLex,"NOW",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         srprintf(ppLex,pzLex,24,"d %"PRIu64"",((U64)time(NULL)));
+         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(NUM)-LEXEM(%s)\n",*ppLex);
+      }
+      return(CLPTOK_NUM);
+   } else if ((siTyp==CLPTYP_NUMBER || siTyp==-1) && strxcmp(psHdl->isCas,*ppLex,"MINUTE",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         srprintf(ppLex,pzLex,24,"d %"PRIu64"",((U64)60));
+         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(NUM)-LEXEM(%s)\n",*ppLex);
+      }
+      return(CLPTOK_NUM);
+   } else if ((siTyp==CLPTYP_NUMBER || siTyp==-1) && strxcmp(psHdl->isCas,*ppLex,"HOUR",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         srprintf(ppLex,pzLex,24,"d %"PRIu64"",((U64)60)*((U64)60));
+         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(NUM)-LEXEM(%s)\n",*ppLex);
+      }
+      return(CLPTOK_NUM);
+   } else if ((siTyp==CLPTYP_NUMBER || siTyp==-1) && strxcmp(psHdl->isCas,*ppLex,"DAY",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         srprintf(ppLex,pzLex,24,"d %"PRIu64"",((U64)24)*((U64)60)*((U64)60));
+         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(NUM)-LEXEM(%s)\n",*ppLex);
+      }
+      return(CLPTOK_NUM);
+   } else if ((siTyp==CLPTYP_NUMBER || siTyp==-1) && strxcmp(psHdl->isCas,*ppLex,"YEAR",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         srprintf(ppLex,pzLex,24,"d %"PRIu64"",((U64)365)*((U64)24)*((U64)60)*((U64)60));
+         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(NUM)-LEXEM(%s)\n",*ppLex);
+      }
+      return(CLPTOK_NUM);
+   } else if ((siTyp==CLPTYP_NUMBER || siTyp==-1) && strxcmp(psHdl->isCas,*ppLex,"KiB",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         srprintf(ppLex,pzLex,24,"d %"PRIu64"",((U64)1024));
+         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(NUM)-LEXEM(%s)\n",*ppLex);
+      }
+      return(CLPTOK_NUM);
+   } else if ((siTyp==CLPTYP_NUMBER || siTyp==-1) && strxcmp(psHdl->isCas,*ppLex,"MiB",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         srprintf(ppLex,pzLex,24,"d %"PRIu64"",((U64)1024)*((U64)1024));
+         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(NUM)-LEXEM(%s)\n",*ppLex);
+      }
+      return(CLPTOK_NUM);
+   } else if ((siTyp==CLPTYP_NUMBER || siTyp==-1) && strxcmp(psHdl->isCas,*ppLex,"GiB",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         srprintf(ppLex,pzLex,24,"d %"PRIu64"",((U64)1024)*((U64)1024)*((U64)1024));
+         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(NUM)-LEXEM(%s)\n",*ppLex);
+      }
+      return(CLPTOK_NUM);
+   } else if ((siTyp==CLPTYP_NUMBER || siTyp==-1) && strxcmp(psHdl->isCas,*ppLex,"TiB",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         srprintf(ppLex,pzLex,24,"d %"PRIu64"",((U64)1024)*((U64)1024)*((U64)1024)*((U64)1024));
+         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(NUM)-LEXEM(%s)\n",*ppLex);
+      }
+      return(CLPTOK_NUM);
+   } else if ((siTyp==CLPTYP_FLOATN || siTyp==-1) && strxcmp(psHdl->isCas,*ppLex,"PI",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         srprintf(ppLex,pzLex,24,"d %f",3.14159265359);
+         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(FLT)-LEXEM(%s)\n",*ppLex);
+      }
+      return(CLPTOK_FLT);
+   } else {
+      return(CLPTOK_KYW);
+   }
+}
+
 static int siClpScnNat(
    void*                         pvHdl,
    FILE*                         pfErr,
@@ -2746,6 +2865,7 @@ static int siClpScnNat(
          if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(STR)-LEXEM(%s)\n",isPrnLex(psArg,pcHlp));
          return(CLPTOK_STR);
       } else if (siTyp==0 && (((*ppCur)[0]=='-' && isalpha((*ppCur)[1])) || ((*ppCur)[0]=='-' && (*ppCur)[1]=='-' && isalpha((*ppCur)[2])))) { /*defined keyword*/
+         pcCur=(*ppCur);
          while ((*ppCur)[0]=='-') {
             (*ppCur)++;
          }
@@ -2757,8 +2877,15 @@ static int siClpScnNat(
             (*ppCur)++; pcLex++;
          }
          *pcLex=EOS;
-         if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(KYW)-LEXEM(%s)\n",pcHlp);
-         return(CLPTOK_KYW);
+         if(pcCur[0]=='-' && pcCur[1]!='-' && CLPTOK_KYW!=siClpConNat(pvHdl,pfErr,pfTrc,NULL,&pcHlp,-1)) {
+            (*ppCur)=pcCur;
+            pcLex[0]='-'; pcLex[1]=EOS; (*ppCur)++;
+            if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(SUB)-LEXEM(%s)\n",pcHlp);
+            return(CLPTOK_SUB);
+         } else {
+            if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(KYW)-LEXEM(%s)\n",pcHlp);
+            return(CLPTOK_KYW);
+         }
       } else if (siTyp==CLPTYP_STRING && isStr((*ppCur)[0])       &&
                         (*ppCur)[0]!='('    && (*ppCur)[0]!=')'   &&
                         (*ppCur)[0]!=C_SBO  && (*ppCur)[0]!=C_SBC) {/*required string*/
@@ -3058,79 +3185,6 @@ static int siClpScnNat(
    }
 }
 
-static int siClpConNat(
-   void*                         pvHdl,
-   FILE*                         pfErr,
-   FILE*                         pfTrc,
-   size_t*                       pzLex,
-   char**                        ppLex,
-   const int                     siTyp)
-{
-   TsHdl*                        psHdl=(TsHdl*)pvHdl;
-   if (siTyp==CLPTYP_NUMBER && strxcmp(psHdl->isCas,*ppLex,"NOW",0,0,FALSE)==0) {
-      if (pzLex!=NULL) {
-         srprintf(ppLex,pzLex,24,"d %"PRIu64"",((U64)time(NULL)));
-         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(NUM)-LEXEM(%s)\n",*ppLex);
-      }
-      return(CLPTOK_NUM);
-   } else if (siTyp==CLPTYP_NUMBER && strxcmp(psHdl->isCas,*ppLex,"MINUTE",0,0,FALSE)==0) {
-      if (pzLex!=NULL) {
-         srprintf(ppLex,pzLex,24,"d %"PRIu64"",((U64)60));
-         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(NUM)-LEXEM(%s)\n",*ppLex);
-      }
-      return(CLPTOK_NUM);
-   } else if (siTyp==CLPTYP_NUMBER && strxcmp(psHdl->isCas,*ppLex,"HOUR",0,0,FALSE)==0) {
-      if (pzLex!=NULL) {
-         srprintf(ppLex,pzLex,24,"d %"PRIu64"",((U64)60)*((U64)60));
-         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(NUM)-LEXEM(%s)\n",*ppLex);
-      }
-      return(CLPTOK_NUM);
-   } else if (siTyp==CLPTYP_NUMBER && strxcmp(psHdl->isCas,*ppLex,"DAY",0,0,FALSE)==0) {
-      if (pzLex!=NULL) {
-         srprintf(ppLex,pzLex,24,"d %"PRIu64"",((U64)24)*((U64)60)*((U64)60));
-         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(NUM)-LEXEM(%s)\n",*ppLex);
-      }
-      return(CLPTOK_NUM);
-   } else if (siTyp==CLPTYP_NUMBER && strxcmp(psHdl->isCas,*ppLex,"YEAR",0,0,FALSE)==0) {
-      if (pzLex!=NULL) {
-         srprintf(ppLex,pzLex,24,"d %"PRIu64"",((U64)365)*((U64)24)*((U64)60)*((U64)60));
-         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(NUM)-LEXEM(%s)\n",*ppLex);
-      }
-      return(CLPTOK_NUM);
-   } else if (siTyp==CLPTYP_NUMBER && strxcmp(psHdl->isCas,*ppLex,"KiB",0,0,FALSE)==0) {
-      if (pzLex!=NULL) {
-         srprintf(ppLex,pzLex,24,"d %"PRIu64"",((U64)1024));
-         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(NUM)-LEXEM(%s)\n",*ppLex);
-      }
-      return(CLPTOK_NUM);
-   } else if (siTyp==CLPTYP_NUMBER && strxcmp(psHdl->isCas,*ppLex,"MiB",0,0,FALSE)==0) {
-      if (pzLex!=NULL) {
-         srprintf(ppLex,pzLex,24,"d %"PRIu64"",((U64)1024)*((U64)1024));
-         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(NUM)-LEXEM(%s)\n",*ppLex);
-      }
-      return(CLPTOK_NUM);
-   } else if (siTyp==CLPTYP_NUMBER && strxcmp(psHdl->isCas,*ppLex,"GiB",0,0,FALSE)==0) {
-      if (pzLex!=NULL) {
-         srprintf(ppLex,pzLex,24,"d %"PRIu64"",((U64)1024)*((U64)1024)*((U64)1024));
-         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(NUM)-LEXEM(%s)\n",*ppLex);
-      }
-      return(CLPTOK_NUM);
-   } else if (siTyp==CLPTYP_NUMBER && strxcmp(psHdl->isCas,*ppLex,"TiB",0,0,FALSE)==0) {
-      if (pzLex!=NULL) {
-         srprintf(ppLex,pzLex,24,"d %"PRIu64"",((U64)1024)*((U64)1024)*((U64)1024)*((U64)1024));
-         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(NUM)-LEXEM(%s)\n",*ppLex);
-      }
-      return(CLPTOK_NUM);
-   } else if (siTyp==CLPTYP_FLOATN && strxcmp(psHdl->isCas,*ppLex,"PI",0,0,FALSE)==0) {
-      if (pzLex!=NULL) {
-         srprintf(ppLex,pzLex,24,"d %f",3.14159265359);
-         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(FLT)-LEXEM(%s)\n",*ppLex);
-      }
-      return(CLPTOK_FLT);
-   } else {
-      return(CLPTOK_KYW);
-   }
-}
 
 static int siClpConSrc(
    void*                         pvHdl,
@@ -3980,6 +4034,7 @@ static int siClpPrsTrm(
          siErr=siFromNumber(pvHdl,siLev,siPos,psArg,pcVal,&siVal2);
          if (siErr) { free(pcVal); return(siErr); }
          srprintf(ppVal,pzVal,24,"d %"PRIi64"",siVal1*siVal2);
+         if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d MUL-NUM(%"PRIi64"*%"PRIi64"=%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,siVal1,siVal2,*ppVal);
          break;
       case CLPTYP_FLOATN:
          siErr=siFromFloat(pvHdl,siLev,siPos,psArg,*ppVal,&flVal1);
@@ -3987,6 +4042,7 @@ static int siClpPrsTrm(
          siErr=siFromFloat(pvHdl,siLev,siPos,psArg,pcVal,&flVal2);
          if (siErr) { free(pcVal); return(siErr); }
          srprintf(ppVal,pzVal,24,"d %f",flVal1*flVal2);
+         if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d MUL-FLT(%f*%f=%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,flVal1,flVal2,*ppVal);
          break;
       default:
          free(pcVal);
@@ -4012,6 +4068,7 @@ static int siClpPrsTrm(
             return CLPERR(psHdl,CLPERR_SEM,"Devision by zero",apClpTyp[psArg->psFix->siTyp]);
          }
          srprintf(ppVal,pzVal,24,"d %"PRIi64"",siVal1/siVal2);
+         if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d DIV-NUM(%"PRIi64"/%"PRIi64"=%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,siVal1,siVal2,*ppVal);
          break;
       case CLPTYP_FLOATN:
          siErr=siFromFloat(pvHdl,siLev,siPos,psArg,*ppVal,&flVal1);
@@ -4023,6 +4080,7 @@ static int siClpPrsTrm(
             return CLPERR(psHdl,CLPERR_SEM,"Devision by zero",apClpTyp[psArg->psFix->siTyp]);
          }
          srprintf(ppVal,pzVal,24,"d %f",flVal1/flVal2);
+         if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d DIV-FLT(%f/%f=%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,flVal1,flVal2,*ppVal);
          break;
       default:
          free(pcVal);
@@ -4042,6 +4100,7 @@ static int siClpPrsTrm(
          siErr=siFromNumber(pvHdl,siLev,siPos,psArg,pcVal,&siVal2);
          if (siErr) { free(pcVal); return(siErr); }
          srprintf(ppVal,pzVal,24,"d %"PRIi64"",siVal1*siVal2);
+         if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d AUTO-MUL-NUM(%"PRIi64"*%"PRIi64"=%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,siVal1,siVal2,*ppVal);
          break;
       case CLPTYP_FLOATN:
          siErr=siFromFloat(pvHdl,siLev,siPos,psArg,*ppVal,&flVal1);
@@ -4049,13 +4108,13 @@ static int siClpPrsTrm(
          siErr=siFromFloat(pvHdl,siLev,siPos,psArg,pcVal,&flVal2);
          if (siErr) { free(pcVal); return(siErr); }
          srprintf(ppVal,pzVal,24,"d %f",flVal1*flVal2);
+         if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d AUTO-MUL-FLT(%f*%f=%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,flVal1,flVal2,*ppVal);
          break;
       default:
          free(pcVal);
          return CLPERR(psHdl,CLPERR_SEM,"Multiplication not supported for type %s",apClpTyp[psArg->psFix->siTyp]);
       }
       free(pcVal);
-
    }
    return(CLP_OK);
 }
@@ -4092,6 +4151,7 @@ static int siClpPrsExp(
          siErr=siFromNumber(pvHdl,siLev,siPos,psArg,pcVal,&siVal2);
          if (siErr) { free(pcVal); return(siErr); }
          srprintf(ppVal,pzVal,24,"d %"PRIi64"",siVal1+siVal2);
+         if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d ADD-NUM(%"PRIi64"+%"PRIi64"=%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,siVal1,siVal2,*ppVal);
          break;
       case CLPTYP_FLOATN:
          siErr=siFromFloat(pvHdl,siLev,siPos,psArg,*ppVal,&flVal1);
@@ -4099,6 +4159,7 @@ static int siClpPrsExp(
          siErr=siFromFloat(pvHdl,siLev,siPos,psArg,pcVal,&flVal2);
          if (siErr) { free(pcVal); return(siErr); }
          srprintf(ppVal,pzVal,24,"d %f",flVal1+flVal2);
+         if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d ADD-FLT(%f+%f=%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,flVal1,flVal2,*ppVal);
          break;
       default:
          free(pcVal);
@@ -4120,6 +4181,7 @@ static int siClpPrsExp(
          siErr=siFromNumber(pvHdl,siLev,siPos,psArg,pcVal,&siVal2);
          if (siErr) { free(pcVal); return(siErr); }
          srprintf(ppVal,pzVal,24,"d %"PRIi64"",siVal1-siVal2);
+         if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d SUB-NUM(%"PRIi64"-%"PRIi64"=%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,siVal1,siVal2,*ppVal);
          break;
       case CLPTYP_FLOATN:
          siErr=siFromFloat(pvHdl,siLev,siPos,psArg,*ppVal,&flVal1);
@@ -4127,6 +4189,7 @@ static int siClpPrsExp(
          siErr=siFromFloat(pvHdl,siLev,siPos,psArg,pcVal,&flVal2);
          if (siErr) { free(pcVal); return(siErr); }
          srprintf(ppVal,pzVal,24,"d %f",flVal1-flVal2);
+         if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d SUB-FLT(%f-%f=%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,flVal1,flVal2,*ppVal);
          break;
       default:
          free(pcVal);
@@ -4146,6 +4209,7 @@ static int siClpPrsExp(
          siErr=siFromNumber(pvHdl,siLev,siPos,psArg,pcVal,&siVal2);
          if (siErr) { free(pcVal); return(siErr); }
          srprintf(ppVal,pzVal,24,"d %"PRIi64"",siVal1+siVal2);
+         if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d AUTO-ADD-NUM(%"PRIi64"+%"PRIi64"=%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,siVal1,siVal2,*ppVal);
          break;
       case CLPTYP_FLOATN:
          siErr=siFromFloat(pvHdl,siLev,siPos,psArg,*ppVal,&flVal1);
@@ -4153,6 +4217,7 @@ static int siClpPrsExp(
          siErr=siFromFloat(pvHdl,siLev,siPos,psArg,pcVal,&flVal2);
          if (siErr) { free(pcVal); return(siErr); }
          srprintf(ppVal,pzVal,24,"d %f",flVal1+flVal2);
+         if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d AUTO-ADD-FLT(%f+%f=%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,flVal1,flVal2,*ppVal);
          break;
       default:
          free(pcVal);
@@ -4184,7 +4249,7 @@ static int siClpPrsVal(
          return CLPERR(psHdl,CLPERR_INT,"Parameter (psArg) is NULL (file %s, function=%s, line %d)",__FUNCTION__,__LINE__,__FILE__);
       }
       psHdl->apPat[siLev]=psArg;
-      siInd=siClpSymFnd(pvHdl,siLev+1,siPos,pcVal,psArg->psDep,&psVal,NULL);
+      siInd=siClpFndSym(pvHdl,siLev+1,siPos,pcVal,psArg->psDep,&psVal,NULL);
       if (siInd>=0) {
          free(pcVal);
          psHdl->siTok=siClpScnSrc(pvHdl,(isAry)?psArg->psFix->siTyp:0,psArg);
