@@ -2598,7 +2598,7 @@ extern int siClpLexem(
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"              and keywords are preferred. To use keywords, separators or    \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"              operators in strings, enclosing quotes are required.          \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                                                                            \n");
-      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," Constant definitions (can be used in value expressions)                    \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," The constant definitions below can be used in a value expressions          \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," NOW       NUMBER - current time in seconds since 1970 (+0t0000)            \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," MINUTE    NUMBER - minute in seconds (60)                                  \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," HOUR      NUMBER - hour in seconds   (60*60)                               \n");
@@ -2609,8 +2609,24 @@ extern int siClpLexem(
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," GiB       NUMBER - gigabyte          (1024*1024*1024)                      \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," TiB       NUMBER - terrabyte         (1024*1024*1024*1024)                 \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," PI        FLOAT  - PI (3.14159265359)                                      \n");
-      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," LCTIME    STRING - current local time in format YYYYMMTT.HHMMSS            \n");
-      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," GMTIME    STRING - current Greenwich mean time in format YYYYMMTT.HHMMSS   \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," LCSTAMP   STRING - current local stamp in format:           YYYYMMDD.HHMMSS\n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," LCDATE    STRING - current local date in format:            YYYYMMDD       \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," LCYEAR    STRING - current local year in format:            YYYY           \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," LCMONTH   STRING - current local month in format:           MM             \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," LCDAY     STRING - current local day in format:             DD             \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," LCTIME    STRING - current local time in format:            HHMMSS         \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," LCHOUR    STRING - current local hour in format:            HH             \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," LCMINUTE  STRING - current local minute in format:          MM             \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," LCSECOND  STRING - current local second in format:          SS             \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," GMSTAMP   STRING - current Greenwich mean stamp in format:  YYYYMMDD.HHMMSS\n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," GMDATE    STRING - current Greenwich mean date in format:   YYYYMMDD       \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," GMYEAR    STRING - current Greenwich mean year in format:   YYYY           \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," GMMONTH   STRING - current Greenwich mean month in format:  MM             \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," GMDAY     STRING - current Greenwich mean day in format:    DD             \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," GMTIME    STRING - current Greenwich mean time in format:   HHMMSS         \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," GMHOUR    STRING - current Greenwich mean hour in format:   HH             \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," GMMINUTE  STRING - current Greenwich mean minute in format: MM             \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," GMSECOND  STRING - current Greenwich mean second in format: SS             \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                                                                            \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," SUPPLEMENT     '\"' [:print:]* '\"' |   (null-terminated string (properties))\n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"           Supplements can contain two \"\" to represent one \"                \n");
@@ -2713,21 +2729,129 @@ static int siClpConNat(
          if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(FLT)-LEXEM(%s)\n",*ppLex);
       }
       return(CLPTOK_FLT);
+   } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,*ppLex,"LCSTAMP",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         time_t t=psHdl->uiNow;
+         strftime(*ppLex,*pzLex,"d'%Y%m%d.%H%M%S",localtime(&t));
+         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(STR)-LEXEM(%s)\n",*ppLex);
+      }
+      return(CLPTOK_STR);
+   } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,*ppLex,"LCDATE",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         time_t t=psHdl->uiNow;
+         strftime(*ppLex,*pzLex,"d'%Y%m%d",localtime(&t));
+         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(STR)-LEXEM(%s)\n",*ppLex);
+      }
+      return(CLPTOK_STR);
+   } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,*ppLex,"LCYEAR",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         time_t t=psHdl->uiNow;
+         strftime(*ppLex,*pzLex,"d'%Y",localtime(&t));
+         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(STR)-LEXEM(%s)\n",*ppLex);
+      }
+      return(CLPTOK_STR);
+   } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,*ppLex,"LCMONTH",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         time_t t=psHdl->uiNow;
+         strftime(*ppLex,*pzLex,"d'%m",localtime(&t));
+         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(STR)-LEXEM(%s)\n",*ppLex);
+      }
+      return(CLPTOK_STR);
+   } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,*ppLex,"LCDAY",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         time_t t=psHdl->uiNow;
+         strftime(*ppLex,*pzLex,"d'%d",localtime(&t));
+         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(STR)-LEXEM(%s)\n",*ppLex);
+      }
+      return(CLPTOK_STR);
    } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,*ppLex,"LCTIME",0,0,FALSE)==0) {
       if (pzLex!=NULL) {
-         char   acBuf[20];
-         time_t h=psHdl->uiNow;
-         strftime(acBuf,sizeof(acBuf),"%Y%m%d.%H%M%S",localtime(&h));
-         srprintf(ppLex,pzLex,strlen(acBuf),"d'%s",acBuf);
+         time_t t=psHdl->uiNow;
+         strftime(*ppLex,*pzLex,"d'%H%M%S",localtime(&t));
+         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(STR)-LEXEM(%s)\n",*ppLex);
+      }
+      return(CLPTOK_STR);
+   } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,*ppLex,"LCHOUR",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         time_t t=psHdl->uiNow;
+         strftime(*ppLex,*pzLex,"d'%H",localtime(&t));
+         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(STR)-LEXEM(%s)\n",*ppLex);
+      }
+      return(CLPTOK_STR);
+   } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,*ppLex,"LCMINUTE",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         time_t t=psHdl->uiNow;
+         strftime(*ppLex,*pzLex,"d'%M",localtime(&t));
+         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(STR)-LEXEM(%s)\n",*ppLex);
+      }
+      return(CLPTOK_STR);
+   } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,*ppLex,"LCSECOND",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         time_t t=psHdl->uiNow;
+         strftime(*ppLex,*pzLex,"d'%S",localtime(&t));
+         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(STR)-LEXEM(%s)\n",*ppLex);
+      }
+      return(CLPTOK_STR);
+   } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,*ppLex,"GMSTAMP",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         time_t t=psHdl->uiNow;
+         strftime(*ppLex,*pzLex,"d'%Y%m%d.%H%M%S",gmtime(&t));
+         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(STR)-LEXEM(%s)\n",*ppLex);
+      }
+      return(CLPTOK_STR);
+   } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,*ppLex,"GMDATE",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         time_t t=psHdl->uiNow;
+         strftime(*ppLex,*pzLex,"d'%Y%m%d",gmtime(&t));
+         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(STR)-LEXEM(%s)\n",*ppLex);
+      }
+      return(CLPTOK_STR);
+   } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,*ppLex,"GMYEAR",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         time_t t=psHdl->uiNow;
+         strftime(*ppLex,*pzLex,"d'%Y",gmtime(&t));
+         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(STR)-LEXEM(%s)\n",*ppLex);
+      }
+      return(CLPTOK_STR);
+   } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,*ppLex,"GMMONTH",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         time_t t=psHdl->uiNow;
+         strftime(*ppLex,*pzLex,"d'%m",gmtime(&t));
+         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(STR)-LEXEM(%s)\n",*ppLex);
+      }
+      return(CLPTOK_STR);
+   } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,*ppLex,"GMDAY",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         time_t t=psHdl->uiNow;
+         strftime(*ppLex,*pzLex,"d'%d",gmtime(&t));
          if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(STR)-LEXEM(%s)\n",*ppLex);
       }
       return(CLPTOK_STR);
    } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,*ppLex,"GMTIME",0,0,FALSE)==0) {
       if (pzLex!=NULL) {
-         char   acBuf[20];
-         time_t h=psHdl->uiNow;
-         strftime(acBuf,sizeof(acBuf),"%Y%m%d.%H%M%S",gmtime(&h));
-         srprintf(ppLex,pzLex,strlen(acBuf),"d'%s",acBuf);
+         time_t t=psHdl->uiNow;
+         strftime(*ppLex,*pzLex,"d'%H%M%S",gmtime(&t));
+         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(STR)-LEXEM(%s)\n",*ppLex);
+      }
+      return(CLPTOK_STR);
+   } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,*ppLex,"GMHOUR",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         time_t t=psHdl->uiNow;
+         strftime(*ppLex,*pzLex,"d'%H",gmtime(&t));
+         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(STR)-LEXEM(%s)\n",*ppLex);
+      }
+      return(CLPTOK_STR);
+   } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,*ppLex,"GMMINUTE",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         time_t t=psHdl->uiNow;
+         strftime(*ppLex,*pzLex,"d'%M",gmtime(&t));
+         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(STR)-LEXEM(%s)\n",*ppLex);
+      }
+      return(CLPTOK_STR);
+   } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,*ppLex,"GMSECOND",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         time_t t=psHdl->uiNow;
+         strftime(*ppLex,*pzLex,"d'%S",gmtime(&t));
          if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(STR)-LEXEM(%s)\n",*ppLex);
       }
       return(CLPTOK_STR);
@@ -2911,8 +3035,8 @@ static int siClpScnNat(
             if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(KYW)-LEXEM(%s)\n",pcHlp);
             return(CLPTOK_KYW);
          }
-      } else if (siTyp==CLPTYP_STRING && isStr((*ppCur)[0])       &&
-                        (*ppCur)[0]!='('    && (*ppCur)[0]!=')'   &&
+      } else if (siTyp==CLPTYP_STRING && isStr((*ppCur)[0])     &&
+                        (*ppCur)[0]!='('    && (*ppCur)[0]!=')' &&
                         (*ppCur)[0]!=C_SBO  && (*ppCur)[0]!=C_SBC) {/*required string*/
          char*             pcKyw;
          *pcLex='d'; pcLex++;
@@ -3275,9 +3399,12 @@ extern int siClpGrammar(
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  factor '/' term                                \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  factor                                         \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," factor         -> NUMBER | FLOAT | STRING                        \n");
-      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  CONSTANT                                       \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  KEYWORD                       # selection #    \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  CONSTANT                      # see lexem #    \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  '(' value ')'                                  \n");
-      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," For string only the operator + are implemented as concatenation  \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," For string only the operator '+' is implemented as concatenation \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," Strings without an operator in between are also concatenated     \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," A number followed by a constant is a multiplication (4KiB=4*1024)\n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                                                                  \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," Property File Parser                                             \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," properties     -> property_list                                  \n");
@@ -3922,6 +4049,16 @@ static int siClpPrsTrm(
          srprintf(ppVal,pzVal,24,"d %f",flVal1*flVal2);
          if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d AUTO-MUL-FLT(%f*%f=%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,flVal1,flVal2,*ppVal);
          break;
+      case CLPTYP_STRING:
+         if ((*ppVal)[0]==pcVal[0]) {
+            if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d ADD-STR(%s+",fpcPre(pvHdl,siLev),siLev,siPos,*ppVal);
+            srprintc(ppVal,pzVal,strlen(pcVal),"%s",pcVal+2);
+            if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s=%s))\n",pcVal,*ppVal);
+         } else {
+            free(pcVal);
+            return(CLPERR(psHdl,CLPERR_SEM,"Cannot concatenate different types (%c <> %c) of strings",(*ppVal)[0],pcVal[0]));
+         }
+         break;
       default:
          free(pcVal);
          return CLPERR(psHdl,CLPERR_SEM,"Multiplication not supported for type %s",apClpTyp[psArg->psFix->siTyp]);
@@ -4018,7 +4155,7 @@ static int siClpPrsExp(
          return CLPERR(psHdl,CLPERR_SEM,"Subtracation not supported for type %s",apClpTyp[psArg->psFix->siTyp]);
       }
       free(pcVal);
-   } else if ((psHdl->siTok==CLPTOK_NUM || psHdl->siTok==CLPTOK_FLT) && psHdl->isSep==FALSE ) {
+   } else if ((psHdl->siTok==CLPTOK_NUM || psHdl->siTok==CLPTOK_FLT || psHdl->siTok==CLPTOK_STR) && psHdl->isSep==FALSE ) {
       size_t szVal=strlen(psHdl->pcLex)+CLPINI_VALSIZ;
       char*  pcVal=(char*)calloc(1,szVal);
       if (pcVal==NULL) return(CLPERR(psHdl,CLPERR_MEM,"Allocation of memory to store expression values failed"));
@@ -4040,6 +4177,16 @@ static int siClpPrsExp(
          if (siErr) { free(pcVal); return(siErr); }
          srprintf(ppVal,pzVal,24,"d %f",flVal1+flVal2);
          if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d AUTO-ADD-FLT(%f+%f=%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,flVal1,flVal2,*ppVal);
+         break;
+      case CLPTYP_STRING:
+         if ((*ppVal)[0]==pcVal[0]) {
+            if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d ADD-STR(%s+",fpcPre(pvHdl,siLev),siLev,siPos,*ppVal);
+            srprintc(ppVal,pzVal,strlen(pcVal),"%s",pcVal+2);
+            if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s=%s))\n",pcVal,*ppVal);
+         } else {
+            free(pcVal);
+            return(CLPERR(psHdl,CLPERR_SEM,"Cannot concatenate different types (%c <> %c) of strings",(*ppVal)[0],pcVal[0]));
+         }
          break;
       default:
          free(pcVal);
