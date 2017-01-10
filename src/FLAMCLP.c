@@ -3552,7 +3552,7 @@ static int siClpPrsAry(
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    int                           siCnt;
    if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d ARY(%s%ctyplst%c)-OPN)\n",fpcPre(pvHdl,siLev),siLev,siPos,psArg->psStd->pcKyw,C_SBO,C_SBC);
-   siClpScnSrc(pvHdl,psArg->psFix->siTyp,psArg);
+   psHdl->siTok=siClpScnSrc(pvHdl,psArg->psFix->siTyp,psArg);
    if (psHdl->siTok<0) return(psHdl->siTok);
    if (psHdl->isPfl && psHdl->siTok==CLPTOK_SGN) {
       siCnt=siClpPrsFil(pvHdl,siLev,siPos,TRUE,psArg);
@@ -3587,6 +3587,7 @@ static int siClpPrsValLst(
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    int                           siErr,siPos=0;
+   printd("----------> %s<>%s\n",apClpTok[psHdl->siTok],apClpTok[siTok]);
    while (psHdl->siTok==siTok || psHdl->siTok==CLPTOK_KYW || psHdl->siTok==CLPTOK_RBO) {
       siErr=siClpPrsVal(pvHdl,siLev,siPos,psArg);
       if (siErr<0) return(siErr);
