@@ -225,7 +225,7 @@ Lexeme
     RBC  ')'\n
     SBO  '['\n
     SBC  ']'\n
-    KYW  [-[-]][:alpha:]+[:alnum: | '_' | '-']*\n
+    KYW  [-[-]][:alpha:]+[:alnum: | '_' ]*\n
     NUM  ([+|-]  [ :digit:]+) |                           decimal (default)\n
          ([+|-]0b[ :digit:]+) |                           binary\n
          ([+|-]0o[ :digit:]+) |                           octal\n

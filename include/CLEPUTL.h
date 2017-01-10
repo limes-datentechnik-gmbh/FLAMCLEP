@@ -71,7 +71,7 @@ extern int win_unsetenv(const char* name);
 #endif
 
 #define isStr(c) (isprint(c) || (c)==C_TLD  || (c)==C_DLR || (c)==C_ATS || (c)==C_BSL || (c)==C_CRT || (c)==C_EXC)
-#define isKyw(c) (isalnum(c) || (c)=='_' || (c)=='-')
+#define isKyw(c) (isalnum(c) || (c)=='_')
 
 #define ISDDNAME(p)     (toupper((p)[0])=='D' && toupper((p)[1])=='D' && (p)[2]==':')
 #define ISPATHNAME(p)   (strchr((p),'/')!=NULL)
