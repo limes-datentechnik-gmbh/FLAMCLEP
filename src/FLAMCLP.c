@@ -323,6 +323,7 @@ typedef struct Hdl {
    int                           siCol;
    int                           siErr;
    char                          acLoc[CLPMAX_LOCSIZ];
+   U64                           uiNow;
 } TsHdl;
 
 /* Deklaration der internen Funktionen ********************************/
@@ -901,6 +902,7 @@ extern void* pvClpOpen(
             snprintf(psHdl->acLoc,sizeof(psHdl->acLoc),"%s",pcLoc);
          }
          setlocale(LC_NUMERIC, "C");
+         psHdl->uiNow=time(NULL);
       }
    }
    return((void*)psHdl);
@@ -926,6 +928,7 @@ extern int siClpParsePro(
    } else {
       srprintf(&psHdl->pcSrc,&psHdl->szSrc,strlen(CLPSRC_PRO),"%s",CLPSRC_PRO);
    }
+   psHdl->uiNow=time(NULL);
    psHdl->pcInp=pcPro;
    psHdl->pcCur=pcPro;
    psHdl->pcOld=pcPro;
@@ -981,6 +984,7 @@ extern int siClpParseCmd(
    } else {
       srprintf(&psHdl->pcSrc,&psHdl->szSrc,strlen(CLPSRC_CMD),"%s",CLPSRC_CMD);
    }
+   psHdl->uiNow=time(NULL);
    psHdl->pcInp=pcCmd;
    psHdl->pcCur=pcCmd;
    psHdl->pcOld=pcCmd;
@@ -2648,7 +2652,7 @@ static int siClpConNat(
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    if ((siTyp==CLPTYP_NUMBER || siTyp==-1) && strxcmp(psHdl->isCas,*ppLex,"NOW",0,0,FALSE)==0) {
       if (pzLex!=NULL) {
-         srprintf(ppLex,pzLex,24,"d %"PRIu64"",((U64)time(NULL)));
+         srprintf(ppLex,pzLex,24,"d %"PRIu64"",psHdl->uiNow);
          if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(NUM)-LEXEM(%s)\n",*ppLex);
       }
       return(CLPTOK_NUM);
