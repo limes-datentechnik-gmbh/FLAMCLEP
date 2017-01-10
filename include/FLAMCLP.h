@@ -51,7 +51,7 @@ To handle passwords and passphrase more secure, you can provide a filename
 as string (PASSWD=f'filename'), which contains the corresponding string
 value. This prevents for example passwords from logging.
 
-In the command string (everywhere, where the scanner start to read a lexems)
+In the command string (everywhere, where the scanner start to read a lexem)
 each value in angle brackets will be transparently replaced by the corresponding
 environment variable, except in strings.
 
