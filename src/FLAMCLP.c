@@ -292,6 +292,7 @@ typedef struct Hdl {
    int                           isPfl;
    int                           isEnv;
    int                           siTok;
+   int                           isSep;
    size_t                        szLex;
    char*                         pcLex;
    size_t                        szSrc;
@@ -376,7 +377,8 @@ static int siClpScnNat(
    size_t*                       pzLex,
    char**                        ppLex,
    int                           siTyp,
-   const TsSym*                  psArg);
+   const TsSym*                  psArg,
+   int*                          piSep);
 
 static int siClpScnSrc(
    void*                         pvHdl,
@@ -2598,7 +2600,8 @@ static int siClpScnNat(
    size_t*                       pzLex,
    char**                        ppLex,
    int                           siTyp,
-   const TsSym*                  psArg)
+   const TsSym*                  psArg,
+   int*                          piSep)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    char*                         pcLex=(*ppLex);
@@ -2614,12 +2617,15 @@ static int siClpScnNat(
 
    if (siTyp!=CLPTYP_NUMBER && siTyp!=CLPTYP_FLOATN && siTyp!=CLPTYP_STRING) siTyp=0;
 
+   if (piSep!=NULL) *piSep=FALSE;
+
    while (1) {
       if (*(*ppCur)==EOS) { /*end*/
          pcLex[0]=EOS;
          if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(END)-LEXEM(%s)\n",isPrnLex(psArg,pcHlp));
          return(CLPTOK_END);
       } else if (isSeparation(*(*ppCur))) { /*separation*/
+         if (piSep!=NULL) *piSep=TRUE;
          if (*(*ppCur)=='\n') {
             psHdl->siRow++;
             psHdl->pcRow=(*ppCur)+1;
@@ -3142,7 +3148,7 @@ static int siClpScnSrc(
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    psHdl->pcOld=psHdl->pcCur;
-   return(siClpScnNat(pvHdl,psHdl->pfErr,psHdl->pfScn,&psHdl->pcCur,&psHdl->szLex,&psHdl->pcLex,siTyp,psArg));
+   return(siClpScnNat(pvHdl,psHdl->pfErr,psHdl->pfScn,&psHdl->pcCur,&psHdl->szLex,&psHdl->pcLex,siTyp,psArg,&psHdl->isSep));
 }
 
 /**********************************************************************/
@@ -4023,7 +4029,7 @@ static int siClpPrsTrm(
          return CLPERR(psHdl,CLPERR_SEM,"Multiplication not supported for type %s",apClpTyp[psArg->psFix->siTyp]);
       }
       free(pcVal);
-   } else if (psHdl->siTok==CLPTOK_KYW && CLPTOK_KYW!=siClpConSrc(pvHdl,psArg->psFix->siTyp,TRUE)) {
+   } else if (psHdl->siTok==CLPTOK_KYW && psHdl->isSep==FALSE && CLPTOK_KYW!=siClpConSrc(pvHdl,psArg->psFix->siTyp,TRUE)) {
       size_t szVal=strlen(psHdl->pcLex)+CLPINI_VALSIZ;
       char*  pcVal=(char*)calloc(1,szVal);
       if (pcVal==NULL) return(CLPERR(psHdl,CLPERR_MEM,"Allocation of memory to store expression values failed"));
@@ -4127,7 +4133,7 @@ static int siClpPrsExp(
          return CLPERR(psHdl,CLPERR_SEM,"Multiplication not supported for type %s",apClpTyp[psArg->psFix->siTyp]);
       }
       free(pcVal);
-   } else if (psHdl->siTok==CLPTOK_NUM || psHdl->siTok==CLPTOK_FLT) {
+   } else if ((psHdl->siTok==CLPTOK_NUM || psHdl->siTok==CLPTOK_FLT) && psHdl->isSep==FALSE ) {
       size_t szVal=strlen(psHdl->pcLex)+CLPINI_VALSIZ;
       char*  pcVal=(char*)calloc(1,szVal);
       if (pcVal==NULL) return(CLPERR(psHdl,CLPERR_MEM,"Allocation of memory to store expression values failed"));
@@ -4795,7 +4801,7 @@ static int siClpBldLit(
          pcRow=psHdl->pcRow; psHdl->pcRow=pcDat;
          siRow=psHdl->siRow; psHdl->siRow=1;
          psHdl->siBuf++;
-         siTok=siClpScnNat(pvHdl,psHdl->pfErr,psHdl->pfScn,&psHdl->pcCur,&szLex,&pcLex,CLPTYP_STRING,psArg);
+         siTok=siClpScnNat(pvHdl,psHdl->pfErr,psHdl->pfScn,&psHdl->pcCur,&szLex,&pcLex,CLPTYP_STRING,psArg,NULL);
          if (siTok<0) {
             free(pcLex);
             return(siTok);
@@ -5605,8 +5611,8 @@ static int siClpSetDefault(
       pcRow=psHdl->pcRow; psHdl->pcRow=psArg->psFix->pcDft;
       siRow=psHdl->siRow; psHdl->siRow=psArg->psFix->siRow;
       psHdl->siBuf++;
-      for (siTok=siClpScnNat(pvHdl,psHdl->pfErr,psHdl->pfScn,&psHdl->pcCur,&szLex,&pcLex,psArg->psFix->siTyp,psArg);siTok!=CLPTOK_END;
-           siTok=siClpScnNat(pvHdl,psHdl->pfErr,psHdl->pfScn,&psHdl->pcCur,&szLex,&pcLex,psArg->psFix->siTyp,psArg)) {
+      for (siTok=siClpScnNat(pvHdl,psHdl->pfErr,psHdl->pfScn,&psHdl->pcCur,&szLex,&pcLex,psArg->psFix->siTyp,psArg,NULL);siTok!=CLPTOK_END;
+           siTok=siClpScnNat(pvHdl,psHdl->pfErr,psHdl->pfScn,&psHdl->pcCur,&szLex,&pcLex,psArg->psFix->siTyp,psArg,NULL)) {
          switch(siTok) {
          case CLPTOK_NUM:
             if (psArg->psFix->siTyp==CLPTYP_SWITCH) {
