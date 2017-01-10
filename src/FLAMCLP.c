@@ -483,6 +483,7 @@ static int siClpPrsVal(
    void*                         pvHdl,
    const int                     siLev,
    const int                     siPos,
+   const int                     isAry,
    TsSym*                        psArg);
 
 static int siClpPrsProLst(
@@ -3306,7 +3307,7 @@ static int siClpPrsSgn(
    if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d SGN(%s=val)\n",fpcPre(pvHdl,siLev),siLev,siPos,psArg->psStd->pcKyw);
    psHdl->siTok=siClpScnSrc(pvHdl,psArg->psFix->siTyp,psArg);
    if (psHdl->siTok<0) return(psHdl->siTok);
-   return(siClpPrsVal(pvHdl,siLev,siPos,psArg));
+   return(siClpPrsVal(pvHdl,siLev,siPos,FALSE,psArg));
 }
 
 static int siClpPrsFil(
@@ -3588,7 +3589,7 @@ static int siClpPrsValLst(
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    int                           siErr,siPos=0;
    while (psHdl->siTok==siTok || psHdl->siTok==CLPTOK_KYW || psHdl->siTok==CLPTOK_RBO) {
-      siErr=siClpPrsVal(pvHdl,siLev,siPos,psArg);
+      siErr=siClpPrsVal(pvHdl,siLev,siPos,TRUE,psArg);
       if (siErr<0) return(siErr);
       siPos++;
    }
@@ -3672,11 +3673,224 @@ static int siFromFloat(
    }
    return(CLP_OK);
 }
-
+/*
+static int siFromString(
+   void*                         pvHdl,
+   const int                     siLev,
+   const int                     siPos,
+   TsSym*                        psArg,
+   const char*                   pcVal,
+   size_t*                       piVal,
+   char**                        ppVal)
+{
+   TsHdl*                        psHdl=(TsHdl*)pvHdl;
+   int                           siErr,l0,l1,l2,siSln;
+   char*                         pcHlp=NULL;
+   if (CLPISF_FIX(psArg->psStd->uiFlg)) l0=psArg->psFix->siSiz; else l0=psArg->psVar->siRst;
+   l1=strlen(pcVal+2);
+   switch (pcVal[0]) {
+   case 'x':
+      if (CLPISF_BIN(psArg->psStd->uiFlg)) {
+         if (l1%2) {
+            return CLPERR(psHdl,CLPERR_LEX,"Length of hexadecimal string (%c(%s)) for '%s.%s' is not a multiple of 2",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+         }
+         if ((l1/2)>l0) {
+            return CLPERR(psHdl,CLPERR_LEX,"Hexadecimal string (%c(%s)) of '%s.%s' is longer than %d",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,2*l0);
+         }
+         l2=hex2bin(pcVal+2,(U08*)psArg->psVar->pvPtr,l1);
+         if (l2!=l1/2) {
+            return CLPERR(psHdl,CLPERR_SEM,"Hexadecimal string (%c(%s)) of '%s.%s' cannot be converted from hex to bin",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+         }
+         siSln=l2;
+         if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-LITERAL-HEX(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
+                                 fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),isPrnLen(psArg,l2));
+      } else {
+         return CLPERR(psHdl,CLPERR_SEM,"String literal (%c(%s)) for '%s.%s' is binary (only null-terminated character string permitted)",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+      }
+      break;
+   case 'a':
+      if (CLPISF_BIN(psArg->psStd->uiFlg)) {
+         if (l1>l0) {
+            return CLPERR(psHdl,CLPERR_LEX,"ASCII string (%c(%s)) of '%s.%s' is longer than %d",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,l0);
+         }
+         l2=chr2asc(pcVal+2,(C08*)psArg->psVar->pvPtr,l1);
+         if (l2!=l1) {
+            return CLPERR(psHdl,CLPERR_SEM,"ASCII string (%c(%s)) of '%s.%s' cannot be converted to ASCII",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+         }
+         siSln=l1;
+         if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-LITERAL-ASC(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
+                                 fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),isPrnLen(psArg,l2));
+      } else {
+         return CLPERR(psHdl,CLPERR_SEM,"String literal (%c(%s)) for '%s.%s' is binary (only null-terminated character string permitted)",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+      }
+      break;
+   case 'e':
+      if (CLPISF_BIN(psArg->psStd->uiFlg)) {
+         if (l1>l0) {
+            return CLPERR(psHdl,CLPERR_LEX,"EBCDIC string (%c(%s)) of '%s.%s' is longer than %d",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,l0);
+         }
+         l2=chr2ebc(pcVal+2,(C08*)psArg->psVar->pvPtr,l1);
+         if (l2!=l1) {
+            return CLPERR(psHdl,CLPERR_SEM,"EBCDIC string (%c(%s)) of '%s.%s' cannot be converted to EBCDIC",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+         }
+         siSln=l1;
+         if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-LITERAL-EBC(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
+                                 fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),isPrnLen(psArg,l2));
+      } else {
+         return CLPERR(psHdl,CLPERR_SEM,"String literal (%c(%s)) for '%s.%s' is binary (only null-terminated character string permitted)",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+      }
+      break;
+   case 'c':
+      if (CLPISF_BIN(psArg->psStd->uiFlg)) {
+         if (l1>l0) {
+            return CLPERR(psHdl,CLPERR_LEX,"Character string (%c(%s)) of '%s.%s' is longer than %d",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,l0);
+         }
+         memcpy(psArg->psVar->pvPtr,pcVal+2,l1); l2=l1;
+         siSln=l1;
+         if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-LITERAL-CHR(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
+                                 fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),isPrnLen(psArg,l2));
+      } else {
+         return CLPERR(psHdl,CLPERR_SEM,"String literal (%c(%s)) for '%s.%s' is binary (only null-terminated character string permitted)",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+      }
+      break;
+   case 's':
+      if (l1+1>l0) {
+         return CLPERR(psHdl,CLPERR_LEX,"Character string (%c(%s)) of '%s.%s' is longer than %d",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,l0-1);
+      }
+      memcpy(psArg->psVar->pvPtr,pcVal+2,l1);
+      ((char*)psArg->psVar->pvPtr)[l1]=EOS;
+      l2=l1+1; siSln=l1;
+      if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-LITERAL-STR(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
+                              fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),isPrnLen(psArg,l2));
+      break;
+   case 'f':
+   {
+      int                           siTok;
+      int                           siRow;
+      int                           siSiz=0;
+      char*                         pcDat=NULL;
+      const char*                   pcCur;
+      const char*                   pcInp;
+      const char*                   pcOld;
+      const char*                   pcRow;
+      char                          acSrc[strlen(psHdl->pcSrc)+1];
+      size_t                        szLex=CLPINI_LEXSIZ;
+      char*                         pcLex=(char*)calloc(1,szLex);
+      char                          acFil[L_filnam]={0};
+      if (pcLex==NULL) return(CLPERR(psHdl,CLPERR_MEM,"Allocation of memory to store the lexem failed"));
+      siErr=file2str(cpmapfil(acFil,sizeof(acFil),pcVal+2),&pcDat,&siSiz,filemode("r"));
+      if (siErr<0) {
+         switch(siErr) {
+         case -1: siErr=CLPERR(psHdl,CLPERR_INT,"Illegal parameters passed to file2str() (Bug)%s","");break;
+         case -2: siErr=CLPERR(psHdl,CLPERR_SYS,"Open of string file (%s) failed (%d - %s)",acFil,errno,strerror(errno));break;
+         case -3: siErr=CLPERR(psHdl,CLPERR_SEM,"String file (%s) is too big (integer overflow)",acFil);break;
+         case -4: siErr=CLPERR(psHdl,CLPERR_MEM,"Allocation of memory for string file (%s) failed",acFil);break;
+         case -5: siErr=CLPERR(psHdl,CLPERR_SYS,"Read of string file (%s) failed (%d - %s)",acFil,errno,strerror(errno));break;
+         default: siErr=CLPERR(psHdl,CLPERR_SYS,"An unknown error occurred while reading string file (%s)",acFil);break;
+         }
+         if (pcDat!=NULL) free(pcDat);
+         free(pcLex);
+         return(siErr);
+      }
+      if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"STRING-FILE-BEGIN(%s)\n",acFil);
+      strcpy(acSrc,psHdl->pcSrc);
+      srprintf(&psHdl->pcSrc,&psHdl->szSrc,strlen(CLPSRC_SRF)+strlen(acFil),"%s%s",CLPSRC_SRF,acFil);
+      pcCur=psHdl->pcCur; psHdl->pcCur=pcDat;
+      pcInp=psHdl->pcInp; psHdl->pcInp=pcDat;
+      pcOld=psHdl->pcOld; psHdl->pcOld=pcDat;
+      pcRow=psHdl->pcRow; psHdl->pcRow=pcDat;
+      siRow=psHdl->siRow; psHdl->siRow=1;
+      psHdl->siBuf++;
+      siTok=siClpScnNat(pvHdl,psHdl->pfErr,psHdl->pfScn,&psHdl->pcCur,&szLex,&pcLex,CLPTYP_STRING,psArg);
+      if (siTok<0) {
+         free(pcLex);
+         return(siTok);
+      }
+      if (siTok!=CLPTOK_STR) {
+         siErr=CLPERR(psHdl,CLPERR_SYN,"The token (%s(%s)) is not allowed in a string file (%c(%s)) of '%s.%s'",apClpTok[siTok],pcLex,pcVal[0],pcVal+2,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+         free(pcDat);
+         free(pcLex);
+         return(siErr);
+      }
+      if (pcLex[0]=='f') {
+         siErr=CLPERR(psHdl,CLPERR_SYN,"Define a string file (%c(%s)) in a string file (%c(%s)) is not allowed (%s.%s)",pcLex[0],pcLex+2,pcVal[0],pcVal+2,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+         free(pcDat);
+         free(pcLex);
+         return(siErr);
+      }
+      siErr=siClpBldLit(pvHdl,siLev,siPos,psArg,pcLex);
+      psHdl->siBuf--;
+      strcpy(psHdl->pcSrc,acSrc);
+      psHdl->pcCur=pcCur; psHdl->pcInp=pcInp; psHdl->pcOld=pcOld; psHdl->pcRow=pcRow; psHdl->siRow=siRow;
+      if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"STRING-FILE-END(%s)\n",acFil);
+      free(pcDat);
+      free(pcLex);
+      return(siErr);
+   }
+   case 'd':
+      if (CLPISF_BIN(psArg->psStd->uiFlg)) {
+         if (CLPISF_HEX(psArg->psStd->uiFlg)) {
+            if (l1%2) {
+               return CLPERR(psHdl,CLPERR_LEX,"Length of hexadecimal string (%c(%s)) for '%s.%s' is not a multiple of 2",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+            }
+            if ((l1/2)>l0) {
+               return CLPERR(psHdl,CLPERR_LEX,"Hexadecimal string (%c(%s)) of '%s.%s' is longer than %d",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,2*l0);
+            }
+            l2=hex2bin(pcVal+2,(U08*)psArg->psVar->pvPtr,l1);
+            if (l2!=l1/2) {
+               return CLPERR(psHdl,CLPERR_SEM,"Hexadecimal string (%c(%s)) of '%s.%s' cannot be converted from hex to bin",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+            }
+            siSln=l2;
+            if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-LITERAL-HEX(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
+                                    fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),isPrnLen(psArg,l2));
+         } else if (CLPISF_ASC(psArg->psStd->uiFlg)) {
+            if (l1>l0) {
+               return CLPERR(psHdl,CLPERR_LEX,"ASCII string (%c(%s)) of '%s.%s' is longer than %d",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,l0);
+            }
+            l2=chr2asc(pcVal+2,(C08*)psArg->psVar->pvPtr,l1);
+            if (l2!=l1) {
+               return CLPERR(psHdl,CLPERR_SEM,"ASCII string (%c(%s)) of '%s.%s' cannot be converted to ASCII",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+            }
+            siSln=l1;
+            if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-LITERAL-ASC(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
+                                    fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),isPrnLen(psArg,l2));
+         } else if (CLPISF_EBC(psArg->psStd->uiFlg)) {
+            if (l1>l0) {
+               return CLPERR(psHdl,CLPERR_LEX,"EBCDIC string (%c(%s)) of '%s.%s' is longer than %d",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,l0);
+            }
+            l2=chr2ebc(pcVal+2,(C08*)psArg->psVar->pvPtr,l1);
+            if (l2!=l1) {
+               return CLPERR(psHdl,CLPERR_SEM,"EBCDIC string (%c(%s)) of '%s.%s' cannot be converted to EBCDIC",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+            }
+            siSln=l1;
+            if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-LITERAL-EBC(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
+                                    fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),isPrnLen(psArg,l2));
+         } else {
+            if (l1>l0) {
+               return CLPERR(psHdl,CLPERR_LEX,"Character string (%c(%s)) of '%s.%s' is longer than %d",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,l0);
+            }
+            memcpy(psArg->psVar->pvPtr,pcVal+2,l1); l2=l1;
+            siSln=l1;
+            if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-LITERAL-CHR(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
+                                    fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),isPrnLen(psArg,l2));
+         }
+      } else {
+         if (l1+1>l0) {
+            return CLPERR(psHdl,CLPERR_LEX,"Character string (%c(%s)) of '%s.%s' is longer than %d",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,l0-1);
+         }
+         memcpy(psArg->psVar->pvPtr,pcVal+2,l1);
+         ((char*)psArg->psVar->pvPtr)[l1]=EOS;
+         l2=l1+1; siSln=l1;
+         if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-LITERAL-STR(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
+                                 fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),isPrnLen(psArg,l2));
+      }
+}
+*/
 static int siClpPrsExp(
    void*                         pvHdl,
    const int                     siLev,
    const int                     siPos,
+   const int                     isAry,
    TsSym*                        psArg,
    size_t*                       pzVal,
    char**                        ppVal);
@@ -3685,6 +3899,7 @@ static int siClpPrsFac(
    void*                         pvHdl,
    const int                     siLev,
    const int                     siPos,
+   const int                     isAry,
    TsSym*                        psArg,
    size_t*                       pzVal,
    char**                        ppVal)
@@ -3697,7 +3912,7 @@ static int siClpPrsFac(
    case CLPTOK_STR:
       srprintf(ppVal,pzVal,strlen(psHdl->pcLex),"%s",psHdl->pcLex);
       if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d NUM/FLT/STR(%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,psHdl->pcLex);
-      psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
+      psHdl->siTok=siClpScnSrc(pvHdl,(isAry)?psArg->psFix->siTyp:0,psArg);
       if (psHdl->siTok<0) return(psHdl->siTok);
       return(CLP_OK);
    case CLPTOK_KYW:
@@ -3707,16 +3922,16 @@ static int siClpPrsFac(
       }
       srprintf(ppVal,pzVal,strlen(psHdl->pcLex),"%s",psHdl->pcLex);
       if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d KYW-CON(%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,psHdl->pcLex);
-      psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
+      psHdl->siTok=siClpScnSrc(pvHdl,(isAry)?psArg->psFix->siTyp:0,psArg);
       if (psHdl->siTok<0) return(psHdl->siTok);
       return(CLP_OK);
    case CLPTOK_RBO:
       psHdl->siTok=siClpScnSrc(pvHdl,psArg->psFix->siTyp,psArg);
       if (psHdl->siTok<0) return(psHdl->siTok);
-      siErr=siClpPrsExp(pvHdl,siLev,siPos,psArg,pzVal,ppVal);
+      siErr=siClpPrsExp(pvHdl,siLev,siPos,isAry,psArg,pzVal,ppVal);
       if (siErr) return(siErr);
       if (psHdl->siTok==CLPTOK_RBC) {
-         psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
+         psHdl->siTok=siClpScnSrc(pvHdl,(isAry)?psArg->psFix->siTyp:0,psArg);
          if (psHdl->siTok<0) return(psHdl->siTok);
          return(CLP_OK);
       } else {
@@ -3731,6 +3946,7 @@ static int siClpPrsTrm(
    void*                         pvHdl,
    const int                     siLev,
    const int                     siPos,
+   const int                     isAry,
    TsSym*                        psArg,
    size_t*                       pzVal,
    char**                        ppVal)
@@ -3741,7 +3957,7 @@ static int siClpPrsTrm(
    I64                           siVal2=0;
    F64                           flVal1=0;
    F64                           flVal2=0;
-   siErr=siClpPrsFac(pvHdl,siLev,siPos,psArg,pzVal,ppVal);
+   siErr=siClpPrsFac(pvHdl,siLev,siPos,isAry,psArg,pzVal,ppVal);
    if (siErr) return(siErr);
    if (psHdl->siTok==CLPTOK_MUL) {
       psHdl->siTok=siClpScnSrc(pvHdl,psArg->psFix->siTyp,psArg);
@@ -3749,7 +3965,7 @@ static int siClpPrsTrm(
       size_t szVal=strlen(psHdl->pcLex)+CLPINI_VALSIZ;
       char*  pcVal=(char*)calloc(1,szVal);
       if (pcVal==NULL) return(CLPERR(psHdl,CLPERR_MEM,"Allocation of memory to store expression values failed"));
-      siErr=siClpPrsTrm(pvHdl,siLev,siPos,psArg,&szVal,&pcVal);
+      siErr=siClpPrsTrm(pvHdl,siLev,siPos,isAry,psArg,&szVal,&pcVal);
       if (siErr) { free(pcVal); return(siErr); }
       switch(psArg->psFix->siTyp) {
       case CLPTYP_NUMBER:
@@ -3777,7 +3993,7 @@ static int siClpPrsTrm(
       size_t szVal=strlen(psHdl->pcLex)+CLPINI_VALSIZ;
       char*  pcVal=(char*)calloc(1,szVal);
       if (pcVal==NULL) return(CLPERR(psHdl,CLPERR_MEM,"Allocation of memory to store expression values failed"));
-      siErr=siClpPrsTrm(pvHdl,siLev,siPos,psArg,&szVal,&pcVal);
+      siErr=siClpPrsTrm(pvHdl,siLev,siPos,isAry,psArg,&szVal,&pcVal);
       if (siErr) { free(pcVal); return(siErr); }
       switch(psArg->psFix->siTyp) {
       case CLPTYP_NUMBER:
@@ -3811,7 +4027,7 @@ static int siClpPrsTrm(
       size_t szVal=strlen(psHdl->pcLex)+CLPINI_VALSIZ;
       char*  pcVal=(char*)calloc(1,szVal);
       if (pcVal==NULL) return(CLPERR(psHdl,CLPERR_MEM,"Allocation of memory to store expression values failed"));
-      siErr=siClpPrsTrm(pvHdl,siLev,siPos,psArg,&szVal,&pcVal);
+      siErr=siClpPrsTrm(pvHdl,siLev,siPos,isAry,psArg,&szVal,&pcVal);
       if (siErr) { free(pcVal); return(siErr); }
       switch(psArg->psFix->siTyp) {
       case CLPTYP_NUMBER:
@@ -3842,6 +4058,7 @@ static int siClpPrsExp(
    void*                         pvHdl,
    const int                     siLev,
    const int                     siPos,
+   const int                     isAry,
    TsSym*                        psArg,
    size_t*                       pzVal,
    char**                        ppVal)
@@ -3852,7 +4069,7 @@ static int siClpPrsExp(
    I64                           siVal2=0;
    F64                           flVal1=0;
    F64                           flVal2=0;
-   siErr=siClpPrsTrm(pvHdl,siLev,siPos,psArg,pzVal,ppVal);
+   siErr=siClpPrsTrm(pvHdl,siLev,siPos,isAry,psArg,pzVal,ppVal);
    if (siErr) return(siErr);
    if (psHdl->siTok==CLPTOK_ADD) {
       psHdl->siTok=siClpScnSrc(pvHdl,psArg->psFix->siTyp,psArg);
@@ -3860,7 +4077,7 @@ static int siClpPrsExp(
       size_t szVal=strlen(psHdl->pcLex)+CLPINI_VALSIZ;
       char*  pcVal=(char*)calloc(1,szVal);
       if (pcVal==NULL) return(CLPERR(psHdl,CLPERR_MEM,"Allocation of memory to store expression values failed"));
-      siErr=siClpPrsExp(pvHdl,siLev,siPos,psArg,&szVal,&pcVal);
+      siErr=siClpPrsExp(pvHdl,siLev,siPos,isAry,psArg,&szVal,&pcVal);
       if (siErr) { free(pcVal); return(siErr); }
       switch(psArg->psFix->siTyp) {
       case CLPTYP_NUMBER:
@@ -3888,7 +4105,7 @@ static int siClpPrsExp(
       size_t szVal=strlen(psHdl->pcLex)+CLPINI_VALSIZ;
       char*  pcVal=(char*)calloc(1,szVal);
       if (pcVal==NULL) return(CLPERR(psHdl,CLPERR_MEM,"Allocation of memory to store expression values failed"));
-      siErr=siClpPrsExp(pvHdl,siLev,siPos,psArg,&szVal,&pcVal);
+      siErr=siClpPrsExp(pvHdl,siLev,siPos,isAry,psArg,&szVal,&pcVal);
       if (siErr) { free(pcVal); return(siErr); }
       switch(psArg->psFix->siTyp) {
       case CLPTYP_NUMBER:
@@ -3914,7 +4131,7 @@ static int siClpPrsExp(
       size_t szVal=strlen(psHdl->pcLex)+CLPINI_VALSIZ;
       char*  pcVal=(char*)calloc(1,szVal);
       if (pcVal==NULL) return(CLPERR(psHdl,CLPERR_MEM,"Allocation of memory to store expression values failed"));
-      siErr=siClpPrsExp(pvHdl,siLev,siPos,psArg,&szVal,&pcVal);
+      siErr=siClpPrsExp(pvHdl,siLev,siPos,isAry,psArg,&szVal,&pcVal);
       if (siErr) { free(pcVal); return(siErr); }
       switch(psArg->psFix->siTyp) {
       case CLPTYP_NUMBER:
@@ -3944,6 +4161,7 @@ static int siClpPrsVal(
    void*                         pvHdl,
    const int                     siLev,
    const int                     siPos,
+   const int                     isAry,
    TsSym*                        psArg)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
@@ -3963,19 +4181,19 @@ static int siClpPrsVal(
       siInd=siClpSymFnd(pvHdl,siLev+1,siPos,pcVal,psArg->psDep,&psVal,NULL);
       if (siInd>=0) {
          free(pcVal);
-         psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
+         psHdl->siTok=siClpScnSrc(pvHdl,(isAry)?psArg->psFix->siTyp:0,psArg);
          if (psHdl->siTok<0) return(psHdl->siTok);
          if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d KYW(%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,pcVal);
          return(siClpBldCon(pvHdl,siLev,siPos,psArg,psVal));
       } else {
-         siInd=siClpPrsExp(pvHdl,siLev+1,siPos,psArg,&szVal,&pcVal);
+         siInd=siClpPrsExp(pvHdl,siLev+1,siPos,isAry,psArg,&szVal,&pcVal);
          if (siInd<0) {
             free(pcVal);
             return(siInd);
          }
       }
    } else {
-      siInd=siClpPrsExp(pvHdl,siLev+1,siPos,psArg,&szVal,&pcVal);
+      siInd=siClpPrsExp(pvHdl,siLev+1,siPos,isAry,psArg,&szVal,&pcVal);
       if (siInd<0) {
          free(pcVal);
          return(siInd);
@@ -4395,18 +4613,8 @@ static int siClpBldLit(
       if (psArg->psVar->siRst<psArg->psFix->siSiz) {
          return CLPERR(psHdl,CLPERR_SIZ,"Rest of space (%d) is not big enough for argument '%s.%s' with type '%s'",fpcPat(pvHdl,siLev),psArg->psVar->siRst,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
       }
-      errno=0;
-      switch (pcVal[0]) {
-      case 'b':siVal=strtoll(pcVal+1,&pcHlp, 2); break;
-      case 'o':siVal=strtoll(pcVal+1,&pcHlp, 8); break;
-      case 'd':siVal=strtoll(pcVal+1,&pcHlp,10); break;
-      case 'x':siVal=strtoll(pcVal+1,&pcHlp,16); break;
-      case 't':siVal=strtoll(pcVal+1,&pcHlp,10); break;
-      default: return CLPERR(psHdl,CLPERR_SEM,"Base (%c) of number literal (%s.%s=%s) not supported",pcVal[0],fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,isPrnStr(psArg,pcVal+1));
-      }
-      if (errno || *pcHlp) {
-         return CLPERR(psHdl,CLPERR_SEM,"Number (%s) of '%s.%s' cannot be converted to a 64 bit value (rest: %s)",isPrnStr(psArg,pcVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,isPrnStr(psArg,pcHlp));
-      }
+      siErr=siFromNumber(pvHdl,siLev,siPos,psArg,pcVal,&siVal);
+      if (siErr) return(siErr);
       switch (psArg->psFix->siSiz) {
       case 1:
          if (siVal<(-128) || siVal>255) {
@@ -4450,14 +4658,8 @@ static int siClpBldLit(
       if (psArg->psVar->siRst<psArg->psFix->siSiz) {
          return CLPERR(psHdl,CLPERR_SEM,"Rest of space (%d) is not big enough for argument '%s.%s' with type '%s'",psArg->psVar->siRst,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
       }
-      errno=0;
-      switch (pcVal[0]) {
-      case 'd':flVal=strtod(pcVal+1,&pcHlp); break;
-      default: return CLPERR(psHdl,CLPERR_SEM,"Base (%c) of floating point literal (%s.%s=%s) not supported",pcVal[0],fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,isPrnStr(psArg,pcVal+1));
-      }
-      if (errno || *pcHlp) {
-         return CLPERR(psHdl,CLPERR_SEM,"Floating number (%s) of '%s.%s' cannot be converted to a valid 64 bit value (rest: %s)",isPrnStr(psArg,pcVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,pcHlp);
-      }
+      siErr=siFromFloat(pvHdl,siLev,siPos,psArg,pcVal,&flVal);
+      if (siErr) return(siErr);
       switch (psArg->psFix->siSiz) {
       case 4:
          *((F32*)psArg->psVar->pvPtr)=flVal;
