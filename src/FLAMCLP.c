@@ -3029,7 +3029,7 @@ static int siClpScnNat(
             return(CLPTOK_KYW);
          }
       } else if (siTyp==CLPTYP_STRING && isStr((*ppCur)[0])     &&
-                        (*ppCur)[0]!='('    && (*ppCur)[0]!=')' &&
+                        (*ppCur)[0]!='('    && (*ppCur)[0]!=')' && (*ppCur)[0]!='+' &&
                         (*ppCur)[0]!=C_SBO  && (*ppCur)[0]!=C_SBC) {/*required string*/
          char*             pcKyw;
          *pcLex='d'; pcLex++;
