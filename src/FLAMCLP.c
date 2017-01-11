@@ -2404,12 +2404,11 @@ static int siClpFndSym(
    const int                     siPos,
    const char*                   pcKyw,
    const TsSym*                  psTab,
-   TsSym**                       ppArg,
-   int*                          piElm)
+   TsSym**                       ppArg)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    const TsSym*                  psHlp=NULL;
-   int                           i,j,k,e;
+   int                           i,j,k;
    *ppArg=NULL;
    if (psTab==NULL) {
       return(CLPERR_SYN);
@@ -2417,7 +2416,7 @@ static int siClpFndSym(
    if (psTab->psBak!=NULL) {
       return(CLPERR_INT);
    }
-   for (e=i=0,psHlp=psTab;psHlp!=NULL;psHlp=psHlp->psNxt,i++) {
+   for (i=0,psHlp=psTab;psHlp!=NULL;psHlp=psHlp->psNxt,i++) {
       if (!CLPISF_LNK(psHlp->psStd->uiFlg)) {
          if (psHdl->isCas) {
             for (k=j=0;pcKyw[j]!=EOS;j++) {
@@ -2429,14 +2428,8 @@ static int siClpFndSym(
             }
          }
          if (k==0 && j>=psHlp->psStd->siKwl) {
-            if (piElm!=NULL) (*piElm)=e;
             *ppArg=(TsSym*)psHlp;
             return(i);
-         }
-         if (piElm!=NULL) {
-            if (CLPISF_ARG(psHlp->psStd->uiFlg) || CLPISF_CON(psHlp->psStd->uiFlg)) {
-               e++;
-            }
          }
       }
    }
@@ -3402,7 +3395,7 @@ extern int siClpGrammar(
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  KEYWORD                       # selection #    \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  CONSTANT                      # see lexem #    \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  '(' value ')'                                  \n");
-      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," For string only the operator '+' is implemented as concatenation \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," For strings only the operator '+' is implemented as concatenation\n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," Strings without an operator in between are also concatenated     \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," A number followed by a constant is a multiplication (4KiB=4*1024)\n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                                                                  \n");
@@ -3904,27 +3897,89 @@ static int siClpPrsFac(
    char**                        ppVal)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
+   TsSym*                        psVal;
    int                           siErr;
+   I64                           siVal;
+   F64                           flVal;
+   C08*                          pcVal;
    switch(psHdl->siTok) {
    case CLPTOK_NUM:
    case CLPTOK_FLT:
    case CLPTOK_STR:
+      if (CLPISF_SEL(psArg->psStd->uiFlg)) {
+         CLPERR(psHdl,CLPERR_SEM,"The argument '%s.%s' requires one of the defined keywords as value",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+         CLPERRADD(psHdl,0,"Please use one of the following arguments:%s","");
+         vdClpPrnArgTab(pvHdl,psHdl->pfErr,1,psArg->psFix->siTyp,psArg->psDep);
+         return(CLPERR_SEM);
+      }
       srprintf(ppVal,pzVal,strlen(psHdl->pcLex),"%s",psHdl->pcLex);
-      if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d NUM/FLT/STR(%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,psHdl->pcLex);
+      if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d NUM/FLT/STR(%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,*ppVal);
       psHdl->siTok=siClpScnSrc(pvHdl,(isAry)?psArg->psFix->siTyp:0,psArg);
       if (psHdl->siTok<0) return(psHdl->siTok);
       return(CLP_OK);
    case CLPTOK_KYW:
-      psHdl->siTok=siClpConSrc(pvHdl,psArg->psFix->siTyp,FALSE);
-      if (psHdl->siTok==CLPTOK_KYW) {
-         return CLPERR(psHdl,CLPERR_SYN,"Keyword (%s) not valid in expression of type %s",psHdl->pcLex,apClpTyp[psArg->psFix->siTyp]);
+      siErr=siClpFndSym(pvHdl,siLev+1,siPos,psHdl->pcLex,psArg->psDep,&psVal);
+      if (siErr>=0) {
+         if (psArg->psFix->siTyp!=psVal->psFix->siTyp) {
+            return CLPERR(psHdl,CLPERR_SEM,"The type of the constant (%s) for argument '%s.%s' don't match the expected type (%s)",apClpTyp[psVal->psFix->siTyp],fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
+         }
+         if (psVal->psVar->siCnt!=1) {
+            return CLPERR(psHdl,CLPERR_TAB,"Keyword (%s) and type (%s) of constant value defined but data element counter is not 1",psVal->psStd->pcKyw,apClpTyp[psVal->psFix->siTyp]);
+         }
+         if (psVal->psVar->pvDat==NULL) {
+            return CLPERR(psHdl,CLPERR_TAB,"Keyword (%s) and type (%s) of constant value defined but data pointer not set",psVal->psStd->pcKyw,apClpTyp[psVal->psFix->siTyp]);
+         }
+         switch (psVal->psFix->siTyp) {
+         case CLPTYP_NUMBER:
+            switch (psVal->psFix->siSiz) {
+            case 1: siVal=((I08*)psVal->psVar->pvDat)[0]; break;
+            case 2: siVal=((I16*)psVal->psVar->pvDat)[0]; break;
+            case 4: siVal=((I32*)psVal->psVar->pvDat)[0]; break;
+            case 8: siVal=((I64*)psVal->psVar->pvDat)[0]; break;
+            default:return CLPERR(psHdl,CLPERR_SIZ,"Size (%d) for the constant value '%s' of '%s.%s' is not 1, 2, 4 or 8)",psVal->psFix->siSiz,psVal->psStd->pcKyw,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+            }
+            srprintf(ppVal,pzVal,24,"d %"PRIi64"",siVal);
+            break;
+         case CLPTYP_FLOATN:
+            switch (psVal->psFix->siSiz) {
+            case 4: flVal=((F32*)psVal->psVar->pvDat)[0]; break;
+            case 8: flVal=((F64*)psVal->psVar->pvDat)[0]; break;
+            default: return CLPERR(psHdl,CLPERR_SIZ,"Size (%d) for the constant value '%s' of '%s.%s' is not 4 or 8)",psVal->psFix->siSiz,psVal->psStd->pcKyw,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+            }
+            srprintf(ppVal,pzVal,24,"d %f",flVal);
+            break;
+         case CLPTYP_STRING:
+            pcVal=(char*)psVal->psVar->pvDat;
+            srprintf(ppVal,pzVal,strlen(pcVal),"d'%s",pcVal);
+            break;
+         default:
+            return CLPERR(psHdl,CLPERR_TYP,"Type (%d) of constant '%s.%s' not supported in this case",psArg->psFix->siTyp,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+         }
+         if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d KYW-CON(%s) TAB)\n",fpcPre(pvHdl,siLev),siLev,siPos,*ppVal);
+      } else {
+         if (CLPISF_SEL(psArg->psStd->uiFlg)) {
+            CLPERR(psHdl,CLPERR_SEM,"The argument '%s.%s' requires one of the defined keywords as value",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+            CLPERRADD(psHdl,0,"Please use one of the following arguments:%s","");
+            vdClpPrnArgTab(pvHdl,psHdl->pfErr,1,psArg->psFix->siTyp,psArg->psDep);
+            return(CLPERR_SEM);
+         }
+         psHdl->siTok=siClpConSrc(pvHdl,psArg->psFix->siTyp,FALSE);
+         if (psHdl->siTok==CLPTOK_KYW) {
+            return CLPERR(psHdl,CLPERR_SYN,"Keyword (%s) not valid in expression of type %s",psHdl->pcLex,apClpTyp[psArg->psFix->siTyp]);
+         }
+         srprintf(ppVal,pzVal,strlen(psHdl->pcLex),"%s",psHdl->pcLex);
+         if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d KYW-CON(%s) FIX)\n",fpcPre(pvHdl,siLev),siLev,siPos,*ppVal);
       }
-      srprintf(ppVal,pzVal,strlen(psHdl->pcLex),"%s",psHdl->pcLex);
-      if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d KYW-CON(%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,psHdl->pcLex);
       psHdl->siTok=siClpScnSrc(pvHdl,(isAry)?psArg->psFix->siTyp:0,psArg);
       if (psHdl->siTok<0) return(psHdl->siTok);
       return(CLP_OK);
    case CLPTOK_RBO:
+      if (CLPISF_SEL(psArg->psStd->uiFlg)) {
+         CLPERR(psHdl,CLPERR_SEM,"The argument '%s.%s' requires one of the defined keywords as value",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+         CLPERRADD(psHdl,0,"Please use one of the following arguments:%s","");
+         vdClpPrnArgTab(pvHdl,psHdl->pfErr,1,psArg->psFix->siTyp,psArg->psDep);
+         return(CLPERR_SEM);
+      }
       psHdl->siTok=siClpScnSrc(pvHdl,psArg->psFix->siTyp,psArg);
       if (psHdl->siTok<0) return(psHdl->siTok);
       siErr=siClpPrsExp(pvHdl,siLev,siPos,isAry,psArg,pzVal,ppVal);
@@ -3959,6 +4014,12 @@ static int siClpPrsTrm(
    siErr=siClpPrsFac(pvHdl,siLev,siPos,isAry,psArg,pzVal,ppVal);
    if (siErr) return(siErr);
    if (psHdl->siTok==CLPTOK_MUL) {
+      if (CLPISF_SEL(psArg->psStd->uiFlg)) {
+         CLPERR(psHdl,CLPERR_SEM,"The argument '%s.%s' requires one of the defined keywords as value",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+         CLPERRADD(psHdl,0,"Please use one of the following arguments:%s","");
+         vdClpPrnArgTab(pvHdl,psHdl->pfErr,1,psArg->psFix->siTyp,psArg->psDep);
+         return(CLPERR_SEM);
+      }
       psHdl->siTok=siClpScnSrc(pvHdl,psArg->psFix->siTyp,psArg);
       if (psHdl->siTok<0) return(psHdl->siTok);
       size_t szVal=strlen(psHdl->pcLex)+CLPINI_VALSIZ;
@@ -3989,6 +4050,12 @@ static int siClpPrsTrm(
       }
       free(pcVal);
    } else if (psHdl->siTok==CLPTOK_DIV) {
+      if (CLPISF_SEL(psArg->psStd->uiFlg)) {
+         CLPERR(psHdl,CLPERR_SEM,"The argument '%s.%s' requires one of the defined keywords as value",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+         CLPERRADD(psHdl,0,"Please use one of the following arguments:%s","");
+         vdClpPrnArgTab(pvHdl,psHdl->pfErr,1,psArg->psFix->siTyp,psArg->psDep);
+         return(CLPERR_SEM);
+      }
       psHdl->siTok=siClpScnSrc(pvHdl,psArg->psFix->siTyp,psArg);
       if (psHdl->siTok<0) return(psHdl->siTok);
       size_t szVal=strlen(psHdl->pcLex)+CLPINI_VALSIZ;
@@ -4027,6 +4094,12 @@ static int siClpPrsTrm(
       }
       free(pcVal);
    } else if (psHdl->siTok==CLPTOK_KYW && psHdl->isSep==FALSE && CLPTOK_KYW!=siClpConSrc(pvHdl,psArg->psFix->siTyp,TRUE)) {
+      if (CLPISF_SEL(psArg->psStd->uiFlg)) {
+         CLPERR(psHdl,CLPERR_SEM,"The argument '%s.%s' requires one of the defined keywords as value",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+         CLPERRADD(psHdl,0,"Please use one of the following arguments:%s","");
+         vdClpPrnArgTab(pvHdl,psHdl->pfErr,1,psArg->psFix->siTyp,psArg->psDep);
+         return(CLPERR_SEM);
+      }
       size_t szVal=strlen(psHdl->pcLex)+CLPINI_VALSIZ;
       char*  pcVal=(char*)calloc(1,szVal);
       if (pcVal==NULL) return(CLPERR(psHdl,CLPERR_MEM,"Allocation of memory to store expression values failed"));
@@ -4086,6 +4159,12 @@ static int siClpPrsExp(
    siErr=siClpPrsTrm(pvHdl,siLev,siPos,isAry,psArg,pzVal,ppVal);
    if (siErr) return(siErr);
    if (psHdl->siTok==CLPTOK_ADD) {
+      if (CLPISF_SEL(psArg->psStd->uiFlg)) {
+         CLPERR(psHdl,CLPERR_SEM,"The argument '%s.%s' requires one of the defined keywords as value",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+         CLPERRADD(psHdl,0,"Please use one of the following arguments:%s","");
+         vdClpPrnArgTab(pvHdl,psHdl->pfErr,1,psArg->psFix->siTyp,psArg->psDep);
+         return(CLPERR_SEM);
+      }
       psHdl->siTok=siClpScnSrc(pvHdl,psArg->psFix->siTyp,psArg);
       if (psHdl->siTok<0) return(psHdl->siTok);
       size_t szVal=strlen(psHdl->pcLex)+CLPINI_VALSIZ;
@@ -4126,6 +4205,12 @@ static int siClpPrsExp(
       }
       free(pcVal);
    } else if (psHdl->siTok==CLPTOK_SUB) {
+      if (CLPISF_SEL(psArg->psStd->uiFlg)) {
+         CLPERR(psHdl,CLPERR_SEM,"The argument '%s.%s' requires one of the defined keywords as value",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+         CLPERRADD(psHdl,0,"Please use one of the following arguments:%s","");
+         vdClpPrnArgTab(pvHdl,psHdl->pfErr,1,psArg->psFix->siTyp,psArg->psDep);
+         return(CLPERR_SEM);
+      }
       psHdl->siTok=siClpScnSrc(pvHdl,psArg->psFix->siTyp,psArg);
       if (psHdl->siTok<0) return(psHdl->siTok);
       size_t szVal=strlen(psHdl->pcLex)+CLPINI_VALSIZ;
@@ -4155,7 +4240,13 @@ static int siClpPrsExp(
          return CLPERR(psHdl,CLPERR_SEM,"Subtracation not supported for type %s",apClpTyp[psArg->psFix->siTyp]);
       }
       free(pcVal);
-   } else if ((psHdl->siTok==CLPTOK_NUM || psHdl->siTok==CLPTOK_FLT || psHdl->siTok==CLPTOK_STR) && psHdl->isSep==FALSE ) {
+   } else if ((psHdl->siTok==CLPTOK_NUM || psHdl->siTok==CLPTOK_FLT || psHdl->siTok==CLPTOK_STR) && psHdl->isSep==FALSE) {
+      if (CLPISF_SEL(psArg->psStd->uiFlg)) {
+         CLPERR(psHdl,CLPERR_SEM,"The argument '%s.%s' requires one of the defined keywords as value",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+         CLPERRADD(psHdl,0,"Please use one of the following arguments:%s","");
+         vdClpPrnArgTab(pvHdl,psHdl->pfErr,1,psArg->psFix->siTyp,psArg->psDep);
+         return(CLPERR_SEM);
+      }
       size_t szVal=strlen(psHdl->pcLex)+CLPINI_VALSIZ;
       char*  pcVal=(char*)calloc(1,szVal);
       if (pcVal==NULL) return(CLPERR(psHdl,CLPERR_MEM,"Allocation of memory to store expression values failed"));
@@ -4206,39 +4297,12 @@ static int siClpPrsVal(
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    int                           siInd;
-   TsSym*                        psVal;
    size_t                        szVal=strlen(psHdl->pcLex)+CLPINI_VALSIZ;
    char*                         pcVal=(char*)malloc(szVal);
    if (pcVal==NULL) return(CLPERR(psHdl,CLPERR_MEM,"Allocation of memory to store expression values failed"));
-   strcpy(pcVal,psHdl->pcLex);
    psHdl->apPat[siLev]=psArg;
-   if (psHdl->siTok==CLPTOK_KYW) { // TODO: move to factor with check of selection flag
-      if (psArg==NULL) { // fix build scan issue
-         free(pcVal);
-         return CLPERR(psHdl,CLPERR_INT,"Parameter (psArg) is NULL (file %s, function=%s, line %d)",__FUNCTION__,__LINE__,__FILE__);
-      }
-      psHdl->apPat[siLev]=psArg;
-      siInd=siClpFndSym(pvHdl,siLev+1,siPos,pcVal,psArg->psDep,&psVal,NULL);
-      if (siInd>=0) {
-         free(pcVal);
-         psHdl->siTok=siClpScnSrc(pvHdl,(isAry)?psArg->psFix->siTyp:0,psArg);
-         if (psHdl->siTok<0) return(psHdl->siTok);
-         if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d KYW(%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,pcVal);
-         return(siClpBldCon(pvHdl,siLev,siPos,psArg,psVal));
-      } else {
-         siInd=siClpPrsExp(pvHdl,siLev+1,siPos,isAry,psArg,&szVal,&pcVal);
-         if (siInd<0) {
-            free(pcVal);
-            return(siInd);
-         }
-      }
-   } else {
-      siInd=siClpPrsExp(pvHdl,siLev+1,siPos,isAry,psArg,&szVal,&pcVal);
-      if (siInd<0) {
-         free(pcVal);
-         return(siInd);
-      }
-   }
+   siInd=siClpPrsExp(pvHdl,siLev+1,siPos,isAry,psArg,&szVal,&pcVal);
+   if (siInd<0) { free(pcVal); return(siInd); }
    if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d LIT(%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,isPrnLex(psArg,pcVal));
    siInd=siClpBldLit(pvHdl,siLev,siPos,psArg,pcVal);
    free(pcVal);
@@ -4636,12 +4700,6 @@ static int siClpBldLit(
 
    if (psArg->psVar->siCnt>=psArg->psFix->siMax) {
       return CLPERR(psHdl,CLPERR_SEM,"Too many (>%d) occurrences of '%s.%s' with type '%s'",psArg->psFix->siMax,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
-   }
-   if (CLPISF_SEL(psArg->psStd->uiFlg)) {
-      CLPERR(psHdl,CLPERR_SEM,"The argument '%s.%s' requires one of the defined keywords as value",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
-      CLPERRADD(psHdl,0,"Please use one of the following arguments:%s","");
-      vdClpPrnArgTab(pvHdl,psHdl->pfErr,1,psArg->psFix->siTyp,psArg->psDep);
-      return(CLPERR_SEM);
    }
    if (psArg->psVar->pvDat==NULL || psArg->psVar->pvPtr==NULL) {
       return CLPERR(psHdl,CLPERR_TAB,"Keyword (%s.%s) and type (%s) of argument defined but data pointer or write pointer not set",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
