@@ -274,10 +274,22 @@ extern unsigned int mapcdstr(const char* csn);
 /**********************************************************************/
 
 /**
+ * Convert binary to hex
+ * @param bin binary blob
+ * @param hex hex string
+ * @param len length of binary blob
+ * @return amount of converted bytes
+ */
+extern unsigned int bin2hex(
+   const unsigned char* bin,
+         char*          hex,
+   const unsigned int   len);
+
+/**
  * Convert from hex to binary
  * @param hex  hex string
  * @param bin  binary string
- * @param len  length
+ * @param len  length of hex string
  * @return     amount of converted bytes
  */
 extern unsigned int hex2bin(

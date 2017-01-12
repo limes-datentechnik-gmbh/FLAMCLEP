@@ -1442,6 +1442,24 @@ extern int srprintf(char** buffer,size_t* size,const size_t expansion,const char
    return(r);
 }
 
+extern unsigned int bin2hex(
+   const unsigned char* bin,
+         char*          hex,
+   const unsigned int   len)
+{
+   unsigned int         i;
+   const unsigned char  m[16]={'0','1','2','3',
+                               '4','5','6','7',
+                               '8','9','A','B',
+                               'C','D','E','F'};
+   for(i=0;i<len;i++)
+   {
+      hex[i*2+0]=m[((bin[i])>>4)&0x0F];
+      hex[i*2+1]=m[((bin[i])>>0)&0x0F];
+   }
+   return(2*i);
+}
+
 extern unsigned int hex2bin(
    const char*          hex,
          unsigned char* bin,

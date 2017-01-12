@@ -3902,6 +3902,7 @@ static int siClpPrsFac(
    I64                           siVal;
    F64                           flVal;
    C08*                          pcVal;
+   C08                           siChr;
    switch(psHdl->siTok) {
    case CLPTOK_NUM:
    case CLPTOK_FLT:
@@ -3950,7 +3951,21 @@ static int siClpPrsFac(
             break;
          case CLPTYP_STRING:
             pcVal=(char*)psVal->psVar->pvDat;
-            srprintf(ppVal,pzVal,strlen(pcVal),"d'%s",pcVal);
+            if (CLPISF_BIN(psVal->psStd->uiFlg)) {
+               char acHlp[(2*psVal->psVar->siLen)+1];
+               acHlp[bin2hex((unsigned char*)pcVal,acHlp,psVal->psVar->siLen)]=0x00;
+               pcVal=acHlp;
+               siChr='x';
+            } else if (CLPISF_HEX(psVal->psStd->uiFlg)) {
+               siChr='x';
+            } else if (CLPISF_ASC(psVal->psStd->uiFlg)) {
+               siChr='a';
+            } else if (CLPISF_EBC(psVal->psStd->uiFlg)) {
+               siChr='e';
+            } else {
+               siChr='d';
+            }
+            srprintf(ppVal,pzVal,strlen(pcVal),"%c'%s",siChr,pcVal);
             break;
          default:
             return CLPERR(psHdl,CLPERR_TYP,"Type (%d) of constant '%s.%s' not supported in this case",psArg->psFix->siTyp,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
@@ -4124,13 +4139,17 @@ static int siClpPrsTrm(
          break;
       case CLPTYP_STRING:
          if ((*ppVal)[0]==pcVal[0]) {
-            if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d ADD-STR(%s+",fpcPre(pvHdl,siLev),siLev,siPos,*ppVal);
-            srprintc(ppVal,pzVal,strlen(pcVal),"%s",pcVal+2);
-            if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s=%s))\n",pcVal,*ppVal);
+         } else if (((*ppVal)[0]=='d' && pcVal[0]=='s') || ((*ppVal)[0]=='s' && pcVal[0]=='d')){
+            (*ppVal)[0]='s';
+         } else if (((*ppVal)[0]=='d' && pcVal[0]=='c') || ((*ppVal)[0]=='c' && pcVal[0]=='d')){
+            (*ppVal)[0]='c';
          } else {
             free(pcVal);
             return(CLPERR(psHdl,CLPERR_SEM,"Cannot concatenate different types (%c <> %c) of strings",(*ppVal)[0],pcVal[0]));
          }
+         if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d ADD-STR(%s+",fpcPre(pvHdl,siLev),siLev,siPos,*ppVal);
+         srprintc(ppVal,pzVal,strlen(pcVal),"%s",pcVal+2);
+         if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s=%s))\n",pcVal,*ppVal);
          break;
       default:
          free(pcVal);
@@ -4191,13 +4210,17 @@ static int siClpPrsExp(
          break;
       case CLPTYP_STRING:
          if ((*ppVal)[0]==pcVal[0]) {
-            if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d ADD-STR(%s+",fpcPre(pvHdl,siLev),siLev,siPos,*ppVal);
-            srprintc(ppVal,pzVal,strlen(pcVal),"%s",pcVal+2);
-            if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s=%s))\n",pcVal,*ppVal);
+         } else if (((*ppVal)[0]=='d' && pcVal[0]=='s') || ((*ppVal)[0]=='s' && pcVal[0]=='d')){
+            (*ppVal)[0]='s';
+         } else if (((*ppVal)[0]=='d' && pcVal[0]=='c') || ((*ppVal)[0]=='c' && pcVal[0]=='d')){
+            (*ppVal)[0]='c';
          } else {
             free(pcVal);
             return(CLPERR(psHdl,CLPERR_SEM,"Cannot concatenate different types (%c <> %c) of strings",(*ppVal)[0],pcVal[0]));
          }
+         if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d ADD-STR(%s+",fpcPre(pvHdl,siLev),siLev,siPos,*ppVal);
+         srprintc(ppVal,pzVal,strlen(pcVal),"%s",pcVal+2);
+         if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s=%s))\n",pcVal,*ppVal);
          break;
       default:
          free(pcVal);
@@ -4271,13 +4294,17 @@ static int siClpPrsExp(
          break;
       case CLPTYP_STRING:
          if ((*ppVal)[0]==pcVal[0]) {
-            if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d ADD-STR(%s+",fpcPre(pvHdl,siLev),siLev,siPos,*ppVal);
-            srprintc(ppVal,pzVal,strlen(pcVal),"%s",pcVal+2);
-            if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s=%s))\n",pcVal,*ppVal);
+         } else if (((*ppVal)[0]=='d' && pcVal[0]=='s') || ((*ppVal)[0]=='s' && pcVal[0]=='d')){
+            (*ppVal)[0]='s';
+         } else if (((*ppVal)[0]=='d' && pcVal[0]=='c') || ((*ppVal)[0]=='c' && pcVal[0]=='d')){
+            (*ppVal)[0]='c';
          } else {
             free(pcVal);
             return(CLPERR(psHdl,CLPERR_SEM,"Cannot concatenate different types (%c <> %c) of strings",(*ppVal)[0],pcVal[0]));
          }
+         if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d ADD-STR(%s+",fpcPre(pvHdl,siLev),siLev,siPos,*ppVal);
+         srprintc(ppVal,pzVal,strlen(pcVal),"%s",pcVal+2);
+         if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s=%s))\n",pcVal,*ppVal);
          break;
       default:
          free(pcVal);

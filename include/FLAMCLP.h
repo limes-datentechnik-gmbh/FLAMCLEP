@@ -793,7 +793,7 @@ typedef struct ClpArgument {
  */
 #define CLPCONTAB_NUMBER(kyw,dat,man,hlp)       {CLPTYP_NUMBER,(kyw),NULL,0,0,  0  ,0,0,CLPFLG_CON           ,NULL,NULL,(man),(hlp),(dat), 0.0 ,NULL       },
 
-/** defines a number literal with the command line keyword *kyw* and the value *dat*
+/** defines a floating point literal with the command line keyword *kyw* and the value *dat*
  *
  *  *man* Pointer to a null-terminated string for a detailed description of this constant
  *        (in ASCIIDOC format, content behind .DESCRIPTION, mainly simply some paragraphs)
@@ -804,7 +804,7 @@ typedef struct ClpArgument {
  */
 #define CLPCONTAB_FLOATN(kyw,dat,man,hlp)       {CLPTYP_FLOATN,(kyw),NULL,0,0,  0  ,0,0,CLPFLG_CON           ,NULL,NULL,(man),(hlp),  0  ,(dat),NULL       },
 
-/** defines a floating point literal with the command line keyword *kyw* and the value *dat*
+/** defines a default string literal with the command line keyword *kyw* and the value *dat*
  *
  *  *man* Pointer to a null-terminated string for a detailed description of this constant
  *        (in ASCIIDOC format, content behind .DESCRIPTION, mainly simply some paragraphs)
@@ -815,9 +815,42 @@ typedef struct ClpArgument {
  */
 #define CLPCONTAB_STRING(kyw,dat,man,hlp)       {CLPTYP_STRING,(kyw),NULL,0,0,  0  ,0,0,CLPFLG_CON           ,NULL,NULL,(man),(hlp),  0  , 0.0 ,(U08*)(dat)},
 
-/** defines a string literal with the command line keyword *kyw* and the value *dat*
+/** defines a hexadecimal string literal with the command line keyword *kyw* and the value *dat*
  *
- *  *siz* Size of the string value
+ *  *man* Pointer to a null-terminated string for a detailed description of this constant
+ *        (in ASCIIDOC format, content behind .DESCRIPTION, mainly simply some paragraphs)
+ *        Can be a NULL pointer or empty string to produce a bullet list.
+ *        It is recommended to use a header file with a define for this long string\n
+ *  *hlp* Pointer to a null-terminated string for context sensitive help for this constant
+ *        (also used as head line or in bullet list in documentation generation).\n
+ */
+#define CLPCONTAB_HEXSTR(kyw,dat,man,hlp)       {CLPTYP_STRING,(kyw),NULL,0,0,  0  ,0,0,CLPFLG_CON|CLPFLG_HEX,NULL,NULL,(man),(hlp),  0  , 0.0 ,(U08*)(dat)},
+
+/** defines a ASCII string literal with the command line keyword *kyw* and the value *dat*
+ *
+ *  *man* Pointer to a null-terminated string for a detailed description of this constant
+ *        (in ASCIIDOC format, content behind .DESCRIPTION, mainly simply some paragraphs)
+ *        Can be a NULL pointer or empty string to produce a bullet list.
+ *        It is recommended to use a header file with a define for this long string\n
+ *  *hlp* Pointer to a null-terminated string for context sensitive help for this constant
+ *        (also used as head line or in bullet list in documentation generation).\n
+ */
+#define CLPCONTAB_ASCSTR(kyw,dat,man,hlp)       {CLPTYP_STRING,(kyw),NULL,0,0,  0  ,0,0,CLPFLG_CON|CLPFLG_ASC,NULL,NULL,(man),(hlp),  0  , 0.0 ,(U08*)(dat)},
+
+/** defines a EBCDIC string literal with the command line keyword *kyw* and the value *dat*
+ *
+ *  *man* Pointer to a null-terminated string for a detailed description of this constant
+ *        (in ASCIIDOC format, content behind .DESCRIPTION, mainly simply some paragraphs)
+ *        Can be a NULL pointer or empty string to produce a bullet list.
+ *        It is recommended to use a header file with a define for this long string\n
+ *  *hlp* Pointer to a null-terminated string for context sensitive help for this constant
+ *        (also used as head line or in bullet list in documentation generation).\n
+ */
+#define CLPCONTAB_EBCSTR(kyw,dat,man,hlp)       {CLPTYP_STRING,(kyw),NULL,0,0,  0  ,0,0,CLPFLG_CON|CLPFLG_EBC,NULL,NULL,(man),(hlp),  0  , 0.0 ,(U08*)(dat)},
+
+/** defines a binary literal with the command line keyword *kyw* and the value *dat*
+ *
+ *  *siz* Size of the binary value
  *  *man* Pointer to a null-terminated string for a detailed description of this constant
  *        (in ASCIIDOC format, content behind .DESCRIPTION, mainly simply some paragraphs)
  *        Can be a NULL pointer or empty string to produce a bullet list.
