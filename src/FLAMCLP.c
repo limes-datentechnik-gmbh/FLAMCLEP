@@ -921,7 +921,6 @@ extern int siClpParsePro(
    } else {
       srprintf(&psHdl->pcSrc,&psHdl->szSrc,strlen(CLPSRC_PRO),"%s",CLPSRC_PRO);
    }
-   psHdl->uiNow=time(NULL);
    psHdl->pcInp=pcPro;
    psHdl->pcCur=pcPro;
    psHdl->pcOld=pcPro;
@@ -977,7 +976,6 @@ extern int siClpParseCmd(
    } else {
       srprintf(&psHdl->pcSrc,&psHdl->szSrc,strlen(CLPSRC_CMD),"%s",CLPSRC_CMD);
    }
-   psHdl->uiNow=time(NULL);
    psHdl->pcInp=pcCmd;
    psHdl->pcCur=pcCmd;
    psHdl->pcOld=pcCmd;
@@ -1851,6 +1849,10 @@ static TsSym* psClpSymIns(
       ERROR(psSym);
    }
 
+   if (CLPTOK_KYW!=siClpConNat(pvHdl,psHdl->pfErr,NULL,NULL,(char**)&psArg->pcKyw,-1)) {
+      printd("%s:%d:1: warning: Constant keyword (%s) used in table definitions",__FILE__,__LINE__,psArg->pcKyw);
+   }
+
    psSym->psStd->pcKyw=psArg->pcKyw;
    psSym->psStd->pcAli=psArg->pcAli;
    psSym->psStd->uiFlg=psArg->uiFlg;
@@ -2584,7 +2586,7 @@ extern int siClpLexem(
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"              and keywords are preferred. To use keywords, separators or    \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"              operators in strings, enclosing quotes are required.          \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                                                                            \n");
-      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," The constant definitions below can be used in a value expressions          \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," The predefined constants below can be used in a value expressions          \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," NOW       NUMBER - current time in seconds since 1970 (+0t0000)            \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," MINUTE    NUMBER - minute in seconds (60)                                  \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," HOUR      NUMBER - hour in seconds   (60*60)                               \n");
