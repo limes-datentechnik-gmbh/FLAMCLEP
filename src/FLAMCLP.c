@@ -1849,10 +1849,6 @@ static TsSym* psClpSymIns(
       ERROR(psSym);
    }
 
-   if (CLPTOK_KYW!=siClpConNat(pvHdl,psHdl->pfErr,NULL,NULL,(char**)&psArg->pcKyw,-1)) {
-      printd("%s:%d:1: warning: Constant keyword (%s) used in table definitions",__FILE__,__LINE__,psArg->pcKyw);
-   }
-
    psSym->psStd->pcKyw=psArg->pcKyw;
    psSym->psStd->pcAli=psArg->pcAli;
    psSym->psStd->uiFlg=psArg->uiFlg;
@@ -2361,7 +2357,19 @@ static int siClpSymCal(
          siErr=siClpSymCal(pvHdl,siLev+1,psSym,psSym->psDep);
          if (siErr<0) return(siErr);
       }
+#ifdef __DEBUG__
+      char  acKyw[strlen(psSym->psStd->pcKyw)+1];
+      char* pcKyw=acKyw;
+      strcpy(acKyw,psSym->psStd->pcKyw);
+      for (int i=strlen(acKyw);i>=psSym->psStd->siKwl;i--) {
+         acKyw[i]=0x00;
+         if (CLPTOK_KYW!=siClpConNat(pvHdl,psHdl->pfErr,NULL,NULL,&pcKyw,-1)) {
+            fprintf(stderr,"%s:%d:1: warning: Constant keyword (%s) re-used in table definitions (%s.%s)",__FILE__,__LINE__,acKyw,fpcPat(pvHdl,siLev),psSym->psStd->pcKyw);
+         }
+      }
+#endif
    }
+
    if (isCon && (isPar || siCon!=siPos)) {
       if (psArg==NULL) {
          return CLPERR(psHdl,CLPERR_TAB,"Argument table is not consistent (mix of constants and parameter)%s","");
