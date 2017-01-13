@@ -2667,61 +2667,61 @@ static int siClpConNat(
 
    if ((siTyp==CLPTYP_NUMBER || siTyp==-1) && strxcmp(psHdl->isCas,*ppLex,"NOW",0,0,FALSE)==0) {
       if (pzLex!=NULL) {
-         srprintf(ppLex,pzLex,24,"d %"PRIu64"",psHdl->uiNow);
+         srprintf(ppLex,pzLex,24,"d%+"PRIu64"",psHdl->uiNow);
          if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(NUM)-LEXEM(%s)\n",*ppLex);
       }
       return(CLPTOK_NUM);
    } else if ((siTyp==CLPTYP_NUMBER || siTyp==-1) && strxcmp(psHdl->isCas,*ppLex,"MINUTE",0,0,FALSE)==0) {
       if (pzLex!=NULL) {
-         srprintf(ppLex,pzLex,24,"d %"PRIu64"",((U64)60));
+         srprintf(ppLex,pzLex,24,"d%+"PRIu64"",((U64)60));
          if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(NUM)-LEXEM(%s)\n",*ppLex);
       }
       return(CLPTOK_NUM);
    } else if ((siTyp==CLPTYP_NUMBER || siTyp==-1) && strxcmp(psHdl->isCas,*ppLex,"HOUR",0,0,FALSE)==0) {
       if (pzLex!=NULL) {
-         srprintf(ppLex,pzLex,24,"d %"PRIu64"",((U64)60)*((U64)60));
+         srprintf(ppLex,pzLex,24,"d%+"PRIu64"",((U64)60)*((U64)60));
          if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(NUM)-LEXEM(%s)\n",*ppLex);
       }
       return(CLPTOK_NUM);
    } else if ((siTyp==CLPTYP_NUMBER || siTyp==-1) && strxcmp(psHdl->isCas,*ppLex,"DAY",0,0,FALSE)==0) {
       if (pzLex!=NULL) {
-         srprintf(ppLex,pzLex,24,"d %"PRIu64"",((U64)24)*((U64)60)*((U64)60));
+         srprintf(ppLex,pzLex,24,"d%+"PRIu64"",((U64)24)*((U64)60)*((U64)60));
          if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(NUM)-LEXEM(%s)\n",*ppLex);
       }
       return(CLPTOK_NUM);
    } else if ((siTyp==CLPTYP_NUMBER || siTyp==-1) && strxcmp(psHdl->isCas,*ppLex,"YEAR",0,0,FALSE)==0) {
       if (pzLex!=NULL) {
-         srprintf(ppLex,pzLex,24,"d %"PRIu64"",((U64)365)*((U64)24)*((U64)60)*((U64)60));
+         srprintf(ppLex,pzLex,24,"d%+"PRIu64"",((U64)365)*((U64)24)*((U64)60)*((U64)60));
          if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(NUM)-LEXEM(%s)\n",*ppLex);
       }
       return(CLPTOK_NUM);
    } else if ((siTyp==CLPTYP_NUMBER || siTyp==-1) && strxcmp(psHdl->isCas,*ppLex,"KiB",0,0,FALSE)==0) {
       if (pzLex!=NULL) {
-         srprintf(ppLex,pzLex,24,"d %"PRIu64"",((U64)1024));
+         srprintf(ppLex,pzLex,24,"d%+"PRIu64"",((U64)1024));
          if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(NUM)-LEXEM(%s)\n",*ppLex);
       }
       return(CLPTOK_NUM);
    } else if ((siTyp==CLPTYP_NUMBER || siTyp==-1) && strxcmp(psHdl->isCas,*ppLex,"MiB",0,0,FALSE)==0) {
       if (pzLex!=NULL) {
-         srprintf(ppLex,pzLex,24,"d %"PRIu64"",((U64)1024)*((U64)1024));
+         srprintf(ppLex,pzLex,24,"d%+"PRIu64"",((U64)1024)*((U64)1024));
          if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(NUM)-LEXEM(%s)\n",*ppLex);
       }
       return(CLPTOK_NUM);
    } else if ((siTyp==CLPTYP_NUMBER || siTyp==-1) && strxcmp(psHdl->isCas,*ppLex,"GiB",0,0,FALSE)==0) {
       if (pzLex!=NULL) {
-         srprintf(ppLex,pzLex,24,"d %"PRIu64"",((U64)1024)*((U64)1024)*((U64)1024));
+         srprintf(ppLex,pzLex,24,"d%+"PRIu64"",((U64)1024)*((U64)1024)*((U64)1024));
          if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(NUM)-LEXEM(%s)\n",*ppLex);
       }
       return(CLPTOK_NUM);
    } else if ((siTyp==CLPTYP_NUMBER || siTyp==-1) && strxcmp(psHdl->isCas,*ppLex,"TiB",0,0,FALSE)==0) {
       if (pzLex!=NULL) {
-         srprintf(ppLex,pzLex,24,"d %"PRIu64"",((U64)1024)*((U64)1024)*((U64)1024)*((U64)1024));
+         srprintf(ppLex,pzLex,24,"d%+"PRIu64"",((U64)1024)*((U64)1024)*((U64)1024)*((U64)1024));
          if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(NUM)-LEXEM(%s)\n",*ppLex);
       }
       return(CLPTOK_NUM);
    } else if ((siTyp==CLPTYP_FLOATN || siTyp==-1) && strxcmp(psHdl->isCas,*ppLex,"PI",0,0,FALSE)==0) {
       if (pzLex!=NULL) {
-         srprintf(ppLex,pzLex,24,"d %f",3.14159265359);
+         srprintf(ppLex,pzLex,24,"d%+f",3.14159265359);
          if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(FLT)-LEXEM(%s)\n",*ppLex);
       }
       return(CLPTOK_FLT);
@@ -3942,7 +3942,7 @@ static int siClpPrsFac(
             case 8: siVal=((I64*)psVal->psVar->pvDat)[0]; break;
             default:return CLPERR(psHdl,CLPERR_SIZ,"Size (%d) for the constant value '%s' of '%s.%s' is not 1, 2, 4 or 8)",psVal->psFix->siSiz,psVal->psStd->pcKyw,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
             }
-            srprintf(ppVal,pzVal,24,"d %"PRIi64"",siVal);
+            srprintf(ppVal,pzVal,24,"d%+"PRIi64"",siVal);
             break;
          case CLPTYP_FLOATN:
             switch (psVal->psFix->siSiz) {
@@ -3950,7 +3950,7 @@ static int siClpPrsFac(
             case 8: flVal=((F64*)psVal->psVar->pvDat)[0]; break;
             default: return CLPERR(psHdl,CLPERR_SIZ,"Size (%d) for the constant value '%s' of '%s.%s' is not 4 or 8)",psVal->psFix->siSiz,psVal->psStd->pcKyw,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
             }
-            srprintf(ppVal,pzVal,24,"d %f",flVal);
+            srprintf(ppVal,pzVal,24,"d%+f",flVal);
             break;
          case CLPTYP_STRING:
             pcVal=(char*)psVal->psVar->pvDat;
@@ -4051,7 +4051,7 @@ static int siClpPrsTrm(
          if (siErr) { free(pcVal); return(siErr); }
          siErr=siFromNumber(pvHdl,siLev,siPos,psArg,pcVal,&siVal2);
          if (siErr) { free(pcVal); return(siErr); }
-         srprintf(ppVal,pzVal,24,"d %"PRIi64"",siVal1*siVal2);
+         srprintf(ppVal,pzVal,24,"d%+"PRIi64"",siVal1*siVal2);
          if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d MUL-NUM(%"PRIi64"*%"PRIi64"=%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,siVal1,siVal2,*ppVal);
          break;
       case CLPTYP_FLOATN:
@@ -4059,7 +4059,7 @@ static int siClpPrsTrm(
          if (siErr) { free(pcVal); return(siErr); }
          siErr=siFromFloat(pvHdl,siLev,siPos,psArg,pcVal,&flVal2);
          if (siErr) { free(pcVal); return(siErr); }
-         srprintf(ppVal,pzVal,24,"d %f",flVal1*flVal2);
+         srprintf(ppVal,pzVal,24,"d%+f",flVal1*flVal2);
          if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d MUL-FLT(%f*%f=%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,flVal1,flVal2,*ppVal);
          break;
       default:
@@ -4091,7 +4091,7 @@ static int siClpPrsTrm(
             free(pcVal);
             return CLPERR(psHdl,CLPERR_SEM,"Devision by zero",apClpTyp[psArg->psFix->siTyp]);
          }
-         srprintf(ppVal,pzVal,24,"d %"PRIi64"",siVal1/siVal2);
+         srprintf(ppVal,pzVal,24,"d%+"PRIi64"",siVal1/siVal2);
          if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d DIV-NUM(%"PRIi64"/%"PRIi64"=%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,siVal1,siVal2,*ppVal);
          break;
       case CLPTYP_FLOATN:
@@ -4103,7 +4103,7 @@ static int siClpPrsTrm(
             free(pcVal);
             return CLPERR(psHdl,CLPERR_SEM,"Devision by zero",apClpTyp[psArg->psFix->siTyp]);
          }
-         srprintf(ppVal,pzVal,24,"d %f",flVal1/flVal2);
+         srprintf(ppVal,pzVal,24,"d%+f",flVal1/flVal2);
          if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d DIV-FLT(%f/%f=%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,flVal1,flVal2,*ppVal);
          break;
       default:
@@ -4129,7 +4129,7 @@ static int siClpPrsTrm(
          if (siErr) { free(pcVal); return(siErr); }
          siErr=siFromNumber(pvHdl,siLev,siPos,psArg,pcVal,&siVal2);
          if (siErr) { free(pcVal); return(siErr); }
-         srprintf(ppVal,pzVal,24,"d %"PRIi64"",siVal1*siVal2);
+         srprintf(ppVal,pzVal,24,"d%+"PRIi64"",siVal1*siVal2);
          if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d AUTO-MUL-NUM(%"PRIi64"*%"PRIi64"=%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,siVal1,siVal2,*ppVal);
          break;
       case CLPTYP_FLOATN:
@@ -4137,7 +4137,7 @@ static int siClpPrsTrm(
          if (siErr) { free(pcVal); return(siErr); }
          siErr=siFromFloat(pvHdl,siLev,siPos,psArg,pcVal,&flVal2);
          if (siErr) { free(pcVal); return(siErr); }
-         srprintf(ppVal,pzVal,24,"d %f",flVal1*flVal2);
+         srprintf(ppVal,pzVal,24,"d%+f",flVal1*flVal2);
          if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d AUTO-MUL-FLT(%f*%f=%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,flVal1,flVal2,*ppVal);
          break;
       case CLPTYP_STRING:
@@ -4147,8 +4147,9 @@ static int siClpPrsTrm(
          } else if (((*ppVal)[0]=='d' && pcVal[0]=='c') || ((*ppVal)[0]=='c' && pcVal[0]=='d')){
             (*ppVal)[0]='c';
          } else {
+            siErr=CLPERR(psHdl,CLPERR_SEM,"Cannot concatenate different types (%c <> %c) of strings",(*ppVal)[0],pcVal[0]);
             free(pcVal);
-            return(CLPERR(psHdl,CLPERR_SEM,"Cannot concatenate different types (%c <> %c) of strings",(*ppVal)[0],pcVal[0]));
+            return(siErr);
          }
          if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d ADD-STR(%s+",fpcPre(pvHdl,siLev),siLev,siPos,*ppVal);
          srprintc(ppVal,pzVal,strlen(pcVal),"%s",pcVal+2);
@@ -4200,7 +4201,7 @@ static int siClpPrsExp(
          if (siErr) { free(pcVal); return(siErr); }
          siErr=siFromNumber(pvHdl,siLev,siPos,psArg,pcVal,&siVal2);
          if (siErr) { free(pcVal); return(siErr); }
-         srprintf(ppVal,pzVal,24,"d %"PRIi64"",siVal1+siVal2);
+         srprintf(ppVal,pzVal,24,"d%+"PRIi64"",siVal1+siVal2);
          if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d ADD-NUM(%"PRIi64"+%"PRIi64"=%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,siVal1,siVal2,*ppVal);
          break;
       case CLPTYP_FLOATN:
@@ -4208,7 +4209,7 @@ static int siClpPrsExp(
          if (siErr) { free(pcVal); return(siErr); }
          siErr=siFromFloat(pvHdl,siLev,siPos,psArg,pcVal,&flVal2);
          if (siErr) { free(pcVal); return(siErr); }
-         srprintf(ppVal,pzVal,24,"d %f",flVal1+flVal2);
+         srprintf(ppVal,pzVal,24,"d%+f",flVal1+flVal2);
          if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d ADD-FLT(%f+%f=%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,flVal1,flVal2,*ppVal);
          break;
       case CLPTYP_STRING:
@@ -4218,8 +4219,9 @@ static int siClpPrsExp(
          } else if (((*ppVal)[0]=='d' && pcVal[0]=='c') || ((*ppVal)[0]=='c' && pcVal[0]=='d')){
             (*ppVal)[0]='c';
          } else {
+            siErr=CLPERR(psHdl,CLPERR_SEM,"Cannot concatenate different types (%c <> %c) of strings",(*ppVal)[0],pcVal[0]);
             free(pcVal);
-            return(CLPERR(psHdl,CLPERR_SEM,"Cannot concatenate different types (%c <> %c) of strings",(*ppVal)[0],pcVal[0]));
+            return(siErr);
          }
          if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d ADD-STR(%s+",fpcPre(pvHdl,siLev),siLev,siPos,*ppVal);
          srprintc(ppVal,pzVal,strlen(pcVal),"%s",pcVal+2);
@@ -4250,7 +4252,7 @@ static int siClpPrsExp(
          if (siErr) { free(pcVal); return(siErr); }
          siErr=siFromNumber(pvHdl,siLev,siPos,psArg,pcVal,&siVal2);
          if (siErr) { free(pcVal); return(siErr); }
-         srprintf(ppVal,pzVal,24,"d %"PRIi64"",siVal1-siVal2);
+         srprintf(ppVal,pzVal,24,"d%+"PRIi64"",siVal1-siVal2);
          if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d SUB-NUM(%"PRIi64"-%"PRIi64"=%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,siVal1,siVal2,*ppVal);
          break;
       case CLPTYP_FLOATN:
@@ -4258,7 +4260,7 @@ static int siClpPrsExp(
          if (siErr) { free(pcVal); return(siErr); }
          siErr=siFromFloat(pvHdl,siLev,siPos,psArg,pcVal,&flVal2);
          if (siErr) { free(pcVal); return(siErr); }
-         srprintf(ppVal,pzVal,24,"d %f",flVal1-flVal2);
+         srprintf(ppVal,pzVal,24,"d%+f",flVal1-flVal2);
          if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d SUB-FLT(%f-%f=%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,flVal1,flVal2,*ppVal);
          break;
       default:
@@ -4284,7 +4286,7 @@ static int siClpPrsExp(
          if (siErr) { free(pcVal); return(siErr); }
          siErr=siFromNumber(pvHdl,siLev,siPos,psArg,pcVal,&siVal2);
          if (siErr) { free(pcVal); return(siErr); }
-         srprintf(ppVal,pzVal,24,"d %"PRIi64"",siVal1+siVal2);
+         srprintf(ppVal,pzVal,24,"d%+"PRIi64"",siVal1+siVal2);
          if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d AUTO-ADD-NUM(%"PRIi64"+%"PRIi64"=%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,siVal1,siVal2,*ppVal);
          break;
       case CLPTYP_FLOATN:
@@ -4292,7 +4294,7 @@ static int siClpPrsExp(
          if (siErr) { free(pcVal); return(siErr); }
          siErr=siFromFloat(pvHdl,siLev,siPos,psArg,pcVal,&flVal2);
          if (siErr) { free(pcVal); return(siErr); }
-         srprintf(ppVal,pzVal,24,"d %f",flVal1+flVal2);
+         srprintf(ppVal,pzVal,24,"d%+f",flVal1+flVal2);
          if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d AUTO-ADD-FLT(%f+%f=%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,flVal1,flVal2,*ppVal);
          break;
       case CLPTYP_STRING:
@@ -4302,8 +4304,9 @@ static int siClpPrsExp(
          } else if (((*ppVal)[0]=='d' && pcVal[0]=='c') || ((*ppVal)[0]=='c' && pcVal[0]=='d')){
             (*ppVal)[0]='c';
          } else {
+            siErr=CLPERR(psHdl,CLPERR_SEM,"Cannot concatenate different types (%c <> %c) of strings",(*ppVal)[0],pcVal[0]);
             free(pcVal);
-            return(CLPERR(psHdl,CLPERR_SEM,"Cannot concatenate different types (%c <> %c) of strings",(*ppVal)[0],pcVal[0]));
+            return(siErr);
          }
          if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d ADD-STR(%s+",fpcPre(pvHdl,siLev),siLev,siPos,*ppVal);
          srprintc(ppVal,pzVal,strlen(pcVal),"%s",pcVal+2);
