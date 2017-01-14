@@ -39,6 +39,7 @@ USED ENVIRONMENT VARIABLES
  * USER    - to determine the current user id on UNIX/WIN
  * ENVID   - for the current environment qualifier (D/T/P) if key label template mapping used (default is 'T')
  * OWNERID - used for current owner if not already defined
+ * CLP_NOW - The current point in time used for predefined constants (0tYYYY/MM/DD.HH:MM:SS)
  * &{PGM}_CONFIG_FILE - the configuration filename (default is '$HOME/.&{pgm}.config' on UNIX/WIN or '&SYSUID..&{PGM}.CONFIG' on mainframes)
  * &{PGM}_DEFAULT_OWNER_ID - the default owner ID (default is '&{oWn}')
  * owner_&{PGM}_command_PROPERTY_FILENAME - To overrule default property file names

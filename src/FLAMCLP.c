@@ -129,12 +129,13 @@
  * 1.2.79: Add parameter file support for arrays
  * 1.2.80: Support command string replacements by environment variables (<HOME>)
  * 1.2.81: Support constant expression (blksiz=64*KiB)
+ * 1.2.82: Read uiNow from environment variable
 **/
 
-#define CLP_VSN_STR       "1.2.81"
+#define CLP_VSN_STR       "1.2.82"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        2
-#define CLP_VSN_REVISION       81
+#define CLP_VSN_REVISION       82
 
 /* Definition der Konstanten ******************************************/
 
@@ -675,6 +676,22 @@ static int siClpPrnPro(
    const TsSym*                  psTab,
    const char*                   pcArg);
 
+static int siFromNumber(
+   void*                         pvHdl,
+   const int                     siLev,
+   const int                     siPos,
+   TsSym*                        psArg,
+   const char*                   pcVal,
+   I64*                          piVal);
+
+static int siFromFloat(
+   void*                         pvHdl,
+   const int                     siLev,
+   const int                     siPos,
+   TsSym*                        psArg,
+   const char*                   pcVal,
+   double*                       pfVal);
+
 static char* fpcPre(
    void*                         pvHdl,
    const int                     siLev);
@@ -831,6 +848,8 @@ extern void* pvClpOpen(
 {
    TsHdl*                        psHdl=NULL;
    char*                         pcLoc=NULL;
+   const char*                   pcNow=NULL;
+   I64                           siNow=0;
    int                           siErr,i;
    if (pcOwn!=NULL && pcPgm!=NULL && pcCmd!=NULL && psTab!=NULL) {
       psHdl=(TsHdl*)calloc(1,sizeof(TsHdl));
@@ -848,7 +867,6 @@ extern void* pvClpOpen(
          psHdl->pcInp=NULL;
          psHdl->pcCur=NULL;
          psHdl->pcOld=NULL;
-         psHdl->siTok=CLPTOK_INI;
          psHdl->szLex=CLPINI_LEXSIZ;
          psHdl->pcLex=(C08*)calloc(1,psHdl->szLex);
          psHdl->szSrc=CLPINI_SRCSIZ;
@@ -895,7 +913,22 @@ extern void* pvClpOpen(
             snprintf(psHdl->acLoc,sizeof(psHdl->acLoc),"%s",pcLoc);
          }
          setlocale(LC_NUMERIC, "C");
+
          psHdl->uiNow=time(NULL);
+         pcNow=GETENV("CLP_NOW");
+         if (pcNow!=NULL && *pcNow) {
+            siErr=siClpScnNat(psHdl,psHdl->pfErr,psHdl->pfScn,&pcNow,&psHdl->szLex,&psHdl->pcLex,CLPTYP_NUMBER,NULL,NULL);
+            if (siErr==CLPTOK_NUM) {
+               siErr=siFromNumber(psHdl,0,0,NULL,psHdl->pcLex,&siNow);
+               if (siErr==0 && siNow>0) {
+                  siErr=siClpScnNat(psHdl,psHdl->pfErr,psHdl->pfScn,&pcNow,&psHdl->szLex,&psHdl->pcLex,0,NULL,NULL);
+                  if (siErr==CLPTOK_END) {
+                     psHdl->uiNow=siNow;
+                  }
+               }
+            }
+         }
+         psHdl->siTok=CLPTOK_INI;
       }
    }
    return((void*)psHdl);
@@ -3928,10 +3961,10 @@ static int siClpPrsFac(
             return CLPERR(psHdl,CLPERR_SEM,"The type of the constant (%s) for argument '%s.%s' don't match the expected type (%s)",apClpTyp[psVal->psFix->siTyp],fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
          }
          if (psVal->psVar->siCnt!=1) {
-            return CLPERR(psHdl,CLPERR_TAB,"Keyword (%s) and type (%s) of constant value defined but data element counter is not 1",psVal->psStd->pcKyw,apClpTyp[psVal->psFix->siTyp]);
+            return CLPERR(psHdl,CLPERR_TAB,"Keyword (%s) and type (%s) of constant value (%s.%s) defined but data element counter is not 1",psVal->psStd->pcKyw,apClpTyp[psVal->psFix->siTyp],fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
          }
          if (psVal->psVar->pvDat==NULL) {
-            return CLPERR(psHdl,CLPERR_TAB,"Keyword (%s) and type (%s) of constant value defined but data pointer not set",psVal->psStd->pcKyw,apClpTyp[psVal->psFix->siTyp]);
+            return CLPERR(psHdl,CLPERR_TAB,"Keyword (%s) and type (%s) of constant value (%s.%s) defined but data pointer not set",psVal->psStd->pcKyw,apClpTyp[psVal->psFix->siTyp],fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
          }
          switch (psVal->psFix->siTyp) {
          case CLPTYP_NUMBER:
@@ -3983,7 +4016,7 @@ static int siClpPrsFac(
          }
          psHdl->siTok=siClpConSrc(pvHdl,psArg->psFix->siTyp,FALSE);
          if (psHdl->siTok==CLPTOK_KYW) {
-            return CLPERR(psHdl,CLPERR_SYN,"Keyword (%s) not valid in expression of type %s",psHdl->pcLex,apClpTyp[psArg->psFix->siTyp]);
+            return CLPERR(psHdl,CLPERR_SYN,"Keyword (%s) not valid in expression of type %s for argument %s.%s",psHdl->pcLex,apClpTyp[psArg->psFix->siTyp],fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
          }
          srprintf(ppVal,pzVal,strlen(psHdl->pcLex),"%s",psHdl->pcLex);
          if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d KYW-CON(%s) FIX)\n",fpcPre(pvHdl,siLev),siLev,siPos,*ppVal);
