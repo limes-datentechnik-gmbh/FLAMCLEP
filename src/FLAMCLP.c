@@ -394,12 +394,13 @@ static int siClpConNat(
    FILE*                         pfTrc,
    size_t*                       pzLex,
    char**                        ppLex,
-   const int                     siTyp);
+   const int                     siTyp,
+   const TsSym*                  psArg);
 
 static int siClpConSrc(
    void*                         pvHdl,
-   const int                     siTyp,
-   const int                     isChk);
+   const int                     isChk,
+   const TsSym*                  psArg);
 
 static int siClpPrsMain(
    void*                         pvHdl,
@@ -2397,7 +2398,7 @@ static int siClpSymCal(
       strcpy(acKyw,psSym->psStd->pcKyw);
       for (int i=strlen(acKyw);i>=psSym->psStd->siKwl;i--) {
          acKyw[i]=0x00;
-         if (CLPTOK_KYW!=siClpConNat(pvHdl,psHdl->pfErr,NULL,NULL,&pcKyw,-1)) {
+         if (CLPTOK_KYW!=siClpConNat(pvHdl,psHdl->pfErr,NULL,NULL,&pcKyw,-1,NULL)) {
             fprintf(stderr,"%s:%d:1: warning: Constant keyword (%s) re-used in table definitions (%s.%s)",__FILE__,__LINE__,acKyw,fpcPat(pvHdl,siLev),psSym->psStd->pcKyw);
          }
       }
@@ -2695,7 +2696,8 @@ static int siClpConNat(
    FILE*                         pfTrc,
    size_t*                       pzLex,
    char**                        ppLex,
-   const int                     siTyp)
+   const int                     siTyp,
+   const TsSym*                  psArg)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
 
@@ -2703,6 +2705,7 @@ static int siClpConNat(
       if (pzLex!=NULL) {
          srprintf(ppLex,pzLex,24,"d%+"PRIu64"",psHdl->uiNow);
          if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(NUM)-LEXEM(%s)\n",*ppLex);
+         if (psArg!=NULL) psArg->psStd->uiFlg|=CLPFLG_TIM;
       }
       return(CLPTOK_NUM);
    } else if ((siTyp==CLPTYP_NUMBER || siTyp==-1) && strxcmp(psHdl->isCas,*ppLex,"MINUTE",0,0,FALSE)==0) {
@@ -3056,7 +3059,7 @@ static int siClpScnNat(
             (*ppCur)++; pcLex++;
          }
          *pcLex=EOS;
-         if(pcCur[0]=='-' && pcCur[1]!='-' && CLPTOK_KYW!=siClpConNat(pvHdl,pfErr,pfTrc,NULL,&pcHlp,-1)) {
+         if(pcCur[0]=='-' && pcCur[1]!='-' && CLPTOK_KYW!=siClpConNat(pvHdl,pfErr,pfTrc,NULL,&pcHlp,-1,psArg)) {
             (*ppCur)=pcCur;
             pcLex[0]='-'; pcLex[1]=EOS; (*ppCur)++;
             if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(SUB)-LEXEM(%s)\n",pcHlp);
@@ -3100,7 +3103,7 @@ static int siClpScnNat(
                   }
                }
             }
-            if (f || CLPTOK_KYW!=siClpConNat(pvHdl,pfErr,pfTrc,NULL,&pcKyw,CLPTYP_STRING)) {
+            if (f || CLPTOK_KYW!=siClpConNat(pvHdl,pfErr,pfTrc,NULL,&pcKyw,CLPTYP_STRING,psArg)) {
                char* p1=pcHlp;
                char* p2=pcKyw;
                while (*p2) {
@@ -3366,11 +3369,11 @@ static int siClpScnNat(
 
 static int siClpConSrc(
    void*                         pvHdl,
-   const int                     siTyp,
-   const int                     isChk)
+   const int                     isChk,
+   const TsSym*                  psArg)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
-   return(siClpConNat(pvHdl,psHdl->pfErr,psHdl->pfScn,(isChk)?NULL:&psHdl->szLex,&psHdl->pcLex,siTyp));
+   return(siClpConNat(pvHdl,psHdl->pfErr,psHdl->pfScn,(isChk)?NULL:&psHdl->szLex,&psHdl->pcLex,(psArg!=NULL)?psArg->psFix->siTyp:0,psArg));
 }
 
 static int siClpScnSrc(
@@ -4015,7 +4018,7 @@ static int siClpPrsFac(
             vdClpPrnArgTab(pvHdl,psHdl->pfErr,1,psArg->psFix->siTyp,psArg->psDep);
             return(CLPERR_SEM);
          }
-         psHdl->siTok=siClpConSrc(pvHdl,psArg->psFix->siTyp,FALSE);
+         psHdl->siTok=siClpConSrc(pvHdl,FALSE,psArg);
          if (psHdl->siTok==CLPTOK_KYW) {
             return CLPERR(psHdl,CLPERR_SYN,"Keyword (%s) not valid in expression of type %s for argument %s.%s",psHdl->pcLex,apClpTyp[psArg->psFix->siTyp],fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
          }
@@ -4145,7 +4148,7 @@ static int siClpPrsTrm(
          return CLPERR(psHdl,CLPERR_SEM,"Division not supported for type %s",apClpTyp[psArg->psFix->siTyp]);
       }
       free(pcVal);
-   } else if (psHdl->siTok==CLPTOK_KYW && psHdl->isSep==FALSE && CLPTOK_KYW!=siClpConSrc(pvHdl,psArg->psFix->siTyp,TRUE)) {
+   } else if (psHdl->siTok==CLPTOK_KYW && psHdl->isSep==FALSE && CLPTOK_KYW!=siClpConSrc(pvHdl,TRUE,psArg)) {
       if (CLPISF_SEL(psArg->psStd->uiFlg)) {
          CLPERR(psHdl,CLPERR_SEM,"The argument '%s.%s' requires one of the defined keywords as value",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
          CLPERRADD(psHdl,0,"Please use one of the following arguments:%s","");
