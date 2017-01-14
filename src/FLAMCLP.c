@@ -130,12 +130,13 @@
  * 1.2.80: Support command string replacements by environment variables (<HOME>)
  * 1.2.81: Support constant expression (blksiz=64*KiB)
  * 1.2.82: Read uiNow from environment variable
+ * 1.2.83: Support CLPFLG_TIM to mark numbers as time values
 **/
 
-#define CLP_VSN_STR       "1.2.82"
+#define CLP_VSN_STR       "1.2.83"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        2
-#define CLP_VSN_REVISION       82
+#define CLP_VSN_REVISION       83
 
 /* Definition der Konstanten ******************************************/
 
@@ -5080,7 +5081,7 @@ static int siClpBldLit(
    psArg->psVar->siCnt++;
 
    pcHlp=fpcPat(pvHdl,siLev);
-   if (psArg->psFix->siTyp==CLPTYP_NUMBER && pcVal[0]=='t') {
+   if (psArg->psFix->siTyp==CLPTYP_NUMBER && (CLPISF_TIM(psArg->psStd->uiFlg) || pcVal[0]=='t')) {
       srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcHlp)+strlen(psArg->psStd->pcKyw)+strlen(isPrnStr(psArg,pcVal))+strlen(cstime(siVal,NULL)),"%s.%s=%s(%s)\n",pcHlp,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),cstime(siVal,NULL));
    } else {
       srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcHlp)+strlen(psArg->psStd->pcKyw)+strlen(isPrnStr(psArg,pcVal)),"%s.%s=%s\n",pcHlp,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal));
