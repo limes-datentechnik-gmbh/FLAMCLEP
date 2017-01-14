@@ -5501,9 +5501,13 @@ static int siClpSetDefault(
    TsSym*                        psArg)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
+   TsSym*                        psDep=NULL;
+   TsSym*                        psVal=NULL;
    size_t                        szVal=CLPINI_VALSIZ;
    char*                         pcVal=(char*)calloc(1,szVal);
    char                          acSrc[strlen(psHdl->pcSrc)+1];
+   char                          acLex[strlen(psHdl->pcLex)+1];
+   TsVar                         asSav[CLPMAX_TABCNT];
    int                           siErr,siRow,siTok;
    const char*                   pcCur;
    const char*                   pcInp;
@@ -5513,6 +5517,7 @@ static int siClpSetDefault(
    if (CLPISF_ARG(psArg->psStd->uiFlg) && psArg->psVar->siCnt==0 && psArg->psFix->pcDft!=NULL && strlen(psArg->psFix->pcDft)) {
       if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"SUPPLEMENT-LIST-PARSER-BEGIN(%s.%s=%s)\n",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,psArg->psFix->pcDft);
       strcpy(acSrc,psHdl->pcSrc);
+      strcpy(acLex,psHdl->pcLex);
       srprintf(&psHdl->pcSrc,&psHdl->szSrc,strlen(psArg->psFix->pcSrc),"%s",psArg->psFix->pcSrc);
       pcCur=psHdl->pcCur; psHdl->pcCur=psArg->psFix->pcDft;
       pcInp=psHdl->pcInp; psHdl->pcInp=psArg->psFix->pcDft;
@@ -5522,16 +5527,55 @@ static int siClpSetDefault(
       siTok=psHdl->siTok;
       psHdl->siBuf++;
 
-      psHdl->siTok=siClpScnSrc(pvHdl,psArg->psFix->siTyp,psArg);
+      for (siTok=siClpScnSrc(pvHdl,psArg->psFix->siTyp,psArg);siTok>=0 && siTok!=CLPTOK_END;
+           siTok=siClpScnSrc(pvHdl,psArg->psFix->siTyp,psArg)) {
+         if (psHdl->siTok==CLPTOK_KYW) {
+            if (psArg->psFix->siTyp==CLPTYP_OBJECT) {
+               if (strxcmp(psHdl->isCas,psHdl->pcLex,"INIT",0,0,FALSE)!=0) {
+                  siErr=CLPERR(psHdl,CLPERR_SYN,"Keyword (%s) in default / property definition for object '%s.%s' is not 'INIT'",psHdl->pcLex,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+                  free(pcVal);
+                  return(siErr);
+               }
+               siErr=siClpIniObj(pvHdl,siLev,siPos,psArg,&psDep,asSav);
+               if (siErr<0) { free(pcVal); return(siErr); }
+               siErr=siClpFinObj(pvHdl,siLev,siPos,psArg,psDep,asSav);
+               if (siErr<0) { free(pcVal); return(siErr); }
+            } else  if (psArg->psFix->siTyp==CLPTYP_OVRLAY) {
+               siErr=siClpIniOvl(pvHdl,siLev,siPos,psArg,&psDep,asSav);
+               if (siErr<0) { free(pcVal); return(siErr); }
+               siErr=siClpSymFnd(pvHdl,siLev+1,siPos,psHdl->pcLex,psDep,&psVal,NULL);
+               if (siErr<0) { free(pcVal); return(siErr); }
+               siErr=siClpFinOvl(pvHdl,siLev,siPos,psArg,psDep,asSav,psVal->psFix->siOid);
+               if (siErr<0) { free(pcVal); return(siErr); }
+            } else if (psArg->psFix->siTyp==CLPTYP_SWITCH) {
+                  if (strxcmp(psHdl->isCas,psHdl->pcLex,"ON",0,0,FALSE)!=0 && strxcmp(psHdl->isCas,psHdl->pcLex,"OFF",0,0,FALSE)!=0) {
+                     siErr=CLPERR(psHdl,CLPERR_SYN,"Keyword (%s) in default / property definition for switch '%s.%s' is not 'ON' or 'OFF'",psHdl->pcLex,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+                     free(pcVal);
+                     return(siErr);
+                  }
+                  if (strxcmp(psHdl->isCas,psHdl->pcLex,"ON",0,0,FALSE)==0) {
+                     siErr=siClpBldSwt(pvHdl,siLev,siPos,psArg);
+                     if (siErr<0) { free(pcVal); return(siErr); }
+                  }
+            } else {
+               siErr=siClpPrsExp(pvHdl,siLev,siPos,FALSE,psArg,&szVal,&pcVal);
+               if (siErr<0) { free(pcVal); return(siErr); }
+               if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d LIT(%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,isPrnLex(psArg,pcVal));
+               siErr=siClpBldLit(pvHdl,siLev,siPos,psArg,pcVal);
+               if (siErr<0) { free(pcVal); return(siErr); }
+            }
+         } else {
+            siErr=siClpPrsExp(pvHdl,siLev,siPos,FALSE,psArg,&szVal,&pcVal);
+            if (siErr<0) { free(pcVal); return(siErr); }
+            if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d LIT(%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,isPrnLex(psArg,pcVal));
+            siErr=siClpBldLit(pvHdl,siLev,siPos,psArg,pcVal);
+            if (siErr<0) { free(pcVal); return(siErr); }
+         }
+      }
       if (psHdl->siTok<0) { free(pcVal); return(psHdl->siTok); }
-      siErr=siClpPrsExp(pvHdl,siLev,siPos,FALSE,psArg,&szVal,&pcVal);
-      if (siErr<0) { free(pcVal); return(siErr); }
-      if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d LIT(%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,isPrnLex(psArg,pcVal));
-      siErr=siClpBldLit(pvHdl,siLev,siPos,psArg,pcVal);
-      if (siErr<0) { free(pcVal); return(siErr); }
-
       psHdl->siBuf--;
       psHdl->siTok=siTok;
+      strcpy(psHdl->pcLex,acLex);
       strcpy(psHdl->pcSrc,acSrc);
       psHdl->pcCur=pcCur; psHdl->pcInp=pcInp; psHdl->pcOld=pcOld; psHdl->pcRow=pcRow; psHdl->siRow=siRow;
       if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"SUPPLEMENT-LIST-PARSER-END(%s.%s=%s)\n",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,psArg->psFix->pcDft);
