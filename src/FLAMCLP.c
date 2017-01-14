@@ -5528,8 +5528,8 @@ static int siClpSetDefault(
       siTok=psHdl->siTok;
       psHdl->siBuf++;
 
-      for (siTok=siClpScnSrc(pvHdl,psArg->psFix->siTyp,psArg);siTok>=0 && siTok!=CLPTOK_END;
-           siTok=siClpScnSrc(pvHdl,psArg->psFix->siTyp,psArg)) {
+      for (psHdl->siTok=siClpScnSrc(pvHdl,psArg->psFix->siTyp,psArg);psHdl->siTok>=0 && psHdl->siTok!=CLPTOK_END;
+           psHdl->siTok=siClpScnSrc(pvHdl,psArg->psFix->siTyp,psArg)) {
          if (psHdl->siTok==CLPTOK_KYW) {
             if (psArg->psFix->siTyp==CLPTYP_OBJECT) {
                if (strxcmp(psHdl->isCas,psHdl->pcLex,"INIT",0,0,FALSE)!=0) {
