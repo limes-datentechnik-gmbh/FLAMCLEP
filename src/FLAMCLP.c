@@ -3259,7 +3259,8 @@ static int siClpScnNat(
             }
             pcHlp[1]=' ';
             sprintf(pcHlp+2,"%"PRIu64"",(U64)t);
-            if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(NUM)-LEXEM(%s)\n",isPrnLex(psArg,pcHlp));
+            if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(NUM)-LEXEM(%s)-TIME\n",isPrnLex(psArg,pcHlp));
+            if (psArg!=NULL) psArg->psStd->uiFlg|=CLPFLG_TIM;
             return(CLPTOK_NUM);
          } else {
             while (isdigit(*(*ppCur))) {
