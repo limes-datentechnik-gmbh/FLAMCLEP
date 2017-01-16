@@ -1992,7 +1992,12 @@ extern char* cstime(signed long long t, char* p) {
    static char    acBuf[20];
    char*          pcStr=(p!=NULL)?p:acBuf;
    time_t         h=(t)?(time_t)t:time(NULL);
-   strftime(pcStr,sizeof(acBuf),"%Y-%m-%d %H:%M:%S",localtime(&h));
+   struct tm*     x=localtime(&h);
+   if (x!=NULL) {
+      strftime(pcStr,sizeof(acBuf),"%Y-%m-%d %H:%M:%S",x);
+   } else {
+      snprintf(acBuf,sizeof(acBuf),"NO-VALID-TIME");
+   }
    return(pcStr);
 }
 
