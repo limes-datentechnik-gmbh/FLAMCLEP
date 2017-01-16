@@ -326,6 +326,7 @@ typedef struct Hdl {
    int                           siErr;
    char                          acLoc[CLPMAX_LOCSIZ];
    U64                           uiNow;
+   U64                           uiRnd;
 } TsHdl;
 
 /* Deklaration der internen Funktionen ********************************/
@@ -702,7 +703,7 @@ static char* fpcPat(
    void*                         pvHdl,
    const int                     siLev);
 
-static int CLPERR(TsHdl* psHdl,int siErr, char* pcMsg, ...) {
+static inline int CLPERR(TsHdl* psHdl,int siErr, char* pcMsg, ...) {
    const char*          p;
    va_list              argv;
    int                  i,l,f=FALSE;
@@ -776,7 +777,7 @@ static int CLPERR(TsHdl* psHdl,int siErr, char* pcMsg, ...) {
    return(siErr);
 }
 
-static void CLPERRADD(TsHdl* psHdl,int siLev, char* pcMsg, ...) {
+static inline void CLPERRADD(TsHdl* psHdl,int siLev, char* pcMsg, ...) {
    if (psHdl->pfErr!=NULL) {
       va_list              argv;
       fprintf(psHdl->pfErr,"%s ",fpcPre(psHdl,siLev));
@@ -785,6 +786,20 @@ static void CLPERRADD(TsHdl* psHdl,int siLev, char* pcMsg, ...) {
    }
 }
 
+static inline U64 ClpRndFnv(const U64 uiRnd)
+{
+   unsigned char* p=(unsigned char*)&uiRnd;
+   U64            h=0xcbf29ce48422232LLU;
+   h^=p[0]; h*=0x100000001b3LLU;
+   h^=p[1]; h*=0x100000001b3LLU;
+   h^=p[2]; h*=0x100000001b3LLU;
+   h^=p[3]; h*=0x100000001b3LLU;
+   h^=p[4]; h*=0x100000001b3LLU;
+   h^=p[5]; h*=0x100000001b3LLU;
+   h^=p[6]; h*=0x100000001b3LLU;
+   h^=p[7]; h*=0x100000001b3LLU;
+   return h;
+}
 /* Implementierung der externen Funktionen ****************************/
 
 extern const char* pcClpVersion(const int l, const int s, char* b)
@@ -915,8 +930,11 @@ extern void* pvClpOpen(
             snprintf(psHdl->acLoc,sizeof(psHdl->acLoc),"%s",pcLoc);
          }
          setlocale(LC_NUMERIC, "C");
-
          psHdl->uiNow=time(NULL);
+         psHdl->uiRnd=clock();
+         for (i=0;psHdl->uiRnd+(CLOCKS_PER_SEC/100)>clock();i++);
+         srand(psHdl->uiNow+i);
+         psHdl->uiRnd=ClpRndFnv(rand())^ClpRndFnv(i);
          pcNow=GETENV("CLP_NOW");
          if (pcNow!=NULL && *pcNow) {
             siErr=siClpScnNat(psHdl,psHdl->pfErr,psHdl->pfScn,&pcNow,&psHdl->szLex,&psHdl->pcLex,CLPTYP_NUMBER,NULL,NULL);
@@ -2639,6 +2657,7 @@ extern int siClpLexem(
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," MiB       NUMBER - megabyte          (1024*1024)                           \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," GiB       NUMBER - gigabyte          (1024*1024*1024)                      \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," TiB       NUMBER - terrabyte         (1024*1024*1024*1024)                 \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," RND       NUMBER - simple 64 bit random number                             \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," PI        FLOAT  - PI (3.14159265359)                                      \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," LCSTAMP   STRING - current local stamp in format:           YYYYMMDD.HHMMSS\n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," LCDATE    STRING - current local date in format:            YYYYMMDD       \n");
@@ -2658,6 +2677,9 @@ extern int siClpLexem(
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," GMHOUR    STRING - current Greenwich mean hour in format:   HH             \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," GMMINUTE  STRING - current Greenwich mean minute in format: MM             \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," GMSECOND  STRING - current Greenwich mean second in format: SS             \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," GMSECOND  STRING - current Greenwich mean second in format: SS             \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," SnRND10   STRING - decimal random number of length n (1 to 8)              \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," SnRND16   STRING - hexadecimal random number of length n (1 to 8)          \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                                                                            \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," SUPPLEMENT     '\"' [:print:]* '\"' |   (null-terminated string (properties))\n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"           Supplements can contain two \"\" to represent one \"                \n");
@@ -2753,6 +2775,13 @@ static int siClpConNat(
    } else if ((siTyp==CLPTYP_NUMBER || siTyp==-1) && strxcmp(psHdl->isCas,*ppLex,"TiB",0,0,FALSE)==0) {
       if (pzLex!=NULL) {
          srprintf(ppLex,pzLex,24,"d%+"PRIu64"",((U64)1024)*((U64)1024)*((U64)1024)*((U64)1024));
+         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(NUM)-LEXEM(%s)\n",*ppLex);
+      }
+      return(CLPTOK_NUM);
+   } else if ((siTyp==CLPTYP_NUMBER || siTyp==-1) && strxcmp(psHdl->isCas,*ppLex,"RND",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         psHdl->uiRnd=ClpRndFnv((psHdl->uiRnd+1)^rand());
+         srprintf(ppLex,pzLex,24,"d%+"PRIu64"",psHdl->uiRnd);
          if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(NUM)-LEXEM(%s)\n",*ppLex);
       }
       return(CLPTOK_NUM);
@@ -2885,6 +2914,118 @@ static int siClpConNat(
       if (pzLex!=NULL) {
          time_t t=psHdl->uiNow;
          strftime(*ppLex,*pzLex,"d'%S",gmtime(&t));
+         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(STR)-LEXEM(%s)\n",*ppLex);
+      }
+      return(CLPTOK_STR);
+   } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,*ppLex,"S1RND10",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         psHdl->uiRnd=ClpRndFnv((psHdl->uiRnd+1)^rand());
+         srprintf(ppLex,pzLex,10,"d'%01u",((U32)psHdl->uiRnd)%10);
+         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(STR)-LEXEM(%s)\n",*ppLex);
+      }
+      return(CLPTOK_STR);
+   } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,*ppLex,"S2RND10",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         psHdl->uiRnd=ClpRndFnv((psHdl->uiRnd+1)^rand());
+         srprintf(ppLex,pzLex,10,"d'%02u",((U32)psHdl->uiRnd)%100);
+         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(STR)-LEXEM(%s)\n",*ppLex);
+      }
+      return(CLPTOK_STR);
+   } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,*ppLex,"S3RND10",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         psHdl->uiRnd=ClpRndFnv((psHdl->uiRnd+1)^rand());
+         srprintf(ppLex,pzLex,10,"d'%03u",((U32)psHdl->uiRnd)%1000);
+         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(STR)-LEXEM(%s)\n",*ppLex);
+      }
+      return(CLPTOK_STR);
+   } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,*ppLex,"S4RND10",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         psHdl->uiRnd=ClpRndFnv((psHdl->uiRnd+1)^rand());
+         srprintf(ppLex,pzLex,10,"d'%04u",((U32)psHdl->uiRnd)%10000);
+         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(STR)-LEXEM(%s)\n",*ppLex);
+      }
+      return(CLPTOK_STR);
+   } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,*ppLex,"S5RND10",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         psHdl->uiRnd=ClpRndFnv((psHdl->uiRnd+1)^rand());
+         srprintf(ppLex,pzLex,10,"d'%05u",((U32)psHdl->uiRnd)%100000);
+         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(STR)-LEXEM(%s)\n",*ppLex);
+      }
+      return(CLPTOK_STR);
+   } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,*ppLex,"S6RND10",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         psHdl->uiRnd=ClpRndFnv((psHdl->uiRnd+1)^rand());
+         srprintf(ppLex,pzLex,10,"d'%06u",((U32)psHdl->uiRnd)%1000000);
+         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(STR)-LEXEM(%s)\n",*ppLex);
+      }
+      return(CLPTOK_STR);
+   } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,*ppLex,"S7RND10",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         psHdl->uiRnd=ClpRndFnv((psHdl->uiRnd+1)^rand());
+         srprintf(ppLex,pzLex,10,"d'%07u",((U32)psHdl->uiRnd)%10000000);
+         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(STR)-LEXEM(%s)\n",*ppLex);
+      }
+      return(CLPTOK_STR);
+   } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,*ppLex,"S8RND10",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         psHdl->uiRnd=ClpRndFnv((psHdl->uiRnd+1)^rand());
+         srprintf(ppLex,pzLex,10,"d'%08u",((U32)psHdl->uiRnd)%100000000);
+         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(STR)-LEXEM(%s)\n",*ppLex);
+      }
+      return(CLPTOK_STR);
+   } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,*ppLex,"S1RND16",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         psHdl->uiRnd=ClpRndFnv((psHdl->uiRnd+1)^rand());
+         srprintf(ppLex,pzLex,10,"d'%01x",((U32)psHdl->uiRnd)&0x0000000F);
+         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(STR)-LEXEM(%s)\n",*ppLex);
+      }
+      return(CLPTOK_STR);
+   } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,*ppLex,"S2RND16",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         psHdl->uiRnd=ClpRndFnv((psHdl->uiRnd+1)^rand());
+         srprintf(ppLex,pzLex,10,"d'%02x",((U32)psHdl->uiRnd)&0x000000FF);
+         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(STR)-LEXEM(%s)\n",*ppLex);
+      }
+      return(CLPTOK_STR);
+   } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,*ppLex,"S3RND16",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         psHdl->uiRnd=ClpRndFnv((psHdl->uiRnd+1)^rand());
+         srprintf(ppLex,pzLex,10,"d'%03x",((U32)psHdl->uiRnd)&0x00000FFF);
+         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(STR)-LEXEM(%s)\n",*ppLex);
+      }
+      return(CLPTOK_STR);
+   } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,*ppLex,"S4RND16",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         psHdl->uiRnd=ClpRndFnv((psHdl->uiRnd+1)^rand());
+         srprintf(ppLex,pzLex,10,"d'%04x",((U32)psHdl->uiRnd)&0x0000FFFF);
+         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(STR)-LEXEM(%s)\n",*ppLex);
+      }
+      return(CLPTOK_STR);
+   } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,*ppLex,"S5RND16",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         psHdl->uiRnd=ClpRndFnv((psHdl->uiRnd+1)^rand());
+         srprintf(ppLex,pzLex,10,"d'%05x",((U32)psHdl->uiRnd)&0x000FFFFF);
+         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(STR)-LEXEM(%s)\n",*ppLex);
+      }
+      return(CLPTOK_STR);
+   } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,*ppLex,"S6RND16",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         psHdl->uiRnd=ClpRndFnv((psHdl->uiRnd+1)^rand());
+         srprintf(ppLex,pzLex,10,"d'%06x",((U32)psHdl->uiRnd)&0x00FFFFFF);
+         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(STR)-LEXEM(%s)\n",*ppLex);
+      }
+      return(CLPTOK_STR);
+   } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,*ppLex,"S7RND16",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         psHdl->uiRnd=ClpRndFnv((psHdl->uiRnd+1)^rand());
+         srprintf(ppLex,pzLex,10,"d'%07x",((U32)psHdl->uiRnd)&0x0FFFFFFF);
+         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(STR)-LEXEM(%s)\n",*ppLex);
+      }
+      return(CLPTOK_STR);
+   } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,*ppLex,"S8RND16",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         psHdl->uiRnd=ClpRndFnv((psHdl->uiRnd+1)^rand());
+         srprintf(ppLex,pzLex,10,"d'%08x",((U32)psHdl->uiRnd)&0xFFFFFFFF);
          if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(STR)-LEXEM(%s)\n",*ppLex);
       }
       return(CLPTOK_STR);
