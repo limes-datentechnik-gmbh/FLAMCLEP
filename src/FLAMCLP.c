@@ -4146,8 +4146,8 @@ static int siClpPrsFac(
             case 8: flVal=((F64*)psVal->psVar->pvDat)[0]; break;
             default: return CLPERR(psHdl,CLPERR_SIZ,"Size (%d) for the constant value '%s' of '%s.%s' is not 4 or 8)",psVal->psFix->siSiz,psVal->psStd->pcKyw,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
             }
-            if (flVal>=0) {
-               srprintf(ppVal,pzVal,24,"d+%",flVal);
+            if (flVal>=0.0) {
+               srprintf(ppVal,pzVal,24,"d+%f",flVal);
             } else {
                srprintf(ppVal,pzVal,24,"d%f",flVal);
             }
@@ -4267,7 +4267,7 @@ static int siClpPrsTrm(
          if (siErr) { free(pcVal); return(siErr); }
          flVal=flVal1*flVal2;
          if (flVal>=0) {
-            srprintf(ppVal,pzVal,24,"d+%",flVal);
+            srprintf(ppVal,pzVal,24,"d+%f",flVal);
          } else {
             srprintf(ppVal,pzVal,24,"d%f",flVal);
          }
@@ -4321,7 +4321,7 @@ static int siClpPrsTrm(
          }
          flVal=flVal1/flVal2;
          if (flVal>=0) {
-            srprintf(ppVal,pzVal,24,"d+%",flVal);
+            srprintf(ppVal,pzVal,24,"d+%f",flVal);
          } else {
             srprintf(ppVal,pzVal,24,"d%f",flVal);
          }
@@ -4365,7 +4365,7 @@ static int siClpPrsTrm(
          if (siErr) { free(pcVal); return(siErr); }
          flVal=flVal1*flVal2;
          if (flVal>=0) {
-            srprintf(ppVal,pzVal,24,"d+%",flVal);
+            srprintf(ppVal,pzVal,24,"d+%f",flVal);
          } else {
             srprintf(ppVal,pzVal,24,"d%f",flVal);
          }
@@ -4449,7 +4449,7 @@ static int siClpPrsExp(
          if (siErr) { free(pcVal); return(siErr); }
          flVal=flVal1+flVal2;
          if (flVal>=0) {
-            srprintf(ppVal,pzVal,24,"d+%",flVal);
+            srprintf(ppVal,pzVal,24,"d+%f",flVal);
          } else {
             srprintf(ppVal,pzVal,24,"d%f",flVal);
          }
@@ -4510,7 +4510,7 @@ static int siClpPrsExp(
          if (siErr) { free(pcVal); return(siErr); }
          flVal=flVal1-flVal2;
          if (flVal>=0) {
-            srprintf(ppVal,pzVal,24,"d+%",flVal);
+            srprintf(ppVal,pzVal,24,"d+%f",flVal);
          } else {
             srprintf(ppVal,pzVal,24,"d%f",flVal);
          }
@@ -4554,7 +4554,7 @@ static int siClpPrsExp(
          if (siErr) { free(pcVal); return(siErr); }
          flVal=flVal1+flVal2;
          if (flVal>=0) {
-            srprintf(ppVal,pzVal,24,"d+%",flVal);
+            srprintf(ppVal,pzVal,24,"d+%f",flVal);
          } else {
             srprintf(ppVal,pzVal,24,"d%f",flVal);
          }
