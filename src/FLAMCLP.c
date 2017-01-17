@@ -3438,7 +3438,7 @@ static int siClpScnNat(
                }
                if (tm.tm_isdst>0) t-=60*60;//correct daylight saving time
             }
-            pcHlp[1]=' ';
+            pcHlp[1]='+';
             sprintf(pcHlp+2,"%"PRIu64"",(U64)t);
             if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(NUM)-LEXEM(%s)-TIME\n",isPrnLex(psArg,pcHlp));
             if (psArg!=NULL) psArg->psStd->uiFlg|=CLPFLG_TIM;
@@ -3473,10 +3473,12 @@ static int siClpScnNat(
                   (*ppCur)++; pcLex++;
                }
                *pcLex=EOS;
+               if (pcHlp[1]==' ') pcHlp[1]='+';
                if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(FLT)-LEXEM(%s)\n",isPrnLex(psArg,pcHlp));
                return(CLPTOK_FLT);
             }
             *pcLex=EOS;
+            if (pcHlp[1]==' ') pcHlp[1]='+';
             if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(FLT)-LEXEM(%s)\n",isPrnLex(psArg,pcHlp));
             return(CLPTOK_FLT);
          } else if ((tolower((*ppCur)[0])=='e') && (isdigit((*ppCur)[1]) ||
@@ -3494,10 +3496,12 @@ static int siClpScnNat(
                (*ppCur)++; pcLex++;
             }
             *pcLex=EOS;
+            if (pcHlp[1]==' ') pcHlp[1]='+';
             if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(FLT)-LEXEM(%s)\n",isPrnLex(psArg,pcHlp));
             return(CLPTOK_FLT);
          } else {
             *pcLex=EOS;
+            if (pcHlp[1]==' ') pcHlp[1]='+';
             if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(NUM)-LEXEM(%s)\n",isPrnLex(psArg,pcHlp));
             return((siTyp==CLPTOK_FLT)?CLPTOK_FLT:CLPTOK_NUM);
          }
