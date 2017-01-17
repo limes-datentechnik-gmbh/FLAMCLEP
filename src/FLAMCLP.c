@@ -5029,6 +5029,8 @@ static int siClpBldLit(
    I64                           siVal=0;
    F64                           flVal=0;
    char*                         pcHlp=NULL;
+   const char*                   pcKyw=NULL;
+   TsSym*                        psCon;
 
    if (psArg->psVar->siCnt>=psArg->psFix->siMax) {
       return CLPERR(psHdl,CLPERR_SEM,"Too many (>%d) occurrences of '%s.%s' with type '%s'",psArg->psFix->siMax,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
@@ -5346,10 +5348,44 @@ static int siClpBldLit(
    psArg->psVar->siCnt++;
 
    pcHlp=fpcPat(pvHdl,siLev);
-   if (psArg->psFix->siTyp==CLPTYP_NUMBER && (CLPISF_TIM(psArg->psStd->uiFlg) || pcVal[0]=='t')) {
-      srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcHlp)+strlen(psArg->psStd->pcKyw)+strlen(isPrnStr(psArg,pcVal))+strlen(cstime(siVal,NULL)),"%s.%s=%s(%s)\n",pcHlp,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),cstime(siVal,NULL));
+   for (psCon=psArg->psDep;psCon!=NULL;psCon=psCon->psNxt) {
+      printd("-- psCon->psStd->pcKyw=%s(%d==%d,%d==%d)\n",psCon->psStd->pcKyw,psCon->psFix->siTyp,psArg->psFix->siTyp,psCon->psVar->siLen,psArg->psVar->siLen);
+      if (pcKyw==NULL && psCon->psFix->siTyp==psArg->psFix->siTyp) {
+         switch (psCon->psFix->siTyp) {
+         case CLPTYP_NUMBER:
+            switch (psCon->psFix->siSiz) {
+            case 1: if (siVal==((I08*)psCon->psVar->pvDat)[0]) pcKyw=psCon->psStd->pcKyw; break;
+            case 2: if (siVal==((I16*)psCon->psVar->pvDat)[0]) pcKyw=psCon->psStd->pcKyw; break;
+            case 4: if (siVal==((I32*)psCon->psVar->pvDat)[0]) pcKyw=psCon->psStd->pcKyw; break;
+            case 8: if (siVal==((I64*)psCon->psVar->pvDat)[0]) pcKyw=psCon->psStd->pcKyw; break;
+            }
+            break;
+         case CLPTYP_FLOATN:
+            switch (psCon->psFix->siSiz) {
+            case 4: if (flVal==((F32*)psCon->psVar->pvDat)[0]) pcKyw=psCon->psStd->pcKyw; break;
+            case 8: if (flVal==((F64*)psCon->psVar->pvDat)[0]) pcKyw=psCon->psStd->pcKyw; break;
+            break;
+            }
+         default:
+            if (psCon->psVar->siLen==psArg->psVar->siLen && memcmp(psCon->psVar->pvDat,psArg->psVar->pvDat,psArg->psVar->siLen)==0) {
+               pcKyw=psCon->psStd->pcKyw;
+            }
+            break;
+         }
+      }
+   }
+   if (pcKyw!=NULL) {
+      if (psArg->psFix->siTyp==CLPTYP_NUMBER && (CLPISF_TIM(psArg->psStd->uiFlg) || pcVal[0]=='t')) {
+         srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcHlp)+strlen(psArg->psStd->pcKyw)+strlen(isPrnStr(psArg,pcVal))+strlen(cstime(siVal,NULL)),"%s.%s=%s(%s(%s))\n",pcHlp,psArg->psStd->pcKyw,pcKyw,isPrnStr(psArg,pcVal),cstime(siVal,NULL));
+      } else {
+         srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcHlp)+strlen(psArg->psStd->pcKyw)+strlen(isPrnStr(psArg,pcVal)),"%s.%s=%s(%s)\n",pcHlp,psArg->psStd->pcKyw,pcKyw,isPrnStr(psArg,pcVal));
+      }
    } else {
-      srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcHlp)+strlen(psArg->psStd->pcKyw)+strlen(isPrnStr(psArg,pcVal)),"%s.%s=%s\n",pcHlp,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal));
+      if (psArg->psFix->siTyp==CLPTYP_NUMBER && (CLPISF_TIM(psArg->psStd->uiFlg) || pcVal[0]=='t')) {
+         srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcHlp)+strlen(psArg->psStd->pcKyw)+strlen(isPrnStr(psArg,pcVal))+strlen(cstime(siVal,NULL)),"%s.%s=%s(%s)\n",pcHlp,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),cstime(siVal,NULL));
+      } else {
+         srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcHlp)+strlen(psArg->psStd->pcKyw)+strlen(isPrnStr(psArg,pcVal)),"%s.%s=%s\n",pcHlp,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal));
+      }
    }
 
    siErr=siClpBldLnk(pvHdl,siLev,siPos,psArg->psVar->siCnt,psArg->psFix->psCnt,FALSE);
