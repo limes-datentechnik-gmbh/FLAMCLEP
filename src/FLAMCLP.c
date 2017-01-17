@@ -5347,9 +5347,7 @@ static int siClpBldLit(
    }
    psArg->psVar->siCnt++;
 
-   pcHlp=fpcPat(pvHdl,siLev);
    for (psCon=psArg->psDep;psCon!=NULL;psCon=psCon->psNxt) {
-      printd("-- psCon->psStd->pcKyw=%s(%d==%d,%d==%d)\n",psCon->psStd->pcKyw,psCon->psFix->siTyp,psArg->psFix->siTyp,psCon->psVar->siLen,psArg->psVar->siLen);
       if (pcKyw==NULL && psCon->psFix->siTyp==psArg->psFix->siTyp) {
          switch (psCon->psFix->siTyp) {
          case CLPTYP_NUMBER:
@@ -5374,6 +5372,7 @@ static int siClpBldLit(
          }
       }
    }
+   pcHlp=fpcPat(pvHdl,siLev);
    if (pcKyw!=NULL) {
       if (psArg->psFix->siTyp==CLPTYP_NUMBER && (CLPISF_TIM(psArg->psStd->uiFlg) || pcVal[0]=='t')) {
          srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcHlp)+strlen(psArg->psStd->pcKyw)+strlen(isPrnStr(psArg,pcVal))+strlen(cstime(siVal,NULL)),"%s.%s=%s(%s(%s))\n",pcHlp,psArg->psStd->pcKyw,pcKyw,isPrnStr(psArg,pcVal),cstime(siVal,NULL));
