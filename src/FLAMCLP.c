@@ -4198,7 +4198,7 @@ static int siClpPrsFac(
             return CLPERR(psHdl,CLPERR_SEM,"The type (%s) of the symbol (%s) for argument '%s.%s' don't match the expected type (%s)",
                   apClpTyp[psVal->psFix->siTyp],acLex,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
          }
-         if (psVal->psVar->pvDat==NULL) {
+         if (psVal->psVar->pvDat==NULL || psVal->psVar->siCnt==0) {
             return CLPERR(psHdl,CLPERR_TAB,"Keyword (%s) and type (%s) of variable value for argument (%s.%s) defined but data pointer not set (variable not defined)",
                   psVal->psStd->pcKyw,apClpTyp[psVal->psFix->siTyp],fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
          }
