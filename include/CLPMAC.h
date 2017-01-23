@@ -35,6 +35,8 @@
 #define CLPARGTAB_SKALAR(kyw,nam,typ,min,max,atyp,flg,oid,tab,dft,man,hlp) typ   nam;
 #define CLPARGTAB_STRING(kyw,nam,siz,min,max,atyp,flg,oid,tab,dft,man,hlp) U08   nam[siz];
 #define CLPARGTAB_ARRAY( kyw,nam,typ,min,max,atyp,flg,oid,tab,dft,man,hlp) typ   nam[max];
+#define CLPARGTAB_DYNSTR(kyw,nam,siz,min,max,atyp,flg,oid,tab,dft,man,hlp) U08*  nam;
+#define CLPARGTAB_DYNARY(kyw,nam,typ,min,max,atyp,flg,oid,tab,dft,man,hlp) typ*  nam;
 #define CLPARGTAB_ALIAS( kyw,ali                                         )
 #define CLPARGTAB_CLS
 
@@ -70,6 +72,21 @@
  *  *hlp* is a pointer to the short description of the argument.\n
  */
 #define CLPARGTAB_STRING(kyw,nam,siz,min,max,atyp,flg,oid,tab,dft,man,hlp) { CLPTYP_STRING,(kyw), NULL,(min),(max),      (siz), offsetof(STRUCT_NAME,nam),(oid),(flg)      ,(tab),(dft),(man),(hlp),0,0.0,NULL},
+/** defines a dynamic string with the command line keyword *kyw* and the member name *nam*
+ * (pointer to alloced memory, must be freed by the using application)
+ *
+ *  *siz* is the total available length of the string(s).\n
+ *  *atyp* is unused and fixed to CLPTYP_STRING.\n
+ *  *min* can be between 0 and *max* for a string and determines if this argument is optional(0) or required(min>=1)\n
+ *  *max* defines the maximum number of strings accepted on the command line.\n
+ *  *flg* is an OR-ed list of the flag macros CLPFLG_* which define various parsing options.\n
+ *  *oid* is a unique id value used for this argument.\n
+ *  *tab* is NULL or a pointer to another argument table describing a selection.\n
+ *  *dft* is the hard coded default value of the argument if no input is given on the command line.\n
+ *  *man* is a pointer to the long description of the argument.\n
+ *  *hlp* is a pointer to the short description of the argument.\n
+ */
+#define CLPARGTAB_DYNSTR(kyw,nam,siz,min,max,atyp,flg,oid,tab,dft,man,hlp) { CLPTYP_STRING,(kyw), NULL,(min),(max),      (siz), offsetof(STRUCT_NAME,nam),(oid),((flg)|CLPFLG_DYN),(tab),(dft),(man),(hlp),0,0.0,NULL},
 /** defines an array with the command line keyword *kyw* and the member name *nam*
  *
  *  *typ* is the C type of the member\n
@@ -84,6 +101,21 @@
  *  *hlp* is a pointer to the short description of the argument.\n
  */
 #define CLPARGTAB_ARRAY( kyw,nam,typ,min,max,atyp,flg,oid,tab,dft,man,hlp) { atyp         ,(kyw), NULL,(min),(max),sizeof(typ), offsetof(STRUCT_NAME,nam),(oid),(flg)      ,(tab),(dft),(man),(hlp),0,0.0,NULL},
+/** defines an dynamic array with the command line keyword *kyw* and the member name *nam*
+ * (pointer to alloced memory, must be freed by the using application)
+ *
+ *  *typ* is the C type of the member\n
+ *  *atyp* is one of the CLPTYP_* macros.\n
+ *  *min* can be between 0 or *max* and determines if this argument is optional(0) or required(min>=1)\n
+ *  *max* defines the size of the array.\n
+ *  *flg* is an OR-ed list of the flag macros CLPFLG_* which define various parsing options.\n
+ *  *oid* is a unique id value used for this argument.\n
+ *  *tab* is NULL or a pointer to another argument table describing the object, overlay or selection.\n
+ *  *dft* is the hard coded default value of the argument if no input is given on the command line.\n
+ *  *man* is a pointer to the long description of the argument.\n
+ *  *hlp* is a pointer to the short description of the argument.\n
+ */
+#define CLPARGTAB_DYNARY( kyw,nam,typ,min,max,atyp,flg,oid,tab,dft,man,hlp) { atyp         ,(kyw), NULL,(min),(max),sizeof(typ), offsetof(STRUCT_NAME,nam),(oid),((flg)|CLPFLG_DYN),(tab),(dft),(man),(hlp),0,0.0,NULL},
 /** defines an alias name for another argument
  *
  *  *kyw* is the alternative keyword accepted on the command line in place of the keyword given in *ali*\n

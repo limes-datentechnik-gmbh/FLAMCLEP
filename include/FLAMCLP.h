@@ -553,6 +553,8 @@ extern const char* pcClpAbout(const int l, const int s, char* b);
 #define CLPFLG_PDF               0x00100000U
 /** CLPFLG_TIM This flag mark a number as time value (only used to print out the corressponing time stamp) */
 #define CLPFLG_TIM               0x00200000U
+/** CLPFLG_DYN This flag mark a string or array as dynamic (only a pointer to allocated memory is used and must be freeed by the user) */
+#define CLPFLG_DYN               0x00400000U
 /** CLPFLG_PWD This flag will ensure that the clear value is only put into the data structure but not traced, logged or given away elsewhere */
 #define CLPFLG_PWD               0x01000000U
 
@@ -580,6 +582,7 @@ extern const char* pcClpAbout(const int l, const int s, char* b);
 #define CLPISF_HEX(flg)          ((flg)&CLPFLG_HEX)
 #define CLPISF_PDF(flg)          ((flg)&CLPFLG_PDF)
 #define CLPISF_TIM(flg)          ((flg)&CLPFLG_TIM)
+#define CLPISF_DYN(flg)          ((flg)&CLPFLG_DYN)
 #define CLPISF_LNK(flg)          (CLPISF_CNT(flg) ||  CLPISF_OID(flg) ||  CLPISF_ELN(flg) || CLPISF_SLN(flg) ||  CLPISF_TLN(flg))
 #define CLPISF_ARG(flg)          ((!CLPISF_LNK(flg)) && (!CLPISF_CON(flg)) && (!CLPISF_ALI(flg)))
 #define CLPISF_ENT(flg)          ((!CLPISF_LNK(flg)) && (!CLPISF_ALI(flg)))
@@ -737,7 +740,8 @@ typedef struct ClpArgument {
    /** Maximum amount of entries for this argument (1-scalar n-array) */
    int                           siMax;
    /** If fixed size type (switch, number, float, object, overlay) then size of this type else (string) available size in memory
-    * (string type can be defined as FIX with CLPFLG_FIX but this requires a typedef for this string size)*/
+    *  String type can be defined as FIX with CLPFLG_FIX but this requires a typedef for this string size
+    *  For dynamic strings an initial size for the first memory allocation can be defined */
    int                           siSiz;
    /** Offset of an argument in a structure used for address calculation (please use offset of(t,m) macro) */
    int                           siOfs;
