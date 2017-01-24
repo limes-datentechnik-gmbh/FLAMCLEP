@@ -156,7 +156,8 @@
 #define CLPINI_MSGSIZ            1024
 #define CLPINI_PRESIZ            1024
 #define CLPINI_PATSIZ            1024
-#define CLPINI_VALSIZ            128;
+#define CLPINI_VALSIZ            128
+#define CLPINI_PTRCNT            128
 
 #define CLPTOK_INI               0
 #define CLPTOK_END               1
@@ -329,6 +330,9 @@ typedef struct Hdl {
    char                          acLoc[CLPMAX_LOCSIZ];
    I64                           siNow;
    I64                           siRnd;
+   int                           siPtr;
+   int                           szPtr;
+   void**                        apPtr;
 } TsHdl;
 
 /* Deklaration der internen Funktionen ********************************/
@@ -803,6 +807,52 @@ static inline I64 ClpRndFnv(const I64 siRnd)
    h^=p[7]; h*=0x100000001b3LLU;
    return h;
 }
+
+static void* pvClpAlloc(
+   void*                         pvHdl,
+   void*                         pvPtr,
+   size_t                        szSiz)
+{
+   TsHdl*                        psHdl=(TsHdl*)pvHdl;
+   for (int i=0;i<psHdl->siPtr;i++) {
+      if (psHdl->apPtr[i]==pvPtr) {
+         pvPtr=realloc(pvPtr,szSiz);
+         if (pvPtr!=NULL) {
+            psHdl->apPtr[i]=pvPtr;
+         }
+         return(pvPtr);
+      }
+   }
+   if (psHdl->siPtr>=psHdl->szPtr) {
+      void* pvHlp=realloc(psHdl->apPtr,(sizeof(void*))*(psHdl->szPtr+CLPINI_PTRCNT));
+      if (pvHlp==NULL) return(NULL);
+      psHdl->apPtr=pvHlp;
+      psHdl->szPtr+=CLPINI_PTRCNT;
+   }
+   pvPtr=realloc(pvPtr,szSiz);
+   if (pvPtr!=NULL) {
+      psHdl->apPtr[psHdl->siPtr]=pvPtr;
+      psHdl->siPtr++;
+   }
+   return(pvPtr);
+}
+
+static void vdClpFree(
+   void*                         pvHdl)
+{
+   TsHdl*                        psHdl=(TsHdl*)pvHdl;
+   if (psHdl->apPtr!=NULL) {
+      for (int i=0;i<psHdl->siPtr;i++) {
+         if (psHdl->apPtr[i]!=NULL) {
+            free(psHdl->apPtr[i]);
+            psHdl->apPtr[i]=NULL;
+         }
+      }
+      free(psHdl->apPtr);
+      psHdl->apPtr=NULL;
+   }
+}
+
 /* Implementierung der externen Funktionen ****************************/
 
 extern const char* pcClpVersion(const int l, const int s, char* b)
@@ -887,6 +937,7 @@ extern void* pvClpOpen(
          psHdl->pcInp=NULL;
          psHdl->pcCur=NULL;
          psHdl->pcOld=NULL;
+         psHdl->apPtr=NULL;
          psHdl->szLex=CLPINI_LEXSIZ;
          psHdl->pcLex=(C08*)calloc(1,psHdl->szLex);
          psHdl->szSrc=CLPINI_SRCSIZ;
@@ -1803,7 +1854,8 @@ extern int siClpSymbolTableUpdate(
 }
 
 extern void vdClpClose(
-   void*                         pvHdl)
+   void*                         pvHdl,
+   const int                     isFree)
 {
    if (pvHdl!=NULL) {
       TsHdl*                     psHdl=(TsHdl*)pvHdl;
@@ -1847,7 +1899,11 @@ extern void vdClpClose(
       }
       setlocale(LC_NUMERIC, psHdl->acLoc);
       vdClpSymDel(psHdl->psTab);
-      free(pvHdl);
+      psHdl->psTab=NULL;
+      if (isFree) {
+         vdClpFree(psHdl);
+         free(pvHdl);
+      }
    }
 }
 
@@ -1952,7 +2008,7 @@ static TsSym* psClpSymIns(
    }
    psSym->psFix->siTyp=psArg->siTyp;
    psSym->psFix->siMin=psArg->siMin;
-   psSym->psFix->siMax=(psSym->psFix->siMax==0)?((CLPISF_DYN(psSym->psStd->uiFlg))?2147483647:1):psArg->siMax;
+   psSym->psFix->siMax=(psArg->siMax==0)?((CLPISF_DYN(psSym->psStd->uiFlg))?2147483647:1):psArg->siMax;
    psSym->psFix->siSiz=psArg->siSiz;
    psSym->psFix->siOfs=psArg->siOfs;
    psSym->psFix->siOid=psArg->siOid;

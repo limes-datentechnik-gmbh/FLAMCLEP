@@ -1161,12 +1161,20 @@ extern int siClpGrammar(
 /**
  * Close the command line parser
  *
- * The function releases the allocated resources in the handle
+ * The function releases the allocated resources in the handle. If dynamic allocation
+ * of data fields used in the CLP structure, you can close the CLP handle accept the
+ * list of dynamic allocated pointer in the CLP structure, if the isFree flag is set to
+ * FALSE. This is useful if you need the CLP no longer but the CLP data structure must be valid.
+ * You can later call the vdClpClose function again to release the dynamic allocated data
+ * fields of the CLP structure.
  *
- * @param[in]  pvHdl Pointer to the corresponding handle created with \a pvClpOpen
+ * @param[in]  pvHdl  Pointer to the corresponding handle created with \a pvClpOpen
+ * @param[in]  isFree If true, then the handle and all dynamic allocated memory are freed
+ *                    else the handle is still valid to call again the close function with free
  */
 extern void vdClpClose(
-   void*             pvHdl);
+   void*             pvHdl,
+   const int         isFree);
 
 /**
  * Provides error message

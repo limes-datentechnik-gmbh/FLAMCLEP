@@ -122,11 +122,12 @@
  * 1.2.55: Make error message and source variable in length
  * 1.2.56: Make root and property variable in length
  * 1.2.57: Separate acNum (number) and acHdl (head line)
+ * 1.2.58: Support dynamic strings and arrays in CLP structure
  */
-#define CLE_VSN_STR       "1.2.57"
+#define CLE_VSN_STR       "1.2.58"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        2
-#define CLE_VSN_REVISION       57
+#define CLE_VSN_REVISION       58
 
 /* Definition der Konstanten ******************************************/
 #define CLEMAX_CNFLEN            1023
@@ -1104,7 +1105,7 @@ EVALUATE:
                   }
                }
                vdPrnCommandManpage(pvHdl,pfDoc,pcCmd,i,isMan,TRUE);
-               vdClpClose(pvHdl); pvHdl=NULL;
+               vdClpClose(pvHdl,TRUE); pvHdl=NULL;
                if (isMan==TRUE) {
                   if (strlen(pcCmd)==strlen(psTab[i].pcKyw)) {
                      fprintf(pfOut,"Manual page for command '%s' successfully written to file (%s)\n",pcCmd,acFil);
@@ -1277,10 +1278,9 @@ EVALUATE:
                   siErr=siClpDocu(pvHdl,pfDoc,psTab[i].pcKyw,NULL,acNum,"COMMAND",TRUE,FALSE,isNbr);
                   if (siErr<0) {
                      fprintf(pfOut,"Creation of documentation file (%s) failed (%d - %s)\n",acFil,errno,strerror(errno));
-                     vdClpClose(pvHdl); pvHdl=NULL;
                      ERROR(CLERTC_SYN,NULL);
                   }
-                  vdClpClose(pvHdl); pvHdl=NULL;
+                  vdClpClose(pvHdl,TRUE); pvHdl=NULL;
                }
             }
 
@@ -1337,10 +1337,9 @@ EVALUATE:
                   siErr=siClpDocu(pvHdl,pfDoc,psApx[i].pcKyw,psApx[i].pcHdl,acNum,"Appendix",TRUE,FALSE,isNbr);
                   if (siErr<0) {
                      fprintf(pfOut,"Creation of documentation file (%s) failed (%d - %s)\n",acFil,errno,strerror(errno));
-                     vdClpClose(pvHdl); pvHdl=NULL;
                      ERROR(CLERTC_SYN,NULL);
                   }
-                  vdClpClose(pvHdl); pvHdl=NULL;
+                  vdClpClose(pvHdl,TRUE); pvHdl=NULL;
                }
                efprintf(pfDoc,"indexterm:[Appendix CLP Strings]\n\n\n");
                s++;
@@ -1371,16 +1370,13 @@ EVALUATE:
             fprintf(pfDoc,"------------------------------------------------------------------------\n");
             fprintf(pfDoc,"Grammar for argument list, parameter file or property file\n");
             siErr=siClpGrammar(pvHdl,pfDoc); s++;
-            vdClpClose(pvHdl); pvHdl=NULL;
+            vdClpClose(pvHdl,TRUE); pvHdl=NULL;
             fprintf(pfDoc,"------------------------------------------------------------------------\n\n");
             efprintf(pfDoc,"indexterm:[Appendix Grammar]\n\n\n");
             if (siErr<0) {
                fprintf(pfOut,"Creation of documentation file (%s) failed (%d - %s)\n",acFil,errno,strerror(errno));
                ERROR(CLERTC_SYN,NULL);
             }
-
-            vdClpClose(pvHdl); pvHdl=NULL;
-
             efprintf(pfDoc,"[[appendix-properties]]\n");
             efprintf(pfDoc,"[appendix]\n");
             fprintf(pfDoc,"PROPERTIES\n");
@@ -1400,7 +1396,7 @@ EVALUATE:
                                        psTab[i].piOid,psTab[i].psTab,isCas,isPfl,isEnv,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,acHlp,&siFil,pfMsg);
                if (siErr) ERROR(siErr,NULL);
                siErr=siClpProperties(pvHdl,CLPPRO_MTD_DOC,10,psTab[i].pcKyw,pfDoc);
-               vdClpClose(pvHdl); pvHdl=NULL;
+               vdClpClose(pvHdl,TRUE); pvHdl=NULL;
             }
             if (siErr<0) {
                fprintf(pfOut,"Creation of documentation file (%s) failed (%d - %s)\n",acFil,errno,strerror(errno));
@@ -1420,7 +1416,7 @@ EVALUATE:
                                        psTab[i].piOid,psTab[i].psTab,isCas,isPfl,isEnv,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,acHlp,&siFil,pfMsg);
                if (siErr) ERROR(siErr,NULL);
                siErr=siClpProperties(pvHdl,CLPPRO_MTD_SET,10,psTab[i].pcKyw,pfDoc);
-               vdClpClose(pvHdl); pvHdl=NULL;
+               vdClpClose(pvHdl,TRUE); pvHdl=NULL;
             }
             fprintf(pfDoc,"------------------------------------------------------------------------\n\n");
             if (siErr<0) {
@@ -1536,7 +1532,6 @@ EVALUATE:
                                        psTab[i].piOid,psTab[i].psTab,isCas,isPfl,isEnv,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,acHlp,&siFil,pfMsg);
                if (siErr) ERROR(siErr,NULL);
                siErr=siClpProperties(pvHdl,CLPPRO_MTD_CMT,10,psTab[i].pcKyw,pfPro);
-               vdClpClose(pvHdl); pvHdl=NULL;
             }
             if (siErr<0) {
                fprintf(pfOut,"Write property file (%s) for program '%s' failed (%d-%s)\n",acFil,pcPgm,errno,strerror(errno));
@@ -1552,7 +1547,6 @@ EVALUATE:
                                           psTab[i].piOid,psTab[i].psTab,isCas,isPfl,isEnv,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,acHlp,&siFil,pfMsg);
                   if (siErr) ERROR(siErr,NULL);
                   siErr=siClpProperties(pvHdl,CLPPRO_MTD_CMT,10,psTab[i].pcKyw,pfPro);
-                  vdClpClose(pvHdl); pvHdl=NULL;
                   if (siErr<0) {
                      fprintf(pfOut,"Write property file (%s) for command '%s' failed (%d-%s)\n",acFil,pcCmd,errno,strerror(errno));
                      ERROR(CLERTC_SYN,NULL);
@@ -1739,7 +1733,6 @@ EVALUATE:
                                     &pvHdl,acFil,&siFil,pfMsg);
             if (siErr) ERROR(siErr,NULL);
             vdPrnProperties(pvHdl,psTab[i].pcKyw,TRUE,10);
-            vdClpClose(pvHdl); pvHdl=NULL;
          }
          ERROR(CLERTC_OK,NULL);
       } else if (argc>=3) {
@@ -2022,7 +2015,7 @@ EVALUATE:
                      strcpy(pcLst,pcTls);
                   }
                }
-               vdClpClose(pvHdl); pvHdl=NULL;
+               vdClpClose(pvHdl,FALSE);
                siErr=psTab[i].pfMap(pfOut,pfTrc,psTab[i].piOid,psTab[i].pvClp,psTab[i].pvPar);
                if (siErr) {
                   if (pfMsg!=NULL && (pcMsg=pfMsg(siErr))!=NULL) {
@@ -2061,6 +2054,7 @@ EVALUATE:
                   }
                }
                siErr=psTab[i].pfFin(pfOut,pfTrc,psTab[i].pvPar);
+               vdClpClose(pvHdl,TRUE); pvHdl=NULL;
                if (siErr) {
                   if (pfMsg!=NULL && (pcMsg=pfMsg(siErr))!=NULL) {
                      fprintf(pfOut,"Finish/cleanup for command '%s' failed (Return code: %d / Reason code: %d (%s))\n",psTab[i].pcKyw,CLERTC_FIN,siErr,pcMsg);
@@ -2140,14 +2134,14 @@ static int siClePropertyInit(
    siErr=siCleGetProperties(*ppHdl,pfOut,psCnf,pcOwn,pcPgm,pcCmd,pcFil,&pcPro,piFil);
    if (siErr) {
       if (pcPro!=NULL) free(pcPro);
-      vdClpClose(*ppHdl);*ppHdl=NULL;
+      vdClpClose(*ppHdl,TRUE);*ppHdl=NULL;
       return(siErr);
    }
    if (pcPro!=NULL) {
       siErr=siClpParsePro(*ppHdl,pcFil,pcPro,FALSE,NULL);
       if (siErr<0) {
          fprintf(pfOut,"Parsing property file \"%s\" for command '%s' failed\n",pcFil,pcCmd);
-         vdClpClose(*ppHdl);*ppHdl=NULL;
+         vdClpClose(*ppHdl,TRUE);*ppHdl=NULL;
          free(pcPro);
          return(CLERTC_SYN);
       }
@@ -2222,16 +2216,16 @@ static int siClePropertyFinish(
    pfPro=fopen(cpmapfil(acFil,sizeof(acFil),pcFil),filemode("w"));
    if (pfPro==NULL) {
       fprintf(pfOut,"Cannot open the property file (\"%s\",\"%s\") for write operation (%d-%s)\n",acFil,filemode("w"),errno,strerror(errno));
-      vdClpClose(pvHdl);
+      vdClpClose(pvHdl,TRUE);
       return(CLERTC_SYS);
    }
 
    siErr=siClpProperties(pvHdl,CLPPRO_MTD_CMT,10,pcCmd,pfPro);
    if (siErr<0) {
       fprintf(pfOut,"Write property file (%s) for command '%s' failed (%d-%s)\n",acFil,pcCmd,errno,strerror(errno));
-      vdClpClose(pvHdl); fclose(pfPro); return(CLERTC_SYN);
+      vdClpClose(pvHdl,TRUE); fclose(pfPro); return(CLERTC_SYN);
    }
-   vdClpClose(pvHdl); fclose(pfPro);
+   vdClpClose(pvHdl,TRUE); fclose(pfPro);
    fprintf(pfOut,"Property file (%s) for command '%s' successfully written\n",acFil,pcCmd);
 
    if (siFil!=3) {
@@ -2294,7 +2288,7 @@ static int siCleCommandInit(
    }
    siErr=siCleGetProperties(*ppHdl,pfOut,psCnf,pcOwn,pcPgm,pcCmd,acFil,&pcPro,&siFil);
    if (siErr) {
-      vdClpClose(*ppHdl);*ppHdl=NULL;
+      vdClpClose(*ppHdl,TRUE);*ppHdl=NULL;
       if (pcPro!=NULL) free(pcPro);
       return(siErr);
    }
@@ -2302,7 +2296,7 @@ static int siCleCommandInit(
       siErr=siClpParsePro(*ppHdl,acFil,pcPro,FALSE,NULL);
       if (siErr<0) {
          fprintf(pfOut,"Property parser for command '%s' failed\n",pcCmd);
-         vdClpClose(*ppHdl);*ppHdl=NULL;
+         vdClpClose(*ppHdl,TRUE);*ppHdl=NULL;
          free(pcPro);
          return(CLERTC_SYN);
       }
@@ -2370,7 +2364,7 @@ static int siCleChangeProperties(
    siErr=siClpParsePro(pvHdl,acFil,pcPro,TRUE,NULL);
    if (siErr<0) {
       fprintf(pfOut,"Property parser for command '%s' failed\n",pcCmd);
-      vdClpClose(pvHdl);
+      vdClpClose(pvHdl,TRUE);
       return(CLERTC_SYN);
    }
 
@@ -2403,7 +2397,7 @@ static int siCleEndExecution(
    if (pfDoc!=NULL) fclose(pfDoc);
    if (pfPro!=NULL) fclose(pfPro);
    if (ppArg!=NULL) free(ppArg);
-   if (pvHdl!=NULL) vdClpClose(pvHdl);
+   if (pvHdl!=NULL) vdClpClose(pvHdl,TRUE);
    if (pcBuf!=NULL) free(pcBuf);
    return(siErr);
 }
@@ -3208,11 +3202,11 @@ extern int siCleParseString(
             pcCmd,pcStr,siErr,pcClpError(siErr),
             *stErr.ppMsg,*stErr.ppSrc,*stErr.piRow,*stErr.piCol);
       if (pfTmp!=NULL) {rewind(pfTmp); fread(acBuffer+strlen(acBuffer),1,sizeof(acBuffer)-(strlen(acBuffer)+1),pfTmp); fclose(pfTmp);}
-      vdClpClose(pvHdl);
+      vdClpClose(pvHdl,TRUE);
       return siErr;
    }
    if (pfTmp!=NULL) fclose(pfTmp);
-   vdClpClose(pvHdl);
+   vdClpClose(pvHdl,TRUE);
    return 0;
 }
 
