@@ -1952,7 +1952,7 @@ static TsSym* psClpSymIns(
    }
    psSym->psFix->siTyp=psArg->siTyp;
    psSym->psFix->siMin=psArg->siMin;
-   psSym->psFix->siMax=psArg->siMax;
+   psSym->psFix->siMax=(psSym->psFix->siMax==0)?((CLPISF_DYN(psSym->psStd->uiFlg))?INT_MAX:1):psArg->siMax;
    psSym->psFix->siSiz=psArg->siSiz;
    psSym->psFix->siOfs=psArg->siOfs;
    psSym->psFix->siOid=psArg->siOid;
@@ -4867,7 +4867,7 @@ static int siClpBldLnk(
 
       switch (psArg->psFix->siSiz) {
       case 1:
-         if (siVal<(-128) || siVal>65535) {
+         if (siVal<(-128) || siVal>255) {
             return CLPERR(psHdl,CLPERR_SEM,"Internal number (%"PRId64") for link '%s.%s' need more than 8 Bit",isPrnInt(psArg,siVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
          }
          *((I08*)psArg->psVar->pvPtr)=(I08)siVal;
