@@ -1952,7 +1952,7 @@ static TsSym* psClpSymIns(
    }
    psSym->psFix->siTyp=psArg->siTyp;
    psSym->psFix->siMin=psArg->siMin;
-   psSym->psFix->siMax=(psSym->psFix->siMax==0)?((CLPISF_DYN(psSym->psStd->uiFlg))?INT_MAX:1):psArg->siMax;
+   psSym->psFix->siMax=(psSym->psFix->siMax==0)?((CLPISF_DYN(psSym->psStd->uiFlg))?2147483647:1):psArg->siMax;
    psSym->psFix->siSiz=psArg->siSiz;
    psSym->psFix->siOfs=psArg->siOfs;
    psSym->psFix->siOid=psArg->siOid;
