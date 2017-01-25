@@ -159,6 +159,8 @@
 #define CLPINI_VALSIZ            128
 #define CLPINI_PTRCNT            128
 
+#define CLPPTR_HSHTAB            1021
+
 #define CLPTOK_INI               0
 #define CLPTOK_END               1
 #define CLPTOK_KYW               2
@@ -333,6 +335,7 @@ typedef struct Hdl {
    int                           siPtr;
    int                           szPtr;
    void**                        apPtr;
+   int                           aiPtr[CLPPTR_HSHTAB];
 } TsHdl;
 
 /* Deklaration der internen Funktionen ********************************/
@@ -808,31 +811,58 @@ static inline I64 ClpRndFnv(const I64 siRnd)
    return h;
 }
 
+static inline int siPtrHsh(void* pvPtr) {
+   uintptr_t p=(uintptr_t)pvPtr;
+   while(p&0x01U) p=p>>1;
+   return(p%CLPPTR_HSHTAB);
+/*FNV
+   unsigned char* p=(unsigned char*)(&pvPtr);
+   unsigned char* e=p+sizeof(void*);
+   unsigned int   h=0x811C9DC5;
+   while (p<e) {
+      h^=*p;
+      h*=0x01000193;
+      p++;
+   }
+   return(h%CLPPTR_HSHTAB);
+*/
+}
 static void* pvClpAlloc(
    void*                         pvHdl,
    void*                         pvPtr,
    size_t                        szSiz)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
-   for (int i=0;i<psHdl->siPtr;i++) {
-      if (psHdl->apPtr[i]==pvPtr) {
-         pvPtr=realloc(pvPtr,szSiz);
-         if (pvPtr!=NULL) {
-            psHdl->apPtr[i]=pvPtr;
-         }
-         return(pvPtr);
+   int                           h=siPtrHsh(pvPtr);
+   int                           i=psHdl->aiPtr[h];
+   if (psHdl->apPtr[i]==pvPtr) {
+      pvPtr=realloc(pvPtr,szSiz);
+      if (pvPtr!=NULL) {
+         psHdl->apPtr[i]=pvPtr;
       }
-   }
-   if (psHdl->siPtr>=psHdl->szPtr) {
-      void* pvHlp=realloc(psHdl->apPtr,(sizeof(void*))*(psHdl->szPtr+CLPINI_PTRCNT));
-      if (pvHlp==NULL) return(NULL);
-      psHdl->apPtr=pvHlp;
-      psHdl->szPtr+=CLPINI_PTRCNT;
-   }
-   pvPtr=realloc(pvPtr,szSiz);
-   if (pvPtr!=NULL) {
-      psHdl->apPtr[psHdl->siPtr]=pvPtr;
-      psHdl->siPtr++;
+      return(pvPtr);
+   } else {
+      for (int i=0;i<psHdl->siPtr;i++) {
+         if (psHdl->apPtr[i]==pvPtr) {
+            pvPtr=realloc(pvPtr,szSiz);
+            if (pvPtr!=NULL) {
+               psHdl->apPtr[i]=pvPtr;
+            }
+            printd("%s:%d:1: warning: Hash function (siPtrHsh) for pointer hash table too week or pointer hash table (%d) to small",__FILE__,__LINE__,CLPPTR_HSHTAB);
+            return(pvPtr);
+         }
+      }
+      if (psHdl->siPtr>=psHdl->szPtr) {
+         void* pvHlp=realloc(psHdl->apPtr,(sizeof(void*))*(psHdl->szPtr+CLPINI_PTRCNT));
+         if (pvHlp==NULL) return(NULL);
+         psHdl->apPtr=pvHlp;
+         psHdl->szPtr+=CLPINI_PTRCNT;
+      }
+      pvPtr=realloc(pvPtr,szSiz);
+      if (pvPtr!=NULL) {
+         psHdl->apPtr[psHdl->siPtr]=pvPtr;
+         psHdl->siPtr++;
+      }
    }
    return(pvPtr);
 }
