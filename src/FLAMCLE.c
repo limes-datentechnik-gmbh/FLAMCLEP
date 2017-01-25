@@ -1532,6 +1532,7 @@ EVALUATE:
                                        psTab[i].piOid,psTab[i].psTab,isCas,isPfl,isEnv,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,acHlp,&siFil,pfMsg);
                if (siErr) ERROR(siErr,NULL);
                siErr=siClpProperties(pvHdl,CLPPRO_MTD_CMT,10,psTab[i].pcKyw,pfPro);
+               vdClpClose(pvHdl,TRUE); pvHdl=NULL;
             }
             if (siErr<0) {
                fprintf(pfOut,"Write property file (%s) for program '%s' failed (%d-%s)\n",acFil,pcPgm,errno,strerror(errno));
@@ -1547,6 +1548,7 @@ EVALUATE:
                                           psTab[i].piOid,psTab[i].psTab,isCas,isPfl,isEnv,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,acHlp,&siFil,pfMsg);
                   if (siErr) ERROR(siErr,NULL);
                   siErr=siClpProperties(pvHdl,CLPPRO_MTD_CMT,10,psTab[i].pcKyw,pfPro);
+                  vdClpClose(pvHdl,TRUE); pvHdl=NULL;
                   if (siErr<0) {
                      fprintf(pfOut,"Write property file (%s) for command '%s' failed (%d-%s)\n",acFil,pcCmd,errno,strerror(errno));
                      ERROR(CLERTC_SYN,NULL);
@@ -2221,11 +2223,11 @@ static int siClePropertyFinish(
    }
 
    siErr=siClpProperties(pvHdl,CLPPRO_MTD_CMT,10,pcCmd,pfPro);
+   vdClpClose(pvHdl,TRUE); fclose(pfPro);
    if (siErr<0) {
       fprintf(pfOut,"Write property file (%s) for command '%s' failed (%d-%s)\n",acFil,pcCmd,errno,strerror(errno));
-      vdClpClose(pvHdl,TRUE); fclose(pfPro); return(CLERTC_SYN);
+      return(CLERTC_SYN);
    }
-   vdClpClose(pvHdl,TRUE); fclose(pfPro);
    fprintf(pfOut,"Property file (%s) for command '%s' successfully written\n",acFil,pcCmd);
 
    if (siFil!=3) {
