@@ -132,13 +132,14 @@
  * 1.2.82: Read siNow from environment variable
  * 1.2.83: Support CLPFLG_TIM to mark numbers as time values
  * 1.2.84: Support expression including symbol keywords which are defined (FROM=NOW-10Day TO=FROM[0]+5DAY)
- * 1.2.85: Support dynamic strings and arrays as new flag CLPFLG_DYN
+ * 1.2.85: Add new CLPFLG_DLM to ensure an additional element as delimiter in arrays (required if CLPFLG_CNT can not used (overlay with arrays))
+ * 1.2.86: Support dynamic strings and arrays as new flag CLPFLG_DYN
 **/
 
-#define CLP_VSN_STR       "1.2.85"
+#define CLP_VSN_STR       "1.2.86"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        2
-#define CLP_VSN_REVISION       85
+#define CLP_VSN_REVISION       86
 
 /* Definition der Konstanten ******************************************/
 
@@ -2050,6 +2051,10 @@ static TsSym* psClpSymIns(
    psSym->psFix->psEln=NULL;
    psSym->psFix->psSln=NULL;
    psSym->psFix->psTln=NULL;
+
+   if (CLPISF_DLM(psSym->psStd->uiFlg) && psSym->psFix->siMax>1) {
+      psSym->psFix->siMax--;
+   }
 
    switch (psSym->psFix->siTyp) {
    case CLPTYP_SWITCH: psSym->psStd->uiFlg|=CLPFLG_FIX; break;
@@ -5714,7 +5719,7 @@ static int siClpIniObj(
 
    if (CLPISF_DYN(psArg->psStd->uiFlg)) {
       void** ppDat=(void**)psArg->psVar->pvDat;
-      (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+psArg->psFix->siSiz,&psArg->psVar->siInd);
+      (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+((((CLPISF_DLM(psArg->psStd->uiFlg))?2:1)*psArg->psFix->siSiz)),&psArg->psVar->siInd);
       if ((*ppDat)==NULL) {
          return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d) for argument '%s.%s' failed",psArg->psVar->siLen+psArg->psFix->siSiz,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
       }
@@ -5850,7 +5855,7 @@ static int siClpIniOvl(
 
    if (CLPISF_DYN(psArg->psStd->uiFlg)) {
       void** ppDat=(void**)psArg->psVar->pvDat;
-      (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+psArg->psFix->siSiz,&psArg->psVar->siInd);
+      (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+((((CLPISF_DLM(psArg->psStd->uiFlg))?2:1)*psArg->psFix->siSiz)),&psArg->psVar->siInd);
       if ((*ppDat)==NULL) {
          return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d) for argument '%s.%s' failed",psArg->psVar->siLen+psArg->psFix->siSiz,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
       }

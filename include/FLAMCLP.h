@@ -540,23 +540,25 @@ extern const char* pcClpAbout(const int l, const int s, char* b);
 /** CLPFLG_TLN This link will be filled by the calculated total length for the argument (sum of all element lengths) */
 #define CLPFLG_TLN               0x00004000U
 /** CLPFLG_DEF This flag enables to use the OID as default for numbers if no value is assigned (only the keyword is used (syntax extension))*/
-#define CLPFLG_DEF               0x00008000U
+#define CLPFLG_DEF               0x00010000U
 /** CLPFLG_CHR This flag will set the default method of interpretation of a binary string to local character string (DEFAULT)*/
-#define CLPFLG_CHR               0x00010000U
+#define CLPFLG_CHR               0x00020000U
 /** CLPFLG_ASC This flag will set the default method of interpretation of a binary string to ASCII*/
-#define CLPFLG_ASC               0x00020000U
+#define CLPFLG_ASC               0x00040000U
 /** CLPFLG_EBC This flag will set the default method of interpretation of a binary string to EBCDIC*/
-#define CLPFLG_EBC               0x00040000U
+#define CLPFLG_EBC               0x00080000U
 /** CLPFLG_HEX This flag will set the default method of interpretation of a binary string to hexadecimal*/
-#define CLPFLG_HEX               0x00080000U
+#define CLPFLG_HEX               0x00100000U
 /** CLPFLG_PDF This flag will be set if a property value was defined from outside, it will be FALSE if the property value was hard coded in the tables */
-#define CLPFLG_PDF               0x00100000U
+#define CLPFLG_PDF               0x00200000U
 /** CLPFLG_TIM This flag mark a number as time value (only used to print out the corressponing time stamp) */
-#define CLPFLG_TIM               0x00200000U
+#define CLPFLG_TIM               0x00400000U
 /** CLPFLG_DYN This flag mark a string or array as dynamic (only a pointer to allocated memory is used and must be freeed by the user) */
-#define CLPFLG_DYN               0x00400000U
+#define CLPFLG_DYN               0x00800000U
 /** CLPFLG_PWD This flag will ensure that the clear value is only put into the data structure but not traced, logged or given away elsewhere */
 #define CLPFLG_PWD               0x01000000U
+/** CLPFLG_DLM This flag ensures that arrays has a empty (initialized) last element (max-1) as delimiter*/
+#define CLPFLG_DLM               0x02000000U
 
 /**
  *  Definition of CLPFLG macros
@@ -583,6 +585,7 @@ extern const char* pcClpAbout(const int l, const int s, char* b);
 #define CLPISF_PDF(flg)          ((flg)&CLPFLG_PDF)
 #define CLPISF_TIM(flg)          ((flg)&CLPFLG_TIM)
 #define CLPISF_DYN(flg)          ((flg)&CLPFLG_DYN)
+#define CLPISF_DLM(flg)          ((flg)&CLPFLG_DLM)
 #define CLPISF_LNK(flg)          (CLPISF_CNT(flg) ||  CLPISF_OID(flg) ||  CLPISF_ELN(flg) || CLPISF_SLN(flg) ||  CLPISF_TLN(flg))
 #define CLPISF_ARG(flg)          ((!CLPISF_LNK(flg)) && (!CLPISF_CON(flg)) && (!CLPISF_ALI(flg)))
 #define CLPISF_ENT(flg)          ((!CLPISF_LNK(flg)) && (!CLPISF_ALI(flg)))
@@ -622,7 +625,6 @@ extern const char* pcClpAbout(const int l, const int s, char* b);
 #define CLPSYM_COUNT             0x00001000U
 /** CLPSYM_LINK Go to the entry link symbol */
 #define CLPSYM_LINK              0x00004000U
-
 /** CLPSYM_OID Go to the entry object identifier symbol */
 #define CLPSYM_OID               0x00008000U
 /** CLPSYM_ELN Go to the element length symbol */
