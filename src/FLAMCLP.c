@@ -278,6 +278,11 @@ typedef struct Sym {
    TsVar*                        psVar;
 }TsSym;
 
+typedef struct Ptr {
+   void*                         pvPtr;
+   long                          siSiz;
+} TsPtr;
+
 typedef struct Hdl {
    const char*                   pcOwn;
    const char*                   pcPgm;
@@ -333,7 +338,7 @@ typedef struct Hdl {
    I64                           siRnd;
    int                           siPtr;
    int                           szPtr;
-   void**                        apPtr;
+   TsPtr*                        psPtr;
 } TsHdl;
 
 /* Deklaration der internen Funktionen ********************************/
@@ -812,52 +817,50 @@ static inline I64 ClpRndFnv(const I64 siRnd)
 static void* pvClpAlloc(
    void*                         pvHdl,
    void*                         pvPtr,
-   size_t                        szSiz,
+   int                           siSiz,
    int*                          piInd)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    if (pvPtr==NULL) {
       if (psHdl->siPtr>=psHdl->szPtr) {
-         void* pvHlp=realloc(psHdl->apPtr,(sizeof(void*))*(psHdl->szPtr+CLPINI_PTRCNT));
+         void* pvHlp=realloc(psHdl->psPtr,sizeof(TsPtr)*(psHdl->szPtr+CLPINI_PTRCNT));
          if (pvHlp==NULL) return(NULL);
-         psHdl->apPtr=pvHlp;
+         psHdl->psPtr=pvHlp;
          psHdl->szPtr+=CLPINI_PTRCNT;
       }
-      pvPtr=calloc(1,szSiz);
+      pvPtr=calloc(1,siSiz);
       if (pvPtr!=NULL) {
-         psHdl->apPtr[psHdl->siPtr]=pvPtr;
+         psHdl->psPtr[psHdl->siPtr].pvPtr=pvPtr;
+         psHdl->psPtr[psHdl->siPtr].siSiz=siSiz;
          if (piInd!=NULL) *piInd=psHdl->siPtr;
          psHdl->siPtr++;
       }
    } else {
-      if (piInd!=NULL && *piInd>=0 && *piInd<psHdl->siPtr && psHdl->apPtr[*piInd]==pvPtr) {
-         pvPtr=realloc(pvPtr,szSiz);
+      if (piInd!=NULL && *piInd>=0 && *piInd<psHdl->siPtr && psHdl->psPtr[*piInd].pvPtr==pvPtr) {
+         pvPtr=realloc(pvPtr,siSiz);
          if (pvPtr!=NULL) {
-            psHdl->apPtr[*piInd]=pvPtr;
+            if (psHdl->psPtr[*piInd].siSiz<siSiz) {
+               memset(pvPtr+psHdl->psPtr[*piInd].siSiz,0,siSiz-psHdl->psPtr[*piInd].siSiz);
+            }
+            psHdl->psPtr[*piInd].pvPtr=pvPtr;
+            psHdl->psPtr[*piInd].siSiz=siSiz;
          }
       } else {
          for (int i=0;i<psHdl->siPtr;i++) {
-            if (psHdl->apPtr[i]==pvPtr) {
-               pvPtr=realloc(pvPtr,szSiz);
+            if (psHdl->psPtr[i].pvPtr==pvPtr) {
+               pvPtr=realloc(pvPtr,siSiz);
                if (pvPtr!=NULL) {
-                  psHdl->apPtr[i]=pvPtr;
+                  if (psHdl->psPtr[i].siSiz<siSiz) {
+                     memset(pvPtr+psHdl->psPtr[i].siSiz,0,siSiz-psHdl->psPtr[i].siSiz);
+                  }
+                  psHdl->psPtr[i].pvPtr=pvPtr;
+                  psHdl->psPtr[i].siSiz=siSiz;
+                  if (piInd!=NULL) *piInd=i;
                }
-               if (piInd!=NULL) *piInd=i;
                return(pvPtr);
             }
          }
-         if (psHdl->siPtr>=psHdl->szPtr) {
-            void* pvHlp=realloc(psHdl->apPtr,(sizeof(void*))*(psHdl->szPtr+CLPINI_PTRCNT));
-            if (pvHlp==NULL) return(NULL);
-            psHdl->apPtr=pvHlp;
-            psHdl->szPtr+=CLPINI_PTRCNT;
-         }
-         pvPtr=realloc(pvPtr,szSiz);
-         if (pvPtr!=NULL) {
-            psHdl->apPtr[psHdl->siPtr]=pvPtr;
-            if (piInd!=NULL) *piInd=psHdl->siPtr;
-            psHdl->siPtr++;
-         }
+         return(NULL);
       }
    }
    return(pvPtr);
@@ -867,15 +870,18 @@ static void vdClpFree(
    void*                         pvHdl)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
-   if (psHdl->apPtr!=NULL) {
+   if (psHdl->psPtr!=NULL) {
       for (int i=0;i<psHdl->siPtr;i++) {
-         if (psHdl->apPtr[i]!=NULL) {
-            free(psHdl->apPtr[i]);
-            psHdl->apPtr[i]=NULL;
+         if (psHdl->psPtr[i].pvPtr!=NULL) {
+            free(psHdl->psPtr[i].pvPtr);
+            psHdl->psPtr[i].pvPtr=NULL;
+            psHdl->psPtr[i].siSiz=0;
          }
       }
-      free(psHdl->apPtr);
-      psHdl->apPtr=NULL;
+      free(psHdl->psPtr);
+      psHdl->psPtr=NULL;
+      psHdl->szPtr=0;
+      psHdl->siPtr=0;
    }
 }
 
@@ -963,7 +969,7 @@ extern void* pvClpOpen(
          psHdl->pcInp=NULL;
          psHdl->pcCur=NULL;
          psHdl->pcOld=NULL;
-         psHdl->apPtr=NULL;
+         psHdl->psPtr=NULL;
          psHdl->szLex=CLPINI_LEXSIZ;
          psHdl->pcLex=(C08*)calloc(1,psHdl->szLex);
          psHdl->szSrc=CLPINI_SRCSIZ;
@@ -5543,7 +5549,8 @@ static int siClpIniMainObj(
          psHlp->psVar->pvPtr=psHlp->psVar->pvDat;
          psHlp->psVar->siCnt=0;
          psHlp->psVar->siLen=0;
-         psHlp->psVar->siRst=psHlp->psFix->siSiz;
+         psHlp->psVar->siInd=0;
+         psHlp->psVar->siRst=CLPISF_DYN(psHlp->psStd->uiFlg)?0:psHlp->psFix->siSiz;
          if (CLPISF_FIX(psHlp->psStd->uiFlg)) psHlp->psVar->siRst*=psHlp->psFix->siMax;
       }
    } else {
@@ -5619,7 +5626,8 @@ static int siClpIniMainOvl(
          psHlp->psVar->pvPtr=psHlp->psVar->pvDat;
          psHlp->psVar->siCnt=0;
          psHlp->psVar->siLen=0;
-         psHlp->psVar->siRst=psHlp->psFix->siSiz;
+         psHlp->psVar->siInd=0;
+         psHlp->psVar->siRst=CLPISF_DYN(psHlp->psStd->uiFlg)?0:psHlp->psFix->siSiz;
          if (CLPISF_FIX(psHlp->psStd->uiFlg)) psHlp->psVar->siRst*=psHlp->psFix->siMax;
       }
    } else {
@@ -5700,11 +5708,21 @@ static int siClpIniObj(
    if (psArg->psVar->siCnt>=psArg->psFix->siMax) {
       return CLPERR(psHdl,CLPERR_SEM,"Too many (>%d) occurrences of '%s.%s' with type '%s'",psArg->psFix->siMax,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
    }
-   if (psArg->psVar->siRst<psArg->psFix->siSiz) {
-      return CLPERR(psHdl,CLPERR_SIZ,"Rest of space (%d) is not big enough for argument '%s.%s' with type '%s'",psArg->psVar->siRst,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[siTyp]);
-   }
    if (psArg->psDep==NULL) {
       return CLPERR(psHdl,CLPERR_TAB,"Keyword (%s.%s) and type (%s) of argument defined but pointer to parameter table not set",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[siTyp]);
+   }
+
+   if (CLPISF_DYN(psArg->psStd->uiFlg)) {
+      void** ppDat=(void**)psArg->psVar->pvDat;
+      (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+psArg->psFix->siSiz,&psArg->psVar->siInd);
+      if ((*ppDat)==NULL) {
+         return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d) for argument '%s.%s' failed",psArg->psVar->siLen+psArg->psFix->siSiz,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+      }
+      psArg->psVar->pvPtr=(*ppDat)+psArg->psVar->siLen;
+   } else {
+      if (psArg->psVar->siRst<psArg->psFix->siSiz) {
+         return CLPERR(psHdl,CLPERR_SIZ,"Rest of space (%d) is not big enough for argument '%s.%s' with type '%s'",psArg->psVar->siRst,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[siTyp]);
+      }
    }
 
    for (psHlp=psArg->psDep;psHlp!=NULL;psHlp=psHlp->psNxt,psSav++) {
@@ -5713,9 +5731,11 @@ static int siClpIniObj(
       psHlp->psVar->pvPtr=psHlp->psVar->pvDat;
       psHlp->psVar->siCnt=0;
       psHlp->psVar->siLen=0;
-      psHlp->psVar->siRst=psHlp->psFix->siSiz;
+      psHlp->psVar->siInd=0;
+      psHlp->psVar->siRst=CLPISF_DYN(psHlp->psStd->uiFlg)?0:psHlp->psFix->siSiz;
       if (CLPISF_FIX(psHlp->psStd->uiFlg)) psHlp->psVar->siRst*=psHlp->psFix->siMax;
    }
+
    if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-BEGIN-OBJECT-%s(PTR=%p CNT=%d LEN=%d RST=%d)\n",
                            fpcPre(pvHdl,siLev),psArg->psStd->pcKyw,psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst);
 
@@ -5777,10 +5797,15 @@ static int siClpFinObj(
 
    for (psHlp=psDep;psHlp!=NULL;psHlp=psHlp->psNxt,psSav++) *psHlp->psVar=*psSav;
 
-   psArg->psVar->pvPtr=((char*)psArg->psVar->pvPtr)+psArg->psFix->siSiz;
-   psArg->psVar->siLen+=psArg->psFix->siSiz;
-   psArg->psVar->siRst-=psArg->psFix->siSiz;
-   psArg->psVar->siCnt++;
+   if (CLPISF_DYN(psArg->psStd->uiFlg)) {
+      psArg->psVar->siLen+=psArg->psFix->siSiz;
+      psArg->psVar->siCnt++;
+   } else {
+      psArg->psVar->pvPtr=((char*)psArg->psVar->pvPtr)+psArg->psFix->siSiz;
+      psArg->psVar->siLen+=psArg->psFix->siSiz;
+      psArg->psVar->siRst-=psArg->psFix->siSiz;
+      psArg->psVar->siCnt++;
+   }
 
    if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-END-OBJECT-%s(PTR=%p CNT=%d LEN=%d RST=%d)\n",
                            fpcPre(pvHdl,siLev),psArg->psStd->pcKyw,psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst);
@@ -5819,11 +5844,21 @@ static int siClpIniOvl(
    if (psArg->psVar->siCnt>=psArg->psFix->siMax) {
       return CLPERR(psHdl,CLPERR_SEM,"Too many (>%d) occurrences of '%s.%s' with type '%s'",psArg->psFix->siMax,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
    }
-   if (psArg->psVar->siRst<psArg->psFix->siSiz) {
-      return CLPERR(psHdl,CLPERR_SIZ,"Rest of space (%d) is not big enough for argument '%s.%s' with type '%s'",psArg->psVar->siRst,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[siTyp]);
-   }
    if (psArg->psDep==NULL) {
       return CLPERR(psHdl,CLPERR_TAB,"Keyword (%s.%s) and type (%s) of argument defined but pointer to parameter table not set",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[siTyp]);
+   }
+
+   if (CLPISF_DYN(psArg->psStd->uiFlg)) {
+      void** ppDat=(void**)psArg->psVar->pvDat;
+      (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+psArg->psFix->siSiz,&psArg->psVar->siInd);
+      if ((*ppDat)==NULL) {
+         return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d) for argument '%s.%s' failed",psArg->psVar->siLen+psArg->psFix->siSiz,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+      }
+      psArg->psVar->pvPtr=(*ppDat)+psArg->psVar->siLen;
+   } else {
+      if (psArg->psVar->siRst<psArg->psFix->siSiz) {
+         return CLPERR(psHdl,CLPERR_SIZ,"Rest of space (%d) is not big enough for argument '%s.%s' with type '%s'",psArg->psVar->siRst,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[siTyp]);
+      }
    }
 
    for (psHlp=psArg->psDep;psHlp!=NULL;psHlp=psHlp->psNxt,psSav++) {
@@ -5832,7 +5867,7 @@ static int siClpIniOvl(
       psHlp->psVar->pvPtr=psHlp->psVar->pvDat;
       psHlp->psVar->siCnt=0;
       psHlp->psVar->siLen=0;
-      psHlp->psVar->siRst=psHlp->psFix->siSiz;
+      psHlp->psVar->siRst=CLPISF_DYN(psHlp->psStd->uiFlg)?0:psHlp->psFix->siSiz;
       if (CLPISF_FIX(psHlp->psStd->uiFlg)) psHlp->psVar->siRst*=psHlp->psFix->siMax;
    }
 
@@ -5898,10 +5933,15 @@ static int siClpFinOvl(
 
    for (psHlp=psDep;psHlp!=NULL;psHlp=psHlp->psNxt,psSav++) *psHlp->psVar=*psSav;
 
-   psArg->psVar->pvPtr=((char*)psArg->psVar->pvPtr)+psArg->psFix->siSiz;
-   psArg->psVar->siLen+=psArg->psFix->siSiz;
-   psArg->psVar->siRst-=psArg->psFix->siSiz;
-   psArg->psVar->siCnt++;
+   if (CLPISF_DYN(psArg->psStd->uiFlg)) {
+      psArg->psVar->siLen+=psArg->psFix->siSiz;
+      psArg->psVar->siCnt++;
+   } else {
+      psArg->psVar->pvPtr=((char*)psArg->psVar->pvPtr)+psArg->psFix->siSiz;
+      psArg->psVar->siLen+=psArg->psFix->siSiz;
+      psArg->psVar->siRst-=psArg->psFix->siSiz;
+      psArg->psVar->siCnt++;
+   }
 
    if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-END-OVERLAY-%s(PTR=%p CNT=%d LEN=%d RST=%d)\n",
                            fpcPre(pvHdl,siLev),psArg->psStd->pcKyw,psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst);
