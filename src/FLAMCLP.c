@@ -4239,6 +4239,7 @@ static int siClpPrsFac(
    I64                           siVal;
    F64                           flVal;
    C08*                          pcVal;
+   void*                         pvDat;
    char                          acLex[strlen(psHdl->pcLex)+1];
    strcpy(acLex,psHdl->pcLex);
    switch(psHdl->siTok) {
@@ -4298,13 +4299,18 @@ static int siClpPrsFac(
             return CLPERR(psHdl,CLPERR_TAB,"Keyword (%s) and type (%s) of variable value for argument (%s.%s) defined but data element counter (%d) too small (index (%d) not valid)",
                   psVal->psStd->pcKyw,apClpTyp[psVal->psFix->siTyp],fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,psVal->psVar->siCnt,(int)siInd);
          }
+         if (CLPISF_DYN(psVal->psStd->uiFlg)) {
+            pvDat=(*((void**)psVal->psVar->pvDat));
+         } else {
+            pvDat=psVal->psVar->pvDat;
+         }
          switch (psVal->psFix->siTyp) {
          case CLPTYP_NUMBER:
             switch (psVal->psFix->siSiz) {
-            case 1: siVal=((I08*)psVal->psVar->pvDat)[siInd]; break;
-            case 2: siVal=((I16*)psVal->psVar->pvDat)[siInd]; break;
-            case 4: siVal=((I32*)psVal->psVar->pvDat)[siInd]; break;
-            case 8: siVal=((I64*)psVal->psVar->pvDat)[siInd]; break;
+            case 1: siVal=((I08*)pvDat)[siInd]; break;
+            case 2: siVal=((I16*)pvDat)[siInd]; break;
+            case 4: siVal=((I32*)pvDat)[siInd]; break;
+            case 8: siVal=((I64*)pvDat)[siInd]; break;
             default:return CLPERR(psHdl,CLPERR_SIZ,"Size (%d) for the constant value '%s' of '%s.%s' is not 1, 2, 4 or 8)",
                   psVal->psFix->siSiz,psVal->psStd->pcKyw,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
             }
@@ -4316,8 +4322,8 @@ static int siClpPrsFac(
             break;
          case CLPTYP_FLOATN:
             switch (psVal->psFix->siSiz) {
-            case 4: flVal=((F32*)psVal->psVar->pvDat)[siInd]; break;
-            case 8: flVal=((F64*)psVal->psVar->pvDat)[siInd]; break;
+            case 4: flVal=((F32*)pvDat)[siInd]; break;
+            case 8: flVal=((F64*)pvDat)[siInd]; break;
             default: return CLPERR(psHdl,CLPERR_SIZ,"Size (%d) for the constant value '%s' of '%s.%s' is not 4 or 8)",
                   psVal->psFix->siSiz,psVal->psStd->pcKyw,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
             }
@@ -4328,11 +4334,11 @@ static int siClpPrsFac(
             }
             break;
          case CLPTYP_STRING:
-            if (siInd!=0) {//TODO: support array access for strings
+            if (siInd!=0) {//TODO: support array access for strings in fix and normal blobs
                return CLPERR(psHdl,CLPERR_TAB,"Array access for strings not supported yet (%s.%s)",
                      psVal->psStd->pcKyw,apClpTyp[psVal->psFix->siTyp],fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,psVal->psVar->siCnt,(int)siInd);
             }
-            pcVal=(char*)psVal->psVar->pvDat;
+            pcVal=(char*)pvDat;
             if (CLPISF_BIN(psVal->psStd->uiFlg)) {
                char acHlp[(2*psVal->psVar->siLen)+1];
                int l=bin2hex((unsigned char*)pcVal,acHlp,psVal->psVar->siLen);
@@ -4970,7 +4976,7 @@ static int siClpBldLnk(
          if (psArg->psVar->pvPtr==NULL) {
             return CLPERR(psHdl,CLPERR_TAB,"Keyword (%s.%s) and type (%s) of link are defined but write pointer not set",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
          }
-     }
+      }
 
       switch (psArg->psFix->siSiz) {
       case 1:
@@ -5005,15 +5011,10 @@ static int siClpBldLnk(
       default: return CLPERR(psHdl,CLPERR_SIZ,"Size (%d) for the value (%"PRId64") of link '%s.%s' is not 1, 2, 4 or 8)",psArg->psFix->siSiz,isPrnInt(psArg,siVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
       }
 
-      if (CLPISF_DYN(psArg->psStd->uiFlg)) {
-         psArg->psVar->siLen+=psArg->psFix->siSiz;
-         psArg->psVar->siCnt++;
-      } else {
-         psArg->psVar->pvPtr=((char*)psArg->psVar->pvPtr)+psArg->psFix->siSiz;
-         psArg->psVar->siLen+=psArg->psFix->siSiz;
-         psArg->psVar->siRst-=psArg->psFix->siSiz;
-         psArg->psVar->siCnt++;
-      }
+      psArg->psVar->pvPtr=((char*)psArg->psVar->pvPtr)+psArg->psFix->siSiz;
+      psArg->psVar->siLen+=psArg->psFix->siSiz;
+      psArg->psVar->siRst-=CLPISF_DYN(psArg->psStd->uiFlg)?0:psArg->psFix->siSiz;
+      psArg->psVar->siCnt++;
 
       return(psArg->psFix->siTyp);
    } else return(CLP_OK);
@@ -5091,15 +5092,10 @@ static int siClpBldSwt(
       return CLPERR(psHdl,CLPERR_SIZ,"Size (%d) for the value (%"PRId64") of '%s.%s' is not 1, 2, 4 or 8)",psArg->psFix->siSiz,isPrnInt(psArg,siVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
    }
 
-   if (CLPISF_DYN(psArg->psStd->uiFlg)) {
-      psArg->psVar->siLen+=psArg->psFix->siSiz;
-      psArg->psVar->siCnt++;
-   } else {
-      psArg->psVar->pvPtr=((char*)psArg->psVar->pvPtr)+psArg->psFix->siSiz;
-      psArg->psVar->siLen+=psArg->psFix->siSiz;
-      psArg->psVar->siRst-=psArg->psFix->siSiz;
-      psArg->psVar->siCnt++;
-   }
+   psArg->psVar->pvPtr=((char*)psArg->psVar->pvPtr)+psArg->psFix->siSiz;
+   psArg->psVar->siLen+=psArg->psFix->siSiz;
+   psArg->psVar->siRst-=CLPISF_DYN(psArg->psStd->uiFlg)?0:psArg->psFix->siSiz;
+   psArg->psVar->siCnt++;
 
    pcHlp=fpcPat(pvHdl,siLev);
    srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcHlp)+strlen(psArg->psStd->pcKyw),"%s.%s=ON\n",pcHlp,psArg->psStd->pcKyw);
@@ -5189,15 +5185,10 @@ static int siClpBldNum(
       return CLPERR(psHdl,CLPERR_SIZ,"Size (%d) for the value (%"PRId64") of '%s.%s' is not 1, 2, 4 or 8)",psArg->psFix->siSiz,isPrnInt(psArg,siVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
    }
 
-   if (CLPISF_DYN(psArg->psStd->uiFlg)) {
-      psArg->psVar->siLen+=psArg->psFix->siSiz;
-      psArg->psVar->siCnt++;
-   } else {
-      psArg->psVar->pvPtr=((char*)psArg->psVar->pvPtr)+psArg->psFix->siSiz;
-      psArg->psVar->siLen+=psArg->psFix->siSiz;
-      psArg->psVar->siRst-=psArg->psFix->siSiz;
-      psArg->psVar->siCnt++;
-   }
+   psArg->psVar->pvPtr=((char*)psArg->psVar->pvPtr)+psArg->psFix->siSiz;
+   psArg->psVar->siLen+=psArg->psFix->siSiz;
+   psArg->psVar->siRst-=CLPISF_DYN(psArg->psStd->uiFlg)?0:psArg->psFix->siSiz;
+   psArg->psVar->siCnt++;
 
    pcHlp=fpcPat(pvHdl,siLev);
    srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcHlp)+strlen(psArg->psStd->pcKyw)+16,"%s.%s=DEFAULT(%d)\n",pcHlp,psArg->psStd->pcKyw,(int)siVal);
@@ -5294,7 +5285,6 @@ static int siClpBldLit(
       default:
          return CLPERR(psHdl,CLPERR_SIZ,"Size (%d) for the value (%s) of '%s.%s' is not 1, 2, 4 or 8)",psArg->psFix->siSiz,isPrnStr(psArg,pcVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
       }
-      psArg->psVar->siRst-=CLPISF_DYN(psArg->psStd->uiFlg)?0:psArg->psFix->siSiz;
       psArg->psVar->pvPtr=((char*)psArg->psVar->pvPtr)+psArg->psFix->siSiz;
       psArg->psVar->siLen+=psArg->psFix->siSiz;
       psArg->psVar->siRst-=CLPISF_DYN(psArg->psStd->uiFlg)?0:psArg->psFix->siSiz;
@@ -5998,15 +5988,10 @@ static int siClpFinObj(
 
    for (psHlp=psDep;psHlp!=NULL;psHlp=psHlp->psNxt,psSav++) *psHlp->psVar=*psSav;
 
-   if (CLPISF_DYN(psArg->psStd->uiFlg)) {
-      psArg->psVar->siLen+=psArg->psFix->siSiz;
-      psArg->psVar->siCnt++;
-   } else {
-      psArg->psVar->pvPtr=((char*)psArg->psVar->pvPtr)+psArg->psFix->siSiz;
-      psArg->psVar->siLen+=psArg->psFix->siSiz;
-      psArg->psVar->siRst-=psArg->psFix->siSiz;
-      psArg->psVar->siCnt++;
-   }
+   psArg->psVar->pvPtr=((char*)psArg->psVar->pvPtr)+psArg->psFix->siSiz;
+   psArg->psVar->siLen+=psArg->psFix->siSiz;
+   psArg->psVar->siRst-=CLPISF_DYN(psArg->psStd->uiFlg)?0:psArg->psFix->siSiz;
+   psArg->psVar->siCnt++;
 
    if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-END-OBJECT-%s(PTR=%p CNT=%d LEN=%d RST=%d)\n",
                            fpcPre(pvHdl,siLev),psArg->psStd->pcKyw,psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst);
@@ -6134,15 +6119,10 @@ static int siClpFinOvl(
 
    for (psHlp=psDep;psHlp!=NULL;psHlp=psHlp->psNxt,psSav++) *psHlp->psVar=*psSav;
 
-   if (CLPISF_DYN(psArg->psStd->uiFlg)) {
-      psArg->psVar->siLen+=psArg->psFix->siSiz;
-      psArg->psVar->siCnt++;
-   } else {
-      psArg->psVar->pvPtr=((char*)psArg->psVar->pvPtr)+psArg->psFix->siSiz;
-      psArg->psVar->siLen+=psArg->psFix->siSiz;
-      psArg->psVar->siRst-=psArg->psFix->siSiz;
-      psArg->psVar->siCnt++;
-   }
+   psArg->psVar->pvPtr=((char*)psArg->psVar->pvPtr)+psArg->psFix->siSiz;
+   psArg->psVar->siLen+=psArg->psFix->siSiz;
+   psArg->psVar->siRst-=CLPISF_DYN(psArg->psStd->uiFlg)?0:psArg->psFix->siSiz;
+   psArg->psVar->siCnt++;
 
    if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-END-OVERLAY-%s(PTR=%p CNT=%d LEN=%d RST=%d)\n",
                            fpcPre(pvHdl,siLev),psArg->psStd->pcKyw,psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst);
