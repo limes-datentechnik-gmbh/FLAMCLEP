@@ -132,7 +132,7 @@
  * 1.2.82: Read siNow from environment variable
  * 1.2.83: Support CLPFLG_TIM to mark numbers as time values
  * 1.2.84: Support expression including symbol keywords which are defined (FROM=NOW-10Day TO=FROM[0]+5DAY)
- * 1.2.85: Add new CLPFLG_DLM to ensure an additional element as delimiter in arrays (required if CLPFLG_CNT can not used (overlay with arrays))
+ * 1.2.85: Add new CLPFLG_DLM to ensure an additional element as delimiter in arrays (required if CLPFLG_CNT cannot used (overlay with arrays))
  * 1.2.86: Support dynamic strings and arrays as new flag CLPFLG_DYN
 **/
 
