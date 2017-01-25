@@ -5688,7 +5688,7 @@ static int siClpBldLit(
             break;
             }
          default:
-            if (siSln>0 && psCon->psVar->siLen==siSln && memcmp(psCon->psVar->pvDat,((char*)psArg->psVar->pvPtr)-l2,siSln)==0) {
+            if (l2>0 && psCon->psVar->siLen==l2 && memcmp(psCon->psVar->pvDat,((char*)psArg->psVar->pvPtr)-l2,l2)==0) {
                pcKyw=psCon->psStd->pcKyw;
             }
             break;
