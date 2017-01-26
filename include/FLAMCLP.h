@@ -5,8 +5,8 @@
  *
  * LIMES Command Line Parser (FLAMCLP) in ANSI-C
  * @author limes datentechnik gmbh
- * @date 06.03.2015
- * @copyright (c) 2015 limes datentechnik gmbh
+ * @date 26.01.2017
+ * @copyright (c) 2017 limes datentechnik gmbh
  *
  * This software is provided 'as-is', without any express or implied
  * warranty. In no event will the authors be held liable for any damages
@@ -34,18 +34,28 @@ Description
 The command line parser (FLAMCLP) is a complier which reads a command
 string using the lexems and grammar below to fill a structure with the
 corresponding values given in this line. The FLAMCLP works only in memory
-(except parameter files are used for objects or overlays or arrays or
-string files for strings) and the syntax and semantic will be defined by
-a tree of tables. Such a table can represent an object (struct) or an
-overlay (union). Each argument in such a table can be a object or overlay
-again in using another table for this type. Basic types are switches,
-numbers, floats or strings. With each argument you can define the required
-minimum and possible maximum amount of occurrences. This means that each
-argument can be an array and arrays are implemented as simplified notations.
+(except parameter files are used for objects, overlays, arrays or
+string files) and the syntax and semantic will be defined by a tree of
+tables. Such a table can represent an object (struct) or an overlay (union).
+Each argument in such a table can be a object or overlay again in using
+another table for this type. Basic types are switches, numbers, floats or
+strings (time and date are implemented as number in seconds from 1970).
+With each argument you can define the required minimum and possible maximum
+amount of occurrences. This means that each argument can be an array and
+arrays are implemented as simplified notations. Arrays and strings can be
+a fix length part of the data structure or dynamic allocated by CLP. In
+the last case, the fix part of the data structure is a pointer to the dynamic
+allocated data area (use '->' instead of '.'). All dynamic allocated data
+blocks are managed by CLP. If you close the CLP you can define if anything
+including the dynamic parts of the CLP structure is closed. Or anything is
+freed except the dynamic blocks allocated for the CLP structure. In this case
+you can keep the CLP handle open, to free the remaining buffers later or
+you can close the CLP handle and the dynamic allocated memory of the CLP
+structure must be free by the application.
 
 For object, overlays and arrays you can provide parameter files (OBJECT='filename')
-containing the parameter string in the corresponding syntax syntax for
-these object, overlay or array (KYW[='filename']).
+containing the parameter string in the corresponding syntax for these object,
+overlay or array (KYW[='filename']).
 
 To handle passwords and passphrase more secure, you can provide a filename
 as string (PASSWD=f'filename'), which contains the corresponding string
@@ -105,6 +115,9 @@ selections. A feature is useful in order to define keywords for values
 (numbers, floats and strings). With help of the selection flag you can
 enforce the pure acceptance of predefined keywords.
 
+Additional hard coded key words (see lexems) can be used in constant
+expressions to build values and strings (value=64KiB).
+
 For each argument or constant you must define a keyword and a short
 help message. If you provide a detailed description, then this argument
 becomes an own chapter in the generated documentation, a manual page
@@ -163,7 +176,7 @@ command line results from a file or argc/argv.
 
 If the isPfl (is parameter file) flag TRUE: For objects, overlays and arrays
 you can use the assignment letter '=' to define a parameter file containing
-the command string for this object, overlay or aary. This means that for
+the command string for this object, overlay or array. This means that for
 each object, overlay or array a dedicated parameter file can be used. The
 parameter file must contain a command string which syntax is valid for the
 certain object, overlay or array. CLP open the file with format string "r".
@@ -209,8 +222,11 @@ that is executed eventually. The FLAMCLE offers an extensive built-in
 functionality and is the optimal access method to the FLAMCLP capabilities.
 
 
-Supported regular expressions
-------------------------------
+Supported regular expressions (lexems) and grammar
+--------------------------------------------------
+
+Call siClpLexem() or siClpGrammar() to get the current supported lexems
+and grammar.
 
 Lexeme
 ------
@@ -495,6 +511,16 @@ extern const char* pcClpAbout(const int l, const int s, char* b);
 #define CLPTYP_OVRLAY            6
 
 #define CLPTYP_XALIAS           -1
+
+/**
+ * Method used to close
+ */
+/** CLPCLS_MTD_ALL Complete close free anything including the dynamic allocated buffers in the CLP strucutre*/
+#define CLPCLS_MTD_ALL           1
+/** CLPCLS_MTD_KEP Free anything except the allocated memory in CLP structure and keep the handle open to close it later with method ALL */
+#define CLPCLS_MTD_KEP           0
+/** CLPCLS_MTD_EXC Free anything except the allocated memory in CLP including the handle, the application must free the dynamic allocated buffers in the CLP structure it self */
+#define CLPCLS_MTD_EXC           2
 
 /**
  * Method for property printing
@@ -1165,19 +1191,21 @@ extern int siClpGrammar(
  * Close the command line parser
  *
  * The function releases the allocated resources in the handle. If dynamic allocation
- * of data fields used in the CLP structure, you can close the CLP handle accept the
- * list of dynamic allocated pointer in the CLP structure, if the isFree flag is set to
- * FALSE. This is useful if you need the CLP no longer but the CLP data structure must be valid.
- * You can later call the vdClpClose function again to release the dynamic allocated data
- * fields of the CLP structure.
+ * of data fields used in the CLP structure, you can close the CLP handle except the
+ * list of dynamic allocated pointer in the CLP structure. If the siMtd is set to
+ * CLPCLS_MTD_KEP the CLP handle is still open and can later be used to free the
+ * remaining pointers of the CLP structure. If the method EXC (except) used, then
+ * the CLP handle is closed and the application must free the allocated memory in
+ * the CLP structure. This is useful if you need the CLP no longer but the CLP data
+ * structure must be valid. You can later call the vdClpClose function again to
+ * release the dynamic allocated data fields of the CLP structure with method keep.
  *
- * @param[in]  pvHdl  Pointer to the corresponding handle created with \a pvClpOpen
- * @param[in]  isFree If true, then the handle and all dynamic allocated memory are freed
- *                    else the handle is still valid to call again the close function with free
+ * @param[in]  pvHdl Pointer to the corresponding handle created with \a pvClpOpen
+ * @param[in]  siMtd Define the close method (EXC/KEP/ALL)
  */
 extern void vdClpClose(
    void*             pvHdl,
-   const int         isFree);
+   const int         siMtd);
 
 /**
  * Provides error message

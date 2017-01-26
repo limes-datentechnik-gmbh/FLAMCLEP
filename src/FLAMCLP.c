@@ -879,10 +879,6 @@ static void vdClpFree(
             psHdl->psPtr[i].siSiz=0;
          }
       }
-      free(psHdl->psPtr);
-      psHdl->psPtr=NULL;
-      psHdl->szPtr=0;
-      psHdl->siPtr=0;
    }
 }
 
@@ -1888,7 +1884,7 @@ extern int siClpSymbolTableUpdate(
 
 extern void vdClpClose(
    void*                         pvHdl,
-   const int                     isFree)
+   const int                     siMtd)
 {
    if (pvHdl!=NULL) {
       TsHdl*                     psHdl=(TsHdl*)pvHdl;
@@ -1933,9 +1929,29 @@ extern void vdClpClose(
       setlocale(LC_NUMERIC, psHdl->acLoc);
       vdClpSymDel(psHdl->psTab);
       psHdl->psTab=NULL;
-      if (isFree) {
-         vdClpFree(psHdl);
+
+      switch (siMtd) {
+      case CLPCLS_MTD_KEP:
+         break;
+      case CLPCLS_MTD_EXC:
+         if (psHdl->psPtr!=NULL) {
+            free(psHdl->psPtr);
+            psHdl->psPtr=NULL;
+            psHdl->szPtr=0;
+            psHdl->siPtr=0;
+         }
          free(pvHdl);
+         break;
+      default:
+         if (psHdl->psPtr!=NULL) {
+            vdClpFree(psHdl);
+            free(psHdl->psPtr);
+            psHdl->psPtr=NULL;
+            psHdl->szPtr=0;
+            psHdl->siPtr=0;
+         }
+         free(pvHdl);
+         break;
       }
    }
 }
