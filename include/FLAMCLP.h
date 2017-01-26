@@ -104,9 +104,9 @@ of a keyword or alias cannot exceed 63 character.
 
 To be compatible with certain shells the features below are implemented.
 
-* Strings can be enclosed with '' or ""
+* Strings can be enclosed with '' or "" or ``
 * Strings can also be defined without quotes
-* Keywords can start with "-" or "--" in front of the qualifier
+* Explicit keywords can start with "-" or "--" in front of the qualifier
 * If it is unique then parenthesis and the dot can be omitted for objects and overlays
 * On EBCDIC systems we use a code page specific interpretation of punctuation characters
 
@@ -150,9 +150,9 @@ With the CLP flags CMD (for command) and PRO (property) you can define if
 a parameter is only visible in the command line or property file. These
 flags have no influence of property or command line parsing. It only
 reflects the online help/syntax and docu/property generation. This means
-that you can still use such a parameter in the property file or in the command
-line, but it is not directly visible to the user. If the flags CMD and
-PRO are not set then the parameter will be visible in both areas. With
+that you can still use such a parameter in the property file or in the
+command line, but it is not directly visible to the user. If the flags CMD
+and PRO are not set then the parameter will be visible in both areas. With
 the flag DMY (for dummy) you can enforce that this parameter is not
 visible in a generated property file, on the command line help, syntax
 and documentation. In this case, the parameter is no part of the symbol
@@ -160,7 +160,13 @@ table. It is only part of the CLP structure.
 
 For binary strings the default interpretation can be free defined over a
 additional set of flags (CLPFLG_HEX/CHR/ASC/EBC). This is useful for hex
-strings or passwords.
+strings or passwords. If you want use arrays in overlays you can not use
+a link to determine the count or length. In this case you can use the DLM
+flag. In this case for fix size types an additional empty element are used
+as delimiter. For the static case the max count are reduced by 1 and in the
+dynamic case one additional element is allocated to determine the end of
+the array. For variable (CLPFLG_FIX is not defined) strings the end of the
+list of strings are marked with 0xFF.
 
 The FLAMCLP calculates automatically the minimum amount of letters
 required to make the meaning of a keyword unique. Depending on the case
@@ -221,12 +227,15 @@ using an additional table. You can make use of only one new function
 that is executed eventually. The FLAMCLE offers an extensive built-in
 functionality and is the optimal access method to the FLAMCLP capabilities.
 
+Additional there is an interface to browse the symbol table. These interface
+can for example used to build several graphical user interfaces or other
+things based on the tables.
 
 Supported regular expressions (lexems) and grammar
 --------------------------------------------------
 
 Call siClpLexem() or siClpGrammar() to get the current supported lexems
-and grammar.
+and grammar. The list below could be a older state of the implementation.
 
 Lexeme
 ------
@@ -515,11 +524,11 @@ extern const char* pcClpAbout(const int l, const int s, char* b);
 /**
  * Method used to close
  */
-/** CLPCLS_MTD_ALL Complete close free anything including the dynamic allocated buffers in the CLP strucutre*/
+/** CLPCLS_MTD_ALL Complete close, free anything including the dynamic allocated buffers in the CLP structure*/
 #define CLPCLS_MTD_ALL           1
 /** CLPCLS_MTD_KEP Free anything except the allocated memory in CLP structure and keep the handle open to close it later with method ALL */
 #define CLPCLS_MTD_KEP           0
-/** CLPCLS_MTD_EXC Free anything except the allocated memory in CLP including the handle, the application must free the dynamic allocated buffers in the CLP structure it self */
+/** CLPCLS_MTD_EXC Free anything including the handle except the allocated memory in the CLP structure, the application must free the dynamic allocated buffers in the CLP structure it self */
 #define CLPCLS_MTD_EXC           2
 
 /**
