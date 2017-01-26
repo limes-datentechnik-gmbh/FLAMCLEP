@@ -557,7 +557,8 @@ extern const char* pcClpAbout(const int l, const int s, char* b);
 #define CLPFLG_DYN               0x00800000U
 /** CLPFLG_PWD This flag will ensure that the clear value is only put into the data structure but not traced, logged or given away elsewhere */
 #define CLPFLG_PWD               0x01000000U
-/** CLPFLG_DLM This flag ensures that arrays has a empty (initialized) last element (max-1) as delimiter*/
+/** CLPFLG_DLM This flag ensures that fix size arrays has a empty (initialized) last element (max-1) as delimiter
+ *             Additional you enforce 0xFF at the and of a non static string array (size-1)*/
 #define CLPFLG_DLM               0x02000000U
 
 /**

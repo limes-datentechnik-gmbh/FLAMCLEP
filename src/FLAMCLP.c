@@ -2041,8 +2041,8 @@ static TsSym* psClpSymIns(
    }
    psSym->psFix->siTyp=psArg->siTyp;
    psSym->psFix->siMin=psArg->siMin;
-   psSym->psFix->siMax=(psArg->siMax==0)?((CLPISF_DYN(psSym->psStd->uiFlg))?2147483647:1):psArg->siMax;
-   psSym->psFix->siSiz=psArg->siSiz;
+   psSym->psFix->siMax=(psArg->siMax==0)?((CLPISF_DYN(psSym->psStd->uiFlg))?2147483647:0):psArg->siMax;
+   psSym->psFix->siSiz=(psArg->siSiz==0)?((CLPISF_DYN(psSym->psStd->uiFlg))?2147483647:0):psArg->siSiz;
    psSym->psFix->siOfs=psArg->siOfs;
    psSym->psFix->siOid=psArg->siOid;
    psSym->psFix->psLnk=NULL;
@@ -2052,21 +2052,25 @@ static TsSym* psClpSymIns(
    psSym->psFix->psSln=NULL;
    psSym->psFix->psTln=NULL;
 
-   if (CLPISF_DLM(psSym->psStd->uiFlg) && psSym->psFix->siMax>1) {
-      psSym->psFix->siMax--;
-   }
-
    switch (psSym->psFix->siTyp) {
    case CLPTYP_SWITCH: psSym->psStd->uiFlg|=CLPFLG_FIX; break;
    case CLPTYP_NUMBER: psSym->psStd->uiFlg|=CLPFLG_FIX; break;
    case CLPTYP_FLOATN: psSym->psStd->uiFlg|=CLPFLG_FIX; break;
    case CLPTYP_OBJECT: psSym->psStd->uiFlg|=CLPFLG_FIX; break;
    case CLPTYP_OVRLAY: psSym->psStd->uiFlg|=CLPFLG_FIX; break;
-   case CLPTYP_STRING: break;
+   case CLPTYP_STRING:
+      if (CLPISF_DLM(psSym->psStd->uiFlg) && !CLPISF_FIX(psSym->psStd->uiFlg) && psSym->psFix->siSiz>0) {
+         psSym->psFix->siSiz--; // CLPFLG_DLM support
+      }
+      break;
    case CLPTYP_XALIAS: break;
    default:
       CLPERR(psHdl,CLPERR_TAB,"Type (%d) for argument '%s.%s' not supported",psSym->psFix->siTyp,pcPat);
       ERROR(psSym);
+   }
+
+   if (CLPISF_DLM(psSym->psStd->uiFlg) && CLPISF_FIX(psSym->psStd->uiFlg) && psSym->psFix->siMax>0) {
+      psSym->psFix->siMax--; // CLPFLG_DLM support
    }
 
    if (psSym->psFix->siTyp!=CLPTYP_NUMBER && CLPISF_DEF(psSym->psStd->uiFlg)) {
@@ -5033,10 +5037,10 @@ static int siClpBldSwt(
    int                           siErr;
 
    if (psArg->psFix->siTyp!=siTyp) {
-      return CLPERR(psHdl,CLPERR_SEM,"The type (%s) of switch '%s.%s' dont match the expected type (%s)",apClpTyp[siTyp],fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
+      return CLPERR(psHdl,CLPERR_SEM,"The type (%s) of switch '%s.%s' don't match the expected type (%s)",apClpTyp[siTyp],fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
    }
    if (psArg->psVar->siCnt>=psArg->psFix->siMax) {
-      return CLPERR(psHdl,CLPERR_SEM,"Too many (>%d) occurrences of '%s.%s' with type '%s'",psArg->psFix->siMax,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[siTyp]);
+      return CLPERR(psHdl,CLPERR_SEM,"Too many (>%d) occurrences of switch '%s.%s' with type '%s'",psArg->psFix->siMax,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[siTyp]);
    }
    if (psArg->psVar->pvDat==NULL) {
       return CLPERR(psHdl,CLPERR_TAB,"Keyword (%s.%s) and type (%s) of switch defined but data pointer not set",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
@@ -5126,35 +5130,35 @@ static int siClpBldNum(
    int                           siErr;
 
    if (psArg->psFix->siTyp!=siTyp) {
-      return CLPERR(psHdl,CLPERR_SEM,"The type (%s) of object identifier '%s.%s' dont match the expected type (%s)",apClpTyp[siTyp],fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
+      return CLPERR(psHdl,CLPERR_SEM,"The type (%s) of argument '%s.%s' don't match the expected type (%s)",apClpTyp[siTyp],fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
    }
    if (psArg->psVar->siCnt>=psArg->psFix->siMax) {
-      return CLPERR(psHdl,CLPERR_SEM,"Too many (>%d) occurrences of '%s.%s' with type '%s'",psArg->psFix->siMax,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[siTyp]);
+      return CLPERR(psHdl,CLPERR_SEM,"Too many (>%d) occurrences of argument '%s.%s' with type '%s'",psArg->psFix->siMax,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[siTyp]);
    }
    if (psArg->psVar->pvDat==NULL) {
-      return CLPERR(psHdl,CLPERR_TAB,"Keyword (%s.%s) and type (%s) of object identifier defined but data pointer not set",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
+      return CLPERR(psHdl,CLPERR_TAB,"Keyword (%s.%s) and type (%s) of argument defined but data pointer not set",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
    }
 
    if (CLPISF_DYN(psArg->psStd->uiFlg)) {
       void** ppDat=(void**)psArg->psVar->pvDat;
       (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+((((CLPISF_DLM(psArg->psStd->uiFlg))?2:1)*psArg->psFix->siSiz)),&psArg->psVar->siInd);
       if ((*ppDat)==NULL) {
-         return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d) for object identifier '%s.%s' failed",psArg->psVar->siLen+psArg->psFix->siSiz,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+         return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d) for argument '%s.%s' failed",psArg->psVar->siLen+psArg->psFix->siSiz,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
       }
       psArg->psVar->pvPtr=(*ppDat)+psArg->psVar->siLen;
    } else {
       if (psArg->psVar->siRst<psArg->psFix->siSiz) {
-         return CLPERR(psHdl,CLPERR_SIZ,"Rest of space (%d) is not big enough for object identifier '%s.%s' with type '%s'",psArg->psVar->siRst,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[siTyp]);
+         return CLPERR(psHdl,CLPERR_SIZ,"Rest of space (%d) is not big enough for argument '%s.%s' with type '%s'",psArg->psVar->siRst,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[siTyp]);
       }
       if (psArg->psVar->pvPtr==NULL) {
-         return CLPERR(psHdl,CLPERR_TAB,"Keyword (%s.%s) and type (%s) of object identifier are defined but write pointer not set",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
+         return CLPERR(psHdl,CLPERR_TAB,"Keyword (%s.%s) and type (%s) of argument defined but write pointer not set",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
       }
   }
 
    switch (psArg->psFix->siSiz) {
    case 1:
       if (siVal<(-128) || siVal>65535) {
-         return CLPERR(psHdl,CLPERR_SEM,"Object identifier (%"PRId64") of '%s.%s' need more than 8 Bit",isPrnInt(psArg,siVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+         return CLPERR(psHdl,CLPERR_SEM,"Default value (%"PRId64") of '%s.%s' need more than 8 Bit",isPrnInt(psArg,siVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
       }
       *((I08*)psArg->psVar->pvPtr)=(I08)siVal;
       if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-NUMBER-I08(PTR=%p CNT=%d LEN=%d RST=%d)%s=%"PRId64"\n",
@@ -5162,7 +5166,7 @@ static int siClpBldNum(
       break;
    case 2:
       if (siVal<(-32768) || siVal>65535) {
-         return CLPERR(psHdl,CLPERR_SEM,"Object identifier (%"PRId64") of '%s.%s' need more than 16 Bit",isPrnInt(psArg,siVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+         return CLPERR(psHdl,CLPERR_SEM,"Default value (%"PRId64") of '%s.%s' need more than 16 Bit",isPrnInt(psArg,siVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
       }
       *((I16*)psArg->psVar->pvPtr)=(I16)siVal;
       if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-NUMBER-I16(PTR=%p CNT=%d LEN=%d RST=%d)%s=%"PRId64"\n",
@@ -5170,7 +5174,7 @@ static int siClpBldNum(
       break;
    case 4:
       if (siVal<(-2147483648LL) || siVal>4294967295LL) {
-         return CLPERR(psHdl,CLPERR_SEM,"Object identifier (%"PRId64") of '%s.%s' need more than 32 Bit",isPrnInt(psArg,siVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+         return CLPERR(psHdl,CLPERR_SEM,"Default value (%"PRId64") of '%s.%s' need more than 32 Bit",isPrnInt(psArg,siVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
       }
       *((I32*)psArg->psVar->pvPtr)=(I32)siVal;
       if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-NUMBER-I32(PTR=%p CNT=%d LEN=%d RST=%d)%s=%"PRId64"\n",
@@ -5226,7 +5230,7 @@ static int siClpBldLit(
    TsSym*                        psCon;
 
    if (psArg->psVar->siCnt>=psArg->psFix->siMax) {
-      return CLPERR(psHdl,CLPERR_SEM,"Too many (>%d) occurrences of '%s.%s' with type '%s'",psArg->psFix->siMax,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
+      return CLPERR(psHdl,CLPERR_SEM,"Too many (>%d) occurrences of argument '%s.%s' with type '%s'",psArg->psFix->siMax,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
    }
    if (psArg->psVar->pvDat==NULL) {
       return CLPERR(psHdl,CLPERR_TAB,"Keyword (%s.%s) and type (%s) of argument defined but data pointer not set",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
@@ -5348,6 +5352,11 @@ static int siClpBldLit(
          }
       } else {
          l0=psArg->psVar->siRst;
+         if (!CLPISF_DYN(psArg->psStd->uiFlg)) {
+            if (psArg->psVar->pvPtr==NULL) {
+               return CLPERR(psHdl,CLPERR_TAB,"Keyword (%s.%s) and type (%s) of argument are defined but write pointer not set",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
+            }
+         }
       }
       l1=strlen(pcVal+2);
       switch (pcVal[0]) {
@@ -5657,6 +5666,9 @@ static int siClpBldLit(
          siErr=siClpBldLnk(pvHdl,siLev,siPos,psArg->psFix->siSiz,psArg->psFix->psEln,TRUE);
          if (siErr<0) return(siErr);
       } else {
+         if (CLPISF_DLM(psArg->psStd->uiFlg)) {
+            ((char*)psArg->psVar->pvPtr)[l2]=0xFF; // end of string list
+         }
          psArg->psVar->pvPtr=((char*)psArg->psVar->pvPtr)+l2;
          psArg->psVar->siLen+=l2;
          psArg->psVar->siRst-=CLPISF_DYN(psArg->psStd->uiFlg)?0:l2;
