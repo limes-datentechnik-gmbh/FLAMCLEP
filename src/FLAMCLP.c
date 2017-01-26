@@ -3372,7 +3372,7 @@ static int siClpScnNat(
          *pcLex='d'; pcLex++;
          *pcLex='\''; pcLex++;
          pcKyw=pcLex;
-         if (psArg!=NULL && psArg->psDep!=NULL) {
+         if (psArg!=NULL) {
             int               k,j,f;
             const TsSym*      psHlp;
             *pcLex=*(*ppCur);
@@ -4300,7 +4300,7 @@ static int siClpPrsFac(
       psHdl->siTok=siClpScnSrc(pvHdl,(isAry)?psArg->psFix->siTyp:0,psArg);
       if (psHdl->siTok<0) return(psHdl->siTok);
       if (psHdl->siTok==CLPTOK_SBO) {
-         psHdl->siTok=siClpScnSrc(pvHdl,psArg->psFix->siTyp,psArg);
+         psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
          if (psHdl->siTok<0) return(psHdl->siTok);
          siErr=siClpPrsExp(pvHdl,siLev,siPos,isAry,psArg,pzVal,ppVal);
          if (siErr) return(siErr);

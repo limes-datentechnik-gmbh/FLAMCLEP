@@ -160,7 +160,7 @@ table. It is only part of the CLP structure.
 
 For binary strings the default interpretation can be free defined over a
 additional set of flags (CLPFLG_HEX/CHR/ASC/EBC). This is useful for hex
-strings or passwords. If you want use arrays in overlays you can not use
+strings or passwords. If you want use arrays in overlays you cannot use
 a link to determine the count or length. In this case you can use the DLM
 flag. In this case for fix size types an additional empty element are used
 as delimiter. For the static case the max count are reduced by 1 and in the
