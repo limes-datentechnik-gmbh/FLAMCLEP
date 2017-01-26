@@ -360,7 +360,7 @@ int main(int argc, char * argv[])
          }
          fflush(stdout);
          fflush(stderr);
-         vdClpClose(pvHdl,TRUE);
+         vdClpClose(pvHdl,CLPCLS_MTD_ALL);
 #ifdef __GEN__
          {
             FILE     *f=fopen("clptst.bin","w");
