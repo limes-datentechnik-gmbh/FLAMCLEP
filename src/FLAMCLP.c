@@ -4242,7 +4242,6 @@ static int siClpPrsFac(
    I64                           siInd;
    I64                           siVal;
    F64                           flVal;
-   C08*                          pcVal;
    void*                         pvDat;
    char                          acLex[strlen(psHdl->pcLex)+1];
    strcpy(acLex,psHdl->pcLex);
@@ -4338,24 +4337,34 @@ static int siClpPrsFac(
             }
             break;
          case CLPTYP_STRING:
-            if (siInd!=0) {//TODO: support array access for strings in fix and normal blobs
-               return CLPERR(psHdl,CLPERR_TAB,"Array access for strings not supported yet (%s.%s)",
-                     psVal->psStd->pcKyw,apClpTyp[psVal->psFix->siTyp],fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,psVal->psVar->siCnt,(int)siInd);
+            if (siInd>0) {
+               char* pcDat=pvDat;
+               char* pcEnd=pcDat+psVal->psVar->siLen;
+               if (CLPISF_FIX(psVal->psStd->uiFlg)) {
+                  pcDat+=siInd*psVal->psFix->siSiz;
+               } else {
+                  for (int j=0;pcDat<pcEnd && j<siInd;pcDat++) {
+                     if (*pcDat==0x00) j++;
+                  }
+               }
+               if (pcDat>=pcEnd) {
+                  return CLPERR(psHdl,CLPERR_TAB,"Array access with index %d is not possible for this string argument (%s.%s)",(int)siInd,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+               }
+               pvDat=pcDat;
             }
-            pcVal=(char*)pvDat;
             if (CLPISF_BIN(psVal->psStd->uiFlg)) {
                char acHlp[(2*psVal->psVar->siLen)+1];
-               int l=bin2hex((unsigned char*)pcVal,acHlp,psVal->psVar->siLen);
+               int l=bin2hex((unsigned char*)pvDat,acHlp,psVal->psVar->siLen);
                acHlp[l]=0x00;
-               srprintf(ppVal,pzVal,strlen(pcVal),"x'%s",acHlp);
+               srprintf(ppVal,pzVal,strlen(acHlp),"x'%s",acHlp);
             } else if (CLPISF_HEX(psVal->psStd->uiFlg)) {
-               srprintf(ppVal,pzVal,strlen(pcVal),"x'%s",pcVal);
+               srprintf(ppVal,pzVal,strlen((char*)pvDat),"x'%s",(char*)pvDat);
             } else if (CLPISF_ASC(psVal->psStd->uiFlg)) {
-               srprintf(ppVal,pzVal,strlen(pcVal),"a'%s",pcVal);
+               srprintf(ppVal,pzVal,strlen((char*)pvDat),"a'%s",(char*)pvDat);
             } else if (CLPISF_EBC(psVal->psStd->uiFlg)) {
-               srprintf(ppVal,pzVal,strlen(pcVal),"e'%s",pcVal);
+               srprintf(ppVal,pzVal,strlen((char*)pvDat),"e'%s",(char*)pvDat);
             } else {
-               srprintf(ppVal,pzVal,strlen(pcVal),"d'%s",pcVal);
+               srprintf(ppVal,pzVal,strlen((char*)pvDat),"d'%s",(char*)pvDat);
             }
             break;
          default:
