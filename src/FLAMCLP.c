@@ -3374,7 +3374,7 @@ static int siClpScnNat(
          pcKyw=pcLex;
          if (psArg!=NULL && psArg->psDep!=NULL) {
             int               k,j,f;
-            TsSym*            psHlp;
+            const TsSym*      psHlp;
             *pcLex=*(*ppCur);
             (*ppCur)++; pcLex++;
             while (isKyw(*(*ppCur))) {
@@ -3400,6 +3400,25 @@ static int siClpScnNat(
                   }
                }
             }
+            for (psHlp=psArg;psHlp->psBak!=NULL;psHlp=psHlp->psBak);
+            while (psHlp!=NULL && f==0) {
+               if (psHlp->psFix->siTyp==psArg->psFix->siTyp && !CLPISF_LNK(psHlp->psStd->uiFlg)) {
+                  if (psHdl->isCas) {
+                     for (k=j=0;pcKyw[j]!=EOS;j++) {
+                        if (pcKyw[j]!=psHlp->psStd->pcKyw[j]) k++;
+                     }
+                  } else {
+                     for (k=j=0;pcKyw[j]!=EOS;j++) {
+                        if (toupper(pcKyw[j])!=toupper(psHlp->psStd->pcKyw[j])) k++;
+                     }
+                  }
+                  if (k==0 && j>=psHlp->psStd->siKwl) {
+                     f=1;
+                  }
+               }
+               psHlp=psHlp->psNxt;
+            }
+
             if (f || CLPTOK_KYW!=siClpConNat(pvHdl,pfErr,pfTrc,pcKyw,NULL,NULL,CLPTYP_STRING,psArg)) {
                char* p1=pcHlp;
                char* p2=pcKyw;
