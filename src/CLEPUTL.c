@@ -1366,6 +1366,22 @@ extern char* cpmaplab(char* label, int size,const char* templ, const char* value
 
 /* implementation of the external functions ***********************************/
 
+
+extern const char* prsdstr(const char** hdl, const char* str, int len)
+{
+   const char* end=(len<0)?NULL:str+len;
+   const char* hlp;
+   if (*hdl==NULL) {
+      (*hdl)=hlp=str;
+   } else {
+      hlp=(*hdl);
+   }
+   if ((end!=NULL && hlp>=end) || ((unsigned char*)hlp)[0]==0xFFU) return(NULL);
+   (*hdl)+=strlen(hlp)+1;
+   return(hlp);
+}
+
+
 extern char* strxcpy(char *dest, const char *src, size_t n)
 {
    size_t i;
