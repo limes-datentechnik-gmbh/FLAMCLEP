@@ -191,6 +191,13 @@ To use DD names on mainframes the file name must like "DD:name".
 If the flag CLPFLG_PWD is used, string outputs containing passwords will
 result in "###SECRECT###" and float or number outputs in a value of 0.
 
+For zero terminated strings in local character set (s'...') several special
+mapping and conversions can be activated over the flags CLPFLG_FIL/LAB/UPP.
+The replacement of environment variables is done for each string but you can
+also activate prefix adjustment and tilde replacement for files, and tilde,
+circumflex and exclamation mark replacement for key labels. Additional you
+can ensure that each such string are converted to upper case.
+
 Parsing of the properties (can be done a lot of times over different
 sources) only change the default values in the symbol table and has no
 effect for the CLP structure. First after parsing the command line the
@@ -595,6 +602,12 @@ extern const char* pcClpAbout(const int l, const int s, char* b);
 /** CLPFLG_DLM This flag ensures that fix size arrays has a empty (initialized) last element (max-1) as delimiter
  *             Additional you enforce 0xFF at the and of a non fix size string array (size-1)*/
 #define CLPFLG_DLM               0x02000000U
+/** CLPFLG_FIL Marks zero terminated string as file and replace additional '~' by HOME and corrects the prefix for different platforms*/
+#define CLPFLG_FIL               0x10000000U
+/** CLPFLG_LAB Marks zero terminated string as label and replace additional '~' by USER, '^' by OWNER and '!' by ENVID */
+#define CLPFLG_LAB               0x20000000U
+/** CLPFLG_UPP Converts zero terminated strings to upper case */
+#define CLPFLG_UPP               0x40000000U
 
 /**
  *  Definition of CLPFLG macros
@@ -622,6 +635,9 @@ extern const char* pcClpAbout(const int l, const int s, char* b);
 #define CLPISF_TIM(flg)          ((flg)&CLPFLG_TIM)
 #define CLPISF_DYN(flg)          ((flg)&CLPFLG_DYN)
 #define CLPISF_DLM(flg)          ((flg)&CLPFLG_DLM)
+#define CLPISF_FIL(flg)          ((flg)&CLPFLG_FIL)
+#define CLPISF_LAB(flg)          ((flg)&CLPFLG_LAB)
+#define CLPISF_UPP(flg)          ((flg)&CLPFLG_UPP)
 #define CLPISF_LNK(flg)          (CLPISF_CNT(flg) ||  CLPISF_OID(flg) ||  CLPISF_ELN(flg) || CLPISF_SLN(flg) ||  CLPISF_TLN(flg))
 #define CLPISF_ARG(flg)          ((!CLPISF_LNK(flg)) && (!CLPISF_CON(flg)) && (!CLPISF_ALI(flg)))
 #define CLPISF_ENT(flg)          ((!CLPISF_LNK(flg)) && (!CLPISF_ALI(flg)))

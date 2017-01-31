@@ -204,6 +204,22 @@ extern char* strxcpy(char *dest, const char *src, size_t n);
 extern char* getenvar(const char* name,size_t size,char* string);
 
 /**
+ * Replace all environment variables enclosed with '<' and '>' to build a string
+ * @param string string for replacement
+ * @param size size of replacement string
+ * @return pointer to string
+ */
+extern char* mapstr(char* string,int size);
+
+/**
+ * Replace all environment variables enclosed with '<' and '>' to build a dynamic string
+ * @param string string for replacement
+ * @param toUpper for mapping string to upper
+ * @return pointer to the new allocated string or NULL if error
+ */
+extern char* dmapstr(const char* string,int toUpper);
+
+/**
  * Replace '~' with "<HOME>" and all environment variables enclosed with '<' and '>' to build a file name
  * @param file string for replacement
  * @param size size of replacement string
@@ -212,13 +228,29 @@ extern char* getenvar(const char* name,size_t size,char* string);
 extern char* mapfil(char* file,int size);
 
 /**
+ * Replace '~' with "<HOME>" and all environment variables enclosed with '<' and '>' to build a dynamic file name
+ * @param file string for replacement
+ * @param toUpper for mapping file to upper
+ * @return pointer to the new allocated string or NULL if error
+ */
+extern char* dmapfil(const char* file, int toUpper);
+
+/**
  * Replace '!' with ENVID, '~' with "<SYSUID>", '^' with "<OWNERID>" and all environment variables enclosed with '<' and '> to build a key label'
  * @param label string for replacement
  * @param size size of replacement string
  * @param toUpper for mapping label to upper
  * @return pointer to label
  */
-extern char* maplab(char* label,int size, int toUpper);
+extern char* maplab(char* label,int size,int toUpper);
+
+/**
+ * Replace '!' with ENVID, '~' with "<SYSUID>", '^' with "<OWNERID>" and all environment variables enclosed with '<' and '> to build a dynamic key label'
+ * @param label string for replacement
+ * @param toUpper for mapping label to upper
+ * @return pointer to new allocated string or NULL if error
+ */
+extern char* dmaplab(const char* label, int toUpper);
 
 /**
  * Replace '~' with "<HOME>" and all environment variables enclosed with '<' and '>'

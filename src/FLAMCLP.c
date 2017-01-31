@@ -134,12 +134,13 @@
  * 1.2.84: Support expression including symbol keywords which are defined (FROM=NOW-10Day TO=FROM[0]+5DAY)
  * 1.2.85: Add new CLPFLG_DLM to ensure an additional element as delimiter in arrays (required if CLPFLG_CNT cannot used (overlay with arrays))
  * 1.2.86: Support dynamic strings and arrays as new flag CLPFLG_DYN
+ * 1.2.87: Support string mapping functions for build of CLP structure
 **/
 
-#define CLP_VSN_STR       "1.2.86"
+#define CLP_VSN_STR       "1.2.87"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        2
-#define CLP_VSN_REVISION       86
+#define CLP_VSN_REVISION       87
 
 /* Definition der Konstanten ******************************************/
 
@@ -5402,9 +5403,9 @@ static int siClpBldLit(
             }
          }
       }
-      l1=strlen(pcVal+2);
       switch (pcVal[0]) {
       case 'x':
+         l1=strlen(pcVal+2);
          if (CLPISF_BIN(psArg->psStd->uiFlg)) {
             if (l1%2) {
                return CLPERR(psHdl,CLPERR_LEX,"Length of hexadecimal string (%c(%s)) for '%s.%s' is not a multiple of 2",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
@@ -5436,6 +5437,7 @@ static int siClpBldLit(
          }
          break;
       case 'a':
+         l1=strlen(pcVal+2);
          if (CLPISF_BIN(psArg->psStd->uiFlg)) {
             if (l1>l0) {
                if (CLPISF_DYN(psArg->psStd->uiFlg)&& !CLPISF_FIX(psArg->psStd->uiFlg)) {
@@ -5464,6 +5466,7 @@ static int siClpBldLit(
          }
          break;
       case 'e':
+         l1=strlen(pcVal+2);
          if (CLPISF_BIN(psArg->psStd->uiFlg)) {
             if (l1>l0) {
                if (CLPISF_DYN(psArg->psStd->uiFlg) && !CLPISF_FIX(psArg->psStd->uiFlg)) {
@@ -5492,6 +5495,7 @@ static int siClpBldLit(
          }
          break;
       case 'c':
+         l1=strlen(pcVal+2);
          if (CLPISF_BIN(psArg->psStd->uiFlg)) {
             if (l1>l0) {
                if (CLPISF_DYN(psArg->psStd->uiFlg)&& !CLPISF_FIX(psArg->psStd->uiFlg)) {
@@ -5517,23 +5521,38 @@ static int siClpBldLit(
          }
          break;
       case 's':
+         if (CLPISF_FIL(psArg->psStd->uiFlg)) {
+            pcHlp=dmapfil(pcVal+2,CLPISF_UPP(psArg->psStd->uiFlg));
+         } else if (CLPISF_LAB(psArg->psStd->uiFlg)) {
+            pcHlp=dmaplab(pcVal+2,CLPISF_UPP(psArg->psStd->uiFlg));
+         } else {
+            pcHlp=dmapstr(pcVal+2,CLPISF_UPP(psArg->psStd->uiFlg));
+         }
+         if (pcHlp==NULL) {
+            return CLPERR(psHdl,CLPERR_MEM,"String mapping (memory allocation) for argument '%s.%s' failed",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+         }
+         l1=strlen(pcHlp);
          if (l1+1>l0) {
-            if (CLPISF_DYN(psArg->psStd->uiFlg)&& !CLPISF_FIX(psArg->psStd->uiFlg)) {
+            if (CLPISF_DYN(psArg->psStd->uiFlg) && !CLPISF_FIX(psArg->psStd->uiFlg)) {
                void** ppDat=(void**)psArg->psVar->pvDat;
                if (psArg->psVar->siLen+l1+1>psArg->psFix->siSiz) {
+                  free(pcHlp);
                   return CLPERR(psHdl,CLPERR_MEM,"Size limit (%d) reached for argument '%s.%s'",psArg->psFix->siSiz,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
                }
                (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+l1+4,&psArg->psVar->siInd);
                if ((*ppDat)==NULL) {
+                  free(pcHlp);
                   return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d) for argument '%s.%s' failed",psArg->psVar->siLen+l1+4,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
                }
                psArg->psVar->pvPtr=(*ppDat)+psArg->psVar->siLen;
             } else {
-               return CLPERR(psHdl,CLPERR_LEX,"Character string (%c(%s)) of '%s.%s' is longer than %d",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,l0-1);
+               free(pcHlp);
+               return CLPERR(psHdl,CLPERR_LEX,"Character string (%c(%s)) of '%s.%s' is longer than %d",pcVal[0],isPrnStr(psArg,pcHlp),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,l0-1);
             }
          }
-         memcpy(psArg->psVar->pvPtr,pcVal+2,l1);
+         memcpy(psArg->psVar->pvPtr,pcHlp,l1);
          ((char*)psArg->psVar->pvPtr)[l1]=EOS;
+         free(pcHlp);
          l2=l1+1; siSln=l1;
          if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-LITERAL-STR(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
                                  fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),isPrnLen(psArg,l2));
@@ -5605,6 +5624,7 @@ static int siClpBldLit(
       case 'd':
          if (CLPISF_BIN(psArg->psStd->uiFlg)) {
             if (CLPISF_HEX(psArg->psStd->uiFlg)) {
+               l1=strlen(pcVal+2);
                if (l1%2) {
                   return CLPERR(psHdl,CLPERR_LEX,"Length of hexadecimal string (%c(%s)) for '%s.%s' is not a multiple of 2",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
                }
@@ -5631,6 +5651,7 @@ static int siClpBldLit(
                if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-LITERAL-HEX(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
                                        fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),isPrnLen(psArg,l2));
             } else if (CLPISF_ASC(psArg->psStd->uiFlg)) {
+               l1=strlen(pcVal+2);
                if (l1>l0) {
                   if (CLPISF_DYN(psArg->psStd->uiFlg)&& !CLPISF_FIX(psArg->psStd->uiFlg)) {
                      void** ppDat=(void**)psArg->psVar->pvDat;
@@ -5654,6 +5675,7 @@ static int siClpBldLit(
                if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-LITERAL-ASC(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
                                        fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),isPrnLen(psArg,l2));
             } else if (CLPISF_EBC(psArg->psStd->uiFlg)) {
+               l1=strlen(pcVal+2);
                if (l1>l0) {
                   if (CLPISF_DYN(psArg->psStd->uiFlg)&& !CLPISF_FIX(psArg->psStd->uiFlg)) {
                      void** ppDat=(void**)psArg->psVar->pvDat;
@@ -5677,6 +5699,7 @@ static int siClpBldLit(
                if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-LITERAL-EBC(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
                                        fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),isPrnLen(psArg,l2));
             } else {
+               l1=strlen(pcVal+2);
                if (l1>l0) {
                   if (CLPISF_DYN(psArg->psStd->uiFlg)&& !CLPISF_FIX(psArg->psStd->uiFlg)) {
                      void** ppDat=(void**)psArg->psVar->pvDat;
@@ -5698,23 +5721,38 @@ static int siClpBldLit(
                                        fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),isPrnLen(psArg,l2));
             }
          } else {
+            if (CLPISF_FIL(psArg->psStd->uiFlg)) {
+               pcHlp=dmapfil(pcVal+2,CLPISF_UPP(psArg->psStd->uiFlg));
+            } else if (CLPISF_LAB(psArg->psStd->uiFlg)) {
+               pcHlp=dmaplab(pcVal+2,CLPISF_UPP(psArg->psStd->uiFlg));
+            } else {
+               pcHlp=dmapstr(pcVal+2,CLPISF_UPP(psArg->psStd->uiFlg));
+            }
+            if (pcHlp==NULL) {
+               return CLPERR(psHdl,CLPERR_MEM,"String mapping (memory allocation) for argument '%s.%s' failed",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+            }
+            l1=strlen(pcHlp);
             if (l1+1>l0) {
                if (CLPISF_DYN(psArg->psStd->uiFlg)&& !CLPISF_FIX(psArg->psStd->uiFlg)) {
                   void** ppDat=(void**)psArg->psVar->pvDat;
                   if (psArg->psVar->siLen+l1+1>psArg->psFix->siSiz) {
+                     free(pcHlp);
                      return CLPERR(psHdl,CLPERR_MEM,"Size limit (%d) reached for argument '%s.%s'",psArg->psFix->siSiz,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
                   }
                   (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+l1+4,&psArg->psVar->siInd);
                   if ((*ppDat)==NULL) {
+                     free(pcHlp);
                      return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d) for argument '%s.%s' failed",psArg->psVar->siLen+l1+4,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
                   }
                   psArg->psVar->pvPtr=(*ppDat)+psArg->psVar->siLen;
                } else {
-                  return CLPERR(psHdl,CLPERR_LEX,"Character string (%c(%s)) of '%s.%s' is longer than %d",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,l0-1);
+                  free(pcHlp);
+                  return CLPERR(psHdl,CLPERR_LEX,"Character string (%c(%s)) of '%s.%s' is longer than %d",pcVal[0],isPrnStr(psArg,pcHlp),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,l0-1);
                }
             }
-            memcpy(psArg->psVar->pvPtr,pcVal+2,l1);
+            memcpy(psArg->psVar->pvPtr,pcHlp,l1);
             ((char*)psArg->psVar->pvPtr)[l1]=EOS;
+            free(pcHlp);
             l2=l1+1; siSln=l1;
             if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-LITERAL-STR(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
                                     fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),isPrnLen(psArg,l2));

@@ -989,6 +989,40 @@ extern const char* mapccsid(const unsigned int uiCcsId){
 
 /**********************************************************************/
 
+
+static char* drplchar(const char* string,const char c, const char* value)
+{
+   size_t      l=strlen(value);
+   if (l==0) return(NULL);
+   const char* p=string;
+   size_t      s=strlen(p)+1;
+   char*       b=malloc(s);
+   char*       r=b;
+   if (b==NULL) return(NULL);
+   while (p[0]) {
+      if (p[0]==c) {
+         if (p[1]==c) { // escape sequence
+            r[0]=p[0];
+            r++; p+=2;
+         } else { // replacement
+            char* h=realloc(b,s+(l-1));
+            if (h==NULL) {
+               free(b);
+               return(NULL);
+            }
+            s+=l-1; r+=h-b; b=h;
+            memcpy(r,value,l);
+            r+=l; p++;
+         }
+      } else { // copy
+         r[0]=p[0];
+         r++; p++;
+      }
+   }
+   r[0]=0x00;
+   return(b);
+}
+
 static void rplchar(char* name,const size_t size,const char c, const char* value)
 {
    char        h[size];
@@ -1066,6 +1100,7 @@ extern char* getenvar(const char* name,size_t size,char* string)
       return(NULL);
    }
 }
+
 static void rplenvar(char* name,const size_t size,const char opn, const char cls)
 {
    char        h[size];
@@ -1118,6 +1153,55 @@ static void rplenvar(char* name,const size_t size,const char opn, const char cls
    }
 }
 
+static char* drplenvar(const char* string,const char opn, const char cls)
+{
+   const char* p=string;
+   size_t      s=strlen(p)+1;
+   char*       b=malloc(s);
+   char*       r=b;
+   if (b==NULL) return(NULL);
+
+   while(p[0]) {
+      if (p[0]==opn) {
+         if (p[1]==opn) {
+            r[0]=p[0];
+            r++; p+=2;
+         } else {
+            char* c=strchr(p+1,cls);
+            if (c!=NULL) {
+               char e[1024];
+               c[0]=0x00;
+               int    x=strlen(p)+1;
+               char*  v=getenvar(p+1,sizeof(e),e);
+               c[0]=cls;
+               if (v!=NULL) {
+                  int   l=strlen(v);
+                  char* h=realloc(b,s+(l-x));
+                  if (h==NULL) {
+                     free(b);
+                     return(NULL);
+                  }
+                  s+=l-x; r+=h-b; b=h;
+                  memcpy(r,v,l);
+                  r+=l; p=c+1;
+               } else {
+                  r[0]=p[0];
+                  r++; p++;
+               }
+            } else {
+               r[0]=p[0];
+               r++; p++;
+            }
+         }
+      } else {
+         r[0]=p[0];
+         r++; p++;
+      }
+   }
+   r[0]=0x00;
+   return(b);
+}
+
 static char* rpltpl(char* string,int size,const char* templ,const char* values) {
    char*       s;
    char*       e;
@@ -1143,7 +1227,7 @@ static char* rpltpl(char* string,int size,const char* templ,const char* values) 
    return(string);
 }
 
-static const char* mapprefix(char* file, int size)
+static const char* adjpfx(char* file, int size)
 {
     char *p1,*p2;
 # ifdef __ZOS__
@@ -1221,11 +1305,122 @@ static const char* mapprefix(char* file, int size)
 # endif
 }
 
+static char* dadjpfx(const char* file,char** tilde)
+{
+    char* b=malloc(strlen(file)+8);
+    if (b==NULL) return(NULL);
+# ifdef __ZOS__
+    if (file[0]=='/' && file[1]=='/' && file[2]=='D' && file[3]=='S' && file[4]==':') {
+       strcpy(b,file+5);
+    } else if (file[0]=='/' && file[1]=='/' && file[2]=='D' && file[3]=='D' && file[4]==':') {
+       strcpy(b,file+2);
+    } else if (file[0]=='/' && file[1]=='/' && file[2]=='\'') {
+       strcpy(b,file+3);
+    } else if (file[0]=='/' && file[1]=='/') {
+       b[0] = C_TLD;
+       if (ISPATHNAME(file)) {
+          b[1] = '/';
+       } else {
+          b[1] = '.';
+       }
+       strcpy(b+2,file+2);
+    }
+    if (ISPATHNAME(file)) {
+       *tilde="<HOME>";
+    } else {
+       *tilde="<SYSUID>";
+    }
+# elif __USS__
+    if (file[0]=='/' && file[1]=='/' && file[2]=='D' && file[3]=='S' && file[4]==':') {
+       b[0]='/';
+       b[1]='/';
+       b[2]='\'';
+       int l=strlen(file+5);
+       memcpy(b+3,file+5,l);
+       b[l+3]='\'';
+       b[l+4]=0x00;
+       *tilde="<SYSUID>";
+    } else if (file[0]=='/' && file[1]=='/' && file[2]=='D' && file[3]=='D' && file[4]==':') {
+       strcpy(b,file);
+       *tilde="<SYSUID>";
+    } else if (file[0]=='/' && file[1]=='/' && file[2]=='\'') {
+       strcpy(b,file);
+       *tilde="<SYSUID>";
+    } else if (file[0]=='/' && file[1]=='/') {
+       strcpy(b,file);
+       *tilde="<SYSUID>";
+    }
+    *tilde="<HOME>";
+# else
+    if (file[0]=='/' && file[1]=='/' && file[2]=='D' && file[3]=='S' && file[4]==':') {
+       strcpy(b,file);
+       *tilde="<SYSUID>";
+    } else if (file[0]=='/' && file[1]=='/' && file[2]=='D' && file[3]=='D' && file[4]==':') {
+       strcpy(b,file);
+       *tilde="<SYSUID>";
+    } else if (file[0]=='/' && file[1]=='/' && file[2]=='\'') { // insert DS:
+       b[0]='/';
+       b[1]='/';
+       b[2]='D';
+       b[3]='S';
+       b[4]=':';
+       strcpy(b+5,file+3);
+       int l=strlen(b);
+       if (l>0 && b[l-1]=='\'') b[l-1]=0x00;
+       *tilde="<SYSUID>";
+    } else if (file[0]=='/' && file[1]=='/') { // insert DS:~.
+       b[0]='/';
+       b[1]='/';
+       b[2]='D';
+       b[3]='S';
+       b[4]=':';
+       b[5]=C_TLD;
+       b[6]='.';
+       strcpy(b+7,file+2);
+       *tilde="<SYSUID>";
+    }
+    *tilde="<HOME>";
+# endif
+    return(b);
+}
+
+extern char* mapstr(char* string,int size)
+{
+   rplenvar(string,size,'<','>');
+   return(string);
+}
+
+extern char* dmapstr(const char* string,int toUpper)
+{
+   char* h1=drplenvar(string,'<','>');
+   if (h1!=NULL && toUpper){
+      for(char* p=h1;*p;p++) *p=toupper(*p);
+   }
+   return(h1);
+}
+
 extern char* mapfil(char* file,int size)
 {
-   rplchar(file,size,C_TLD,mapprefix(file,size));
+   rplchar(file,size,C_TLD,adjpfx(file,size));
    rplenvar(file,size,'<','>');
    return(file);
+}
+
+extern char* dmapfil(const char* file, int toUpper)
+{
+   char* pfx="";
+   char* h1=dadjpfx(file,&pfx);
+   if (h1!=NULL) {
+      char* h2=drplchar(h1,C_TLD,pfx); free(h1);
+      if (h2!=NULL) {
+         char* h3=drplenvar(h2,'<','>'); free(h2);
+         if (h3!=NULL && toUpper){
+            for(char* p=h3;*p;p++) *p=toupper(*p);
+         }
+         return(h3);
+      }
+   }
+   return(NULL);
 }
 
 #ifdef __ZOS__
@@ -1356,6 +1551,24 @@ extern char* maplab(char* label,int size, int toUpper) {
       }
    }
    return(label);
+}
+
+extern char* dmaplab(const char* label, int toUpper)
+{
+   char* h1=drplchar(label,C_EXC,"<ENVID>");
+   if (h1!=NULL) {
+      char* h2=drplchar(h1,C_EXC,"<SYSUID>"); free(h1);
+      if (h2!=NULL) {
+         char* h3=drplchar(h2,C_EXC,"<OWNERID>"); free(h2);
+         if (h3!=NULL) {
+            char* h4=drplenvar(h3,'<','>'); free(h3);
+            if (h4!=NULL && toUpper){
+               for(char* p=h4;*p;p++) *p=toupper(*p);
+            }
+         }
+      }
+   }
+   return(NULL);
 }
 
 extern char* cpmaplab(char* label, int size,const char* templ, const char* values, int toUpper) {
