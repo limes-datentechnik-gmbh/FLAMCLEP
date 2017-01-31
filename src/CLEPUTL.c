@@ -1618,14 +1618,15 @@ extern char* dmaplab(const char* label, int toUpper)
 {
    char* h1=drplchar(label,C_EXC,"<ENVID>");
    if (h1!=NULL) {
-      char* h2=drplchar(h1,C_EXC,"<SYSUID>"); free(h1);
+      char* h2=drplchar(h1,C_TLD,"<SYSUID>"); free(h1);
       if (h2!=NULL) {
-         char* h3=drplchar(h2,C_EXC,"<OWNERID>"); free(h2);
+         char* h3=drplchar(h2,C_CRT,"<OWNERID>"); free(h2);
          if (h3!=NULL) {
             char* h4=drplenvar(h3,'<','>'); free(h3);
             if (h4!=NULL && toUpper){
                for(char* p=h4;*p;p++) *p=toupper(*p);
             }
+            return(h4);
          }
       }
    }
