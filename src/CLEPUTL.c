@@ -1227,6 +1227,49 @@ static char* rpltpl(char* string,int size,const char* templ,const char* values) 
    return(string);
 }
 
+static char* drpltpl(const char* templ,const char* values) {
+   const char* p=templ;
+   size_t      s=strlen(p)+1;
+   char*       b=malloc(s);
+   char*       r=b;
+   if (b==NULL) return(NULL);
+
+   while(p[0]) {
+      if (p[0]=='%') {
+         if (p[1]=='%') {
+            r[0]=p[0];
+            r++; p+=2;
+         } else if (p[1]) {
+            for (const char* v=values;v[0];v++) {
+               if (v[0]==p[1] && v[1]==':') {
+                  const char* x=v+2;
+                  while (x[0] && x[0]!='\n') x++;
+                  int l=x-(v+2);
+                  char* h=realloc(b,s+(l-2));
+                  if (h==NULL) {
+                     free(b);
+                     return(NULL);
+                  }
+                  s+=l-2; r+=h-b; b=h;
+                  memcpy(r,v+2,l);
+                  r+=l;
+                  break;
+               }
+            }
+            p+=2;
+         } else {
+            r[0]=p[0];
+            r++; p++;
+         }
+      } else {
+         r[0]=p[0];
+         r++; p++;
+      }
+   }
+   r[0]=0x00;
+   return(b);
+}
+
 static const char* adjpfx(char* file, int size)
 {
     char *p1,*p2;
@@ -1435,6 +1478,18 @@ extern char* cpmapfil(char* dest, int size,const char* source) {
    return mapfil(dest,size);
 }
 
+extern char* dcpmapfil(const char* file) {
+   if (ISPATHNAME(file)) {
+      return dmapfil(file,FALSE);
+   } else if(ISDDNAME(file) || file[0]=='\'' || file[0]==':') {
+      return dmapfil(file,TRUE);
+   } else {
+      char f[strlen(file)+4];
+      sprintf(f,"'%s'",file);
+      return dmapfil(f,TRUE);
+   }
+}
+
 extern char* filemode(const char* mode) {
    if(mode==NULL) return NULL;
 
@@ -1503,6 +1558,10 @@ extern char* filemode(const char* mode) {
 extern char* cpmapfil(char* dest, int size,const char* source) {
    snprintf(dest,size,"%s",source);
    return mapfil(dest,size);
+}
+
+extern char* dcpmapfil(const char* file) {
+   return dmapfil(file,FALSE);
 }
 
 extern char* filemode(const char* mode) {
@@ -1577,6 +1636,15 @@ extern char* cpmaplab(char* label, int size,const char* templ, const char* value
    rpltpl(label,size,templ,values);
    maplab(label,size,toUpper);
    return(label);
+}
+
+extern char* dcpmaplab(const char* templ, const char* values, int toUpper) {
+   char* h1=drpltpl(templ,values);
+   if (h1!=NULL) {
+      char* h2=dmaplab(h1,toUpper); free(h1);
+      return(h2);
+   }
+   return(NULL);
 }
 
 /* implementation of the external functions ***********************************/

@@ -257,9 +257,16 @@ extern char* dmaplab(const char* label, int toUpper);
  * @param dest string for replacement
  * @param size size of replacement string
  * @param source original string
- * @return pointer to format string for fopen()
+ * @return pointer to dest
  */
 extern char* cpmapfil(char* dest, int size,const char* source);
+
+/**
+ * Replace '~' with "<HOME>" and all environment variables enclosed with '<' and '>' and returns a dynamic string
+ * @param file string for replacement
+ * @return pointer to dynamic allocated string
+ */
+extern char* dcpmapfil(const char* file);
 
 /**
  * set the right mode for fopen, private extension use 's' for fopen with seek
@@ -275,9 +282,18 @@ extern char* filemode(const char* mode);
  * @param templ key label template (with %x)
  * @param values value string for replacement (x:%s\n)
  * @param toUpper for mapping label to upper
- * @return pointer to string
+ * @return pointer to label
  */
 extern char* cpmaplab(char* label, int size,const char* templ, const char* values, int toUpper);
+
+/**
+ * Use drpltpl() and dmaplab() to build key label names, based on key label templates in dynamic form
+ * @param templ key label template (with %x)
+ * @param values value string for replacement (x:%s\n)
+ * @param toUpper for mapping label to upper
+ * @return pointer to dynamic allocated string
+ */
+extern char* dcpmaplab(const char* templ, const char* values, int toUpper);
 
 /**
  * Determines the system default CCSID by querying nl_langinfo() (POSIX) or GetCPInfoEx() (Windows).
