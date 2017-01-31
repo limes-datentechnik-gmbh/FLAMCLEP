@@ -1324,11 +1324,9 @@ static char* dadjpfx(const char* file,char** tilde)
           b[1] = '.';
        }
        strcpy(b+2,file+2);
-    }
-    if (ISPATHNAME(file)) {
-       *tilde="<HOME>";
     } else {
-       *tilde="<SYSUID>";
+       strcpy(b,file);
+       *tilde=ISPATHNAME(file)?"<HOME>":"<SYSUID>";
     }
 # elif __USS__
     if (file[0]=='/' && file[1]=='/' && file[2]=='D' && file[3]=='S' && file[4]==':') {
@@ -1349,8 +1347,10 @@ static char* dadjpfx(const char* file,char** tilde)
     } else if (file[0]=='/' && file[1]=='/') {
        strcpy(b,file);
        *tilde="<SYSUID>";
+    } else {
+       strcpy(b,file);
+       *tilde="<HOME>";
     }
-    *tilde="<HOME>";
 # else
     if (file[0]=='/' && file[1]=='/' && file[2]=='D' && file[3]=='S' && file[4]==':') {
        strcpy(b,file);
@@ -1378,8 +1378,10 @@ static char* dadjpfx(const char* file,char** tilde)
        b[6]='.';
        strcpy(b+7,file+2);
        *tilde="<SYSUID>";
+    } else {
+       strcpy(b,file);
+       *tilde="<HOME>";
     }
-    *tilde="<HOME>";
 # endif
     return(b);
 }
