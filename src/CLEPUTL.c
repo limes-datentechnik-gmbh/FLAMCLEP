@@ -1660,7 +1660,7 @@ extern const char* prsdstr(const char** hdl, const char* str, int len)
    } else {
       hlp=(*hdl);
    }
-   if ((end!=NULL && hlp>=end) || ((unsigned char*)hlp)[0]==0xFFU) return(NULL);
+   if (hlp==NULL || (end!=NULL && hlp>=end) || ((unsigned char*)hlp)[0]==0xFFU) return(NULL);
    (*hdl)+=strlen(hlp)+1;
    return(hlp);
 }
