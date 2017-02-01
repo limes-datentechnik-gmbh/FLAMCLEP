@@ -1456,9 +1456,11 @@ extern char* dmapfil(const char* file, int toUpper)
    char* pfx="";
    char* h1=dadjpfx(file,&pfx);
    if (h1!=NULL) {
-      char* h2=drplchar(h1,C_TLD,pfx); free(h1);
+      char* h2=drplchar(h1,C_TLD,pfx);
+      free(h1);
       if (h2!=NULL) {
-         char* h3=drplenvar(h2,'<','>'); free(h2);
+         char* h3=drplenvar(h2,'<','>');
+         free(h2);
          if (h3!=NULL && toUpper){
             for(char* p=h3;*p;p++) *p=toupper(*p);
          }
@@ -1618,11 +1620,14 @@ extern char* dmaplab(const char* label, int toUpper)
 {
    char* h1=drplchar(label,C_EXC,"<ENVID>");
    if (h1!=NULL) {
-      char* h2=drplchar(h1,C_TLD,"<SYSUID>"); free(h1);
+      char* h2=drplchar(h1,C_TLD,"<SYSUID>");
+      free(h1);
       if (h2!=NULL) {
-         char* h3=drplchar(h2,C_CRT,"<OWNERID>"); free(h2);
+         char* h3=drplchar(h2,C_CRT,"<OWNERID>");
+         free(h2);
          if (h3!=NULL) {
-            char* h4=drplenvar(h3,'<','>'); free(h3);
+            char* h4=drplenvar(h3,'<','>');
+            free(h3);
             if (h4!=NULL && toUpper){
                for(char* p=h4;*p;p++) *p=toupper(*p);
             }
@@ -1642,7 +1647,8 @@ extern char* cpmaplab(char* label, int size,const char* templ, const char* value
 extern char* dcpmaplab(const char* templ, const char* values, int toUpper) {
    char* h1=drpltpl(templ,values);
    if (h1!=NULL) {
-      char* h2=dmaplab(h1,toUpper); free(h1);
+      char* h2=dmaplab(h1,toUpper);
+      free(h1);
       return(h2);
    }
    return(NULL);
