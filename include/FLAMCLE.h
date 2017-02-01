@@ -392,6 +392,10 @@ typedef int (*tpfIni)(
  * for mapping. (The piOid can also (mis)used to give back a integer to
  * the caller of siCleExecute() from mapping if this pointer not NULL.)
  *
+ * If additional dynamic memory required in the CLP structure the provided
+ * handle can be used for pvClpAlloc.
+ *
+ * @param[in]  pvHdl Pointer to the CLP handle for allocation of memory in the CLP structure
  * @param[in]  pfOut File pointer for outputs (mainly error messages, given over CleExecute)
  * @param[in]  pfTrc File pointer for tracing (mainly for complex stuff, given over CleExecute)
  * @param[in]  piOid Pointer to the object identifier for overlay commands, if the pointer set at siCleExecute()
@@ -401,6 +405,7 @@ typedef int (*tpfIni)(
  * @return     Reason code (!=0) for termination or 0 for success
  */
 typedef int (*tpfMap)(
+   void*                         pvHdl,
    FILE*                         pfOut,
    FILE*                         pfTrc,
    int*                          piOid,

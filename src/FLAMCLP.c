@@ -816,7 +816,7 @@ static inline I64 ClpRndFnv(const I64 siRnd)
    return h;
 }
 
-static void* pvClpAlloc(
+extern void* pvClpAlloc(
    void*                         pvHdl,
    void*                         pvPtr,
    int                           siSiz,

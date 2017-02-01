@@ -2018,7 +2018,7 @@ EVALUATE:
                   }
                }
                vdClpClose(pvHdl,CLPCLS_MTD_KEP);
-               siErr=psTab[i].pfMap(pfOut,pfTrc,psTab[i].piOid,psTab[i].pvClp,psTab[i].pvPar);
+               siErr=psTab[i].pfMap(pvHdl,pfOut,pfTrc,psTab[i].piOid,psTab[i].pvClp,psTab[i].pvPar);
                if (siErr) {
                   if (pfMsg!=NULL && (pcMsg=pfMsg(siErr))!=NULL) {
                      fprintf(pfOut,"Mapping of CLP structure for command '%s' failed (Return code: %d / Reason code: %d (%s))\n",psTab[i].pcKyw,CLERTC_MAP,siErr,pcMsg);

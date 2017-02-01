@@ -1233,6 +1233,24 @@ extern void vdClpClose(
    const int         siMtd);
 
 /**
+ * Allocate memory in CLP structure
+ *
+ * This function allocates memory for the CLP structure and can be used to extend
+ * the structure where dynamic array or strings must be extended.
+ *
+ * @param[in]    pvHdl Pointer to the corresponding handle created with \a pvClpOpen
+ * @param[in]    pvPtr Pointer of the dynamic allocated area or NULL if it is a new one
+ * @param[in]    siSiz Required size for the dynamic area
+ * @param[inout] piInd Pointer to the index of the memory area or NULL (improves performance)
+ *
+ */
+extern void* pvClpAlloc(
+   void*                         pvHdl,
+   void*                         pvPtr,
+   int                           siSiz,
+   int*                          piInd);
+
+/**
  * Provides error message
  *
  * The function provides a error message for the corresponding error code
