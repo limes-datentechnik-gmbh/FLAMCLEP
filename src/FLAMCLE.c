@@ -2027,6 +2027,7 @@ EVALUATE:
                   }
                   if (pcCmd!=NULL) free(pcCmd);
                   if (pcLst!=NULL) free(pcLst);
+                  psTab[i].pfFin(pfOut,pfTrc,psTab[i].pvPar);
                   ERROR(((CLERTC_MAP>siMaxCC)?siMaxCC:CLERTC_MAP),NULL);
                }
                siErr=psTab[i].pfRun(pfOut,pfTrc,acOwn,pcPgm,pcVsn,pcAbo,pcLic,psTab[i].pcKyw,pcCmd,pcLst,psTab[i].pvPar,&isWrn,&siScc);
