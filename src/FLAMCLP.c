@@ -5546,8 +5546,9 @@ static int siClpBldLit(
                }
                psArg->psVar->pvPtr=(*ppDat)+psArg->psVar->siLen;
             } else {
+               siErr=CLPERR(psHdl,CLPERR_LEX,"Character string (%c(%s)) of '%s.%s' is longer than %d",pcVal[0],isPrnStr(psArg,pcHlp),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,l0-1);
                free(pcHlp);
-               return CLPERR(psHdl,CLPERR_LEX,"Character string (%c(%s)) of '%s.%s' is longer than %d",pcVal[0],isPrnStr(psArg,pcHlp),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,l0-1);
+               return(siErr);
             }
          }
          memcpy(psArg->psVar->pvPtr,pcHlp,l1);
@@ -5746,8 +5747,9 @@ static int siClpBldLit(
                   }
                   psArg->psVar->pvPtr=(*ppDat)+psArg->psVar->siLen;
                } else {
+                  siErr=CLPERR(psHdl,CLPERR_LEX,"Character string (%c(%s)) of '%s.%s' is longer than %d",pcVal[0],isPrnStr(psArg,pcHlp),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,l0-1);
                   free(pcHlp);
-                  return CLPERR(psHdl,CLPERR_LEX,"Character string (%c(%s)) of '%s.%s' is longer than %d",pcVal[0],isPrnStr(psArg,pcHlp),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,l0-1);
+                  return(siErr);
                }
             }
             memcpy(psArg->psVar->pvPtr,pcHlp,l1);
