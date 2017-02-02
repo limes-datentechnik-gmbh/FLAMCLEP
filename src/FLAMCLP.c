@@ -3282,7 +3282,6 @@ static int siClpScnNat(
             }
             srprintf(&psHdl->apBuf[psHdl->siBuf],&psHdl->pzBuf[psHdl->siBuf],l+strlen(pcEnv)+strlen((*ppCur)),"%.*s%s%s",l,psHdl->pcInp,pcEnv,(*ppCur));
             if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-ENVARREP\n%s %s\n%s %s\n",fpcPre(psHdl,0),psHdl->pcInp,fpcPre(psHdl,0),psHdl->apBuf[psHdl->siBuf]);
-            printd("%s CLP-ENVAR-REPLACEMENT\n%s %s\n%s %s\n",psHdl->pcDep,fpcPre(psHdl,1),psHdl->pcInp,fpcPre(psHdl,1),psHdl->apBuf[psHdl->siBuf]);
             (*ppCur)=psHdl->apBuf[psHdl->siBuf]+l;
             psHdl->pcInp=psHdl->apBuf[psHdl->siBuf];
             psHdl->pcOld=psHdl->apBuf[psHdl->siBuf]+(psHdl->pcOld-psHdl->pcInp);
