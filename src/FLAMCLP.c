@@ -842,7 +842,7 @@ extern void* pvClpAlloc(
          pvPtr=realloc(pvPtr,siSiz);
          if (pvPtr!=NULL) {
             if (psHdl->psPtr[*piInd].siSiz<siSiz) {
-               memset(pvPtr+psHdl->psPtr[*piInd].siSiz,0,siSiz-psHdl->psPtr[*piInd].siSiz);
+               memset(((char*)pvPtr)+psHdl->psPtr[*piInd].siSiz,0,siSiz-psHdl->psPtr[*piInd].siSiz);
             }
             psHdl->psPtr[*piInd].pvPtr=pvPtr;
             psHdl->psPtr[*piInd].siSiz=siSiz;
@@ -853,7 +853,7 @@ extern void* pvClpAlloc(
                pvPtr=realloc(pvPtr,siSiz);
                if (pvPtr!=NULL) {
                   if (psHdl->psPtr[i].siSiz<siSiz) {
-                     memset(pvPtr+psHdl->psPtr[i].siSiz,0,siSiz-psHdl->psPtr[i].siSiz);
+                     memset(((char*)pvPtr)+psHdl->psPtr[i].siSiz,0,siSiz-psHdl->psPtr[i].siSiz);
                   }
                   psHdl->psPtr[i].pvPtr=pvPtr;
                   psHdl->psPtr[i].siSiz=siSiz;
