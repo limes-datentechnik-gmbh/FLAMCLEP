@@ -2332,12 +2332,6 @@ extern int readEnvVars(const char* pcFil, FILE* pfOut) {
          }
       }
       fclose(pfTmp);
-   }else{
-      if(pfOut!=NULL){
-         fprintf(pfOut,
-            "Open of environment file (%s) failed (%d - %s)\n",
-            pcFil,errno,strerror(errno));
-      }
    }
    return CLERTC_OK;
 }
