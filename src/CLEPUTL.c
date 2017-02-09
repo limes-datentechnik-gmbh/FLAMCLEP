@@ -140,7 +140,7 @@ extern int win_setenv(const char* name, const char* value){
 
 extern int win_unsetenv(const char* name){
   char envstr[strlen(name) + 2];
-  sprintf(envstr,"%s=",name)
+  sprintf(envstr,"%s=",name);
   return _putenv(envstr);
 }
 
