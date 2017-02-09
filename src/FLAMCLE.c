@@ -488,37 +488,8 @@ extern int siCleExecute(
    for (i=0;i<(sizeof(acPgm)-1) && pcPgm[i];i++) acPgm[i]=toupper(pcPgm[i]);
    acPgm[i]=0;
 #if defined(__ZOS__) || defined(__USS__)
-   pfTmp=fopen("DD:STDENV","r");
-   if (pfTmp!=NULL) {
-      memset(acCnf,0,sizeof(acCnf));
-      while (fgets(acCnf,sizeof(acCnf)-1,pfTmp)!=NULL) {
-         pcCnf=acCnf+strlen(acCnf);
-         while (isspace(*(pcCnf-1))) {
-            pcCnf--; *pcCnf=EOS;
-         }
-         pcCnf=strchr(acCnf,'=');
-         if (pcCnf!=NULL) {
-            *pcCnf=0x00;
-            for (pcTmp=acCnf;isspace(*pcTmp);pcTmp++);
-            if (*pcTmp) {
-               if (SETENV(pcTmp,pcCnf+1)) {
-                  fprintf(pfOut,"Put variable (%s=%s) to environment failed (%d - %s)\n",pcTmp,pcCnf+1,errno,strerror(errno));
-                  fclose(pfTmp);
-                  return(CLERTC_SYS);
-               } else {
-                  if (strcmp(pcCnf+1,GETENV(pcTmp))) {
-                     fprintf(pfOut,"Put variable (%s=%s) to environment failed (strcmp(%s,GETENV(%s)))\n",pcTmp,pcCnf+1,pcCnf+1,pcTmp);
-                     fclose(pfTmp);
-                     return(CLERTC_SYS);
-                  } else {
-                     fprintf(pfOut,"Put variable (%s=%s) to environment was successful\n",pcTmp,pcCnf+1);
-                  }
-               }
-            }
-         }
-      }
-      fclose(pfTmp);
-   }
+   siErr = readEnvVars("DD:STDENV",pfOut);
+   if(siErr){ return siErr;}
 #endif
    snprintf(acCnf,sizeof(acCnf),"%s_DEFAULT_OWNER_ID",acPgm);
    pcCnf=GETENV(acCnf);
