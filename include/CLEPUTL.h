@@ -456,6 +456,16 @@ extern int strxcmp(
 
 extern char* cstime(signed long long t, char* p);
 
+/**
+ * Read and set environment variables from file
+ *
+ * @param[in] pcFil Filename, if pcFil==NULL use "DD:STDENV" instead
+ * @param[in] pfOut File pointer for output messages
+ *
+ * @return    0 for successful else CLERTCs
+ */
+extern int readEnvVars(const char* pcFil, FILE* pfOut);
+
 /**********************************************************************/
 
 #ifdef __EBCDIC__

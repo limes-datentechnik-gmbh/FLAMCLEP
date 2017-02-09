@@ -5810,8 +5810,8 @@ static int siClpBldLit(
             switch (psCon->psFix->siSiz) {
             case 4: if (flVal==((F32*)psCon->psVar->pvDat)[0]) pcKyw=psCon->psStd->pcKyw; break;
             case 8: if (flVal==((F64*)psCon->psVar->pvDat)[0]) pcKyw=psCon->psStd->pcKyw; break;
-            break;
             }
+            break;
          default:
             if (l2>0 && psCon->psVar->siLen==l2 && memcmp(psCon->psVar->pvDat,((char*)psArg->psVar->pvPtr)-l2,l2)==0) {
                pcKyw=psCon->psStd->pcKyw;

@@ -92,21 +92,17 @@ extern int ebcdic_sprintf(char* string, const char* format, ...) {
 extern int ebcdic_fprintf(FILE* file, const char* format, ...) {
    va_list  argv;
    char*    help;
-   char*    temp;
-   size_t   size=65536;
+   char     temp[65536];
    int      r=0;
-   temp=(char*)malloc(size);
-   if (temp==NULL) return(0);
    *temp='\0';
    va_start(argv, format);
-   vsnprintf(temp,size,format,argv);
+   vsnprintf(temp,sizeof(temp),format,argv);
    va_end(argv);
-   temp[size-1]='\0';
+   temp[sizeof(temp)-1]='\0';
    if (*temp) {
       RPLDIAC(temp);
       r=fprintf(file,"%s",temp);
    }
-   free(temp);
    return(r);
 }
 
@@ -136,36 +132,16 @@ extern char* homedir(int flag, const int size, char* buffer) {
    return(buffer);
 }
 
-extern int win_setenv(const char* name, const char* value)
-{
-   char* envstr;
-   int rc;
-
-   envstr = (char*) malloc(strlen(name) + strlen(value) + 2);
-   if (NULL == envstr) {
-       errno = ENOMEM;
-       return -1;
-   }
+extern int win_setenv(const char* name, const char* value){
+   char envstr[strlen(name) + strlen(value) + 2];
    sprintf(envstr,"%s=%s",name,value);
-   rc = _putenv(envstr);
-   free(envstr);
-   return rc;
+   return  _putenv(envstr);
 }
 
-extern int win_unsetenv(const char* name)
-{
-  char* envstr;
-  int rc;
-
-  envstr = (char*) malloc(strlen(name) + 2);
-  if (NULL == envstr) {
-      errno = ENOMEM;
-      return -1;
-  }
-  sprintf(envstr,"%s=",name);
-  rc = _putenv(envstr);
-  free(envstr);
-  return rc;
+extern int win_unsetenv(const char* name){
+  char envstr[strlen(name) + 2];
+  sprintf(envstr,"%s=",name)
+  return _putenv(envstr);
 }
 
 #else
@@ -265,8 +241,8 @@ extern void fprintm(FILE* file,const char* own, const char* pgm, const char* man
    char*       ptr;
    char        tmp[strlen(man)+4];
    switch (cnt) {
-   case  0:snprintf(tmp,sizeof(tmp),"%s",man);
-   case  1:snprintf(tmp,sizeof(tmp),"%s\n",man);
+   case  0:snprintf(tmp,sizeof(tmp),"%s",man);     break;
+   case  1:snprintf(tmp,sizeof(tmp),"%s\n",man);   break;
    default:snprintf(tmp,sizeof(tmp),"%s\n\n",man);
    }
    ptr=tmp;
@@ -2305,6 +2281,65 @@ extern char* cstime(signed long long t, char* p) {
       snprintf(acBuf,sizeof(acBuf),"NO-VALID-TIME");
    }
    return(pcStr);
+}
+
+extern int readEnvVars(const char* pcFil, FILE* pfOut) {
+   char* pcCnf;
+   char* pcTmp;
+   char  acCnf[1024];
+   if(pcFil==NULL || pcFil[0]=='\0'){
+      pcFil = "DD:STDENV";
+   }
+   FILE* pfTmp=fopen(pcFil,"r");
+   if (pfTmp!=NULL) { /*Ignore if open failed*/
+      memset(acCnf,0,sizeof(acCnf));
+      while (fgets(acCnf,sizeof(acCnf)-1,pfTmp)!=NULL) {
+         pcCnf=acCnf+strlen(acCnf);
+         while (isspace(*(pcCnf-1))) {
+            pcCnf--; *pcCnf=EOS;
+         }
+         pcCnf=strchr(acCnf,'=');
+         if (pcCnf!=NULL) {
+            *pcCnf=0x00;
+            for (pcTmp=acCnf;isspace(*pcTmp);pcTmp++);
+            if (*pcTmp) {
+               if (SETENV(pcTmp,pcCnf+1)) {
+                  if(pfOut!=NULL){
+                     fprintf(pfOut,
+                           "Put variable (%s=%s) to environment failed (%d - %s)\n",
+                           pcTmp,pcCnf+1,errno,strerror(errno));
+                  }
+                  fclose(pfTmp);
+                  return CLERTC_SYS;
+               } else {
+                  if (strcmp(pcCnf+1,GETENV(pcTmp))) {
+                     if(pfOut!=NULL){
+                        fprintf(pfOut,
+                              "Put variable (%s=%s) to environment failed (strcmp(%s,GETENV(%s)))\n",
+                              pcTmp,pcCnf+1,pcCnf+1,pcTmp);
+                     }
+                     fclose(pfTmp);
+                     return CLERTC_SYS;
+                  } else {
+                     if(pfOut!=NULL){
+                        fprintf(pfOut,
+                              "Put variable (%s=%s) to environment was successful\n",
+                              pcTmp,pcCnf+1);
+                     }
+                  }
+               }
+            }
+         }
+      }
+      fclose(pfTmp);
+   }else{
+      if(pfOut!=NULL){
+         fprintf(pfOut,
+            "Open of environment file (%s) failed (%d - %s)\n",
+            pcFil,errno,strerror(errno));
+      }
+   }
+   return CLERTC_OK;
 }
 
 /**********************************************************************/
