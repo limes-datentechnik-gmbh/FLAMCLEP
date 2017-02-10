@@ -50,14 +50,6 @@
    #define EOS             (0x00)
 #endif
 
-#ifndef L_userid
-#  define L_userid         (257)
-#endif
-
-#ifndef L_filnam
-#  define L_filnam         (1025)
-#endif
-
 #ifdef __WIN__
 extern int win_setenv(const char* name, const char* value);
 extern int win_unsetenv(const char* name);

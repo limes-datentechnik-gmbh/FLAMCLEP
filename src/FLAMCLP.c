@@ -135,12 +135,13 @@
  * 1.2.85: Add new CLPFLG_DLM to ensure an additional element as delimiter in arrays (required if CLPFLG_CNT cannot used (overlay with arrays))
  * 1.2.86: Support dynamic strings and arrays as new flag CLPFLG_DYN
  * 1.2.87: Support string mapping functions for build of CLP structure
+ * 1.2.88: Make remaining parameter file names dynamic
 **/
 
-#define CLP_VSN_STR       "1.2.87"
+#define CLP_VSN_STR       "1.2.88"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        2
-#define CLP_VSN_REVISION       87
+#define CLP_VSN_REVISION       88
 
 /* Definition der Konstanten ******************************************/
 
@@ -3887,7 +3888,7 @@ static int siClpPrsFil(
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    char                          acSrc[strlen(psHdl->pcSrc)+1];
-   char                          acFil[L_filnam]={0};
+   char*                         pcFil;
    char*                         pcPar=NULL;
    int                           siRow,siCnt,siErr,siSiz=0;
    const char*                   pcCur;
@@ -3901,23 +3902,28 @@ static int siClpPrsFil(
    if (psHdl->siTok!=CLPTOK_STR) {
       return CLPERR(psHdl,CLPERR_SYN,"After object/overlay/array assignment '%s.%s=' parameter file ('filename') expected",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
    }
-   siErr=file2str(cpmapfil(acFil,sizeof(acFil),psHdl->pcLex+2),&pcPar,&siSiz,filemode("r"));
+   pcFil=dcpmapfil(psHdl->pcLex+2);
+   if (pcFil==NULL) {
+      return CLPERR(psHdl,CLPERR_MEM,"Dynamic allocation of parameter file string (%s) for argument '%s.%s' failed",psHdl->pcLex+2,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+   }
+   siErr=file2str(pcFil,&pcPar,&siSiz,filemode("r"));
    if (siErr<0) {
       switch(siErr) {
       case -1: siErr=CLPERR(psHdl,CLPERR_INT,"Illegal parameters passed to file2str() (Bug)%s","");break;
-      case -2: siErr=CLPERR(psHdl,CLPERR_SYS,"Open of parameter file (%s) failed (%d - %s)",acFil,errno,strerror(errno));break;
-      case -3: siErr=CLPERR(psHdl,CLPERR_SEM,"Parameter file (%s) is too big (integer overflow)",acFil);break;
-      case -4: siErr=CLPERR(psHdl,CLPERR_MEM,"Allocation of memory for parameter file (%s) failed",acFil);break;
-      case -5: siErr=CLPERR(psHdl,CLPERR_SYS,"Read of parameter file (%s) failed (%d - %s)",acFil,errno,strerror(errno));break;
-      default: siErr=CLPERR(psHdl,CLPERR_SYS,"An unknown error occurred while reading parameter file (%s)",acFil);break;
+      case -2: siErr=CLPERR(psHdl,CLPERR_SYS,"Open of parameter file (%s) failed (%d - %s)",pcFil,errno,strerror(errno));break;
+      case -3: siErr=CLPERR(psHdl,CLPERR_SEM,"Parameter file (%s) is too big (integer overflow)",pcFil);break;
+      case -4: siErr=CLPERR(psHdl,CLPERR_MEM,"Allocation of memory for parameter file (%s) failed",pcFil);break;
+      case -5: siErr=CLPERR(psHdl,CLPERR_SYS,"Read of parameter file (%s) failed (%d - %s)",pcFil,errno,strerror(errno));break;
+      default: siErr=CLPERR(psHdl,CLPERR_SYS,"An unknown error occurred while reading parameter file (%s)",pcFil);break;
       }
       if (pcPar!=NULL) free(pcPar);
+      free(pcFil);
       return(siErr);
    }
 
-   if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"PARAMETER-FILE-PARSER-BEGIN(FILE=%s)\n",acFil);
+   if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"PARAMETER-FILE-PARSER-BEGIN(FILE=%s)\n",pcFil);
    strcpy(acSrc,psHdl->pcSrc);
-   srprintf(&psHdl->pcSrc,&psHdl->szSrc,strlen(CLPSRC_PAF)+strlen(acFil),"%s%s",CLPSRC_PAF,acFil);
+   srprintf(&psHdl->pcSrc,&psHdl->szSrc,strlen(CLPSRC_PAF)+strlen(pcFil),"%s%s",CLPSRC_PAF,pcFil);
    pcCur=psHdl->pcCur; psHdl->pcCur=pcPar;
    pcInp=psHdl->pcInp; psHdl->pcInp=pcPar;
    pcOld=psHdl->pcOld; psHdl->pcOld=pcPar;
@@ -3927,6 +3933,7 @@ static int siClpPrsFil(
    psHdl->siTok=siClpScnSrc(pvHdl,psArg->psFix->siTyp,psArg);
    if (psHdl->siTok<0) {
       if (pcPar!=NULL) free(pcPar);
+      free(pcFil);
       return(psHdl->siTok);
    }
    if (isAry) {
@@ -3937,15 +3944,19 @@ static int siClpPrsFil(
       case CLPTYP_OBJECT: siCnt=siClpPrsObjLst(pvHdl,siLev,psArg); break;
       case CLPTYP_OVRLAY: siCnt=siClpPrsOvlLst(pvHdl,siLev,psArg); break;
       default:
+         if (pcPar!=NULL) free(pcPar);
+         free(pcFil);
          return CLPERR(psHdl,CLPERR_SEM,"Type (%d) of parameter '%s.%s' is not supported with arrays",psArg->psFix->siTyp,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
       }
       if (siCnt<0) {
          if (pcPar!=NULL) free(pcPar);
+         free(pcFil);
          return(siCnt);
       }
       psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
       if (psHdl->siTok<0) {
          if (pcPar!=NULL) free(pcPar);
+         free(pcFil);
          return(psHdl->siTok);
       }
    } else {
@@ -3953,17 +3964,20 @@ static int siClpPrsFil(
          siCnt=siClpPrsObj(pvHdl,siLev,siPos,psArg);
          if (siCnt<0) {
             if (pcPar!=NULL) free(pcPar);
+            free(pcFil);
             return(siCnt);
          }
       } else if (psHdl->siTok==CLPTOK_DOT) {
          psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
          if (psHdl->siTok<0) {
             if (pcPar!=NULL) free(pcPar);
+            free(pcFil);
             return(psHdl->siTok);
          }
          siCnt=siClpPrsOvl(pvHdl,siLev,siPos,psArg);
          if (siCnt<0) {
             if (pcPar!=NULL) free(pcPar);
+            free(pcFil);
             return(siCnt);
          }
       } else {
@@ -3971,12 +3985,14 @@ static int siClpPrsFil(
             siCnt=siClpPrsObjWob(pvHdl,siLev,siPos,psArg);
             if (siCnt<0) {
                if (pcPar!=NULL) free(pcPar);
+               free(pcFil);
                return(siCnt);
             }
          } else {
             siCnt=siClpPrsOvl(pvHdl,siLev,siPos,psArg);
             if (siCnt<0) {
                if (pcPar!=NULL) free(pcPar);
+               free(pcFil);
                return(siCnt);
             }
          }
@@ -3988,13 +4004,15 @@ static int siClpPrsFil(
       strcpy(psHdl->pcSrc,acSrc);
       psHdl->pcCur=pcCur; psHdl->pcInp=pcInp; psHdl->pcOld=pcOld; psHdl->pcRow=pcRow; psHdl->siRow=siRow;
       if (pcPar!=NULL) free(pcPar);
-      if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"PARAMETER-FILE-PARSER-END(FILE=%s CNT=%d)\n",acFil,siCnt);
+      if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"PARAMETER-FILE-PARSER-END(FILE=%s CNT=%d)\n",pcFil,siCnt);
+      free(pcFil);
       psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
       if (psHdl->siTok<0) return(psHdl->siTok);
       return(siCnt);
    } else {
-      siErr=CLPERR(psHdl,CLPERR_SYN,"Last token (%s) of parameter file '%s' is not EOF",apClpTok[psHdl->siTok],acFil);
+      siErr=CLPERR(psHdl,CLPERR_SYN,"Last token (%s) of parameter file '%s' is not EOF",apClpTok[psHdl->siTok],pcFil);
       if (pcPar!=NULL) free(pcPar);
+      free(pcFil);
       return(siErr);
    }
 }
@@ -5570,25 +5588,29 @@ static int siClpBldLit(
          char                          acSrc[strlen(psHdl->pcSrc)+1];
          size_t                        szLex=CLPINI_LEXSIZ;
          char*                         pcLex=(char*)calloc(1,szLex);
-         char                          acFil[L_filnam]={0};
-         if (pcLex==NULL) return(CLPERR(psHdl,CLPERR_MEM,"Allocation of memory to store the lexem failed"));
-         siErr=file2str(cpmapfil(acFil,sizeof(acFil),pcVal+2),&pcDat,&siSiz,filemode("r"));
+         char*                         pcFil=dcpmapfil(pcVal+2);
+         if (pcLex==NULL || pcFil==NULL) {
+            if (pcLex!=NULL) free(pcLex);
+            if (pcFil!=NULL) free(pcFil);
+            return(CLPERR(psHdl,CLPERR_MEM,"Allocation of memory to store the lexem or file name failed"));
+         }
+         siErr=file2str(pcFil,&pcDat,&siSiz,filemode("r"));
          if (siErr<0) {
             switch(siErr) {
             case -1: siErr=CLPERR(psHdl,CLPERR_INT,"Illegal parameters passed to file2str() (Bug)%s","");break;
-            case -2: siErr=CLPERR(psHdl,CLPERR_SYS,"Open of string file (%s) failed (%d - %s)",acFil,errno,strerror(errno));break;
-            case -3: siErr=CLPERR(psHdl,CLPERR_SEM,"String file (%s) is too big (integer overflow)",acFil);break;
-            case -4: siErr=CLPERR(psHdl,CLPERR_MEM,"Allocation of memory for string file (%s) failed",acFil);break;
-            case -5: siErr=CLPERR(psHdl,CLPERR_SYS,"Read of string file (%s) failed (%d - %s)",acFil,errno,strerror(errno));break;
-            default: siErr=CLPERR(psHdl,CLPERR_SYS,"An unknown error occurred while reading string file (%s)",acFil);break;
+            case -2: siErr=CLPERR(psHdl,CLPERR_SYS,"Open of string file (%s) failed (%d - %s)",pcFil,errno,strerror(errno));break;
+            case -3: siErr=CLPERR(psHdl,CLPERR_SEM,"String file (%s) is too big (integer overflow)",pcFil);break;
+            case -4: siErr=CLPERR(psHdl,CLPERR_MEM,"Allocation of memory for string file (%s) failed",pcFil);break;
+            case -5: siErr=CLPERR(psHdl,CLPERR_SYS,"Read of string file (%s) failed (%d - %s)",pcFil,errno,strerror(errno));break;
+            default: siErr=CLPERR(psHdl,CLPERR_SYS,"An unknown error occurred while reading string file (%s)",pcFil);break;
             }
             if (pcDat!=NULL) free(pcDat);
-            free(pcLex);
+            free(pcLex); free(pcFil);
             return(siErr);
          }
-         if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"STRING-FILE-BEGIN(%s)\n",acFil);
+         if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"STRING-FILE-BEGIN(%s)\n",pcFil);
          strcpy(acSrc,psHdl->pcSrc);
-         srprintf(&psHdl->pcSrc,&psHdl->szSrc,strlen(CLPSRC_SRF)+strlen(acFil),"%s%s",CLPSRC_SRF,acFil);
+         srprintf(&psHdl->pcSrc,&psHdl->szSrc,strlen(CLPSRC_SRF)+strlen(pcFil),"%s%s",CLPSRC_SRF,pcFil);
          pcCur=psHdl->pcCur; psHdl->pcCur=pcDat;
          pcInp=psHdl->pcInp; psHdl->pcInp=pcDat;
          pcOld=psHdl->pcOld; psHdl->pcOld=pcDat;
@@ -5597,28 +5619,33 @@ static int siClpBldLit(
          psHdl->siBuf++;
          siTok=siClpScnNat(pvHdl,psHdl->pfErr,psHdl->pfScn,&psHdl->pcCur,&szLex,&pcLex,CLPTYP_STRING,psArg,NULL);
          if (siTok<0) {
+            free(pcDat);
             free(pcLex);
+            free(pcFil);
             return(siTok);
          }
          if (siTok!=CLPTOK_STR) {
             siErr=CLPERR(psHdl,CLPERR_SYN,"The token (%s(%s)) is not allowed in a string file (%c(%s)) of '%s.%s'",apClpTok[siTok],pcLex,pcVal[0],pcVal+2,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
             free(pcDat);
             free(pcLex);
+            free(pcFil);
             return(siErr);
          }
          if (pcLex[0]=='f') {
             siErr=CLPERR(psHdl,CLPERR_SYN,"Define a string file (%c(%s)) in a string file (%c(%s)) is not allowed (%s.%s)",pcLex[0],pcLex+2,pcVal[0],pcVal+2,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
             free(pcDat);
             free(pcLex);
+            free(pcFil);
             return(siErr);
          }
          siErr=siClpBldLit(pvHdl,siLev,siPos,psArg,pcLex);
          psHdl->siBuf--;
          strcpy(psHdl->pcSrc,acSrc);
          psHdl->pcCur=pcCur; psHdl->pcInp=pcInp; psHdl->pcOld=pcOld; psHdl->pcRow=pcRow; psHdl->siRow=siRow;
-         if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"STRING-FILE-END(%s)\n",acFil);
+         if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"STRING-FILE-END(%s)\n",pcFil);
          free(pcDat);
          free(pcLex);
+         free(pcFil);
          return(siErr);
       }
       case 'd':
