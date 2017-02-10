@@ -123,11 +123,12 @@
  * 1.2.56: Make root and property variable in length
  * 1.2.57: Separate acNum (number) and acHdl (head line)
  * 1.2.58: Support dynamic strings and arrays in CLP structure
+ * 1.2.59: Support pvClpAlloc in RUN functions
  */
-#define CLE_VSN_STR       "1.2.58"
+#define CLE_VSN_STR       "1.2.59"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        2
-#define CLE_VSN_REVISION       58
+#define CLE_VSN_REVISION       59
 
 /* Definition der Konstanten ******************************************/
 #define CLEMAX_CNFLEN            1023
