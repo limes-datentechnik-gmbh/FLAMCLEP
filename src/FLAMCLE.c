@@ -2001,7 +2001,7 @@ EVALUATE:
                   psTab[i].pfFin(pfOut,pfTrc,psTab[i].pvPar);
                   ERROR(((CLERTC_MAP>siMaxCC)?siMaxCC:CLERTC_MAP),NULL);
                }
-               siErr=psTab[i].pfRun(pfOut,pfTrc,acOwn,pcPgm,pcVsn,pcAbo,pcLic,psTab[i].pcKyw,pcCmd,pcLst,psTab[i].pvPar,&isWrn,&siScc);
+               siErr=psTab[i].pfRun(pvHdl,pfOut,pfTrc,acOwn,pcPgm,pcVsn,pcAbo,pcLic,psTab[i].pcKyw,pcCmd,pcLst,psTab[i].pvPar,&isWrn,&siScc);
                if (pcCmd!=NULL) free(pcCmd);
                if (pcLst!=NULL) free(pcLst);
                if (siErr) {

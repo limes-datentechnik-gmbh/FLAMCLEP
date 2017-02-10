@@ -426,6 +426,10 @@ typedef int (*tpfMap)(
  * error with value 8 and additional 4 in a case of a warning. The warning
  * means that the run don't fail, but something was happen.
  *
+ * If additional dynamic memory required in the FLC structure (from mapping)
+ * the provided handle can be used for pvClpAlloc.
+ *
+ * @param[in]  pvHdl Pointer to the CLP handle for allocation of memory in the FLC structure
  * @param[in]  pfOut File pointer for outputs (given over CleExecute)
  * @param[in]  pfTrc File pointer for tracing (given over CleExecute)
  * @param[in]  pcOwn Current owner name (given over CleExecute)
@@ -443,6 +447,7 @@ typedef int (*tpfMap)(
  * @return     Reason code (!=0) for termination or warning, 0 for success
  */
 typedef int (*tpfRun)(
+   void*                         pvHdl,
    FILE*                         pfOut,
    FILE*                         pfTrc,
    const char*                   pcOwn,
