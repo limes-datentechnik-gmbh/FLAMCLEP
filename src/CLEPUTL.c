@@ -119,6 +119,15 @@ extern char* userid(const int size, char* buffer) {
    GetUserName(buffer,&tmp);
    return(buffer);
 }
+extern char* duserid(void) {
+   char*    buffer=NULL;
+   size_t   size=0;
+   char user[1024]={0};
+   DWORD tmp=sizeof(user);
+   GetUserName(user,&tmp);
+   srprintf(&buffer,&size,strlen(user),"%s",user);
+   return(buffer);
+}
 extern char* homedir(int flag, const int size, char* buffer) {
    char path[MAX_PATH+1]={0};
    buffer[0]=0x00;
@@ -127,6 +136,19 @@ extern char* homedir(int flag, const int size, char* buffer) {
          snprintf(buffer,size,"%s%c",path,C_BSL);
       } else {
          snprintf(buffer,size,"%s",path);
+      }
+   }
+   return(buffer);
+}
+extern char* dhomedir(int flag) {
+   char*    buffer=NULL;
+   size_t   size=0;
+   char path[MAX_PATH+1]={0};
+   if (SHGetFolderPath(NULL,CSIDL_PROFILE,NULL,0,path)==S_OK) {
+      if (flag) {
+         srprintf(&buffer,&size,strlen(path)+1,"%s%c",path,C_BSL);
+      } else {
+         srprintf(&buffer,&size,strlen(path),"%s",path);
       }
    }
    return(buffer);
@@ -157,8 +179,19 @@ extern char* userid(const int size, char* buffer) {
    }
    return(buffer);
 }
+extern char* duserid(void) {
+   char*          buffer= NULL;
+   size_t         size  = 0;
+   struct passwd* uP    = getpwuid(geteuid());
+   if (NULL != uP) {
+      srprintf(&buffer,&size,strlen(uP->pw_name),"%s",uP->pw_name);
+   } else {
+      srprintf(&buffer,&size,0,"");
+   }
+   return(buffer);
+}
 extern char* homedir(int flag, const int size, char* buffer) {
-   const char*    home=GETENV("HOME");
+   const char*    home  = GETENV("HOME");
    if (home!=NULL && *home) {
       if (flag) {
          snprintf(buffer,size,"%s/",home);
@@ -174,26 +207,26 @@ extern char* homedir(int flag, const int size, char* buffer) {
             snprintf(buffer,size,"%s",uP->pw_dir);
          }
       } else {
-         char acUsr[64]={0};
-         userid(sizeof(acUsr),acUsr);
-         if (acUsr[0]) {
+         char user[64]={0};
+         userid(sizeof(user),user);
+         if (user[0]) {
 #ifdef __ZOS__
          if (flag) {
-            snprintf(buffer,size,"%s.",acUsr);
+            snprintf(buffer,size,"%s.",user);
          } else {
-            snprintf(buffer,size,"%s",acUsr);
+            snprintf(buffer,size,"%s",user);
          }
 #elif defined(__USS__)
          if (flag) {
-            snprintf(buffer,size,"/u/%s/",acUsr);
+            snprintf(buffer,size,"/u/%s/",user);
          } else {
-            snprintf(buffer,size,"/u/%s",acUsr);
+            snprintf(buffer,size,"/u/%s",user);
          }
 #else
          if (flag) {
-            snprintf(buffer,size,"/home/%s/",acUsr);
+            snprintf(buffer,size,"/home/%s/",user);
          } else {
-            snprintf(buffer,size,"/home/%s",acUsr);
+            snprintf(buffer,size,"/home/%s",user);
          }
 #endif
          } else {
@@ -201,6 +234,66 @@ extern char* homedir(int flag, const int size, char* buffer) {
                snprintf(buffer,size,"/");
             } else {
                if (size>=0) buffer[0]=0x00;
+            }
+         }
+      }
+   }
+   return(buffer);
+}
+extern char* dhomedir(int flag) {
+   char*          buffer= NULL;
+   size_t         size  = 0;
+   const char*    home  = GETENV("HOME");
+   if (home!=NULL && *home) {
+      if (flag) {
+         srprintf(&buffer,&size,strlen(home),"%s/",home);
+      } else {
+         srprintf(&buffer,&size,strlen(home),"%s",home);
+      }
+   } else {
+      struct passwd* uP = getpwuid(geteuid());
+      if (uP != NULL && uP->pw_dir != NULL) {
+         if (flag) {
+            srprintf(&buffer,&size,strlen(uP->pw_dir),"%s/",uP->pw_dir);
+         } else {
+            srprintf(&buffer,&size,strlen(uP->pw_dir),"%s",uP->pw_dir);
+         }
+      } else {
+         char* user=duserid();
+         if (user!=NULL) {
+            if (user[0]) {
+#ifdef __ZOS__
+               if (flag) {
+                  srprintf(&buffer,&size,strlen(user),"%s.",user);
+               } else {
+                  srprintf(&buffer,&size,strlen(user),"%s",user);
+               }
+#elif defined(__USS__)
+               if (flag) {
+                  srprintf(&buffer,&size,strlen(user),"/u/%s/",user);
+               } else {
+                  srprintf(&buffer,&size,strlen(user),"/u/%s",user);
+               }
+#else
+               if (flag) {
+                  srprintf(&buffer,&size,strlen(user),"/home/%s/",user);
+               } else {
+                  srprintf(&buffer,&size,strlen(user),"/home/%s",user);
+               }
+#endif
+            } else {
+               if (flag) {
+                  srprintf(&buffer,&size,0,"/");
+               } else {
+                  srprintf(&buffer,&size,0,"");
+               }
+            }
+            free(user);
+         } else {
+            if (flag) {
+               srprintf(&buffer,&size,0,"/");
+            } else {
+               srprintf(&buffer,&size,0,"");
             }
          }
       }
@@ -1411,11 +1504,14 @@ extern char* mapstr(char* string,int size)
    return(string);
 }
 
-extern char* dmapstr(const char* string,int toUpper)
+extern char* dmapstr(const char* string,int method)
 {
    char* h1=drplenvar(string,'<','>');
-   if (h1!=NULL && toUpper){
-      for(char* p=h1;*p;p++) *p=toupper(*p);
+   if (h1!=NULL){
+      switch (method) {
+      case 1: for(char* p=h1;*p;p++) *p=toupper(*p); break;
+      case 2: for(char* p=h1;*p;p++) *p=tolower(*p); break;
+      }
    }
    return(h1);
 }
@@ -1427,7 +1523,7 @@ extern char* mapfil(char* file,int size)
    return(file);
 }
 
-extern char* dmapfil(const char* file, int toUpper)
+extern char* dmapfil(const char* file, int method)
 {
    char* pfx="";
    char* h1=dadjpfx(file,&pfx);
@@ -1437,8 +1533,11 @@ extern char* dmapfil(const char* file, int toUpper)
       if (h2!=NULL) {
          char* h3=drplenvar(h2,'<','>');
          free(h2);
-         if (h3!=NULL && toUpper){
-            for(char* p=h3;*p;p++) *p=toupper(*p);
+         if (h3!=NULL){
+            switch (method) {
+            case 1: for(char* p=h3;*p;p++) *p=toupper(*p); break;
+            case 2: for(char* p=h3;*p;p++) *p=tolower(*p); break;
+            }
          }
          return(h3);
       }
@@ -1460,11 +1559,11 @@ extern char* dcpmapfil(const char* file) {
    if (ISPATHNAME(file)) {
       return dmapfil(file,FALSE);
    } else if(ISDDNAME(file) || file[0]=='\'' || file[0]==':') {
-      return dmapfil(file,TRUE);
+      return dmapfil(file,1);
    } else {
       char f[strlen(file)+4];
       sprintf(f,"'%s'",file);
-      return dmapfil(f,TRUE);
+      return dmapfil(f,1);
    }
 }
 
@@ -1539,7 +1638,7 @@ extern char* cpmapfil(char* dest, int size,const char* source) {
 }
 
 extern char* dcpmapfil(const char* file) {
-   return dmapfil(file,FALSE);
+   return dmapfil(file,0);
 }
 
 extern char* filemode(const char* mode) {
@@ -1592,7 +1691,7 @@ extern char* maplab(char* label,int size, int toUpper) {
    return(label);
 }
 
-extern char* dmaplab(const char* label, int toUpper)
+extern char* dmaplab(const char* label, int method)
 {
    char* h1=drplchar(label,C_EXC,"<ENVID>");
    if (h1!=NULL) {
@@ -1604,8 +1703,11 @@ extern char* dmaplab(const char* label, int toUpper)
          if (h3!=NULL) {
             char* h4=drplenvar(h3,'<','>');
             free(h3);
-            if (h4!=NULL && toUpper){
-               for(char* p=h4;*p;p++) *p=toupper(*p);
+            if (h4!=NULL){
+               switch (method) {
+               case 1: for(char* p=h4;*p;p++) *p=toupper(*p); break;
+               case 2: for(char* p=h4;*p;p++) *p=tolower(*p); break;
+               }
             }
             return(h4);
          }
@@ -1620,10 +1722,10 @@ extern char* cpmaplab(char* label, int size,const char* templ, const char* value
    return(label);
 }
 
-extern char* dcpmaplab(const char* templ, const char* values, int toUpper) {
+extern char* dcpmaplab(const char* templ, const char* values, int method) {
    char* h1=drpltpl(templ,values);
    if (h1!=NULL) {
-      char* h2=dmaplab(h1,toUpper);
+      char* h2=dmaplab(h1,method);
       free(h1);
       return(h2);
    }

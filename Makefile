@@ -6,7 +6,7 @@ BLDDIR_REL = build/release
 BINDIR_DEB = bin/debug
 BINDIR_REL = bin/release
 
-INC_OPT = -I include
+INC_OPT = -I include -D_XOPEN_SOURCE=600
 
 CFLAGS= -Wall -fPIC -std=c99
 DEB_OPT = $(CFLAGS) -g -O0 -D__UNIX__ -D__XLIN__ -D__DEBUG__  $(INC_OPT)

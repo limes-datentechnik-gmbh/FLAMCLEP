@@ -1034,7 +1034,11 @@ extern void* pvClpOpen(
             }
          }
          psHdl->siTok=CLPTOK_INI;
+      } else {
+         if (pfErr!=NULL) fprintf(pfErr,"Allocation of CLP structure failed\n");
       }
+   } else {
+      if (pfErr!=NULL) fprintf(pfErr,"One or more parameter pcOwn(%p), pcPgm(%p), pcCmd(%p) or psTab(%p) are NULL\n",pcOwn,pcPgm,pcCmd,psTab);
    }
    return((void*)psHdl);
 }
@@ -5539,11 +5543,11 @@ static int siClpBldLit(
          break;
       case 's':
          if (CLPISF_FIL(psArg->psStd->uiFlg)) {
-            pcHlp=dmapfil(pcVal+2,CLPISF_UPP(psArg->psStd->uiFlg));
+            pcHlp=dmapfil(pcVal+2,CLPISF_UPP(psArg->psStd->uiFlg)?1:CLPISF_LOW(psArg->psStd->uiFlg)?2:0);
          } else if (CLPISF_LAB(psArg->psStd->uiFlg)) {
-            pcHlp=dmaplab(pcVal+2,CLPISF_UPP(psArg->psStd->uiFlg));
+            pcHlp=dmaplab(pcVal+2,CLPISF_UPP(psArg->psStd->uiFlg)?1:CLPISF_LOW(psArg->psStd->uiFlg)?2:0);
          } else {
-            pcHlp=dmapstr(pcVal+2,CLPISF_UPP(psArg->psStd->uiFlg));
+            pcHlp=dmapstr(pcVal+2,CLPISF_UPP(psArg->psStd->uiFlg)?1:CLPISF_LOW(psArg->psStd->uiFlg)?2:0);
          }
          if (pcHlp==NULL) {
             return CLPERR(psHdl,CLPERR_MEM,"String mapping (memory allocation) for argument '%s.%s' failed",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);

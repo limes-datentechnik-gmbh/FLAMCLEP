@@ -50,6 +50,9 @@
    #define EOS             (0x00)
 #endif
 
+/** Free memory space */
+#define SAFE_FREE(x) do { if ((x) != NULL) {free((void*)(x)); (x)=NULL;} } while(0)
+
 #ifdef __WIN__
 extern int win_setenv(const char* name, const char* value);
 extern int win_unsetenv(const char* name);
@@ -83,6 +86,7 @@ extern int win_unsetenv(const char* name);
 #define CLERTC_SYS            36
 #define CLERTC_ACS            40
 #define CLERTC_ITF            44
+#define CLERTC_MEM            48
 #define CLERTC_FAT            64
 #define CLERTC_MAX            64
 
@@ -104,6 +108,19 @@ extern char* userid(const int size, char* buffer);
  * @return        pointer to the buffer containing the current home directory (null-terminated)
  */
 extern char* homedir(const int flag, const int size, char* buffer);
+
+/**
+ * Returns the current user id.
+ * @return        pointer to the buffer containing the current user id (null-terminated) must be freed by the caller
+ */
+extern char* duserid(void);
+
+/**
+ * Returns the current home directory.
+ * @param flag    if true then slash/backslash are added
+ * @return        pointer to the buffer containing the current home directory (null-terminated) must be freed by the caller
+ */
+extern char* dhomedir(const int flag);
 
 /**
  * Gets an environment variable and stores it in the provided buffer. If
@@ -206,10 +223,10 @@ extern char* mapstr(char* string,int size);
 /**
  * Replace all environment variables enclosed with '<' and '>' to build a dynamic string
  * @param string string for replacement
- * @param toUpper for mapping string to upper
+ * @param method conversion method (1 - to upper, 2 - to lower, else nothing)
  * @return pointer to the new allocated string or NULL if error
  */
-extern char* dmapstr(const char* string,int toUpper);
+extern char* dmapstr(const char* string,int method);
 
 /**
  * Replace '~' with "<HOME>" and all environment variables enclosed with '<' and '>' to build a file name
@@ -222,16 +239,16 @@ extern char* mapfil(char* file,int size);
 /**
  * Replace '~' with "<HOME>" and all environment variables enclosed with '<' and '>' to build a dynamic file name
  * @param file string for replacement
- * @param toUpper for mapping file to upper
+ * @param method conversion method (1 - to upper, 2 - to lower, else nothing)
  * @return pointer to the new allocated string or NULL if error
  */
-extern char* dmapfil(const char* file, int toUpper);
+extern char* dmapfil(const char* file, int method);
 
 /**
  * Replace '!' with ENVID, '~' with "<SYSUID>", '^' with "<OWNERID>" and all environment variables enclosed with '<' and '> to build a key label'
  * @param label string for replacement
  * @param size size of replacement string
- * @param toUpper for mapping label to upper
+ * @param toUpper for mapping file to upper
  * @return pointer to label
  */
 extern char* maplab(char* label,int size,int toUpper);
@@ -239,10 +256,10 @@ extern char* maplab(char* label,int size,int toUpper);
 /**
  * Replace '!' with ENVID, '~' with "<SYSUID>", '^' with "<OWNERID>" and all environment variables enclosed with '<' and '> to build a dynamic key label'
  * @param label string for replacement
- * @param toUpper for mapping label to upper
+ * @param method conversion method (1 - to upper, 2 - to lower, else nothing)
  * @return pointer to new allocated string or NULL if error
  */
-extern char* dmaplab(const char* label, int toUpper);
+extern char* dmaplab(const char* label, int method);
 
 /**
  * Replace '~' with "<HOME>" and all environment variables enclosed with '<' and '>'
@@ -282,10 +299,10 @@ extern char* cpmaplab(char* label, int size,const char* templ, const char* value
  * Use drpltpl() and dmaplab() to build key label names, based on key label templates in dynamic form
  * @param templ key label template (with %x)
  * @param values value string for replacement (x:%s\n)
- * @param toUpper for mapping label to upper
+ * @param method conversion method (1 - to upper, 2 - to lower, else nothing)
  * @return pointer to dynamic allocated string
  */
-extern char* dcpmaplab(const char* templ, const char* values, int toUpper);
+extern char* dcpmaplab(const char* templ, const char* values, int method);
 
 /**
  * Determines the system default CCSID by querying nl_langinfo() (POSIX) or GetCPInfoEx() (Windows).

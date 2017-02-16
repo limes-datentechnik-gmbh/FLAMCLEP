@@ -608,6 +608,8 @@ extern const char* pcClpAbout(const int l, const int s, char* b);
 #define CLPFLG_LAB               0x20000000U
 /** CLPFLG_UPP Converts zero terminated strings to upper case */
 #define CLPFLG_UPP               0x40000000U
+/** CLPFLG_LOW Converts zero terminated strings to lower case */
+#define CLPFLG_LOW               0x80000000U
 
 /**
  *  Definition of CLPFLG macros
@@ -638,6 +640,7 @@ extern const char* pcClpAbout(const int l, const int s, char* b);
 #define CLPISF_FIL(flg)          ((flg)&CLPFLG_FIL)
 #define CLPISF_LAB(flg)          ((flg)&CLPFLG_LAB)
 #define CLPISF_UPP(flg)          ((flg)&CLPFLG_UPP)
+#define CLPISF_LOW(flg)          ((flg)&CLPFLG_LOW)
 #define CLPISF_LNK(flg)          (CLPISF_CNT(flg) ||  CLPISF_OID(flg) ||  CLPISF_ELN(flg) || CLPISF_SLN(flg) ||  CLPISF_TLN(flg))
 #define CLPISF_ARG(flg)          ((!CLPISF_LNK(flg)) && (!CLPISF_CON(flg)) && (!CLPISF_ALI(flg)))
 #define CLPISF_ENT(flg)          ((!CLPISF_LNK(flg)) && (!CLPISF_ALI(flg)))
