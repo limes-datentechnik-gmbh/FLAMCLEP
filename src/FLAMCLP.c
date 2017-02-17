@@ -825,19 +825,21 @@ extern void* pvClpAlloc(
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    if (pvPtr==NULL) {
-      if (psHdl->siPtr>=psHdl->szPtr) {
-         void* pvHlp=realloc(psHdl->psPtr,sizeof(TsPtr)*(psHdl->szPtr+CLPINI_PTRCNT));
-         if (pvHlp==NULL) return(NULL);
-         psHdl->psPtr=pvHlp;
-         psHdl->szPtr+=CLPINI_PTRCNT;
-      }
-      pvPtr=calloc(1,siSiz);
-      if (pvPtr!=NULL) {
-         psHdl->psPtr[psHdl->siPtr].pvPtr=pvPtr;
-         psHdl->psPtr[psHdl->siPtr].siSiz=siSiz;
-         if (piInd!=NULL) *piInd=psHdl->siPtr;
-         psHdl->siPtr++;
-      }
+      if (siSiz>0) {
+         if (psHdl->siPtr>=psHdl->szPtr) {
+            void* pvHlp=realloc(psHdl->psPtr,sizeof(TsPtr)*(psHdl->szPtr+CLPINI_PTRCNT));
+            if (pvHlp==NULL) return(NULL);
+            psHdl->psPtr=pvHlp;
+            psHdl->szPtr+=CLPINI_PTRCNT;
+         }
+         pvPtr=calloc(1,siSiz);
+         if (pvPtr!=NULL) {
+            psHdl->psPtr[psHdl->siPtr].pvPtr=pvPtr;
+            psHdl->psPtr[psHdl->siPtr].siSiz=siSiz;
+            if (piInd!=NULL) *piInd=psHdl->siPtr;
+            psHdl->siPtr++;
+         }
+      } else return(NULL);
    } else {
       if (piInd!=NULL && *piInd>=0 && *piInd<psHdl->siPtr && psHdl->psPtr[*piInd].pvPtr==pvPtr) {
          pvPtr=realloc(pvPtr,siSiz);
