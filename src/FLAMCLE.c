@@ -2475,11 +2475,11 @@ static int siCleChangeProperties(
    }
 
    if (siErr==0) {
-      fprintf(pfOut, "Don't update any property in property file (%s)\n",pcFil);
+      fprintf(pfOut, "Don't update any property in property file (%s)\n",(NULL==pcFil)?"null":pcFil);
    } else if (siErr==1) {
-      fprintf(pfOut, "Updated 1 property in property file (%s)\n",pcFil);
+      fprintf(pfOut, "Updated 1 property in property file (%s)\n",(NULL==pcFil)?"null":pcFil);
    } else {
-      fprintf(pfOut, "Updated %d properties in property file (%s)\n",siErr,pcFil);
+      fprintf(pfOut, "Updated %d properties in property file (%s)\n",siErr,(NULL==pcFil)?"null":pcFil);
    }
 
    siErr=siClePropertyFinish(pcHom,pcOwn,pcPgm,pcCmd,pfOut,pfTrc,psCnf,pvHdl,pcFil,siFil);
