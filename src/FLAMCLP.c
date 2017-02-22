@@ -136,12 +136,13 @@
  * 1.2.86: Support dynamic strings and arrays as new flag CLPFLG_DYN
  * 1.2.87: Support string mapping functions for build of CLP structure
  * 1.2.88: Make remaining parameter file names dynamic
+ * 1.2.89: Check if keyword and alias contain only valid letters
 **/
 
-#define CLP_VSN_STR       "1.2.88"
+#define CLP_VSN_STR       "1.2.89"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        2
-#define CLP_VSN_REVISION       88
+#define CLP_VSN_REVISION       89
 
 /* Definition der Konstanten ******************************************/
 
@@ -2016,6 +2017,24 @@ static TsSym* psClpSymIns(
    if (psSym->psStd==NULL || psSym->psFix==NULL || psSym->psVar==NULL) {
       CLPERR(psHdl,CLPERR_MEM,"Allocation of memory for symbol element '%s.%s' failed",pcPat,psArg->pcKyw);
       ERROR(psSym);
+   }
+
+   if (psArg->pcKyw!=NULL) {
+      for (const char* p=psArg->pcKyw; *p; p++) {
+         if (!isKyw(*p)) {
+            CLPERR(psHdl,CLPERR_TAB,"Invalid letter (%c) in keyword '%s.%s'",*p,pcPat,psArg->pcKyw);
+            ERROR(psSym);
+         }
+      }
+   }
+
+   if (psArg->pcAli!=NULL) {
+      for (const char* p=psArg->pcAli; *p; p++) {
+         if (!isKyw(*p)) {
+            CLPERR(psHdl,CLPERR_TAB,"Invalid letter (%c) in alias '%s.%s'",*p,pcPat,psArg->pcAli);
+            ERROR(psSym);
+         }
+      }
    }
 
    psSym->psStd->pcKyw=psArg->pcKyw;
