@@ -343,6 +343,7 @@ typedef struct Hdl {
    int                           siPtr;
    int                           szPtr;
    TsPtr*                        psPtr;
+   const TsSym*                  psVal;
 } TsHdl;
 
 /* Deklaration der internen Funktionen ********************************/
@@ -398,7 +399,8 @@ static int siClpScnNat(
    char**                        ppLex,
    int                           siTyp,
    const TsSym*                  psArg,
-   int*                          piSep);
+   int*                          piSep,
+   const TsSym**                 ppVal);
 
 static int siClpScnSrc(
    void*                         pvHdl,
@@ -1025,11 +1027,11 @@ extern void* pvClpOpen(
          psHdl->siRnd=ClpRndFnv(rand())^ClpRndFnv(i);
          pcNow=GETENV("CLP_NOW");
          if (pcNow!=NULL && *pcNow) {
-            siErr=siClpScnNat(psHdl,psHdl->pfErr,psHdl->pfScn,&pcNow,&psHdl->szLex,&psHdl->pcLex,CLPTYP_NUMBER,NULL,NULL);
+            siErr=siClpScnNat(psHdl,psHdl->pfErr,psHdl->pfScn,&pcNow,&psHdl->szLex,&psHdl->pcLex,CLPTYP_NUMBER,NULL,NULL,NULL);
             if (siErr==CLPTOK_NUM) {
                siErr=siFromNumberLexem(psHdl,0,0,NULL,psHdl->pcLex,&siNow);
                if (siErr==0 && siNow>0) {
-                  siErr=siClpScnNat(psHdl,psHdl->pfErr,psHdl->pfScn,&pcNow,&psHdl->szLex,&psHdl->pcLex,0,NULL,NULL);
+                  siErr=siClpScnNat(psHdl,psHdl->pfErr,psHdl->pfScn,&pcNow,&psHdl->szLex,&psHdl->pcLex,0,NULL,NULL,NULL);
                   if (siErr==CLPTOK_END) {
                      psHdl->siNow=siNow;
                   }
@@ -2020,7 +2022,11 @@ static TsSym* psClpSymIns(
    }
 
    if (psArg->pcKyw!=NULL) {
-      for (const char* p=psArg->pcKyw; *p; p++) {
+      if (!isalpha(*psArg->pcKyw)) {
+         CLPERR(psHdl,CLPERR_TAB,"Invalid first letter (%c) in keyword '%s.%s'",*psArg->pcKyw,pcPat,psArg->pcKyw);
+         ERROR(psSym);
+      }
+      for (const char* p=psArg->pcKyw+1; *p; p++) {
          if (!isKyw(*p)) {
             CLPERR(psHdl,CLPERR_TAB,"Invalid letter (%c) in keyword '%s.%s'",*p,pcPat,psArg->pcKyw);
             ERROR(psSym);
@@ -2029,7 +2035,11 @@ static TsSym* psClpSymIns(
    }
 
    if (psArg->pcAli!=NULL) {
-      for (const char* p=psArg->pcAli; *p; p++) {
+      if (!isalpha(*psArg->pcAli)) {
+         CLPERR(psHdl,CLPERR_TAB,"Invalid first letter (%c) in alias '%s.%s'",*psArg->pcAli,pcPat,psArg->pcKyw);
+         ERROR(psSym);
+      }
+      for (const char* p=psArg->pcAli+1; *p; p++) {
          if (!isKyw(*p)) {
             CLPERR(psHdl,CLPERR_TAB,"Invalid letter (%c) in alias '%s.%s'",*p,pcPat,psArg->pcAli);
             ERROR(psSym);
@@ -2596,24 +2606,14 @@ static int siClpSymCal(
    return(CLP_OK);
 }
 
-static int siClpFndSym(
+static const TsSym* psClpFndSym(
    void*                         pvHdl,
-   const int                     siLev,
-   const int                     siPos,
    const char*                   pcKyw,
-   const TsSym*                  psTab,
-   TsSym**                       ppArg)
+   const TsSym*                  psTab)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    const TsSym*                  psHlp=NULL;
    int                           i,j,k;
-   *ppArg=NULL;
-   if (psTab==NULL) {
-      return(CLPERR_SYN);
-   }
-   if (psTab->psBak!=NULL) {
-      return(CLPERR_INT);
-   }
    for (i=0,psHlp=psTab;psHlp!=NULL;psHlp=psHlp->psNxt,i++) {
       if (!CLPISF_LNK(psHlp->psStd->uiFlg)) {
          if (psHdl->isCas) {
@@ -2626,12 +2626,11 @@ static int siClpFndSym(
             }
          }
          if (k==0 && j>=psHlp->psStd->siKwl) {
-            *ppArg=(TsSym*)psHlp;
-            return(i);
+            return(psHlp);
          }
       }
    }
-   return(CLPERR_SEM);
+   return(NULL);
 }
 
 static int siClpSymFnd(
@@ -2766,7 +2765,7 @@ extern int siClpLexem(
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," SEPARATOR [:space: | :cntr: | ',']*                  (abbreviated with SEP)\n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," OPERATOR1 '=' | '.' | '(' | ')' | '[' | ']'  (SGN, DOT, RBO, RBC, SBO, SBC)\n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," OPERATOR2 '+' | '-' | '*' | '/'                        (ADD, SUB, MUL, DIV)\n");
-      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," KEYWORD   ['-'['-']][:alpha:]+[:alnum: | '_' | '-' | '/']*     (predefined)\n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," KEYWORD   ['-'['-']][:alpha:]+[:graph:]*                (always predefined)\n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," NUMBER    ([+|-]  [ :digit:]+)  |                       (decimal (default))\n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," num       ([+|-]0b[ :digit:]+)  |                                  (binary)\n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," num       ([+|-]0o[ :digit:]+)  |                                   (octal)\n");
@@ -3224,50 +3223,24 @@ static inline int isClpKyw (
    const char*                   pcKyw,
    const int                     siFlg,
    const int                     siTyp,
-   const TsSym*                  psArg)
+   const TsSym*                  psArg,
+   const TsSym**                 ppVal)
 {
-   TsHdl*                        psHdl=(TsHdl*)pvHdl;
-   const TsSym*                  psHlp;
-   int                           k,j,f=0;
-   if (siFlg>0 && psArg!=NULL) {
-      for (psHlp=psArg->psDep;psHlp!=NULL && f==0;psHlp=psHlp->psNxt) {
-         if ((((siTyp>0 && psHlp->psFix->siTyp==siTyp)) || siTyp<=0) && !CLPISF_LNK(psHlp->psStd->uiFlg)) {
-            if (psHdl->isCas) {
-               for (k=j=0;pcKyw[j]!=EOS;j++) {
-                  if (pcKyw[j]!=psHlp->psStd->pcKyw[j]) k++;
-               }
-            } else {
-               for (k=j=0;pcKyw[j]!=EOS;j++) {
-                  if (toupper(pcKyw[j])!=toupper(psHlp->psStd->pcKyw[j])) k++;
-               }
-            }
-            if (k==0 && j>=psHlp->psStd->siKwl) {
-               f=1;
-            }
-         }
-      }
+   const TsSym*                  psHlp=NULL;
+   const TsSym*                  psVal=NULL;
+   if (siFlg>0 && psArg!=NULL && psArg->psDep!=NULL) {
+      psVal=psClpFndSym(pvHdl,pcKyw,psArg->psDep);
    }
-   if (siFlg>1 && psArg!=NULL) {
+   if (siFlg>1 && psArg!=NULL && psVal==NULL && !CLPISF_SEL(psArg->psStd->uiFlg)) {
       for (psHlp=psArg;psHlp->psBak!=NULL;psHlp=psHlp->psBak);
-      while (psHlp!=NULL && f==0) {
-         if ((((siTyp>0 && psHlp->psFix->siTyp==siTyp && psHlp->psVar->siCnt)) || siTyp<=0) && !CLPISF_LNK(psHlp->psStd->uiFlg)) {
-            if (psHdl->isCas) {
-               for (k=j=0;pcKyw[j]!=EOS;j++) {
-                  if (pcKyw[j]!=psHlp->psStd->pcKyw[j]) k++;
-               }
-            } else {
-               for (k=j=0;pcKyw[j]!=EOS;j++) {
-                  if (toupper(pcKyw[j])!=toupper(psHlp->psStd->pcKyw[j])) k++;
-               }
-            }
-            if (k==0 && j>=psHlp->psStd->siKwl) {
-               f=1;
-            }
-         }
-         psHlp=psHlp->psNxt;
-      }
+      psVal=psClpFndSym(pvHdl,pcKyw,psHlp);
    }
-   return(f || CLPTOK_KYW!=siClpConNat(pvHdl,pfErr,pfTrc,pcKyw,NULL,NULL,siTyp,psArg));
+   if (psVal!=NULL && ((((siTyp>0 && psVal->psFix->siTyp==siTyp && psVal->psVar->siCnt)) || siTyp<=0))) {
+      if (ppVal!=NULL) *ppVal=psVal;
+      return(TRUE);
+   } else {
+      return(CLPTOK_KYW!=siClpConNat(pvHdl,pfErr,pfTrc,pcKyw,NULL,NULL,siTyp,psArg));
+   }
 }
 
 static int siClpScnNat(
@@ -3279,7 +3252,8 @@ static int siClpScnNat(
    char**                        ppLex,
    int                           siTyp,
    const TsSym*                  psArg,
-   int*                          piSep)
+   int*                          piSep,
+   const TsSym**                 ppVal)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    char*                         pcLex=(*ppLex);
@@ -3296,8 +3270,8 @@ static int siClpScnNat(
    char                          acHlp[1024];
 
    if (siTyp!=CLPTYP_NUMBER && siTyp!=CLPTYP_FLOATN && siTyp!=CLPTYP_STRING) siTyp=0;
-
    if (piSep!=NULL) *piSep=FALSE;
+   if (ppVal!=NULL) *ppVal=NULL;
 
    while (1) {
       if (*(*ppCur)==EOS) { /*end*/
@@ -3441,13 +3415,13 @@ static int siClpScnNat(
             (*ppCur)++; pcLex++;
          }
          *pcLex=EOS;
-         if(pcCur[0]=='-' && pcCur[1]!='-' && isClpKyw(pvHdl,pfErr,pfTrc,pcHlp,2,psArg!=NULL?psArg->psFix->siTyp:-1,psArg)) {
+         if(pcCur[0]=='-' && pcCur[1]!='-' && isClpKyw(pvHdl,pfErr,pfTrc,pcHlp,2,psArg!=NULL?psArg->psFix->siTyp:-1,psArg,NULL)) {
             (*ppCur)=pcCur;
             pcLex[0]='-'; pcLex[1]=EOS; (*ppCur)++;
             if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(SUB)-LEXEM(%s)\n",pcHlp);
             return(CLPTOK_SUB);
          } else {
-            if (pcOld!=NULL && !isClpKyw(pvHdl,pfErr,pfTrc,pcHlp,2,-1,psArg)) {
+            if (pcOld!=NULL && !isClpKyw(pvHdl,pfErr,pfTrc,pcHlp,2,-1,psArg,ppVal)) {
                *pcZro=0x00;
                *ppCur=pcOld;
             }
@@ -3470,7 +3444,7 @@ static int siClpScnNat(
                (*ppCur)++; pcLex++;
             }
             *pcLex=EOS;
-            if (isClpKyw(pvHdl,pfErr,pfTrc,pcKyw,2,CLPTYP_STRING,psArg)) {
+            if (isClpKyw(pvHdl,pfErr,pfTrc,pcKyw,2,CLPTYP_STRING,psArg,ppVal)) {
                char* p1=pcHlp;
                char* p2=pcKyw;
                while (*p2) {
@@ -3504,7 +3478,7 @@ static int siClpScnNat(
             (*ppCur)++; pcLex++;
          }
          *pcLex=EOS;
-         if (pcOld!=NULL && !isClpKyw(pvHdl,pfErr,pfTrc,pcHlp,2,-1,psArg)) {
+         if (pcOld!=NULL && !isClpKyw(pvHdl,pfErr,pfTrc,pcHlp,2,-1,psArg,ppVal)) {
             *pcZro=0x00;
             *ppCur=pcOld;
          }
@@ -3763,7 +3737,7 @@ static int siClpScnSrc(
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    psHdl->pcOld=psHdl->pcCur;
-   return(siClpScnNat(pvHdl,psHdl->pfErr,psHdl->pfScn,&psHdl->pcCur,&psHdl->szLex,&psHdl->pcLex,siTyp,psArg,&psHdl->isSep));
+   return(siClpScnNat(pvHdl,psHdl->pfErr,psHdl->pfScn,&psHdl->pcCur,&psHdl->szLex,&psHdl->pcLex,siTyp,psArg,&psHdl->isSep,&psHdl->psVal));
 }
 
 /**********************************************************************/
@@ -4347,7 +4321,7 @@ static int siClpPrsFac(
    char**                        ppVal)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
-   TsSym*                        psVal;
+   const TsSym*                  psVal=psHdl->psVal;
    TsSym*                        psHlp;
    int                           siErr;
    I64                           siInd;
@@ -4389,18 +4363,20 @@ static int siClpPrsFac(
          siErr=siFromNumberLexem(pvHdl,siLev,siPos,psArg,*ppVal,&siInd);
          if (siErr) return(siErr);
       }
-      siErr=siClpFndSym(pvHdl,siLev,siPos,acLex,psArg->psDep,&psVal);
-      if (siErr<0) {
-         if (CLPISF_SEL(psArg->psStd->uiFlg)) {
-            CLPERR(psHdl,CLPERR_SEM,"The argument '%s.%s' requires one of the defined keywords as value",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
-            CLPERRADD(psHdl,0,"Please use one of the following arguments:%s","");
-            vdClpPrnArgTab(pvHdl,psHdl->pfErr,1,psArg->psFix->siTyp,psArg->psDep);
-            return(CLPERR_SEM);
+      if (psVal==NULL) { // not already find in scanner
+         psVal=psClpFndSym(pvHdl,acLex,psArg->psDep);
+         if (psVal==NULL) {
+            if (CLPISF_SEL(psArg->psStd->uiFlg)) {
+               CLPERR(psHdl,CLPERR_SEM,"The argument '%s.%s' requires one of the defined keywords as value",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+               CLPERRADD(psHdl,0,"Please use one of the following arguments:%s","");
+               vdClpPrnArgTab(pvHdl,psHdl->pfErr,1,psArg->psFix->siTyp,psArg->psDep);
+               return(CLPERR_SEM);
+            }
+            for (psHlp=psArg;psHlp->psBak!=NULL;psHlp=psHlp->psBak);
+            psVal=psClpFndSym(pvHdl,acLex,psHlp);
          }
-         for (psHlp=psArg;psHlp->psBak!=NULL;psHlp=psHlp->psBak);
-         siErr=siClpFndSym(pvHdl,siLev,siPos,acLex,psHlp,&psVal);
       }
-      if (siErr>=0) {
+      if (psVal!=NULL) {
          if (psArg->psFix->siTyp!=psVal->psFix->siTyp) {
             return CLPERR(psHdl,CLPERR_SEM,"The type (%s) of the symbol (%s) for argument '%s.%s' don't match the expected type (%s)",
                   apClpTyp[psVal->psFix->siTyp],acLex,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
@@ -5675,7 +5651,7 @@ static int siClpBldLit(
          pcRow=psHdl->pcRow; psHdl->pcRow=pcDat;
          siRow=psHdl->siRow; psHdl->siRow=1;
          psHdl->siBuf++;
-         siTok=siClpScnNat(pvHdl,psHdl->pfErr,psHdl->pfScn,&psHdl->pcCur,&szLex,&pcLex,CLPTYP_STRING,psArg,NULL);
+         siTok=siClpScnNat(pvHdl,psHdl->pfErr,psHdl->pfScn,&psHdl->pcCur,&szLex,&pcLex,CLPTYP_STRING,psArg,NULL,NULL);
          if (siTok<0) {
             free(pcDat);
             free(pcLex);
