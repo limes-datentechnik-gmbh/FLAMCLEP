@@ -788,9 +788,9 @@ typedef struct ClpArgument {
  /** Type of this parameter (CLPTYP_xxxxxx)\n
  *           The type will be displayed in context sensitive help messages (TYPE: type_name)*/
    int                           siTyp;
-   /** Pointer to a null-terminated key word for this parameter (:alpha:[:alnum:|'-'|'_']*) */
+   /** Pointer to a null-terminated key word for this parameter (:alpha:[:alnum:|'_']*) */
    const char*                   pcKyw;
-   /** Pointer to another key word to define an alias (:alpha:[:alnum:|'-'|'_']*) */
+   /** Pointer to another key word to define an alias (:alpha:[:alnum:|'_']*) */
    const char*                   pcAli;
    /** Minimum amount of entries for this argument (0-optional n-required) */
    int                           siMin;

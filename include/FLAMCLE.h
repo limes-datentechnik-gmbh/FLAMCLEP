@@ -224,7 +224,7 @@ Lexemes (regular expressions) for argument list or parameter file:
     --| LCOMMENT  ';' [:print:]* 'nl'                             (will be ignored)
     --| SEPARATOR [:space: | :cntr: | ',']*                  (abbreviated with SEP)
     --| OPERATOR  '=' | '.' | '(' | ')' | '[' | ']'  (SGN, DOT, RBO, RBC, SBO, SBC)
-    --| KEYWORD   [:alpha:]+[:alnum: | '_' | '-']*              (always predefined)
+    --| KEYWORD   [:alpha:]+[:alnum: | '_']*                    (always predefined)
     --| NUMBER    ([+|-]  [ :digit:]+)  |                       (decimal (default))
     --| num       ([+|-]0b[ :digit:]+)  |                                  (binary)
     --| num       ([+|-]0o[ :digit:]+)  |                                   (octal)
@@ -505,7 +505,7 @@ typedef const char* (*tpfMsg)(const int siRsn);
  *
  * Its members are:
  * \par
- * \b pcKyw  Pointer to the key word for this command (:alpha:[:alnum:|'-'|'_']*)\n
+ * \b pcKyw  Pointer to the key word for this command (:alpha:[:alnum:|'_']*)\n
  * \b psTab  Pointer to the main argument table for this command (defines the semantic for the parser)\n
  * \b pvClp  Pointer to the corresponding argument structure (filled up by the parser)\n
  * \b pvPar  Pointer to the corresponding parameter structure (filled up by the mapping function)\n
@@ -545,9 +545,9 @@ typedef struct CleCommand {
  *
  * Its members are:
  * \par
- * \b pcRot  Pointer to the root key word for this string (:alpha:[:alnum:|'-'|'_']*)\n
- * \b pcKyw  Pointer to the key word for this string (:alpha:[:alnum:|'-'|'_']*)\n
- * \b pcHdl  Pointer to the headline for the sub chapter for this CLP string (:alpha:[:alnum:|'-'|'_']*)\n
+ * \b pcRot  Pointer to the root key word for this string (:alpha:[:alnum:|'_']*)\n
+ * \b pcKyw  Pointer to the key word for this string (:alpha:[:alnum:|'_']*)\n
+ * \b pcHdl  Pointer to the headline for the sub chapter for this CLP string (:alpha:[:alnum:|'_']*)\n
  * \b psTab  Pointer to the main argument table for this CLP string\n
  * \b pcMan  Pointer to a null-terminated string for a detailed description for this CLP string
  *           (in ASCIDOC format, content behind .DESCRIPTION, mainly simply some paragraphs plus .OPTIONS and/or.EXAMPLES)

@@ -2027,7 +2027,7 @@ static TsSym* psClpSymIns(
          ERROR(psSym);
       }
       for (const char* p=psArg->pcKyw+1; *p; p++) {
-         if (!isKyw(*p)) {
+         if (CLPISF_CON(psArg->uiFlg)?!isCon(*p):!isKyw(*p)) {
             CLPERR(psHdl,CLPERR_TAB,"Invalid letter (%c) in keyword '%s.%s'",*p,pcPat,psArg->pcKyw);
             ERROR(psSym);
          }
@@ -2040,7 +2040,7 @@ static TsSym* psClpSymIns(
          ERROR(psSym);
       }
       for (const char* p=psArg->pcAli+1; *p; p++) {
-         if (!isKyw(*p)) {
+         if (CLPISF_CON(psArg->uiFlg)?!isCon(*p):!isKyw(*p)) {
             CLPERR(psHdl,CLPERR_TAB,"Invalid letter (%c) in alias '%s.%s'",*p,pcPat,psArg->pcAli);
             ERROR(psSym);
          }
@@ -2765,7 +2765,7 @@ extern int siClpLexem(
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," SEPARATOR [:space: | :cntr: | ',']*                  (abbreviated with SEP)\n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," OPERATOR1 '=' | '.' | '(' | ')' | '[' | ']'  (SGN, DOT, RBO, RBC, SBO, SBC)\n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," OPERATOR2 '+' | '-' | '*' | '/'                        (ADD, SUB, MUL, DIV)\n");
-      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," KEYWORD   ['-'['-']][:alpha:]+[:alnum: | '_' | '-' | '/']*     (predefined)\n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," KEYWORD   ['-'['-']][:alpha:]+[:alnum: | '_']*          (always predefined)\n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," NUMBER    ([+|-]  [ :digit:]+)  |                       (decimal (default))\n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," num       ([+|-]0b[ :digit:]+)  |                                  (binary)\n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," num       ([+|-]0o[ :digit:]+)  |                                   (octal)\n");
@@ -3405,9 +3405,9 @@ static int siClpScnNat(
          }
          *pcLex=*(*ppCur);
          (*ppCur)++; pcLex++;
-         while (isKyw(*(*ppCur))) {
+         while (isCon(*(*ppCur))) {
             LEX_REALLOC
-            if (!isalnum(*(*ppCur)) && pcOld==NULL) {
+            if (!isKyw(*(*ppCur)) && pcOld==NULL) {
                pcOld=(*ppCur);
                pcZro=pcLex;
             }
@@ -3438,7 +3438,7 @@ static int siClpScnNat(
          if (psArg!=NULL) {
             *pcLex=*(*ppCur);
             (*ppCur)++; pcLex++;
-            while (isKyw(*(*ppCur))) {
+            while (isCon(*(*ppCur))) {
                LEX_REALLOC
                *pcLex=*(*ppCur);
                (*ppCur)++; pcLex++;
@@ -3468,9 +3468,9 @@ static int siClpScnNat(
       } else if (isalpha((*ppCur)[0])) { /*simple keyword*/
          *pcLex=*(*ppCur);
          (*ppCur)++; pcLex++;
-         while (isKyw(*(*ppCur))) {
+         while (isCon(*(*ppCur))) {
             LEX_REALLOC
-            if (!isalnum(*(*ppCur)) && pcOld==NULL) {
+            if (!isKyw(*(*ppCur)) && pcOld==NULL) {
                pcOld=(*ppCur);
                pcZro=pcLex;
             }
