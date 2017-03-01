@@ -2223,7 +2223,7 @@ static int siClePropertyInit(
    if (pcPro!=NULL) {
       siErr=siClpParsePro(*ppHdl,pcFil,pcPro,FALSE,NULL);
       if (siErr<0) {
-         fprintf(pfOut,"Parsing property file \"%s\" for command '%s' failed\n",*ppFil,pcCmd);
+         fprintf(pfOut,"Parsing property file \"%s\" for command '%s' failed\n",pcFil,pcCmd);
          vdClpClose(*ppHdl,CLPCLS_MTD_ALL);*ppHdl=NULL;
          free(pcPro); SAFE_FREE(pcFil);
          return(CLERTC_SYN);
