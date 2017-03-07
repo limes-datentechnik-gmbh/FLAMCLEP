@@ -2264,6 +2264,7 @@ static int siClePropertyFinish(
          srprintf(&pcEnv,&szEnv,strlen(pcFil),"%s",pcFil);
          if (pcEnv==NULL) {
             fprintf(pfOut,"Allocation of memory for property file name (%s) failed\n",pcFil);
+            vdClpClose(pvHdl,CLPCLS_MTD_ALL);
             return(CLERTC_MEM);
          }
          pcFil=pcEnv;
@@ -2310,12 +2311,14 @@ static int siClePropertyFinish(
    if (pcHlp==NULL) {
       fprintf(pfOut,"Allocation of memory for property file name (%s) failed\n",pcFil);
       SAFE_FREE(pcEnv);
+      vdClpClose(pvHdl,CLPCLS_MTD_ALL);
       return(CLERTC_MEM);
    }
    pfPro=fopen(pcHlp,filemode("w"));
    if (pfPro==NULL) {
       fprintf(pfOut,"Cannot open the property file (\"%s\",\"%s\") for write operation (%d-%s)\n",pcHlp,filemode("w"),errno,strerror(errno));
       SAFE_FREE(pcHlp); SAFE_FREE(pcEnv);
+      vdClpClose(pvHdl,CLPCLS_MTD_ALL);
       return(CLERTC_SYS);
    }
 
