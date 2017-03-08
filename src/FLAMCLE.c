@@ -3261,7 +3261,7 @@ static void vdCnfCls(
          }
          free(psHdl->pcFil);
       }
-      if (pfFil!=NULL) {
+      if (pfFil!=NULL && psHdl->pcPgm!=NULL) {
          fprintf(pfFil,"%c Configuration file for program '%s'\n",C_HSH,psHdl->pcPgm);
       }
       for (psEnt=psHdl->psFst;psEnt!=NULL;psEnt=psHlp) {
