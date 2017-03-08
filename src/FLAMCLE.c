@@ -3255,17 +3255,8 @@ static void vdCnfCls(
    FILE*                         pfFil=NULL;
    if (psHdl!=NULL) {
       if (psHdl->pcFil!=NULL) {
-         if (psHdl->isClr) {
+         if ((psHdl->isChg || psHdl->isClr) && psHdl->pcFil[0]) {
             pfFil=fopen(psHdl->pcFil,filemode("w"));
-            if (pfFil!=NULL) {
-               fclose(pfFil);
-               pfFil=NULL;
-            }
-            if (!ISDDNAME(psHdl->pcFil)) remove(psHdl->pcFil);
-         } else {
-            if (psHdl->isChg && psHdl->pcFil[0]) {
-               pfFil=fopen(psHdl->pcFil,filemode("w"));
-            }
          }
          free(psHdl->pcFil);
       }
@@ -3273,7 +3264,9 @@ static void vdCnfCls(
          fprintf(pfFil,"%c Configuration file for program '%s'\n",C_HSH,psHdl->pcPgm);
       }
       for (psEnt=psHdl->psFst;psEnt!=NULL;psEnt=psHlp) {
-         if (pfFil!=NULL) fprintf(pfFil,"%s=%s\n",psEnt->pcKyw,psEnt->pcVal);
+         if (pfFil!=NULL && psHdl->isClr==FALSE){
+            fprintf(pfFil,"%s=%s\n",psEnt->pcKyw,psEnt->pcVal);
+         }
          psHlp=psEnt->psNxt;
          free(psEnt->pcKyw);
          free(psEnt->pcVal);
