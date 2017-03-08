@@ -415,6 +415,7 @@ extern const char* pcCleAbout(const int l, const int s, char* b)
 
 #undef  ERROR
 #define ERROR(x,b) do { \
+   int r = siCleEndExecution((x),psCnf,pfTrh,pfDoc,pfPro,ppArg,pvHdl,(b));\
    SAFE_FREE(pcHom); \
    SAFE_FREE(pcPgm); \
    SAFE_FREE(pcPgu); \
@@ -422,7 +423,7 @@ extern const char* pcCleAbout(const int l, const int s, char* b)
    SAFE_FREE(pcCnf); \
    SAFE_FREE(pcOwn); \
    SAFE_FREE(pcFil); \
-   return(siCleEndExecution((x),psCnf,pfTrh,pfDoc,pfPro,ppArg,pvHdl,(b))); \
+   return(r); \
 } while(FALSE)
 
 extern int siCleExecute(
