@@ -137,12 +137,13 @@
  * 1.2.87: Support string mapping functions for build of CLP structure
  * 1.2.88: Make remaining parameter file names dynamic
  * 1.2.89: Check if keyword and alias contain only valid letters
+ * 1.2.90: Use realloc_nowarn macro for realloc() to give the possibility to use own defines for it
 **/
 
-#define CLP_VSN_STR       "1.2.89"
+#define CLP_VSN_STR       "1.2.90"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        2
-#define CLP_VSN_REVISION       89
+#define CLP_VSN_REVISION       90
 
 /* Definition der Konstanten ******************************************/
 
@@ -184,6 +185,10 @@
 #define isPrnFlt(p,v) (CLPISF_PWD(p->psStd->uiFlg)?((F64)0.0):(v))
 #define isPrnStr(p,v) (CLPISF_PWD(p->psStd->uiFlg)?("***SECRET***"):(v))
 #define isPrnLen(p,v) (CLPISF_PWD(p->psStd->uiFlg)?((int)0):(v))
+
+#ifndef realloc_nowarn
+#  define realloc_nowarn      realloc
+#endif
 
 static const char*               apClpTok[]={
       "INI",
@@ -830,7 +835,7 @@ extern void* pvClpAlloc(
    if (pvPtr==NULL) {
       if (siSiz>0) {
          if (psHdl->siPtr>=psHdl->szPtr) {
-            void* pvHlp=realloc(psHdl->psPtr,sizeof(TsPtr)*(psHdl->szPtr+CLPINI_PTRCNT));
+            void* pvHlp=realloc_nowarn(psHdl->psPtr,sizeof(TsPtr)*(psHdl->szPtr+CLPINI_PTRCNT));
             if (pvHlp==NULL) return(NULL);
             psHdl->psPtr=pvHlp;
             psHdl->szPtr+=CLPINI_PTRCNT;
@@ -845,7 +850,7 @@ extern void* pvClpAlloc(
       } else return(NULL);
    } else {
       if (piInd!=NULL && *piInd>=0 && *piInd<psHdl->siPtr && psHdl->psPtr[*piInd].pvPtr==pvPtr) {
-         pvPtr=realloc(pvPtr,siSiz);
+         pvPtr=realloc_nowarn(pvPtr,siSiz);
          if (pvPtr!=NULL) {
             if (psHdl->psPtr[*piInd].siSiz<siSiz) {
                memset(((char*)pvPtr)+psHdl->psPtr[*piInd].siSiz,0,siSiz-psHdl->psPtr[*piInd].siSiz);
@@ -856,7 +861,7 @@ extern void* pvClpAlloc(
       } else {
          for (int i=0;i<psHdl->siPtr;i++) {
             if (psHdl->psPtr[i].pvPtr==pvPtr) {
-               pvPtr=realloc(pvPtr,siSiz);
+               pvPtr=realloc_nowarn(pvPtr,siSiz);
                if (pvPtr!=NULL) {
                   if (psHdl->psPtr[i].siSiz<siSiz) {
                      memset(((char*)pvPtr)+psHdl->psPtr[i].siSiz,0,siSiz-psHdl->psPtr[i].siSiz);
@@ -1881,7 +1886,7 @@ extern int siClpSymbolTableUpdate(
       if (!CLPISF_ARG(psHdl->psSym->psStd->uiFlg)) {
          return CLPERR(psHdl,CLPERR_SIZ,"Update of property field failed (symbol (%s) is not a argument)",psHdl->psSym->psStd->pcKyw);
       }
-      pcHlp=realloc(psHdl->psSym->psFix->pcPro,strlen(psSym->pcPro)+1);
+      pcHlp=realloc_nowarn(psHdl->psSym->psFix->pcPro,strlen(psSym->pcPro)+1);
       if (pcHlp==NULL) {
          return CLPERR(psHdl,CLPERR_SIZ,"Update of property field failed (string (%d(%s)) too long)",(int)strlen(psSym->pcPro),psSym->pcPro);
       }
@@ -2842,7 +2847,7 @@ extern int siClpLexem(
       size_t l=pcLex-(*ppLex);\
       size_t h=pcHlp-(*ppLex);\
       size_t s=(*pzLex)?(*pzLex)*2:CLPINI_LEXSIZ;\
-      char*  b=(char*)realloc(*ppLex,s);\
+      char*  b=(char*)realloc_nowarn(*ppLex,s);\
       if (b==NULL) return CLPERR(psHdl,CLPERR_MEM,"Re-allocation to store the lexem failed");\
       (*pzLex)=s;\
       if (b!=(*ppLex)) {\
@@ -5001,14 +5006,14 @@ static int siClpBldPro(
       }
       if (psArg!=NULL) {
          if (CLPISF_ARG(psArg->psStd->uiFlg) || CLPISF_ALI(psArg->psStd->uiFlg)) {
-            C08* pcHlp=realloc(psArg->psFix->pcPro,strlen(pcPro)+1);
+            C08* pcHlp=realloc_nowarn(psArg->psFix->pcPro,strlen(pcPro)+1);
             if (pcHlp==NULL) {
                return CLPERR(psHdl,CLPERR_SIZ,"Build of property field failed (string (%d(%s)) too long)",(int)strlen(pcPro),pcPro);
             }
             psArg->psFix->pcPro=pcHlp;
             strcpy(psArg->psFix->pcPro,pcPro);
             psArg->psFix->pcDft=psArg->psFix->pcPro;
-            pcHlp=realloc(psArg->psFix->pcSrc,strlen(psHdl->pcSrc)+1);
+            pcHlp=realloc_nowarn(psArg->psFix->pcSrc,strlen(psHdl->pcSrc)+1);
             if (pcHlp==NULL) {
                return CLPERR(psHdl,CLPERR_SIZ,"Build of source field failed (string (%d(%s)) too long)",(int)strlen(psHdl->pcSrc),psHdl->pcSrc);
             }
