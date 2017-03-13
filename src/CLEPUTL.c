@@ -47,6 +47,10 @@
 
 #include "CLEPUTL.h"
 
+#ifndef realloc_nowarn
+#  define realloc_nowarn      realloc
+#endif
+
 #ifdef __EBCDIC__
 
 #define RPLDIAC(str) {                            \
@@ -1074,7 +1078,7 @@ static char* drplchar(const char* string,const char c, const char* value)
             r[0]=p[0];
             r++; p+=2;
          } else { // replacement
-            char* h=realloc(b,s+(l-1));
+            char* h=realloc_nowarn(b,s+(l-1));
             if (h==NULL) {
                free(b);
                return(NULL);
@@ -1245,7 +1249,7 @@ static char* drplenvar(const char* string,const char opn, const char cls)
                c[0]=cls;
                if (v!=NULL) {
                   int   l=strlen(v);
-                  char* h=realloc(b,s+(l-x));
+                  char* h=realloc_nowarn(b,s+(l-x));
                   if (h==NULL) {
                      free(b);
                      return(NULL);
@@ -1314,7 +1318,7 @@ static char* drpltpl(const char* templ,const char* values) {
                   const char* x=v+2;
                   while (x[0] && x[0]!='\n') x++;
                   int l=x-(v+2);
-                  char* h=realloc(b,s+(l-2));
+                  char* h=realloc_nowarn(b,s+(l-2));
                   if (h==NULL) {
                      free(b);
                      return(NULL);
@@ -1795,7 +1799,7 @@ extern int srprintc(char** buffer,size_t* size,const size_t expansion,const char
    size_t   s=h+strlen(format)+expansion+1;
    if ((*size)<s || *buffer==NULL) {
       s=(*size>s)?*size:2*s;
-      char* b=(char*)realloc(*buffer,s);
+      char* b=(char*)realloc_nowarn(*buffer,s);
       if (b==NULL) return(0);
       (*buffer)=b;
       (*size)=s;
@@ -1814,7 +1818,7 @@ extern int srprintf(char** buffer,size_t* size,const size_t expansion,const char
    size_t   s=strlen(format)+expansion+1;
    if ((*size)<s || *buffer==NULL) {
       s=(*size>s)?*size:2*s;
-      char* b=(char*)realloc(*buffer,s);
+      char* b=(char*)realloc_nowarn(*buffer,s);
       if (b==NULL) return(0);
       (*buffer)=b;
       (*size)=s;
@@ -2197,7 +2201,7 @@ extern int file2str(const char* filename, char** buf, int* bufsize, const char* 
             return -3; // integer overflow
          }
          siHlp=*bufsize+freadLen*2+1;
-         pcHlp=(char*)realloc(*buf, siHlp);
+         pcHlp=(char*)realloc_nowarn(*buf, siHlp);
          if (pcHlp==NULL) {
             fclose(pfFile);
             return -4; // realloc failed
@@ -2238,7 +2242,7 @@ extern int arry2str(char* array[], const int count, const char* separ, const int
    if (*outlen<uiSumLen || *out==NULL) {
       if (uiSumLen < 1)
          uiSumLen = 4;
-      pcHlp=(char*)realloc(*out, uiSumLen);
+      pcHlp=(char*)realloc_nowarn(*out, uiSumLen);
       if (pcHlp==NULL) {
          return -2; // realloc failed
       }
