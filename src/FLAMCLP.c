@@ -139,12 +139,13 @@
  * 1.2.89: Check if keyword and alias contain only valid letters
  * 1.2.90: Use realloc_nowarn macro for realloc() to give the possibility to use own defines for it
  * 1.2.91: Support separation of signed and unsigned numbers over a new flag
+ * 1.2.92: Support type string to determine unsigned flag
 **/
 
-#define CLP_VSN_STR       "1.2.91"
+#define CLP_VSN_STR       "1.2.92"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        2
-#define CLP_VSN_REVISION       91
+#define CLP_VSN_REVISION       92
 
 /* Definition der Konstanten ******************************************/
 
@@ -2056,6 +2057,11 @@ static TsSym* psClpSymIns(
    psSym->psStd->pcKyw=psArg->pcKyw;
    psSym->psStd->pcAli=psArg->pcAli;
    psSym->psStd->uiFlg=psArg->uiFlg;
+   if (psArg->pcTyp!=NULL) {
+      if (strcmp(psArg->pcTyp,"U08")==0 || strcmp(psArg->pcTyp,"U16")==0 || strcmp(psArg->pcTyp,"U32")==0 || strcmp(psArg->pcTyp,"U64")==0) {
+         psSym->psStd->uiFlg|=CLPFLG_UNS;
+      }
+   }
    psSym->psStd->psAli=NULL;
    psSym->psStd->siKwl=strlen(psSym->psStd->pcKyw);
    psSym->psStd->siLev=siLev;
