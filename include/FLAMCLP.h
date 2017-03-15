@@ -841,6 +841,7 @@ typedef struct ClpArgument {
    signed long long int          siVal;
    double                        flVal;
    const unsigned char*          pcVal;
+   const char*                   pcTyp;
 }TsClpArgument;
 
 /** Starts a table with constant definitions
@@ -858,7 +859,7 @@ typedef struct ClpArgument {
  *  *hlp* Pointer to a null-terminated string for context sensitive help for this constant
  *        (also used as head line or in bullet list in documentation generation).\n
  */
-#define CLPCONTAB_NUMBER(kyw,dat,man,hlp)       {CLPTYP_NUMBER,(kyw),NULL,0,0,  0  ,0,0,CLPFLG_CON           ,NULL,NULL,(man),(hlp),(dat), 0.0 ,NULL       },
+#define CLPCONTAB_NUMBER(kyw,dat,man,hlp)       {CLPTYP_NUMBER,(kyw),NULL,0,0,  0  ,0,0,CLPFLG_CON           ,NULL,NULL,(man),(hlp),(dat), 0.0 ,NULL       ,NULL},
 
 /** defines a floating point literal with the command line keyword *kyw* and the value *dat*
  *
@@ -869,7 +870,7 @@ typedef struct ClpArgument {
  *  *hlp* Pointer to a null-terminated string for context sensitive help for this constant
  *        (also used as head line or in bullet list in documentation generation).\n
  */
-#define CLPCONTAB_FLOATN(kyw,dat,man,hlp)       {CLPTYP_FLOATN,(kyw),NULL,0,0,  0  ,0,0,CLPFLG_CON           ,NULL,NULL,(man),(hlp),  0  ,(dat),NULL       },
+#define CLPCONTAB_FLOATN(kyw,dat,man,hlp)       {CLPTYP_FLOATN,(kyw),NULL,0,0,  0  ,0,0,CLPFLG_CON           ,NULL,NULL,(man),(hlp),  0  ,(dat),NULL       ,NULL},
 
 /** defines a default string literal with the command line keyword *kyw* and the value *dat*
  *
@@ -880,7 +881,7 @@ typedef struct ClpArgument {
  *  *hlp* Pointer to a null-terminated string for context sensitive help for this constant
  *        (also used as head line or in bullet list in documentation generation).\n
  */
-#define CLPCONTAB_STRING(kyw,dat,man,hlp)       {CLPTYP_STRING,(kyw),NULL,0,0,  0  ,0,0,CLPFLG_CON           ,NULL,NULL,(man),(hlp),  0  , 0.0 ,(U08*)(dat)},
+#define CLPCONTAB_STRING(kyw,dat,man,hlp)       {CLPTYP_STRING,(kyw),NULL,0,0,  0  ,0,0,CLPFLG_CON           ,NULL,NULL,(man),(hlp),  0  , 0.0 ,(U08*)(dat),NULL},
 
 /** defines a hexadecimal string literal with the command line keyword *kyw* and the value *dat*
  *
@@ -891,7 +892,7 @@ typedef struct ClpArgument {
  *  *hlp* Pointer to a null-terminated string for context sensitive help for this constant
  *        (also used as head line or in bullet list in documentation generation).\n
  */
-#define CLPCONTAB_HEXSTR(kyw,dat,man,hlp)       {CLPTYP_STRING,(kyw),NULL,0,0,  0  ,0,0,CLPFLG_CON|CLPFLG_HEX,NULL,NULL,(man),(hlp),  0  , 0.0 ,(U08*)(dat)},
+#define CLPCONTAB_HEXSTR(kyw,dat,man,hlp)       {CLPTYP_STRING,(kyw),NULL,0,0,  0  ,0,0,CLPFLG_CON|CLPFLG_HEX,NULL,NULL,(man),(hlp),  0  , 0.0 ,(U08*)(dat),NULL},
 
 /** defines a ASCII string literal with the command line keyword *kyw* and the value *dat*
  *
@@ -902,7 +903,7 @@ typedef struct ClpArgument {
  *  *hlp* Pointer to a null-terminated string for context sensitive help for this constant
  *        (also used as head line or in bullet list in documentation generation).\n
  */
-#define CLPCONTAB_ASCSTR(kyw,dat,man,hlp)       {CLPTYP_STRING,(kyw),NULL,0,0,  0  ,0,0,CLPFLG_CON|CLPFLG_ASC,NULL,NULL,(man),(hlp),  0  , 0.0 ,(U08*)(dat)},
+#define CLPCONTAB_ASCSTR(kyw,dat,man,hlp)       {CLPTYP_STRING,(kyw),NULL,0,0,  0  ,0,0,CLPFLG_CON|CLPFLG_ASC,NULL,NULL,(man),(hlp),  0  , 0.0 ,(U08*)(dat),NULL},
 
 /** defines a EBCDIC string literal with the command line keyword *kyw* and the value *dat*
  *
@@ -913,7 +914,7 @@ typedef struct ClpArgument {
  *  *hlp* Pointer to a null-terminated string for context sensitive help for this constant
  *        (also used as head line or in bullet list in documentation generation).\n
  */
-#define CLPCONTAB_EBCSTR(kyw,dat,man,hlp)       {CLPTYP_STRING,(kyw),NULL,0,0,  0  ,0,0,CLPFLG_CON|CLPFLG_EBC,NULL,NULL,(man),(hlp),  0  , 0.0 ,(U08*)(dat)},
+#define CLPCONTAB_EBCSTR(kyw,dat,man,hlp)       {CLPTYP_STRING,(kyw),NULL,0,0,  0  ,0,0,CLPFLG_CON|CLPFLG_EBC,NULL,NULL,(man),(hlp),  0  , 0.0 ,(U08*)(dat),NULL},
 
 /** defines a binary literal with the command line keyword *kyw* and the value *dat*
  *
@@ -925,11 +926,11 @@ typedef struct ClpArgument {
  *  *hlp* Pointer to a null-terminated string for context sensitive help for this constant
  *        (also used as head line or in bullet list in documentation generation).\n
  */
-#define CLPCONTAB_BINARY(kyw,dat,siz,man,hlp)   {CLPTYP_STRING,(kyw),NULL,0,0,(siz),0,0,CLPFLG_CON|CLPFLG_BIN,NULL,NULL,(man),(hlp),  0  , 0.0 ,(U08*)(dat)},
+#define CLPCONTAB_BINARY(kyw,dat,siz,man,hlp)   {CLPTYP_STRING,(kyw),NULL,0,0,(siz),0,0,CLPFLG_CON|CLPFLG_BIN,NULL,NULL,(man),(hlp),  0  , 0.0 ,(U08*)(dat),NULL},
 
 /** Ends a table with constant definitions
  */
-#define CLPCONTAB_CLS                           {CLPTYP_NON   , NULL,NULL,0,0,  0  ,0,0,CLPFLG_NON           ,NULL,NULL, NULL, NULL,  0  , 0.0 ,NULL       }
+#define CLPCONTAB_CLS                           {CLPTYP_NON   , NULL,NULL,0,0,  0  ,0,0,CLPFLG_NON           ,NULL,NULL, NULL, NULL,  0  , 0.0 ,NULL       ,NULL}
 
 
 /** Defines a structure with error information

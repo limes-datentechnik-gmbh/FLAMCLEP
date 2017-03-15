@@ -59,7 +59,7 @@
  *  *man* is a pointer to the long description of the argument.\n
  *  *hlp* is a pointer to the short description of the argument.\n
  */
-#define CLPARGTAB_SKALAR(kyw,nam,typ,min,max,atyp,flg,oid,tab,dft,man,hlp) { atyp         ,(kyw), NULL,(min),  1  ,sizeof(typ), offsetof(STRUCT_NAME,nam),(oid),(flg)      ,(tab),(dft),(man),(hlp),0,0.0,NULL},
+#define CLPARGTAB_SKALAR(kyw,nam,typ,min,max,atyp,flg,oid,tab,dft,man,hlp) { atyp         ,(kyw), NULL,(min),  1  ,sizeof(typ), offsetof(STRUCT_NAME,nam),(oid),(flg)      ,(tab),(dft),(man),(hlp),0,0.0,NULL,#typ},
 /** defines a string with the command line keyword *kyw* and the member name *nam*
  *
  *  *siz* is the total available length of the string(s).\n
@@ -73,7 +73,7 @@
  *  *man* is a pointer to the long description of the argument.\n
  *  *hlp* is a pointer to the short description of the argument.\n
  */
-#define CLPARGTAB_STRING(kyw,nam,siz,min,max,atyp,flg,oid,tab,dft,man,hlp) { CLPTYP_STRING,(kyw), NULL,(min),(max),      (siz), offsetof(STRUCT_NAME,nam),(oid),(flg)      ,(tab),(dft),(man),(hlp),0,0.0,NULL},
+#define CLPARGTAB_STRING(kyw,nam,siz,min,max,atyp,flg,oid,tab,dft,man,hlp) { CLPTYP_STRING,(kyw), NULL,(min),(max),      (siz), offsetof(STRUCT_NAME,nam),(oid),(flg)      ,(tab),(dft),(man),(hlp),0,0.0,NULL,NULL},
 /** defines a dynamic string with the command line keyword *kyw* and the member name *nam*
  * (pointer to alloced memory, must be freed by the using application)
  *
@@ -88,7 +88,7 @@
  *  *man* is a pointer to the long description of the argument.\n
  *  *hlp* is a pointer to the short description of the argument.\n
  */
-#define CLPARGTAB_DYNSTR(kyw,nam,siz,min,max,atyp,flg,oid,tab,dft,man,hlp) { CLPTYP_STRING,(kyw), NULL,(min),(max),      (siz), offsetof(STRUCT_NAME,nam),(oid),((flg)|CLPFLG_DYN),(tab),(dft),(man),(hlp),0,0.0,NULL},
+#define CLPARGTAB_DYNSTR(kyw,nam,siz,min,max,atyp,flg,oid,tab,dft,man,hlp) { CLPTYP_STRING,(kyw), NULL,(min),(max),      (siz), offsetof(STRUCT_NAME,nam),(oid),((flg)|CLPFLG_DYN),(tab),(dft),(man),(hlp),0,0.0,NULL,NULL},
 /** defines an array with the command line keyword *kyw* and the member name *nam*
  *
  *  *typ* is the C type of the member\n
@@ -117,14 +117,14 @@
  *  *man* is a pointer to the long description of the argument.\n
  *  *hlp* is a pointer to the short description of the argument.\n
  */
-#define CLPARGTAB_DYNARY( kyw,nam,typ,min,max,atyp,flg,oid,tab,dft,man,hlp) { atyp         ,(kyw), NULL,(min),(max),sizeof(typ), offsetof(STRUCT_NAME,nam),(oid),((flg)|CLPFLG_DYN),(tab),(dft),(man),(hlp),0,0.0,NULL},
+#define CLPARGTAB_DYNARY( kyw,nam,typ,min,max,atyp,flg,oid,tab,dft,man,hlp) { atyp         ,(kyw), NULL,(min),(max),sizeof(typ), offsetof(STRUCT_NAME,nam),(oid),((flg)|CLPFLG_DYN),(tab),(dft),(man),(hlp),0,0.0,NULL,NULL},
 /** defines an alias name for another argument
  *
  *  *kyw* is the alternative keyword accepted on the command line in place of the keyword given in *ali*\n
  */
-#define CLPARGTAB_ALIAS( kyw,ali                                         ) { CLPTYP_XALIAS,(kyw),(ali),  0  ,  0  ,        0  ,                       0  ,  0  , CLPFLG_ALI, NULL, NULL, NULL, NULL,0,0.0,NULL},
+#define CLPARGTAB_ALIAS( kyw,ali                                         ) { CLPTYP_XALIAS,(kyw),(ali),  0  ,  0  ,        0  ,                       0  ,  0  , CLPFLG_ALI, NULL, NULL, NULL, NULL,0,0.0,NULL,NULL},
 /**  will mark the end of an argument table.
  */
-#define CLPARGTAB_CLS                                                      { CLPTYP_NON   , NULL, NULL,  0  ,  0  ,        0  ,                       0  ,  0  ,  0        , NULL, NULL, NULL, NULL,0,0.0,NULL}
+#define CLPARGTAB_CLS                                                      { CLPTYP_NON   , NULL, NULL,  0  ,  0  ,        0  ,                       0  ,  0  ,  0        , NULL, NULL, NULL, NULL,0,0.0,NULL,NULL}
 
 #endif
