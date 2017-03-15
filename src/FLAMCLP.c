@@ -138,12 +138,13 @@
  * 1.2.88: Make remaining parameter file names dynamic
  * 1.2.89: Check if keyword and alias contain only valid letters
  * 1.2.90: Use realloc_nowarn macro for realloc() to give the possibility to use own defines for it
+ * 1.2.91: Support separation of signed and unsigned numbers over a new flag
 **/
 
-#define CLP_VSN_STR       "1.2.90"
+#define CLP_VSN_STR       "1.2.91"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        2
-#define CLP_VSN_REVISION       90
+#define CLP_VSN_REVISION       91
 
 /* Definition der Konstanten ******************************************/
 
@@ -5357,6 +5358,9 @@ static int siClpBldLit(
       }
       siErr=siFromNumberLexem(pvHdl,siLev,siPos,psArg,pcVal,&siVal);
       if (siErr) return(siErr);
+      if (siVal<0 && CLPISF_UNS(psArg->psStd->uiFlg)) {
+         return CLPERR(psHdl,CLPERR_SEM,"Literal number (%s) of '%s.%s' is negative (%"PRIi64") but marked as unsigned",isPrnStr(psArg,pcVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,siVal);
+      }
       switch (psArg->psFix->siSiz) {
       case 1:
          if (siVal<(-128) || siVal>255) {
@@ -5414,6 +5418,9 @@ static int siClpBldLit(
       }
       siErr=siFromFloatLexem(pvHdl,siLev,siPos,psArg,pcVal,&flVal);
       if (siErr) return(siErr);
+      if (flVal<0 && CLPISF_UNS(psArg->psStd->uiFlg)) {
+         return CLPERR(psHdl,CLPERR_SEM,"Literal number (%s) of '%s.%s' is negative (%f) but marked as unsigned",isPrnStr(psArg,pcVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,flVal);
+      }
       switch (psArg->psFix->siSiz) {
       case 4:
          *((F32*)psArg->psVar->pvPtr)=flVal;

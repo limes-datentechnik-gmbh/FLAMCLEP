@@ -602,6 +602,8 @@ extern const char* pcClpAbout(const int l, const int s, char* b);
 /** CLPFLG_DLM This flag ensures that fix size arrays has a empty (initialized) last element (max-1) as delimiter
  *             Additional you enforce 0xFF at the and of a non fix size string array (size-1)*/
 #define CLPFLG_DLM               0x02000000U
+/** CLPFLG_UNS Marks a number as unsigned (prevent negative values)*/
+#define CLPFLG_UNS               0x04000000U
 /** CLPFLG_FIL Marks zero terminated string as file and replace additional '~' by HOME and corrects the prefix for different platforms*/
 #define CLPFLG_FIL               0x10000000U
 /** CLPFLG_LAB Marks zero terminated string as label and replace additional '~' by USER, '^' by OWNER and '!' by ENVID */
@@ -637,6 +639,7 @@ extern const char* pcClpAbout(const int l, const int s, char* b);
 #define CLPISF_TIM(flg)          ((flg)&CLPFLG_TIM)
 #define CLPISF_DYN(flg)          ((flg)&CLPFLG_DYN)
 #define CLPISF_DLM(flg)          ((flg)&CLPFLG_DLM)
+#define CLPISF_UNS(flg)          ((flg)&CLPFLG_UNS)
 #define CLPISF_FIL(flg)          ((flg)&CLPFLG_FIL)
 #define CLPISF_LAB(flg)          ((flg)&CLPFLG_LAB)
 #define CLPISF_UPP(flg)          ((flg)&CLPFLG_UPP)
