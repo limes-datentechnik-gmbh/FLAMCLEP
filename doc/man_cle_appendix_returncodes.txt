@@ -51,3 +51,8 @@ side, if the finish failed then an additional warning in the log can not
 determined because the condition code is still 2. All completion codes
 bigger than 8 and smaller or equal to 64 indicate an error in front of
 the command execution.
+
+A relevant warning is a warning written to the log by a used component.
+Warnings written by components which are removed from procession because
+the format does not fit or something else, are still in the log but not
+relevant for the completion code 1.
