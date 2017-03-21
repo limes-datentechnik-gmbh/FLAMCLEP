@@ -47,7 +47,7 @@ please have a look in the log (e.g. a key is close to expire)). A return
 code of 2 indicates that a call to the finish function failed. Such a
 fail of the finish function is not recognizable if the run function
 (command execution) returns with a warning or an error. On the other
-side, if the finish failed then an additional warning in the log can not
+side, if the finish failed then an additional warning in the log cannot
 determined because the condition code is still 2. All completion codes
 bigger than 8 and smaller or equal to 64 indicate an error in front of
 the command execution.
