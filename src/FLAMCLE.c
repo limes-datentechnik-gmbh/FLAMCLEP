@@ -125,11 +125,12 @@
  * 1.2.58: Support dynamic strings and arrays in CLP structure
  * 1.2.59: Support pvClpAlloc in RUN functions
  * 1.2.60: Support dynamic string for file names
+ * 1.2.61: Support condition code 1 if a relevant warning in the log
  */
-#define CLE_VSN_STR       "1.2.60"
+#define CLE_VSN_STR       "1.2.61"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        2
-#define CLE_VSN_REVISION       60
+#define CLE_VSN_REVISION       61
 
 /* Definition der Konstanten ******************************************/
 
@@ -2111,7 +2112,7 @@ EVALUATE:
                siErr=psTab[i].pfRun(pvHdl,pfOut,pfTrc,pcOwn,pcPgm,pcVsn,pcAbo,pcLic,psTab[i].pcKyw,pcCmd,pcLst,psTab[i].pvPar,&isWrn,&siScc);
                SAFE_FREE(pcCmd); SAFE_FREE(pcLst);
                if (siErr) {
-                  if (isWrn) {
+                  if (isWrn&0x00010000) {
                      if (pfMsg!=NULL && (pcMsg=pfMsg(siErr))!=NULL) {
                         fprintf(pfOut,"Run of command '%s' ends with warning (Return code: %d / Reason code: %d (%s))\n",psTab[i].pcKyw,CLERTC_WRN,siErr,pcMsg);
                      } else {
@@ -2143,7 +2144,7 @@ EVALUATE:
                   }
                   ERROR(((CLERTC_FIN>siMaxCC)?siMaxCC:CLERTC_FIN),NULL);
                }
-               ERROR(isWrn,NULL);
+               ERROR(isWrn&0x00000001,NULL);
             }
          }
       }

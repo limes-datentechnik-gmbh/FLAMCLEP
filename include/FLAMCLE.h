@@ -441,7 +441,7 @@ typedef int (*tpfMap)(
  * @param[in]  pcCmd Current command (complete entered line of user)
  * @param[in]  pcLst Current list of parsed arguments (given from FLAMCLP, could be NULL or empty)
  * @param[in]  pvPar Pointer to the filled parameter for the run of the subprogram
- * @param[out] piWrn Pointer to an integer which is true if the given reason code only a warning
+ * @param[out] piWrn Pointer to an integer (the fist half word is true (0x0001), if warnings collated by directory walk, the second halfword is true (0x0001) if warnings are logged)
  * @param[out] piScc Pointer to an integer containing a special condition code (if greater CLERTC_MAX(64) then used instead of CLERTC_RUN(8))
  *
  * @return     Reason code (!=0) for termination or warning, 0 for success
