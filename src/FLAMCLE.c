@@ -2143,7 +2143,7 @@ EVALUATE:
                   }
                   ERROR(((CLERTC_FIN>siMaxCC)?siMaxCC:CLERTC_FIN),NULL);
                }
-               ERROR(CLERTC_OK,NULL);
+               ERROR(isWrn,NULL);
             }
          }
       }

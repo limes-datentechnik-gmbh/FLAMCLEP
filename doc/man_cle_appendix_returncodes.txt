@@ -3,6 +3,7 @@ returned at program termination. This content is printed on the screen
 with the built-in function 'ERRORS'.
 
  * 0  - command line, command syntax, mapping, execution and finish of the command was successful
+ * 1  - command line, command syntax, mapping, execution and finish of the command was successful but a warning can be found in the log
  * 2  - command line, command syntax, mapping, execution was successful but cleanup of the command failed (may not happened)
  * 4  - command line, command syntax and mapping was successful but execution of the command returned with a warning
  * 8  - command line, command syntax and mapping was successful but execution of the command returned with an error

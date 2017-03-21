@@ -75,6 +75,7 @@ extern int win_unsetenv(const char* name);
 /* Definition of return/condition/exit codes **************************/
 
 #define CLERTC_OK             0
+#define CLERTC_INF            1
 #define CLERTC_FIN            2
 #define CLERTC_WRN            4
 #define CLERTC_RUN            8

@@ -678,6 +678,7 @@ typedef struct CleAppendix {
  *
  * @return signed integer with the condition codes below:\n
  * 0  - command line, command syntax, mapping, execution and finish of the command was successful\n
+ * 1  - command line, command syntax, mapping, execution and finish of the command was successful but a warning can be found in the log
  * 2  - command line, command syntax, mapping, execution was successful but cleanup of the command failed (may not happened)\n
  * 4  - command line, command syntax and mapping was successful but execution of the command returns with a warning\n
  * 8  - command line, command syntax and mapping was successful but execution of the command returns with an error\n
