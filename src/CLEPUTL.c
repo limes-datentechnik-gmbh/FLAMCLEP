@@ -1134,10 +1134,12 @@ static void rplchar(char* name,const size_t size,const char c, const char* value
 
 #ifdef __ZOS__
 
-#include <leawi.h>
-#include <ceeedcct.h>
+#if __BUILDNR__ != 123
+#  include <leawi.h>
+#  include <ceeedcct.h>
+#endif
 
-typedef void TfCEEGTJS(_INT4* funcode, _VSTRING* symname, _CHAR255* symvalue, _INT4* valuelen, _FEEDBACK* fc);
+typedef void TfCEEGTJS(_INT4* funcode, _VSTRING* symname, _CHAR255 symvalue, _INT4* valuelen, _FEEDBACK* fc);
 
 static TfCEEGTJS* gpfCeeGtjs=NULL;
 
