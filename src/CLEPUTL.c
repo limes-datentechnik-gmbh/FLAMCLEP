@@ -1132,9 +1132,61 @@ static void rplchar(char* name,const size_t size,const char c, const char* value
    }
 }
 
+#ifdef __ZOS__
+
+#include <leawi.h>
+#include <ceeedcct.h>
+
+typedef void TfCEEGTJS(_INT4* funcode, _VSTRING* symname, _CHAR255* symvalue, _INT4* valuelen, _FEEDBACK* fc);
+
+static TfCEEGTJS* gpfCeeGtjs=NULL;
+
+static void releaseCeeGtjs(void) {
+   if (gpfCeeGtjs!=NULL) {
+      release(gpfCeeGtjs);
+      gpfCeeGtjs=NULL;
+   }
+}
+
+static const char* getjclvar(const char* symbol) {
+   _FEEDBACK         fc;
+   _INT4             funcode=1;
+   static _CHAR255   symvalue="";
+   _VSTRING          symname;
+   _INT4             valuelen=0;
+
+/* Preparing the JCL symbol */
+   symname.length=strlen(symbol);
+   memcpy(symname.string,symbol,strlen(symbol));
+/* dynamic load of CEEGTJS function */
+   if (gpfCeeGtjs==NULL) {
+      gpfCeeGtjs=(TfCEEGTJS*)fetch("CEEGTJS");
+      if (gpfCeeGtjs!=NULL) {
+         atexit(releaseCeeGtjs);
+      }
+   }
+   if (gpfCeeGtjs!=NULL) {
+   /* Retrieving the value of the JCL symbol */
+      gpfCeeGtjs(&funcode,&symname,symvalue,&valuelen,&fc);
+      if( _FBCHECK (fc, CEE000) !=0) return(NULL);
+   /* Success do zero termination and return*/
+      symvalue[valuelen]='\0';
+      return(symvalue);
+   } else return(NULL);
+}
+
+#else
+
+static const char* getjclvar(const char* symbol) {
+   return(NULL);
+}
+
+#endif
+
 extern char* getenvar(const char* name,size_t size,char* string)
 {
    const char* v=GETENV(name);
+   if (v==NULL) v=getjclvar(name);
    if (v!=NULL && *v) {
       size_t lv=strlen(v);
       while(lv>0 && isspace(v[lv-1])) {

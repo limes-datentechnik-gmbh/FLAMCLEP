@@ -70,6 +70,17 @@ a dedicated file for each user.
  //STDENV   DD DSN=USER.ENVIR(&SYSUID.), DSP=SHR
 -----------------------------------------------------------------------
 
+Since z/OSv2r1 you can also used exported JCL symbols like environment
+variables. The exported JCL symbols have lower priority then the same
+environment variable. The service CEEGTJS is called dynamically and the
+language environment must be in the steplib concatenation to use it
+
+------------------------------------------------------------------------
+ //E0       EXPORT SYMLIST=*
+ //S1       SET    BLKSIZE=27886
+ //S3       SET    LRECL=128
+------------------------------------------------------------------------
+
 Beside all the environment variables managed by CLE it is possible to
 set all properties as environment variables to overrule the hard coded
 default values with CLP. If a property is defined as environment variable
@@ -105,16 +116,15 @@ FLCL_ICNV_TO=UTF-8                # "UTF-8" could result in errors
 
 See <<appendix-properties>> for the current property file content.
 
-FILENAME MAPPING
-~~~~~~~~~~~~~~~~
+ENVIRONMENT VARIABLE MAPPING
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-All filenames used by CLEP are additionally mapped based on the rules
-below:
+Each value enclosed with angle brackets (`<>`) are replaced with the
+corresponding environment variable (`<LANG>`). This feature is available
+at each starting point of a lexem and inside of a normal string.
 
- * The tilde character (`~`) is replaced with the string "<HOME>"
- * Each value enclosed with angle brackets (`<>`) are replaced with the
-   corresponding environment variable (`<OWNERID>`). If the environment
-   variable not defined the replacements below are still possible:
+If the environment variable not defined the replacements below are still
+possible:
  ** <SYSUID> - Current user id in upper case
  ** <USER>   - Current user id (case sensitive)
  ** <CUSER>  - Current user id in upper case == <SYSUID>
@@ -125,6 +135,14 @@ below:
  *** On UNIX with /home/<USER>
  *** On USS with /u/<USER>
  *** On ZOS with <SYSUID>
+
+FILENAME MAPPING
+~~~~~~~~~~~~~~~~
+
+All filenames used by CLEP are additionally mapped based on the rules
+below:
+
+ * The tilde character (`~`) is replaced with the string "<HOME>"
  * DD names on mainframes must be prefixed with "DD:"
  * Data set names on mainframes are always full qualified
  * Path names on mainframes must contain a least one slash (`/`)
@@ -147,6 +165,13 @@ be available, for such cases the possibilities above are implemented.
 This file name mapping is provided by the library CLEPUTL and should
 also be used for file names managed by the commands supported with this
 program.
+
+KEY LABEL NAME MAPPING
+~~~~~~~~~~~~~~~~~~~~~~
+
+The key label name mapping works like the file name mapping, but you can
+additional use `^` to replace it with the OWNERID (`^=<ONWERID>`) and `~`
+is only replaced with login user id.
 
 SPECIAL EBCDIC CODE PAGE SUPPORT
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
