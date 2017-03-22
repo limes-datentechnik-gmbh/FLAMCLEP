@@ -1155,11 +1155,12 @@ static const char* getjclvar(const char* symbol) {
    _INT4             funcode=1;
    static _CHAR255   symvalue="";
    _VSTRING          symname;
-   _INT4             valuelen=0;
+   _INT4             valuelen=strlen(symbol);
 
 /* Preparing the JCL symbol */
-   symname.length=strlen(symbol);
-   memcpy(symname.string,symbol,strlen(symbol));
+   if (valuelen>sizeof(symname.string)) return(NULL);
+   symname.length=valuelen;
+   memcpy(symname.string,symbol,valuelen);
 /* dynamic load of CEEGTJS function */
    if (gpfCeeGtjs==NULL) {
       gpfCeeGtjs=(TfCEEGTJS*)fetch("CEEGTJS");
@@ -1169,9 +1170,11 @@ static const char* getjclvar(const char* symbol) {
    }
    if (gpfCeeGtjs!=NULL) {
    /* Retrieving the value of the JCL symbol */
+      valuelen=sizeof(symvalue);
       gpfCeeGtjs(&funcode,&symname,symvalue,&valuelen,&fc);
       if( _FBCHECK (fc, CEE000) !=0) return(NULL);
    /* Success do zero termination and return*/
+      if (valuelen>=sizeof(symvalue)) return(NULL);
       symvalue[valuelen]='\0';
       return(symvalue);
    } else return(NULL);
