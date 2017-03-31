@@ -58,7 +58,7 @@
  * 1.1.7: Add possibility to use getenv to overrule hard coded default values
  * 1.1.8: An empty path "" are handled like NULL pointer path
  * 1.1.9: Allow strings without ' like keyword=...SPACE/SEP and switch between " and '
- * 1.1.10: Add new flag to prevent print outs in clear form for passwords or other critical informations
+ * 1.1.10: Add new flag to prevent print outs in clear form for passwords or other critical information
  * 1.1.11: Add overlays and objects to parsed parameter list
  * 1.1.12: Correct generation of manpages
  * 1.1.13: Keywords can now be preceded by '-' or '--'

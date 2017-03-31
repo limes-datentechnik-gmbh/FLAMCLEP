@@ -985,7 +985,7 @@ typedef struct ClpError {
  * @param[in]  pcOpt String used to separate options (recommended "/")
  * @param[in]  pcEnt String used to separate list entries (recommended ",")
  * @param[out] psErr Pointer to the error structure. If the pointer != NULL the structure is filled with pointers to
- *                   certain error informations in the CLP handle. If pfErr defined all error information are printed
+ *                   certain error information in the CLP handle. If pfErr defined all error information are printed
  *                   by CLP. In this case these structure is not required. If pfErr==NULL you can use these structure
  *                   to gather all error information of CLP in memory. The pointer are only valid until vsClpClose().
  *
