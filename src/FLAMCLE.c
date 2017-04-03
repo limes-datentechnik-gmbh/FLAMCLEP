@@ -126,11 +126,12 @@
  * 1.2.59: Support pvClpAlloc in RUN functions
  * 1.2.60: Support dynamic string for file names
  * 1.2.61: Support condition code 1 if a relevant warning in the log
+ * 1.2.62: Support suppression of minimal condition codes as MAXCC extension
  */
-#define CLE_VSN_STR       "1.2.61"
+#define CLE_VSN_STR       "1.2.62"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        2
-#define CLE_VSN_REVISION       61
+#define CLE_VSN_REVISION       62
 
 /* Definition der Konstanten ******************************************/
 
@@ -2049,11 +2050,19 @@ EVALUATE:
       ERROR(CLERTC_CMD,NULL);
    } else {
       int siMaxCC=0x0FFFFFFF;
+      int siMinCC=0x00000000;
+      if (strxcmp(isCas,argv[argc-1],"MAXCC=",6,0,FALSE)==0) {
+          char* h=strchr(&(argv[argc-1][6]),'-');
+          if (h!=NULL && isdigit(h[1])) siMinCC=atoi(h+1);
+          if (isdigit(argv[argc-1][6])) siMaxCC=atoi(&(argv[argc-1][6]));
+          argc--;
+      }
       if (strxcmp(isCas,argv[1],"OWNER=",6,0,FALSE)==0) {
          srprintf(&pcOwn,&szOwn,strlen(&argv[1][6]),"%s",&argv[1][6]);
          if (pcOwn==NULL) {
             fprintf(pfOut,"Allocation of memory for owner string failed\n");
-            ERROR(CLERTC_MEM,NULL);
+            siErr=CLERTC_MEM;
+            ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
          }
          if (isEnvOwn) {
             if (SETENV("OWNERID",pcOwn)) {
@@ -2067,10 +2076,6 @@ EVALUATE:
          for (i=1;i<argc;i++) argv[i]=argv[i+1];
          argc--;
       }
-      if (strxcmp(isCas,argv[argc-1],"MAXCC=",6,0,FALSE)==0) {
-          siMaxCC=atoi(&argv[argc-1][6]);
-          argc--;
-      }
       if (argc>1) {
          for (i=0;psTab[i].pcKyw!=NULL;i++) {
             l=strlen(psTab[i].pcKyw);
@@ -2082,14 +2087,15 @@ EVALUATE:
                char*                         pcTls=NULL;
                char*                         pcLst=NULL;
                siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,pcOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isPfl,isEnv,siMkl,pfOut,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg);
-               if (siErr) ERROR(((siErr>siMaxCC)?siMaxCC:siErr),NULL);
+               if (siErr) ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
                siErr=siCleGetCommand(pvHdl,pfOut,pcDep,psTab[i].pcKyw,argc,argv,&pcFil,&pcCmd);
-               if (siErr) ERROR(((siErr>siMaxCC)?siMaxCC:siErr),NULL);
+               if (siErr) ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
                siErr=siClpParseCmd(pvHdl,pcFil,pcCmd,TRUE,psTab[i].piOid,&pcTls);
                if (siErr<0) {
                   fprintf(pfOut,"Command line parser for command '%s' failed\n",psTab[i].pcKyw);
                   SAFE_FREE(pcCmd);
-                  ERROR(((CLERTC_SYN>siMaxCC)?siMaxCC:CLERTC_SYN),NULL);
+                  siErr=CLERTC_SYN;
+                  ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
                }
                if (pcTls!=NULL) {
                   pcLst=(char*)malloc(strlen(pcTls)+1);
@@ -2107,7 +2113,8 @@ EVALUATE:
                   }
                   SAFE_FREE(pcCmd); SAFE_FREE(pcLst);
                   psTab[i].pfFin(pfOut,pfTrc,psTab[i].pvPar);
-                  ERROR(((CLERTC_MAP>siMaxCC)?siMaxCC:CLERTC_MAP),NULL);
+                  siErr=CLERTC_MAP;
+                  ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
                }
                siErr=psTab[i].pfRun(pvHdl,pfOut,pfTrc,pcOwn,pcPgm,pcVsn,pcAbo,pcLic,psTab[i].pcKyw,pcCmd,pcLst,psTab[i].pvPar,&isWrn,&siScc);
                SAFE_FREE(pcCmd); SAFE_FREE(pcLst);
@@ -2119,7 +2126,8 @@ EVALUATE:
                         fprintf(pfOut,"Run of command '%s' ends with warning (Return code: %d / Reason code: %d)\n",psTab[i].pcKyw,CLERTC_WRN,siErr);
                      }
                      psTab[i].pfFin(pfOut,pfTrc,psTab[i].pvPar);
-                     ERROR(((CLERTC_WRN>siMaxCC)?siMaxCC:CLERTC_WRN),NULL);
+                     siErr=CLERTC_WRN;
+                     ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
                   } else {
                      if (pfMsg!=NULL && (pcMsg=pfMsg(siErr))!=NULL) {
                         fprintf(pfOut,"Run of command '%s' failed (Return code: %d / Reason code: %d (%s))\n",psTab[i].pcKyw,CLERTC_RUN,siErr,pcMsg);
@@ -2128,9 +2136,11 @@ EVALUATE:
                      }
                      psTab[i].pfFin(pfOut,pfTrc,psTab[i].pvPar);
                      if (siScc>CLERTC_MAX) {
-                        ERROR(((siScc     >siMaxCC)?siMaxCC:siScc),NULL);
+                        siErr=siScc;
+                        ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
                      } else {
-                        ERROR(((CLERTC_RUN>siMaxCC)?siMaxCC:CLERTC_RUN),NULL);
+                        siErr=CLERTC_RUN;
+                        ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
                      }
                   }
                }
@@ -2142,9 +2152,11 @@ EVALUATE:
                   } else {
                      fprintf(pfOut,"Finish/cleanup for command '%s' failed (Return code: %d / Reason code: %d)\n",psTab[i].pcKyw,CLERTC_FIN,siErr);
                   }
-                  ERROR(((CLERTC_FIN>siMaxCC)?siMaxCC:CLERTC_FIN),NULL);
+                  siErr=CLERTC_FIN;
+                  ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
                }
-               ERROR(isWrn&0x00000001,NULL);
+               siErr=isWrn&0x00000001;
+               ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
             }
          }
       }
@@ -2152,7 +2164,8 @@ EVALUATE:
          ppArg=malloc((argc+1)*sizeof(*ppArg));
          if (ppArg == NULL) {
             fprintf(pfOut,"Memory allocation for argument list to run the default command '%s' failed\n",pcDef);
-            ERROR(((CLERTC_SYS>siMaxCC)?siMaxCC:CLERTC_SYS),NULL);
+            siErr=CLERTC_SYS;
+            ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
          }
          for (i=argc;i>1;i--) ppArg[i]=argv[i-1];
          ppArg[0]=argv[0]; ppArg[1]=(char*)pcDef; argc++; argv=ppArg;
@@ -2160,7 +2173,8 @@ EVALUATE:
       }
       fprintf(pfOut,"Command or built-in function '%s' not supported\n",argv[1]);
       vdPrnStaticSyntax(pfOut,psTab,argv[0],pcDep,pcOpt);
-      ERROR(((CLERTC_CMD>siMaxCC)?siMaxCC:CLERTC_CMD),NULL);
+      siErr=CLERTC_CMD;
+      ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
    }
 }
 #undef ERROR
@@ -2730,8 +2744,12 @@ static void vdPrnStaticSyntax(
       }
    }
    fprintf(pfOut,"\n");
-   fprintf(pfOut,"%s%s %s %cOWNER=oid%c command \"... argument list ...\" %cMAXCC=num%c\n",pcDep,pcDep,pcPgm,C_SBO,C_SBC,C_SBO,C_SBC);
-   fprintf(pfOut,"%s%s %s %cOWNER=oid%c command=\" parameter file name \" %cMAXCC=num%c\n",pcDep,pcDep,pcPgm,C_SBO,C_SBC,C_SBO,C_SBC);
+   fprintf(pfOut,"%s%s %s %cOWNER=oid%c command \"... argument list ...\" %cMAXCC=%cfrom%c%c-to%c%c\n",pcDep,pcDep,pcPgm,C_SBO,C_SBO,C_SBC,C_SBC,C_SBO,C_SBO,C_SBC,C_SBC);
+   fprintf(pfOut,"%s%s %s %cOWNER=oid%c command=\" parameter file name \" %cMAXCC=%cfrom%c%c-to%c%c\n",pcDep,pcDep,pcPgm,C_SBO,C_SBO,C_SBC,C_SBC,C_SBO,C_SBO,C_SBC,C_SBC);
+   fprintf(pfOut,"%s%s You can optional define:\n",pcDep,pcDep);
+   fprintf(pfOut,"%s%s%s the owner id for this command to use a own configuration\n",pcDep,pcDep,pcDep);
+   fprintf(pfOut,"%s%s%s the maximal condition code overall (from) and to suppress warnings\n",pcDep,pcDep,pcDep);
+   fprintf(pfOut,"%s%s%s the maximal condition code which will be set to zero (to)\n",pcDep,pcDep,pcDep);
    fprintf(pfOut,"%s Built-in functions:\n",pcDep);
    fprintf(pfOut,"%s%s %s ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",SYN_CLE_SYNTAX  );
    fprintf(pfOut,"%s%s %s ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",SYN_CLE_HELP    );
@@ -2961,8 +2979,8 @@ static int siCleGetCommand(
       fprintf(pfOut,"No blank space ' ', equal sign '=', dot '.' or bracket '(' behind '%s'\n",pcFct);
       fprintf(pfOut,"Please use a blank space to define an argument list or an equal sign for a parameter file\n");
       fprintf(pfOut,"Syntax for command '%s' not valid\n",pcFct);
-      fprintf(pfOut,"%s %s %cOWNER=oid%c %s \"... argument list ...\" %cMAXCC=num%c\n",pcDep,argv[0],C_SBO,C_SBC,pcFct,C_SBO,C_SBC);
-      fprintf(pfOut,"%s %s %cOWNER=oid%c %s=\" parameter file name \" %cMAXCC=num%c\n",pcDep,argv[0],C_SBO,C_SBC,pcFct,C_SBO,C_SBC);
+      fprintf(pfOut,"%s %s %cOWNER=oid%c %s \"... argument list ...\" %cMAXCC=%cfrom%c%c-to%c%c\n",pcDep,argv[0],C_SBO,C_SBC,pcFct,C_SBO,C_SBO,C_SBC,C_SBO,C_SBC,C_SBC);
+      fprintf(pfOut,"%s %s %cOWNER=oid%c %s=\" parameter file name \" %cMAXCC=%cfrom%c%c-to%c%c\n",pcDep,argv[0],C_SBO,C_SBC,pcFct,C_SBO,C_SBO,C_SBC,C_SBO,C_SBC,C_SBC);
       fprintf(pfOut,"Please use '%s SYNTAX %s%c.path%c' for more information\n",argv[0],pcFct,C_SBO,C_SBC);
       SAFE_FREE(*ppFil);
       return(CLERTC_CMD);
