@@ -1028,10 +1028,8 @@ extern void* pvClpOpen(
          }
          setlocale(LC_NUMERIC, "C");
          psHdl->siNow=time(NULL);
-         psHdl->siRnd=clock();
-         for (i=0;psHdl->siRnd+(CLOCKS_PER_SEC/100)>clock();i++);
-         srand(psHdl->siNow+i);
-         psHdl->siRnd=ClpRndFnv(rand())^ClpRndFnv(i);
+         srand(psHdl->siNow+clock());
+         psHdl->siRnd=ClpRndFnv(rand()+clock());
          pcNow=GETENV("CLP_NOW");
          if (pcNow!=NULL && *pcNow) {
             siErr=siClpScnNat(psHdl,psHdl->pfErr,psHdl->pfScn,&pcNow,&psHdl->szLex,&psHdl->pcLex,CLPTYP_NUMBER,NULL,NULL,NULL);
