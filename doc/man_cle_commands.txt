@@ -40,12 +40,22 @@ synopsis.
 To run commands under different owners, the owner id can be defined in
 front of the command.
 
+To suppress the printouts of the command line executer you can set QUIET
+as the last parameter. This option has no effect of the outputs of the
+commands and build-in functions.
+
 For job control, the maximum condition code (MAXCC=num) of the command
 execution can optionally be set as the last parameter for each command.
+To suppress warnings you can define additionally a lower maximum
+separated by a hyphen (MAXCC=from-to), where all completion codes less
+this value will be set to zero. If you don't want limit the higher
+maximum you can simply write the hyphen followed by the lower maximum.
+For example, the clause "MAXCC=8-4" will set each complition code
+greater than 8 to 8 and each condition code smaller than 4 to 0.
 
 ------------------------------------------------------------------------
-&{pgm} [OWNER=oid] command "... argument list ..." [MAXCC=num]
-&{pgm} [OWNER=oid] command=" parameter file name " [MAXCC=num]
+&{pgm} [OWNER=oid] command "... argument list ..." [MAXCC=[from][-to]] [QUIET]
+&{pgm} [OWNER=oid] command=" parameter file name " [MAXCC=[from][-to]] [QUIET]
 ------------------------------------------------------------------------
 
 The parameter for each command can be provided as argument list on the
