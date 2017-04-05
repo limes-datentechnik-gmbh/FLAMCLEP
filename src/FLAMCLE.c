@@ -2785,8 +2785,8 @@ static void vdPrnStaticSyntax(
       }
    }
    fprintf(pfOut,"\n");
-   fprintf(pfOut,"%s%s %s %cOWNER=oid%c command \"... argument list ...\" %cMAXCC=%cfrom%c%c-to%c%c %cQUIET%c\n",pcDep,pcDep,pcPgm,C_SBO,C_SBO,C_SBC,C_SBC,C_SBO,C_SBO,C_SBC,C_SBC,C_SBO,C_SBC);
-   fprintf(pfOut,"%s%s %s %cOWNER=oid%c command=\" parameter file name \" %cMAXCC=%cfrom%c%c-to%c%c %cQUIET%c\n",pcDep,pcDep,pcPgm,C_SBO,C_SBO,C_SBC,C_SBC,C_SBO,C_SBO,C_SBC,C_SBC,C_SBO,C_SBC);
+   fprintf(pfOut,"%s%s %s %cOWNER=oid%c command \"... argument list ...\" %cMAXCC=%cfrom%c%c-to%c%c %cQUIET%c\n",pcDep,pcDep,pcPgm,C_SBO,C_SBC,C_SBO,C_SBO,C_SBC,C_SBO,C_SBC,C_SBC,C_SBO,C_SBC);
+   fprintf(pfOut,"%s%s %s %cOWNER=oid%c command=\" parameter file name \" %cMAXCC=%cfrom%c%c-to%c%c %cQUIET%c\n",pcDep,pcDep,pcPgm,C_SBO,C_SBC,C_SBO,C_SBO,C_SBC,C_SBO,C_SBC,C_SBC,C_SBO,C_SBC);
    fprintf(pfOut,"%s%s You can optional define:\n",pcDep,pcDep);
    fprintf(pfOut,"%s%s%s the owner id for this command to use a own configuration\n",pcDep,pcDep,pcDep);
    fprintf(pfOut,"%s%s%s the maximal condition code overall (from) and to suppress warnings\n",pcDep,pcDep,pcDep);
