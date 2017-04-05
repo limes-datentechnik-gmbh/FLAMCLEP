@@ -2446,7 +2446,7 @@ extern char* cstime(signed long long t, char* p) {
    return(pcStr);
 }
 
-extern int readEnvVars(const char* pcFil, FILE* pfOut) {
+extern int readEnvVars(const char* pcFil, FILE* pfOut, FILE* pfErr) {
    char* pcCnf;
    char* pcTmp;
    char  acCnf[1024];
@@ -2467,8 +2467,8 @@ extern int readEnvVars(const char* pcFil, FILE* pfOut) {
             for (pcTmp=acCnf;isspace(*pcTmp);pcTmp++);
             if (*pcTmp) {
                if (SETENV(pcTmp,pcCnf+1)) {
-                  if(pfOut!=NULL){
-                     fprintf(pfOut,
+                  if(pfErr!=NULL){
+                     fprintf(pfErr,
                            "Put variable (%s=%s) to environment failed (%d - %s)\n",
                            pcTmp,pcCnf+1,errno,strerror(errno));
                   }
@@ -2476,8 +2476,8 @@ extern int readEnvVars(const char* pcFil, FILE* pfOut) {
                   return CLERTC_SYS;
                } else {
                   if (strcmp(pcCnf+1,GETENV(pcTmp))) {
-                     if(pfOut!=NULL){
-                        fprintf(pfOut,
+                     if(pfErr!=NULL){
+                        fprintf(pfErr,
                               "Put variable (%s=%s) to environment failed (strcmp(%s,GETENV(%s)))\n",
                               pcTmp,pcCnf+1,pcCnf+1,pcTmp);
                      }

@@ -41,8 +41,9 @@ To run commands under different owners, the owner id can be defined in
 front of the command.
 
 To suppress the printouts of the command line executer you can set QUIET
-as the last parameter. This option has no effect of the outputs of the
-commands and build-in functions.
+or SILENT as the last parameter. Additional to SILENT, QUIET suppressed
+also the error messages. These options has no effect of the outputs of
+the commands and build-in functions.
 
 For job control, the maximum condition code (MAXCC=num) of the command
 execution can optionally be set as the last parameter for each command.

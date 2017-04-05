@@ -472,10 +472,11 @@ extern char* cstime(signed long long t, char* p);
  *
  * @param[in] pcFil Filename, if pcFil==NULL use "DD:STDENV" instead
  * @param[in] pfOut File pointer for output messages
+ * @param[in] pfErr File pointer for error messages
  *
  * @return    0 for successful else CLERTCs
  */
-extern int readEnvVars(const char* pcFil, FILE* pfOut);
+extern int readEnvVars(const char* pcFil, FILE* pfOut, FILE* pfErr);
 
 /**********************************************************************/
 
