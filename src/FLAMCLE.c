@@ -491,11 +491,11 @@ extern int siCleExecute(
    const char*                   m;
 
    if (argc>0) {
-      if (strxcmp(isCas,argv[argc-1],"QUIET",0,0,FALSE)==0) {
+      if (strxcmp(isCas,argv[argc-1],"SILENT",0,0,FALSE)==0) {
          pfErr=NULL;
          pfOut=NULL;
          argc--;
-      } else if (strxcmp(isCas,argv[argc-1],"SILENT",0,0,FALSE)==0) {
+      } else if (strxcmp(isCas,argv[argc-1],"QUIET",0,0,FALSE)==0) {
          pfErr=pfOut;
          pfOut=NULL;
          argc--;
@@ -2830,7 +2830,8 @@ static void vdPrnStaticSyntax(
    fprintf(pfOut,"%s%s%s the owner id for this command to use a own configuration\n",pcDep,pcDep,pcDep);
    fprintf(pfOut,"%s%s%s the maximal condition code overall (from) and to suppress warnings\n",pcDep,pcDep,pcDep);
    fprintf(pfOut,"%s%s%s the maximal condition code which will be set to zero (to)\n",pcDep,pcDep,pcDep);
-   fprintf(pfOut,"%s%s%s disable printouts (quiet) of command line executer\n",pcDep,pcDep,pcDep);
+   fprintf(pfOut,"%s%s%s QUIET disables the normal printouts of command line executer\n",pcDep,pcDep,pcDep);
+   fprintf(pfOut,"%s%s%s SILENT disables printouts and errors messages of command line executer\n",pcDep,pcDep,pcDep);
    fprintf(pfOut,"%s Built-in functions:\n",pcDep);
    fprintf(pfOut,"%s%s %s ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",SYN_CLE_SYNTAX  );
    fprintf(pfOut,"%s%s %s ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",SYN_CLE_HELP    );

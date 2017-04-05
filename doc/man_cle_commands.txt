@@ -40,8 +40,8 @@ synopsis.
 To run commands under different owners, the owner id can be defined in
 front of the command.
 
-To suppress the printouts of the command line executer you can set QUIET
-or SILENT as the last parameter. Additional to SILENT, QUIET suppressed
+To suppress the outputs of the command line executer you can set QUIET
+or SILENT as the last parameter. Additional to QUIET, SILENT suppressed
 also the error messages. These options has no effect of the outputs of
 the commands and build-in functions.
 
