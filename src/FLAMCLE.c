@@ -2142,9 +2142,9 @@ EVALUATE:
                if (pfOut!=NULL) fprintf(pfOut,"Use owner: '%s' (set as environment variable was successful)\n",pcOwn);
             }
          } else {
-            if (pfOut!=NULL) fprintf(pfOut,"Use owner: '%s' (environment was variable already defined)\n",pcOwn);
+            if (pfOut!=NULL) fprintf(pfOut,"Use owner: '%s' (environment variable was already defined)\n",pcOwn);
          }
-         for (i=1;i<argc;i++) argv[i]=argv[i+1];
+         for (i=2;i<argc;i++) argv[i-1]=argv[i];
          argc--;
       }
       if (argc>1) {
