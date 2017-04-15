@@ -4275,8 +4275,8 @@ static int siFromNumberLexem(
    case 't':*piVal=strtoll(pcVal+1,&pcHlp,10); break;
    default: return CLPERR(psHdl,CLPERR_SEM,"Base (%c) of number literal (%s.%s=%s) not supported",pcVal[0],fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,isPrnStr(psArg,pcVal+1));
    }
-   if (errno || *pcHlp) {
-      if (*pcHlp) {
+   if (errno || (pcHlp!=NULL && *pcHlp)) {
+      if (pcHlp!=NULL && *pcHlp) {
          return CLPERR(psHdl,CLPERR_SEM,"Number (%s) of '%s.%s' cannot be converted to a valid 64 bit value (rest: %s)",isPrnStr(psArg,pcVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,isPrnStr(psArg,pcHlp));
       } else {
          return CLPERR(psHdl,CLPERR_SEM,"Number (%s) of '%s.%s' cannot be converted to a valid 64 bit value (errno: %d - %s)",isPrnStr(psArg,pcVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,errno,strerror(errno));
@@ -4300,14 +4300,12 @@ static int siFromFloatLexem(
    case 'd':*pfVal=strtod(pcVal+1,&pcHlp); break;
    default: return CLPERR(psHdl,CLPERR_SEM,"Base (%c) of floating point literal (%s.%s=%s) not supported",pcVal[0],fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,isPrnStr(psArg,pcVal+1));
    }
-   if (errno || *pcHlp) {
-      if (*pcHlp) {
+   if (errno ||  (pcHlp!=NULL && *pcHlp)) {
+      if (pcHlp!=NULL && *pcHlp) {
          return CLPERR(psHdl,CLPERR_SEM,"Floating number (%s) of '%s.%s' cannot be converted to a valid 64 bit value (rest: %s)",isPrnStr(psArg,pcVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,pcHlp);
       } else {
          return CLPERR(psHdl,CLPERR_SEM,"Floating number (%s) of '%s.%s' cannot be converted to a valid 64 bit value (errno: %d - %s)",isPrnStr(psArg,pcVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,errno,strerror(errno));
       }
-   }
-   if (errno || *pcHlp) {
    }
    return(CLP_OK);
 }
