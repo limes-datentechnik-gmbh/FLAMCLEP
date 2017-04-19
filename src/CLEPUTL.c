@@ -2441,7 +2441,7 @@ extern char* cstime(signed long long t, char* p) {
    if (x!=NULL) {
       strftime(pcStr,sizeof(acBuf),"%Y-%m-%d %H:%M:%S",x);
    } else {
-      snprintf(acBuf,sizeof(acBuf),"NO-VALID-TIME");
+      snprintf(acBuf,sizeof(acBuf),"NO-VALID-TIME      ");
    }
    return(pcStr);
 }
