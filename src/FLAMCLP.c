@@ -140,12 +140,13 @@
  * 1.2.90: Use realloc_nowarn macro for realloc() to give the possibility to use own defines for it
  * 1.2.91: Support separation of signed and unsigned numbers over a new flag
  * 1.2.92: Support type string to determine unsigned flag
+ * 1.2.93: Support literal or static variable assignments for dynamic values in CLP structure
 **/
 
-#define CLP_VSN_STR       "1.2.92"
+#define CLP_VSN_STR       "1.2.93"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        2
-#define CLP_VSN_REVISION       92
+#define CLP_VSN_REVISION       93
 
 /* Definition der Konstanten ******************************************/
 
@@ -875,7 +876,7 @@ extern void* pvClpAlloc(
                return(pvPtr);
             }
          }
-         return(NULL);
+         return(pvClpAlloc(pvHdl,NULL,siSiz,piInd));
       }
    }
    return(pvPtr);
