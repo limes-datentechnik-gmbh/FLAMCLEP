@@ -129,11 +129,12 @@
  * 1.2.62: Support suppression of minimal condition codes as MAXCC extension
  * 1.2.63: Support option QUIET in command syntax to suppress all printouts of CLE
  * 1.2.64: Support option SILENT like QUIET but the error messages will be printed
+ * 1.2.65: Support pvClpAlloc in INI functions
  */
-#define CLE_VSN_STR       "1.2.64"
+#define CLE_VSN_STR       "1.2.65"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        2
-#define CLE_VSN_REVISION       64
+#define CLE_VSN_REVISION       65
 
 /* Definition der Konstanten ******************************************/
 
@@ -2287,22 +2288,22 @@ static int siClePropertyInit(
    int                           siFil=0;
    const char*                   pcMsg;
 
-   *ppHdl=NULL;
    if (piFil!=NULL) *piFil=0;
    if (ppFil!=NULL) *ppFil=NULL;
-   siErr=pfIni(pfErr,pfTrc,pcOwn,pcPgm,pvClp);
+   *ppHdl=pvClpOpen(isCas,isPfl,isEnv,siMkl,pcOwn,pcPgm,pcCmd,pcMan,pcHlp,isOvl,psTab,pvClp,pfOut,pfErr,pfTrc,pfTrc,pfTrc,pfTrc,pcDep,pcOpt,pcEnt,NULL);
+   if (*ppHdl==NULL) {
+      if (pfErr!=NULL) fprintf(pfErr,"Open of property parser for command '%s' failed\n",pcCmd);
+      return(CLERTC_TAB);
+   }
+   siErr=pfIni(*ppHdl,pfErr,pfTrc,pcOwn,pcPgm,pvClp);
    if (siErr) {
       if (pfMsg!=NULL && (pcMsg=pfMsg(siErr))!=NULL) {
          if (pfErr!=NULL) fprintf(pfErr,"Initialization of CLP structure for command '%s' failed (Return code: %d / Reason code: %d (%s))\n",pcCmd,CLERTC_INI,siErr,pcMsg);
       } else {
          if (pfErr!=NULL) fprintf(pfErr,"Initialization of CLP structure for command '%s' failed (Return code: %d / Reason code: %d)\n",pcCmd,CLERTC_INI,siErr);
       }
+      vdClpClose(*ppHdl,CLPCLS_MTD_ALL);*ppHdl=NULL;
       return(CLERTC_INI);
-   }
-   *ppHdl=pvClpOpen(isCas,isPfl,isEnv,siMkl,pcOwn,pcPgm,pcCmd,pcMan,pcHlp,isOvl,psTab,pvClp,pfOut,pfErr,pfTrc,pfTrc,pfTrc,pfTrc,pcDep,pcOpt,pcEnt,NULL);
-   if (*ppHdl==NULL) {
-      if (pfErr!=NULL) fprintf(pfErr,"Open of property parser for command '%s' failed\n",pcCmd);
-      return(CLERTC_TAB);
    }
    siErr=siCleGetProperties(*ppHdl,pfErr,psCnf,pcOwn,pcPgm,pcCmd,&pcFil,&pcPro,&siFil);
    if (siErr) {
@@ -2469,21 +2470,20 @@ static int siCleCommandInit(
    char*                         pcPro=NULL;
    const char*                   pcMsg;
 
-   *ppHdl=NULL;
-
-   siErr=pfIni(pfErr,pfTrc,pcOwn,pcPgm,pvClp);
+   *ppHdl=pvClpOpen(isCas,isPfl,isEnv,siMkl,pcOwn,pcPgm,pcCmd,pcMan,pcHlp,isOvl,psTab,pvClp,pfOut,pfErr,pfTrc,pfTrc,pfTrc,pfTrc,pcDep,pcOpt,pcEnt,NULL);
+   if (*ppHdl==NULL) {
+      if (pfErr!=NULL) fprintf(pfErr,"Open of parser for command '%s' failed\n",pcCmd);
+      return(CLERTC_TAB);
+   }
+   siErr=pfIni(*ppHdl,pfErr,pfTrc,pcOwn,pcPgm,pvClp);
    if (siErr) {
       if (pfMsg!=NULL && (pcMsg=pfMsg(siErr))!=NULL) {
          if (pfErr!=NULL) fprintf(pfErr,"Initialization of CLP structure for command '%s' failed (Return code: %d / Reason code: %d (%s))\n",pcCmd,CLERTC_INI,siErr,pcMsg);
       } else {
          if (pfErr!=NULL) fprintf(pfErr,"Initialization of CLP structure for command '%s' failed (Return code: %d / Reason code: %d)\n",pcCmd,CLERTC_INI,siErr);
       }
+      vdClpClose(*ppHdl,CLPCLS_MTD_ALL);*ppHdl=NULL;
       return(CLERTC_INI);
-   }
-   *ppHdl=pvClpOpen(isCas,isPfl,isEnv,siMkl,pcOwn,pcPgm,pcCmd,pcMan,pcHlp,isOvl,psTab,pvClp,pfOut,pfErr,pfTrc,pfTrc,pfTrc,pfTrc,pcDep,pcOpt,pcEnt,NULL);
-   if (*ppHdl==NULL) {
-      if (pfErr!=NULL) fprintf(pfErr,"Open of parser for command '%s' failed\n",pcCmd);
-      return(CLERTC_TAB);
    }
    siErr=siCleGetProperties(*ppHdl,pfErr,psCnf,pcOwn,pcPgm,pcCmd,&pcFil,&pcPro,&siFil);
    if (siErr) {

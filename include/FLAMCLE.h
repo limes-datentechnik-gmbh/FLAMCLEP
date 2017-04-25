@@ -354,6 +354,10 @@ extern const char* pcCleAbout(const int l, const int s, char* b);
  * over the properties or command line. The current owner and program
  * name are given by CleExecute to know these values at initialization.
  *
+ * If additional dynamic memory required in the CLP structure the provided
+ * handle can be used for pvClpAlloc.
+ *
+ * @param[in]  pvHdl Pointer to the CLP handle for allocation of memory in the CLP structure
  * @param[in]  pfOut File pointer for outputs (given over CleExecute)
  * @param[in]  pfTrc File pointer for tracing (given over CleExecute)
  * @param[in]  pcOwn Current owner name (given over CleExecute)
@@ -363,6 +367,7 @@ extern const char* pcCleAbout(const int l, const int s, char* b);
  * @return     Reason code (!=0) for termination or 0 for success
  */
 typedef int (*tpfIni)(
+   void*                         pvHdl,
    FILE*                         pfOut,
    FILE*                         pfTrc,
    const char*                   pcOwn,
