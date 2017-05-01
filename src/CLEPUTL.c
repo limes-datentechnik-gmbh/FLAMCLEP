@@ -1414,6 +1414,7 @@ static const char* adjpfx(char* file, int size)
           *p1 = *p2;
        }
        *p1 = 0;
+       return "<SYSUID>";
     } else if (file[0]=='/' && file[1]=='/' && file[2]=='\'') {
        for (p1=file,p2=file+3 ; *p2 && *p2!='\'' ; p1++,p2++) {
           *p1 = *p2;
@@ -1421,7 +1422,7 @@ static const char* adjpfx(char* file, int size)
        *p1 = 0;
     } else if (file[0]=='/' && file[1]=='/') {
        file[0] = C_TLD;
-       if (ISPATHNAME(file)) {
+       if (ISPATHNAME(file+2)) {
           file[1] = '/';
           return "<HOME>";
        } else {
@@ -1485,21 +1486,26 @@ static char* dadjpfx(const char* file,char** tilde)
 # ifdef __ZOS__
     if (file[0]=='/' && file[1]=='/' && file[2]=='D' && file[3]=='S' && file[4]==':') {
        strcpy(b,file+5);
+       *tilde=ISPATHNAME(b)?"<HOME>":"<SYSUID>";
     } else if (file[0]=='/' && file[1]=='/' && file[2]=='D' && file[3]=='D' && file[4]==':') {
        strcpy(b,file+2);
+       *tilde="<SYSUID>";
     } else if (file[0]=='/' && file[1]=='/' && file[2]=='\'') {
        strcpy(b,file+3);
+       *tilde=ISPATHNAME(b)?"<HOME>":"<SYSUID>";
     } else if (file[0]=='/' && file[1]=='/') {
        b[0] = C_TLD;
-       if (ISPATHNAME(file)) {
+       if (ISPATHNAME(file+2)) {
           b[1] = '/';
+          *tilde="<HOME>";
        } else {
           b[1] = '.';
+          *tilde="<SYSUID>";
        }
        strcpy(b+2,file+2);
     } else {
        strcpy(b,file);
-       *tilde=ISPATHNAME(file)?"<HOME>":"<SYSUID>";
+       *tilde=ISPATHNAME(b)?"<HOME>":"<SYSUID>";
     }
 # elif __USS__
     if (file[0]=='/' && file[1]=='/' && file[2]=='D' && file[3]=='S' && file[4]==':') {
