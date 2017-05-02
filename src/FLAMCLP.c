@@ -141,12 +141,13 @@
  * 1.2.91: Support separation of signed and unsigned numbers over a new flag
  * 1.2.92: Support type string to determine unsigned flag
  * 1.2.93: Support literal or static variable assignments for dynamic values in CLP structure
+ * 1.2.94: Reduce memory of symbol table (don't store pcAli use psAli instead)
 **/
 
-#define CLP_VSN_STR       "1.2.93"
+#define CLP_VSN_STR       "1.2.94"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        2
-#define CLP_VSN_REVISION       93
+#define CLP_VSN_REVISION       94
 
 /* Definition der Konstanten ******************************************/
 
@@ -188,6 +189,8 @@
 #define isPrnFlt(p,v) (CLPISF_PWD(p->psStd->uiFlg)?((F64)0.0):(v))
 #define isPrnStr(p,v) (CLPISF_PWD(p->psStd->uiFlg)?("***SECRET***"):(v))
 #define isPrnLen(p,v) (CLPISF_PWD(p->psStd->uiFlg)?((int)0):(v))
+
+#define GETALI(sym) (((sym)->psStd->psAli!=NULL)?(sym)->psStd->psAli->psStd->pcKyw:NULL)
 
 #ifndef realloc_nowarn
 #  define realloc_nowarn      realloc
@@ -242,9 +245,8 @@ static const char* pcClpErr(int siErr) {
 
 typedef struct Std {
    const char*                   pcKyw;
-   const char*                   pcAli;
-   unsigned int                  uiFlg;
    struct Sym*                   psAli;
+   unsigned int                  uiFlg;
    int                           siKwl;
    int                           siLev;
    int                           siPos;
@@ -1844,17 +1846,16 @@ extern int siClpSymbolTableWalk(
       psSym->pcPat=psHdl->pcPat;
       psSym->siKwl=psHdl->psSym->psStd->siKwl;
       psSym->pcKyw=psHdl->psSym->psStd->pcKyw;
-      psSym->pcAli=psHdl->psSym->psStd->pcAli;
+      psSym->pcAli=GETALI(psHdl->psSym);
       psSym->uiFlg=psHdl->psSym->psStd->uiFlg;
       psSym->pcDft=psHdl->psSym->psFix->pcDft;
       psSym->pcMan=psHdl->psSym->psFix->pcMan;
       psSym->pcHlp=psHdl->psSym->psFix->pcHlp;
-      psSym->siMin=psHdl->psSym->psFix->siTyp;
+      psSym->siTyp=psHdl->psSym->psFix->siTyp;
       psSym->siMin=psHdl->psSym->psFix->siMin;
       psSym->siMax=psHdl->psSym->psFix->siMax;
       psSym->siSiz=psHdl->psSym->psFix->siSiz;
       psSym->siOid=psHdl->psSym->psFix->siOid;
-      psSym->siTyp=psHdl->psSym->psFix->siTyp;
       psSym->uiOpr=0;
       psSym->uiOpr|=(psHdl->psTab!=NULL)?CLPSYM_ROOT:0;
       psSym->uiOpr|=(psHdl->psOld!=NULL)?CLPSYM_OLD:0;
@@ -2054,7 +2055,6 @@ static TsSym* psClpSymIns(
    }
 
    psSym->psStd->pcKyw=psArg->pcKyw;
-   psSym->psStd->pcAli=psArg->pcAli;
    psSym->psStd->uiFlg=psArg->uiFlg;
    if (psArg->pcTyp!=NULL) {
       if (strcmp(psArg->pcTyp,"U08")==0 || strcmp(psArg->pcTyp,"U16")==0 || strcmp(psArg->pcTyp,"U32")==0 || strcmp(psArg->pcTyp,"U64")==0) {
@@ -2146,31 +2146,31 @@ static TsSym* psClpSymIns(
       ERROR(psSym);
    }
 
-   if (psSym->psStd->pcAli!=NULL) {
+   if (psArg->pcAli!=NULL) {
       if (psSym->psStd->pcKyw==NULL || *psSym->psStd->pcKyw==0) {
-         CLPERR(psHdl,CLPERR_TAB,"Keyword of alias (%s.%s) is not defined",pcPat,psSym->psStd->pcAli);
+         CLPERR(psHdl,CLPERR_TAB,"Keyword of alias (%s.%s) is not defined",pcPat,psArg->pcAli);
          ERROR(psSym);
       }
-      if (strxcmp(psHdl->isCas,psSym->psStd->pcKyw,psSym->psStd->pcAli,0,0,FALSE)==0) {
-         CLPERR(psHdl,CLPERR_TAB,"Keyword and alias (%s.%s) are equal",pcPat,psSym->psStd->pcAli);
+      if (strxcmp(psHdl->isCas,psSym->psStd->pcKyw,psArg->pcAli,0,0,FALSE)==0) {
+         CLPERR(psHdl,CLPERR_TAB,"Keyword and alias (%s.%s) are equal",pcPat,psArg->pcAli);
          ERROR(psSym);
       }
       for (k=0,psHlp=psCur;psHlp!=NULL;psHlp=psHlp->psBak) {
-         if (CLPISF_ARG(psHlp->psStd->uiFlg) && strxcmp(psHdl->isCas,psSym->psStd->pcAli,psHlp->psStd->pcKyw,0,0,FALSE)==0) {
+         if (CLPISF_ARG(psHlp->psStd->uiFlg) && strxcmp(psHdl->isCas,psArg->pcAli,psHlp->psStd->pcKyw,0,0,FALSE)==0) {
             if (k==0) {
                psSym->psStd->psAli=psHlp;
                psSym->psStd->uiFlg=psHlp->psStd->uiFlg|CLPFLG_ALI;
                free(psSym->psFix); psSym->psFix=psHlp->psFix;
                free(psSym->psVar); psSym->psVar=psHlp->psVar;
             } else {
-               CLPERR(psHdl,CLPERR_TAB,"Alias for keyword '%s.%s' is not unique",pcPat,psSym->psStd->pcKyw);
+               CLPERR(psHdl,CLPERR_TAB,"Alias '%s' for keyword '%s.%s' is not unique",psArg->pcAli,pcPat,psSym->psStd->pcKyw);
                ERROR(psSym);
             }
             k++;
          }
       }
       if (k==0) {
-         CLPERR(psHdl,CLPERR_TAB,"Alias '%s' for keyword '%s.%s' cannot be resolved",psSym->psStd->pcAli,pcPat,psSym->psStd->pcKyw);
+         CLPERR(psHdl,CLPERR_TAB,"Alias '%s' for keyword '%s.%s' cannot be resolved",psArg->pcAli,pcPat,psSym->psStd->pcKyw);
          ERROR(psSym);
       }
    } else if (CLPISF_ARG(psSym->psStd->uiFlg)) {
@@ -2195,8 +2195,8 @@ static TsSym* psClpSymIns(
          CLPERR(psHdl,CLPERR_TAB,"Keyword of a link (%s.?) is not defined",pcPat);
          ERROR(psSym);
       }
-      if (psSym->psStd->pcAli!=NULL) {
-         CLPERR(psHdl,CLPERR_TAB,"Alias (%s) for link '%s.%s' defined",psSym->psStd->pcAli,pcPat,psSym->psStd->pcKyw);
+      if (psArg->pcAli!=NULL) {
+         CLPERR(psHdl,CLPERR_TAB,"Alias (%s) for link '%s.%s' defined",psArg->pcAli,pcPat,psSym->psStd->pcKyw);
          ERROR(psSym);
       }
       if (psSym->psFix->pcDft!=NULL) {
@@ -2224,8 +2224,8 @@ static TsSym* psClpSymIns(
          CLPERR(psHdl,CLPERR_TAB,"Key word for a constant (%s.?) is not defined",pcPat);
          ERROR(psSym);
       }
-      if (psSym->psStd->pcAli!=NULL) {
-         CLPERR(psHdl,CLPERR_TAB,"Alias (%s) for constant '%s.%s' defined",psSym->psStd->pcAli,pcPat,psSym->psStd->pcKyw);
+      if (psArg->pcAli!=NULL) {
+         CLPERR(psHdl,CLPERR_TAB,"Alias (%s) for constant '%s.%s' defined",psArg->pcAli,pcPat,psSym->psStd->pcKyw);
          ERROR(psSym);
       }
       if (psSym->psFix->pcDft!=NULL) {
@@ -5980,12 +5980,12 @@ static int siClpFinMainObj(
             if (psHlp->psFix->siMin<=1) {
                CLPERR(psHdl,CLPERR_SEM,"Parameter '%s.%s' not specified",fpcPat(pvHdl,0),psHlp->psStd->pcKyw);
                CLPERRADD(psHdl,0,"Please specify parameter:%s","");
-               vdClpPrnArg(pvHdl,psHdl->pfErr,1,psHlp->psStd->pcKyw,psHlp->psStd->pcAli,psHlp->psStd->siKwl,psHlp->psFix->siTyp,psHlp->psFix->pcHlp,psHlp->psFix->pcDft,
+               vdClpPrnArg(pvHdl,psHdl->pfErr,1,psHlp->psStd->pcKyw,GETALI(psHlp),psHlp->psStd->siKwl,psHlp->psFix->siTyp,psHlp->psFix->pcHlp,psHlp->psFix->pcDft,
                            CLPISF_SEL(psHlp->psStd->uiFlg),CLPISF_CON(psHlp->psStd->uiFlg));
             } else {
                CLPERR(psHdl,CLPERR_SEM,"Amount of occurrences (%d) of parameter '%s.%s' is smaller than required minimum amount (%d)",psHlp->psVar->siCnt,fpcPat(pvHdl,0),psHlp->psStd->pcKyw,psHlp->psFix->siMin);
                CLPERRADD(psHdl,0,"Please specify parameter additionally %d times:%s","");
-               vdClpPrnArg(pvHdl,psHdl->pfErr,1,psHlp->psStd->pcKyw,psHlp->psStd->pcAli,psHlp->psStd->siKwl,psHlp->psFix->siTyp,psHlp->psFix->pcHlp,psHlp->psFix->pcDft,
+               vdClpPrnArg(pvHdl,psHdl->pfErr,1,psHlp->psStd->pcKyw,GETALI(psHlp),psHlp->psStd->siKwl,psHlp->psFix->siTyp,psHlp->psFix->pcHlp,psHlp->psFix->pcDft,
                            CLPISF_SEL(psHlp->psStd->uiFlg),CLPISF_CON(psHlp->psStd->uiFlg));
             }
             return(CLPERR_SEM);
@@ -6061,12 +6061,12 @@ static int siClpFinMainOvl(
                if (psHlp->psFix->siMin<=1) {
                   CLPERR(psHdl,CLPERR_SEM,"Parameter '%s.%s' not specified",fpcPat(pvHdl,0),psHlp->psStd->pcKyw);
                   CLPERRADD(psHdl,0,"Please specify parameter:%s","");
-                  vdClpPrnArg(pvHdl,psHdl->pfErr,1,psHlp->psStd->pcKyw,psHlp->psStd->pcAli,psHlp->psStd->siKwl,psHlp->psFix->siTyp,psHlp->psFix->pcHlp,psHlp->psFix->pcDft,
+                  vdClpPrnArg(pvHdl,psHdl->pfErr,1,psHlp->psStd->pcKyw,GETALI(psHlp),psHlp->psStd->siKwl,psHlp->psFix->siTyp,psHlp->psFix->pcHlp,psHlp->psFix->pcDft,
                               CLPISF_SEL(psHlp->psStd->uiFlg),CLPISF_SEL(psHlp->psStd->uiFlg));
                } else {
                   CLPERR(psHdl,CLPERR_SEM,"Amount of occurrences (%d) of parameter '%s.%s' is smaller than required minimum amount (%d)",psHlp->psVar->siCnt,fpcPat(pvHdl,0),psHlp->psStd->pcKyw,psHlp->psFix->siMin);
                   CLPERRADD(psHdl,0,"Please specify parameter additionally %d times:%s","");
-                  vdClpPrnArg(pvHdl,psHdl->pfErr,1,psHlp->psStd->pcKyw,psHlp->psStd->pcAli,psHlp->psStd->siKwl,psHlp->psFix->siTyp,psHlp->psFix->pcHlp,psHlp->psFix->pcDft,
+                  vdClpPrnArg(pvHdl,psHdl->pfErr,1,psHlp->psStd->pcKyw,GETALI(psHlp),psHlp->psStd->siKwl,psHlp->psFix->siTyp,psHlp->psFix->pcHlp,psHlp->psFix->pcDft,
                               CLPISF_SEL(psHlp->psStd->uiFlg),CLPISF_CON(psHlp->psStd->uiFlg));
                }
                return(CLPERR_SEM);
@@ -6174,12 +6174,12 @@ static int siClpFinObj(
             if (psHlp->psFix->siMin<=1) {
                CLPERR(psHdl,CLPERR_SEM,"Parameter '%s.%s.%s' not specified",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,psHlp->psStd->pcKyw);
                CLPERRADD(psHdl,0,"Please specify parameter:%s","");
-               vdClpPrnArg(pvHdl,psHdl->pfErr,1,psHlp->psStd->pcKyw,psHlp->psStd->pcAli,psHlp->psStd->siKwl,psHlp->psFix->siTyp,psHlp->psFix->pcHlp,psHlp->psFix->pcDft,
+               vdClpPrnArg(pvHdl,psHdl->pfErr,1,psHlp->psStd->pcKyw,GETALI(psHlp),psHlp->psStd->siKwl,psHlp->psFix->siTyp,psHlp->psFix->pcHlp,psHlp->psFix->pcDft,
                            CLPISF_SEL(psHlp->psStd->uiFlg),CLPISF_CON(psHlp->psStd->uiFlg));
             } else {
                CLPERR(psHdl,CLPERR_SEM,"Amount of occurrences (%d) of parameter '%s.%s.%s' is smaller than required minimum amount (%d)",psDep->psVar->siCnt,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,psHlp->psStd->pcKyw,psHlp->psFix->siMin);
                CLPERRADD(psHdl,0,"Please specify parameter additionally %d times:%s","");
-               vdClpPrnArg(pvHdl,psHdl->pfErr,1,psHlp->psStd->pcKyw,psHlp->psStd->pcAli,psHlp->psStd->siKwl,psHlp->psFix->siTyp,psHlp->psFix->pcHlp,psHlp->psFix->pcDft,
+               vdClpPrnArg(pvHdl,psHdl->pfErr,1,psHlp->psStd->pcKyw,GETALI(psHlp),psHlp->psStd->siKwl,psHlp->psFix->siTyp,psHlp->psFix->pcHlp,psHlp->psFix->pcDft,
                            CLPISF_SEL(psHlp->psStd->uiFlg),CLPISF_CON(psHlp->psStd->uiFlg));
             }
             return(CLPERR_SEM);
@@ -6304,12 +6304,12 @@ static int siClpFinOvl(
                if (psHlp->psFix->siMin<=1) {
                   CLPERR(psHdl,CLPERR_SEM,"Parameter '%s.%s.%s' not specified",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,psHlp->psStd->pcKyw);
                   CLPERRADD(psHdl,0,"Please specify parameter:%s","");
-                  vdClpPrnArg(pvHdl,psHdl->pfErr,1,psHlp->psStd->pcKyw,psHlp->psStd->pcAli,psHlp->psStd->siKwl,psHlp->psFix->siTyp,psHlp->psFix->pcHlp,psHlp->psFix->pcDft,
+                  vdClpPrnArg(pvHdl,psHdl->pfErr,1,psHlp->psStd->pcKyw,GETALI(psHlp),psHlp->psStd->siKwl,psHlp->psFix->siTyp,psHlp->psFix->pcHlp,psHlp->psFix->pcDft,
                               CLPISF_SEL(psHlp->psStd->uiFlg),CLPISF_CON(psHlp->psStd->uiFlg));
                } else {
                   CLPERR(psHdl,CLPERR_SEM,"Amount of occurrences (%d) of parameter '%s.%s.%s' is smaller than required minimum amount (%d)",psDep->psVar->siCnt,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,psHlp->psStd->pcKyw,psHlp->psFix->siMin);
                   CLPERRADD(psHdl,0,"Please specify parameter additionally %d times:%s","");
-                  vdClpPrnArg(pvHdl,psHdl->pfErr,1,psHlp->psStd->pcKyw,psHlp->psStd->pcAli,psHlp->psStd->siKwl,psHlp->psFix->siTyp,psHlp->psFix->pcHlp,psHlp->psFix->pcDft,
+                  vdClpPrnArg(pvHdl,psHdl->pfErr,1,psHlp->psStd->pcKyw,GETALI(psHlp),psHlp->psStd->siKwl,psHlp->psFix->siTyp,psHlp->psFix->pcHlp,psHlp->psFix->pcDft,
                               CLPISF_SEL(psHlp->psStd->uiFlg),CLPISF_CON(psHlp->psStd->uiFlg));
                }
                return(CLPERR_SEM);
@@ -6512,7 +6512,7 @@ static void vdClpPrnArgTab(
    }
    for (psHlp=psTab;psHlp!=NULL;psHlp=psHlp->psNxt) {
       if ((psHlp->psFix->siTyp==siTyp || siTyp<0) && !CLPISF_LNK(psHlp->psStd->uiFlg)) {
-         vdClpPrnArg(pvHdl,pfOut,siLev,psHlp->psStd->pcKyw,psHlp->psStd->pcAli,psHlp->psStd->siKwl,psHlp->psFix->siTyp,psHlp->psFix->pcHlp,psHlp->psFix->pcDft,
+         vdClpPrnArg(pvHdl,pfOut,siLev,psHlp->psStd->pcKyw,GETALI(psHlp),psHlp->psStd->siKwl,psHlp->psFix->siTyp,psHlp->psFix->pcHlp,psHlp->psFix->pcDft,
                      CLPISF_SEL(psHlp->psStd->uiFlg),CLPISF_CON(psHlp->psStd->uiFlg));
       }
    }
@@ -6860,7 +6860,7 @@ static int siClpPrnHlp(
          for (psHlp=psTab;psHlp!=NULL;psHlp=psHlp->psNxt) {
             if ((psHlp->psFix->siTyp==siTyp || siTyp<0) && CLPISF_CMD(psHlp->psStd->uiFlg) && !CLPISF_LNK(psHlp->psStd->uiFlg)) {
                if (!CLPISF_ALI(psHlp->psStd->uiFlg) || (CLPISF_ALI(psHlp->psStd->uiFlg) && isAli)) {
-                  vdClpPrnArg(pvHdl,pfOut,siLev,psHlp->psStd->pcKyw,psHlp->psStd->pcAli,psHlp->psStd->siKwl,psHlp->psFix->siTyp,psHlp->psFix->pcHlp,psHlp->psFix->pcDft,
+                  vdClpPrnArg(pvHdl,pfOut,siLev,psHlp->psStd->pcKyw,GETALI(psHlp),psHlp->psStd->siKwl,psHlp->psFix->siTyp,psHlp->psFix->pcHlp,psHlp->psFix->pcDft,
                               CLPISF_SEL(psHlp->psStd->uiFlg),CLPISF_CON(psHlp->psStd->uiFlg));
                   if (psHlp->psFix->siTyp==CLPTYP_NUMBER && CLPISF_DEF(psHlp->psStd->uiFlg)) {
                      fprintf(pfOut,"%s If you type the keyword without an assignment of a value, the default (%d) is used\n",fpcPre(pvHdl,siLev+1),psHlp->psFix->siOid);
