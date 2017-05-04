@@ -2828,7 +2828,6 @@ static void vdPrnStaticSyntax(
    fprintf(pfOut,"%s%s %s %cOWNER=oid%c command=\" parameter file name \" %cMAXCC=%cfrom%c%c-to%c%c %cQUIET/SILENT%c\n",pcDep,pcDep,pcPgm,C_SBO,C_SBC,C_SBO,C_SBO,C_SBC,C_SBO,C_SBC,C_SBC,C_SBO,C_SBC);
    fprintf(pfOut,"%s%s You can optionally specify:\n",pcDep,pcDep);
    fprintf(pfOut,"%s%s%s the owner id for this command (to use custom configuration files)\n",pcDep,pcDep,pcDep);
-   // TODO: rewrite following two lines. no clue what the meaning is supposed to be
    fprintf(pfOut,"%s%s%s the maximal condition code overall (from) and to suppress warnings\n",pcDep,pcDep,pcDep);
    fprintf(pfOut,"%s%s%s the maximal condition code which will be set to zero (to)\n",pcDep,pcDep,pcDep);
    fprintf(pfOut,"%s%s%s QUIET disables the normal printouts of command line executer\n",pcDep,pcDep,pcDep);
