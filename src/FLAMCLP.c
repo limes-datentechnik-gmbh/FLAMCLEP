@@ -967,6 +967,7 @@ extern void* pvClpOpen(
    const char*                   pcNow=NULL;
    I64                           siNow=0;
    int                           siErr,i;
+   clock_t                       uiClock=clock();
    if (pcOwn!=NULL && pcPgm!=NULL && pcCmd!=NULL && psTab!=NULL) {
       psHdl=(TsHdl*)calloc(1,sizeof(TsHdl));
       if (psHdl!=NULL) {
@@ -1047,6 +1048,7 @@ extern void* pvClpOpen(
             }
          }
          psHdl->siTok=CLPTOK_INI;
+         printd("ClpOpen(%3.3f)\n",((double)((clock()-uiClock)))/CLOCKS_PER_SEC);
       } else {
          if (pfErr!=NULL) fprintf(pfErr,"Allocation of CLP structure failed\n");
       }
@@ -1065,6 +1067,7 @@ extern int siClpParsePro(
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    int                           siCnt;
+   clock_t                       uiClock=clock();
 
    if (pcPro==NULL)
       return CLPERR(psHdl,CLPERR_INT,"Property string is NULL");
@@ -1099,6 +1102,7 @@ extern int siClpParsePro(
          psHdl->isChk=FALSE;
          if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"PROPERTY-PARSER-END(CNT=%d)\n",siCnt);
          if (ppLst!=NULL) *ppLst=psHdl->pcLst;
+         printd("ClpParsePro(%3.3f)\n",((double)((clock()-uiClock)))/CLOCKS_PER_SEC);
          return(siCnt);
       } else {
          if (ppLst!=NULL) *ppLst=psHdl->pcLst;
@@ -1120,6 +1124,7 @@ extern int siClpParseCmd(
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    int                           siCnt;
+   clock_t                       uiClock=clock();
 
    if (pcCmd==NULL)
       return CLPERR(psHdl,CLPERR_INT,"Command string is NULL");
@@ -1154,6 +1159,7 @@ extern int siClpParseCmd(
          psHdl->isChk=FALSE;
          if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"COMMAND-PARSER-END(CNT=%d)\n",siCnt);
          if (ppLst!=NULL) *ppLst=psHdl->pcLst;
+         printd("ClpParseCmd(%3.3f)\n",((double)((clock()-uiClock)))/CLOCKS_PER_SEC);
          return(siCnt);
       } else {
          if (ppLst!=NULL) *ppLst=psHdl->pcLst;
@@ -1180,6 +1186,7 @@ extern int siClpSyntax(
    char                          acKyw[CLPMAX_KYWSIZ];
    int                           siErr,siLev,i;
    int                           l=strlen(psHdl->pcCmd);
+   clock_t                       uiClock=clock();
 
    if (psHdl->pcLst!=NULL) psHdl->pcLst[0]=0x00;
 
@@ -1222,6 +1229,7 @@ extern int siClpSyntax(
       if (siErr<0) return (siErr);
    }
    if (isSkr && psHdl->pfHlp!=NULL) fprintf(psHdl->pfHlp,"\n");
+   printd("ClpSyntax(%3.3f)\n",((double)((clock()-uiClock)))/CLOCKS_PER_SEC);
    return(CLP_OK);
 }
 
@@ -1286,6 +1294,7 @@ extern int siClpHelp(
    char                          acKyw[CLPMAX_KYWSIZ];
    int                           siErr,siLev,i;
    int                           l=strlen(psHdl->pcCmd);
+   clock_t                       uiClock=clock();
 
    if (psHdl->pcLst!=NULL) psHdl->pcLst[0]=0x00;
 
@@ -1432,6 +1441,7 @@ extern int siClpHelp(
          }
       }
    }
+   printd("ClpHelp(%3.3f)\n",((double)((clock()-uiClock)))/CLOCKS_PER_SEC);
    return(CLP_OK);
 }
 
@@ -1458,6 +1468,7 @@ extern int siClpDocu(
    char                          acNum[strlen(pcNum)+10];
    char                          acArg[20];
    const char*                   p;
+   clock_t                       uiClock=clock();
 
    if (psHdl->pcLst!=NULL) psHdl->pcLst[0]=0x00;
 
@@ -1736,6 +1747,7 @@ extern int siClpDocu(
    } else {
       return CLPERR(psHdl,CLPERR_INT,"No valid initial number or command string for head lines (%s)",psHdl->pcCmd);
    }
+   printd("ClpDocu(%3.3f)\n",((double)((clock()-uiClock)))/CLOCKS_PER_SEC);
    return(CLP_OK);
 }
 
@@ -1755,6 +1767,7 @@ extern int siClpProperties(
    int                           siErr,siLev,i;
    int                           l=strlen(psHdl->pcCmd);
    const char*                   pcArg=NULL;
+   clock_t                       uiClock=clock();
 
    if (psHdl->pcLst!=NULL) psHdl->pcLst[0]=0x00;
 
@@ -1803,6 +1816,7 @@ extern int siClpProperties(
          if (siErr<0) return(siErr);
       }
    }
+   printd("ClpProperties(%3.3f)\n",((double)((clock()-uiClock)))/CLOCKS_PER_SEC);
    return(CLP_OK);
 }
 
