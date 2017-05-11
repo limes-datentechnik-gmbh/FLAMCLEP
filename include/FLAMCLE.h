@@ -683,7 +683,7 @@ typedef struct CleAppendix {
  *
  * @return signed integer with the condition codes below:\n
  * 0  - command line, command syntax, mapping, execution and finish of the command was successful\n
- * 1  - command line, command syntax, mapping, execution and finish of the command was successful but a warning can be found in the log
+ * 1  - command line, command syntax, mapping, execution and finish of the command was successful but a warning can be found in the log\n
  * 2  - command line, command syntax, mapping, execution was successful but cleanup of the command failed (may not happened)\n
  * 4  - command line, command syntax and mapping was successful but execution of the command returns with a warning\n
  * 8  - command line, command syntax and mapping was successful but execution of the command returns with an error\n
@@ -696,8 +696,9 @@ typedef struct CleAppendix {
  * 36 - system error (mainly memory allocation or some thing like this failed)\n
  * 40 - access control or license error\n
  * 44 - interface error (parameter pointer equals to NULL or something like this)\n
+ * 48 - memory allocation failed (e.g. dynamic string handling)\n
  * 64 - fatal error (basic things are damaged)\n
- *>64 - Special condition code for job control
+ *>64 - Special condition code for job control\n
  */
 extern int siCleExecute(
    const TsCleCommand*           psTab,
