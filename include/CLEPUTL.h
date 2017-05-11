@@ -74,6 +74,7 @@ extern int win_unsetenv(const char* name);
 
 /* Definition of return/condition/exit codes **************************/
 
+// TODO: explanation of these macros?
 #define CLERTC_OK             0
 #define CLERTC_INF            1
 #define CLERTC_FIN            2
