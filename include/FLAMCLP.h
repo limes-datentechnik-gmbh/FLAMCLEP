@@ -1031,7 +1031,7 @@ extern void* pvClpOpen(
  *             (if FALSE then other properties are ignored, if TRUE then other properties are not possible)
  * @param[out] ppLst Pointer to the parsed parameter list (NULL = no list provided) in the CLP handle
  *
- * @return signed integer with CLP_OK(0) or an error code (CLPERR_xxxxxx)
+ * @return signed integer with CLP_OK (0 - nothing parsed) or an error code (CLPERR_xxxxxx (<0)) or the amount of parsed entities (>0)
  */
 extern int siClpParsePro(
    void*                         pvHdl,
@@ -1053,7 +1053,7 @@ extern int siClpParsePro(
  * @param[out] piOid If this pointer is set and the main table is an overlay the corresponding object identifier is returned
  * @param[out] ppLst Pointer to the parsed parameter list (NULL = no list provided) in the CLP handle
  *
- * @return signed integer with CLP_OK(0) or an error code (CLPERR_xxxxxx)
+ * @return signed integer with CLP_OK (0 - nothing parsed) or an error code (CLPERR_xxxxxx (<0)) or the amount of parsed entities (>0)
  */
 extern int siClpParseCmd(
    void*                         pvHdl,
