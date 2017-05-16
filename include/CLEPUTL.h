@@ -74,23 +74,55 @@ extern int win_unsetenv(const char* name);
 
 /* Definition of return/condition/exit codes **************************/
 
-// TODO: explanation of these macros?
+/** 0  - command line, command syntax, mapping, execution and finish of the command was successful*/
 #define CLERTC_OK             0
+
+/** 1  - command line, command syntax, mapping, execution and finish of the command was successful but a warning can be found in the log*/
 #define CLERTC_INF            1
+
+/** 2  - command line, command syntax, mapping, execution was successful but cleanup of the command failed (may not happened)*/
 #define CLERTC_FIN            2
+
+/** 4  - command line, command syntax and mapping was successful but execution of the command returns with a warning*/
 #define CLERTC_WRN            4
+
+/** 8  - command line, command syntax and mapping was successful but execution of the command returns with an error*/
 #define CLERTC_RUN            8
+
+/** 12 - command line and command syntax was OK but mapping failed*/
 #define CLERTC_MAP            12
+
+/** 16 - command line was OK but command syntax was wrong*/
 #define CLERTC_SYN            16
+
+/** 20 - command line was wrong (user error)*/
 #define CLERTC_CMD            20
+
+/** 24 - initialization of parameter structure for the command failed (may not happened)*/
 #define CLERTC_INI            24
+
+/** 28 - configuration is wrong (user error)*/
 #define CLERTC_CFG            28
+
+/** 32 - table error (something within the predefined tables is wrong)*/
 #define CLERTC_TAB            32
+
+/** 36 - system error (mainly memory allocation or some thing like this failed)*/
 #define CLERTC_SYS            36
+
+/** 40 - access control or license error*/
 #define CLERTC_ACS            40
+
+/** 44 - interface error (parameter pointer equals to NULL or something like this)*/
 #define CLERTC_ITF            44
+
+/** 48 - memory allocation failed (e.g. dynamic string handling)*/
 #define CLERTC_MEM            48
+
+/** 64 - fatal error (basic things are damaged)*/
 #define CLERTC_FAT            64
+
+/** maximal condition code value (greater condition codes are special return codes)*/
 #define CLERTC_MAX            64
 
 /**********************************************************************/
