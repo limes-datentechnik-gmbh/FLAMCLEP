@@ -142,7 +142,7 @@ extern char* safe_getenv(const char* name, char* buffer, size_t bufsiz);
  * @param format  format string
  * @return        amount of characters printed (0 are mainly a error)
  */
-extern int printd(const char* format,...);
+extern int printd(const char* format,...) __attribute__((format(printf, 1, 2)));
 /**
  * Works like snprintf but concatenates the format string to the buffer.
  * @param buffer  pointer to the string buffer
@@ -150,7 +150,7 @@ extern int printd(const char* format,...);
  * @param format  format string
  * @return        amount of characters printed (0 are mainly a error)
  */
-extern int snprintc(char* buffer,const size_t size,const char* format,...);
+extern int snprintc(char* buffer,const size_t size,const char* format,...)__attribute__((format(printf, 3, 4)));
 
 /**
  * Works like snprintf but does reallocation of the buffer (maximal expansion of the format string can be specified).
@@ -160,7 +160,7 @@ extern int snprintc(char* buffer,const size_t size,const char* format,...);
  * @param format  format string
  * @return        amount of characters printed (0 are mainly a error)
  */
-extern int srprintc(char** buffer,size_t* size,const size_t expan,const char* format,...);
+extern int srprintc(char** buffer,size_t* size,const size_t expan,const char* format,...) __attribute__((format(printf, 4, 5)));
 
 /**
  * Works like snprintc but does reallocation of the buffer (maximal expansion of the format string can be specified).
@@ -170,7 +170,7 @@ extern int srprintc(char** buffer,size_t* size,const size_t expan,const char* fo
  * @param format  format string
  * @return        amount of characters printed (0 are mainly a error)
  */
-extern int srprintf(char** buffer,size_t* size,const size_t expan,const char* format,...);
+extern int srprintf(char** buffer,size_t* size,const size_t expan,const char* format,...) __attribute__((format(printf, 4, 5)));
 
 
 /**
