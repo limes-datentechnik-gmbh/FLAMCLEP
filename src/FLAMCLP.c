@@ -3360,7 +3360,7 @@ static int siClpScnNat(
             if (psHdl->siBuf>=CLPMAX_BUFCNT) {
                return CLPERR(psHdl,CLPERR_LEX,"Environment variable replacement (%s=%s) not possible (more than %d recursions)",pcLex,pcEnv,CLPMAX_BUFCNT);
             }
-            srprintf(&psHdl->apBuf[psHdl->siBuf],&psHdl->pzBuf[psHdl->siBuf],l+strlen(pcEnv)+strlen((*ppCur)),"%.*s%s%s",l,psHdl->pcInp,pcEnv,(*ppCur));
+            srprintf(&psHdl->apBuf[psHdl->siBuf],&psHdl->pzBuf[psHdl->siBuf],l+strlen(pcEnv)+strlen((*ppCur)),"%.*s%s%s",(int)l,psHdl->pcInp,pcEnv,(*ppCur));
             if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-ENVARREP\n%s %s\n%s %s\n",fpcPre(psHdl,0),psHdl->pcInp,fpcPre(psHdl,0),psHdl->apBuf[psHdl->siBuf]);
             (*ppCur)=psHdl->apBuf[psHdl->siBuf]+l;
             psHdl->pcInp=psHdl->apBuf[psHdl->siBuf];
