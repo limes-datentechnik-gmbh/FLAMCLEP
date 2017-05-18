@@ -884,6 +884,7 @@ EVALUATE:
          if (pcDef!=NULL && *pcDef) {
             for (i=0;psTab[i].pcKyw!=NULL;i++) {
                if (strxcmp(isCas,pcDef,psTab[i].pcKyw,0,0,FALSE)==0) {
+                  // TODO: Stack Allokation mit unbegrenzter Größe = Potenzielle Sicherheitslücke
                   char acPat[strlen(pcDef)+strlen(argv[2]+2)];
                   siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,pcOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isPfl,isEnv,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg);
                   if (siErr) ERROR(siErr,NULL);
@@ -983,6 +984,7 @@ EVALUATE:
          if (pcDef!=NULL && *pcDef) {
             for (i=0;psTab[i].pcKyw!=NULL;i++) {
                if (strxcmp(isCas,pcDef,psTab[i].pcKyw,0,0,FALSE)==0) {
+                  // TODO: Stack Allokation mit unbegrenzter Größe = Potenzielle Sicherheitslücke
                   char acPat[strlen(psTab[i].pcKyw)+strlen(argv[2]+2)];
                   siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,pcOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isPfl,isEnv,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg);
                   if (siErr) ERROR(siErr,NULL);
@@ -1326,6 +1328,7 @@ EVALUATE:
             if (pcDef!=NULL && *pcDef) {
                for (i=0;psTab[i].pcKyw!=NULL;i++) {
                   if (strxcmp(isCas,pcDef,psTab[i].pcKyw,0,0,FALSE)==0) {
+                     // TODO: Stack Allokation mit unbegrenzter Größe = Potenzielle Sicherheitslücke
                      char acPat[strlen(pcDef)+strlen(pcCmd+2)];
                      siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,pcOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isPfl,isEnv,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg);
                      if (siErr) ERROR(siErr,NULL);
@@ -1925,6 +1928,7 @@ EVALUATE:
          if (pcDef!=NULL && *pcDef) {
             for (i=0;psTab[i].pcKyw!=NULL;i++) {
                if (strxcmp(isCas,pcDef,psTab[i].pcKyw,0,0,FALSE)==0) {
+                  // TODO: Stack Allokation mit unbegrenzter Größe = Potenzielle Sicherheitslücke
                   char acPat[strlen(pcDef)+strlen(argv[2]+2)];
                   siErr=siClePropertyInit(psTab[i].pfIni,psTab[i].pvClp,pcOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,
                                           psTab[i].piOid,psTab[i].psTab,isCas,isPfl,isEnv,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,NULL,NULL,pfMsg);
@@ -2343,6 +2347,7 @@ static int siClePropertyFinish(
 {
    int                           siErr,i;
    FILE*                         pfPro;
+   // TODO: Stack Allokation mit unbegrenzter Größe = Potenzielle Sicherheitslücke
    char                          acEnv[strlen(pcHom)+strlen(pcOwn)+strlen(pcPgm)+strlen(pcCmd)+64];
    size_t                        szEnv=0;
    char*                         pcEnv=NULL;
@@ -2959,6 +2964,7 @@ static int siCleGetProperties(
 {
    int                     siErr,siSiz=0;
    const char*             pcHlp=NULL;
+   // TODO: Stack Allokation mit unbegrenzter Größe = Potenzielle Sicherheitslücke
    char                    acRoot[strlen(pcOwn)+strlen(pcPgm)+strlen(pcCmd)+17];
 
    SAFE_FREE(*ppFil);

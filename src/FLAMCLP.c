@@ -2026,6 +2026,7 @@ static TsSym* psClpSymIns(
    TsSym*                        psHlp=NULL;
    char*                         pcEnv=NULL;
    char*                         pcPat=fpcPat(pvHdl,siLev);
+   // TODO: Stack Allokation mit unbegrenzter Größe = Potenzielle Sicherheitslücke
    char                          acVar[strlen(psHdl->pcOwn)+strlen(psHdl->pcPgm)+strlen(pcPat)+strlen(psArg->pcKyw)+4];
    int                           k;
    acVar[0]=0x00;
@@ -3944,6 +3945,7 @@ static int siClpPrsFil(
    TsSym*                        psArg)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
+   // TODO: Stack Allokation mit unbegrenzter Größe = Potenzielle Sicherheitslücke
    char                          acSrc[strlen(psHdl->pcSrc)+1];
    char*                         pcFil;
    char*                         pcPar=NULL;
@@ -5648,6 +5650,7 @@ static int siClpBldLit(
          const char*                   pcInp;
          const char*                   pcOld;
          const char*                   pcRow;
+         // TODO: Stack Allokation mit unbegrenzter Größe = Potenzielle Sicherheitslücke
          char                          acSrc[strlen(psHdl->pcSrc)+1];
          size_t                        szLex=CLPINI_LEXSIZ;
          char*                         pcLex=(char*)calloc(1,szLex);
@@ -6368,6 +6371,7 @@ static int siClpSetDefault(
    TsSym*                        psVal=NULL;
    size_t                        szVal=CLPINI_VALSIZ;
    char*                         pcVal=(char*)calloc(1,szVal);
+   // TODO: Stack Allokation mit unbegrenzter Größe = Potenzielle Sicherheitslücke
    char                          acSrc[strlen(psHdl->pcSrc)+1];
    char                          acLex[strlen(psHdl->pcLex)+1];
    TsVar                         asSav[CLPMAX_TABCNT];
