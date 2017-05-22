@@ -138,12 +138,13 @@
  * 1.2.92: Support type string to determine unsigned flag
  * 1.2.93: Support literal or static variable assignments for dynamic values in CLP structure
  * 1.2.94: Reduce memory of symbol table (don't store pcAli use psAli instead)
+ * 1.2.95: Add new link to get the index (byte offset) of the current key word in the CLP string
 **/
 
-#define CLP_VSN_STR       "1.2.94"
+#define CLP_VSN_STR       "1.2.95"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        2
-#define CLP_VSN_REVISION       94
+#define CLP_VSN_REVISION       95
 
 /* Definition der Konstanten ******************************************/
 
@@ -262,6 +263,7 @@ typedef struct Fix {
    struct Sym*                   psLnk;
    struct Sym*                   psCnt;
    struct Sym*                   psOid;
+   struct Sym*                   psInd;
    struct Sym*                   psEln;
    struct Sym*                   psSln;
    struct Sym*                   psTln;
@@ -2109,6 +2111,7 @@ static TsSym* psClpSymIns(
    psSym->psFix->psLnk=NULL;
    psSym->psFix->psCnt=NULL;
    psSym->psFix->psOid=NULL;
+   psSym->psFix->psInd=NULL;
    psSym->psFix->psEln=NULL;
    psSym->psFix->psSln=NULL;
    psSym->psFix->psTln=NULL;
@@ -2417,6 +2420,18 @@ static void vdClpSymLnkOid(
    }
 }
 
+static void vdClpSymLnkInd(
+   TsSym*            psSym,
+   TsSym*            psLnk)
+{
+   TsSym*            psSon;
+   for (psSon=psSym->psDep; psSon!=NULL; psSon=psSon->psNxt) {
+      if (psSon->psFix->siTyp==CLPTYP_OVRLAY) {
+         psSon->psFix->psInd=psLnk;
+         vdClpSymLnkInd(psSon,psLnk);
+      }
+   }
+}
 
 static void vdClpSymLnkEln(
    TsSym*            psSym,
@@ -2499,6 +2514,12 @@ static int siClpSymCal(
                   psHlp->psFix->psOid=psSym; k++;
                   if (psHlp->psFix->siTyp==CLPTYP_OVRLAY) {
                      vdClpSymLnkOid(psHlp,psSym);
+                  }
+               }
+               if (CLPISF_IND(psSym->psStd->uiFlg)) {
+                  psHlp->psFix->psInd=psSym; k++;
+                  if (psHlp->psFix->siTyp==CLPTYP_OVRLAY) {
+                     vdClpSymLnkInd(psHlp,psSym);
                   }
                }
                if (CLPISF_ELN(psSym->psStd->uiFlg)) {
@@ -2701,10 +2722,10 @@ static void vdClpSymPrn(
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    TsSym*                        psHlp=psSym;
    while (psHlp!=NULL) {
-      if (psHdl->pfSym!=NULL) efprintf(psHdl->pfSym,"%s %3.3d - %s (KWL=%d TYP=%s MIN=%d MAX=%d SIZ=%d OFS=%d OID=%d FLG=%8.8X (NXT=%p BAK=%p DEP=%p HIH=%p ALI=%p CNT=%p OID=%p ELN=%p SLN=%p TLN=%p LNK=%p)) - %s\n",
+      if (psHdl->pfSym!=NULL) efprintf(psHdl->pfSym,"%s %3.3d - %s (KWL=%d TYP=%s MIN=%d MAX=%d SIZ=%d OFS=%d OID=%d FLG=%8.8X (NXT=%p BAK=%p DEP=%p HIH=%p ALI=%p CNT=%p OID=%p IND=%p ELN=%p SLN=%p TLN=%p LNK=%p)) - %s\n",
             fpcPre(pvHdl,siLev),psHlp->psStd->siPos+1,psHlp->psStd->pcKyw,psHlp->psStd->siKwl,apClpTyp[psHlp->psFix->siTyp],psHlp->psFix->siMin,psHlp->psFix->siMax,psHlp->psFix->siSiz,
             psHlp->psFix->siOfs,psHlp->psFix->siOid,psHlp->psStd->uiFlg,psHlp->psNxt,psHlp->psBak,psHlp->psDep,psHlp->psHih,psHlp->psStd->psAli,psHlp->psFix->psCnt,psHlp->psFix->psOid,
-            psHlp->psFix->psEln,psHlp->psFix->psSln,psHlp->psFix->psTln,psHlp->psFix->psLnk,psHlp->psFix->pcHlp);
+            psHlp->psFix->psInd,psHlp->psFix->psEln,psHlp->psFix->psSln,psHlp->psFix->psTln,psHlp->psFix->psLnk,psHlp->psFix->pcHlp);
       if (psHlp->psDep!=NULL) {
          vdClpSymPrn(pvHdl,siLev+1,psHlp->psDep);
       }
@@ -3842,12 +3863,14 @@ static int siClpPrsPar(
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    char                          acKyw[CLPMAX_KYWSIZ];
    TsSym*                        psArg=NULL;
-   int                           siInd;
+   int                           siErr;
 
    if (psHdl->siTok==CLPTOK_KYW) {
       snprintf(acKyw,sizeof(acKyw),"%s",psHdl->pcLex);
-      siInd=siClpSymFnd(pvHdl,siLev,siPos,acKyw,psTab,&psArg,NULL);
-      if (siInd<0) return(siInd);
+      siErr=siClpSymFnd(pvHdl,siLev,siPos,acKyw,psTab,&psArg,NULL);
+      if (siErr<0) return(siErr);
+      siErr=siClpBldLnk(pvHdl,siLev,siPos,psHdl->pcOld-psHdl->pcInp,psArg->psFix->psInd,TRUE);
+      if (siErr<0) return(siErr);
       if (piOid!=NULL) *piOid=psArg->psFix->siOid;
       psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
       if (psHdl->siTok<0) return(psHdl->siTok);

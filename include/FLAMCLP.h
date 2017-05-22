@@ -575,6 +575,8 @@ extern const char* pcClpAbout(const int l, const int s, char* b);
 #define CLPFLG_CNT               0x00000100U
 /** CLPFLG_OID This link will be filled by the object identifier (OID) of the chosen argument (useful for overlays) */
 #define CLPFLG_OID               0x00000200U
+/** CLPFLG_IND This link will be filled with the index (position) in the CLP string (byte offset of the current key word)*/
+#define CLPFLG_IND               0x00000400U
 /** CLPFLG_ELN This link will be filled by the calculated length of an element (fixed types == data size, packed types == data length) */
 #define CLPFLG_ELN               0x00001000U
 /** CLPFLG_SLN This link will be filled by the calculated string length for an element (only for null-terminated strings) */
@@ -626,6 +628,7 @@ extern const char* pcClpAbout(const int l, const int s, char* b);
 #define CLPISF_BIN(flg)          ((flg)&CLPFLG_BIN)
 #define CLPISF_CNT(flg)          ((flg)&CLPFLG_CNT)
 #define CLPISF_OID(flg)          ((flg)&CLPFLG_OID)
+#define CLPISF_IND(flg)          ((flg)&CLPFLG_IND)
 #define CLPISF_ELN(flg)          ((flg)&CLPFLG_ELN)
 #define CLPISF_SLN(flg)          ((flg)&CLPFLG_SLN)
 #define CLPISF_TLN(flg)          ((flg)&CLPFLG_TLN)
