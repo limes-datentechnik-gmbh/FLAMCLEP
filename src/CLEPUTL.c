@@ -190,7 +190,7 @@ extern char* duserid(void) {
    if (NULL != uP) {
       srprintf(&buffer,&size,strlen(uP->pw_name),"%s",uP->pw_name);
    } else {
-      srprintf(&buffer,&size,0,"");
+      srprintf(&buffer,&size,0,"%s","");
    }
    return(buffer);
 }
@@ -289,7 +289,7 @@ extern char* dhomedir(int flag) {
                if (flag) {
                   srprintf(&buffer,&size,0,"/");
                } else {
-                  srprintf(&buffer,&size,0,"");
+                  srprintf(&buffer,&size,0,"%s","");
                }
             }
             free(user);
@@ -297,7 +297,7 @@ extern char* dhomedir(int flag) {
             if (flag) {
                srprintf(&buffer,&size,0,"/");
             } else {
-               srprintf(&buffer,&size,0,"");
+               srprintf(&buffer,&size,0,"%s","");
             }
          }
       }
@@ -1833,6 +1833,7 @@ extern int printd(const char* format,...)
    va_start(argv, format);
    r=vfprintf (stderr, format, argv );
    va_end(argv);
+   fflush(stderr);
    return r;
 #else
    return 0;
