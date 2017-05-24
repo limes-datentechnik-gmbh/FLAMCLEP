@@ -50,6 +50,10 @@
    #define EOS             (0x00)
 #endif
 
+#ifndef __PRINTF_CHECK__
+#  define __PRINTF_CHECK__(A,B)
+#endif
+
 /** Free memory space */
 #define SAFE_FREE(x) do { if ((x) != NULL) {free((void*)(x)); (x)=NULL;} } while(0)
 
