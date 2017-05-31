@@ -38,7 +38,7 @@
 #include <stdarg.h>
 #include <locale.h>
 
-#include "FLCLEUTL.h"
+#include "CLEPUTL.h"
 /* Include der Schnittstelle ******************************************/
 #include "FLAMCLP.h"
 
