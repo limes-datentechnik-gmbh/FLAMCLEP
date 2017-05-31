@@ -38,7 +38,7 @@
 #include <stdarg.h>
 #include <locale.h>
 
-#include "CLEPUTL.h"
+#include "FLCLEUTL.h"
 /* Include der Schnittstelle ******************************************/
 #include "FLAMCLP.h"
 
@@ -152,8 +152,6 @@
 #define CLPMAX_HDEPTH            128
 #define CLPMAX_KYWLEN            63
 #define CLPMAX_KYWSIZ            64
-#define CLPMAX_LOCSIZ            128
-#define CLPMAX_LOCLEN            127
 #define CLPMAX_BUFCNT            32
 
 #define CLPINI_LEXSIZ            1024
@@ -345,7 +343,6 @@ typedef struct Hdl {
    int                           siRow;
    int                           siCol;
    int                           siErr;
-   char                          acLoc[CLPMAX_LOCSIZ];
    I64                           siNow;
    I64                           siRnd;
    int                           siPtr;
@@ -1023,11 +1020,6 @@ extern void* pvClpOpen(
             psErr->piRow=&psHdl->siRow;
             psErr->piCol=&psHdl->siCol;
          }
-         pcLoc=setlocale(LC_NUMERIC, NULL);
-         if (pcLoc!=NULL && *pcLoc) {
-            snprintf(psHdl->acLoc,sizeof(psHdl->acLoc),"%s",pcLoc);
-         }
-         setlocale(LC_NUMERIC, "C");
          psHdl->siNow=time(NULL);
          srand(psHdl->siNow+clock());
          psHdl->siRnd=ClpRndFnv(rand()+clock());
@@ -1942,7 +1934,6 @@ extern void vdClpClose(
             psHdl->pzBuf[i]=0;
          }
       }
-      setlocale(LC_NUMERIC, psHdl->acLoc);
       vdClpSymDel(psHdl->psTab);
       psHdl->psTab=NULL;
 
@@ -4317,9 +4308,15 @@ static int siFromFloatLexem(
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    char*                         pcHlp=NULL;
+   char*                         pcLoc;
    errno=0;
    switch (pcVal[0]) {
-   case 'd':*pfVal=strtod(pcVal+1,&pcHlp); break;
+   case 'd':
+      pcLoc=setlocale(LC_NUMERIC, NULL);
+      setlocale(LC_NUMERIC, "C");
+      *pfVal=strtod(pcVal+1,&pcHlp);
+      setlocale(LC_NUMERIC, pcLoc);
+      break;
    default: return CLPERR(psHdl,CLPERR_SEM,"Base (%c) of floating point literal (%s.%s=%s) not supported",pcVal[0],fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,isPrnStr(psArg,pcVal+1));
    }
    if (errno ||  (pcHlp!=NULL && *pcHlp)) {

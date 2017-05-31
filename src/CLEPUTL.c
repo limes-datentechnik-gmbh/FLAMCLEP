@@ -394,10 +394,14 @@ extern unsigned int sysccsid(void) {
    // From man page:
    // On startup of the main program, the portable "C" locale is selected
    // as default.
+   // TODO: avoid using setlocale()/localeconv() anywhere in the project (except in main()) as they are not thread-safe
+   char* oldLocale = setlocale(LC_ALL, NULL);
    setlocale(LC_ALL, "");
 
    charset = nl_langinfo(CODESET);
    ccsid = mapcdstr(charset);
+
+   setlocale(LC_ALL, oldLocale);
 #elif defined(__WIN__)
    static CPINFOEX info;
 
