@@ -4312,6 +4312,7 @@ static int siFromFloatLexem(
    errno=0;
    switch (pcVal[0]) {
    case 'd':
+      // TODO: avoid using setlocale()/localeconv() anywhere in the project (except in main()) as they are not thread-safe
       pcLoc=setlocale(LC_NUMERIC, NULL);
       setlocale(LC_NUMERIC, "C");
       *pfVal=strtod(pcVal+1,&pcHlp);

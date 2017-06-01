@@ -397,11 +397,10 @@ extern unsigned int sysccsid(void) {
    // TODO: avoid using setlocale()/localeconv() anywhere in the project (except in main()) as they are not thread-safe
    char* oldLocale = setlocale(LC_ALL, NULL);
    setlocale(LC_ALL, "");
-
    charset = nl_langinfo(CODESET);
+   setlocale(LC_ALL, oldLocale);
    ccsid = mapcdstr(charset);
 
-   setlocale(LC_ALL, oldLocale);
 #elif defined(__WIN__)
    static CPINFOEX info;
 
