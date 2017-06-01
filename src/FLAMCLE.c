@@ -3413,7 +3413,7 @@ extern int siCleParseString(
    TsClpError              stErr;
    char                    acBuffer[4096];
 #ifdef __ZOS__
-   C08                     acTmpNam[64];
+   char                    acTmpNam[64];
    snprintf(acTmpNam,sizeof(acTmpNam),"CLPTEMP.P%7.7d",((unsigned int)getpid())%10000000);
    pfTmp=fopen(acTmpNam,"wb+,type=memory");
 #else
