@@ -139,12 +139,13 @@
  * 1.2.93: Support literal or static variable assignments for dynamic values in CLP structure
  * 1.2.94: Reduce memory of symbol table (don't store pcAli use psAli instead)
  * 1.2.95: Add new link to get the index (byte offset) of the current key word in the CLP string
+ * 1.2.96: Set locale to "C" close to strtod (remove from open and close functions)
 **/
 
-#define CLP_VSN_STR       "1.2.95"
+#define CLP_VSN_STR       "1.2.96"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        2
-#define CLP_VSN_REVISION       95
+#define CLP_VSN_REVISION       96
 
 /* Definition der Konstanten ******************************************/
 
@@ -958,7 +959,6 @@ extern void* pvClpOpen(
    TsClpError*                   psErr)
 {
    TsHdl*                        psHdl=NULL;
-   char*                         pcLoc=NULL;
    const char*                   pcNow=NULL;
    I64                           siNow=0;
    int                           siErr,i;
