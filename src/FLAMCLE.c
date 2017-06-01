@@ -2829,14 +2829,14 @@ static void vdPrnStaticSyntax(
       }
    }
    fprintf(pfOut,"\n");
-   fprintf(pfOut,"%s%s %s %cOWNER=oid%c command \"... argument list ...\" %cMAXCC=%cfrom%c%c-to%c%c %cQUIET/SILENT%c\n",pcDep,pcDep,pcPgm,C_SBO,C_SBC,C_SBO,C_SBO,C_SBC,C_SBO,C_SBC,C_SBC,C_SBO,C_SBC);
-   fprintf(pfOut,"%s%s %s %cOWNER=oid%c command=\" parameter file name \" %cMAXCC=%cfrom%c%c-to%c%c %cQUIET/SILENT%c\n",pcDep,pcDep,pcPgm,C_SBO,C_SBC,C_SBO,C_SBO,C_SBC,C_SBO,C_SBC,C_SBC,C_SBO,C_SBC);
+   fprintf(pfOut,"%s%s %s %cOWNER=oid%c command \"... argument list ...\" %cMAXCC=%cmax%c%c-min%c%c %cQUIET/SILENT%c\n",pcDep,pcDep,pcPgm,C_SBO,C_SBC,C_SBO,C_SBO,C_SBC,C_SBO,C_SBC,C_SBC,C_SBO,C_SBC);
+   fprintf(pfOut,"%s%s %s %cOWNER=oid%c command=\" parameter file name \" %cMAXCC=%cmax%c%c-min%c%c %cQUIET/SILENT%c\n",pcDep,pcDep,pcPgm,C_SBO,C_SBC,C_SBO,C_SBO,C_SBC,C_SBO,C_SBC,C_SBC,C_SBO,C_SBC);
    fprintf(pfOut,"%s%s You can optionally specify:\n",pcDep,pcDep);
    fprintf(pfOut,"%s%s%s the owner id for this command (to use custom configuration files)\n",pcDep,pcDep,pcDep);
-   fprintf(pfOut,"%s%s%s the maximal condition code overall (from) and to suppress warnings\n",pcDep,pcDep,pcDep);
-   fprintf(pfOut,"%s%s%s the maximal condition code which will be set to zero (to)\n",pcDep,pcDep,pcDep);
-   fprintf(pfOut,"%s%s%s QUIET disables the normal printouts of command line executer\n",pcDep,pcDep,pcDep);
-   fprintf(pfOut,"%s%s%s SILENT disables printouts and errors messages of command line executer\n",pcDep,pcDep,pcDep);
+   fprintf(pfOut,"%s%s%s the maximum condition code (max) to suppress warnings\n",pcDep,pcDep,pcDep);
+   fprintf(pfOut,"%s%s%s the minimum condition code (min), zero is returned if the condition code would be smaller\n",pcDep,pcDep,pcDep);
+   fprintf(pfOut,"%s%s%s QUIET disables the normal log output of the command line executer\n",pcDep,pcDep,pcDep);
+   fprintf(pfOut,"%s%s%s SILENT disables log and errors messages of the command line executer\n",pcDep,pcDep,pcDep);
    fprintf(pfOut,"%s Built-in functions:\n",pcDep);
    fprintf(pfOut,"%s%s %s ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",SYN_CLE_SYNTAX  );
    fprintf(pfOut,"%s%s %s ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",SYN_CLE_HELP    );
@@ -3067,8 +3067,8 @@ static int siCleGetCommand(
       if (pfErr!=NULL) fprintf(pfErr,"No blank space ' ', equal sign '=', dot '.' or bracket '(' behind '%s'\n",pcFct);
       if (pfErr!=NULL) fprintf(pfErr,"Please use a blank space to define an argument list or an equal sign for a parameter file\n");
       if (pfErr!=NULL) fprintf(pfErr,"Syntax for command '%s' not valid\n",pcFct);
-      if (pfErr!=NULL) fprintf(pfErr,"%s %s %cOWNER=oid%c %s \"... argument list ...\" %cMAXCC=%cfrom%c%c-to%c%c %cQUIET%c\n",pcDep,argv[0],C_SBO,C_SBC,pcFct,C_SBO,C_SBO,C_SBC,C_SBO,C_SBC,C_SBC,C_SBO,C_SBC);
-      if (pfErr!=NULL) fprintf(pfErr,"%s %s %cOWNER=oid%c %s=\" parameter file name \" %cMAXCC=%cfrom%c%c-to%c%c %cQUIET%c\n",pcDep,argv[0],C_SBO,C_SBC,pcFct,C_SBO,C_SBO,C_SBC,C_SBO,C_SBC,C_SBC,C_SBO,C_SBC);
+      if (pfErr!=NULL) fprintf(pfErr,"%s %s %cOWNER=oid%c %s \"... argument list ...\" %cMAXCC=%cmax%c%c-min%c%c %cQUIET%c\n",pcDep,argv[0],C_SBO,C_SBC,pcFct,C_SBO,C_SBO,C_SBC,C_SBO,C_SBC,C_SBC,C_SBO,C_SBC);
+      if (pfErr!=NULL) fprintf(pfErr,"%s %s %cOWNER=oid%c %s=\" parameter file name \" %cMAXCC=%cmax%c%c-min%c%c %cQUIET%c\n",pcDep,argv[0],C_SBO,C_SBC,pcFct,C_SBO,C_SBO,C_SBC,C_SBO,C_SBC,C_SBC,C_SBO,C_SBC);
       if (pfErr!=NULL) fprintf(pfErr,"Please use '%s SYNTAX %s%c.path%c' for more information\n",argv[0],pcFct,C_SBO,C_SBC);
       SAFE_FREE(*ppFil);
       return(CLERTC_CMD);
