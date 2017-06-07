@@ -720,11 +720,11 @@ static int siFromFloatLexem(
    const char*                   pcVal,
    double*                       pfVal);
 
-static char* fpcPre(
+static const char* fpcPre(
    void*                         pvHdl,
    const int                     siLev);
 
-static char* fpcPat(
+static const char* fpcPat(
    void*                         pvHdl,
    const int                     siLev);
 
@@ -1965,7 +1965,7 @@ extern void vdClpClose(
 
 /* Interne Funktionen *************************************************/
 
-static char* get_env(char* var,const size_t size,const char* fmtstr, ...)
+static const char* get_env(char* var,const size_t size,const char* fmtstr, ...)
 {
    int                  i;
    va_list              argv;
@@ -1999,8 +1999,8 @@ static TsSym* psClpSymIns(
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    TsSym*                        psSym=NULL;
    TsSym*                        psHlp=NULL;
-   char*                         pcEnv=NULL;
-   char*                         pcPat=fpcPat(pvHdl,siLev);
+   const char*                   pcEnv=NULL;
+   const char*                   pcPat=fpcPat(pvHdl,siLev);
    // TODO: Stack Allokation mit unbegrenzter Größe = Potenzielle Sicherheitslücke
    char                          acVar[strlen(psHdl->pcOwn)+strlen(psHdl->pcPgm)+strlen(pcPat)+strlen(psArg->pcKyw)+4];
    int                           k;
@@ -5157,7 +5157,7 @@ static int siClpBldSwt(
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    const int                     siTyp=CLPTYP_SWITCH;
    I64                           siVal=psArg->psFix->siOid;
-   char*                         pcHlp=NULL;
+   const char*                   pcPat=NULL;
    int                           siErr;
 
    if (psArg->psFix->siTyp!=siTyp) {
@@ -5225,8 +5225,8 @@ static int siClpBldSwt(
    psArg->psVar->siRst-=CLPISF_DYN(psArg->psStd->uiFlg)?0:psArg->psFix->siSiz;
    psArg->psVar->siCnt++;
 
-   pcHlp=fpcPat(pvHdl,siLev);
-   srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcHlp)+strlen(psArg->psStd->pcKyw),"%s.%s=ON\n",pcHlp,psArg->psStd->pcKyw);
+   pcPat=fpcPat(pvHdl,siLev);
+   srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcPat)+strlen(psArg->psStd->pcKyw),"%s.%s=ON\n",pcPat,psArg->psStd->pcKyw);
 
    siErr=siClpBldLnk(pvHdl,siLev,siPos,psArg->psVar->siCnt,psArg->psFix->psCnt,FALSE);
    if (siErr<0) return(siErr);
@@ -5250,7 +5250,7 @@ static int siClpBldNum(
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    const int                     siTyp=CLPTYP_NUMBER;
    I64                           siVal=psArg->psFix->siOid;
-   char*                         pcHlp=NULL;
+   const char*                   pcPat=NULL;
    int                           siErr;
 
    if (psArg->psFix->siTyp!=siTyp) {
@@ -5318,8 +5318,8 @@ static int siClpBldNum(
    psArg->psVar->siRst-=CLPISF_DYN(psArg->psStd->uiFlg)?0:psArg->psFix->siSiz;
    psArg->psVar->siCnt++;
 
-   pcHlp=fpcPat(pvHdl,siLev);
-   srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcHlp)+strlen(psArg->psStd->pcKyw)+16,"%s.%s=DEFAULT(%d)\n",pcHlp,psArg->psStd->pcKyw,(int)siVal);
+   pcPat=fpcPat(pvHdl,siLev);
+   srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcPat)+strlen(psArg->psStd->pcKyw)+16,"%s.%s=DEFAULT(%d)\n",pcPat,psArg->psStd->pcKyw,(int)siVal);
 
    siErr=siClpBldLnk(pvHdl,siLev,siPos,psArg->psVar->siCnt,psArg->psFix->psCnt,FALSE);
    if (siErr<0) return(siErr);
@@ -5351,6 +5351,7 @@ static int siClpBldLit(
    F64                           flVal=0;
    char*                         pcHlp=NULL;
    const char*                   pcKyw=NULL;
+   const char*                   pcPat=NULL;
    TsSym*                        psCon;
 
    if (psArg->psVar->siCnt>=psArg->psFix->siMax) {
@@ -5916,18 +5917,18 @@ static int siClpBldLit(
          }
       }
    }
-   pcHlp=fpcPat(pvHdl,siLev);
+   pcPat=fpcPat(pvHdl,siLev);
    if (pcKyw!=NULL) {
       if (psArg->psFix->siTyp==CLPTYP_NUMBER && (CLPISF_TIM(psArg->psStd->uiFlg) || pcVal[0]=='t')) {
-         srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcHlp)+strlen(psArg->psStd->pcKyw)+strlen(isPrnStr(psArg,pcVal))+strlen(cstime(siVal,NULL)),"%s.%s=%s(%s(%s))\n",pcHlp,psArg->psStd->pcKyw,pcKyw,isPrnStr(psArg,pcVal),cstime(siVal,NULL));
+         srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcPat)+strlen(psArg->psStd->pcKyw)+strlen(isPrnStr(psArg,pcVal))+strlen(cstime(siVal,NULL)),"%s.%s=%s(%s(%s))\n",pcPat,psArg->psStd->pcKyw,pcKyw,isPrnStr(psArg,pcVal),cstime(siVal,NULL));
       } else {
-         srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcHlp)+strlen(psArg->psStd->pcKyw)+strlen(isPrnStr(psArg,pcVal)),"%s.%s=%s(%s)\n",pcHlp,psArg->psStd->pcKyw,pcKyw,isPrnStr(psArg,pcVal));
+         srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcPat)+strlen(psArg->psStd->pcKyw)+strlen(isPrnStr(psArg,pcVal)),"%s.%s=%s(%s)\n",pcPat,psArg->psStd->pcKyw,pcKyw,isPrnStr(psArg,pcVal));
       }
    } else {
       if (psArg->psFix->siTyp==CLPTYP_NUMBER && (CLPISF_TIM(psArg->psStd->uiFlg) || pcVal[0]=='t')) {
-         srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcHlp)+strlen(psArg->psStd->pcKyw)+strlen(isPrnStr(psArg,pcVal))+strlen(cstime(siVal,NULL)),"%s.%s=%s(%s)\n",pcHlp,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),cstime(siVal,NULL));
+         srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcPat)+strlen(psArg->psStd->pcKyw)+strlen(isPrnStr(psArg,pcVal))+strlen(cstime(siVal,NULL)),"%s.%s=%s(%s)\n",pcPat,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),cstime(siVal,NULL));
       } else {
-         srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcHlp)+strlen(psArg->psStd->pcKyw)+strlen(isPrnStr(psArg,pcVal)),"%s.%s=%s\n",pcHlp,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal));
+         srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcPat)+strlen(psArg->psStd->pcKyw)+strlen(isPrnStr(psArg,pcVal)),"%s.%s=%s\n",pcPat,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal));
       }
    }
 
@@ -6112,7 +6113,7 @@ static int siClpIniObj(
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    const int                     siTyp=CLPTYP_OBJECT;
    TsSym*                        psHlp;
-   char*                         pcHlp;
+   const char*                   pcPat;
 
    if (psArg->psFix->siTyp!=siTyp) {
       return CLPERR(psHdl,CLPERR_SEM,"The type (%s) of argument '%s.%s' don't match the expected type (%s)",apClpTyp[siTyp],fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
@@ -6151,8 +6152,8 @@ static int siClpIniObj(
    if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-BEGIN-OBJECT-%s(PTR=%p CNT=%d LEN=%d RST=%d)\n",
                            fpcPre(pvHdl,siLev),psArg->psStd->pcKyw,psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst);
 
-   pcHlp=fpcPat(pvHdl,siLev);
-   srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcHlp)+strlen(psArg->psStd->pcKyw),"%s.%s(\n",pcHlp,psArg->psStd->pcKyw);
+   pcPat=fpcPat(pvHdl,siLev);
+   srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcPat)+strlen(psArg->psStd->pcKyw),"%s.%s(\n",pcPat,psArg->psStd->pcKyw);
 
    psHdl->apPat[siLev]=psArg;
    *ppDep=psArg->psDep;
@@ -6170,7 +6171,7 @@ static int siClpFinObj(
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    const int                     siTyp=CLPTYP_OBJECT;
    TsSym*                        psHlp;
-   char*                         pcHlp;
+   const char*                   pcPat;
    int                           siErr,i;
 
    if (psArg->psFix->siTyp!=siTyp) {
@@ -6217,8 +6218,8 @@ static int siClpFinObj(
    if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-END-OBJECT-%s(PTR=%p CNT=%d LEN=%d RST=%d)\n",
                            fpcPre(pvHdl,siLev),psArg->psStd->pcKyw,psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst);
 
-   pcHlp=fpcPat(pvHdl,siLev);
-   srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcHlp)+strlen(psArg->psStd->pcKyw),"%s.%s)\n",pcHlp,psArg->psStd->pcKyw);
+   pcPat=fpcPat(pvHdl,siLev);
+   srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcPat)+strlen(psArg->psStd->pcKyw),"%s.%s)\n",pcPat,psArg->psStd->pcKyw);
 
    siErr=siClpBldLnk(pvHdl,siLev,siPos,psArg->psVar->siCnt,psArg->psFix->psCnt,FALSE);
    if (siErr<0) return(siErr);
@@ -6470,7 +6471,7 @@ static void vdClpPrnArg(
    const unsigned int            isCon)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
-   char*                         p=fpcPre(pvHdl,siLev);
+   const char*                   p=fpcPre(pvHdl,siLev);
    int                           i,siLen;
    const char*                   a="TYPE";
    const char*                   b=(isSel)?"SELECTION":((isCon)?"KEYWORD":apClpTyp[siTyp]);
@@ -7319,7 +7320,7 @@ static int siClpPrnPro(
 
 /**********************************************************************/
 
-static char* fpcPre(
+static const char* fpcPre(
    void*                         pvHdl,
    const int                     siLev)
 {
@@ -7332,7 +7333,7 @@ static char* fpcPre(
    return(psHdl->pcPre);
 }
 
-static char* fpcPat(
+static const char* fpcPat(
    void*                         pvHdl,
    const int                     siLev)
 {

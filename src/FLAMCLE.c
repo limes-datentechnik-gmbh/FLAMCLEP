@@ -3272,9 +3272,9 @@ static int siCnfPutEnv(
           strstr(psEnt->pcKyw,".envar.")!=NULL) {
          const char* pcKyw=strstr(psEnt->pcKyw,".envar.")+7;
          if (SETENV(pcKyw,psEnt->pcVal)==0) {
-            const char* pcHlp=GETENV(pcKyw);
-            if (pcHlp!=NULL) {
-               if (strcmp(pcHlp,psEnt->pcVal)==0) {
+            const char* pcEnv=GETENV(pcKyw);
+            if (pcEnv!=NULL) {
+               if (strcmp(pcEnv,psEnt->pcVal)==0) {
                   j++;
                }
             }
@@ -3299,9 +3299,9 @@ static int siCnfPrnEnv(
           strstr(psEnt->pcKyw,pcPgm)!=NULL &&
           strstr(psEnt->pcKyw,".envar.")!=NULL) {
          const char* pcKyw=strstr(psEnt->pcKyw,".envar.")+7;
-         const char* pcHlp=GETENV(pcKyw);
-         if (pcHlp!=NULL) {
-            if (strcmp(pcHlp,psEnt->pcVal)==0) {
+         const char* pcEnv=GETENV(pcKyw);
+         if (pcEnv!=NULL) {
+            if (strcmp(pcEnv,psEnt->pcVal)==0) {
                pcAdd="was verified";
             } else pcAdd="not verified";
          } else pcAdd="not verified";
