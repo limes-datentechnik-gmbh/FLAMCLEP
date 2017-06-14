@@ -39,12 +39,14 @@
 #include <locale.h>
 #include <time.h>
 #ifdef __UNIX__
-#include <langinfo.h>
+#  include <langinfo.h>
 #endif
 #ifdef __WIN__
-#include <windows.h>
+#  include <windows.h>
 #endif
-
+#if defined(__ZOS__) && defined(__FL5__)
+#  include "FLZASM31.h"
+#endif
 #include "CLEPUTL.h"
 
 #ifndef realloc_nowarn
@@ -174,7 +176,23 @@ extern int win_unsetenv(const char* name){
 #include <unistd.h>
 #include <sys/types.h>
 #include <pwd.h>
+
 extern char* userid(const int size, char* buffer) {
+#if defined(__ZOS__) && defined(__FL5__)
+   int      r,i;
+   char     acUid[16];
+   char     acGid[16];
+   memset(acUid,0,sizeof(acUid));
+   r=FLZGUID(acUid,acGid);
+   if (r==0) {
+      for (i=strlen(acUid);i>0 && acUid[i-1]<=0x40;i--);
+      acUid[i]=0x00;
+   } else i=0;
+   if (i) {
+      snprintf(buffer,size,"%s",acUid);
+      return(buffer);
+   }
+#endif
    struct passwd* uP = getpwuid(geteuid());
    if (NULL != uP) {
       snprintf(buffer,size,"%s",uP->pw_name);
@@ -186,6 +204,21 @@ extern char* userid(const int size, char* buffer) {
 extern char* duserid(void) {
    char*          buffer= NULL;
    size_t         size  = 0;
+#if defined(__ZOS__) && defined(__FL5__)
+   int      r,i;
+   char     acUid[16];
+   char     acGid[16];
+   memset(acUid,0,sizeof(acUid));
+   r=FLZGUID(acUid,acGid);
+   if (r==0) {
+      for (i=strlen(acUid);i>0 && acUid[i-1]<=0x40;i--);
+      acUid[i]=0x00;
+   } else i=0;
+   if (i) {
+      srprintf(&buffer,&size,strlen(acUid),"%s",acUid);
+      return(buffer);
+   }
+#endif
    struct passwd* uP    = getpwuid(geteuid());
    if (NULL != uP) {
       srprintf(&buffer,&size,strlen(uP->pw_name),"%s",uP->pw_name);
