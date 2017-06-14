@@ -180,10 +180,10 @@ extern int win_unsetenv(const char* name){
 extern char* userid(const int size, char* buffer) {
 #if defined(__ZOS__) && defined(__FL5__)
    int      r,i;
-   char     acUid[16];
    char     acGid[16];
+   char     acUid[16];
    memset(acUid,0,sizeof(acUid));
-   r=FLZGUID(acUid,acGid);
+   r=FLZGUID(acGid,acUid);
    if (r==0) {
       for (i=strlen(acUid);i>0 && acUid[i-1]<=0x40;i--);
       acUid[i]=0x00;
@@ -206,10 +206,10 @@ extern char* duserid(void) {
    size_t         size  = 0;
 #if defined(__ZOS__) && defined(__FL5__)
    int      r,i;
-   char     acUid[16];
    char     acGid[16];
+   char     acUid[16];
    memset(acUid,0,sizeof(acUid));
-   r=FLZGUID(acUid,acGid);
+   r=FLZGUID(acGid,acUid);
    if (r==0) {
       for (i=strlen(acUid);i>0 && acUid[i-1]<=0x40;i--);
       acUid[i]=0x00;
