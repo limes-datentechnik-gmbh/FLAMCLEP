@@ -63,6 +63,10 @@ extern int win_unsetenv(const char* name);
 #  define GETENV(name)        getenv((name))
 #  define SETENV(name, value) win_setenv((name), (value))
 #  define UNSETENV(name)      win_unsetenv((name))
+#elif defined (__ZOS__) || defined (__ZOS__)
+#  define GETENV(name)        __getenv((name))
+#  define SETENV(name, value) setenv((name), (value), 1)
+#  define UNSETENV(name)      unsetenv((name))
 #else
 #  define GETENV(name)        getenv((name))
 #  define SETENV(name, value) setenv((name), (value), 1)
