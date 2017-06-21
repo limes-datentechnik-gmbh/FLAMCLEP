@@ -3279,7 +3279,7 @@ static int siClpScnNat(
    char*                         pcLex=(*ppLex);
    char*                         pcHlp=(*ppLex);
    char*                         pcEnd=(*ppLex)+(*pzLex);
-   const char*                   pcCur;
+   const char*                   pcCur=(*ppCur);
    int                           isEnv=psHdl->isEnv;
    const char*                   pcEnv=NULL;
    const char*                   pcOld=NULL;
@@ -3336,7 +3336,6 @@ static int siClpScnNat(
          }
          psHdl->pcOld=(*ppCur);
       } else if (isEnv && *(*ppCur)=='<') { /*environment variable replacement*/
-         pcCur=(*ppCur);
          (*ppCur)++;
          while ((*ppCur)[0]!=EOS && (*ppCur)[0]!='>') {
             LEX_REALLOC
@@ -3419,7 +3418,6 @@ static int siClpScnNat(
          if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(STR)-LEXEM(%s)\n",isPrnLex(psArg,pcHlp));
          return(CLPTOK_STR);
       } else if (siTyp==0 && (((*ppCur)[0]=='-' && isalpha((*ppCur)[1])) || ((*ppCur)[0]=='-' && (*ppCur)[1]=='-' && isalpha((*ppCur)[2])))) { /*defined keyword*/
-         pcCur=(*ppCur);
          while ((*ppCur)[0]=='-') {
             (*ppCur)++;
          }
