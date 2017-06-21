@@ -722,7 +722,7 @@ extern int siCleExecute(
 EVALUATE:
    if (strxcmp(isCas,argv[1],"LICENSE",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
-      if (pfErr==NULL) pfErr=pfStd;
+      //if (pfErr==NULL) pfErr=pfStd; (never read)
       if (argc==2) {
          fprintf(pfOut,"License of program '%s':\n",pcPgm);
          if (pcLic==NULL) {
@@ -737,7 +737,7 @@ EVALUATE:
       ERROR(CLERTC_CMD,NULL);
    } else if (strxcmp(isCas,argv[1],"VERSION",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
-      if (pfErr==NULL) pfErr=pfStd;
+      //if (pfErr==NULL) pfErr=pfStd; (never read)
       if (argc==2) {
          fprintf(pfOut,"Version for program '%s':\n",pcPgm);
          if (pcVsn==NULL) {
@@ -752,7 +752,7 @@ EVALUATE:
       ERROR(CLERTC_CMD,NULL);
    } else if (strxcmp(isCas,argv[1],"ABOUT",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
-      if (pfErr==NULL) pfErr=pfStd;
+      //if (pfErr==NULL) pfErr=pfStd; (never read)
       if (argc==2) {
          fprintf(pfOut,"About program '%s':\n",pcPgm);
          if (pcAbo==NULL) {
@@ -793,7 +793,7 @@ EVALUATE:
       ERROR(CLERTC_CMD,NULL);
    } else if (strxcmp(isCas,argv[1],"ERRORS",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
-      if (pfErr==NULL) pfErr=pfStd;
+      //if (pfErr==NULL) pfErr=pfStd; (never read)
       if (argc==2) {
          fprintf(pfOut,"\n");
          fprintf(pfOut,"Return/condition/exit codes of the executable\n");
@@ -1688,7 +1688,7 @@ EVALUATE:
       const char*                pcCmd=NULL;
       const char*                pcSgn=NULL;
       if (pfOut==NULL) pfOut=pfStd;
-      if (pfErr==NULL) pfErr=pfStd;
+      //if (pfErr==NULL) pfErr=pfStd; (never read)
       if (argc==3) {
          pcSgn=strchr(argv[2],'=');
          if (pcSgn!=NULL) {
@@ -1812,7 +1812,7 @@ EVALUATE:
       ERROR(CLERTC_CMD,NULL);
    } else if (strxcmp(isCas,argv[1],"DELPROP",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
-      if (pfErr==NULL) pfErr=pfStd;
+      //if (pfErr==NULL) pfErr=pfStd; (never read)
       if (argc==2) {
          srprintf(&pcCnf,&szCnf,strlen(pcOwn)+strlen(pcPgm),"%s.%s.property.file",pcOwn,pcPgm);
           if (pcCnf==NULL) {
@@ -1952,7 +1952,7 @@ EVALUATE:
       ERROR(CLERTC_CMD,NULL);
    } else if (strxcmp(isCas,argv[1],"SETOWNER",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
-      if (pfErr==NULL) pfErr=pfStd;
+      //if (pfErr==NULL) pfErr=pfStd; (unused)
       if (argc==3) {
          srprintf(&pcCnf,&szCnf,strlen(pcPgm),"%s.owner.id",pcPgm);
          if (pcCnf==NULL) {
@@ -1970,7 +1970,7 @@ EVALUATE:
       ERROR(CLERTC_CMD,NULL);
    } else if (strxcmp(isCas,argv[1],"GETOWNER",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
-      if (pfErr==NULL) pfErr=pfStd;
+      //if (pfErr==NULL) pfErr=pfStd; (unused)
       if (argc==2) {
          fprintf(pfOut,"Current owner id for '%s' is: %s\n",argv[0],pcOwn);
          ERROR(CLERTC_OK,NULL);
@@ -1980,7 +1980,7 @@ EVALUATE:
       ERROR(CLERTC_CMD,NULL);
    } else if (strxcmp(isCas,argv[1],"SETENV",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
-      if (pfErr==NULL) pfErr=pfStd;
+      //if (pfErr==NULL) pfErr=pfStd; (never read)
       if (argc==3) {
          const char* pcVal=NULL;
          const char* pcEnv=NULL;
@@ -2008,7 +2008,7 @@ EVALUATE:
       ERROR(CLERTC_CMD,NULL);
    } else if (strxcmp(isCas,argv[1],"GETENV",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
-      if (pfErr==NULL) pfErr=pfStd;
+      //if (pfErr==NULL) pfErr=pfStd; (never read)
       if (argc==2) {
          fprintf(pfOut,"Current environment variables for owner '%s':\n",pcOwn);
          siCnt=siCnfPrnEnv(psCnf,pfOut,pcDep,pcOwn,pcPgm);
@@ -2024,7 +2024,7 @@ EVALUATE:
       ERROR(CLERTC_CMD,NULL);
    } else if (strxcmp(isCas,argv[1],"DELENV",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
-      if (pfErr==NULL) pfErr=pfStd;
+      //if (pfErr==NULL) pfErr=pfStd; (never read)
       if (argc==3) {
          srprintf(&pcCnf,&szCnf,strlen(pcOwn)+strlen(pcPgm)+strlen(argv[2]),"%s.%s.envar.%s",pcOwn,pcPgm,argv[2]);
          if (pcCnf==NULL) {
@@ -2042,7 +2042,7 @@ EVALUATE:
       ERROR(CLERTC_CMD,NULL);
    } else if (strxcmp(isCas,argv[1],"TRACE",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
-      if (pfErr==NULL) pfErr=pfStd;
+      //if (pfErr==NULL) pfErr=pfStd; (never read)
       if (argc==3) {
          if (strxcmp(isCas,argv[2],"ON",0,0,FALSE)==0 || strxcmp(isCas,argv[2],"-ON",0,0,FALSE)==0 || strxcmp(isCas,argv[2],"--ON",0,0,FALSE)==0) {
             srprintf(&pcCnf,&szCnf,strlen(pcOwn)+strlen(pcPgm),"%s.%s.trace",pcOwn,pcPgm);
@@ -2097,7 +2097,7 @@ EVALUATE:
       ERROR(CLERTC_CMD,NULL);
    } else if (strxcmp(isCas,argv[1],"CONFIG",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
-      if (pfErr==NULL) pfErr=pfStd;
+      //if (pfErr==NULL) pfErr=pfStd; (never read)
       if (argc==2) {
          fprintf(pfOut,"Current configuration data:\n");
          siCnt=siCnfPrn(psCnf,pfOut,pcDep);

@@ -3279,7 +3279,7 @@ static int siClpScnNat(
    char*                         pcLex=(*ppLex);
    char*                         pcHlp=(*ppLex);
    char*                         pcEnd=(*ppLex)+(*pzLex);
-   const char*                   pcCur=(*ppCur);
+   const char*                   pcCur;
    int                           isEnv=psHdl->isEnv;
    const char*                   pcEnv=NULL;
    const char*                   pcOld=NULL;
