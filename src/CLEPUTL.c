@@ -1368,6 +1368,7 @@ static char* drplenvar(const char* string,const char opn, const char cls)
    return(b);
 }
 
+// TODO: Besserer Name und/oder Beschreibung der Funktion
 static char* rpltpl(char* string,int size,const char* templ,const char* values) {
    char*       s;
    char*       e;
@@ -1393,6 +1394,7 @@ static char* rpltpl(char* string,int size,const char* templ,const char* values) 
    return(string);
 }
 
+// TODO: Besserer Name und/oder Beschreibung der Funktion
 static char* drpltpl(const char* templ,const char* values) {
    const char* p=templ;
    size_t      s=strlen(p)+1;
@@ -1436,6 +1438,7 @@ static char* drpltpl(const char* templ,const char* values) {
    return(b);
 }
 
+// TODO: Besserer Name und/oder Beschreibung der Funktion
 static const char* adjpfx(char* file, int size)
 {
     char *p1,*p2;
@@ -1515,6 +1518,7 @@ static const char* adjpfx(char* file, int size)
 # endif
 }
 
+// TODO: Besserer Name und/oder Beschreibung der Funktion
 static char* dadjpfx(const char* file,char** tilde)
 {
     char* b=malloc(strlen(file)+8);
