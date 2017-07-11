@@ -1378,7 +1378,7 @@ static char* rpltpl(char* string,int size,const char* templ,const char* values) 
          s[0]='%'; s++; t++;
       } else if ((t[0]=='%' && t[1])) {
          for (const char* v=values;v[0];v++) {
-            if (v[0]==t[1] && v[1]==':') {
+            if (toupper(v[0])==toupper(t[1]) && v[1]==':') {
                for (v+=2;v[0] && v[0]!='\n' && s<e;v++) {
                   s[0]=v[0]; s++;
                }
@@ -1409,7 +1409,7 @@ static char* drpltpl(const char* templ,const char* values) {
             r++; p+=2;
          } else if (p[1]) {
             for (const char* v=values;v[0];v++) {
-               if (v[0]==p[1] && v[1]==':') {
+               if (toupper(v[0])==toupper(p[1]) && v[1]==':') {
                   const char* x=v+2;
                   while (x[0] && x[0]!='\n') x++;
                   int l=x-(v+2);
