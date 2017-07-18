@@ -1139,7 +1139,7 @@ static void rplchar(char* name,const size_t size,const char c, const char* value
    const char* v=value;
    char*       b;
    char*       p;
-   int         catlen;
+   size_t      catlen, hlen, vlen=strlen(v);
 
    for (b=strchr(a,c); b!=NULL ;b=strchr(a,c)) {
       if (b[1]==c) {
@@ -1147,23 +1147,22 @@ static void rplchar(char* name,const size_t size,const char c, const char* value
          a=b+1;
       } else {
          b[0]=0;
-         strncpy(h,b+1,size-1);
-         h[size-1]=0;
+         hlen=strlcpy(h,b+1,size);
          catlen = size - strlen(name) - 1;
          if (catlen > 0)
                strncat(a, v, catlen);
          else
                catlen = 0;
-         if (strlen(v) >= catlen)
+         if (vlen >= catlen)
                name[size-1] = 0;
          catlen = size - strlen(name) - 1;
          if (catlen > 0)
                strncat(a, h, catlen);
          else
                catlen = 0;
-         if (strlen(h) >= catlen)
+         if (hlen >= catlen)
                name[size-1] = 0;
-         a=b+strlen(v);
+         a=b+vlen;
       }
    }
 }
@@ -1277,7 +1276,7 @@ static void rplenvar(char* name,const size_t size,const char opn, const char cls
    char*       v;
    char*       p;
    int         match;
-   int         catlen;
+   size_t      catlen, hlen, vlen;
 
    for (b=strchr(a,opn); b!=NULL ;b=strchr(a,opn)) {
       if (b[1]==opn) {
@@ -1287,8 +1286,7 @@ static void rplenvar(char* name,const size_t size,const char opn, const char cls
          c=strchr(b,cls);
          if (c!=NULL) {
             b[0]=c[0]=0;
-            strncpy(h,c+1,size-1);
-            h[size-1]=0;
+            hlen=strlcpy(h,c+1,size);
             match = 1;
             v=getenvar(b+1,size,x);
             if (v==NULL) {
@@ -1296,21 +1294,22 @@ static void rplenvar(char* name,const size_t size,const char opn, const char cls
                match = 0;
             }
             if (match) {
+               vlen = strlen(v);
                catlen = size - strlen(name) - 1;
                if (catlen > 0)
                   strncat(a, v, catlen);
                else
                   catlen = 0;
-               if (strlen(v) >= catlen)
+               if (vlen >= catlen)
                   name[size-1] = 0;
                catlen = size - strlen(name) - 1;
                if (catlen > 0)
                   strncat(a, h, catlen);
                else
                   catlen = 0;
-               if (strlen(h) >= catlen)
+               if (hlen >= catlen)
                   name[size-1] = 0;
-               a=b+strlen(v);
+               a=b+vlen;
             }
          } else {
             a=b+1;
