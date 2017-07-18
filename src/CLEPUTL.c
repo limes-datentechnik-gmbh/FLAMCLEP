@@ -1856,14 +1856,14 @@ extern const char* prsdstr(const char** hdl, const char* str, int len)
    return(hlp);
 }
 
-extern char* strxcpy(char *dest, const char *src, size_t n)
+extern size_t strlcpy(char *dest, const char *src, size_t n)
 {
    size_t len = strlen(src);
    if (len>n-1)
       len=n-1;
    memcpy(dest, src, len);
    dest[len]='\0';
-   return dest;
+   return len;
 }
 
 extern int printd(const char* format,...)

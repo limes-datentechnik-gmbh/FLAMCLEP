@@ -242,9 +242,9 @@ extern const char* prsdstr(const char** hdl, const char* str, int len);
  * @param dest    pointer to destination string
  * @param src     pointer to source string
  * @param n       size of memory available for buffer
- * @return        pointer to destination string
+ * @return        number of bytes actually copied (excludes NUL-termination)
  */
-extern char* strxcpy(char *dest, const char *src, size_t n);
+extern size_t strlcpy(char *dest, const char *src, size_t n);
 
 /**
  * Get environment variable and handle HOME, USER, CUSEr, Cuser, cuser, OWNER, ENVID if not defined
