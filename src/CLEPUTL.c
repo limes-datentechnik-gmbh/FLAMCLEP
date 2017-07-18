@@ -1856,12 +1856,13 @@ extern const char* prsdstr(const char** hdl, const char* str, int len)
    return(hlp);
 }
 
-
 extern char* strxcpy(char *dest, const char *src, size_t n)
 {
-   size_t i;
-   for (i=0;i<(n-1) && src[i];i++) dest[i]=src[i];
-   dest[i] = '\0';
+   size_t len = strlen(src);
+   if (len>n-1)
+      len=n-1;
+   memcpy(dest, src, len);
+   dest[len]='\0';
    return dest;
 }
 
