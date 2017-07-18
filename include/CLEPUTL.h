@@ -237,6 +237,14 @@ extern void fprintm(FILE* file,const char* own, const char* pgm, const char* man
  */
 extern const char* prsdstr(const char** hdl, const char* str, int len);
 
+#ifndef __WIN__
+/* Force the use of strlcpy instead of strncpy, but not on Windows because it causes trouble with MinGW headers */
+#ifdef strncpy
+#undef strncpy
+#endif
+#define strncpy(...) Error: Do not use strncpy! Use strlcpy instead!
+#endif
+
 /**
  * Works like strncpy but ensures null-termination.
  * @param dest    pointer to destination string
