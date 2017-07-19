@@ -141,7 +141,7 @@ extern char* homedir(int flag, const int size, char* buffer) {
       if (flag) {
          snprintf(buffer,size,"%s%c",path,C_BSL);
       } else {
-         snprintf(buffer,size,"%s",path);
+         strlcpy(buffer,path,size);
       }
    }
    return(buffer);
@@ -189,13 +189,13 @@ extern char* userid(const int size, char* buffer) {
       acUid[i]=0x00;
    } else i=0;
    if (i) {
-      snprintf(buffer,size,"%s",acUid);
+      strlcpy(buffer,acUid,size);
       return(buffer);
    }
 #endif
    struct passwd* uP = getpwuid(geteuid());
    if (NULL != uP) {
-      snprintf(buffer,size,"%s",uP->pw_name);
+      strlcpy(buffer,uP->pw_name,size);
    } else {
       if (size>=0) buffer[0]=0x00;
    }
@@ -233,7 +233,7 @@ extern char* homedir(int flag, const int size, char* buffer) {
       if (flag) {
          snprintf(buffer,size,"%s/",home);
       } else {
-         snprintf(buffer,size,"%s",home);
+         strlcpy(buffer,home,size);
       }
    } else {
       struct passwd* uP = getpwuid(geteuid());
@@ -241,7 +241,7 @@ extern char* homedir(int flag, const int size, char* buffer) {
          if (flag) {
             snprintf(buffer,size,"%s/",uP->pw_dir);
          } else {
-            snprintf(buffer,size,"%s",uP->pw_dir);
+            strlcpy(buffer,uP->pw_dir,size);
          }
       } else {
          char user[64]={0};
@@ -251,7 +251,7 @@ extern char* homedir(int flag, const int size, char* buffer) {
          if (flag) {
             snprintf(buffer,size,"%s.",user);
          } else {
-            snprintf(buffer,size,"%s",user);
+            strlcpy(buffer,user,size);
          }
 #elif defined(__USS__)
          if (flag) {
@@ -371,7 +371,7 @@ extern void fprintm(FILE* file,const char* own, const char* pgm, const char* man
    char*       ptr;
    char        tmp[strlen(man)+4];
    switch (cnt) {
-   case  0:snprintf(tmp,sizeof(tmp),"%s",man);     break;
+   case  0:strlcpy(tmp,man,sizeof(tmp));     break;
    case  1:snprintf(tmp,sizeof(tmp),"%s\n",man);   break;
    default:snprintf(tmp,sizeof(tmp),"%s\n\n",man);
    }
@@ -1654,7 +1654,7 @@ extern char* dmapfil(const char* file, int method)
 #ifdef __ZOS__
 extern char* cpmapfil(char* dest, int size,const char* source) {
    if (ISPATHNAME(source) || ISDDNAME(source) || source[0]=='\'' || source[0]==':') {
-      snprintf(dest,size,"%s",source);
+      strlcpy(dest,source,size);
    } else {
       snprintf(dest,size,"'%s'",source);
    }
@@ -1739,7 +1739,7 @@ extern char* filemode(const char* mode) {
 }
 #else
 extern char* cpmapfil(char* dest, int size,const char* source) {
-   snprintf(dest,size,"%s",source);
+   strlcpy(dest,source,size);
    return mapfil(dest,size);
 }
 

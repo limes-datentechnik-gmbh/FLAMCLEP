@@ -1471,7 +1471,7 @@ extern int siClpDocu(
                   return CLPERR(psHdl,CLPERR_SEM,"Path (%s) is not valid",pcPat);
                }
                if (strlen(pcPat)>l) {
-                  snprintf(acNum,sizeof(acNum),"%s",pcNum);
+                  strlcpy(acNum,pcNum,sizeof(acNum));
                   for (siLev=0,pcPtr=strchr(pcPat,'.');pcPtr!=NULL && siLev<CLPMAX_HDEPTH;pcPtr=strchr(pcPtr+1,'.'),siLev++) {
                      for (pcKyw=pcPtr+1,i=0;i<CLPMAX_KYWLEN && pcKyw[i]!=EOS && pcKyw[i]!='.';i++) acKyw[i]=pcKyw[i];
                      acKyw[i]=EOS;
@@ -3855,7 +3855,7 @@ static int siClpPrsPar(
    int                           siErr;
 
    if (psHdl->siTok==CLPTOK_KYW) {
-      snprintf(acKyw,sizeof(acKyw),"%s",psHdl->pcLex);
+      strlcpy(acKyw,psHdl->pcLex,sizeof(acKyw));
       siErr=siClpSymFnd(pvHdl,siLev,siPos,acKyw,psTab,&psArg,NULL);
       if (siErr<0) return(siErr);
       siErr=siClpBldLnk(pvHdl,siLev,siPos,psHdl->pcOld-psHdl->pcInp,psArg->psFix->psInd,TRUE);
