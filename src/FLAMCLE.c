@@ -1982,8 +1982,8 @@ EVALUATE:
       if (pfOut==NULL) pfOut=pfStd;
       //if (pfErr==NULL) pfErr=pfStd; (never read)
       if (argc==3) {
-         const char* pcVal=NULL;
-         const char* pcEnv=NULL;
+         const char* pcVal;
+         const char* pcEnv;
          pcVal=strchr(argv[2],'=');
          if (pcVal!=NULL) {
             *((char*)pcVal)=EOS; pcVal++; pcEnv=argv[2];
