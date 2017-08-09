@@ -3369,7 +3369,7 @@ static int siClpScnNat(
          *pcLex= 'd'; pcLex++;
          *pcLex='\''; pcLex++;
          (*ppCur)++;
-         while ((*ppCur)[0]!=EOS && ((*ppCur)[0]!=USECHR || ((*ppCur)[0]==USECHR && (*ppCur)[1]==USECHR))) {
+         while ((*ppCur)[0]!=EOS && ((*ppCur)[0]!=USECHR || (*ppCur)[1]==USECHR)) {
             LEX_REALLOC
             *pcLex=*(*ppCur); pcLex++;
             if (*(*ppCur)=='\n') {
@@ -3396,7 +3396,7 @@ static int siClpScnNat(
          *pcLex=tolower(*(*ppCur)); pcLex++;
          *pcLex='\''; pcLex++;
          (*ppCur)+=2;
-         while ((*ppCur)[0]!=EOS && ((*ppCur)[0]!=USECHR || ((*ppCur)[0]==USECHR && (*ppCur)[1]==USECHR))) {
+         while ((*ppCur)[0]!=EOS && ((*ppCur)[0]!=USECHR || (*ppCur)[1]==USECHR)) {
             LEX_REALLOC
             *pcLex=*(*ppCur); pcLex++;
             if (*(*ppCur)=='\n') {
