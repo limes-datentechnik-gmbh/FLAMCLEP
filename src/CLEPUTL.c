@@ -443,13 +443,16 @@ extern unsigned int sysccsid(void) {
    }
 #endif
 
+   // cppcheck-suppress knownConditionTrueFalse
    if (ccsid == 0) {
       // fallback to LANG variable
+      // cppcheck-suppress knownConditionTrueFalse
       charset = mapl2c(' ' == 0x40);
       ccsid = mapcdstr(charset);
 
       if (ccsid == 0) {
          // fallback to platform default (aka. we don't know any better)
+         // cppcheck-suppress knownConditionTrueFalse
          if (' ' == 0x40)
             return 1047; // IBM-1047
          else
@@ -466,6 +469,7 @@ extern const char* mapl2c(unsigned isEBCDIC) {
    static char acHlp[32];
    size_t      i;
    if (pcEnv!=NULL) {
+      // cppcheck-suppress knownConditionTrueFalse
       if ((isEBCDIC && '0'==0xF0) || (!isEBCDIC && '0'==0x30)) {
          pcPtr=strchr(pcEnv,'.');
          if (pcPtr!=NULL) {
@@ -1338,6 +1342,7 @@ static char* drplenvar(const char* string,const char opn, const char cls)
                c[0]=0x00;
                int    x=strlen(p)+1;
                char*  v=getenvar(p+1,sizeof(e),e);
+               // cppcheck-suppress redundantAssignment
                c[0]=cls;
                if (v!=NULL) {
                   int   l=strlen(v);

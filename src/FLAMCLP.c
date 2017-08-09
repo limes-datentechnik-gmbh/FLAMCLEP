@@ -1437,18 +1437,6 @@ extern int siClpDocu(
    const int                     isNbr)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
-   TsSym*                        psTab=psHdl->psTab;
-   TsSym*                        psArg=NULL;
-   char*                         pcPtr=NULL;
-   char*                         pcKyw=NULL;
-   char                          acKyw[CLPMAX_KYWSIZ];
-   int                           siErr=0,siLev,siPos,i;
-   const char*                   pcSta=(pcHdl!=NULL&&*pcHdl)?pcHdl:psHdl->pcCmd;
-   int                           l=strlen(psHdl->pcCmd);
-   char                          acNum[strlen(pcNum)+10];
-   char                          acArg[20];
-   const char*                   p;
-
    if (psHdl->pcLst!=NULL) psHdl->pcLst[0]=0x00;
 
    psHdl->pcInp=NULL;
@@ -1465,6 +1453,17 @@ extern int siClpDocu(
 
    if (pcNum!=NULL && strlen(pcNum)<100 && pcCmd!=NULL) {
       if (pfDoc!=NULL) {
+         TsSym*                        psTab=psHdl->psTab;
+         TsSym*                        psArg=NULL;
+         char*                         pcPtr=NULL;
+         char*                         pcKyw=NULL;
+         char                          acKyw[CLPMAX_KYWSIZ];
+         int                           siErr=0,siLev,siPos,i;
+         const char*                   pcSta=(pcHdl!=NULL&&*pcHdl)?pcHdl:psHdl->pcCmd;
+         int                           l=strlen(psHdl->pcCmd);
+         char                          acNum[strlen(pcNum)+10];
+         char                          acArg[20];
+         const char*                   p;
          if (pcPat!=NULL && *pcPat) {
             if (strxcmp(psHdl->isCas,psHdl->pcCmd,pcPat,l,0,FALSE)==0) {
                if (strlen(pcPat)>l && pcPat[l]!='.') {
@@ -4563,7 +4562,7 @@ static int siClpPrsTrm(
          } else {
             srprintf(ppVal,pzVal,24,"d%"PRIi64"",siVal);
          }
-         if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d MUL-NUM(%"PRIi64"*%"PRIi64"=%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,siVal1,siVal2,*ppVal);
+         if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d MUL-NUM(%"PRIi64"*%"PRIi64"=%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,(int64_t)siVal1,(int64_t)siVal2,*ppVal);
          break;
       case CLPTYP_FLOATN:
          siErr=siFromFloatLexem(pvHdl,siLev,siPos,psArg,*ppVal,&flVal1);
@@ -4613,7 +4612,7 @@ static int siClpPrsTrm(
          } else {
             srprintf(ppVal,pzVal,24,"d%"PRIi64"",siVal);
          }
-         if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d DIV-NUM(%"PRIi64"/%"PRIi64"=%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,siVal1,siVal2,*ppVal);
+         if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d DIV-NUM(%"PRIi64"/%"PRIi64"=%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,(int64_t)siVal1,(int64_t)siVal2,*ppVal);
          break;
       case CLPTYP_FLOATN:
          siErr=siFromFloatLexem(pvHdl,siLev,siPos,psArg,*ppVal,&flVal1);
@@ -4661,7 +4660,7 @@ static int siClpPrsTrm(
          } else {
             srprintf(ppVal,pzVal,24,"d%"PRIi64"",siVal);
          }
-         if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d AUTO-MUL-NUM(%"PRIi64"*%"PRIi64"=%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,siVal1,siVal2,*ppVal);
+         if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d AUTO-MUL-NUM(%"PRIi64"*%"PRIi64"=%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,(int64_t)siVal1,(int64_t)siVal2,*ppVal);
          break;
       case CLPTYP_FLOATN:
          siErr=siFromFloatLexem(pvHdl,siLev,siPos,psArg,*ppVal,&flVal1);
@@ -4745,7 +4744,7 @@ static int siClpPrsExp(
          } else {
             srprintf(ppVal,pzVal,24,"d%"PRIi64"",siVal);
          }
-         if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d ADD-NUM(%"PRIi64"+%"PRIi64"=%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,siVal1,siVal2,*ppVal);
+         if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d ADD-NUM(%"PRIi64"+%"PRIi64"=%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,(int64_t)siVal1,(int64_t)siVal2,*ppVal);
          break;
       case CLPTYP_FLOATN:
          siErr=siFromFloatLexem(pvHdl,siLev,siPos,psArg,*ppVal,&flVal1);
@@ -4806,7 +4805,7 @@ static int siClpPrsExp(
          } else {
             srprintf(ppVal,pzVal,24,"d%"PRIi64"",siVal);
          }
-         if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d SUB-NUM(%"PRIi64"-%"PRIi64"=%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,siVal1,siVal2,*ppVal);
+         if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d SUB-NUM(%"PRIi64"-%"PRIi64"=%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,(int64_t)siVal1,(int64_t)siVal2,*ppVal);
          break;
       case CLPTYP_FLOATN:
          siErr=siFromFloatLexem(pvHdl,siLev,siPos,psArg,*ppVal,&flVal1);
@@ -4850,7 +4849,7 @@ static int siClpPrsExp(
          } else {
             srprintf(ppVal,pzVal,24,"d%"PRIi64"",siVal);
          }
-         if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d AUTO-ADD-NUM(%"PRIi64"+%"PRIi64"=%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,siVal1,siVal2,*ppVal);
+         if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d AUTO-ADD-NUM(%"PRIi64"+%"PRIi64"=%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,(int64_t)siVal1,(int64_t)siVal2,*ppVal);
          break;
       case CLPTYP_FLOATN:
          siErr=siFromFloatLexem(pvHdl,siLev,siPos,psArg,*ppVal,&flVal1);
@@ -7082,19 +7081,18 @@ static int siClpPrnDoc(
    const TsSym*                  psTab)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
-   const TsSym*                  psHlp;
-   const TsSym*                  psSel;
-   int                           siErr,isCon;
-   int                           i,k,l,m;
-   char                          acNum[strlen(pcNum)+10];
-   char                          acArg[20];
-   int                           siMan=0;
-   int                           siLst=0;
-   const TsSym*                  apMan[CLPMAX_HDEPTH];
-   const TsSym*                  apLst[CLPMAX_HDEPTH];
-
 
    if (pfDoc!=NULL && psTab!=NULL && pcNum!=NULL) {
+      const TsSym*                  psHlp;
+      const TsSym*                  psSel;
+      int                           siErr,isCon;
+      int                           i,k,l,m;
+      char                          acNum[strlen(pcNum)+10];
+      char                          acArg[20];
+      int                           siMan=0;
+      int                           siLst=0;
+      const TsSym*                  apMan[CLPMAX_HDEPTH];
+      const TsSym*                  apLst[CLPMAX_HDEPTH];
       if (psTab->psBak!=NULL) {
          return CLPERR(psHdl,CLPERR_INT,"Entry '%s.%s' not at beginning of a table",fpcPat(pvHdl,siLev),psTab->psStd->pcKyw);
       }
