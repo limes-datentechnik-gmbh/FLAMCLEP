@@ -1019,8 +1019,8 @@ EVALUATE:
          }
          ERROR(CLERTC_OK,NULL);
       } else if (argc==3) {
-         const char*                pcCmd=NULL;
-         const char*                pcSgn=NULL;
+         const char*                pcSgn;
+         const char*                pcCmd;
          int                        isMan=FALSE;
          int                        isAll=FALSE;
          pcSgn=strchr(argv[2],'=');
@@ -1616,11 +1616,11 @@ EVALUATE:
       fprintf(pfOut,"%s %s GENDOCU filename %cNONBR%c\n",pcDep,argv[0],C_SBO,C_SBC);
       ERROR(CLERTC_CMD,NULL);
    } else if (strxcmp(isCas,argv[1],"GENPROP",0,0,FALSE)==0) {
-      const char*                pcCmd=NULL;
-      const char*                pcSgn=NULL;
       if (pfOut==NULL) pfOut=pfStd;
       if (pfErr==NULL) pfErr=pfStd;
       if (argc==3) {
+         const char* pcSgn;
+         const char* pcCmd;
          pcSgn=strchr(argv[2],'=');
          if (pcSgn!=NULL) {
             *((char*)pcSgn)=EOS; pcSgn++; pcCmd=argv[2];
@@ -1685,11 +1685,11 @@ EVALUATE:
       fprintf(pfOut,"%s %s GENPROP filename\n",pcDep,argv[0]);
       ERROR(CLERTC_CMD,NULL);
    } else if (strxcmp(isCas,argv[1],"SETPROP",0,0,FALSE)==0) {
-      const char*                pcCmd=NULL;
-      const char*                pcSgn=NULL;
       if (pfOut==NULL) pfOut=pfStd;
       //if (pfErr==NULL) pfErr=pfStd; (never read)
       if (argc==3) {
+         const char* pcSgn;
+         const char* pcCmd;
          pcSgn=strchr(argv[2],'=');
          if (pcSgn!=NULL) {
             *((char*)pcSgn)=EOS; pcSgn++; pcCmd=argv[2];
@@ -2068,10 +2068,10 @@ EVALUATE:
             }
          } else {
             const char* pcSgn;
-            const char* pcCmd;
             pcSgn=strchr(argv[2],'=');
             if (pcSgn!=NULL) {
-               *((char*)pcSgn)=EOS; pcSgn++; pcCmd=argv[2];
+               const char* pcCmd=argv[2];
+               *((char*)pcSgn)=EOS; pcSgn++;
                if (strxcmp(isCas,pcCmd,"FILE",0,0,FALSE)==0) {
                   srprintf(&pcCnf,&szCnf,strlen(pcOwn)+strlen(pcPgm),"%s.%s.trace.file",pcOwn,pcPgm);
                   if (pcCnf==NULL) {
