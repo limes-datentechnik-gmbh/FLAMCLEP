@@ -688,8 +688,8 @@ static int siClpPrnHlp(
 static int siClpPrnDoc(
    void*                         pvHdl,
    FILE*                         pfDoc,
-   const int                     isNbr,
    const int                     siLev,
+   const int                     isNbr,
    const char*                   pcNum,
    const TsSym*                  psArg,
    const TsSym*                  psTab);
