@@ -2348,7 +2348,7 @@ static int siClePropertyFinish(
    int                           siErr,i;
    FILE*                         pfPro;
    // TODO: Stack Allokation mit unbegrenzter Größe = Potenzielle Sicherheitslücke
-   char                          acEnv[strlen(pcHom)+strlen(pcOwn)+strlen(pcPgm)+strlen(pcCmd)+64];
+   char                          acEnv[((pcHom!=NULL)?strlen(pcHom):0)+strlen(pcOwn)+strlen(pcPgm)+strlen(pcCmd)+64];
    size_t                        szEnv=0;
    char*                         pcEnv=NULL;
    char*                         pcHlp=NULL;
@@ -3408,8 +3408,8 @@ extern int siCleParseString(
    void*                         pvDat)
 {
    int                     siErr=0;
-   void*                   pvHdl=NULL;
-   FILE*                   pfTmp=NULL;
+   void*                   pvHdl;
+   FILE*                   pfTmp;
    TsClpError              stErr;
    char                    acBuffer[4096];
 #ifdef __ZOS__
