@@ -1996,8 +1996,8 @@ static TsSym* psClpSymIns(
    TsSym*                        psCur)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
-   TsSym*                        psSym=NULL;
-   TsSym*                        psHlp=NULL;
+   TsSym*                        psSym;
+   TsSym*                        psHlp;
    const char*                   pcEnv=NULL;
    const char*                   pcPat=fpcPat(pvHdl,siLev);
    // TODO: Stack Allokation mit unbegrenzter Größe = Potenzielle Sicherheitslücke
