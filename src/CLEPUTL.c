@@ -191,6 +191,8 @@ extern char* userid(const int size, char* buffer) {
    if (i) {
       strlcpy(buffer,acUid,size);
       return(buffer);
+   } else {
+      if (size>=0) buffer[0]=0x00;
    }
 #endif
    struct passwd* uP = getpwuid(geteuid());
@@ -1248,17 +1250,17 @@ extern char* getenvar(const char* name,size_t size,char* string)
       return(userid(size,string));
    } else if (strcmp(name,"CUSER")==0) {
       userid(size,string);
-      for(char* p=string;p!=NULL && *p ;p++) *p = toupper(*p);
+      for(char* p=string;*p;p++) *p = toupper(*p);
       return(string);
    } else if (strcmp(name,"cuser")==0) {
       userid(size,string);
-      for(char* p=string;p!=NULL &&  *p ;p++) *p = tolower(*p);
+      for(char* p=string;*p;p++) *p = tolower(*p);
       return(string);
    } else if (strcmp(name,"Cuser")==0) {
       userid(size,string);
-      if (string!=NULL && *string) {
+      if (*string) {
          *string = toupper(*string);
-         for(char* p=string+1; *p ;p++) *p = tolower(*p);
+         for(char* p=string+1;*p;p++) *p = tolower(*p);
       }
       return(string);
    } else if (strcmp(name,"OWNERID")==0) {
