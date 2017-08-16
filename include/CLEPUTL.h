@@ -194,23 +194,23 @@ extern int snprintc(char* buffer,const size_t size,const char* format,...) __PRI
 
 /**
  * Works like snprintf but does reallocation of the buffer (maximal expansion of the format string can be specified).
- * @param buffer  pointer to pointer to the string buffer (is updated, could be NULL at beginning)
- * @param size    pointer to size of the string buffer (is updated, could be 0 at beginning)
- * @param expan   maximal expected expansion of the format string (size must be fit strlen(*buffer)+strlen(format)+expansion+1)
- * @param format  format string
- * @return        amount of characters printed (0 are mainly a error)
+ * @param buffer    pointer to pointer to the string buffer (is updated, could be NULL at beginning)
+ * @param size      pointer to size of the string buffer (is updated, could be 0 at beginning)
+ * @param expansion maximal expected expansion of the format string (size must be fit strlen(*buffer)+strlen(format)+expansion+1)
+ * @param format    format string
+ * @return          amount of characters printed (0 are mainly a error)
  */
-extern int srprintc(char** buffer,size_t* size,const size_t expan,const char* format,...) __PRINTF_CHECK__(4, 5);
+extern int srprintc(char** buffer,size_t* size,const size_t expansion,const char* format,...) __PRINTF_CHECK__(4, 5);
 
 /**
  * Works like snprintc but does reallocation of the buffer (maximal expansion of the format string can be specified).
- * @param buffer  pointer to pointer to the string buffer (is updated, could be NULL at beginning)
- * @param size    pointer to size of the string buffer (is updated, could be 0 at beginning)
- * @param expan   maximal expected expansion of the format string (size must be fit strlen(format)+expansion+1)
- * @param format  format string
- * @return        amount of characters printed (0 are mainly a error)
+ * @param buffer    pointer to pointer to the string buffer (is updated, could be NULL at beginning)
+ * @param size      pointer to size of the string buffer (is updated, could be 0 at beginning)
+ * @param expansion maximal expected expansion of the format string (size must be fit strlen(format)+expansion+1)
+ * @param format    format string
+ * @return          amount of characters printed (0 are mainly a error)
  */
-extern int srprintf(char** buffer,size_t* size,const size_t expan,const char* format,...) __PRINTF_CHECK__(4, 5);
+extern int srprintf(char** buffer,size_t* size,const size_t expansion,const char* format,...) __PRINTF_CHECK__(4, 5);
 
 
 /**
@@ -384,14 +384,14 @@ extern const char* lng2ccsd(const char* pcLang, unsigned isEbcdic);
  * @param csn CCSID
  * @return    encoding string
  */
-extern const char* mapccsid(const unsigned int csn);
+extern const char* mapccsid(const unsigned int uiCcsId);
 
 /**
  * Map encoding string in CCSID
  * @param csn encoding string
  * @return    CCSID
  */
-extern unsigned int mapcdstr(const char* csn);
+extern unsigned int mapcdstr(const char* p);
 
 /**********************************************************************/
 
@@ -434,13 +434,13 @@ extern unsigned int chr2asc(
 /**
  * Convert character string to EBCDIC(only non variant characters) and stops at not convertible chars
  * @param chr  character string
- * @param asc  EBCDIC string
+ * @param ebc  EBCDIC string
  * @param len  length
  * @return     amount of converted bytes
  */
 extern unsigned int chr2ebc(
    const char*          chr,
-         char*          asc,
+         char*          ebc,
    const unsigned int   len);
 
 /**

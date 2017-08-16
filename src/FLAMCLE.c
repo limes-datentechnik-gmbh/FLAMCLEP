@@ -345,7 +345,7 @@ static int siCleGetProperties(
    TsCnfHdl*                     psCnf,
    const char*                   pcOwn,
    const char*                   pcPgm,
-   const char*                   pcFct,
+   const char*                   pcCmd,
    char**                        ppFil,
    char**                        ppPro,
    int*                          piFlg);

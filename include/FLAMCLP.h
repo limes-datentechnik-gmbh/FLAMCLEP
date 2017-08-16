@@ -1183,7 +1183,7 @@ extern int siClpDocu(
  * @param[in]  siMtd Method for property printing (0-ALL, 1-Defined, 2-All but not defined as comment)
  * @param[in]  siDep Depth of next levels to print (1-One Level, 2-Two Level, ..., <9-All)
  * @param[in]  pcPat Path (root.input...) to limit the amount of properties
- * @param[in]  pfPro File pointer to write the property list (if NULL then pfHlp of FLAMCLP is used)
+ * @param[in]  pfOut File pointer to write the property list (if NULL then pfHlp of FLAMCLP is used)
  *
  * @return signed integer with CLP_OK(0) or an error code (CLPERR_xxxxxx)
  */
@@ -1192,7 +1192,7 @@ extern int siClpProperties(
    const int                     siMtd,
    const int                     siDep,
    const char*                   pcPat,
-   FILE*                         pfPro);
+   FILE*                         pfOut);
 
 /**
  * Print the lexems of the command line compiler

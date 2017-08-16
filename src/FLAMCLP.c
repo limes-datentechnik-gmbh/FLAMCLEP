@@ -682,7 +682,7 @@ static int siClpPrnHlp(
    const int                     siLev,
    const int                     siDep,
    const int                     siTyp,
-   const TsSym*                  psArg,
+   const TsSym*                  psTab,
    const int                     isFlg);
 
 static int siClpPrnDoc(
@@ -698,7 +698,7 @@ static int siClpPrnPro(
    void*                         pvHdl,
    FILE*                         pfOut,
    int                           isMan,
-   const int                     isAll,
+   const int                     siMtd,
    const int                     siLev,
    const int                     siDep,
    const TsSym*                  psTab,
