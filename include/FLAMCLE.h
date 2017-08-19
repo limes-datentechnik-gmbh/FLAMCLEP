@@ -300,9 +300,10 @@ For compilation the defines below must be set:
 #define INC_CLE_H
 
 #ifdef __HOSTSHORTING__
-   #define pcCleVersion          FLCLEVSN
-   #define pcCleAbout            FLCLEABO
-   #define siCleExecute          FLCLEEXE
+#  define pcCleVersion          FLCLEVSN
+#  define pcCleAbout            FLCLEABO
+#  define siCleExecute          FLCLEEXE
+#  define siCleParseString      FLCLEPRS
 #endif
 
 

@@ -381,14 +381,14 @@ extern const char* lng2ccsd(const char* pcLang, unsigned isEbcdic);
 
 /**
  * Map CCSID in encoding string
- * @param csn CCSID
+ * @param uiCcsId CCSID
  * @return    encoding string
  */
 extern const char* mapccsid(const unsigned int uiCcsId);
 
 /**
  * Map encoding string in CCSID
- * @param csn encoding string
+ * @param p encoding string
  * @return    CCSID
  */
 extern unsigned int mapcdstr(const char* p);
