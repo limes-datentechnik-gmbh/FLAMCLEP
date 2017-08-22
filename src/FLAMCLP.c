@@ -140,12 +140,13 @@
  * 1.2.94: Reduce memory of symbol table (don't store pcAli use psAli instead)
  * 1.2.95: Add new link to get the index (byte offset) of the current key word in the CLP string
  * 1.2.96: Set locale to "C" close to strtod (remove from open and close functions)
+ * 1.2.97: Support NULL pointer for owner, program, command, help and manpage at ClpOpen (path don't start with '.' in such case)
 **/
 
-#define CLP_VSN_STR       "1.2.96"
+#define CLP_VSN_STR       "1.2.97"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        2
-#define CLP_VSN_REVISION       96
+#define CLP_VSN_REVISION       97
 
 /* Definition der Konstanten ******************************************/
 
@@ -962,18 +963,18 @@ extern void* pvClpOpen(
    const char*                   pcNow=NULL;
    I64                           siNow=0;
    int                           siErr,i;
-   if (pcOwn!=NULL && pcPgm!=NULL && pcCmd!=NULL && psTab!=NULL) {
+   if (psTab!=NULL) {
       psHdl=(TsHdl*)calloc(1,sizeof(TsHdl));
       if (psHdl!=NULL) {
          psHdl->isCas=isCas;
          psHdl->isPfl=isPfl;
          psHdl->isEnv=isEnv;
          psHdl->siMkl=siMkl;
-         psHdl->pcOwn=pcOwn;
-         psHdl->pcPgm=pcPgm;
-         psHdl->pcCmd=pcCmd;
-         psHdl->pcMan=pcMan;
-         psHdl->pcHlp=pcHlp;
+         psHdl->pcOwn=(pcOwn!=NULL)?pcOwn:"";
+         psHdl->pcPgm=(pcPgm!=NULL)?pcPgm:"";
+         psHdl->pcCmd=(pcCmd!=NULL)?pcCmd:"";
+         psHdl->pcMan=(pcMan!=NULL)?pcMan:"";
+         psHdl->pcHlp=(pcHlp!=NULL)?pcHlp:"";
          psHdl->isOvl=isOvl;
          psHdl->pcInp=NULL;
          psHdl->pcCur=NULL;
@@ -1041,7 +1042,7 @@ extern void* pvClpOpen(
          if (pfErr!=NULL) fprintf(pfErr,"Allocation of CLP structure failed\n");
       }
    } else {
-      if (pfErr!=NULL) fprintf(pfErr,"One or more parameter pcOwn(%p), pcPgm(%p), pcCmd(%p) or psTab(%p) are NULL\n",pcOwn,pcPgm,pcCmd,psTab);
+      if (pfErr!=NULL) fprintf(pfErr,"Parameter psTab is NULL\n");
    }
    return((void*)psHdl);
 }
@@ -1187,7 +1188,7 @@ extern int siClpSyntax(
 
    if (pcPat!=NULL && *pcPat) {
       if (strxcmp(psHdl->isCas,psHdl->pcCmd,pcPat,l,0,FALSE)==0) {
-         if (strlen(pcPat)>l && pcPat[l]!='.') {
+         if (l && strlen(pcPat)>l && pcPat[l]!='.') {
             return CLPERR(psHdl,CLPERR_SEM,"Path (%s) is not valid",pcPat);
          }
          for (siLev=0,pcPtr=strchr(pcPat,'.');pcPtr!=NULL && siLev<CLPMAX_HDEPTH;pcPtr=strchr(pcPtr+1,'.'),siLev++) {
@@ -1245,7 +1246,7 @@ extern const char* pcClpInfo(
 
    if (pcPat!=NULL && *pcPat) {
       if (strxcmp(psHdl->isCas,psHdl->pcCmd,pcPat,l,0,FALSE)==0) {
-         if (strlen(pcPat)<=l || pcPat[l]=='.') {
+         if (l==0 || strlen(pcPat)<=l || pcPat[l]=='.') {
             for (siLev=0,pcPtr=strchr(pcPat,'.');pcPtr!=NULL && siLev<CLPMAX_HDEPTH;pcPtr=strchr(pcPtr+1,'.'),siLev++) {
                for (pcKyw=pcPtr+1,i=0;i<CLPMAX_KYWLEN && pcKyw[i]!=EOS && pcKyw[i]!='.';i++) acKyw[i]=pcKyw[i];
                acKyw[i]=EOS;
@@ -1294,7 +1295,7 @@ extern int siClpHelp(
    if (psHdl->pfHlp!=NULL) {
       if (pcPat!=NULL && *pcPat) {
          if (strxcmp(psHdl->isCas,psHdl->pcCmd,pcPat,l,0,FALSE)==0) {
-            if (strlen(pcPat)>l && pcPat[l]!='.') {
+            if (l && strlen(pcPat)>l && pcPat[l]!='.') {
                return CLPERR(psHdl,CLPERR_SEM,"Path (%s) is not valid",pcPat);
             }
             for (siLev=0,pcPtr=strchr(pcPat,'.');pcPtr!=NULL && siLev<CLPMAX_HDEPTH;pcPtr=strchr(pcPtr+1,'.'),siLev++) {
@@ -1466,7 +1467,7 @@ extern int siClpDocu(
          const char*                   p;
          if (pcPat!=NULL && *pcPat) {
             if (strxcmp(psHdl->isCas,psHdl->pcCmd,pcPat,l,0,FALSE)==0) {
-               if (strlen(pcPat)>l && pcPat[l]!='.') {
+               if (l && strlen(pcPat)>l && pcPat[l]!='.') {
                   return CLPERR(psHdl,CLPERR_SEM,"Path (%s) is not valid",pcPat);
                }
                if (strlen(pcPat)>l) {
@@ -1763,7 +1764,7 @@ extern int siClpProperties(
    if (pfOut!=NULL) {
       if (pcPat!=NULL && *pcPat) {
          if (strxcmp(psHdl->isCas,psHdl->pcCmd,pcPat,l,0,FALSE)==0) {
-            if (strlen(pcPat)>l && pcPat[l]!='.') {
+            if (l && strlen(pcPat)>l && pcPat[l]!='.') {
                return CLPERR(psHdl,CLPERR_SEM,"Path (%s) is not valid",pcPat);
             }
             for (siLev=0,pcPtr=strchr(pcPat,'.');pcPtr!=NULL && siLev<CLPMAX_HDEPTH;pcPtr=strchr(pcPtr+1,'.'),siLev++) {
@@ -1822,7 +1823,7 @@ extern int siClpSymbolTableWalk(
       TsSym*               apTmp[CLPMAX_HDEPTH];
       TsSym*               psTmp;
       int                  i;
-      if (psHdl->pcCmd!=NULL) {
+      if (psHdl->pcCmd!=NULL && *psHdl->pcCmd) {
          srprintf(&psHdl->pcPat,&psHdl->szPat,strlen(psHdl->pcCmd),"%s",psHdl->pcCmd);
       } else {
          psHdl->pcPat[0]=EOS;
@@ -7335,13 +7336,21 @@ static const char* fpcPat(
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    int                           i;
-   if (psHdl->pcCmd!=NULL) {
-      srprintf(&psHdl->pcPat,&psHdl->szPat,strlen(psHdl->pcCmd),"%s",psHdl->pcCmd);
+   if (psHdl->pcCmd!=NULL && *psHdl->pcCmd) {
+      if (siLev) {
+         srprintf(&psHdl->pcPat,&psHdl->szPat,strlen(psHdl->pcCmd),"%s.",psHdl->pcCmd);
+      } else {
+         srprintf(&psHdl->pcPat,&psHdl->szPat,strlen(psHdl->pcCmd),"%s",psHdl->pcCmd);
+      }
    } else {
       psHdl->pcPat[0]=EOS;
    }
    for (i=0;i<(siLev);i++) {
-      srprintc(&psHdl->pcPat,&psHdl->szPat,strlen(psHdl->apPat[i]->psStd->pcKyw),".%s",psHdl->apPat[i]->psStd->pcKyw);
+      if (i) {
+         srprintc(&psHdl->pcPat,&psHdl->szPat,strlen(psHdl->apPat[i]->psStd->pcKyw),".%s",psHdl->apPat[i]->psStd->pcKyw);
+      } else {
+         srprintc(&psHdl->pcPat,&psHdl->szPat,strlen(psHdl->apPat[i]->psStd->pcKyw),"%s",psHdl->apPat[i]->psStd->pcKyw);
+      }
    }
    return(psHdl->pcPat);
 }
