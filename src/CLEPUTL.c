@@ -198,8 +198,8 @@ extern char* userid(const int size, char* buffer) {
    char           acBuffer[1024];
    struct passwd* uP=NULL;
    struct passwd  sP={0};
-   int r=getpwuid_r(geteuid(),&sP,acBuffer,sizeof(acBuffer),&uP);
-   if (0==r && NULL != uP) {
+   int e=getpwuid_r(geteuid(),&sP,acBuffer,sizeof(acBuffer),&uP);
+   if (0==e && NULL != uP) {
       strlcpy(buffer,uP->pw_name,size);
    } else {
       if (size>=0) buffer[0]=0x00;
@@ -227,8 +227,8 @@ extern char* duserid(void) {
    char           acBuffer[1024];
    struct passwd* uP=NULL;
    struct passwd  sP={0};
-   int r=getpwuid_r(geteuid(),&sP,acBuffer,sizeof(acBuffer),&uP);
-   if (0==r && NULL != uP) {
+   int e=getpwuid_r(geteuid(),&sP,acBuffer,sizeof(acBuffer),&uP);
+   if (0==e && NULL != uP) {
       srprintf(&buffer,&size,strlen(uP->pw_name),"%s",uP->pw_name);
    } else {
       srprintf(&buffer,&size,0,"%s","");
