@@ -195,8 +195,11 @@ extern char* userid(const int size, char* buffer) {
       if (size>=0) buffer[0]=0x00;
    }
 #endif
-   struct passwd* uP = getpwuid(geteuid());
-   if (NULL != uP) {
+   char           acBuffer[1024];
+   struct passwd* uP=NULL;
+   struct passwd  sP={0};
+   int r=getpwuid_r(geteuid(),&sP,acBuffer,sizeof(acBuffer),&uP);
+   if (0==r && NULL != uP) {
       strlcpy(buffer,uP->pw_name,size);
    } else {
       if (size>=0) buffer[0]=0x00;
@@ -221,8 +224,11 @@ extern char* duserid(void) {
       return(buffer);
    }
 #endif
-   struct passwd* uP    = getpwuid(geteuid());
-   if (NULL != uP) {
+   char           acBuffer[1024];
+   struct passwd* uP=NULL;
+   struct passwd  sP={0};
+   int r=getpwuid_r(geteuid(),&sP,acBuffer,sizeof(acBuffer),&uP);
+   if (0==r && NULL != uP) {
       srprintf(&buffer,&size,strlen(uP->pw_name),"%s",uP->pw_name);
    } else {
       srprintf(&buffer,&size,0,"%s","");
@@ -238,8 +244,11 @@ extern char* homedir(int flag, const int size, char* buffer) {
          strlcpy(buffer,home,size);
       }
    } else {
-      struct passwd* uP = getpwuid(geteuid());
-      if (uP != NULL && uP->pw_dir != NULL) {
+      char           acBuffer[1024];
+      struct passwd* uP=NULL;
+      struct passwd  sP={0};
+      int r=getpwuid_r(geteuid(),&sP,acBuffer,sizeof(acBuffer),&uP);
+      if (0==r && uP != NULL && uP->pw_dir != NULL) {
          if (flag) {
             snprintf(buffer,size,"%s/",uP->pw_dir);
          } else {
@@ -290,8 +299,11 @@ extern char* dhomedir(int flag) {
          srprintf(&buffer,&size,strlen(home),"%s",home);
       }
    } else {
-      struct passwd* uP = getpwuid(geteuid());
-      if (uP != NULL && uP->pw_dir != NULL) {
+      char           acBuffer[1024];
+      struct passwd* uP=NULL;
+      struct passwd  sP={0};
+      int r=getpwuid_r(geteuid(),&sP,acBuffer,sizeof(acBuffer),&uP);
+      if (0==r && uP != NULL && uP->pw_dir != NULL) {
          if (flag) {
             srprintf(&buffer,&size,strlen(uP->pw_dir),"%s/",uP->pw_dir);
          } else {
@@ -2491,7 +2503,8 @@ extern char* cstime(signed long long t, char* p) {
    static char    acBuf[20];
    char*          pcStr=(p!=NULL)?p:acBuf;
    time_t         h=(t)?(time_t)t:time(NULL);
-   struct tm*     x=localtime(&h);
+   struct tm      st;
+   struct tm*     x=localtime_r(&h,&st);
    if (x!=NULL) {
       strftime(pcStr,sizeof(acBuf),"%Y-%m-%d %H:%M:%S",x);
    } else {

@@ -141,12 +141,13 @@
  * 1.2.95: Add new link to get the index (byte offset) of the current key word in the CLP string
  * 1.2.96: Set locale to "C" close to strtod (remove from open and close functions)
  * 1.2.97: Support NULL pointer for owner, program, command, help and manpage at ClpOpen (path don't start with '.' in such case)
+ * 1.2.98: Use threat safe time functions
 **/
 
-#define CLP_VSN_STR       "1.2.97"
+#define CLP_VSN_STR       "1.2.98"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        2
-#define CLP_VSN_REVISION       97
+#define CLP_VSN_REVISION       98
 
 /* Definition der Konstanten ******************************************/
 
@@ -2995,127 +2996,145 @@ static int siClpConNat(
       return(CLPTOK_FLT);
    } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,pcKyw,"LCSTAMP",0,0,FALSE)==0) {
       if (pzLex!=NULL) {
-         time_t t=psHdl->siNow;
-         strftime(*ppLex,*pzLex,"d'%Y%m%d.%H%M%S",localtime(&t));
+         struct tm   st;
+         time_t      t=psHdl->siNow;
+         strftime(*ppLex,*pzLex,"d'%Y%m%d.%H%M%S",localtime_r(&t,&st));
          if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(STR)-LEXEM(%s)\n",*ppLex);
       }
       return(CLPTOK_STR);
    } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,pcKyw,"LCDATE",0,0,FALSE)==0) {
       if (pzLex!=NULL) {
-         time_t t=psHdl->siNow;
-         strftime(*ppLex,*pzLex,"d'%Y%m%d",localtime(&t));
+         struct tm   st;
+         time_t      t=psHdl->siNow;
+         strftime(*ppLex,*pzLex,"d'%Y%m%d",localtime_r(&t,&st));
          if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(STR)-LEXEM(%s)\n",*ppLex);
       }
       return(CLPTOK_STR);
    } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,pcKyw,"LCYEAR",0,0,FALSE)==0) {
       if (pzLex!=NULL) {
-         time_t t=psHdl->siNow;
-         strftime(*ppLex,*pzLex,"d'%Y",localtime(&t));
+         struct tm   st;
+         time_t      t=psHdl->siNow;
+         strftime(*ppLex,*pzLex,"d'%Y",localtime_r(&t,&st));
          if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(STR)-LEXEM(%s)\n",*ppLex);
       }
       return(CLPTOK_STR);
    } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,pcKyw,"LCMONTH",0,0,FALSE)==0) {
       if (pzLex!=NULL) {
-         time_t t=psHdl->siNow;
-         strftime(*ppLex,*pzLex,"d'%m",localtime(&t));
+         struct tm   st;
+         time_t      t=psHdl->siNow;
+         strftime(*ppLex,*pzLex,"d'%m",localtime_r(&t,&st));
          if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(STR)-LEXEM(%s)\n",*ppLex);
       }
       return(CLPTOK_STR);
    } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,pcKyw,"LCDAY",0,0,FALSE)==0) {
       if (pzLex!=NULL) {
-         time_t t=psHdl->siNow;
-         strftime(*ppLex,*pzLex,"d'%d",localtime(&t));
+         struct tm   st;
+         time_t      t=psHdl->siNow;
+         strftime(*ppLex,*pzLex,"d'%d",localtime_r(&t,&st));
          if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(STR)-LEXEM(%s)\n",*ppLex);
       }
       return(CLPTOK_STR);
    } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,pcKyw,"LCTIME",0,0,FALSE)==0) {
       if (pzLex!=NULL) {
-         time_t t=psHdl->siNow;
-         strftime(*ppLex,*pzLex,"d'%H%M%S",localtime(&t));
+         struct tm   st;
+         time_t      t=psHdl->siNow;
+         strftime(*ppLex,*pzLex,"d'%H%M%S",localtime_r(&t,&st));
          if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(STR)-LEXEM(%s)\n",*ppLex);
       }
       return(CLPTOK_STR);
    } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,pcKyw,"LCHOUR",0,0,FALSE)==0) {
       if (pzLex!=NULL) {
-         time_t t=psHdl->siNow;
-         strftime(*ppLex,*pzLex,"d'%H",localtime(&t));
+         struct tm   st;
+         time_t      t=psHdl->siNow;
+         strftime(*ppLex,*pzLex,"d'%H",localtime_r(&t,&st));
          if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(STR)-LEXEM(%s)\n",*ppLex);
       }
       return(CLPTOK_STR);
    } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,pcKyw,"LCMINUTE",0,0,FALSE)==0) {
       if (pzLex!=NULL) {
-         time_t t=psHdl->siNow;
-         strftime(*ppLex,*pzLex,"d'%M",localtime(&t));
+         struct tm   st;
+         time_t      t=psHdl->siNow;
+         strftime(*ppLex,*pzLex,"d'%M",localtime_r(&t,&st));
          if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(STR)-LEXEM(%s)\n",*ppLex);
       }
       return(CLPTOK_STR);
    } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,pcKyw,"LCSECOND",0,0,FALSE)==0) {
       if (pzLex!=NULL) {
-         time_t t=psHdl->siNow;
-         strftime(*ppLex,*pzLex,"d'%S",localtime(&t));
+         struct tm   st;
+         time_t      t=psHdl->siNow;
+         strftime(*ppLex,*pzLex,"d'%S",localtime_r(&t,&st));
          if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(STR)-LEXEM(%s)\n",*ppLex);
       }
       return(CLPTOK_STR);
    } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,pcKyw,"GMSTAMP",0,0,FALSE)==0) {
       if (pzLex!=NULL) {
-         time_t t=psHdl->siNow;
-         strftime(*ppLex,*pzLex,"d'%Y%m%d.%H%M%S",gmtime(&t));
+         struct tm   st;
+         time_t      t=psHdl->siNow;
+         strftime(*ppLex,*pzLex,"d'%Y%m%d.%H%M%S",gmtime_r(&t,&st));
          if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(STR)-LEXEM(%s)\n",*ppLex);
       }
       return(CLPTOK_STR);
    } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,pcKyw,"GMDATE",0,0,FALSE)==0) {
       if (pzLex!=NULL) {
-         time_t t=psHdl->siNow;
-         strftime(*ppLex,*pzLex,"d'%Y%m%d",gmtime(&t));
+         struct tm   st;
+         time_t      t=psHdl->siNow;
+         strftime(*ppLex,*pzLex,"d'%Y%m%d",gmtime_r(&t,&st));
          if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(STR)-LEXEM(%s)\n",*ppLex);
       }
       return(CLPTOK_STR);
    } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,pcKyw,"GMYEAR",0,0,FALSE)==0) {
       if (pzLex!=NULL) {
-         time_t t=psHdl->siNow;
-         strftime(*ppLex,*pzLex,"d'%Y",gmtime(&t));
+         struct tm   st;
+         time_t      t=psHdl->siNow;
+         strftime(*ppLex,*pzLex,"d'%Y",gmtime_r(&t,&st));
          if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(STR)-LEXEM(%s)\n",*ppLex);
       }
       return(CLPTOK_STR);
    } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,pcKyw,"GMMONTH",0,0,FALSE)==0) {
       if (pzLex!=NULL) {
-         time_t t=psHdl->siNow;
-         strftime(*ppLex,*pzLex,"d'%m",gmtime(&t));
+         struct tm   st;
+         time_t      t=psHdl->siNow;
+         strftime(*ppLex,*pzLex,"d'%m",gmtime_r(&t,&st));
          if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(STR)-LEXEM(%s)\n",*ppLex);
       }
       return(CLPTOK_STR);
    } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,pcKyw,"GMDAY",0,0,FALSE)==0) {
       if (pzLex!=NULL) {
-         time_t t=psHdl->siNow;
-         strftime(*ppLex,*pzLex,"d'%d",gmtime(&t));
+         struct tm   st;
+         time_t      t=psHdl->siNow;
+         strftime(*ppLex,*pzLex,"d'%d",gmtime_r(&t,&st));
          if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(STR)-LEXEM(%s)\n",*ppLex);
       }
       return(CLPTOK_STR);
    } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,pcKyw,"GMTIME",0,0,FALSE)==0) {
       if (pzLex!=NULL) {
-         time_t t=psHdl->siNow;
-         strftime(*ppLex,*pzLex,"d'%H%M%S",gmtime(&t));
+         struct tm   st;
+         time_t      t=psHdl->siNow;
+         strftime(*ppLex,*pzLex,"d'%H%M%S",gmtime_r(&t,&st));
          if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(STR)-LEXEM(%s)\n",*ppLex);
       }
       return(CLPTOK_STR);
    } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,pcKyw,"GMHOUR",0,0,FALSE)==0) {
       if (pzLex!=NULL) {
-         time_t t=psHdl->siNow;
-         strftime(*ppLex,*pzLex,"d'%H",gmtime(&t));
+         struct tm   st;
+         time_t      t=psHdl->siNow;
+         strftime(*ppLex,*pzLex,"d'%H",gmtime_r(&t,&st));
          if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(STR)-LEXEM(%s)\n",*ppLex);
       }
       return(CLPTOK_STR);
    } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,pcKyw,"GMMINUTE",0,0,FALSE)==0) {
       if (pzLex!=NULL) {
-         time_t t=psHdl->siNow;
-         strftime(*ppLex,*pzLex,"d'%M",gmtime(&t));
+         struct tm   st;
+         time_t      t=psHdl->siNow;
+         strftime(*ppLex,*pzLex,"d'%M",gmtime_r(&t,&st));
          if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(STR)-LEXEM(%s)\n",*ppLex);
       }
       return(CLPTOK_STR);
    } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,pcKyw,"GMSECOND",0,0,FALSE)==0) {
       if (pzLex!=NULL) {
-         time_t t=psHdl->siNow;
-         strftime(*ppLex,*pzLex,"d'%S",gmtime(&t));
+         struct tm   st;
+         time_t      t=psHdl->siNow;
+         strftime(*ppLex,*pzLex,"d'%S",gmtime_r(&t,&st));
          if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(STR)-LEXEM(%s)\n",*ppLex);
       }
       return(CLPTOK_STR);
@@ -3286,6 +3305,7 @@ static int siClpScnNat(
    char*                         pcZro=NULL;
    time_t                        t;
    struct tm                     tm;
+   struct tm                     stAkt;
    struct tm                     *tmAkt;
    char                          acHlp[1024];
 
@@ -3584,7 +3604,7 @@ static int siClpScnNat(
                if (t==-1) {
                   return CLPERR(psHdl,CLPERR_SYS,"Determine the current time is not possible%s","");
                }
-               tmAkt=localtime(&t);
+               tmAkt=localtime_r(&t,&stAkt);
                tmAkt->tm_year +=tm.tm_year;
                tmAkt->tm_mon  +=tm.tm_mon;
                tmAkt->tm_mday +=tm.tm_mday;
@@ -3601,7 +3621,7 @@ static int siClpScnNat(
                if (t==-1) {
                   return CLPERR(psHdl,CLPERR_SYS,"Determine the current time is not possible%s","");
                }
-               tmAkt=localtime(&t);
+               tmAkt=localtime_r(&t,&stAkt);
                tmAkt->tm_year -=tm.tm_year;
                tmAkt->tm_mon  -=tm.tm_mon;
                tmAkt->tm_mday -=tm.tm_mday;
