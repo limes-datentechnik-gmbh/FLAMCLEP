@@ -58,10 +58,20 @@
 #define SAFE_FREE(x) do { if ((x) != NULL) {free((void*)(x)); (x)=NULL;} } while(0)
 
 #ifdef __WIN__
-#define localtime_r(t,s)   localtime(t)
-#define gmtime_r(t,s)      gmtime(t)
-#define asctime_r(s,b)     asctime(s)
-#define ctime_r(t,b)       ctime(t)
+#  ifndef __FL5__
+#     ifndef localtime_r
+#        define localtime_r(t,s)   localtime(t)
+#     endif
+#     ifndef gmtime_r
+#        define gmtime_r(t,s)      gmtime(t)
+#     endif
+#     ifndef asctime_r
+#        define asctime_r(s,b)     asctime(s)
+#     endif
+#     ifndef ctime_r
+#        define ctime_r(t,b)       ctime(t)
+#     endif
+#endif
 extern int win_setenv(const char* name, const char* value);
 extern int win_unsetenv(const char* name);
 #  define GETENV(name)        getenv((name))
