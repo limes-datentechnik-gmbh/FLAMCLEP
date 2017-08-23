@@ -71,7 +71,7 @@
 #     ifndef ctime_r
 #        define ctime_r(t,b)       ctime(t)
 #     endif
-#endif
+#  endif
 extern int win_setenv(const char* name, const char* value);
 extern int win_unsetenv(const char* name);
 #  define GETENV(name)        getenv((name))
