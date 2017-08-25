@@ -5371,6 +5371,7 @@ static int siClpBldLit(
    const char*                   pcKyw=NULL;
    const char*                   pcPat=NULL;
    TsSym*                        psCon;
+   C08                           acTim[CSTIME_BUFSIZ];
 
    if (psArg->psVar->siCnt>=psArg->psFix->siMax) {
       return CLPERR(psHdl,CLPERR_SEM,"Too many (>%d) occurrences of argument '%s.%s' with type '%s'",psArg->psFix->siMax,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
@@ -5938,13 +5939,13 @@ static int siClpBldLit(
    pcPat=fpcPat(pvHdl,siLev);
    if (pcKyw!=NULL) {
       if (psArg->psFix->siTyp==CLPTYP_NUMBER && (CLPISF_TIM(psArg->psStd->uiFlg) || pcVal[0]=='t')) {
-         srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcPat)+strlen(psArg->psStd->pcKyw)+strlen(isPrnStr(psArg,pcVal))+strlen(cstime(siVal,NULL)),"%s.%s=%s(%s(%s))\n",pcPat,psArg->psStd->pcKyw,pcKyw,isPrnStr(psArg,pcVal),cstime(siVal,NULL));
+         srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcPat)+strlen(psArg->psStd->pcKyw)+strlen(isPrnStr(psArg,pcVal))+strlen(cstime(siVal,acTim)),"%s.%s=%s(%s(%s))\n",pcPat,psArg->psStd->pcKyw,pcKyw,isPrnStr(psArg,pcVal),cstime(siVal,NULL));
       } else {
          srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcPat)+strlen(psArg->psStd->pcKyw)+strlen(isPrnStr(psArg,pcVal)),"%s.%s=%s(%s)\n",pcPat,psArg->psStd->pcKyw,pcKyw,isPrnStr(psArg,pcVal));
       }
    } else {
       if (psArg->psFix->siTyp==CLPTYP_NUMBER && (CLPISF_TIM(psArg->psStd->uiFlg) || pcVal[0]=='t')) {
-         srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcPat)+strlen(psArg->psStd->pcKyw)+strlen(isPrnStr(psArg,pcVal))+strlen(cstime(siVal,NULL)),"%s.%s=%s(%s)\n",pcPat,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),cstime(siVal,NULL));
+         srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcPat)+strlen(psArg->psStd->pcKyw)+strlen(isPrnStr(psArg,pcVal))+strlen(cstime(siVal,acTim)),"%s.%s=%s(%s)\n",pcPat,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),cstime(siVal,NULL));
       } else {
          srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcPat)+strlen(psArg->psStd->pcKyw)+strlen(isPrnStr(psArg,pcVal)),"%s.%s=%s\n",pcPat,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal));
       }
