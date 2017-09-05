@@ -3385,7 +3385,6 @@ static void vdCnfCls(
    }
 }
 
-
 extern int siCleParseString(
    const int                     uiErr,
    char*                         pcErr,

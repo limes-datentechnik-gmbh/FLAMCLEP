@@ -730,6 +730,8 @@ extern int siCleExecute(
    const char*                   pcApx,
    const TsCleAppendix*          psApx);
 
+ /**********************************************************************/
+ /*! @cond PRIVATE */
  extern int siCleParseString(
     const int                     uiErr,
     char*                         pcErr,
@@ -750,6 +752,7 @@ extern int siCleExecute(
     const char*                   pcEnt,
     int*                          piMod,
     void*                         pvDat);
+ /*! @endcond */
 
 #endif /*INC_CLE_H*/
 
