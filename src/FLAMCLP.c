@@ -2703,7 +2703,7 @@ static int siClpSymFnd(
    CLPERR(psHdl,CLPERR_SYN,"Parameter '%s.%s' not valid",fpcPat(pvHdl,siLev),pcKyw);
    CLPERRADD(psHdl,0,"Please use one of the following parameters:%s","");
    vdClpPrnArgTab(pvHdl,psHdl->pfErr,1,-1,psTab);
-   return(CLPERR_SEM);
+   return(CLPERR_SYN);
 }
 
 static void vdClpSymPrn(
