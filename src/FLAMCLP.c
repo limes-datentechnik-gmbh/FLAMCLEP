@@ -142,12 +142,13 @@
  * 1.2.96: Set locale to "C" close to strtod (remove from open and close functions)
  * 1.2.97: Support NULL pointer for owner, program, command, help and manpage at ClpOpen (path don't start with '.' in such case)
  * 1.2.98: Use threat safe time functions
+ * 1.2.99: avoid using set locale for strtod
 **/
 
-#define CLP_VSN_STR       "1.2.98"
+#define CLP_VSN_STR       "1.2.99"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        2
-#define CLP_VSN_REVISION       98
+#define CLP_VSN_REVISION       99
 
 /* Definition der Konstanten ******************************************/
 
@@ -2991,6 +2992,9 @@ static int siClpConNat(
    } else if ((siTyp==CLPTYP_FLOATN || siTyp==-1) && strxcmp(psHdl->isCas,pcKyw,"PI",0,0,FALSE)==0) {
       if (pzLex!=NULL) {
          srprintf(ppLex,pzLex,24,"d+%f",3.14159265359);
+         for (char* p=*ppLex;*p;p++) {
+            if (*p==',') *p='.';
+         }
          if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(FLT)-LEXEM(%s)\n",*ppLex);
       }
       return(CLPTOK_FLT);
@@ -4326,15 +4330,16 @@ static int siFromFloatLexem(
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    char*                         pcHlp=NULL;
-   char*                         pcLoc;
    errno=0;
    switch (pcVal[0]) {
    case 'd':
-      // TODO: avoid using setlocale()/localeconv() anywhere in the project (except in main()) as they are not thread-safe
-      pcLoc=setlocale(LC_NUMERIC, NULL);
-      setlocale(LC_NUMERIC, "C");
       *pfVal=strtod(pcVal+1,&pcHlp);
-      setlocale(LC_NUMERIC, pcLoc);
+      if (pcHlp!=NULL && *pcHlp=='.') {
+         char* p=pcHlp;
+         *p=',';
+         *pfVal=strtod(pcVal+1,&pcHlp);
+         *p='.';
+      }
       break;
    default: return CLPERR(psHdl,CLPERR_SEM,"Base (%c) of floating point literal (%s.%s=%s) not supported",pcVal[0],fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,isPrnStr(psArg,pcVal+1));
    }
@@ -4468,6 +4473,9 @@ static int siClpPrsFac(
             } else {
                srprintf(ppVal,pzVal,24,"d%f",flVal);
             }
+            for (char* p=*ppVal;*p;p++) {
+               if (*p==',') *p='.';
+            }
             break;
          case CLPTYP_STRING:
             if (siInd>0) {
@@ -4596,6 +4604,9 @@ static int siClpPrsTrm(
          } else {
             srprintf(ppVal,pzVal,24,"d%f",flVal);
          }
+         for (char* p=*ppVal;*p;p++) {
+            if (*p==',') *p='.';
+         }
          if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d MUL-FLT(%f*%f=%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,flVal1,flVal2,*ppVal);
          break;
       default:
@@ -4650,6 +4661,9 @@ static int siClpPrsTrm(
          } else {
             srprintf(ppVal,pzVal,24,"d%f",flVal);
          }
+         for (char* p=*ppVal;*p;p++) {
+            if (*p==',') *p='.';
+         }
          if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d DIV-FLT(%f/%f=%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,flVal1,flVal2,*ppVal);
          break;
       default:
@@ -4693,6 +4707,9 @@ static int siClpPrsTrm(
             srprintf(ppVal,pzVal,24,"d+%f",flVal);
          } else {
             srprintf(ppVal,pzVal,24,"d%f",flVal);
+         }
+         for (char* p=*ppVal;*p;p++) {
+            if (*p==',') *p='.';
          }
          if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d AUTO-MUL-FLT(%f*%f=%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,flVal1,flVal2,*ppVal);
          break;
@@ -4778,6 +4795,9 @@ static int siClpPrsExp(
          } else {
             srprintf(ppVal,pzVal,24,"d%f",flVal);
          }
+         for (char* p=*ppVal;*p;p++) {
+            if (*p==',') *p='.';
+         }
          if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d ADD-FLT(%f+%f=%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,flVal1,flVal2,*ppVal);
          break;
       case CLPTYP_STRING:
@@ -4839,6 +4859,9 @@ static int siClpPrsExp(
          } else {
             srprintf(ppVal,pzVal,24,"d%f",flVal);
          }
+         for (char* p=*ppVal;*p;p++) {
+            if (*p==',') *p='.';
+         }
          if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d SUB-FLT(%f-%f=%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,flVal1,flVal2,*ppVal);
          break;
       default:
@@ -4882,6 +4905,9 @@ static int siClpPrsExp(
             srprintf(ppVal,pzVal,24,"d+%f",flVal);
          } else {
             srprintf(ppVal,pzVal,24,"d%f",flVal);
+         }
+         for (char* p=*ppVal;*p;p++) {
+            if (*p==',') *p='.';
          }
          if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d AUTO-ADD-FLT(%f+%f=%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,flVal1,flVal2,*ppVal);
          break;
