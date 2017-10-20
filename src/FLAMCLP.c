@@ -3346,13 +3346,7 @@ static int siClpScnNat(
          psHdl->pcOld=(*ppCur);
       } else if (*(*ppCur)==';') { /*line comment*/
          (*ppCur)++;
-         while (*(*ppCur)!='\n' && *(*ppCur)!=EOS) {
-            if (*(*ppCur)=='\n') {
-               psHdl->siRow++;
-               psHdl->pcRow=(*ppCur)+1;
-            }
-            (*ppCur)++;
-         }
+         while (*(*ppCur)!='\n' && *(*ppCur)!=EOS) (*ppCur)++;
          if (*(*ppCur)=='\n') {
             (*ppCur)++;
             psHdl->siRow++;
