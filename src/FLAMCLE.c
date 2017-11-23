@@ -130,6 +130,7 @@
  * 1.2.63: Support option QUIET in command syntax to suppress all printouts of CLE
  * 1.2.64: Support option SILENT like QUIET but the error messages will be printed
  * 1.2.65: Support pvClpAlloc in INI functions
+ * 1.2.66: Fix valgrind issue at read of configuration file
  */
 #define CLE_VSN_STR       "1.2.65"
 #define CLE_VSN_MAJOR      1
@@ -3119,50 +3120,53 @@ static TsCnfHdl* psCnfOpn(
    while (fgets(acBuf,sizeof(acBuf)-1,pfFil)!=NULL) {
       pcHlp=strchr(acBuf,C_HSH);
       if (pcHlp!=NULL) *pcHlp=EOS;
-      pcHlp=acBuf+strlen(acBuf);
-      while (isspace(*(pcHlp-1))) {
-         pcHlp--; *pcHlp=EOS;
-      }
-      pcHlp=strchr(acBuf,'=');
-      if (pcHlp!=NULL) {
-         pcKyw=acBuf; pcVal=pcHlp+1; *pcHlp=EOS;
-         while (isspace(*pcKyw)) pcKyw++;
-         while (isspace(*pcVal)) pcVal++;
-         for (char* p=pcKyw+strlen(pcKyw);p>pcKyw && isspace(*(p-1));p--) *p=0x00;
-         for (char* p=pcVal+strlen(pcVal);p>pcVal && isspace(*(p-1));p--) *p=0x00;
-         psEnt=(TsCnfEnt*)calloc(1,sizeof(TsCnfEnt));
-         if (psEnt==NULL) {
-            if (pfErr!=NULL) fprintf(pfErr,"Memory allocation for configuration data element failed\n");
-            fclose(pfFil);
-            vdCnfCls(psHdl);
-            return(NULL);
+      size_t l=strlen(acBuf);
+      if (l>0) {
+         pcHlp=acBuf+l;
+         while (isspace(*(pcHlp-1))) {
+            pcHlp--; *pcHlp=EOS;
          }
-         siKyw=strlen(pcKyw); siVal=strlen(pcVal);
-         if (siKyw && siVal) {
-            srprintf(&psEnt->pcKyw,&psEnt->szKyw,siKyw,"%s",pcKyw);
-            srprintf(&psEnt->pcVal,&psEnt->szVal,siVal,"%s",pcVal);
-            if (psEnt->pcKyw==NULL || psEnt->pcVal==NULL) {
-               if (pfErr!=NULL) fprintf(pfErr,"Memory allocation for configuration data (%s=%s) failed\n",pcKyw,pcVal);
-               free(psEnt);
+         pcHlp=strchr(acBuf,'=');
+         if (pcHlp!=NULL) {
+            pcKyw=acBuf; pcVal=pcHlp+1; *pcHlp=EOS;
+            while (isspace(*pcKyw)) pcKyw++;
+            while (isspace(*pcVal)) pcVal++;
+            for (char* p=pcKyw+strlen(pcKyw);p>pcKyw && isspace(*(p-1));p--) *p=0x00;
+            for (char* p=pcVal+strlen(pcVal);p>pcVal && isspace(*(p-1));p--) *p=0x00;
+            psEnt=(TsCnfEnt*)calloc(1,sizeof(TsCnfEnt));
+            if (psEnt==NULL) {
+               if (pfErr!=NULL) fprintf(pfErr,"Memory allocation for configuration data element failed\n");
                fclose(pfFil);
                vdCnfCls(psHdl);
                return(NULL);
             }
-            if (psHdl->psLst!=NULL) {
-               psEnt->psBak=psHdl->psLst;
-               psEnt->psNxt=psHdl->psLst->psNxt;
-               if (psHdl->psLst->psNxt!=NULL) {
-                  psHdl->psLst->psNxt->psBak=psEnt;
+            siKyw=strlen(pcKyw); siVal=strlen(pcVal);
+            if (siKyw && siVal) {
+               srprintf(&psEnt->pcKyw,&psEnt->szKyw,siKyw,"%s",pcKyw);
+               srprintf(&psEnt->pcVal,&psEnt->szVal,siVal,"%s",pcVal);
+               if (psEnt->pcKyw==NULL || psEnt->pcVal==NULL) {
+                  if (pfErr!=NULL) fprintf(pfErr,"Memory allocation for configuration data (%s=%s) failed\n",pcKyw,pcVal);
+                  free(psEnt);
+                  fclose(pfFil);
+                  vdCnfCls(psHdl);
+                  return(NULL);
                }
-               psHdl->psLst->psNxt=psEnt;
+               if (psHdl->psLst!=NULL) {
+                  psEnt->psBak=psHdl->psLst;
+                  psEnt->psNxt=psHdl->psLst->psNxt;
+                  if (psHdl->psLst->psNxt!=NULL) {
+                     psHdl->psLst->psNxt->psBak=psEnt;
+                  }
+                  psHdl->psLst->psNxt=psEnt;
+               } else {
+                  psEnt->psNxt=NULL;
+                  psEnt->psBak=NULL;
+                  psHdl->psFst=psEnt;
+               }
+               psHdl->psLst=psEnt;
             } else {
-               psEnt->psNxt=NULL;
-               psEnt->psBak=NULL;
-               psHdl->psFst=psEnt;
+               free(psEnt);
             }
-            psHdl->psLst=psEnt;
-         } else {
-            free(psEnt);
          }
       }
    }
