@@ -143,6 +143,7 @@
  * 1.2.97: Support NULL pointer for owner, program, command, help and manpage at ClpOpen (path don't start with '.' in such case)
  * 1.2.98: Use threat safe time functions
  * 1.2.99: avoid using set locale for strtod
+ * 1.2.100: Support XML path string mapping with '(' and ')' instead of '<' and '>'
 **/
 
 #define CLP_VSN_STR       "1.2.99"
@@ -5646,7 +5647,9 @@ static int siClpBldLit(
          }
          break;
       case 's':
-         if (CLPISF_FIL(psArg->psStd->uiFlg)) {
+         if (CLPISF_XML(psArg->psStd->uiFlg)) {
+            pcHlp=dmapxml(pcVal+2,CLPISF_UPP(psArg->psStd->uiFlg)?1:CLPISF_LOW(psArg->psStd->uiFlg)?2:0);
+         } else if (CLPISF_FIL(psArg->psStd->uiFlg)) {
             pcHlp=dmapfil(pcVal+2,CLPISF_UPP(psArg->psStd->uiFlg)?1:CLPISF_LOW(psArg->psStd->uiFlg)?2:0);
          } else if (CLPISF_LAB(psArg->psStd->uiFlg)) {
             pcHlp=dmaplab(pcVal+2,CLPISF_UPP(psArg->psStd->uiFlg)?1:CLPISF_LOW(psArg->psStd->uiFlg)?2:0);
@@ -5857,12 +5860,14 @@ static int siClpBldLit(
                                        fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),isPrnLen(psArg,l2));
             }
          } else {
-            if (CLPISF_FIL(psArg->psStd->uiFlg)) {
-               pcHlp=dmapfil(pcVal+2,CLPISF_UPP(psArg->psStd->uiFlg));
+            if (CLPISF_XML(psArg->psStd->uiFlg)) {
+               pcHlp=dmapxml(pcVal+2,CLPISF_UPP(psArg->psStd->uiFlg)?1:CLPISF_LOW(psArg->psStd->uiFlg)?2:0);
+            } else if (CLPISF_FIL(psArg->psStd->uiFlg)) {
+               pcHlp=dmapfil(pcVal+2,CLPISF_UPP(psArg->psStd->uiFlg)?1:CLPISF_LOW(psArg->psStd->uiFlg)?2:0);
             } else if (CLPISF_LAB(psArg->psStd->uiFlg)) {
-               pcHlp=dmaplab(pcVal+2,CLPISF_UPP(psArg->psStd->uiFlg));
+               pcHlp=dmaplab(pcVal+2,CLPISF_UPP(psArg->psStd->uiFlg)?1:CLPISF_LOW(psArg->psStd->uiFlg)?2:0);
             } else {
-               pcHlp=dmapstr(pcVal+2,CLPISF_UPP(psArg->psStd->uiFlg));
+               pcHlp=dmapstr(pcVal+2,CLPISF_UPP(psArg->psStd->uiFlg)?1:CLPISF_LOW(psArg->psStd->uiFlg)?2:0);
             }
             if (pcHlp==NULL) {
                return CLPERR(psHdl,CLPERR_MEM,"String mapping (memory allocation) for argument '%s.%s' failed",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);

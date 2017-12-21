@@ -606,6 +606,8 @@ extern const char* pcClpAbout(const int l, const int s, char* b);
 #define CLPFLG_DLM               0x02000000U
 /** CLPFLG_UNS Marks a number as unsigned (prevent negative values)*/
 #define CLPFLG_UNS               0x04000000U
+/** CLPFLG_XML Marks zero terminated string as XML path where '(' and ')' are used to replace environment variables*/
+#define CLPFLG_XML               0x08000000U
 /** CLPFLG_FIL Marks zero terminated string as file and replace additional '~' by HOME and corrects the prefix for different platforms*/
 #define CLPFLG_FIL               0x10000000U
 /** CLPFLG_LAB Marks zero terminated string as label and replace additional '~' by USER, '^' by OWNER and '!' by ENVID */
@@ -643,6 +645,7 @@ extern const char* pcClpAbout(const int l, const int s, char* b);
 #define CLPISF_DYN(flg)          ((flg)&CLPFLG_DYN)
 #define CLPISF_DLM(flg)          ((flg)&CLPFLG_DLM)
 #define CLPISF_UNS(flg)          ((flg)&CLPFLG_UNS)
+#define CLPISF_XML(flg)          ((flg)&CLPFLG_XML)
 #define CLPISF_FIL(flg)          ((flg)&CLPFLG_FIL)
 #define CLPISF_LAB(flg)          ((flg)&CLPFLG_LAB)
 #define CLPISF_UPP(flg)          ((flg)&CLPFLG_UPP)

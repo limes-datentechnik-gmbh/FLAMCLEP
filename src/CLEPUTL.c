@@ -1641,6 +1641,18 @@ extern char* dmapstr(const char* string,int method)
    return(h1);
 }
 
+extern char* dmapxml(const char* string,int method)
+{
+   char* h1=drplenvar(string,'(',')');
+   if (h1!=NULL){
+      switch (method) {
+      case 1: for(char* p=h1;*p;p++) *p=toupper(*p); break;
+      case 2: for(char* p=h1;*p;p++) *p=tolower(*p); break;
+      }
+   }
+   return(h1);
+}
+
 extern char* mapfil(char* file,int size)
 {
    rplchar(file,size,C_TLD,adjpfx(file,size));

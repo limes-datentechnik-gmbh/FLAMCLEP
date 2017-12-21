@@ -294,6 +294,14 @@ extern char* mapstr(char* string,int size);
 extern char* dmapstr(const char* string,int method);
 
 /**
+ * Replace all environment variables enclosed with '(' and ')' to build a dynamic string
+ * @param string string for replacement
+ * @param method conversion method (1 - to upper, 2 - to lower, else nothing)
+ * @return pointer to the new allocated string or NULL if error
+ */
+extern char* dmapxml(const char* string,int method);
+
+/**
  * Replace '~' with "<HOME>" and all environment variables enclosed with '<' and '>' to build a file name
  * @param file string for replacement
  * @param size size of replacement string
