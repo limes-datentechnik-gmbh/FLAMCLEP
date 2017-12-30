@@ -144,12 +144,13 @@
  * 1.2.98: Use threat safe time functions
  * 1.2.99: avoid using set locale for strtod
  * 1.2.100: Support XML path string mapping with '(' and ')' instead of '<' and '>'
+ * 1.2.101: Add xxYEAR2 string literal for year without century (YY)
 **/
 
-#define CLP_VSN_STR       "1.2.99"
+#define CLP_VSN_STR       "1.2.101"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        2
-#define CLP_VSN_REVISION       99
+#define CLP_VSN_REVISION       101
 
 /* Definition der Konstanten ******************************************/
 
@@ -2826,6 +2827,7 @@ extern int siClpLexem(
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," LCSTAMP   STRING - current local stamp in format:           YYYYMMDD.HHMMSS\n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," LCDATE    STRING - current local date in format:            YYYYMMDD       \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," LCYEAR    STRING - current local year in format:            YYYY           \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," LCYEAR2   STRING - current local year in format:            YY             \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," LCMONTH   STRING - current local month in format:           MM             \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," LCDAY     STRING - current local day in format:             DD             \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," LCTIME    STRING - current local time in format:            HHMMSS         \n");
@@ -2835,6 +2837,7 @@ extern int siClpLexem(
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," GMSTAMP   STRING - current Greenwich mean stamp in format:  YYYYMMDD.HHMMSS\n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," GMDATE    STRING - current Greenwich mean date in format:   YYYYMMDD       \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," GMYEAR    STRING - current Greenwich mean year in format:   YYYY           \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," GMYEAR2   STRING - current Greenwich mean year in format:   YY             \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," GMMONTH   STRING - current Greenwich mean month in format:  MM             \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," GMDAY     STRING - current Greenwich mean day in format:    DD             \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," GMTIME    STRING - current Greenwich mean time in format:   HHMMSS         \n");
@@ -3023,6 +3026,14 @@ static int siClpConNat(
          if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(STR)-LEXEM(%s)\n",*ppLex);
       }
       return(CLPTOK_STR);
+   } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,pcKyw,"LCYEAR2",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         struct tm   st;
+         time_t      t=psHdl->siNow;
+         strftime(*ppLex,*pzLex,"d'%y",localtime_r(&t,&st));
+         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(STR)-LEXEM(%s)\n",*ppLex);
+      }
+      return(CLPTOK_STR);
    } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,pcKyw,"LCMONTH",0,0,FALSE)==0) {
       if (pzLex!=NULL) {
          struct tm   st;
@@ -3092,6 +3103,14 @@ static int siClpConNat(
          struct tm   st;
          time_t      t=psHdl->siNow;
          strftime(*ppLex,*pzLex,"d'%Y",gmtime_r(&t,&st));
+         if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(STR)-LEXEM(%s)\n",*ppLex);
+      }
+      return(CLPTOK_STR);
+   } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,pcKyw,"GMYEAR2",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         struct tm   st;
+         time_t      t=psHdl->siNow;
+         strftime(*ppLex,*pzLex,"d'%y",gmtime_r(&t,&st));
          if (pfTrc!=NULL) fprintf(pfTrc,"CONSTANT-TOKEN(STR)-LEXEM(%s)\n",*ppLex);
       }
       return(CLPTOK_STR);
