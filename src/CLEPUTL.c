@@ -46,7 +46,14 @@
 #endif
 #if defined(__ZOS__) && defined(__FL5__)
 #  include "FLZASM31.h"
-#endif
+#  define flzsym FLZSYM
+#else
+static inline int flzsym(const char* pcDat, const int* piSln, char* pcVal, int* piVln) {
+   memset(pcVal,0,*piVln);
+   *piVln=0;
+   return(8);
+}
+#endif /* __ZOS__ */
 #include "CLEPUTL.h"
 
 #ifndef realloc_nowarn
@@ -1241,10 +1248,28 @@ static const char* getjclvar(const char* symbol) {
 
 #endif
 
+static const char* systemsymbol(const char* pcSym)
+{
+   static char acVal[128];
+   int        siVln=sizeof(acVal)-1;
+   int        siSln=strlen(pcSym);
+   if (flzsym(pcSym,&siSln,acVal,&siVln)==0) {
+      if (siVln!=siSln || memcmp(pcSym,acVal,siVln)) {                  // check if real replacement
+         while (siVln>0 && isspace(acVal[siVln-1])) siVln--;            // remove trailing whitespace
+         if (siVln) {
+            acVal[siVln]=0x00;
+            return(acVal);
+         }
+      }
+   }
+   return(NULL);
+}
+
 extern char* getenvar(const char* name,size_t size,char* string)
 {
    const char* v=GETENV(name);
    if (v==NULL) v=getjclvar(name);
+   if (v==NULL) v=systemsymbol(name);
    if (v!=NULL && *v) {
       size_t lv=strlen(v);
       while(lv>0 && isspace(v[lv-1])) {

@@ -73,7 +73,12 @@ a dedicated file for each user.
 Since z/OSv2r1 you can also used exported JCL symbols like environment
 variables. The exported JCL symbols have lower priority then the same
 environment variable. The service CEEGTJS is called dynamically and the
-language environment must be in the steplib concatenation to use it
+language environment must be in the STEPLIB concatenation to use it.
+Additional all z/OS system symbols can be used in the in the string
+replacement (<&LDAY>). The environment variable have the highest
+priority, followed by the exported JCL symbols. The lowest priority have
+system symbols. If the variable name not found, then no replacement are
+done and the angle bracket keep still in place.
 
 ------------------------------------------------------------------------
  //E0       EXPORT SYMLIST=*
