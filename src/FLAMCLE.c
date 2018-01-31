@@ -511,7 +511,7 @@ extern int siCleExecute(
    }
 
 #if defined(__ZOS__) || defined(__USS__)
-   siErr = readEnvVars("DD:STDENV",pfOut,pfErr);
+   siErr = readEnvars("DD:STDENV",pfOut,pfErr,NULL);
    if (siErr) return(siErr);
 #endif
 

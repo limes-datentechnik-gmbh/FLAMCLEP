@@ -2550,7 +2550,57 @@ extern char* cstime(signed long long t, char* p) {
    return(pcStr);
 }
 
-extern int readEnvVars(const char* pcFil, FILE* pfOut, FILE* pfErr) {
+extern int envarInsert(TsEnVarList** ppList,const char* pcName,const char* pcValue) {
+   if (ppList!=NULL) {
+      TsEnVarList* psNode=(TsEnVarList*)malloc(sizeof(TsEnVarList));
+      if (psNode==NULL) {
+         resetEnvars(ppList);
+         return(CLERTC_MEM);
+      }
+      psNode->pcName=(char*)malloc(strlen(pcName)+1);
+      if (psNode->pcName==NULL) {
+         free(psNode);
+         resetEnvars(ppList);
+         return(CLERTC_MEM);
+      }
+      strcpy(psNode->pcName,pcName);
+      if (pcValue!=NULL) {
+         psNode->pcValue=(char*)malloc(strlen(pcValue)+1);
+         if (psNode->pcValue==NULL) {
+            free(psNode->pcName);
+            free(psNode);
+            resetEnvars(ppList);
+            return(CLERTC_MEM);
+         }
+         strcpy(psNode->pcValue,pcValue);
+      } else {
+         psNode->pcValue=NULL;
+      }
+      psNode->psNext=*ppList;
+      *ppList=psNode;
+   }
+   return(CLERTC_OK);
+}
+
+extern void resetEnvars(TsEnVarList** ppList) {
+   if (ppList!=NULL) {
+      while(*ppList!=NULL) {
+         TsEnVarList* psHelp=(*ppList);
+         (*ppList)=(*ppList)->psNext;
+         if (psHelp->pcValue!=NULL) {
+            SETENV(psHelp->pcName,psHelp->pcValue);
+         } else {
+            UNSETENV(psHelp->pcName);
+         }
+         SAFE_FREE(psHelp->pcName);
+         SAFE_FREE(psHelp->pcValue);
+         free(psHelp);
+      }
+      *ppList=NULL;
+   }
+}
+
+extern int readEnvars(const char* pcFil, FILE* pfOut, FILE* pfErr, TsEnVarList** ppList) {
    char* pcCnf;
    char* pcTmp;
    char  acCnf[1024];
@@ -2570,6 +2620,14 @@ extern int readEnvVars(const char* pcFil, FILE* pfOut, FILE* pfErr) {
             *pcCnf=0x00;
             for (pcTmp=acCnf;isspace(*pcTmp);pcTmp++);
             if (*pcTmp) {
+               int siErr=envarInsert(ppList,pcTmp,GETENV(pcTmp));
+               if (siErr) {
+                  if(pfErr!=NULL){
+                     fprintf(pfErr,"Build envar list for reset failed (%s)\n",pcTmp);
+                  }
+                  fclose(pfTmp);
+                  return siErr;
+               }
                if (SETENV(pcTmp,pcCnf+1)) {
                   if(pfErr!=NULL){
                      fprintf(pfErr,

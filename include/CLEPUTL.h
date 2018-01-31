@@ -57,6 +57,12 @@
 /** Free memory space */
 #define SAFE_FREE(x) do { if ((x) != NULL) {free((void*)(x)); (x)=NULL;} } while(0)
 
+typedef struct EnVarList {
+   char*                pcName;
+   char*                pcValue;
+   struct EnVarList*    psNext;
+}TsEnVarList;
+
 #ifdef __WIN__
 #  ifndef __FL5__
 #     ifndef localtime_r
@@ -544,10 +550,28 @@ extern char* cstime(signed long long t, char* p);
  * @param[in] pcFil Filename, if pcFil==NULL use "DD:STDENV" instead
  * @param[in] pfOut File pointer for output messages
  * @param[in] pfErr File pointer for error messages
+ * @param[out] ppList Pointer to an optional envar list for reset (the list and each string must freed by caller)
  *
  * @return    0 for successful else CLERTCs
  */
-extern int readEnvVars(const char* pcFil, FILE* pfOut, FILE* pfErr);
+extern int readEnvars(const char* pcFil, FILE* pfOut, FILE* pfErr, TsEnVarList** ppList);
+
+/**
+ * Store envars in a list for reset
+ *
+ * @param[out] ppList Pointer to envar list for reset
+ * @param[in]  pcName Name of the environment variable
+ * @param[in]  pcValue Value of the environment variable (NULL for unset)
+ */
+extern int envarInsert(TsEnVarList** ppList,const char* pcName,const char* pcValue);
+
+/**
+ * Reset list of environment variables
+ *
+ * @param[in] ppList Pointer to envar lisl
+ */
+extern void resetEnvars(TsEnVarList** ppList);
+
 
 /**********************************************************************/
 
