@@ -48,9 +48,11 @@ USED ENVIRONMENT VARIABLES
 Environment variables can be set from the system or in the program
 configuration file with the build-in function 'SETENV'. Particularly on
 mainframe systems the configuration file is an easy way to define
-environment variables. Additionally on host the DD name STDENV is
-supported. The DD:STDENV allows to define the &{PGM}_CONFIG_FILE,
-&{PGM}_DEFAULT_OWNER_ID, LANG and other environment variables in JCL:
+environment variables. Additionally on host systems the DD name STDENV 
+and with lower priority the data set name '&SYSUID..STDENV' is supported.
+The DD:STDENV allows to define the &{PGM}_CONFIG_FILE,
+&{PGM}_DEFAULT_OWNER_ID, LANG and other environment variables
+in JCL:
 
 -----------------------------------------------------------------------
  //STDENV   DD *

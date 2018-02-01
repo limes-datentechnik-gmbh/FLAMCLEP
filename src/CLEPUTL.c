@@ -2604,10 +2604,15 @@ extern int readEnvars(const char* pcFil, FILE* pfOut, FILE* pfErr, TsEnVarList**
    char* pcCnf;
    char* pcTmp;
    char  acCnf[1024];
+   FILE* pfTmp;
    if(pcFil==NULL || pcFil[0]=='\0'){
-      pcFil = "DD:STDENV";
+      pfTmp = fopen("DD:STDENV","r");
+      if (pfTmp==NULL) {
+         pfTmp = fopen("STDENV","r");
+      }
+   } else {
+      pfTmp=fopen(pcFil,"r");
    }
-   FILE* pfTmp=fopen(pcFil,"r");
    if (pfTmp!=NULL) { /*Ignore if open failed*/
       memset(acCnf,0,sizeof(acCnf));
       while (fgets(acCnf,sizeof(acCnf)-1,pfTmp)!=NULL) {

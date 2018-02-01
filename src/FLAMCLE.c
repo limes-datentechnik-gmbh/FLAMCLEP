@@ -131,11 +131,12 @@
  * 1.2.64: Support option SILENT like QUIET but the error messages will be printed
  * 1.2.65: Support pvClpAlloc in INI functions
  * 1.2.66: Fix valgrind issue at read of configuration file
+ * 1.2.67: Read environment also from SYSUID.STDENV on z/OS
  */
-#define CLE_VSN_STR       "1.2.65"
+#define CLE_VSN_STR       "1.2.67"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        2
-#define CLE_VSN_REVISION       65
+#define CLE_VSN_REVISION       67
 
 /* Definition der Konstanten ******************************************/
 
@@ -511,7 +512,7 @@ extern int siCleExecute(
    }
 
 #if defined(__ZOS__) || defined(__USS__)
-   siErr = readEnvars("DD:STDENV",pfOut,pfErr,NULL);
+   siErr = readEnvars(NULL,pfOut,pfErr,NULL);
    if (siErr) return(siErr);
 #endif
 
