@@ -145,12 +145,13 @@
  * 1.2.99: avoid using set locale for strtod
  * 1.2.100: Support XML path string mapping with '(' and ')' instead of '<' and '>'
  * 1.2.101: Add xxYEAR2 string literal for year without century (YY)
+ * 1.2.102: Add missing frees if ClpOpen failes
 **/
 
-#define CLP_VSN_STR       "1.2.101"
+#define CLP_VSN_STR       "1.2.102"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        2
-#define CLP_VSN_REVISION       101
+#define CLP_VSN_REVISION       102
 
 /* Definition der Konstanten ******************************************/
 
@@ -1015,9 +1016,29 @@ extern void* pvClpOpen(
          psHdl->pcOpt=pcOpt;
          psHdl->pcEnt=pcEnt;
          siErr=siClpSymIni(psHdl,0,NULL,psTab,NULL,&psHdl->psTab);
-         if (siErr<0) { vdClpSymDel(psHdl->psTab); free(psHdl); return(NULL); }
+         if (siErr<0) {
+            vdClpSymDel(psHdl->psTab);
+            SAFE_FREE(psHdl->pcLex);
+            SAFE_FREE(psHdl->pcSrc);
+            SAFE_FREE(psHdl->pcPre);
+            SAFE_FREE(psHdl->pcPat);
+            SAFE_FREE(psHdl->pcLst);
+            SAFE_FREE(psHdl->pcMsg);
+            free(psHdl);
+            return(NULL);
+         }
          siErr=siClpSymCal(psHdl,0,NULL,psHdl->psTab);
-         if (siErr<0) { vdClpSymDel(psHdl->psTab); free(psHdl); return(NULL); }
+         if (siErr<0) {
+            vdClpSymDel(psHdl->psTab);
+            SAFE_FREE(psHdl->pcLex);
+            SAFE_FREE(psHdl->pcSrc);
+            SAFE_FREE(psHdl->pcPre);
+            SAFE_FREE(psHdl->pcPat);
+            SAFE_FREE(psHdl->pcLst);
+            SAFE_FREE(psHdl->pcMsg);
+            free(psHdl);
+            return(NULL);
+         }
          vdClpSymTrc(psHdl);
          if (psErr!=NULL) {
             psErr->ppMsg=(const char**)&psHdl->pcMsg;
