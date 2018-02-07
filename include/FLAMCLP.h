@@ -555,65 +555,97 @@ extern const char* pcClpAbout(const int l, const int s, char* b);
 */
 /** CLPFLG_NON To define no special flags */
 #define CLPFLG_NON               0x00000000U
+
 /** CLPFLG_ALI This parameter is an alias for another argument (set by macros) */
 #define CLPFLG_ALI               0x00000001U
+
 /** CLPFLG_CON This parameter is a constant definition (no argument, no link, no alias (set by macros)) */
 #define CLPFLG_CON               0x00000002U
+
 /** CLPFLG_CMD If set the parameter is only used within the command line (command line only) */
 #define CLPFLG_CMD               0x00000004U
+
 /** CLPFLG_PRO If set the parameter is only used within the property file (property file only) */
 #define CLPFLG_PRO               0x00000008U
+
 /** CLPFLG_SEL If set only the predefined constants over the corresponding key words can be selected (useful to define selections) */
 #define CLPFLG_SEL               0x00000010U
+
 /** CLPFLG_FIX This argument has a fixed length (only useful for strings if a typedef defines a fixed length per element, else set internally) */
 #define CLPFLG_FIX               0x00000020U
+
 /** CLPFLG_BIN This argument can contain binary data without null termination (length must be known or determined with a link) */
 #define CLPFLG_BIN               0x00000040U
-/** CLPFLG_DMY If set the parameter is not visible, meaning it is a dummy */
+
+/** CLPFLG_DMY If set the parameter is not put in the symbol table, meaning it is only a peace of memory in the CLP structure */
 #define CLPFLG_DMY               0x00000080U
+
 /** CLPFLG_CNT This link will be filled by the calculated amount of elements (useful for arrays) */
 #define CLPFLG_CNT               0x00000100U
+
 /** CLPFLG_OID This link will be filled by the object identifier (OID) of the chosen argument (useful for overlays) */
 #define CLPFLG_OID               0x00000200U
+
 /** CLPFLG_IND This link will be filled with the index (position) in the CLP string (byte offset of the current key word)*/
 #define CLPFLG_IND               0x00000400U
+
+/** CLPFLG_HID If set the parameter is not visible, meaning it is a hidden parameter */
+#define CLPFLG_HID               0x00000800U
+
 /** CLPFLG_ELN This link will be filled by the calculated length of an element (fixed types == data size, packed types == data length) */
 #define CLPFLG_ELN               0x00001000U
+
 /** CLPFLG_SLN This link will be filled by the calculated string length for an element (only for null-terminated strings) */
 #define CLPFLG_SLN               0x00002000U
+
 /** CLPFLG_TLN This link will be filled by the calculated total length for the argument (sum of all element lengths) */
 #define CLPFLG_TLN               0x00004000U
+
 /** CLPFLG_DEF This flag enables to use the OID as default for numbers if no value is assigned (only the keyword is used (syntax extension))*/
 #define CLPFLG_DEF               0x00010000U
+
 /** CLPFLG_CHR This flag will set the default method of interpretation of a binary string to local character string (DEFAULT)*/
 #define CLPFLG_CHR               0x00020000U
+
 /** CLPFLG_ASC This flag will set the default method of interpretation of a binary string to ASCII*/
 #define CLPFLG_ASC               0x00040000U
+
 /** CLPFLG_EBC This flag will set the default method of interpretation of a binary string to EBCDIC*/
 #define CLPFLG_EBC               0x00080000U
+
 /** CLPFLG_HEX This flag will set the default method of interpretation of a binary string to hexadecimal*/
 #define CLPFLG_HEX               0x00100000U
+
 /** CLPFLG_PDF This flag will be set if a property value was defined from outside, it will be FALSE if the property value was hard coded in the tables */
 #define CLPFLG_PDF               0x00200000U
+
 /** CLPFLG_TIM This flag mark a number as time value (only used to print out the corressponing time stamp) */
 #define CLPFLG_TIM               0x00400000U
+
 /** CLPFLG_DYN This flag mark a string or array as dynamic (only a pointer to allocated memory is used and must be freeed by the user) */
 #define CLPFLG_DYN               0x00800000U
+
 /** CLPFLG_PWD This flag will ensure that the clear value is only put into the data structure but not traced, logged or given away elsewhere */
 #define CLPFLG_PWD               0x01000000U
 /** CLPFLG_DLM This flag ensures that fix size arrays has a empty (initialized) last element (max-1) as delimiter
  *             Additional you enforce 0xFF at the and of a non fix size string array (size-1)*/
 #define CLPFLG_DLM               0x02000000U
+
 /** CLPFLG_UNS Marks a number as unsigned (prevent negative values)*/
 #define CLPFLG_UNS               0x04000000U
+
 /** CLPFLG_XML Marks zero terminated string as XML path where '(' and ')' are used to replace environment variables*/
 #define CLPFLG_XML               0x08000000U
+
 /** CLPFLG_FIL Marks zero terminated string as file and replace additional '~' by HOME and corrects the prefix for different platforms*/
 #define CLPFLG_FIL               0x10000000U
+
 /** CLPFLG_LAB Marks zero terminated string as label and replace additional '~' by USER, '^' by OWNER and '!' by ENVID */
 #define CLPFLG_LAB               0x20000000U
+
 /** CLPFLG_UPP Converts zero terminated strings to upper case */
 #define CLPFLG_UPP               0x40000000U
+
 /** CLPFLG_LOW Converts zero terminated strings to lower case */
 #define CLPFLG_LOW               0x80000000U
 
@@ -625,6 +657,7 @@ extern const char* pcClpAbout(const int l, const int s, char* b);
 #define CLPISF_CMD(flg)          ((flg)&CLPFLG_CMD)
 #define CLPISF_PRO(flg)          ((flg)&CLPFLG_PRO)
 #define CLPISF_DMY(flg)          ((flg)&CLPFLG_DMY)
+#define CLPISF_HID(flg)          ((flg)&CLPFLG_HID)
 #define CLPISF_SEL(flg)          ((flg)&CLPFLG_SEL)
 #define CLPISF_FIX(flg)          ((flg)&CLPFLG_FIX)
 #define CLPISF_BIN(flg)          ((flg)&CLPFLG_BIN)

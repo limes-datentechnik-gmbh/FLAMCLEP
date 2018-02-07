@@ -145,13 +145,14 @@
  * 1.2.99: avoid using set locale for strtod
  * 1.2.100: Support XML path string mapping with '(' and ')' instead of '<' and '>'
  * 1.2.101: Add xxYEAR2 string literal for year without century (YY)
- * 1.2.102: Add missing frees if ClpOpen failes
+ * 1.2.102: Add missing frees if ClpOpen failed
+ * 1.2.103: Add flag hidden (CLPFLG_HID) to support hidden parameter
 **/
 
-#define CLP_VSN_STR       "1.2.102"
+#define CLP_VSN_STR       "1.2.103"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        2
-#define CLP_VSN_REVISION       102
+#define CLP_VSN_REVISION       103
 
 /* Definition der Konstanten ******************************************/
 
@@ -2296,7 +2297,7 @@ static TsSym* psClpSymIns(
       ERROR(psSym);
    }
 
-   if (!CLPISF_CMD(psSym->psStd->uiFlg) && !CLPISF_PRO(psSym->psStd->uiFlg) && !CLPISF_DMY(psSym->psStd->uiFlg)) {
+   if (!CLPISF_CMD(psSym->psStd->uiFlg) && !CLPISF_PRO(psSym->psStd->uiFlg) && !CLPISF_DMY(psSym->psStd->uiFlg) && !CLPISF_HID(psSym->psStd->uiFlg)) {
       psSym->psStd->uiFlg|=CLPFLG_CMD;
       psSym->psStd->uiFlg|=CLPFLG_PRO;
    }
