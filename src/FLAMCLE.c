@@ -425,14 +425,36 @@ extern const char* pcCleAbout(const int l, const int s, char* b)
    return(pcClpAbout(l+1,s,b));
 }
 
+static inline const char* pcMapCleRtc(int siRtc) {
+   switch(siRtc) {
+   case CLERTC_OK:  return("o.k.");
+   case CLERTC_INF: return("info");
+   case CLERTC_FIN: return("finish");
+   case CLERTC_WRN: return("warning");
+   case CLERTC_RUN: return("run");
+   case CLERTC_MAP: return("mapping");
+   case CLERTC_SYN: return("syntax");
+   case CLERTC_CMD: return("command");
+   case CLERTC_INI: return("initialization");
+   case CLERTC_CFG: return("configuration");
+   case CLERTC_TAB: return("tables (CLP)");
+   case CLERTC_SYS: return("system");
+   case CLERTC_ACS: return("license/access");
+   case CLERTC_ITF: return("interface");
+   case CLERTC_MEM: return("memory/allocation");
+   case CLERTC_FAT: return("fatal");
+   default        : return("special");
+   }
+}
+
 #undef  ERROR
 #define ERROR(x,b) do { \
    int r = siCleEndExecution((x),psCnf,pfTrh,pfDoc,pfPro,ppArg,pvHdl,(b));\
    if (r) {\
       if (pcBld!=NULL && *pcBld) {\
-         if (pfErr!=NULL) fprintf(pfErr,"Program '%s' (Build: %s) ends with completion code %d\n",pcProgram,pcBld,r);\
+         if (pfErr!=NULL) fprintf(pfErr,"Program '%s' (Build: %s) ends with completion code %d (%s)\n",pcProgram,pcBld,r,pcMapCleRtc(r));\
       } else {\
-         if (pfErr!=NULL) fprintf(pfErr,"Program '%s' ends with completion code %d\n",pcProgram,r);\
+         if (pfErr!=NULL) fprintf(pfErr,"Program '%s' ends with completion code %d (%s)\n",pcProgram,r,pcMapCleRtc(r));\
       }\
    } else {\
       if (pcBld!=NULL && *pcBld) {\
