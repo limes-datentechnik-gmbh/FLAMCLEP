@@ -430,15 +430,15 @@ extern const char* pcCleAbout(const int l, const int s, char* b)
    int r = siCleEndExecution((x),psCnf,pfTrh,pfDoc,pfPro,ppArg,pvHdl,(b));\
    if (r) {\
       if (pcBld!=NULL && *pcBld) {\
-         if (pfErr!=NULL) fprintf(pfErr,"%s (Build: %s) ends with completion code %d\n",pcProgram,pcBld,r);\
+         if (pfErr!=NULL) fprintf(pfErr,"Program '%s' (Build: %s) ends with completion code %d\n",pcProgram,pcBld,r);\
       } else {\
-         if (pfErr!=NULL) fprintf(pfErr,"%s ends with completion code %d\n",pcProgram,r);\
+         if (pfErr!=NULL) fprintf(pfErr,"Program '%s' ends with completion code %d\n",pcProgram,r);\
       }\
    } else {\
       if (pcBld!=NULL && *pcBld) {\
-         if (pfErr!=NULL) fprintf(pfErr,"%s (Build: %s) runs successful\n",pcProgram,pcBld);\
+         if (pfErr!=NULL) fprintf(pfErr,"Program '%s' (Build: %s) run successfully\n",pcProgram,pcBld);\
       } else {\
-         if (pfErr!=NULL) fprintf(pfErr,"%s runs successful\n",pcProgram);\
+         if (pfErr!=NULL) fprintf(pfErr,"Program '%s' ran successfully\n",pcProgram);\
       }\
    }\
    SAFE_FREE(pcHom); \
