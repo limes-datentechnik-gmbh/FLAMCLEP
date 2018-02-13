@@ -427,8 +427,20 @@ extern const char* pcCleAbout(const int l, const int s, char* b)
 
 #undef  ERROR
 #define ERROR(x,b) do { \
-   fprintf(pfErr,"%s (%s)\n",pcHlp,pcPgmVsn);\
    int r = siCleEndExecution((x),psCnf,pfTrh,pfDoc,pfPro,ppArg,pvHdl,(b));\
+   if (r) {\
+      if (pcBld!=NULL && *pcBld) {\
+         if (pfErr!=NULL) fprintf(pfErr,"%s (Build: %s) ends with completion code %d\n",pcProgram,pcBld,r);\
+      } else {\
+         if (pfErr!=NULL) fprintf(pfErr,"%s ends with completion code %d\n",pcProgram,r);\
+      }\
+   } else {\
+      if (pcBld!=NULL && *pcBld) {\
+         if (pfErr!=NULL) fprintf(pfErr,"%s (Build: %s) runs successful\n",pcProgram,pcBld);\
+      } else {\
+         if (pfErr!=NULL) fprintf(pfErr,"%s runs successful\n",pcProgram);\
+      }\
+   }\
    SAFE_FREE(pcHom); \
    SAFE_FREE(pcPgm); \
    SAFE_FREE(pcPgu); \
@@ -455,7 +467,7 @@ extern int siCleExecute(
    const char*                   pcOpt,
    const char*                   pcEnt,
    const char*                   pcLic,
-   const char*                   pcPgmVsn,
+   const char*                   pcBld,
    const char*                   pcVsn,
    const char*                   pcAbo,
    const char*                   pcHlp,
@@ -507,8 +519,8 @@ extern int siCleExecute(
       }
    }
 
-   if (psTab==NULL || argc==0     || argv==NULL  ||  pcOwner==NULL ||  pcProgram==NULL ||  pcHlp==NULL || pcPgmVsn==NULL ||
-       pcDep==NULL || pcOpt==NULL || pcEnt==NULL || *pcOwner==0x00 || *pcProgram==0x00 || *pcHlp==0    || *pcPgmVsn==0) {
+   if (psTab==NULL || argc==0     || argv==NULL  ||  pcOwner==NULL ||  pcProgram==NULL ||  pcHlp==NULL ||
+       pcDep==NULL || pcOpt==NULL || pcEnt==NULL || *pcOwner==0x00 || *pcProgram==0x00 || *pcHlp==0   ) {
       if (pfErr!=NULL) fprintf(pfErr,"CLE parameter incorrect\n");
       ERROR(CLERTC_FAT,NULL);
    }

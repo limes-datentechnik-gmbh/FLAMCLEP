@@ -667,7 +667,7 @@ typedef struct CleAppendix {
  * @param[in]  pcOpt String to separate options (recommended: "/")
  * @param[in]  pcEnt String to separate list entries (recommended: ",")
  * @param[in]  pcLic String containing the license information for this program (used by built-in function LICENSE - not converted on EBCDIC systems)
- * @param[in]  pcPgmVsn String containing the base version for this program
+ * @param[in]  pcBld String containing the build number / raw version for this program (optional, can be NULL) used in final message about completion
  * @param[in]  pcVsn String containing the version information for this program (used by built-in function VERSION - not converted on EBCDIC systems)
  * @param[in]  pcAbo String containing the about message for this program (used by built-in function ABOUT - not converted on EBCDIC systems)
  * @param[in]  pcHlp Short help message for the whole program (converted on EBCDIC systems)
@@ -718,7 +718,7 @@ extern int siCleExecute(
    const char*                   pcOpt,
    const char*                   pcEnt,
    const char*                   pcLic,
-   const char*                   pcPgmVsn,
+   const char*                   pcBld,
    const char*                   pcVsn,
    const char*                   pcAbo,
    const char*                   pcHlp,
