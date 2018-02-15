@@ -147,12 +147,13 @@
  * 1.2.101: Add xxYEAR2 string literal for year without century (YY)
  * 1.2.102: Add missing frees if ClpOpen failed
  * 1.2.103: Add flag hidden (CLPFLG_HID) to support hidden parameter
+ * 1.2.104: Separate version and build number with hyphen instead of dot
 **/
 
-#define CLP_VSN_STR       "1.2.103"
+#define CLP_VSN_STR       "1.2.104"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        2
-#define CLP_VSN_REVISION       103
+#define CLP_VSN_REVISION       104
 
 /* Definition der Konstanten ******************************************/
 
@@ -906,7 +907,7 @@ static void vdClpFree(
 
 extern const char* pcClpVersion(const int l, const int s, char* b)
 {
-   snprintc(b,s,"%2.2d FLAM-CLP VERSION: %s.%u BUILD: %s %s %s\n",l,CLP_VSN_STR,__BUILDNR__,__BUILD__,__DATE__,__TIME__);
+   snprintc(b,s,"%2.2d FLAM-CLP VERSION: %s-%u BUILD: %s %s %s\n",l,CLP_VSN_STR,__BUILDNR__,__BUILD__,__DATE__,__TIME__);
    return(b);
 }
 
@@ -914,7 +915,7 @@ extern const char* pcClpAbout(const int l, const int s, char* b)
 {
    snprintc(b,s,
    "%2.2d Frankenstein Limes Command Line Parser (FLAM-CLP)\n"
-   "   Version: %s.%u Build: %s %s %s\n"
+   "   Version: %s-%u Build: %s %s %s\n"
    "   Copyright (C) limes datentechnik (R) gmbh\n"
    "   This library is open source from the FLAM(R) project: http://www.flam.de\n"
    "   for license see: https://github.com/limes-datentechnik-gmbh/flamclep\n"

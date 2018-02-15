@@ -132,11 +132,12 @@
  * 1.2.65: Support pvClpAlloc in INI functions
  * 1.2.66: Fix valgrind issue at read of configuration file
  * 1.2.67: Read environment also from SYSUID.STDENV on z/OS
+ * 1.2.68: Separate version and build number with hyphen instead of dot
  */
-#define CLE_VSN_STR       "1.2.67"
+#define CLE_VSN_STR       "1.2.68"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        2
-#define CLE_VSN_REVISION       67
+#define CLE_VSN_REVISION       68
 
 /* Definition der Konstanten ******************************************/
 
@@ -408,7 +409,7 @@ static void vdCnfCls(
 
 extern const char* pcCleVersion(const int l, const int s, char* b)
 {
-   snprintc(b,s,"%2.2d FLAM-CLE VERSION: %s.%u BUILD: %s %s %s\n",l,CLE_VSN_STR,__BUILDNR__,__BUILD__,__DATE__,__TIME__);
+   snprintc(b,s,"%2.2d FLAM-CLE VERSION: %s-%u BUILD: %s %s %s\n",l,CLE_VSN_STR,__BUILDNR__,__BUILD__,__DATE__,__TIME__);
    return(pcClpVersion(l+1,s,b));
 }
 
@@ -416,7 +417,7 @@ extern const char* pcCleAbout(const int l, const int s, char* b)
 {
    snprintc(b,s,
    "%2.2d Frankenstein Limes Command Line Execution (FLAM-CLE)\n"
-   "   Version: %s.%u Build: %s %s %s\n"
+   "   Version: %s-%u Build: %s %s %s\n"
    "   Copyright (C) limes datentechnik (R) gmbh\n"
    "   This library is open source from the FLAM(R) project: http://www.flam.de\n"
    "   for license see: https://github.com/limes-datentechnik-gmbh/flamclep\n"
@@ -452,15 +453,15 @@ static inline const char* pcMapCleRtc(int siRtc) {
    int r = siCleEndExecution((x),psCnf,pfTrh,pfDoc,pfPro,ppArg,pvHdl,(b));\
    if (r) {\
       if (pcBld!=NULL && *pcBld) {\
-         if (pfErr!=NULL) fprintf(pfErr,"Program '%s' (Build: %s) ends with completion code %d (%s)\n",pcProgram,pcBld,r,pcMapCleRtc(r));\
+         if (pfErr!=NULL) fprintf(pfErr,"Program '%s' (Build: %s (%s %s)) ends with completion code %d (%s)\n",pcProgram,pcBld,__DATE__,__TIME__,r,pcMapCleRtc(r));\
       } else {\
-         if (pfErr!=NULL) fprintf(pfErr,"Program '%s' ends with completion code %d (%s)\n",pcProgram,r,pcMapCleRtc(r));\
+         if (pfErr!=NULL) fprintf(pfErr,"Program '%s' (Build: %s %s) ends with completion code %d (%s)\n",pcProgram,__DATE__,__TIME__,r,pcMapCleRtc(r));\
       }\
    } else {\
       if (pcBld!=NULL && *pcBld) {\
-         if (pfErr!=NULL) fprintf(pfErr,"Program '%s' (Build: %s) run successfully\n",pcProgram,pcBld);\
+         if (pfErr!=NULL) fprintf(pfErr,"Program '%s' (Build: %s (%s %s)) run successfully\n",pcProgram,pcBld,__DATE__,__TIME__);\
       } else {\
-         if (pfErr!=NULL) fprintf(pfErr,"Program '%s' ran successfully\n",pcProgram);\
+         if (pfErr!=NULL) fprintf(pfErr,"Program '%s' (Build: %s %s) run successfully\n",pcProgram,__DATE__,__TIME__);\
       }\
    }\
    SAFE_FREE(pcHom); \
