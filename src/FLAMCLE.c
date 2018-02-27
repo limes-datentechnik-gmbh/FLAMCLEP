@@ -430,21 +430,21 @@ static inline const char* pcMapCleRtc(int siRtc) {
    switch(siRtc) {
    case CLERTC_OK:  return("o.k.");
    case CLERTC_INF: return("info");
-   case CLERTC_FIN: return("finish");
+   case CLERTC_FIN: return("finish function failed");
    case CLERTC_WRN: return("warning");
-   case CLERTC_RUN: return("run");
-   case CLERTC_MAP: return("mapping");
-   case CLERTC_SYN: return("syntax");
-   case CLERTC_CMD: return("command");
-   case CLERTC_INI: return("initialization");
-   case CLERTC_CFG: return("configuration");
-   case CLERTC_TAB: return("tables (CLP)");
-   case CLERTC_SYS: return("system");
-   case CLERTC_ACS: return("license/access");
-   case CLERTC_ITF: return("interface");
-   case CLERTC_MEM: return("memory/allocation");
-   case CLERTC_FAT: return("fatal");
-   default        : return("special");
+   case CLERTC_RUN: return("run failed");
+   case CLERTC_MAP: return("mapping failed");
+   case CLERTC_SYN: return("syntax error");
+   case CLERTC_CMD: return("command failed");
+   case CLERTC_INI: return("initialization failed");
+   case CLERTC_CFG: return("configuration wrong");
+   case CLERTC_TAB: return("table error (CLP) ");
+   case CLERTC_SYS: return("system error");
+   case CLERTC_ACS: return("license/access error");
+   case CLERTC_ITF: return("interface error");
+   case CLERTC_MEM: return("memory/allocation failed");
+   case CLERTC_FAT: return("fatal error");
+   default        : return("special condition code");
    }
 }
 
