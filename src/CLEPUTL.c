@@ -1304,6 +1304,12 @@ extern char* getenvar(const char* name,size_t size,char* string)
       return(userid(size,string));
    } else if (strcmp(name,"ENVID")==0) {
       return(envid(size,string));
+   } else if (strcmp(name,"HOSTNAME")==0) {
+      if (gethostname(string, size)==0)
+         string[size-1]='\0';
+      else
+         string[0]='\0'; //gethostname() failed => empty string
+      return(string);
    } else {
       return(NULL);
    }
