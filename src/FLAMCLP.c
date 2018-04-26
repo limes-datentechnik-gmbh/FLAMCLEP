@@ -148,12 +148,13 @@
  * 1.2.102: Add missing frees if ClpOpen failed
  * 1.2.103: Add flag hidden (CLPFLG_HID) to support hidden parameter
  * 1.2.104: Separate version and build number with hyphen instead of dot
+ * 1.2.105: Support parameter list without '***SECRET***' replacement
 **/
 
-#define CLP_VSN_STR       "1.2.104"
+#define CLP_VSN_STR       "1.2.105"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        2
-#define CLP_VSN_REVISION       104
+#define CLP_VSN_REVISION       105
 
 /* Definition der Konstanten ******************************************/
 
@@ -191,7 +192,7 @@
 
 #define isPrnInt(p,v) (CLPISF_PWD(p->psStd->uiFlg)?((I64)0):(v))
 #define isPrnFlt(p,v) (CLPISF_PWD(p->psStd->uiFlg)?((F64)0.0):(v))
-#define isPrnStr(p,v) (CLPISF_PWD(p->psStd->uiFlg)?("***SECRET***"):(v))
+#define isPrnStr(p,v) (CLPISF_PWD(p->psStd->uiFlg && psHdl->isPwd)?("***SECRET***"):(v))
 #define isPrnLen(p,v) (CLPISF_PWD(p->psStd->uiFlg)?((int)0):(v))
 
 #define GETALI(sym) (((sym)->psStd->psAli!=NULL)?(sym)->psStd->psAli->psStd->pcKyw:NULL)
@@ -318,6 +319,7 @@ typedef struct Hdl {
    int                           siMkl;
    int                           isOvl;
    int                           isChk;
+   int                           isPwd;
    int                           isCas;
    int                           isPfl;
    int                           isEnv;
@@ -1133,6 +1135,7 @@ extern int siClpParseCmd(
    const char*                   pcSrc,
    const char*                   pcCmd,
    const int                     isChk,
+   const int                     isPwd,
    int*                          piOid,
    char**                        ppLst)
 {
@@ -1154,6 +1157,7 @@ extern int siClpParseCmd(
    psHdl->pcOld=pcCmd;
    psHdl->pcRow=pcCmd;
    psHdl->isChk=isChk;
+   psHdl->isPwd=isPwd;
    psHdl->siRow=1;
    psHdl->siCol=0;
    psHdl->pcLex[0]=EOS;
@@ -2880,7 +2884,7 @@ extern int siClpLexem(
    return(CLP_OK);
 }
 
-#define isPrintF(p)    (((p)!=NULL)?(CLPISF_PWD((p)->psStd->uiFlg)==FALSE):(TRUE))
+#define isPrintF(p)    (((p)!=NULL)?(CLPISF_PWD((p)->psStd->uiFlg)==FALSE || psHdl->isPwd==FALSE):(TRUE))
 #define isPrnLex(p,l)  (isPrintF(p)?(l):("***SECRET***"))
 #define isPrintF2(p)   (CLPISF_PWD((p)->psStd->uiFlg)==FALSE)
 #define isPrnLex2(p,l) (isPrintF2(p)?(l):("***SECRET***"))

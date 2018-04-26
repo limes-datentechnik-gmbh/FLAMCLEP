@@ -315,7 +315,7 @@ int main(int argc, char * argv[])
          fprintf(stderr,"SYNTAX optional:\n"); siClpSyntax(pvHdl,TRUE,TRUE,10,NULL); fprintf(stderr,"\n");
          siClpHelp(pvHdl,10,NULL,TRUE,TRUE);
          fprintf(stderr,"*** PROPERTY FILE PARSER ***\n");
-         siCnt=siClpParseCmd(pvHdl,NULL,acBuf,TRUE,NULL,&pcLst);
+         siCnt=siClpParseCmd(pvHdl,NULL,acBuf,TRUE,TRUE,NULL,&pcLst);
          if (siCnt<0) {
             switch (siCnt) {
                case CLPERR_LEX:fprintf(stderr,"LEXICAL-ERROR\n");break;
@@ -340,7 +340,7 @@ int main(int argc, char * argv[])
          }
          fprintf(stderr,"*** COMMAND LINE PARSER ***\n");
          fprintf(stderr,"line: %s\n", acBuf);
-         siCnt=siClpParseCmd(pvHdl,NULL,acBuf,TRUE,NULL,&pcLst);
+         siCnt=siClpParseCmd(pvHdl,NULL,acBuf,TRUE,TRUE,NULL,&pcLst);
          if (siCnt<0) {
             switch (siCnt) {
                case CLPERR_LEX:fprintf(stderr,"LEXICAL-ERROR\n");break;

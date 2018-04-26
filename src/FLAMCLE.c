@@ -2205,7 +2205,7 @@ EVALUATE:
                if (siErr) ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
                siErr=siCleGetCommand(pvHdl,pfOut,pcDep,psTab[i].pcKyw,argc,argv,&pcFil,&pcCmd);
                if (siErr) ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
-               siErr=siClpParseCmd(pvHdl,pcFil,pcCmd,TRUE,psTab[i].piOid,&pcTls);
+               siErr=siClpParseCmd(pvHdl,pcFil,pcCmd,TRUE,TRUE,psTab[i].piOid,&pcTls);
                if (siErr<0) {
                   if (pfErr!=NULL) fprintf(pfErr,"Command line parser for command '%s' failed\n",psTab[i].pcKyw);
                   SAFE_FREE(pcCmd);
@@ -3469,7 +3469,7 @@ extern int siCleParseString(
       if (pfTmp!=NULL) {rewind(pfTmp); size_t l=strlen(pcErr); size_t r=fread(pcErr+l,1,uiErr-(l+1),pfTmp); fclose(pfTmp); pcErr[l+r]=0x00;}
       return -1;
    }
-   siErr=siClpParseCmd(pvHdl,NULL,pcStr,TRUE,(int*)piMod,NULL);
+   siErr=siClpParseCmd(pvHdl,NULL,pcStr,TRUE,TRUE,(int*)piMod,NULL);
    if (siErr<0) {
       snprintf(pcErr,uiErr,
             "CTX-MESSAGE : Parsing of string for command '%s' failed\n"

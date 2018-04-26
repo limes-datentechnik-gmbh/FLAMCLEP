@@ -1089,6 +1089,7 @@ extern int siClpParsePro(
  *                   If the command line taken from a file it is useful to provide this file name for error printing else use NULL.
  * @param[in]  pcCmd Pointer to a null-terminated string containing the command for parsing
  * @param[in]  isChk Boolean to enable (TRUE) or disable (FALSE) validation of minimum number of entries
+ * @param[in]  isPwd Boolean to enable (TRUE) or disable (FALSE) '*** SECRET ***' replacement in parsed parameter list below
  * @param[out] piOid If this pointer is set and the main table is an overlay the corresponding object identifier is returned
  * @param[out] ppLst Pointer to the parsed parameter list (NULL = no list provided) in the CLP handle
  *
@@ -1099,6 +1100,7 @@ extern int siClpParseCmd(
    const char*                   pcSrc,
    const char*                   pcCmd,
    const int                     isChk,
+   const int                     isPwd,
    int*                          piOid,
    char**                        ppLst);
 
