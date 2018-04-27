@@ -1305,10 +1305,21 @@ extern char* getenvar(const char* name,size_t size,char* string)
    } else if (strcmp(name,"ENVID")==0) {
       return(envid(size,string));
    } else if (strcmp(name,"HOSTNAME")==0) {
-      if (gethostname(string, size)==0)
-         string[size-1]='\0';
-      else
-         string[0]='\0'; //gethostname() failed => empty string
+      #ifdef __WIN__
+      WORD wVersionRequested;
+      WSADATA wsaData;
+      wVersionRequested = MAKEWORD( 2, 0 );
+
+      if (WSAStartup(wVersionRequested, &wsaData)==0) {
+      #endif
+         if (gethostname(string, size)==0)
+            string[size-1]='\0';
+         else
+            string[0]='\0'; //gethostname() failed => empty string
+      #ifdef __WIN__
+         WSACleanup( );
+      }
+      #endif
       return(string);
    } else {
       return(NULL);
