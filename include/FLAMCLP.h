@@ -43,7 +43,7 @@ strings (time and date are implemented as number in seconds from 1970).
 With each argument you can define the required minimum and possible maximum
 amount of occurrences. This means that each argument can be an array and
 arrays are implemented as simplified notations. Arrays and strings can be
-a fix length part of the data structure or dynamic allocated by CLP. In
+a fixed length part of the data structure or dynamic allocated by CLP. In
 the last case, the fix part of the data structure is a pointer to the dynamic
 allocated data area (use '->' instead of '.'). All dynamic allocated data
 blocks are managed by CLP. If you close the CLP you can define if anything

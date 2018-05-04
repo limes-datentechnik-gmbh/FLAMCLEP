@@ -472,7 +472,7 @@ typedef int (*tpfRun)(
  * Type definition for the fin function
  *
  * This function is called at the end after the run to clean up the
- * parameter structure. For example it could be there was a file pointer
+ * parameter structure. For example, it could be there was a file pointer
  * which must be closed or memory which must be freed.
  *
  * @param[in]  pfOut File pointer for outputs (given over CleExecute)
