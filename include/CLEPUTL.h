@@ -97,8 +97,9 @@ extern int win_unsetenv(const char* name);
 #define isKyw(c) (isalnum(c) || (c)=='_')
 #define isCon(c) (isKyw(c)   || (c)=='-' || (c)=='/')
 
-#define ISDDNAME(p)     (strlen(p)>2 && toupper((p)[0])=='D' && toupper((p)[1])=='D' && (p)[2]==':')
+#define ISDDNAME(p)     (strlen(p)>3 && toupper((p)[0])=='D' && toupper((p)[1])=='D' && (p)[2]==':')
 #define ISPATHNAME(p)   (strchr((p),'/')!=NULL)
+#define ISDSNAME(p)     (strlen(p)>2 && toupper((p)[0])=='/' && toupper((p)[1])=='/')
 
 /* Definition of return/condition/exit codes **************************/
 
