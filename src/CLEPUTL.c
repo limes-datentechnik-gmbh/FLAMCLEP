@@ -1210,17 +1210,22 @@ static void releaseCeeGtjs(void) {
    }
 }
 
-static const char* getjclvar(const char* symbol) {
-   _FEEDBACK         fc;
-   _INT4             funcode=1;
-   static _CHAR255   symvalue="";
-   _VSTRING          symname;
-   _INT4             valuelen=strlen(symbol);
+static const char* getjclvar(const char* symbol, int siz, char* pcVal) {
+   _FEEDBACK   fc;
+   _INT4       funcode=1;
+   _CHAR255    symvalue="";
+   _VSTRING    symname;
+   _INT4       valuelen=strlen(symbol);
 
 /* Preparing the JCL symbol */
    if (valuelen>sizeof(symname.string)) return(NULL);
-   symname.length=valuelen;
-   memcpy(symname.string,symbol,(size_t)valuelen);
+   if(symbol!=NULL && symbol[0]=='&'){
+      symname.length=valuelen-1;
+      memcpy(symname.string,symbol+1,(size_t)symname.length);
+   }else{
+      symname.length=valuelen;
+      memcpy(symname.string,symbol,(size_t)valuelen);
+   }
 /* dynamic load of CEEGTJS function */
    if (gpfCeeGtjs==NULL) {
       gpfCeeGtjs=(TfCEEGTJS*)fetch("CEEGTJS");
@@ -1234,31 +1239,40 @@ static const char* getjclvar(const char* symbol) {
       gpfCeeGtjs(&funcode,&symname,symvalue,&valuelen,&fc);
       if( _FBCHECK (fc, CEE000) !=0) return(NULL);
    /* Success do zero termination and return*/
-      if (valuelen>=sizeof(symvalue)) return(NULL);
-      symvalue[valuelen]='\0';
-      return(symvalue);
+      if (valuelen>=sizeof(symvalue) || valuelen>=siz) return(NULL);
+      memcpy(pcVal,symvalue,valuelen);
+      pcVal[valuelen]='\0';
+      return(pcVal);
    } else return(NULL);
 }
 
 #else
 
-static const char* getjclvar(const char* symbol) {
+static const char* getjclvar(const char* symbol, int siz, char* pcVal) {
    return(NULL);
 }
 
 #endif
 
-static const char* systemsymbol(const char* pcSym)
+static const char* systemsymbol(const char* pcSym, int siz, char* pcVal)
 {
-   static char acVal[128];
-   int        siVln=sizeof(acVal)-1;
+   int        err=0;
+   char       acCpy[128]={0};
+   int        siVln=siz-1;
    int        siSln=strlen(pcSym);
-   if (flzsym(pcSym,&siSln,acVal,&siVln)==0) {
-      if (siVln!=siSln || memcmp(pcSym,acVal,siVln)) {                  // check if real replacement
-         while (siVln>0 && isspace(acVal[siVln-1])) siVln--;            // remove trailing whitespace
+   if(pcSym!=NULL && pcSym[0]!='&'){
+      snprintf(acCpy,sizeof(acCpy),"&%s",pcSym);
+      siSln=strlen(acCpy);
+      err=flzsym(acCpy,&siSln,pcVal,&siVln);
+   }else{
+      err=flzsym(pcSym,&siSln,pcVal,&siVln);
+   }
+   if (err==0) {
+      if (siVln!=siSln || memcmp(pcSym,pcVal,siVln)) {                  // check if real replacement
+         while (siVln>0 && isspace(pcVal[siVln-1])) siVln--;            // remove trailing whitespace
          if (siVln) {
-            acVal[siVln]=0x00;
-            return(acVal);
+            pcVal[siVln]=0x00;
+            return(pcVal);
          }
       }
    }
@@ -1267,9 +1281,10 @@ static const char* systemsymbol(const char* pcSym)
 
 extern char* getenvar(const char* name,size_t size,char* string)
 {
+   char acVal[255];
    const char* v=GETENV(name);
-   if (v==NULL) v=getjclvar(name);
-   if (v==NULL) v=systemsymbol(name);
+   if (v==NULL) v=getjclvar(name,sizeof(acVal),acVal);
+   if (v==NULL) v=systemsymbol(name,sizeof(acVal),acVal);
    if (v!=NULL && *v) {
       size_t lv=strlen(v);
       while(lv>0 && isspace(v[lv-1])) {
