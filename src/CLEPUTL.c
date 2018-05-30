@@ -1210,7 +1210,7 @@ static void releaseCeeGtjs(void) {
    }
 }
 
-static const char* getjclvar(const char* symbol, int siz, char* pcVal) {
+static const char* getjclvar(const char* symbol, int size, char* value) {
    _FEEDBACK   fc;
    _INT4       funcode=1;
    _CHAR255    symvalue="";
@@ -1218,14 +1218,13 @@ static const char* getjclvar(const char* symbol, int siz, char* pcVal) {
    _INT4       valuelen=strlen(symbol);
 
 /* Preparing the JCL symbol */
-   if (valuelen>sizeof(symname.string)) return(NULL);
    if(symbol!=NULL && symbol[0]=='&'){
-      symname.length=valuelen-1;
-      memcpy(symname.string,symbol+1,(size_t)symname.length);
-   }else{
-      symname.length=valuelen;
-      memcpy(symname.string,symbol,(size_t)valuelen);
+      valuelen--;
+      symbol++;
    }
+   if (valuelen>sizeof(symname.string)) return(NULL);
+   symname.length=valuelen;
+   memcpy(symname.string,symbol,(size_t)valuelen);
 /* dynamic load of CEEGTJS function */
    if (gpfCeeGtjs==NULL) {
       gpfCeeGtjs=(TfCEEGTJS*)fetch("CEEGTJS");
@@ -1239,40 +1238,41 @@ static const char* getjclvar(const char* symbol, int siz, char* pcVal) {
       gpfCeeGtjs(&funcode,&symname,symvalue,&valuelen,&fc);
       if( _FBCHECK (fc, CEE000) !=0) return(NULL);
    /* Success do zero termination and return*/
-      if (valuelen>=sizeof(symvalue) || valuelen>=siz) return(NULL);
-      memcpy(pcVal,symvalue,valuelen);
-      pcVal[valuelen]='\0';
-      return(pcVal);
+      if (valuelen>=size) return(NULL);
+      memcpy(value,symvalue,valuelen);
+      value[valuelen]='\0';
+      return(value);
    } else return(NULL);
 }
 
 #else
 
-static const char* getjclvar(const char* symbol, int siz, char* pcVal) {
+static const char* getjclvar(const char* symbol, int size, char* value) {
    return(NULL);
 }
 
 #endif
 
-static const char* systemsymbol(const char* pcSym, int siz, char* pcVal)
+static const char* systemsymbol(const char* symbol, int size, char* value)
 {
    int        err=0;
+   int        siSln;
+   int        siVln=size-1;
    char       acCpy[128]={0};
-   int        siVln=siz-1;
-   int        siSln=strlen(pcSym);
-   if(pcSym!=NULL && pcSym[0]!='&'){
-      snprintf(acCpy,sizeof(acCpy),"&%s",pcSym);
-      siSln=strlen(acCpy);
-      err=flzsym(acCpy,&siSln,pcVal,&siVln);
+   if(symbol!=NULL && symbol[0]!='&'){
+      snprintf(acCpy,sizeof(acCpy),"&%s",symbol);
+      symbol=acCpy;
    }else{
-      err=flzsym(pcSym,&siSln,pcVal,&siVln);
+      err=flzsym(symbol,&siSln,value,&siVln);
    }
+   siSln=strlen(symbol);
+   err=flzsym(symbol,&siSln,value,&siVln);
    if (err==0) {
-      if (siVln!=siSln || memcmp(pcSym,pcVal,siVln)) {                  // check if real replacement
-         while (siVln>0 && isspace(pcVal[siVln-1])) siVln--;            // remove trailing whitespace
+      if (siVln!=siSln || memcmp(symbol,value,siVln)) {                  // check if real replacement
+         while (siVln>0 && isspace(value[siVln-1])) siVln--;            // remove trailing whitespace
          if (siVln) {
-            pcVal[siVln]=0x00;
-            return(pcVal);
+            value[siVln]=0x00;
+            return(value);
          }
       }
    }
