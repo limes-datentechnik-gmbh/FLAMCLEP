@@ -1262,8 +1262,6 @@ static const char* systemsymbol(const char* symbol, int size, char* value)
    if(symbol!=NULL && symbol[0]!='&'){
       snprintf(acCpy,sizeof(acCpy),"&%s",symbol);
       symbol=acCpy;
-   }else{
-      err=flzsym(symbol,&siSln,value,&siVln);
    }
    siSln=strlen(symbol);
    err=flzsym(symbol,&siSln,value,&siVln);
