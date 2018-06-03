@@ -1224,7 +1224,7 @@ static const char* getjclvar(const char* symbol, int size, char* value) {
    }
    if (valuelen>sizeof(symname.string)) return(NULL);
    symname.length=valuelen;
-   memcpy(symname.string,symbol,(size_t)valuelen);
+   memcpy(symname.string,symbol,valuelen);
 /* dynamic load of CEEGTJS function */
    if (gpfCeeGtjs==NULL) {
       gpfCeeGtjs=(TfCEEGTJS*)fetch("CEEGTJS");
