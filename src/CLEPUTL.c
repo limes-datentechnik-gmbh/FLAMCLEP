@@ -1218,7 +1218,7 @@ static const char* getjclvar(const char* symbol, int size, char* value) {
    _INT4       valuelen=strlen(symbol);
 
 /* Preparing the JCL symbol */
-   if(symbol!=NULL && symbol[0]=='&'){
+   if(symbol[0]=='&'){
       valuelen--;
       symbol++;
    }
@@ -1259,7 +1259,7 @@ static const char* systemsymbol(const char* symbol, int size, char* value)
    int        siSln;
    int        siVln=size-1;
    char       acCpy[128]={0};
-   if(symbol!=NULL && symbol[0]!='&'){
+   if(symbol[0]!='&'){
       snprintf(acCpy,sizeof(acCpy),"&%s",symbol);
       symbol=acCpy;
    }
