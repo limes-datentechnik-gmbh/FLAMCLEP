@@ -1224,7 +1224,7 @@ static const char* getjclvar(const char* symbol, int size, char* value) {
    }
    if (valuelen>sizeof(symname.string)) return(NULL);
    symname.length=valuelen;
-   memcpy(symname.string,symbol,valuelen);
+   memcpy(symname.string,symbol,(size_t)valuelen);
 /* dynamic load of CEEGTJS function */
    if (gpfCeeGtjs==NULL) {
       gpfCeeGtjs=(TfCEEGTJS*)fetch("CEEGTJS");
@@ -1239,7 +1239,7 @@ static const char* getjclvar(const char* symbol, int size, char* value) {
       if( _FBCHECK (fc, CEE000) !=0) return(NULL);
    /* Success do zero termination and return*/
       if (valuelen>=size) return(NULL);
-      memcpy(value,symvalue,valuelen);
+      memcpy(value,symvalue,(size_t)valuelen);
       value[valuelen]='\0';
       return(value);
    } else return(NULL);
