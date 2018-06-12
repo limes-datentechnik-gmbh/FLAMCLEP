@@ -149,12 +149,13 @@
  * 1.2.103: Add flag hidden (CLPFLG_HID) to support hidden parameter
  * 1.2.104: Separate version and build number with hyphen instead of dot
  * 1.2.105: Support parameter list without '***SECRET***' replacement
+ * 1.2.106: Allow help, info, syntax, docu and proterty generation without command as start of the path
 **/
 
-#define CLP_VSN_STR       "1.2.105"
+#define CLP_VSN_STR       "1.2.106"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        2
-#define CLP_VSN_REVISION       105
+#define CLP_VSN_REVISION       106
 
 /* Definition der Konstanten ******************************************/
 
@@ -1197,8 +1198,8 @@ extern int siClpSyntax(
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    TsSym*                        psTab=psHdl->psTab;
    TsSym*                        psArg=NULL;
-   char*                         pcPtr=NULL;
-   char*                         pcKyw=NULL;
+   const char*                   pcPtr=NULL;
+   const char*                   pcKyw=NULL;
    char                          acKyw[CLPMAX_KYWSIZ];
    int                           siErr,siLev,i;
    int                           l=strlen(psHdl->pcCmd);
@@ -1218,11 +1219,11 @@ extern int siClpSyntax(
    srprintf(&psHdl->pcSrc,&psHdl->szSrc,0,":SYNTAX:");
 
    if (pcPat!=NULL && *pcPat) {
-      if (strxcmp(psHdl->isCas,psHdl->pcCmd,pcPat,l,0,FALSE)==0) {
+      if (l==0 || strxcmp(psHdl->isCas,psHdl->pcCmd,pcPat,l,0,FALSE)==0) {
          if (l && strlen(pcPat)>l && pcPat[l]!='.') {
             return CLPERR(psHdl,CLPERR_SEM,"Path (%s) is not valid",pcPat);
          }
-         for (siLev=0,pcPtr=strchr(pcPat,'.');pcPtr!=NULL && siLev<CLPMAX_HDEPTH;pcPtr=strchr(pcPtr+1,'.'),siLev++) {
+         for (siLev=0,pcPtr=l?strchr(pcPat,'.'):pcPat-1;pcPtr!=NULL && siLev<CLPMAX_HDEPTH;pcPtr=strchr(pcPtr+1,'.'),siLev++) {
             for (pcKyw=pcPtr+1,i=0;i<CLPMAX_KYWLEN && pcKyw[i]!=EOS && pcKyw[i]!='.';i++) acKyw[i]=pcKyw[i];
             acKyw[i]=EOS;
             siErr=siClpSymFnd(pvHdl,siLev,0,acKyw,psTab,&psArg,NULL);
@@ -1255,8 +1256,8 @@ extern const char* pcClpInfo(
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    TsSym*                        psTab=psHdl->psTab;
    TsSym*                        psArg=NULL;
-   char*                         pcPtr=NULL;
-   char*                         pcKyw=NULL;
+   const char*                   pcPtr=NULL;
+   const char*                   pcKyw=NULL;
    char                          acKyw[CLPMAX_KYWSIZ];
    int                           siErr,siLev,i;
    int                           l=strlen(psHdl->pcCmd);
@@ -1276,9 +1277,9 @@ extern const char* pcClpInfo(
    srprintf(&psHdl->pcSrc,&psHdl->szSrc,0,":INFO:");
 
    if (pcPat!=NULL && *pcPat) {
-      if (strxcmp(psHdl->isCas,psHdl->pcCmd,pcPat,l,0,FALSE)==0) {
-         if (l==0 || strlen(pcPat)<=l || pcPat[l]=='.') {
-            for (siLev=0,pcPtr=strchr(pcPat,'.');pcPtr!=NULL && siLev<CLPMAX_HDEPTH;pcPtr=strchr(pcPtr+1,'.'),siLev++) {
+      if (l==0 || strxcmp(psHdl->isCas,psHdl->pcCmd,pcPat,l,0,FALSE)==0) {
+         if (strlen(pcPat)<=l || pcPat[l]=='.') {
+            for (siLev=0,pcPtr=l?strchr(pcPat,'.'):pcPat-1;pcPtr!=NULL && siLev<CLPMAX_HDEPTH;pcPtr=strchr(pcPtr+1,'.'),siLev++) {
                for (pcKyw=pcPtr+1,i=0;i<CLPMAX_KYWLEN && pcKyw[i]!=EOS && pcKyw[i]!='.';i++) acKyw[i]=pcKyw[i];
                acKyw[i]=EOS;
                siErr=siClpSymFnd(pvHdl,siLev,0,acKyw,psTab,&psArg,NULL);
@@ -1303,8 +1304,8 @@ extern int siClpHelp(
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    TsSym*                        psTab=psHdl->psTab;
    TsSym*                        psArg=NULL;
-   char*                         pcPtr=NULL;
-   char*                         pcKyw=NULL;
+   const char*                   pcPtr=NULL;
+   const char*                   pcKyw=NULL;
    char                          acKyw[CLPMAX_KYWSIZ];
    int                           siErr,siLev,i;
    int                           l=strlen(psHdl->pcCmd);
@@ -1325,11 +1326,11 @@ extern int siClpHelp(
 
    if (psHdl->pfHlp!=NULL) {
       if (pcPat!=NULL && *pcPat) {
-         if (strxcmp(psHdl->isCas,psHdl->pcCmd,pcPat,l,0,FALSE)==0) {
+         if (l==0 || strxcmp(psHdl->isCas,psHdl->pcCmd,pcPat,l,0,FALSE)==0) {
             if (l && strlen(pcPat)>l && pcPat[l]!='.') {
                return CLPERR(psHdl,CLPERR_SEM,"Path (%s) is not valid",pcPat);
             }
-            for (siLev=0,pcPtr=strchr(pcPat,'.');pcPtr!=NULL && siLev<CLPMAX_HDEPTH;pcPtr=strchr(pcPtr+1,'.'),siLev++) {
+            for (siLev=0,pcPtr=l?strchr(pcPat,'.'):pcPat-1;pcPtr!=NULL && siLev<CLPMAX_HDEPTH;pcPtr=strchr(pcPtr+1,'.'),siLev++) {
                for (pcKyw=pcPtr+1,i=0;i<CLPMAX_KYWLEN && pcKyw[i]!=EOS && pcKyw[i]!='.';i++) acKyw[i]=pcKyw[i];
                acKyw[i]=EOS;
                siErr=siClpSymFnd(pvHdl,siLev,0,acKyw,psTab,&psArg,NULL);
@@ -1487,8 +1488,8 @@ extern int siClpDocu(
       if (pfDoc!=NULL) {
          TsSym*                        psTab=psHdl->psTab;
          TsSym*                        psArg=NULL;
-         char*                         pcPtr=NULL;
-         char*                         pcKyw=NULL;
+         const char*                   pcPtr=NULL;
+         const char*                   pcKyw=NULL;
          char                          acKyw[CLPMAX_KYWSIZ];
          int                           siErr=0,siLev,siPos,i;
          const char*                   pcSta=(pcHdl!=NULL&&*pcHdl)?pcHdl:psHdl->pcCmd;
@@ -1497,13 +1498,13 @@ extern int siClpDocu(
          char                          acArg[20];
          const char*                   p;
          if (pcPat!=NULL && *pcPat) {
-            if (strxcmp(psHdl->isCas,psHdl->pcCmd,pcPat,l,0,FALSE)==0) {
+            if (l==0 || strxcmp(psHdl->isCas,psHdl->pcCmd,pcPat,l,0,FALSE)==0) {
                if (l && strlen(pcPat)>l && pcPat[l]!='.') {
                   return CLPERR(psHdl,CLPERR_SEM,"Path (%s) is not valid",pcPat);
                }
                if (strlen(pcPat)>l) {
                   strlcpy(acNum,pcNum,sizeof(acNum));
-                  for (siLev=0,pcPtr=strchr(pcPat,'.');pcPtr!=NULL && siLev<CLPMAX_HDEPTH;pcPtr=strchr(pcPtr+1,'.'),siLev++) {
+                  for (siLev=0,pcPtr=l?strchr(pcPat,'.'):pcPat-1;pcPtr!=NULL && siLev<CLPMAX_HDEPTH;pcPtr=strchr(pcPtr+1,'.'),siLev++) {
                      for (pcKyw=pcPtr+1,i=0;i<CLPMAX_KYWLEN && pcKyw[i]!=EOS && pcKyw[i]!='.';i++) acKyw[i]=pcKyw[i];
                      acKyw[i]=EOS;
                      siErr=siClpSymFnd(pvHdl,siLev,0,acKyw,psTab,&psArg,&siPos);
@@ -1770,8 +1771,8 @@ extern int siClpProperties(
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    TsSym*                        psTab=psHdl->psTab;
    TsSym*                        psArg=NULL;
-   char*                         pcPtr=NULL;
-   char*                         pcKyw=NULL;
+   const char*                   pcPtr=NULL;
+   const char*                   pcKyw=NULL;
    char                          acKyw[CLPMAX_KYWSIZ];
    int                           siErr,siLev,i;
    int                           l=strlen(psHdl->pcCmd);
@@ -1794,11 +1795,11 @@ extern int siClpProperties(
    if (pfOut==NULL) pfOut=psHdl->pfHlp;
    if (pfOut!=NULL) {
       if (pcPat!=NULL && *pcPat) {
-         if (strxcmp(psHdl->isCas,psHdl->pcCmd,pcPat,l,0,FALSE)==0) {
+         if (l==0 || strxcmp(psHdl->isCas,psHdl->pcCmd,pcPat,l,0,FALSE)==0) {
             if (l && strlen(pcPat)>l && pcPat[l]!='.') {
                return CLPERR(psHdl,CLPERR_SEM,"Path (%s) is not valid",pcPat);
             }
-            for (siLev=0,pcPtr=strchr(pcPat,'.');pcPtr!=NULL && siLev<CLPMAX_HDEPTH;pcPtr=strchr(pcPtr+1,'.'),siLev++) {
+            for (siLev=0,pcPtr=l?strchr(pcPat,'.'):pcPat-1;pcPtr!=NULL && siLev<CLPMAX_HDEPTH;pcPtr=strchr(pcPtr+1,'.'),siLev++) {
                for (pcKyw=pcPtr+1,i=0;i<CLPMAX_KYWLEN && pcKyw[i]!=EOS && pcKyw[i]!='.';i++) acKyw[i]=pcKyw[i];
                acKyw[i]=EOS;
                if (pcArg!=NULL) {
