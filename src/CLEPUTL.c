@@ -2378,7 +2378,7 @@ extern int file2str(const char* filename, char** buf, int* bufsize, const char* 
       *bufsize=0;
 
 #if !defined(__USS__) && !defined(__ZOS__) && defined(__FL5__)
-      int r=siGetMFNameNativ(filename, &filename, NULL);
+      int r=siGetMFNameNative(filename, &filename, NULL);
       if (r && r!=-4) return(-6);
 #endif
 
