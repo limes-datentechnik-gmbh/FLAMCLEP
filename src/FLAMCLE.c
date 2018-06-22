@@ -3035,6 +3035,7 @@ static int siCleGetProperties(
       case -3: if (pfErr!=NULL) fprintf(pfErr,"Property file (%s) is too big (integer overflow)\n",*ppFil);                   SAFE_FREE(*ppFil); return(CLERTC_CMD);
       case -4: if (pfErr!=NULL) fprintf(pfErr,"Allocation of memory for property file (%s) failed.\n",*ppFil);                SAFE_FREE(*ppFil); return(CLERTC_SYS);
       case -5: if (pfErr!=NULL) fprintf(pfErr,"Read of property file (%s) failed (%d - %s)\n",*ppFil,errno,strerror(errno));  SAFE_FREE(*ppFil); return(CLERTC_SYS);
+      case -6: if (pfErr!=NULL) fprintf(pfErr,"Resolve of host dataset name (%s) failed\n",*ppFil);                           SAFE_FREE(*ppFil); return(CLERTC_SYS);
       default: if (pfErr!=NULL) fprintf(pfErr,"An unknown error occurred while reading property file (%s).\n",*ppFil);        SAFE_FREE(*ppFil); return(CLERTC_FAT);
       }
    }
@@ -3099,6 +3100,7 @@ static int siCleGetCommand(
          case -3: if (pfErr!=NULL) fprintf(pfErr,"Command file (%s) is too big (integer overflow)\n",*ppFil);                  SAFE_FREE(*ppFil); return(CLERTC_CMD);
          case -4: if (pfErr!=NULL) fprintf(pfErr,"Allocation of memory for command file (%s) failed.\n",*ppFil);               SAFE_FREE(*ppFil); return(CLERTC_SYS);
          case -5: if (pfErr!=NULL) fprintf(pfErr,"Read of command file (%s) failed (%d - %s)\n",*ppFil,errno,strerror(errno)); SAFE_FREE(*ppFil); return(CLERTC_SYS);
+         case -6: if (pfErr!=NULL) fprintf(pfErr,"Resolve of host dataset name (%s) failed\n",*ppFil);                         SAFE_FREE(*ppFil); return(CLERTC_SYS);
          default: if (pfErr!=NULL) fprintf(pfErr,"An unknown error occurred while reading command file (%s).\n",*ppFil);       SAFE_FREE(*ppFil); return(CLERTC_FAT);
          }
       }

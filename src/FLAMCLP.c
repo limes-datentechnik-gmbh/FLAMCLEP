@@ -4033,6 +4033,7 @@ static int siClpPrsFil(
       case -3: siErr=CLPERR(psHdl,CLPERR_SEM,"Parameter file (%s) is too big (integer overflow)",pcFil);break;
       case -4: siErr=CLPERR(psHdl,CLPERR_MEM,"Allocation of memory for parameter file (%s) failed",pcFil);break;
       case -5: siErr=CLPERR(psHdl,CLPERR_SYS,"Read of parameter file (%s) failed (%d - %s)",pcFil,errno,strerror(errno));break;
+      case -6: siErr=CLPERR(psHdl,CLPERR_SYS,"Resolve of host dataset name (%s) failed",pcFil);break;
       default: siErr=CLPERR(psHdl,CLPERR_SYS,"An unknown error occurred while reading parameter file (%s)",pcFil);break;
       }
       if (pcPar!=NULL) free(pcPar);
@@ -5761,6 +5762,7 @@ static int siClpBldLit(
             case -3: siErr=CLPERR(psHdl,CLPERR_SEM,"String file (%s) is too big (integer overflow)",pcFil);break;
             case -4: siErr=CLPERR(psHdl,CLPERR_MEM,"Allocation of memory for string file (%s) failed",pcFil);break;
             case -5: siErr=CLPERR(psHdl,CLPERR_SYS,"Read of string file (%s) failed (%d - %s)",pcFil,errno,strerror(errno));break;
+            case -6: siErr=CLPERR(psHdl,CLPERR_SYS,"Resolve of host dataset name (%s) failed",pcFil);break;
             default: siErr=CLPERR(psHdl,CLPERR_SYS,"An unknown error occurred while reading string file (%s)",pcFil);break;
             }
             if (pcDat!=NULL) free(pcDat);

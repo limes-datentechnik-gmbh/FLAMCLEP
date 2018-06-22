@@ -54,6 +54,9 @@ static inline int flzsym(const char* pcDat, const int* piSln, char* pcVal, int* 
    return(8);
 }
 #endif /* __ZOS__ */
+#if !defined(__USS__) && !defined(__ZOS__) && defined(__FL5__)
+#include "mfinit.h"
+#endif
 #include "CLEPUTL.h"
 
 #ifndef realloc_nowarn
@@ -2373,6 +2376,11 @@ extern int file2str(const char* filename, char** buf, int* bufsize, const char* 
       return -1; // bad args
    if (*buf==NULL)
       *bufsize=0;
+
+#if !defined(__USS__) && !defined(__ZOS__) && defined(__FL5__)
+      int r=siGetMFNameNativ(filename, &filename, NULL);
+      if (r && r!=-4) return(-6);
+#endif
 
    errno=0;
    if (format!=NULL && format[0]=='r') {
