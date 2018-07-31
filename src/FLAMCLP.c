@@ -150,13 +150,14 @@
  * 1.2.104: Separate version and build number with hyphen instead of dot
  * 1.2.105: Support parameter list without '***SECRET***' replacement
  * 1.2.106: Allow help, info, syntax, docu and proterty generation without command as start of the path
- * 1.2.107: Correct '***SECRET***' replacment
+ * 1.2.107: Correct '***SECRET***' replacement
+ * 1.2.108: Don't support disablement of '***SECRET***' replacement in trace messages
 **/
 
-#define CLP_VSN_STR       "1.2.107"
+#define CLP_VSN_STR       "1.2.108"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        2
-#define CLP_VSN_REVISION       107
+#define CLP_VSN_REVISION       108
 
 /* Definition der Konstanten ******************************************/
 
@@ -2886,7 +2887,7 @@ extern int siClpLexem(
    return(CLP_OK);
 }
 
-#define isPrintF(p)    (((p)!=NULL)?(CLPISF_PWD((p)->psStd->uiFlg)==FALSE || psHdl->isPwd==FALSE):(TRUE))
+#define isPrintF(p)    (((p)!=NULL)?(CLPISF_PWD((p)->psStd->uiFlg)==FALSE):(TRUE))
 #define isPrnLex(p,l)  (isPrintF(p)?(l):("***SECRET***"))
 #define isPrintF2(p)   (CLPISF_PWD((p)->psStd->uiFlg)==FALSE)
 #define isPrnLex2(p,l) (isPrintF2(p)?(l):("***SECRET***"))
