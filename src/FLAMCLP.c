@@ -150,12 +150,13 @@
  * 1.2.104: Separate version and build number with hyphen instead of dot
  * 1.2.105: Support parameter list without '***SECRET***' replacement
  * 1.2.106: Allow help, info, syntax, docu and proterty generation without command as start of the path
+ * 1.2.107: Correct '***SECRET***' replacment
 **/
 
-#define CLP_VSN_STR       "1.2.106"
+#define CLP_VSN_STR       "1.2.107"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        2
-#define CLP_VSN_REVISION       106
+#define CLP_VSN_REVISION       107
 
 /* Definition der Konstanten ******************************************/
 
@@ -193,7 +194,7 @@
 
 #define isPrnInt(p,v) (CLPISF_PWD(p->psStd->uiFlg)?((I64)0):(v))
 #define isPrnFlt(p,v) (CLPISF_PWD(p->psStd->uiFlg)?((F64)0.0):(v))
-#define isPrnStr(p,v) (CLPISF_PWD(p->psStd->uiFlg && psHdl->isPwd)?("***SECRET***"):(v))
+#define isPrnStr(p,v) ((CLPISF_PWD(p->psStd->uiFlg) && psHdl->isPwd)?("***SECRET***"):(v))
 #define isPrnLen(p,v) (CLPISF_PWD(p->psStd->uiFlg)?((int)0):(v))
 
 #define GETALI(sym) (((sym)->psStd->psAli!=NULL)?(sym)->psStd->psAli->psStd->pcKyw:NULL)
