@@ -152,12 +152,13 @@
  * 1.2.106: Allow help, info, syntax, docu and proterty generation without command as start of the path
  * 1.2.107: Correct '***SECRET***' replacement
  * 1.2.108: Don't support disablement of '***SECRET***' replacement in trace messages
+ * 1.2.109: Use new file2str interface
 **/
 
-#define CLP_VSN_STR       "1.2.108"
+#define CLP_VSN_STR       "1.2.109"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        2
-#define CLP_VSN_REVISION       108
+#define CLP_VSN_REVISION       109
 
 /* Definition der Konstanten ******************************************/
 
@@ -4016,6 +4017,7 @@ static int siClpPrsFil(
    const char*                   pcInp;
    const char*                   pcOld;
    const char*                   pcRow;
+   char                          acMsg[1024]="";
 
    if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d PARFIL(%s=val)\n",fpcPre(pvHdl,siLev),siLev,siPos,psArg->psStd->pcKyw);
    psHdl->siTok=siClpScnSrc(pvHdl,CLPTYP_STRING,psArg);
@@ -4027,17 +4029,10 @@ static int siClpPrsFil(
    if (pcFil==NULL) {
       return CLPERR(psHdl,CLPERR_MEM,"Dynamic allocation of parameter file string (%s) for argument '%s.%s' failed",psHdl->pcLex+2,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
    }
-   siErr=file2str(pcFil,&pcPar,&siSiz,filemode("r"));
+
+   siErr=file2str(NULL,pcFil,&pcPar,&siSiz,acMsg,sizeof(acMsg));
    if (siErr<0) {
-      switch(siErr) {
-      case -1: siErr=CLPERR(psHdl,CLPERR_INT,"Illegal parameters passed to file2str() (Bug)%s","");break;
-      case -2: siErr=CLPERR(psHdl,CLPERR_SYS,"Open of parameter file (%s) failed (%d - %s)",pcFil,errno,strerror(errno));break;
-      case -3: siErr=CLPERR(psHdl,CLPERR_SEM,"Parameter file (%s) is too big (integer overflow)",pcFil);break;
-      case -4: siErr=CLPERR(psHdl,CLPERR_MEM,"Allocation of memory for parameter file (%s) failed",pcFil);break;
-      case -5: siErr=CLPERR(psHdl,CLPERR_SYS,"Read of parameter file (%s) failed (%d - %s)",pcFil,errno,strerror(errno));break;
-      case -6: siErr=CLPERR(psHdl,CLPERR_SYS,"Resolve of host dataset name (%s) failed",pcFil);break;
-      default: siErr=CLPERR(psHdl,CLPERR_SYS,"An unknown error occurred while reading parameter file (%s)",pcFil);break;
-      }
+      siErr=CLPERR(psHdl,CLPERR_SYS,"Parameter file: %s",acMsg);
       if (pcPar!=NULL) free(pcPar);
       free(pcFil);
       return(siErr);
@@ -5751,22 +5746,15 @@ static int siClpBldLit(
          size_t                        szLex=CLPINI_LEXSIZ;
          char*                         pcLex=(char*)calloc(1,szLex);
          char*                         pcFil=dcpmapfil(pcVal+2);
+         char                          acMsg[1024]="";
          if (pcLex==NULL || pcFil==NULL) {
             if (pcLex!=NULL) free(pcLex);
             if (pcFil!=NULL) free(pcFil);
             return(CLPERR(psHdl,CLPERR_MEM,"Allocation of memory to store the lexem or file name failed"));
          }
-         siErr=file2str(pcFil,&pcDat,&siSiz,filemode("r"));
+         siErr=file2str(NULL,pcFil,&pcDat,&siSiz,acMsg,sizeof(acMsg));
          if (siErr<0) {
-            switch(siErr) {
-            case -1: siErr=CLPERR(psHdl,CLPERR_INT,"Illegal parameters passed to file2str() (Bug)%s","");break;
-            case -2: siErr=CLPERR(psHdl,CLPERR_SYS,"Open of string file (%s) failed (%d - %s)",pcFil,errno,strerror(errno));break;
-            case -3: siErr=CLPERR(psHdl,CLPERR_SEM,"String file (%s) is too big (integer overflow)",pcFil);break;
-            case -4: siErr=CLPERR(psHdl,CLPERR_MEM,"Allocation of memory for string file (%s) failed",pcFil);break;
-            case -5: siErr=CLPERR(psHdl,CLPERR_SYS,"Read of string file (%s) failed (%d - %s)",pcFil,errno,strerror(errno));break;
-            case -6: siErr=CLPERR(psHdl,CLPERR_SYS,"Resolve of host dataset name (%s) failed",pcFil);break;
-            default: siErr=CLPERR(psHdl,CLPERR_SYS,"An unknown error occurred while reading string file (%s)",pcFil);break;
-            }
+            siErr=CLPERR(psHdl,CLPERR_SYS,"String file: %s",acMsg);
             if (pcDat!=NULL) free(pcDat);
             free(pcLex); free(pcFil);
             return(siErr);

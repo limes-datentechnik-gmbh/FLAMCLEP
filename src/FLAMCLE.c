@@ -133,11 +133,12 @@
  * 1.2.66: Fix valgrind issue at read of configuration file
  * 1.2.67: Read environment also from SYSUID.STDENV on z/OS
  * 1.2.68: Separate version and build number with hyphen instead of dot
+ * 1.2.69: Use new file2str interface
  */
-#define CLE_VSN_STR       "1.2.68"
+#define CLE_VSN_STR       "1.2.69"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        2
-#define CLE_VSN_REVISION       68
+#define CLE_VSN_REVISION       69
 
 /* Definition der Konstanten ******************************************/
 
@@ -3005,6 +3006,7 @@ static int siCleGetProperties(
    const char*             pcHlp=NULL;
    // TODO: Stack Allokation mit unbegrenzter Größe = Potenzielle Sicherheitslücke
    char                    acRoot[strlen(pcOwn)+strlen(pcPgm)+strlen(pcCmd)+17];
+   char                    acMsg[1024]="";
 
    SAFE_FREE(*ppFil);
    snprintf(acRoot,sizeof(acRoot),"%s.%s.%s.property.file",pcOwn,pcPgm,pcCmd);
@@ -3026,18 +3028,12 @@ static int siCleGetProperties(
       if (pfErr!=NULL) fprintf(pfErr,"Allocation of memory for property file name (%s) failed)\n",pcHlp);
       return(CLERTC_MEM);
    }
-   siErr=file2str(*ppFil,ppPro,&siSiz,filemode("r"));
+   siErr=file2str(NULL,*ppFil,ppPro,&siSiz,acMsg,sizeof(acMsg));
    if (siErr<0) {
-      if (*ppPro!=NULL) { free(*ppPro); *ppPro=NULL; }
-      switch(siErr) {
-      case -1: if (pfErr!=NULL) fprintf(pfErr,"Illegal parameters passed to file2str() (Bug)\n");                             SAFE_FREE(*ppFil); return(CLERTC_FAT);
-      case -2: if (pfErr!=NULL) fprintf(pfErr,"Open of property file (%s) failed (%d - %s)\n",*ppFil,errno,strerror(errno));  SAFE_FREE(*ppFil); return(CLERTC_SYS);
-      case -3: if (pfErr!=NULL) fprintf(pfErr,"Property file (%s) is too big (integer overflow)\n",*ppFil);                   SAFE_FREE(*ppFil); return(CLERTC_CMD);
-      case -4: if (pfErr!=NULL) fprintf(pfErr,"Allocation of memory for property file (%s) failed.\n",*ppFil);                SAFE_FREE(*ppFil); return(CLERTC_SYS);
-      case -5: if (pfErr!=NULL) fprintf(pfErr,"Read of property file (%s) failed (%d - %s)\n",*ppFil,errno,strerror(errno));  SAFE_FREE(*ppFil); return(CLERTC_SYS);
-      case -6: if (pfErr!=NULL) fprintf(pfErr,"Resolve of host dataset name (%s) failed\n",*ppFil);                           SAFE_FREE(*ppFil); return(CLERTC_SYS);
-      default: if (pfErr!=NULL) fprintf(pfErr,"An unknown error occurred while reading property file (%s).\n",*ppFil);        SAFE_FREE(*ppFil); return(CLERTC_FAT);
-      }
+      if (pfErr!=NULL) fprintf(pfErr,"Property file: %s\n",acMsg);
+      SAFE_FREE(*ppFil);
+      SAFE_FREE(*ppPro);
+      return(CLERTC_SYS);
    }
    return(CLERTC_OK);
 }
@@ -3091,18 +3087,13 @@ static int siCleGetCommand(
          return(CLERTC_MEM);
       }
 
-      siErr=file2str(*ppFil,ppCmd,&siSiz,filemode("r"));
+      char acMsg[1024]="";
+      siErr=file2str(NULL,*ppFil,ppCmd,&siSiz,acMsg,sizeof(acMsg));
       if (siErr<0) {
-         if (*ppCmd!=NULL) { free(*ppCmd); *ppCmd=NULL; }
-         switch(siErr) {
-         case -1: if (pfErr!=NULL) fprintf(pfErr,"Illegal parameters passed to file2str() (Bug)\n");                           SAFE_FREE(*ppFil); return(CLERTC_FAT);
-         case -2: if (pfErr!=NULL) fprintf(pfErr,"Open of command file (%s) failed (%d - %s)\n",*ppFil,errno,strerror(errno)); SAFE_FREE(*ppFil); return(CLERTC_SYS);
-         case -3: if (pfErr!=NULL) fprintf(pfErr,"Command file (%s) is too big (integer overflow)\n",*ppFil);                  SAFE_FREE(*ppFil); return(CLERTC_CMD);
-         case -4: if (pfErr!=NULL) fprintf(pfErr,"Allocation of memory for command file (%s) failed.\n",*ppFil);               SAFE_FREE(*ppFil); return(CLERTC_SYS);
-         case -5: if (pfErr!=NULL) fprintf(pfErr,"Read of command file (%s) failed (%d - %s)\n",*ppFil,errno,strerror(errno)); SAFE_FREE(*ppFil); return(CLERTC_SYS);
-         case -6: if (pfErr!=NULL) fprintf(pfErr,"Resolve of host dataset name (%s) failed\n",*ppFil);                         SAFE_FREE(*ppFil); return(CLERTC_SYS);
-         default: if (pfErr!=NULL) fprintf(pfErr,"An unknown error occurred while reading command file (%s).\n",*ppFil);       SAFE_FREE(*ppFil); return(CLERTC_FAT);
-         }
+         if (pfErr!=NULL) fprintf(pfErr,"Command file: %s\n",acMsg);
+         SAFE_FREE(*ppFil);
+         SAFE_FREE(*ppCmd);
+         return(CLERTC_SYS);
       }
    } else {
       if (pfErr!=NULL) fprintf(pfErr,"No blank space ' ', equal sign '=', dot '.' or bracket '(' behind '%s'\n",pcFct);
