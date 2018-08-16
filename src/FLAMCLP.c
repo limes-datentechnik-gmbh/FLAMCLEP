@@ -153,12 +153,13 @@
  * 1.2.107: Correct '***SECRET***' replacement
  * 1.2.108: Don't support disablement of '***SECRET***' replacement in trace messages
  * 1.2.109: Use new file2str interface
+ * 1.2.110: Support callback function for file to string
 **/
 
-#define CLP_VSN_STR       "1.2.109"
+#define CLP_VSN_STR       "1.2.110"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        2
-#define CLP_VSN_REVISION       109
+#define CLP_VSN_REVISION       110
 
 /* Definition der Konstanten ******************************************/
 
@@ -364,6 +365,8 @@ typedef struct Hdl {
    int                           szPtr;
    TsPtr*                        psPtr;
    const TsSym*                  psVal;
+   void*                         pvF2s;
+   tpfF2S                        pfF2s;
 } TsHdl;
 
 /* Deklaration der internen Funktionen ********************************/
@@ -970,7 +973,9 @@ extern void* pvClpOpen(
    const char*                   pcDep,
    const char*                   pcOpt,
    const char*                   pcEnt,
-   TsClpError*                   psErr)
+   TsClpError*                   psErr,
+   void*                         pvF2S,
+   tpfF2S                        pfF2S)
 {
    TsHdl*                        psHdl=NULL;
    const char*                   pcNow=NULL;
@@ -1023,6 +1028,13 @@ extern void* pvClpOpen(
          psHdl->pcDep=pcDep;
          psHdl->pcOpt=pcOpt;
          psHdl->pcEnt=pcEnt;
+         if (pfF2S!=NULL) {
+            psHdl->pfF2s=pfF2S;
+            psHdl->pvF2s=pvF2S;
+         } else {
+            psHdl->pfF2s=file2str;
+            psHdl->pvF2s=NULL;
+         }
          siErr=siClpSymIni(psHdl,0,NULL,psTab,NULL,&psHdl->psTab);
          if (siErr<0) {
             vdClpSymDel(psHdl->psTab);
@@ -4030,7 +4042,7 @@ static int siClpPrsFil(
       return CLPERR(psHdl,CLPERR_MEM,"Dynamic allocation of parameter file string (%s) for argument '%s.%s' failed",psHdl->pcLex+2,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
    }
 
-   siErr=file2str(NULL,pcFil,&pcPar,&siSiz,acMsg,sizeof(acMsg));
+   siErr=psHdl->pfF2s(psHdl->pvF2s,pcFil,&pcPar,&siSiz,acMsg,sizeof(acMsg));
    if (siErr<0) {
       siErr=CLPERR(psHdl,CLPERR_SYS,"Parameter file: %s",acMsg);
       if (pcPar!=NULL) free(pcPar);
@@ -5752,7 +5764,7 @@ static int siClpBldLit(
             if (pcFil!=NULL) free(pcFil);
             return(CLPERR(psHdl,CLPERR_MEM,"Allocation of memory to store the lexem or file name failed"));
          }
-         siErr=file2str(NULL,pcFil,&pcDat,&siSiz,acMsg,sizeof(acMsg));
+         siErr=psHdl->pfF2s(psHdl->pvF2s,pcFil,&pcDat,&siSiz,acMsg,sizeof(acMsg));
          if (siErr<0) {
             siErr=CLPERR(psHdl,CLPERR_SYS,"String file: %s",acMsg);
             if (pcDat!=NULL) free(pcDat);

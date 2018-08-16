@@ -57,6 +57,14 @@ For object, overlays and arrays you can provide parameter files (OBJECT='filenam
 containing the parameter string in the corresponding syntax for these object,
 overlay or array (KYW[='filename']).
 
+To read such a parameter file as string into the memory a handle and a
+callback function can be provided. If the parameter NULL a default
+implementation is used. If you provide your own function you can include
+for example URL support, remote access, character conversion aso. The
+handle is given to the callback function. The default implementation don't
+need any handle, but you can use it for example for the character conversion
+module, a remote session or something else.
+
 To handle passwords and passphrase more secure, you can provide a filename
 as string (PASSWD=f'filename'), which contains the corresponding string
 value. This prevents for example passwords from logging.
@@ -996,6 +1004,28 @@ typedef struct ClpError {
    const int*                    piCol;
 }TsClpError;
 
+/**
+ * Type definition for string to file call back function
+ *
+ * Read a file using the specified filename and reads the whole content
+ * into the supplied buffer. The buffer is reallocated and bufsize updated,
+ * if necessary.
+ *
+ * @param[in]     pvHdl Pointer to a handle given for this callback
+ * @param[in]     pcFil Reason code from INI, MAP, RUN and FIN function
+ * @param[inout]  ppBuf Pointer to a buffer pointer for reallocation
+ * @param[inout]  piBuf Pointer to the buffer size (updated after reallocation)
+ * @param[out]    pcMsg Pointer to a buffer for the error message
+ * @param[in]     siMsg Size of the message buffer (should be 1024)
+ * @return              bytes read or negative value if error
+ */
+typedef int (*tpfF2S)(
+   void*                         pvHdl,
+   const char*                   pcFil,
+   char**                        ppBuf,
+   int*                          piBuf,
+   char*                         pcMsg,
+   const int                     siMsg);
 
 /**
  * Open command line parser
@@ -1027,6 +1057,8 @@ typedef struct ClpError {
  *                   certain error information in the CLP handle. If pfErr defined all error information are printed
  *                   by CLP. In this case these structure is not required. If pfErr==NULL you can use these structure
  *                   to gather all error information of CLP in memory. The pointer are only valid until vsClpClose().
+ * @param[in]  pvF2S Pointer to a handle which can be used in file 2 string callback function (if not required then NULL)
+ * @param[in]  pfF2S Callback function which reads a file into a variable null-terminated string in memory (if NULL then default implementation is used)
  *
  * @return void pointer to the memory containing the handle
  */
@@ -1052,7 +1084,9 @@ extern void* pvClpOpen(
    const char*                   pcDep,
    const char*                   pcOpt,
    const char*                   pcEnt,
-   TsClpError*                   psErr);
+   TsClpError*                   psErr,
+   void*                         pvF2S,
+   tpfF2S                        pfF2S);
 
 /**
  * Parse the property list

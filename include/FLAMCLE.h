@@ -306,7 +306,6 @@ For compilation the defines below must be set:
 #  define siCleParseString      FLCLEPRS
 #endif
 
-
 /**
 * Get version information
 *
@@ -682,6 +681,8 @@ typedef struct CleAppendix {
  * @param[in]  pcApx Optional description if appendix A used for other CLP string (in ASCIIDOC format (term:: explanation) - converted on EBCDIC systems),
  *             if NULL or empty then no description is generated, the parameter is only used if psApx below set
  * @param[in]  psApx Pointer to the table with other CLP strings to print as appendix (optional could be NULL)
+ * @param[in]  pvF2S Pointer to a handle which can be used in file 2 string callback function (if not required then NULL)
+ * @param[in]  pfF2S Callback function which reads a file into a null-terminated string in memory (if NULL then default implementation is used)
  *
  * @return signed integer with the condition codes below:\n
  * 0  - command line, command syntax, mapping, execution and finish of the command was successful\n
@@ -730,7 +731,9 @@ extern int siCleExecute(
    const char*                   pcDef,
    tpfMsg                        pfMsg,
    const char*                   pcApx,
-   const TsCleAppendix*          psApx);
+   const TsCleAppendix*          psApx,
+   void*                         pvF2S,
+   tpfF2S                        pfF2S);
 
  /**********************************************************************/
  /*! @cond PRIVATE */
@@ -753,7 +756,9 @@ extern int siCleExecute(
     const char*                   pcOpt,
     const char*                   pcEnt,
     int*                          piMod,
-    void*                         pvDat);
+    void*                         pvDat,
+    void*                         pvF2S,
+    tpfF2S                        pfF2S);
  /*! @endcond */
 
 #endif /*INC_CLE_H*/
