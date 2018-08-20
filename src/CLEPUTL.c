@@ -2401,7 +2401,7 @@ extern int file2str(void* hdl, const char* filename, char** buf, int* bufsize, c
       if (*bufsize-siLen<freadLen+1) {
          if (*bufsize>INT_MAX-(freadLen*2+1)) {
             if (errmsg!=NULL && msgsiz) {
-               snprintf(errmsg,msgsiz,"File (%s) is too big (integer overflow)",filename,errno,strerror(errno));
+               snprintf(errmsg,msgsiz,"File (%s) is too big (integer overflow)",filename);
             }
             fclose(pfFile);
             return -3; // integer overflow
