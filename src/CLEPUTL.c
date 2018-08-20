@@ -2374,7 +2374,7 @@ extern int file2str(void* hdl, const char* filename, char** buf, int* bufsize, c
 
    if (filename==NULL || buf==NULL || bufsize==NULL || *bufsize<0) {
       if (errmsg!=NULL && msgsiz) {
-         snprintf(errmsg,msgsiz,"Illegal parameters passed to file2str(%p,%p,%p,%p,%p,%d) (Bug)",hdl,filename,buf,bufsize,errmsg,msgsiz);
+         snprintf(errmsg,msgsiz,"Illegal parameters passed to file2str(%p,%p,%p,%p) (Bug)",hdl,filename,buf,bufsize);
       }
       return -1; // bad args
    }
