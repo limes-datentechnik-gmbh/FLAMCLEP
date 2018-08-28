@@ -134,11 +134,12 @@
  * 1.2.68: Separate version and build number with hyphen instead of dot
  * 1.2.69: Use new file2str interface
  * 1.2.70: Support callback function for file to string
+ * 1.2.71: Fix memory leak if GETPROP used without command
  */
-#define CLE_VSN_STR       "1.2.70"
+#define CLE_VSN_STR       "1.2.71"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        2
-#define CLE_VSN_REVISION       70
+#define CLE_VSN_REVISION       71
 
 /* Definition der Konstanten ******************************************/
 
@@ -1922,6 +1923,7 @@ EVALUATE:
                                     &pvHdl,NULL,NULL,pfMsg,pvF2S,pfF2S);
             if (siErr) ERROR(siErr,NULL);
             vdPrnProperties(pvHdl,psTab[i].pcKyw,TRUE,10);
+            vdClpClose(pvHdl,CLPCLS_MTD_ALL); pvHdl=NULL;
          }
          ERROR(CLERTC_OK,NULL);
       } else if (argc>=3) {
