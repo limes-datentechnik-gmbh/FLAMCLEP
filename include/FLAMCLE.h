@@ -404,7 +404,7 @@ typedef int (*tpfIni)(
  * @param[in]  pfOut File pointer for outputs (mainly error messages, given over CleExecute)
  * @param[in]  pfTrc File pointer for tracing (mainly for complex stuff, given over CleExecute)
  * @param[in]  piOid Pointer to the object identifier for overlay commands, if the pointer set at siCleExecute()
- * @param[in]  pvClp Pointer to the filled FLAMCLP structure (output from the the command line parser)
+ * @param[in]  pvClp Pointer to the filled FLAMCLP structure (output from the command line parser)
  * @param[out] pvPar Pointer to the parameter structure, which will be filled based on the FLAMCLP structure with this function
  *
  * @return     Reason code (!=0) for termination or 0 for success
