@@ -55,7 +55,7 @@ static inline int flzsym(const char* pcDat, const int* piSln, char* pcVal, int* 
 }
 #endif /* __ZOS__ */
 #if !defined(__USS__) && !defined(__ZOS__) && defined(__FL5__)
-#include "mfinit.h"
+#  include "mfinit.h"
 #endif
 #include "CLEPUTL.h"
 
@@ -1444,7 +1444,7 @@ static char* drplenvar(const char* string,const char opn, const char cls)
    return(b);
 }
 
-// TODO: Besserer Name und/oder Beschreibung der Funktion
+// replace against key template
 static char* rpltpl(char* string,int size,const char* templ,const char* values) {
    char*       s;
    char*       e;
@@ -1470,7 +1470,7 @@ static char* rpltpl(char* string,int size,const char* templ,const char* values) 
    return(string);
 }
 
-// TODO: Besserer Name und/oder Beschreibung der Funktion
+// dynamic version of template replacement
 static char* drpltpl(const char* templ,const char* values) {
    const char* p=templ;
    size_t      s=strlen(p)+1;
@@ -1514,7 +1514,7 @@ static char* drpltpl(const char* templ,const char* values) {
    return(b);
 }
 
-// TODO: Besserer Name und/oder Beschreibung der Funktion
+// Adjust prefix
 static const char* adjpfx(char* file, int size)
 {
     char *p1,*p2;
@@ -1594,7 +1594,7 @@ static const char* adjpfx(char* file, int size)
 # endif
 }
 
-// TODO: Besserer Name und/oder Beschreibung der Funktion
+// dynamic version of adjuct prefix
 static char* dadjpfx(const char* file,char** tilde)
 {
     char* b=malloc(strlen(file)+8);
@@ -2366,41 +2366,52 @@ extern unsigned int chr2ebc(
    return(i);
 }
 
-extern int file2str(const char* filename, char** buf, int* bufsize, const char* format) {
+extern int file2str(void* hdl, const char* filename, char** buf, int* bufsize, char* errmsg, const int msgsiz) {
    int siLen=0, siHlp;
    char* pcHlp;
    FILE* pfFile=NULL;
    const int freadLen=65536;
 
-   if (filename==NULL || buf==NULL || bufsize==NULL || *bufsize<0)
+   if (filename==NULL || buf==NULL || bufsize==NULL || *bufsize<0) {
+      if (errmsg!=NULL && msgsiz) {
+         snprintf(errmsg,msgsiz,"Illegal parameters passed to file2str(%p,%p,%p,%p) (Bug)",hdl,filename,buf,bufsize);
+      }
       return -1; // bad args
+   }
    if (*buf==NULL)
       *bufsize=0;
-
 #if !defined(__USS__) && !defined(__ZOS__) && defined(__FL5__)
       int r=siGetMFNameNative(filename, &filename, NULL);
-      if (r && r!=-4) return(-6);
+      if (r && r!=-4) {
+         if (errmsg!=NULL && msgsiz) {
+            snprintf(errmsg,msgsiz,"Resolve of host dataset name (%s) over MF-EDZ catalog failed",filename);
+         }
+         return(-6);
+      }
 #endif
-
    errno=0;
-   if (format!=NULL && format[0]=='r') {
-      pfFile=fopen(filename, format);
-   } else {
-      pfFile=fopen(filename, "r");
-   }
+   pfFile=fopen(filename, filemode("r"));
    if (pfFile == NULL) {
+      if (errmsg!=NULL && msgsiz) {
+         snprintf(errmsg,msgsiz,"Open of file (%s) failed (%d - %s)",filename,errno,strerror(errno));
+      }
       return -2; // fopen failed
    }
-
    while (!ferror(pfFile) && !feof(pfFile)) {
       if (*bufsize-siLen<freadLen+1) {
          if (*bufsize>INT_MAX-(freadLen*2+1)) {
+            if (errmsg!=NULL && msgsiz) {
+               snprintf(errmsg,msgsiz,"File (%s) is too big (integer overflow)",filename);
+            }
             fclose(pfFile);
             return -3; // integer overflow
          }
          siHlp=*bufsize+freadLen*2+1;
          pcHlp=(char*)realloc_nowarn(*buf, siHlp);
          if (pcHlp==NULL) {
+            if (errmsg!=NULL && msgsiz) {
+               snprintf(errmsg,msgsiz,"Allocation of memory to read file (%s) failed",filename);
+            }
             fclose(pfFile);
             return -4; // realloc failed
          }
@@ -2410,10 +2421,12 @@ extern int file2str(const char* filename, char** buf, int* bufsize, const char* 
       siLen+=fread(*buf+siLen, 1, freadLen, pfFile);
    }
    if (ferror(pfFile)) {
+      if (errmsg!=NULL && msgsiz) {
+         snprintf(errmsg,msgsiz,"Read of file (%s) to string in memory failed (%d - %s)",filename,errno,strerror(errno));
+      }
       fclose(pfFile);
       return -5; // read error
    }
-
    fclose(pfFile);
    if (*buf!=NULL) // empty file
       (*buf)[siLen]='\0';

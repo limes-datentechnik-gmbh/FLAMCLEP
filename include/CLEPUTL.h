@@ -476,10 +476,15 @@ extern unsigned int chr2ebc(
  * Read a file using the specified filename and reads the whole content
  * into the supplied buffer. The buffer is reallocated and bufsize updated,
  * if necessary.
+ *
+ * This is the default implementation if no file to string function for CLEP provided
+ *
+ * @param hdl is ignored and not used (required for default implementation of call back function)
  * @param filename The path and name of the file to read
- * @param buf A pointer to a buffer, may be a pointer to NULL
- * @param bufsize The size of buf
- * @param format The format string for the file (must start with 'r' otherwise ignored)
+ * @param buf A pointer to a pointer to a buffer, may be a pointer to NULL for allocation else reallocation
+ * @param bufsize A pointer to the size of buf, is updated ater the call
+ * @param errmsg Pointer to a provided buffer for the error message (optional (can be NULL), result is null terminated)
+ * @param msgsiz The size of the buffer for the error message (optional (can be 0))
  * @return A positive value indicates the number of bytes read and copied into buf.
  *         A negative value indicates an error, in which case the content of buf is undefined.
  *         Error codes:
@@ -489,7 +494,7 @@ extern unsigned int chr2ebc(
  *         * -4: realloc() failed
  *         * -5: file read error
  */
-extern int file2str(const char* filename, char** buf, int* bufsize, const char* format);
+extern int file2str(void* hdl, const char* filename, char** buf, int* bufsize, char* errmsg, const int msgsiz);
 
 /**
  * Takes an array of null-terminated strings and concatenates all strings

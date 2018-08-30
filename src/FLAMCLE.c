@@ -47,7 +47,6 @@
 #include <unistd.h>
 #endif
 
-
 /* Include eigener Bibliotheken  **************************************/
 
 #include "CLEPUTL.h"
@@ -133,11 +132,14 @@
  * 1.2.66: Fix valgrind issue at read of configuration file
  * 1.2.67: Read environment also from SYSUID.STDENV on z/OS
  * 1.2.68: Separate version and build number with hyphen instead of dot
+ * 1.2.69: Use new file2str interface
+ * 1.2.70: Support callback function for file to string
+ * 1.2.71: Fix memory leak if GETPROP used without command
  */
-#define CLE_VSN_STR       "1.2.68"
+#define CLE_VSN_STR       "1.2.71"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        2
-#define CLE_VSN_REVISION       68
+#define CLE_VSN_REVISION       71
 
 /* Definition der Konstanten ******************************************/
 
@@ -190,7 +192,9 @@ static int siClePropertyInit(
    void**                        ppHdl,
    char**                        ppFil,
    int*                          piFil,
-   tpfMsg                        pfMsg);
+   tpfMsg                        pfMsg,
+   void*                         pvF2S,
+   tpfF2S                        pfF2S);
 
 static int siClePropertyFinish(
    const char*                   pcHom,
@@ -228,7 +232,9 @@ static int siCleChangeProperties(
    const char*                   pcOpt,
    const char*                   pcEnt,
    TsCnfHdl*                     psCnf,
-   tpfMsg                        pfMsg);
+   tpfMsg                        pfMsg,
+   void*                         pvF2S,
+   tpfF2S                        pfF2S);
 
 static int siCleCommandInit(
    tpfIni                        pfIni,
@@ -252,7 +258,9 @@ static int siCleCommandInit(
    const char*                   pcEnt,
    TsCnfHdl*                     psCnf,
    void**                        ppHdl,
-   tpfMsg                        pfMsg);
+   tpfMsg                        pfMsg,
+   void*                         pvF2S,
+   tpfF2S                        pfF2S);
 
 static int siCleSimpleInit(
    FILE*                         pfOut,
@@ -351,7 +359,9 @@ static int siCleGetProperties(
    const char*                   pcCmd,
    char**                        ppFil,
    char**                        ppPro,
-   int*                          piFlg);
+   int*                          piFlg,
+   void*                         pvF2S,
+   tpfF2S                        pfF2S);
 
 static int siCleGetCommand(
    void*                         pvHdl,
@@ -361,7 +371,9 @@ static int siCleGetCommand(
    int                           argc,
    char*                         argv[],
    char**                        ppFil,
-   char**                        ppCmd);
+   char**                        ppCmd,
+   void*                         pvF2S,
+   tpfF2S                        pfF2S);
 
 static TsCnfHdl* psCnfOpn(
    FILE*                         pfErr,
@@ -502,7 +514,9 @@ extern int siCleExecute(
    const char*                   pcDef,
    tpfMsg                        pfMsg,
    const char*                   pcApx,
-   const TsCleAppendix*          psApx)
+   const TsCleAppendix*          psApx,
+   void*                         pvF2S,
+   tpfF2S                        pfF2S)
 {
    int                           i,j,l,s,siErr,siDep,siCnt,isSet=0;
    TsCnfHdl*                     psCnf=NULL;
@@ -909,7 +923,8 @@ EVALUATE:
          }
          for (i=0;psTab[i].pcKyw!=NULL;i++) {
             if (strxcmp(isCas,argv[2],psTab[i].pcKyw,strlen(psTab[i].pcKyw),'.',TRUE)==0) {
-               siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,pcOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isPfl,isEnv,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg);
+               siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,pcOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,
+                                      isCas,isPfl,isEnv,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg,pvF2S,pfF2S);
                if (siErr) ERROR(siErr,NULL);
                if (strlen(argv[2])==strlen(psTab[i].pcKyw)) {
                   fprintf(pfOut,"Syntax for command '%s':\n",argv[2]);
@@ -925,7 +940,8 @@ EVALUATE:
                if (strxcmp(isCas,pcDef,psTab[i].pcKyw,0,0,FALSE)==0) {
                   // TODO: Stack Allokation mit unbegrenzter Größe = Potenzielle Sicherheitslücke
                   char acPat[strlen(pcDef)+strlen(argv[2]+2)];
-                  siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,pcOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isPfl,isEnv,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg);
+                  siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,pcOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,
+                                         isCas,isPfl,isEnv,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg,pvF2S,pfF2S);
                   if (siErr) ERROR(siErr,NULL);
                   sprintf(acPat,"%s.%s",pcDef,argv[2]);
                   fprintf(pfOut,"Syntax for argument '%s':\n",acPat);
@@ -1004,7 +1020,8 @@ EVALUATE:
          }
          for (i=0;psTab[i].pcKyw!=NULL;i++) {
             if (strxcmp(isCas,argv[2],psTab[i].pcKyw,strlen(psTab[i].pcKyw),'.',TRUE)==0) {
-               siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,pcOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isPfl,isEnv,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg);
+               siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,pcOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,
+                                      isCas,isPfl,isEnv,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg,pvF2S,pfF2S);
                if (siErr) ERROR(siErr,NULL);
                if (strlen(argv[2])==strlen(psTab[i].pcKyw)) {
                   fprintf(pfOut,"Help for command '%s': %s\n",argv[2],psTab[i].pcHlp);
@@ -1025,7 +1042,8 @@ EVALUATE:
                if (strxcmp(isCas,pcDef,psTab[i].pcKyw,0,0,FALSE)==0) {
                   // TODO: Stack Allokation mit unbegrenzter Größe = Potenzielle Sicherheitslücke
                   char acPat[strlen(psTab[i].pcKyw)+strlen(argv[2]+2)];
-                  siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,pcOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isPfl,isEnv,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg);
+                  siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,pcOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,
+                                         isCas,isPfl,isEnv,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg,pvF2S,pfF2S);
                   if (siErr) ERROR(siErr,NULL);
                   sprintf(acPat,"%s.%s",psTab[i].pcKyw,argv[2]);
                   fprintf(pfOut,"Help for argument '%s': %s\n",acPat,pcClpInfo(pvHdl,acPat));
@@ -1233,7 +1251,8 @@ EVALUATE:
                }
             }
             if (strxcmp(isCas,pcCmd,psTab[i].pcKyw,strlen(psTab[i].pcKyw),'.',TRUE)==0) {
-               siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,pcOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isPfl,isEnv,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg);
+               siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,pcOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,
+                                      isCas,isPfl,isEnv,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg,pvF2S,pfF2S);
                if (siErr) ERROR(siErr,NULL);
                if (isMan==FALSE) {
                   if (strlen(pcCmd)==strlen(psTab[i].pcKyw)) {
@@ -1260,7 +1279,8 @@ EVALUATE:
             for (i=0;psTab[i].pcKyw!=NULL;i++) {
                if (strxcmp(isCas,pcDef,psTab[i].pcKyw,0,0,FALSE)==0) {
                   char acPat[strlen(pcDef)+strlen(pcCmd+2)];
-                  siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,pcOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isPfl,isEnv,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg);
+                  siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,pcOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,
+                                         isCas,isPfl,isEnv,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg,pvF2S,pfF2S);
                   if (siErr) ERROR(siErr,NULL);
                   sprintf(acPat,"%s.%s",pcDef,pcCmd);
                   fprintf(pfOut,"Manual page fo'argument '%s':\n\n",acPat);
@@ -1347,7 +1367,8 @@ EVALUATE:
          if (pcCmd!=NULL) {
             for (i=0;psTab[i].pcKyw!=NULL;i++) {
                if (strxcmp(isCas,pcCmd,psTab[i].pcKyw,strlen(psTab[i].pcKyw),'.',TRUE)==0) {
-                  siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,pcOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isPfl,isEnv,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg);
+                  siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,pcOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,
+                                         isCas,isPfl,isEnv,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg,pvF2S,pfF2S);
                   if (siErr) ERROR(siErr,NULL);
                   snprintf(acNum,sizeof(acNum),"2.%d.",i+1);
                   siErr=siClpDocu(pvHdl,pfDoc,pcCmd,NULL,acNum,"COMMAND",TRUE,FALSE,isNbr);
@@ -1369,7 +1390,8 @@ EVALUATE:
                   if (strxcmp(isCas,pcDef,psTab[i].pcKyw,0,0,FALSE)==0) {
                      // TODO: Stack Allokation mit unbegrenzter Größe = Potenzielle Sicherheitslücke
                      char acPat[strlen(pcDef)+strlen(pcCmd+2)];
-                     siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,pcOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isPfl,isEnv,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg);
+                     siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,pcOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,
+                                            isCas,isPfl,isEnv,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg,pvF2S,pfF2S);
                      if (siErr) ERROR(siErr,NULL);
                      snprintf(acNum,sizeof(acNum),"2.%d.",i+1);
                      sprintf(acPat,"%s.%s",pcDef,pcCmd);
@@ -1420,7 +1442,8 @@ EVALUATE:
 
             for (i=0;psTab[i].pcKyw!=NULL;i++) {
                if (psTab[i].siFlg) {
-                  siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,pcOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isPfl,isEnv,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg);
+                  siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,pcOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,
+                                         isCas,isPfl,isEnv,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg,pvF2S,pfF2S);
                   if (siErr) ERROR(siErr,NULL);
                   snprintf(acNum,sizeof(acNum),"3.%d.",i+1);
                   siErr=siClpDocu(pvHdl,pfDoc,psTab[i].pcKyw,NULL,acNum,"COMMAND",TRUE,FALSE,isNbr);
@@ -1475,7 +1498,7 @@ EVALUATE:
                fprintf(pfDoc,"-----------------\n\n");
                if (pcApx!=NULL && *pcApx) fprintm(pfDoc,pcOwn,pcPgm,pcApx,1);
                for (i=0;psApx[i].pcHdl!=NULL;i++) {
-                  pvHdl=pvClpOpen(isCas,isPfl,isEnv,siMkl,pcOwn,psApx[i].pcRot,psApx[i].pcKyw,psApx[i].pcMan,psApx[i].pcHlp,psApx[i].isOvl,psApx[i].psTab,NULL,pfOut,pfErr,pfTrc,pfTrc,pfTrc,pfTrc,pcDep,pcOpt,pcEnt,NULL);
+                  pvHdl=pvClpOpen(isCas,isPfl,isEnv,siMkl,pcOwn,psApx[i].pcRot,psApx[i].pcKyw,psApx[i].pcMan,psApx[i].pcHlp,psApx[i].isOvl,psApx[i].psTab,NULL,pfOut,pfErr,pfTrc,pfTrc,pfTrc,pfTrc,pcDep,pcOpt,pcEnt,NULL,pvF2S,pfF2S);
                   if (pvHdl==NULL) {
                      fprintf(pfOut,"Open of parser for CLP string of appendix '%s' failed\n",psApx[i].pcRot);
                      return(CLERTC_TAB);
@@ -1540,7 +1563,7 @@ EVALUATE:
                           "the help message is printed.\n\n");
             for (siErr=CLP_OK, i=0;psTab[i].pcKyw!=NULL && siErr==CLP_OK;i++) {
                siErr=siClePropertyInit(psTab[i].pfIni,psTab[i].pvClp,pcOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,
-                                       psTab[i].piOid,psTab[i].psTab,isCas,isPfl,isEnv,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,NULL,NULL,pfMsg);
+                                       psTab[i].piOid,psTab[i].psTab,isCas,isPfl,isEnv,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,NULL,NULL,pfMsg,pvF2S,pfF2S);
                if (siErr) ERROR(siErr,NULL);
                siErr=siClpProperties(pvHdl,CLPPRO_MTD_DOC,10,psTab[i].pcKyw,pfDoc);
                vdClpClose(pvHdl,CLPCLS_MTD_ALL); pvHdl=NULL;
@@ -1560,7 +1583,7 @@ EVALUATE:
             efprintf(pfDoc,"%s",HLP_CLE_PROPFIL);
             for (siErr=CLP_OK, i=0;psTab[i].pcKyw!=NULL && siErr==CLP_OK;i++) {
                siErr=siClePropertyInit(psTab[i].pfIni,psTab[i].pvClp,pcOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,
-                                       psTab[i].piOid,psTab[i].psTab,isCas,isPfl,isEnv,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,NULL,NULL,pfMsg);
+                                       psTab[i].piOid,psTab[i].psTab,isCas,isPfl,isEnv,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,NULL,NULL,pfMsg,pvF2S,pfF2S);
                if (siErr) ERROR(siErr,NULL);
                siErr=siClpProperties(pvHdl,CLPPRO_MTD_SET,10,psTab[i].pcKyw,pfDoc);
                vdClpClose(pvHdl,CLPCLS_MTD_ALL); pvHdl=NULL;
@@ -1684,7 +1707,7 @@ EVALUATE:
          if (pcCmd==NULL) {
             for (siErr=CLP_OK, i=0;psTab[i].pcKyw!=NULL && siErr==CLP_OK;i++) {
                siErr=siClePropertyInit(psTab[i].pfIni,psTab[i].pvClp,pcOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,
-                                       psTab[i].piOid,psTab[i].psTab,isCas,isPfl,isEnv,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,NULL,NULL,pfMsg);
+                                       psTab[i].piOid,psTab[i].psTab,isCas,isPfl,isEnv,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,NULL,NULL,pfMsg,pvF2S,pfF2S);
                if (siErr) ERROR(siErr,NULL);
                siErr=siClpProperties(pvHdl,CLPPRO_MTD_CMT,10,psTab[i].pcKyw,pfPro);
                vdClpClose(pvHdl,CLPCLS_MTD_ALL); pvHdl=NULL;
@@ -1700,7 +1723,7 @@ EVALUATE:
             for (i=0;psTab[i].pcKyw!=NULL;i++) {
                if (strxcmp(isCas,pcCmd,psTab[i].pcKyw,0,0,FALSE)==0) {
                   siErr=siClePropertyInit(psTab[i].pfIni,psTab[i].pvClp,pcOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,
-                                          psTab[i].piOid,psTab[i].psTab,isCas,isPfl,isEnv,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,NULL,NULL,pfMsg);
+                                          psTab[i].piOid,psTab[i].psTab,isCas,isPfl,isEnv,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,NULL,NULL,pfMsg,pvF2S,pfF2S);
                   if (siErr) ERROR(siErr,NULL);
                   siErr=siClpProperties(pvHdl,CLPPRO_MTD_CMT,10,psTab[i].pcKyw,pfPro);
                   vdClpClose(pvHdl,CLPCLS_MTD_ALL); pvHdl=NULL;
@@ -1807,7 +1830,7 @@ EVALUATE:
                   }
                }
                siErr=siCleChangeProperties(psTab[i].pfIni,psTab[i].pvClp,pcHom,pcOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,pcPro,
-                     psTab[i].piOid,psTab[i].psTab,isCas,isPfl,isEnv,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,pfMsg);
+                     psTab[i].piOid,psTab[i].psTab,isCas,isPfl,isEnv,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,pfMsg,pvF2S,pfF2S);
                ERROR(siErr,pcPro);
             }
          }
@@ -1836,7 +1859,7 @@ EVALUATE:
                   }
                }
                siErr=siCleChangeProperties(psTab[i].pfIni,psTab[i].pvClp,pcHom,pcOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,pcPro,
-                     psTab[i].piOid,psTab[i].psTab,isCas,isPfl,isEnv,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,pfMsg);
+                     psTab[i].piOid,psTab[i].psTab,isCas,isPfl,isEnv,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,pfMsg,pvF2S,pfF2S);
                ERROR(siErr,pcPro);
             }
          }
@@ -1897,9 +1920,10 @@ EVALUATE:
          for (i=0;psTab[i].pcKyw!=NULL;i++) {
             siErr=siClePropertyInit(psTab[i].pfIni,psTab[i].pvClp,pcOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,
                                     psTab[i].piOid,psTab[i].psTab,isCas,isPfl,isEnv,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,
-                                    &pvHdl,NULL,NULL,pfMsg);
+                                    &pvHdl,NULL,NULL,pfMsg,pvF2S,pfF2S);
             if (siErr) ERROR(siErr,NULL);
             vdPrnProperties(pvHdl,psTab[i].pcKyw,TRUE,10);
+            vdClpClose(pvHdl,CLPCLS_MTD_ALL); pvHdl=NULL;
          }
          ERROR(CLERTC_OK,NULL);
       } else if (argc>=3) {
@@ -1953,7 +1977,8 @@ EVALUATE:
          for (i=0;psTab[i].pcKyw!=NULL;i++) {
             if (strxcmp(isCas,argv[2],psTab[i].pcKyw,strlen(psTab[i].pcKyw),'.',TRUE)==0) {
                siErr=siClePropertyInit(psTab[i].pfIni,psTab[i].pvClp,pcOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,
-                                       psTab[i].piOid,psTab[i].psTab,isCas,isPfl,isEnv,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,NULL,NULL,pfMsg);
+                                       psTab[i].piOid,psTab[i].psTab,isCas,isPfl,isEnv,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,
+                                       psCnf,&pvHdl,NULL,NULL,pfMsg,pvF2S,pfF2S);
                if (siErr) ERROR(siErr,NULL);
                if (strlen(argv[2])==strlen(psTab[i].pcKyw)) {
                   fprintf(pfOut,"Properties for command '%s':\n",argv[2]);
@@ -1970,7 +1995,8 @@ EVALUATE:
                   // TODO: Stack Allokation mit unbegrenzter Größe = Potenzielle Sicherheitslücke
                   char acPat[strlen(pcDef)+strlen(argv[2]+2)];
                   siErr=siClePropertyInit(psTab[i].pfIni,psTab[i].pvClp,pcOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,
-                                          psTab[i].piOid,psTab[i].psTab,isCas,isPfl,isEnv,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,NULL,NULL,pfMsg);
+                                          psTab[i].piOid,psTab[i].psTab,isCas,isPfl,isEnv,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,
+                                          psCnf,&pvHdl,NULL,NULL,pfMsg,pvF2S,pfF2S);
                   if (siErr) ERROR(siErr,NULL);
                   sprintf(acPat,"%s.%s",pcDef,argv[2]);
                   fprintf(pfOut,"Properties for argument '%s':\n",acPat);
@@ -2201,9 +2227,10 @@ EVALUATE:
                char*                         pcCmd=NULL;
                char*                         pcTls=NULL;
                char*                         pcLst=NULL;
-               siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,pcOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,isCas,isPfl,isEnv,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg);
+               siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,pcOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,
+                                      isCas,isPfl,isEnv,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg,pvF2S,pfF2S);
                if (siErr) ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
-               siErr=siCleGetCommand(pvHdl,pfOut,pcDep,psTab[i].pcKyw,argc,argv,&pcFil,&pcCmd);
+               siErr=siCleGetCommand(pvHdl,pfOut,pcDep,psTab[i].pcKyw,argc,argv,&pcFil,&pcCmd,pvF2S,pfF2S);
                if (siErr) ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
                siErr=siClpParseCmd(pvHdl,pcFil,pcCmd,TRUE,TRUE,psTab[i].piOid,&pcTls);
                if (siErr<0) {
@@ -2322,7 +2349,9 @@ static int siClePropertyInit(
    void**                        ppHdl,
    char**                        ppFil,
    int*                          piFil,
-   tpfMsg                        pfMsg)
+   tpfMsg                        pfMsg,
+   void*                         pvF2S,
+   tpfF2S                        pfF2S)
 {
    int                           siErr;
    int                           isOvl=(piOid==NULL)?FALSE:TRUE;
@@ -2333,7 +2362,7 @@ static int siClePropertyInit(
 
    if (piFil!=NULL) *piFil=0;
    if (ppFil!=NULL) *ppFil=NULL;
-   *ppHdl=pvClpOpen(isCas,isPfl,isEnv,siMkl,pcOwn,pcPgm,pcCmd,pcMan,pcHlp,isOvl,psTab,pvClp,pfOut,pfErr,pfTrc,pfTrc,pfTrc,pfTrc,pcDep,pcOpt,pcEnt,NULL);
+   *ppHdl=pvClpOpen(isCas,isPfl,isEnv,siMkl,pcOwn,pcPgm,pcCmd,pcMan,pcHlp,isOvl,psTab,pvClp,pfOut,pfErr,pfTrc,pfTrc,pfTrc,pfTrc,pcDep,pcOpt,pcEnt,NULL,pvF2S,pfF2S);
    if (*ppHdl==NULL) {
       if (pfErr!=NULL) fprintf(pfErr,"Open of property parser for command '%s' failed\n",pcCmd);
       return(CLERTC_TAB);
@@ -2348,7 +2377,7 @@ static int siClePropertyInit(
       vdClpClose(*ppHdl,CLPCLS_MTD_ALL);*ppHdl=NULL;
       return(CLERTC_INI);
    }
-   siErr=siCleGetProperties(*ppHdl,pfErr,psCnf,pcOwn,pcPgm,pcCmd,&pcFil,&pcPro,&siFil);
+   siErr=siCleGetProperties(*ppHdl,pfErr,psCnf,pcOwn,pcPgm,pcCmd,&pcFil,&pcPro,&siFil,pvF2S,pfF2S);
    if (siErr) {
       if (pcPro!=NULL) free(pcPro); SAFE_FREE(pcFil);
       vdClpClose(*ppHdl,CLPCLS_MTD_ALL);*ppHdl=NULL;
@@ -2506,7 +2535,9 @@ static int siCleCommandInit(
    const char*                   pcEnt,
    TsCnfHdl*                     psCnf,
    void**                        ppHdl,
-   tpfMsg                        pfMsg)
+   tpfMsg                        pfMsg,
+   void*                         pvF2S,
+   tpfF2S                        pfF2S)
 {
    int                           siErr,siFil=0;
    int                           isOvl=(piOid==NULL)?FALSE:TRUE;
@@ -2514,7 +2545,7 @@ static int siCleCommandInit(
    char*                         pcPro=NULL;
    const char*                   pcMsg;
 
-   *ppHdl=pvClpOpen(isCas,isPfl,isEnv,siMkl,pcOwn,pcPgm,pcCmd,pcMan,pcHlp,isOvl,psTab,pvClp,pfOut,pfErr,pfTrc,pfTrc,pfTrc,pfTrc,pcDep,pcOpt,pcEnt,NULL);
+   *ppHdl=pvClpOpen(isCas,isPfl,isEnv,siMkl,pcOwn,pcPgm,pcCmd,pcMan,pcHlp,isOvl,psTab,pvClp,pfOut,pfErr,pfTrc,pfTrc,pfTrc,pfTrc,pcDep,pcOpt,pcEnt,NULL,pvF2S,pfF2S);
    if (*ppHdl==NULL) {
       if (pfErr!=NULL) fprintf(pfErr,"Open of parser for command '%s' failed\n",pcCmd);
       return(CLERTC_TAB);
@@ -2529,7 +2560,7 @@ static int siCleCommandInit(
       vdClpClose(*ppHdl,CLPCLS_MTD_ALL);*ppHdl=NULL;
       return(CLERTC_INI);
    }
-   siErr=siCleGetProperties(*ppHdl,pfErr,psCnf,pcOwn,pcPgm,pcCmd,&pcFil,&pcPro,&siFil);
+   siErr=siCleGetProperties(*ppHdl,pfErr,psCnf,pcOwn,pcPgm,pcCmd,&pcFil,&pcPro,&siFil,pvF2S,pfF2S);
    if (siErr) {
       vdClpClose(*ppHdl,CLPCLS_MTD_ALL);*ppHdl=NULL;
       SAFE_FREE(pcPro); SAFE_FREE(pcFil);
@@ -2563,7 +2594,7 @@ static int siCleSimpleInit(
          {CLPTYP_NUMBER,"XX",NULL,0,1,1,0,0,CLPFLG_NON,NULL,NULL,NULL,"XX",0,0.0,NULL},
          {CLPTYP_NON   ,NULL,NULL,0,0,0,0,0,CLPFLG_NON,NULL,NULL,NULL,NULL,0,0.0,NULL}
    };
-   *ppHdl=pvClpOpen(FALSE,isPfl,isEnv,0,"","","","","",FALSE,asTab,"",pfOut,pfErr,NULL,NULL,NULL,NULL,pcDep,pcOpt,pcEnt,NULL);
+   *ppHdl=pvClpOpen(FALSE,isPfl,isEnv,0,"","","","","",FALSE,asTab,"",pfOut,pfErr,NULL,NULL,NULL,NULL,pcDep,pcOpt,pcEnt,NULL,NULL,NULL);
    if (*ppHdl==NULL) {
       if (pfErr!=NULL) fprintf(pfErr,"Open of command line parser for grammar and lexem print out failed\n");
       return(CLERTC_TAB);
@@ -2594,7 +2625,9 @@ static int siCleChangeProperties(
    const char*                   pcOpt,
    const char*                   pcEnt,
    TsCnfHdl*                     psCnf,
-   tpfMsg                        pfMsg)
+   tpfMsg                        pfMsg,
+   void*                         pvF2S,
+   tpfF2S                        pfF2S)
 {
    int                           siErr;
    void*                         pvHdl=NULL;
@@ -2603,7 +2636,7 @@ static int siCleChangeProperties(
 
    siErr=siClePropertyInit(pfIni,pvClp,pcOwn,pcPgm,pcCmd,pcMan,pcHlp,
                            piOid,psTab,isCas,isPfl,isEnv,siMkl,pfOut,pfErr,pfTrc,
-                           pcDep,pcOpt,pcEnt,psCnf,&pvHdl,&pcFil,&siFil,pfMsg);
+                           pcDep,pcOpt,pcEnt,psCnf,&pvHdl,&pcFil,&siFil,pfMsg,pvF2S,pfF2S);
    if (siErr) {
       SAFE_FREE(pcFil);
       return(siErr);
@@ -2999,12 +3032,15 @@ static int siCleGetProperties(
    const char*             pcCmd,
    char**                  ppFil,
    char**                  ppPro,
-   int*                    piFlg)
+   int*                    piFlg,
+   void*                   pvF2S,
+   tpfF2S                  pfF2S)
 {
    int                     siErr,siSiz=0;
    const char*             pcHlp=NULL;
    // TODO: Stack Allokation mit unbegrenzter Größe = Potenzielle Sicherheitslücke
    char                    acRoot[strlen(pcOwn)+strlen(pcPgm)+strlen(pcCmd)+17];
+   char                    acMsg[1024]="";
 
    SAFE_FREE(*ppFil);
    snprintf(acRoot,sizeof(acRoot),"%s.%s.%s.property.file",pcOwn,pcPgm,pcCmd);
@@ -3026,18 +3062,12 @@ static int siCleGetProperties(
       if (pfErr!=NULL) fprintf(pfErr,"Allocation of memory for property file name (%s) failed)\n",pcHlp);
       return(CLERTC_MEM);
    }
-   siErr=file2str(*ppFil,ppPro,&siSiz,filemode("r"));
+   siErr=pfF2S(pvF2S,*ppFil,ppPro,&siSiz,acMsg,sizeof(acMsg));
    if (siErr<0) {
-      if (*ppPro!=NULL) { free(*ppPro); *ppPro=NULL; }
-      switch(siErr) {
-      case -1: if (pfErr!=NULL) fprintf(pfErr,"Illegal parameters passed to file2str() (Bug)\n");                             SAFE_FREE(*ppFil); return(CLERTC_FAT);
-      case -2: if (pfErr!=NULL) fprintf(pfErr,"Open of property file (%s) failed (%d - %s)\n",*ppFil,errno,strerror(errno));  SAFE_FREE(*ppFil); return(CLERTC_SYS);
-      case -3: if (pfErr!=NULL) fprintf(pfErr,"Property file (%s) is too big (integer overflow)\n",*ppFil);                   SAFE_FREE(*ppFil); return(CLERTC_CMD);
-      case -4: if (pfErr!=NULL) fprintf(pfErr,"Allocation of memory for property file (%s) failed.\n",*ppFil);                SAFE_FREE(*ppFil); return(CLERTC_SYS);
-      case -5: if (pfErr!=NULL) fprintf(pfErr,"Read of property file (%s) failed (%d - %s)\n",*ppFil,errno,strerror(errno));  SAFE_FREE(*ppFil); return(CLERTC_SYS);
-      case -6: if (pfErr!=NULL) fprintf(pfErr,"Resolve of host dataset name (%s) failed\n",*ppFil);                           SAFE_FREE(*ppFil); return(CLERTC_SYS);
-      default: if (pfErr!=NULL) fprintf(pfErr,"An unknown error occurred while reading property file (%s).\n",*ppFil);        SAFE_FREE(*ppFil); return(CLERTC_FAT);
-      }
+      if (pfErr!=NULL) fprintf(pfErr,"Property file: %s\n",acMsg);
+      SAFE_FREE(*ppFil);
+      SAFE_FREE(*ppPro);
+      return(CLERTC_SYS);
    }
    return(CLERTC_OK);
 }
@@ -3050,7 +3080,9 @@ static int siCleGetCommand(
    int                     argc,
    char*                   argv[],
    char**                  ppFil,
-   char**                  ppCmd)
+   char**                  ppCmd,
+   void*                   pvF2S,
+   tpfF2S                  pfF2S)
 {
    int                     siErr,siSiz=0;
    int                     l=strlen(pcFct);
@@ -3091,18 +3123,13 @@ static int siCleGetCommand(
          return(CLERTC_MEM);
       }
 
-      siErr=file2str(*ppFil,ppCmd,&siSiz,filemode("r"));
+      char acMsg[1024]="";
+      siErr=pfF2S(pvF2S,*ppFil,ppCmd,&siSiz,acMsg,sizeof(acMsg));
       if (siErr<0) {
-         if (*ppCmd!=NULL) { free(*ppCmd); *ppCmd=NULL; }
-         switch(siErr) {
-         case -1: if (pfErr!=NULL) fprintf(pfErr,"Illegal parameters passed to file2str() (Bug)\n");                           SAFE_FREE(*ppFil); return(CLERTC_FAT);
-         case -2: if (pfErr!=NULL) fprintf(pfErr,"Open of command file (%s) failed (%d - %s)\n",*ppFil,errno,strerror(errno)); SAFE_FREE(*ppFil); return(CLERTC_SYS);
-         case -3: if (pfErr!=NULL) fprintf(pfErr,"Command file (%s) is too big (integer overflow)\n",*ppFil);                  SAFE_FREE(*ppFil); return(CLERTC_CMD);
-         case -4: if (pfErr!=NULL) fprintf(pfErr,"Allocation of memory for command file (%s) failed.\n",*ppFil);               SAFE_FREE(*ppFil); return(CLERTC_SYS);
-         case -5: if (pfErr!=NULL) fprintf(pfErr,"Read of command file (%s) failed (%d - %s)\n",*ppFil,errno,strerror(errno)); SAFE_FREE(*ppFil); return(CLERTC_SYS);
-         case -6: if (pfErr!=NULL) fprintf(pfErr,"Resolve of host dataset name (%s) failed\n",*ppFil);                         SAFE_FREE(*ppFil); return(CLERTC_SYS);
-         default: if (pfErr!=NULL) fprintf(pfErr,"An unknown error occurred while reading command file (%s).\n",*ppFil);       SAFE_FREE(*ppFil); return(CLERTC_FAT);
-         }
+         if (pfErr!=NULL) fprintf(pfErr,"Command file: %s\n",acMsg);
+         SAFE_FREE(*ppFil);
+         SAFE_FREE(*ppCmd);
+         return(CLERTC_SYS);
       }
    } else {
       if (pfErr!=NULL) fprintf(pfErr,"No blank space ' ', equal sign '=', dot '.' or bracket '(' behind '%s'\n",pcFct);
@@ -3448,7 +3475,9 @@ extern int siCleParseString(
    const char*                   pcOpt,
    const char*                   pcEnt,
    int*                          piMod,
-   void*                         pvDat)
+   void*                         pvDat,
+   void*                         pvF2S,
+   tpfF2S                        pfF2S)
 {
    int                           siErr=0;
    void*                         pvHdl;
@@ -3465,7 +3494,7 @@ extern int siCleParseString(
 
    pvHdl=pvClpOpen(isCas,isPfl,isEnv,siMkl,pcOwn,pcPgm,pcCmd,pcMan,pcHlp,isOvl,
                    psTab,pvDat,pfTmp,pfTmp,NULL,NULL,NULL,NULL,
-                   pcDep,pcOpt,pcEnt,&stErr);
+                   pcDep,pcOpt,pcEnt,&stErr,pvF2S,pfF2S);
    if (pvHdl==NULL) {
       snprintf(pcErr,uiErr,"CTX-MESSAGE : Open of string parser for command '%s' failed\n",pcCmd);
       if (pfTmp!=NULL) {rewind(pfTmp); size_t l=strlen(pcErr); size_t r=fread(pcErr+l,1,uiErr-(l+1),pfTmp); fclose(pfTmp); pcErr[l+r]=0x00;}
