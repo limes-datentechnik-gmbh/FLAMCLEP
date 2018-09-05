@@ -2636,7 +2636,7 @@ static int siClpSymCal(
       for (int i=strlen(acKyw);i>=psSym->psStd->siKwl;i--) {
          acKyw[i]=0x00;
          if (CLPTOK_KYW!=siClpConNat(pvHdl,psHdl->pfErr,NULL,acKyw,NULL,NULL,-1,NULL)) {
-            fprintf(stderr,"%s:%d:1: warning: Constant keyword (%s) re-used in table definitions (%s.%s)",__FILE__,__LINE__,acKyw,fpcPat(pvHdl,siLev),psSym->psStd->pcKyw);
+            fprintf(stderr,"%s:%d:1: warning: Constant keyword (%s) re-used in table definitions (%s.%s)\n",__FILE__,__LINE__,acKyw,fpcPat(pvHdl,siLev),psSym->psStd->pcKyw);
          }
       }
 #endif
