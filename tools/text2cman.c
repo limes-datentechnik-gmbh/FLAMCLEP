@@ -47,7 +47,7 @@ int main(int argc, char* argv[])
         char* outputName = NULL;
         int  quiet=0;
         char linebuf[1024];
-        char pageName[512];
+        char pageName[1024];
         char stringName[512];
         char* prefix = "";
         int isCommentBlock = 0;
@@ -122,25 +122,29 @@ int main(int argc, char* argv[])
                 sprintf(pageName, "static const char %s%s[] =\n", prefix, stringName);
                 fputs(pageName, outFile);
 
-                if (NULL == fgets(linebuf, sizeof(linebuf), inFile))
-                        return -1;
+                if (NULL == fgets(linebuf, sizeof(linebuf), inFile)) {
+                   exit(-1);
+                }
                 linecount++;
                 n = strlen(linebuf);
                 if (n > 2 && strncmp("(1)\n", &(linebuf[n-4]),4) == 0) {
-                    if (NULL == fgets(linebuf, sizeof(linebuf), inFile))
-                            return -1;
+                    if (NULL == fgets(linebuf, sizeof(linebuf), inFile)) {
+                       exit(-1);
+                    }
                     linecount++;
                     n = strlen(linebuf);
                     if (strncmp("===", linebuf, 3) != 0)
                         fprintf(stderr, "WARNING unexpected start of file %s\n", inputName);
-                    if (NULL == fgets(linebuf, sizeof(linebuf), inFile))
-                            return -1;
+                    if (NULL == fgets(linebuf, sizeof(linebuf), inFile)) {
+                       exit(-1);
+                    }
                     linecount++;
                     n = strlen(linebuf);
                 }
                 while (n <= 2) {
-                    if (NULL == fgets(linebuf, sizeof(linebuf), inFile))
-                            return -1;
+                    if (NULL == fgets(linebuf, sizeof(linebuf), inFile)) {
+                       exit(-1);
+                    }
                     linecount++;
                     n = strlen(linebuf);
                     if (n > 2 && linebuf[0] != '\n' && linebuf[0] != '\r')
