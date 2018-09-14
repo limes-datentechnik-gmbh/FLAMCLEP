@@ -54,6 +54,9 @@
 #  define __PRINTF_CHECK__(A,B)
 #endif
 
+#define CLEP_DEFAULT_CCSID_ASCII     819  // "ISO8859-1" Latin 1
+#define CLEP_DEFAULT_CCSID_EBCDIC    1047 // "IBM-1047"  Open Systems Latin 1
+
 /** Free memory space */
 #define SAFE_FREE(x) do { if ((x) != NULL) {free((void*)(x)); (x)=NULL;} } while(0)
 
@@ -388,7 +391,7 @@ extern char* dcpmaplab(const char* templ, const char* values, int method);
  * Determines the system default CCSID by querying nl_langinfo() (POSIX) or GetCPInfoEx() (Windows).
  * If none of both are available or no valid CCSID can be determined,
  * mapl2c() is called. If it also fails to determine the system default CSSID,
- * the CCSID for US-ASCII (ASCII platforms) or IBM-1047 (EBCDIC platforms) is returned.
+ * the CCSID for ASCII (ISO8859-1) or IBM-1047 (EBCDIC platforms) is returned.
  * @return A supported CCSID > 0
  */
 extern unsigned int sysccsid(void);
@@ -583,361 +586,109 @@ extern void resetEnvars(TsEnVarList** ppList);
 
 #ifdef __EBCDIC__
 
-extern int ebcdic_snprintf(char* string, size_t size, const char* format, ...);
-extern int ebcdic_sprintf(char* string, const char* format, ...);
-extern int ebcdic_fprintf(FILE* file, const char* format, ...);
+extern int           ebcdic_snprintf(char* string, size_t size, const char* format, ...);
+extern int           ebcdic_sprintf(char* string, const char* format, ...);
+extern int           ebcdic_fprintf(FILE* file, const char* format, ...);
 
-static char       gs_exc[4]={0,0,0,0};
-static char       gs_hsh[4]={0,0,0,0};
-static char       gs_dlr[4]={0,0,0,0};
-static char       gs_ats[4]={0,0,0,0};
-static char       gs_sbo[4]={0,0,0,0};
-static char       gs_bsl[4]={0,0,0,0};
-static char       gs_sbc[4]={0,0,0,0};
-static char       gs_crt[4]={0,0,0,0};
-static char       gs_grv[4]={0,0,0,0};
-static char       gs_cbo[4]={0,0,0,0};
-static char       gs_vbr[4]={0,0,0,0};
-static char       gs_cbc[4]={0,0,0,0};
-static char       gs_tld[4]={0,0,0,0};
-static char       gs_svb[4]={0,0,0,0};
-static char       gs_sbs[4]={0,0,0,0};
-static char       gs_idt[4]={0,0,0,0};
+extern char          init_char(char* p);
+extern char*         init_string(char* p);
 
-static char init_char(char* p) {
-   unsigned int ccsid=mapcdstr(mapl2c(TRUE));
-   switch (ccsid) {
-   case 37:
-   case 424:
-   case 1140:
-      gs_exc[0]=0x5A;
-      gs_hsh[0]=0x7B;
-      gs_dlr[0]=0x5B;
-      gs_ats[0]=0x7C;
-      gs_sbo[0]=0xBA;
-      gs_bsl[0]=0xE0;
-      gs_sbc[0]=0xBB;
-      gs_crt[0]=0xB0;
-      gs_grv[0]=0x79;
-      gs_cbo[0]=0xC0;
-      gs_vbr[0]=0x4F;
-      gs_cbc[0]=0xD0;
-      gs_tld[0]=0xA1;
-      break;
-   case 273:
-   case 1141:
-      gs_exc[0]=0x4F;
-      gs_hsh[0]=0x7B;
-      gs_dlr[0]=0x5B;
-      gs_ats[0]=0xB5;
-      gs_sbo[0]=0x63;
-      gs_bsl[0]=0xEC;
-      gs_sbc[0]=0xFC;
-      gs_crt[0]=0x5F;
-      gs_grv[0]=0x79;
-      gs_cbo[0]=0x43;
-      gs_vbr[0]=0xBB;
-      gs_cbc[0]=0xDC;
-      gs_tld[0]=0x59;
-      break;
-   case 1142:
-      gs_exc[0]=0x4F;
-      gs_hsh[0]=0x4A;
-      gs_dlr[0]=0x67;
-      gs_ats[0]=0x80;
-      gs_sbo[0]=0x9E;
-      gs_bsl[0]=0xE0;
-      gs_sbc[0]=0x9F;
-      gs_crt[0]=0x5F;
-      gs_grv[0]=0x79;
-      gs_cbo[0]=0x9C;
-      gs_vbr[0]=0xBB;
-      gs_cbc[0]=0x47;
-      gs_tld[0]=0xDC;
-      break;
-   case 1143:
-      gs_exc[0]=0x4F;
-      gs_hsh[0]=0x63;
-      gs_dlr[0]=0x67;
-      gs_ats[0]=0xEC;
-      gs_sbo[0]=0xB5;
-      gs_bsl[0]=0x71;
-      gs_sbc[0]=0x9F;
-      gs_crt[0]=0x5F;
-      gs_grv[0]=0x51;
-      gs_cbo[0]=0x43;
-      gs_vbr[0]=0xBB;
-      gs_cbc[0]=0x47;
-      gs_tld[0]=0xDC;
-      break;
-   case 1144:
-      gs_exc[0]=0x4F;
-      gs_hsh[0]=0xB1;
-      gs_dlr[0]=0x5B;
-      gs_ats[0]=0xB5;
-      gs_sbo[0]=0x90;
-      gs_bsl[0]=0x48;
-      gs_sbc[0]=0x51;
-      gs_crt[0]=0x5F;
-      gs_grv[0]=0xDD;
-      gs_cbo[0]=0x44;
-      gs_vbr[0]=0xBB;
-      gs_cbc[0]=0x54;
-      gs_tld[0]=0x58;
-      break;
-   case 1145:
-      gs_exc[0]=0xBB;
-      gs_hsh[0]=0x69;
-      gs_dlr[0]=0x5B;
-      gs_ats[0]=0x7C;
-      gs_sbo[0]=0x4A;
-      gs_bsl[0]=0xE0;
-      gs_sbc[0]=0x5A;
-      gs_crt[0]=0xBA;
-      gs_grv[0]=0x79;
-      gs_cbo[0]=0xC0;
-      gs_vbr[0]=0x4F;
-      gs_cbc[0]=0xD0;
-      gs_tld[0]=0xBD;
-      break;
-   case 1146:
-      gs_exc[0]=0x5A;
-      gs_hsh[0]=0x7B;
-      gs_dlr[0]=0x4A;
-      gs_ats[0]=0x7C;
-      gs_sbo[0]=0xB1;
-      gs_bsl[0]=0xE0;
-      gs_sbc[0]=0xBB;
-      gs_crt[0]=0xBA;
-      gs_grv[0]=0x79;
-      gs_cbo[0]=0xC0;
-      gs_vbr[0]=0x4F;
-      gs_cbc[0]=0xD0;
-      gs_tld[0]=0xBC;
-      break;
-   case 1147:
-      gs_exc[0]=0x4F;
-      gs_hsh[0]=0xB1;
-      gs_dlr[0]=0x5B;
-      gs_ats[0]=0x44;
-      gs_sbo[0]=0x90;
-      gs_bsl[0]=0x48;
-      gs_sbc[0]=0xB5;
-      gs_crt[0]=0x5F;
-      gs_grv[0]=0xA0;
-      gs_cbo[0]=0x51;
-      gs_vbr[0]=0xBB;
-      gs_cbc[0]=0x54;
-      gs_tld[0]=0xBD;
-      break;
-   case 500:
-   case 875:
-   case 1148:
-      gs_exc[0]=0x4F;
-      gs_hsh[0]=0x7B;
-      gs_dlr[0]=0x5B;
-      gs_ats[0]=0x7C;
-      gs_sbo[0]=0x4A;
-      gs_bsl[0]=0xE0;
-      gs_sbc[0]=0x5A;
-      gs_crt[0]=0x5F;
-      gs_grv[0]=0x79;
-      gs_cbo[0]=0xC0;
-      gs_vbr[0]=0xBB;
-      gs_cbc[0]=0xD0;
-      gs_tld[0]=0xA1;
-      break;
-   case 1149:
-      gs_exc[0]=0x4F;
-      gs_hsh[0]=0x7B;
-      gs_dlr[0]=0x5B;
-      gs_ats[0]=0xAC;
-      gs_sbo[0]=0xAE;
-      gs_bsl[0]=0xBE;
-      gs_sbc[0]=0x9E;
-      gs_crt[0]=0xEC;
-      gs_grv[0]=0x8C;
-      gs_cbo[0]=0x8E;
-      gs_vbr[0]=0xBB;
-      gs_cbc[0]=0x9C;
-      gs_tld[0]=0xCC;
-      break;
-   case 1153:
-      gs_exc[0]=0x4F;
-      gs_hsh[0]=0x7B;
-      gs_dlr[0]=0x5B;
-      gs_ats[0]=0x7C;
-      gs_sbo[0]=0x4A;
-      gs_bsl[0]=0xE0;
-      gs_sbc[0]=0x5A;
-      gs_crt[0]=0x5F;
-      gs_grv[0]=0x79;
-      gs_cbo[0]=0xC0;
-      gs_vbr[0]=0x6A;
-      gs_cbc[0]=0xD0;
-      gs_tld[0]=0xA1;
-      break;
-   case 1154:
-      gs_exc[0]=0x4F;
-      gs_hsh[0]=0x7B;
-      gs_dlr[0]=0x5B;
-      gs_ats[0]=0x7C;
-      gs_sbo[0]=0x4A;
-      gs_bsl[0]=0xE0;
-      gs_sbc[0]=0x5A;
-      gs_crt[0]=0x5F;
-      gs_grv[0]=0x79;
-      gs_cbo[0]=0xC0;
-      gs_vbr[0]=0x6A;
-      gs_cbc[0]=0xD0;
-      gs_tld[0]=0xA1;
-      break;
-   case 1156:
-      gs_exc[0]=0x5A;
-      gs_hsh[0]=0x7B;
-      gs_dlr[0]=0x5B;
-      gs_ats[0]=0x7C;
-      gs_sbo[0]=0xBA;
-      gs_bsl[0]=0xE0;
-      gs_sbc[0]=0xBB;
-      gs_crt[0]=0xB0;
-      gs_grv[0]=0x79;
-      gs_cbo[0]=0xC0;
-      gs_vbr[0]=0x4F;
-      gs_cbc[0]=0xD0;
-      gs_tld[0]=0xA1;
-      break;
-   case 1122:
-      gs_exc[0]=0x4F;
-      gs_hsh[0]=0x63;
-      gs_dlr[0]=0x67;
-      gs_ats[0]=0xEC;
-      gs_sbo[0]=0xB5;
-      gs_bsl[0]=0x71;
-      gs_sbc[0]=0x9F;
-      gs_crt[0]=0x5F;
-      gs_grv[0]=0x51;
-      gs_cbo[0]=0x43;
-      gs_vbr[0]=0xBB;
-      gs_cbc[0]=0x47;
-      gs_tld[0]=0xDC;
-      break;
-   case 1047:
-      gs_exc[0]=0x5A;
-      gs_hsh[0]=0x7B;
-      gs_dlr[0]=0x5B;
-      gs_ats[0]=0x7C;
-      gs_sbo[0]=0xAD;
-      gs_bsl[0]=0xE0;
-      gs_sbc[0]=0xBD;
-      gs_crt[0]=0x5F;
-      gs_grv[0]=0x79;
-      gs_cbo[0]=0xC0;
-      gs_vbr[0]=0x4F;
-      gs_cbc[0]=0xD0;
-      gs_tld[0]=0xA1;
-      break;
-   default:
-      gs_exc[0]='!' ;/*nodiac*/
-      gs_hsh[0]='#' ;/*nodiac*/
-      gs_dlr[0]='$' ;/*nodiac*/
-      gs_ats[0]='@' ;/*nodiac*/
-      gs_sbo[0]='[' ;/*nodiac*/
-      gs_bsl[0]='\\';/*nodiac*/
-      gs_sbc[0]=']' ;/*nodiac*/
-      gs_crt[0]='^' ;/*nodiac*/
-      gs_grv[0]='`' ;/*nodiac*/
-      gs_cbo[0]='{' ;/*nodiac*/
-      gs_vbr[0]='|' ;/*nodiac*/
-      gs_cbc[0]='}' ;/*nodiac*/
-      gs_tld[0]='~' ;/*nodiac*/
-      break;
-   }
-   gs_svb[0]='=';
-   gs_svb[1]=gs_vbr[0];
-   gs_sbs[0]='/';
-   gs_sbs[1]=gs_bsl[0];
-   gs_idt[0]='-';
-   gs_idt[1]='-';
-   gs_idt[2]=gs_vbr[0];
-   return(p[0]);
-}
+typedef struct DiaChr {
+   char              exc[4];
+   char              hsh[4];
+   char              dlr[4];
+   char              ats[4];
+   char              sbo[4];
+   char              bsl[4];
+   char              sbc[4];
+   char              crt[4];
+   char              grv[4];
+   char              cbo[4];
+   char              vbr[4];
+   char              cbc[4];
+   char              tld[4];
+   char              svb[4];
+   char              sbs[4];
+   char              idt[4];
+} TsDiaChr;
 
-static char* init_string(char* p) {
-   init_char(p);
-   return(p);
-}
+extern TsDiaChr      gsDiaChr;
 
-#  define C_EXC               ((gs_exc[0])?gs_exc[0]:init_char(gs_exc))
-#  define C_HSH               ((gs_hsh[0])?gs_hsh[0]:init_char(gs_hsh))
-#  define C_DLR               ((gs_dlr[0])?gs_dlr[0]:init_char(gs_dlr))
-#  define C_ATS               ((gs_ats[0])?gs_ats[0]:init_char(gs_ats))
-#  define C_SBO               ((gs_sbo[0])?gs_sbo[0]:init_char(gs_sbo))
-#  define C_BSL               ((gs_bsl[0])?gs_bsl[0]:init_char(gs_bsl))
-#  define C_SBC               ((gs_sbc[0])?gs_sbc[0]:init_char(gs_sbc))
-#  define C_CRT               ((gs_sbo[0])?gs_crt[0]:init_char(gs_crt))
-#  define C_GRV               ((gs_grv[0])?gs_grv[0]:init_char(gs_grv))
-#  define C_CBO               ((gs_cbo[0])?gs_cbo[0]:init_char(gs_cbo))
-#  define C_VBR               ((gs_vbr[0])?gs_vbr[0]:init_char(gs_vbr))
-#  define C_CBC               ((gs_cbc[0])?gs_cbc[0]:init_char(gs_cbc))
-#  define C_TLD               ((gs_tld[0])?gs_tld[0]:init_char(gs_tld))
-#  define S_EXC               ((gs_exc[0])?gs_exc:init_string(gs_exc))
-#  define S_HSH               ((gs_hsh[0])?gs_hsh:init_string(gs_hsh))
-#  define S_DLR               ((gs_dlr[0])?gs_dlr:init_string(gs_dlr))
-#  define S_ATS               ((gs_ats[0])?gs_ats:init_string(gs_ats))
-#  define S_SBO               ((gs_sbo[0])?gs_sbo:init_string(gs_sbo))
-#  define S_BSL               ((gs_bsl[0])?gs_bsl:init_string(gs_bsl))
-#  define S_SBC               ((gs_sbc[0])?gs_sbc:init_string(gs_sbc))
-#  define S_CRT               ((gs_sbo[0])?gs_crt:init_string(gs_crt))
-#  define S_GRV               ((gs_grv[0])?gs_grv:init_string(gs_grv))
-#  define S_CBO               ((gs_cbo[0])?gs_cbo:init_string(gs_cbo))
-#  define S_VBR               ((gs_vbr[0])?gs_vbr:init_string(gs_vbr))
-#  define S_CBC               ((gs_cbc[0])?gs_cbc:init_string(gs_cbc))
-#  define S_TLD               ((gs_tld[0])?gs_tld:init_string(gs_tld))
-#  define S_SVB               ((gs_svb[0])?gs_svb:init_string(gs_svb))
-#  define S_SBS               ((gs_sbs[0])?gs_sbs:init_string(gs_sbs))
-#  define S_IDT               ((gs_idt[0])?gs_idt:init_string(gs_idt))
+#  define HSH_PBRK   "\x7B\x4A\x63\xB1\x69"
+#  define ATS_PBRK   "\x7C\xB5\x80\xEC\x44\xAC"
 
+#  define C_EXC      ((gsDiaChr.exc[0])?gsDiaChr.exc[0]:init_char(gsDiaChr.exc))
+#  define C_HSH      ((gsDiaChr.hsh[0])?gsDiaChr.hsh[0]:init_char(gsDiaChr.hsh))
+#  define C_DLR      ((gsDiaChr.dlr[0])?gsDiaChr.dlr[0]:init_char(gsDiaChr.dlr))
+#  define C_ATS      ((gsDiaChr.ats[0])?gsDiaChr.ats[0]:init_char(gsDiaChr.ats))
+#  define C_SBO      ((gsDiaChr.sbo[0])?gsDiaChr.sbo[0]:init_char(gsDiaChr.sbo))
+#  define C_BSL      ((gsDiaChr.bsl[0])?gsDiaChr.bsl[0]:init_char(gsDiaChr.bsl))
+#  define C_SBC      ((gsDiaChr.sbc[0])?gsDiaChr.sbc[0]:init_char(gsDiaChr.sbc))
+#  define C_CRT      ((gsDiaChr.sbo[0])?gsDiaChr.crt[0]:init_char(gsDiaChr.crt))
+#  define C_GRV      ((gsDiaChr.grv[0])?gsDiaChr.grv[0]:init_char(gsDiaChr.grv))
+#  define C_CBO      ((gsDiaChr.cbo[0])?gsDiaChr.cbo[0]:init_char(gsDiaChr.cbo))
+#  define C_VBR      ((gsDiaChr.vbr[0])?gsDiaChr.vbr[0]:init_char(gsDiaChr.vbr))
+#  define C_CBC      ((gsDiaChr.cbc[0])?gsDiaChr.cbc[0]:init_char(gsDiaChr.cbc))
+#  define C_TLD      ((gsDiaChr.tld[0])?gsDiaChr.tld[0]:init_char(gsDiaChr.tld))
+#  define S_EXC      ((gsDiaChr.exc[0])?gsDiaChr.exc:init_string(gsDiaChr.exc))
+#  define S_HSH      ((gsDiaChr.hsh[0])?gsDiaChr.hsh:init_string(gsDiaChr.hsh))
+#  define S_DLR      ((gsDiaChr.dlr[0])?gsDiaChr.dlr:init_string(gsDiaChr.dlr))
+#  define S_ATS      ((gsDiaChr.ats[0])?gsDiaChr.ats:init_string(gsDiaChr.ats))
+#  define S_SBO      ((gsDiaChr.sbo[0])?gsDiaChr.sbo:init_string(gsDiaChr.sbo))
+#  define S_BSL      ((gsDiaChr.bsl[0])?gsDiaChr.bsl:init_string(gsDiaChr.bsl))
+#  define S_SBC      ((gsDiaChr.sbc[0])?gsDiaChr.sbc:init_string(gsDiaChr.sbc))
+#  define S_CRT      ((gsDiaChr.sbo[0])?gsDiaChr.crt:init_string(gsDiaChr.crt))
+#  define S_GRV      ((gsDiaChr.grv[0])?gsDiaChr.grv:init_string(gsDiaChr.grv))
+#  define S_CBO      ((gsDiaChr.cbo[0])?gsDiaChr.cbo:init_string(gsDiaChr.cbo))
+#  define S_VBR      ((gsDiaChr.vbr[0])?gsDiaChr.vbr:init_string(gsDiaChr.vbr))
+#  define S_CBC      ((gsDiaChr.cbc[0])?gsDiaChr.cbc:init_string(gsDiaChr.cbc))
+#  define S_TLD      ((gsDiaChr.tld[0])?gsDiaChr.tld:init_string(gsDiaChr.tld))
+#  define S_SVB      ((gsDiaChr.svb[0])?gsDiaChr.svb:init_string(gsDiaChr.svb))
+#  define S_SBS      ((gsDiaChr.sbs[0])?gsDiaChr.sbs:init_string(gsDiaChr.sbs))
+#  define S_IDT      ((gsDiaChr.idt[0])?gsDiaChr.idt:init_string(gsDiaChr.idt))
 
-#  define esnprintf           ebcdic_snprintf
-#  define esprintf            ebcdic_sprintf
-#  define efprintf            ebcdic_fprintf
+#  define esnprintf  ebcdic_snprintf
+#  define esprintf   ebcdic_sprintf
+#  define efprintf   ebcdic_fprintf
 
 #else
 
-#  define C_EXC              '!' /*nodiac*/
-#  define C_HSH              '#' /*nodiac*/
-#  define C_DLR              '$' /*nodiac*/
-#  define C_ATS              '@' /*nodiac*/
-#  define C_SBO              '[' /*nodiac*/
-#  define C_BSL              '\\'/*nodiac*/
-#  define C_SBC              ']' /*nodiac*/
-#  define C_CRT              '^' /*nodiac*/
-#  define C_GRV              '`' /*nodiac*/
-#  define C_CBO              '{' /*nodiac*/
-#  define C_VBR              '|' /*nodiac*/
-#  define C_CBC              '}' /*nodiac*/
-#  define C_TLD              '~' /*nodiac*/
-#  define S_EXC              "!" /*nodiac*/
-#  define S_HSH              "#" /*nodiac*/
-#  define S_DLR              "$" /*nodiac*/
-#  define S_ATS              "@" /*nodiac*/
-#  define S_SBO              "[" /*nodiac*/
-#  define S_BSL              "\\"/*nodiac*/
-#  define S_SBC              "]" /*nodiac*/
-#  define S_CRT              "^" /*nodiac*/
-#  define S_GRV              "`" /*nodiac*/
-#  define S_CBO              "{" /*nodiac*/
-#  define S_VBR              "|" /*nodiac*/
-#  define S_CBC              "}" /*nodiac*/
-#  define S_TLD              "~" /*nodiac*/
-#  define S_SVB              "=|" /*nodiac*/
-#  define S_SBS              "/\\" /*nodiac*/
-#  define S_IDT              "--|" /*nodiac*/
+#  define HSH_PBRK   "#"   /*nodiac*/
+#  define ATS_PBRK   "@"   /*nodiac*/
 
-#  define esnprintf          snprintf
-#  define esprintf           sprintf
-#  define efprintf           fprintf
+#  define C_EXC      '!'   /*nodiac*/
+#  define C_HSH      '#'   /*nodiac*/
+#  define C_DLR      '$'   /*nodiac*/
+#  define C_ATS      '@'   /*nodiac*/
+#  define C_SBO      '['   /*nodiac*/
+#  define C_BSL      '\\'  /*nodiac*/
+#  define C_SBC      ']'   /*nodiac*/
+#  define C_CRT      '^'   /*nodiac*/
+#  define C_GRV      '`'   /*nodiac*/
+#  define C_CBO      '{'   /*nodiac*/
+#  define C_VBR      '|'   /*nodiac*/
+#  define C_CBC      '}'   /*nodiac*/
+#  define C_TLD      '~'   /*nodiac*/
+#  define S_EXC      "!"   /*nodiac*/
+#  define S_HSH      "#"   /*nodiac*/
+#  define S_DLR      "$"   /*nodiac*/
+#  define S_ATS      "@"   /*nodiac*/
+#  define S_SBO      "["   /*nodiac*/
+#  define S_BSL      "\\"  /*nodiac*/
+#  define S_SBC      "]"   /*nodiac*/
+#  define S_CRT      "^"   /*nodiac*/
+#  define S_GRV      "`"   /*nodiac*/
+#  define S_CBO      "{"   /*nodiac*/
+#  define S_VBR      "|"   /*nodiac*/
+#  define S_CBC      "}"   /*nodiac*/
+#  define S_TLD      "~"   /*nodiac*/
+#  define S_SVB      "=|"  /*nodiac*/
+#  define S_SBS      "/\\" /*nodiac*/
+#  define S_IDT      "--|" /*nodiac*/
+
+#  define esnprintf  snprintf
+#  define esprintf   sprintf
+#  define efprintf   fprintf
 
 #endif
 

@@ -63,7 +63,275 @@ static inline int flzsym(const char* pcDat, const int* piSln, char* pcVal, int* 
 #  define realloc_nowarn      realloc
 #endif
 
+#ifndef fopen_nowarn
+#  define fopen_nowarn     fopen
+#endif
+
 #ifdef __EBCDIC__
+
+TsDiaChr gsDiaChr={{0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0},
+                   {0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0},
+                   {0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0},
+                   {0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0}};
+
+extern char init_char(char* p) {
+   unsigned int  ccsid=mapcdstr(mapl2c(TRUE));
+   if (ccsid==0) {
+      ccsid=CLEP_DEFAULT_CCSID_EBCDIC;
+#ifdef __DEBUG__
+      fprintf(stderr,"run init_char with default CCSID %u(%s)\n",ccsid,mapccsid(ccsid));
+   } else {
+      fprintf(stderr,"run init_char with determined CCSID %u(%s)\n",ccsid,mapccsid(ccsid));
+#endif
+   }
+   switch (ccsid) {
+   case 37:
+   case 424:
+   case 1140:
+      gsDiaChr.exc[0]='\x5A';
+      gsDiaChr.hsh[0]='\x7B';
+      gsDiaChr.dlr[0]='\x5B';
+      gsDiaChr.ats[0]='\x7C';
+      gsDiaChr.sbo[0]='\xBA';
+      gsDiaChr.bsl[0]='\xE0';
+      gsDiaChr.sbc[0]='\xBB';
+      gsDiaChr.crt[0]='\xB0';
+      gsDiaChr.grv[0]='\x79';
+      gsDiaChr.cbo[0]='\xC0';
+      gsDiaChr.vbr[0]='\x4F';
+      gsDiaChr.cbc[0]='\xD0';
+      gsDiaChr.tld[0]='\xA1';
+      break;
+   case 273:
+   case 1141:
+      gsDiaChr.exc[0]='\x4F';
+      gsDiaChr.hsh[0]='\x7B';
+      gsDiaChr.dlr[0]='\x5B';
+      gsDiaChr.ats[0]='\xB5';
+      gsDiaChr.sbo[0]='\x63';
+      gsDiaChr.bsl[0]='\xEC';
+      gsDiaChr.sbc[0]='\xFC';
+      gsDiaChr.crt[0]='\x5F';
+      gsDiaChr.grv[0]='\x79';
+      gsDiaChr.cbo[0]='\x43';
+      gsDiaChr.vbr[0]='\xBB';
+      gsDiaChr.cbc[0]='\xDC';
+      gsDiaChr.tld[0]='\x59';
+      break;
+   case 1142:
+      gsDiaChr.exc[0]='\x4F';
+      gsDiaChr.hsh[0]='\x4A';
+      gsDiaChr.dlr[0]='\x67';
+      gsDiaChr.ats[0]='\x80';
+      gsDiaChr.sbo[0]='\x9E';
+      gsDiaChr.bsl[0]='\xE0';
+      gsDiaChr.sbc[0]='\x9F';
+      gsDiaChr.crt[0]='\x5F';
+      gsDiaChr.grv[0]='\x79';
+      gsDiaChr.cbo[0]='\x9C';
+      gsDiaChr.vbr[0]='\xBB';
+      gsDiaChr.cbc[0]='\x47';
+      gsDiaChr.tld[0]='\xDC';
+      break;
+   case 1143:
+      gsDiaChr.exc[0]='\x4F';
+      gsDiaChr.hsh[0]='\x63';
+      gsDiaChr.dlr[0]='\x67';
+      gsDiaChr.ats[0]='\xEC';
+      gsDiaChr.sbo[0]='\xB5';
+      gsDiaChr.bsl[0]='\x71';
+      gsDiaChr.sbc[0]='\x9F';
+      gsDiaChr.crt[0]='\x5F';
+      gsDiaChr.grv[0]='\x51';
+      gsDiaChr.cbo[0]='\x43';
+      gsDiaChr.vbr[0]='\xBB';
+      gsDiaChr.cbc[0]='\x47';
+      gsDiaChr.tld[0]='\xDC';
+      break;
+   case 1144:
+      gsDiaChr.exc[0]='\x4F';
+      gsDiaChr.hsh[0]='\xB1';
+      gsDiaChr.dlr[0]='\x5B';
+      gsDiaChr.ats[0]='\xB5';
+      gsDiaChr.sbo[0]='\x90';
+      gsDiaChr.bsl[0]='\x48';
+      gsDiaChr.sbc[0]='\x51';
+      gsDiaChr.crt[0]='\x5F';
+      gsDiaChr.grv[0]='\xDD';
+      gsDiaChr.cbo[0]='\x44';
+      gsDiaChr.vbr[0]='\xBB';
+      gsDiaChr.cbc[0]='\x54';
+      gsDiaChr.tld[0]='\x58';
+      break;
+   case 1145:
+      gsDiaChr.exc[0]='\xBB';
+      gsDiaChr.hsh[0]='\x69';
+      gsDiaChr.dlr[0]='\x5B';
+      gsDiaChr.ats[0]='\x7C';
+      gsDiaChr.sbo[0]='\x4A';
+      gsDiaChr.bsl[0]='\xE0';
+      gsDiaChr.sbc[0]='\x5A';
+      gsDiaChr.crt[0]='\xBA';
+      gsDiaChr.grv[0]='\x79';
+      gsDiaChr.cbo[0]='\xC0';
+      gsDiaChr.vbr[0]='\x4F';
+      gsDiaChr.cbc[0]='\xD0';
+      gsDiaChr.tld[0]='\xBD';
+      break;
+   case 1146:
+      gsDiaChr.exc[0]='\x5A';
+      gsDiaChr.hsh[0]='\x7B';
+      gsDiaChr.dlr[0]='\x4A';
+      gsDiaChr.ats[0]='\x7C';
+      gsDiaChr.sbo[0]='\xB1';
+      gsDiaChr.bsl[0]='\xE0';
+      gsDiaChr.sbc[0]='\xBB';
+      gsDiaChr.crt[0]='\xBA';
+      gsDiaChr.grv[0]='\x79';
+      gsDiaChr.cbo[0]='\xC0';
+      gsDiaChr.vbr[0]='\x4F';
+      gsDiaChr.cbc[0]='\xD0';
+      gsDiaChr.tld[0]='\xBC';
+      break;
+   case 1147:
+      gsDiaChr.exc[0]='\x4F';
+      gsDiaChr.hsh[0]='\xB1';
+      gsDiaChr.dlr[0]='\x5B';
+      gsDiaChr.ats[0]='\x44';
+      gsDiaChr.sbo[0]='\x90';
+      gsDiaChr.bsl[0]='\x48';
+      gsDiaChr.sbc[0]='\xB5';
+      gsDiaChr.crt[0]='\x5F';
+      gsDiaChr.grv[0]='\xA0';
+      gsDiaChr.cbo[0]='\x51';
+      gsDiaChr.vbr[0]='\xBB';
+      gsDiaChr.cbc[0]='\x54';
+      gsDiaChr.tld[0]='\xBD';
+      break;
+   case 500:
+   case 875:
+   case 1148:
+      gsDiaChr.exc[0]='\x4F';
+      gsDiaChr.hsh[0]='\x7B';
+      gsDiaChr.dlr[0]='\x5B';
+      gsDiaChr.ats[0]='\x7C';
+      gsDiaChr.sbo[0]='\x4A';
+      gsDiaChr.bsl[0]='\xE0';
+      gsDiaChr.sbc[0]='\x5A';
+      gsDiaChr.crt[0]='\x5F';
+      gsDiaChr.grv[0]='\x79';
+      gsDiaChr.cbo[0]='\xC0';
+      gsDiaChr.vbr[0]='\xBB';
+      gsDiaChr.cbc[0]='\xD0';
+      gsDiaChr.tld[0]='\xA1';
+      break;
+   case 1149:
+      gsDiaChr.exc[0]='\x4F';
+      gsDiaChr.hsh[0]='\x7B';
+      gsDiaChr.dlr[0]='\x5B';
+      gsDiaChr.ats[0]='\xAC';
+      gsDiaChr.sbo[0]='\xAE';
+      gsDiaChr.bsl[0]='\xBE';
+      gsDiaChr.sbc[0]='\x9E';
+      gsDiaChr.crt[0]='\xEC';
+      gsDiaChr.grv[0]='\x8C';
+      gsDiaChr.cbo[0]='\x8E';
+      gsDiaChr.vbr[0]='\xBB';
+      gsDiaChr.cbc[0]='\x9C';
+      gsDiaChr.tld[0]='\xCC';
+      break;
+   case 1153:
+      gsDiaChr.exc[0]='\x4F';
+      gsDiaChr.hsh[0]='\x7B';
+      gsDiaChr.dlr[0]='\x5B';
+      gsDiaChr.ats[0]='\x7C';
+      gsDiaChr.sbo[0]='\x4A';
+      gsDiaChr.bsl[0]='\xE0';
+      gsDiaChr.sbc[0]='\x5A';
+      gsDiaChr.crt[0]='\x5F';
+      gsDiaChr.grv[0]='\x79';
+      gsDiaChr.cbo[0]='\xC0';
+      gsDiaChr.vbr[0]='\x6A';
+      gsDiaChr.cbc[0]='\xD0';
+      gsDiaChr.tld[0]='\xA1';
+      break;
+   case 1154:
+      gsDiaChr.exc[0]='\x4F';
+      gsDiaChr.hsh[0]='\x7B';
+      gsDiaChr.dlr[0]='\x5B';
+      gsDiaChr.ats[0]='\x7C';
+      gsDiaChr.sbo[0]='\x4A';
+      gsDiaChr.bsl[0]='\xE0';
+      gsDiaChr.sbc[0]='\x5A';
+      gsDiaChr.crt[0]='\x5F';
+      gsDiaChr.grv[0]='\x79';
+      gsDiaChr.cbo[0]='\xC0';
+      gsDiaChr.vbr[0]='\x6A';
+      gsDiaChr.cbc[0]='\xD0';
+      gsDiaChr.tld[0]='\xA1';
+      break;
+   case 1156:
+      gsDiaChr.exc[0]='\x5A';
+      gsDiaChr.hsh[0]='\x7B';
+      gsDiaChr.dlr[0]='\x5B';
+      gsDiaChr.ats[0]='\x7C';
+      gsDiaChr.sbo[0]='\xBA';
+      gsDiaChr.bsl[0]='\xE0';
+      gsDiaChr.sbc[0]='\xBB';
+      gsDiaChr.crt[0]='\xB0';
+      gsDiaChr.grv[0]='\x79';
+      gsDiaChr.cbo[0]='\xC0';
+      gsDiaChr.vbr[0]='\x4F';
+      gsDiaChr.cbc[0]='\xD0';
+      gsDiaChr.tld[0]='\xA1';
+      break;
+   case 1122:
+      gsDiaChr.exc[0]='\x4F';
+      gsDiaChr.hsh[0]='\x63';
+      gsDiaChr.dlr[0]='\x67';
+      gsDiaChr.ats[0]='\xEC';
+      gsDiaChr.sbo[0]='\xB5';
+      gsDiaChr.bsl[0]='\x71';
+      gsDiaChr.sbc[0]='\x9F';
+      gsDiaChr.crt[0]='\x5F';
+      gsDiaChr.grv[0]='\x51';
+      gsDiaChr.cbo[0]='\x43';
+      gsDiaChr.vbr[0]='\xBB';
+      gsDiaChr.cbc[0]='\x47';
+      gsDiaChr.tld[0]='\xDC';
+      break;
+   case 924:
+   case 1047:
+   default:
+      gsDiaChr.exc[0]='\x5A';
+      gsDiaChr.hsh[0]='\x7B';
+      gsDiaChr.dlr[0]='\x5B';
+      gsDiaChr.ats[0]='\x7C';
+      gsDiaChr.sbo[0]='\xAD';
+      gsDiaChr.bsl[0]='\xE0';
+      gsDiaChr.sbc[0]='\xBD';
+      gsDiaChr.crt[0]='\x5F';
+      gsDiaChr.grv[0]='\x79';
+      gsDiaChr.cbo[0]='\xC0';
+      gsDiaChr.vbr[0]='\x4F';
+      gsDiaChr.cbc[0]='\xD0';
+      gsDiaChr.tld[0]='\xA1';
+      break;
+   }
+   gsDiaChr.svb[0]='=';
+   gsDiaChr.svb[1]=gsDiaChr.vbr[0];
+   gsDiaChr.sbs[0]='/';
+   gsDiaChr.sbs[1]=gsDiaChr.bsl[0];
+   gsDiaChr.idt[0]='-';
+   gsDiaChr.idt[1]='-';
+   gsDiaChr.idt[2]=gsDiaChr.vbr[0];
+   return(p[0]);
+}
+
+extern char* init_string(char* p) {
+   init_char(p);
+   return(p);
+}
 
 #define RPLDIAC(str) {                            \
    for (char* p=(str); *p; p++) {                 \
@@ -382,14 +650,6 @@ extern char* safe_getenv(const char* name, char* buffer, size_t bufsiz) {
 
 /**********************************************************************/
 
-#ifdef __EBCDIC__
-#  define HSH_CHR "\x7B\x4A\x63\xB1\x69"
-#  define ATS_CHR "\x7C\xB5\x80\xEC\x44\xAC"
-#else
-#  define HSH_CHR "#" /*nodiac*/
-#  define ATS_CHR "@" /*nodiac*/
-#endif
-
 extern void fprintm(FILE* file,const char* own, const char* pgm, const char* man, const int cnt) {
    char*       hlp;
    char*       ptr;
@@ -478,9 +738,9 @@ extern unsigned int sysccsid(void) {
          // fallback to platform default (aka. we don't know any better)
          // cppcheck-suppress knownConditionTrueFalse
          if (' ' == 0x40)
-            return 1047; // IBM-1047
+            return CLEP_DEFAULT_CCSID_EBCDIC; // IBM-1047 (EBCDIC (Open Systems Latin 1))
          else
-            return 367;  // US-ASCII
+            return CLEP_DEFAULT_CCSID_ASCII; // ISO-8859-1 (ASCII (Latin 1))
       }
    }
 
@@ -527,7 +787,7 @@ extern const char* lng2ccsd(const char* pcLang, unsigned isEbcdic) {
    }
    pcLngCpy[1] = tolower(pcLang[1]);
 
-   pcPtr=strpbrk(pcLang, ATS_CHR);
+   pcPtr=strpbrk(pcLang, ATS_PBRK);
    if (pcPtr!=NULL) {
       if (((pcPtr-pcLang)+4 < uiLen) && tolower(pcPtr[1])=='e' && tolower(pcPtr[2])=='u' && tolower(pcPtr[3])=='r' && tolower(pcPtr[4])=='o') {
          isEuro=TRUE;
@@ -2656,14 +2916,60 @@ extern int readEnvars(const char* pcFil, FILE* pfOut, FILE* pfErr, TsEnVarList**
    char* pcTmp;
    char  acCnf[1024];
    FILE* pfTmp;
+#if defined(__ZOS__)
    if(pcFil==NULL || pcFil[0]=='\0'){
-      pfTmp = fopen("DD:STDENV","r");
+      pfTmp = fopen_nowarn("DD:STDENV","r");
       if (pfTmp==NULL) {
-         pfTmp = fopen("STDENV","r");
+         pfTmp = fopen_nowarn("STDENV","r");
       }
    } else {
-      pfTmp=fopen(pcFil,"r");
+      pfTmp=fopen_nowarn(pcFil,"r");
    }
+#elif defined (__USS__)
+   if(pcFil==NULL || pcFil[0]=='\0'){
+      pfTmp = fopen_nowarn("DD:STDENV","r");
+      if (pfTmp==NULL) {
+         pfTmp = fopen_nowarn(".stdenv","r");
+         if (pfTmp==NULL) {
+            char* pcHom=dhomedir(TRUE);
+            if (pcHom!=NULL) {
+               char*    pcFil=NULL;
+               size_t   szFil=0;
+               srprintf(&pcFil,&szFil,strlen(pcHom),"%s.stdenv",pcHom);
+               if (pcFil!=NULL) {
+                  pfTmp = fopen_nowarn(pcFil,"r");
+                  free(pcFil);
+               }
+               free(pcHom);
+            }
+            if (pfTmp==NULL) {
+               pfTmp = fopen_nowarn("//STDENV","r");
+            }
+         }
+      }
+   } else {
+      pfTmp=fopen_nowarn(pcFil,"r");
+   }
+#else
+   if(pcFil==NULL || pcFil[0]=='\0') {
+      pfTmp = fopen_nowarn(".stdenv","r");
+      if (pfTmp==NULL) {
+         char* pcHom=dhomedir(TRUE);
+         if (pcHom!=NULL) {
+            char*    pcFil=NULL;
+            size_t   szFil=0;
+            srprintf(&pcFil,&szFil,strlen(pcHom),"%s.stdenv",pcHom);
+            if (pcFil!=NULL) {
+               pfTmp = fopen_nowarn(pcFil,"r");
+               free(pcFil);
+            }
+            free(pcHom);
+         }
+      }
+   } else {
+      pfTmp=fopen_nowarn(pcFil,"r");
+   }
+#endif
    if (pfTmp!=NULL) { /*Ignore if open failed*/
       memset(acCnf,0,sizeof(acCnf));
       while (fgets(acCnf,sizeof(acCnf)-1,pfTmp)!=NULL) {

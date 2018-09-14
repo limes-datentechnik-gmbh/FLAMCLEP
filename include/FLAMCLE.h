@@ -276,8 +276,8 @@ Grammar for argument list, parameter file or property file
     --|--| SUPPLEMENT is a string in double quotation marks ("property")
 
 
-Compiler switches
------------------
+Compilation concerns
+--------------------
 
 For compilation the defines below must be set:
 
@@ -289,8 +289,20 @@ For compilation the defines below must be set:
     __BUILDNR__      to define the build number (integer, default is 0)
     __BUILD__        to define the build string ("debug", "release", "alpha", ...)
     __HOSTSHORTING__ to short function names to 8 character for mainframes
- *
- ******************************************************************************/
+
+On z/OS or USS the CELP and the using project must be compiled with the
+same CONVLIT() parameter (we recommend IBM-1047) for correct conversion
+of the literals. Don't use the literal replacements (S_xxx or C_xxx or
+the exprintf() functions) in front of the CleExecute call, to ensure the
+environment of the configuration file is used for character conversion.
+
+Few of the strings provided to the CleExecute function are converted for
+EBCDIC system. These conversions are done, based on stack allocations.
+We expect string literals with a limited length for these values. Please
+be aware of the security issues if you provide variable length strings
+in this case.
+
+***********************************************************************/
 
 #ifdef __cplusplus
    extern "C" {
@@ -658,17 +670,18 @@ typedef struct CleAppendix {
  * @param[in]  pcPgm Logical program name (can be different from argv[0] and will be used in the root "com.company.program")
  * @param[in]  isCas Switch to enable case sensitive interpretation of the command line (recommended is FLASE)
  * @param[in]  isPfl Switch to enable parameter file support for object, overlays and arrays (recommended is TRUE)
- * @param[in]  isEnv Switch to enable replacement of environment variables (recommended is TRUE)
+ * @param[in]  isRpl Switch to enable replacement of environment variables (recommended is TRUE)
+ * @param[in]  isEnv Switch to load environment variables from default files (recommended is TRUE if no own load done else FALSE)
  * @param[in]  siMkl Integer defining the minimal key word length (siMkl<=0 --> full length, no auto abbreviation)
  * @param[in]  pfOut File pointer for help and error messages (if not defined stderr will be used)
  * @param[in]  pfTrc Default trace file if no trace file is defined with the configuration data management (recommended: NULL, stdout or stderr)
- * @param[in]  pcDep String to visualize hierarchies (recommended: S_IDT="--|")
- * @param[in]  pcOpt String to separate options (recommended: "/")
- * @param[in]  pcEnt String to separate list entries (recommended: ",")
- * @param[in]  pcLic String containing the license information for this program (used by built-in function LICENSE - not converted on EBCDIC systems)
- * @param[in]  pcBld String containing the build number / raw version for this program (optional, can be NULL) used in final message about completion
- * @param[in]  pcVsn String containing the version information for this program (used by built-in function VERSION - not converted on EBCDIC systems)
- * @param[in]  pcAbo String containing the about message for this program (used by built-in function ABOUT - not converted on EBCDIC systems)
+ * @param[in]  pcDep String to visualize hierarchies (recommended: "--|" converted on EBCDIC systems (don't use S_IDT))
+ * @param[in]  pcOpt String to separate options (recommended: "/" converted on EBCDIC systems)
+ * @param[in]  pcEnt String to separate list entries (recommended: "," converted on EBCDIC systems)
+ * @param[in]  pcLic String containing the license information for this program (used by built-in function LICENSE - not converted on EBCDIC systems (don't use dia-critical characters))
+ * @param[in]  pcBld String containing the build number / raw version for this program (optional, can be NULL) used in final message about completion - converted on EBCDIC systems
+ * @param[in]  pcVsn String containing the version information for this program (used by built-in function VERSION - not converted on EBCDIC systems (don't use dia-critical characters))
+ * @param[in]  pcAbo String containing the about message for this program (used by built-in function ABOUT - not converted on EBCDIC systems (don't use dia-critical characters))
  * @param[in]  pcHlp Short help message for the whole program (converted on EBCDIC systems)
  * @param[in]  pcMan Manual page for the whole program (as == 2.1 DESCRIPTION == in ASCIIDOC format, Level 3-4 can be used for sub chapters - converted on EBCDIC systems)
  * @param[in]  pcCov Cover sheets for documentation generation (Header (Title, Autor, Revision) and Preample in ASCIIDOC format - converted on EBCDIC systems)
@@ -711,6 +724,7 @@ extern int siCleExecute(
    const char*                   pcPgm,
    const int                     isCas,
    const int                     isPfl,
+   const int                     isRpl,
    const int                     isEnv,
    const int                     siMkl,
    FILE*                         pfOut,

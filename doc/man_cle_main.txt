@@ -49,11 +49,17 @@ Environment variables can be set from the system or in the program
 configuration file with the build-in function 'SETENV'. Particularly on
 mainframe systems the configuration file is an easy way to define
 environment variables. Additionally on host systems the DD name STDENV 
-and with lower priority the data set name '&SYSUID..STDENV' is supported.
-The DD:STDENV allows to define the &{PGM}_CONFIG_FILE,
+and with lower priority the data set name '&SYSUID..STDENV' is
+supported. On the other architectures the file '.stdenv' in the
+working or with lower priority in the home directory can be used to
+define environment variables for FLAM utility, subsystems and subprogram
+interfaces.
+
+The STDENV files allows to define the &{PGM}_CONFIG_FILE,
 &{PGM}_DEFAULT_OWNER_ID, LANG and other environment variables
 in JCL:
 
+Below a you can find a sample with a z/OS DD name allocation.
 -----------------------------------------------------------------------
  //STDENV   DD *
  &{PGM}_CONFIG_FILE=GLOBAL.&{PGM}.CONFIG
@@ -63,6 +69,11 @@ in JCL:
  ENVID=T
  /*
 -----------------------------------------------------------------------
+The definition of the LANG variable outside of the program configuration
+file is recommended, so that the system character set is defined in each
+situation. The program configuration file name is used as is, there are
+no replacements (<USER>) possible, because it is used in front of
+establishment of the environment it self.
 
 Often it will be useful to have a dedicated environment per user on
 mainframes. In such a case it makes sense to define the environment in
@@ -193,15 +204,15 @@ values.
 
 These critical characters are interpreted dependent on the environment
 variable LANG. If the environment variable LANG is not defined then the
-compilation default CCSID (e.g. IBM-1047 on USS and IBM1141 on ZOS) is
-used. Below is the current list of supported CCSIDs on EBCDIC systems.
+default CCSID IBM1047 (Open Systems Latin 1) is used. Below is the
+current list of supported CCSIDs on EBCDIC systems.
 
 ------------------------------------------------------------------------
    SUPPORTED EBCDIC CODE PAGES FOR COMMAND ENTRY:
       "IBM-1140","IBM-1141","IBM-1142","IBM-1143",
       "IBM-1144","IBM-1145","IBM-1146","IBM-1147",
       "IBM-1148","IBM-1149","IBM-1153","IBM-1154",
-      "IBM-1156","IBM-1122","IBM-1047"
+      "IBM-1156","IBM-1122","IBM-1047","IBM-924",
       "IBM-500","IBM-273","IBM-037","IBM-875","IBM-424"
 ------------------------------------------------------------------------
 
