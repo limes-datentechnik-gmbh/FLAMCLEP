@@ -118,6 +118,7 @@ extern char init_char(char* p) {
       gsDiaChr.cbc[0]='\xDC';
       gsDiaChr.tld[0]='\x59';
       break;
+   case 277:
    case 1142:
       gsDiaChr.exc[0]='\x4F';
       gsDiaChr.hsh[0]='\x4A';
@@ -133,6 +134,7 @@ extern char init_char(char* p) {
       gsDiaChr.cbc[0]='\x47';
       gsDiaChr.tld[0]='\xDC';
       break;
+   case 278:
    case 1143:
       gsDiaChr.exc[0]='\x4F';
       gsDiaChr.hsh[0]='\x63';
@@ -148,6 +150,7 @@ extern char init_char(char* p) {
       gsDiaChr.cbc[0]='\x47';
       gsDiaChr.tld[0]='\xDC';
       break;
+   case 280:
    case 1144:
       gsDiaChr.exc[0]='\x4F';
       gsDiaChr.hsh[0]='\xB1';
@@ -163,6 +166,7 @@ extern char init_char(char* p) {
       gsDiaChr.cbc[0]='\x54';
       gsDiaChr.tld[0]='\x58';
       break;
+   case 284:
    case 1145:
       gsDiaChr.exc[0]='\xBB';
       gsDiaChr.hsh[0]='\x69';
@@ -178,6 +182,7 @@ extern char init_char(char* p) {
       gsDiaChr.cbc[0]='\xD0';
       gsDiaChr.tld[0]='\xBD';
       break;
+   case 285:
    case 1146:
       gsDiaChr.exc[0]='\x5A';
       gsDiaChr.hsh[0]='\x7B';
@@ -193,6 +198,7 @@ extern char init_char(char* p) {
       gsDiaChr.cbc[0]='\xD0';
       gsDiaChr.tld[0]='\xBC';
       break;
+   case 297:
    case 1147:
       gsDiaChr.exc[0]='\x4F';
       gsDiaChr.hsh[0]='\xB1';
@@ -225,6 +231,7 @@ extern char init_char(char* p) {
       gsDiaChr.cbc[0]='\xD0';
       gsDiaChr.tld[0]='\xA1';
       break;
+   case 871:
    case 1149:
       gsDiaChr.exc[0]='\x4F';
       gsDiaChr.hsh[0]='\x7B';
@@ -240,6 +247,7 @@ extern char init_char(char* p) {
       gsDiaChr.cbc[0]='\x9C';
       gsDiaChr.tld[0]='\xCC';
       break;
+   case 870:
    case 1153:
       gsDiaChr.exc[0]='\x4F';
       gsDiaChr.hsh[0]='\x7B';
@@ -255,6 +263,7 @@ extern char init_char(char* p) {
       gsDiaChr.cbc[0]='\xD0';
       gsDiaChr.tld[0]='\xA1';
       break;
+   case 1025:
    case 1154:
       gsDiaChr.exc[0]='\x4F';
       gsDiaChr.hsh[0]='\x7B';
@@ -270,6 +279,7 @@ extern char init_char(char* p) {
       gsDiaChr.cbc[0]='\xD0';
       gsDiaChr.tld[0]='\xA1';
       break;
+   case 1112:
    case 1156:
       gsDiaChr.exc[0]='\x5A';
       gsDiaChr.hsh[0]='\x7B';
@@ -285,6 +295,7 @@ extern char init_char(char* p) {
       gsDiaChr.cbc[0]='\xD0';
       gsDiaChr.tld[0]='\xA1';
       break;
+   case 1157:
    case 1122:
       gsDiaChr.exc[0]='\x4F';
       gsDiaChr.hsh[0]='\x63';

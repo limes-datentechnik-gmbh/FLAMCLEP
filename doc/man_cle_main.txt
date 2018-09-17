@@ -213,7 +213,10 @@ current list of supported CCSIDs on EBCDIC systems.
       "IBM-1144","IBM-1145","IBM-1146","IBM-1147",
       "IBM-1148","IBM-1149","IBM-1153","IBM-1154",
       "IBM-1156","IBM-1122","IBM-1047","IBM-924",
-      "IBM-500","IBM-273","IBM-037","IBM-875","IBM-424"
+      "IBM-500","IBM-273","IBM-037","IBM-875","IBM-424",
+      "IBM-277","IBM-278","IBM-280","IBM-284","IBM-285",
+      "IBM-297","IBM-871","IBM-870","IBM-1025","IBM-1112",
+      "IBM-1157"
 ------------------------------------------------------------------------
 
 You can define the code page explicitly (LANG=de_DE.IBM-1141) or only the
