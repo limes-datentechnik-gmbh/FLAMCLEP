@@ -584,15 +584,6 @@ extern void resetEnvars(TsEnVarList** ppList);
 
 /**********************************************************************/
 
-#ifdef __EBCDIC__
-
-extern int           ebcdic_snprintf(char* string, size_t size, const char* format, ...);
-extern int           ebcdic_sprintf(char* string, const char* format, ...);
-extern int           ebcdic_fprintf(FILE* file, const char* format, ...);
-
-extern char          init_char(char* p);
-extern char*         init_string(char* p);
-
 typedef struct DiaChr {
    char              exc[4];
    char              hsh[4];
@@ -612,7 +603,18 @@ typedef struct DiaChr {
    char              idt[4];
 } TsDiaChr;
 
+extern void          init_diachr(TsDiaChr* psDiaChr,const unsigned int uiCcsId);
+
+#ifdef __EBCDIC__
+
 extern TsDiaChr      gsDiaChr;
+
+extern int           ebcdic_snprintf(char* string, size_t size, const char* format, ...);
+extern int           ebcdic_sprintf(char* string, const char* format, ...);
+extern int           ebcdic_fprintf(FILE* file, const char* format, ...);
+
+extern char          init_char(char* p);
+extern char*         init_string(char* p);
 
 #  define HSH_PBRK   "\x7B\x4A\x63\xB1\x69"
 #  define ATS_PBRK   "\x7C\xB5\x80\xEC\x44\xAC"

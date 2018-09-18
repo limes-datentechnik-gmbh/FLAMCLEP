@@ -154,12 +154,13 @@
  * 1.2.108: Don't support disablement of '***SECRET***' replacement in trace messages
  * 1.2.109: Use new file2str interface
  * 1.2.110: Support callback function for file to string
+ * 1.2.111: Support escaping of CLP string (&xxx; or &nnnn<...>)
 **/
 
-#define CLP_VSN_STR       "1.2.110"
+#define CLP_VSN_STR       "1.2.111"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        2
-#define CLP_VSN_REVISION       110
+#define CLP_VSN_REVISION       111
 
 /* Definition der Konstanten ******************************************/
 
@@ -412,6 +413,10 @@ static void vdClpSymTrc(
 
 static void vdClpSymDel(
    TsSym*                        psSym);
+
+static char* pcClpUnEscape(
+   void*                         pvHdl,
+   const char*                   pcInp);
 
 static int siClpScnNat(
    void*                         pvHdl,
@@ -951,6 +956,14 @@ extern char* pcClpError(
    }
 }
 
+static int siClpFile2String(void* hdl, const char* filename, char** buf, int* bufsize, char* errmsg, const int msgsiz) {
+   char* pcFil=dcpmapfil(filename);
+   if (pcFil==NULL) return(-1);
+   int siErr=file2str(hdl, pcFil, buf, bufsize, errmsg, msgsiz);
+   free(pcFil);
+   return(siErr);
+}
+
 extern void* pvClpOpen(
    const int                     isCas,
    const int                     isPfl,
@@ -1032,7 +1045,7 @@ extern void* pvClpOpen(
             psHdl->pfF2s=pfF2S;
             psHdl->pvF2s=pvF2S;
          } else {
-            psHdl->pfF2s=file2str;
+            psHdl->pfF2s=siClpFile2String;
             psHdl->pvF2s=NULL;
          }
          siErr=siClpSymIni(psHdl,0,NULL,psTab,NULL,&psHdl->psTab);
@@ -1112,10 +1125,13 @@ extern int siClpParsePro(
    } else {
       srprintf(&psHdl->pcSrc,&psHdl->szSrc,strlen(CLPSRC_PRO),"%s",CLPSRC_PRO);
    }
-   psHdl->pcInp=pcPro;
-   psHdl->pcCur=pcPro;
-   psHdl->pcOld=pcPro;
-   psHdl->pcRow=pcPro;
+   psHdl->pcInp=pcClpUnEscape(pvHdl,pcPro);
+   if (psHdl->pcInp==NULL) {
+      return CLPERR(psHdl,CLPERR_MEM,"Un-escaping of property string failed");
+   }
+   psHdl->pcCur=psHdl->pcInp;
+   psHdl->pcOld=psHdl->pcInp;
+   psHdl->pcRow=psHdl->pcInp;
    psHdl->isChk=isChk;
    psHdl->siRow=1;
    psHdl->siCol=0;
@@ -1168,10 +1184,13 @@ extern int siClpParseCmd(
    } else {
       srprintf(&psHdl->pcSrc,&psHdl->szSrc,strlen(CLPSRC_CMD),"%s",CLPSRC_CMD);
    }
-   psHdl->pcInp=pcCmd;
-   psHdl->pcCur=pcCmd;
-   psHdl->pcOld=pcCmd;
-   psHdl->pcRow=pcCmd;
+   psHdl->pcInp=pcClpUnEscape(pvHdl,pcCmd);
+   if (psHdl->pcInp==NULL) {
+      return CLPERR(psHdl,CLPERR_MEM,"Un-escaping of command string failed");
+   }
+   psHdl->pcCur=psHdl->pcInp;
+   psHdl->pcOld=psHdl->pcInp;
+   psHdl->pcRow=psHdl->pcInp;
    psHdl->isChk=isChk;
    psHdl->isPwd=isPwd;
    psHdl->siRow=1;
@@ -2048,7 +2067,6 @@ static TsSym* psClpSymIns(
    TsSym*                        psHlp;
    const char*                   pcEnv=NULL;
    const char*                   pcPat=fpcPat(pvHdl,siLev);
-   // TODO: Stack Allokation mit unbegrenzter Größe = Potenzielle Sicherheitslücke
    char                          acVar[strlen(psHdl->pcOwn)+strlen(psHdl->pcPgm)+strlen(pcPat)+strlen(psArg->pcKyw)+4];
    int                           k;
    acVar[0]=0x00;
@@ -2896,6 +2914,22 @@ extern int siClpLexem(
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"           Supplements can also be enclosed in ' or %c instead of \"          \n",ALTCHR);
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"           Supplements can also be enclosed in ' or %c instead of \"          \n",ALTCHR);
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," ENVIRONMENT VARIABLES '<'varnam'>' will replaced by the corresponding value  \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," Escape sequences for critical punctuation characters on EBCDIC systems     \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"    '!' = '&EXC;'   - Exclamation mark                                      \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"    '$' = '&DLR;'   - Dollar sign                                           \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"    '#' = '&HSH;'   - Hashtag (number sign)                                 \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"    '@' = '&ATS;'   - At sign                                               \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"    '[' = '&SBO;'   - Square bracket open                                   \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"    '\\' = '&BSL;'   - Backslash                                             \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"    ']' = '&SBC;'   - Square bracket close                                  \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"    '^' = '&CRT;'   - Caret (circumflex)                                    \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"    '`' = '&GRV;'   - Grave accent                                          \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"    '{' = '&CBO;'   - Curly bracket open                                    \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"    '|' = '&VBR;'   - Vertical bar                                          \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"    '}' = '&CBC;'   - Curly bracket close                                   \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"    '~' = '&TLD;'   - Tilde                                                 \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," Define CCSIDs for certain areas in CLP strings on EBCDIC systems           \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"    '&' [:digit:]+ '<' [:print:]* '>'  (..\"&1047<get.file='>%%s&1047<'>\",f..)\n");
    }
    return(CLP_OK);
 }
@@ -3346,6 +3380,204 @@ static inline int isClpKyw (
       return(TRUE);
    } else {
       return(CLPTOK_KYW!=siClpConNat(pvHdl,pfErr,pfTrc,pcKyw,NULL,NULL,siTyp,psArg));
+   }
+}
+
+static char* pcClpUnEscape(
+   void*                         pvHdl,
+   const char*                   pcInp)
+{
+   int   i=0;
+   int   o=0;
+   char* pcOut=(char*)pvClpAlloc(pvHdl,NULL,strlen(pcInp)+1,NULL);
+   if (pcOut==NULL) return(pcOut);
+   while(1) {
+      if (pcInp[i]==EOS) {
+         pcOut[o]=EOS;
+         return(pcOut);
+      } else if (pcInp[i]=='&') {
+         if (pcInp[i+1]=='&') {
+            pcOut[o]='&';
+            i+=2; o++;
+         } else if (toupper(pcInp[i+1])=='E' && toupper(pcInp[i+2])=='X' && toupper(pcInp[i+3])=='C' && pcInp[i+4]==';') {
+            pcOut[o]=C_EXC;
+            i+=5; o++;
+         } else if (toupper(pcInp[i+1])=='H' && toupper(pcInp[i+2])=='S' && toupper(pcInp[i+3])=='H' && pcInp[i+4]==';') {
+            pcOut[o]=C_HSH;
+            i+=5; o++;
+         } else if (toupper(pcInp[i+1])=='D' && toupper(pcInp[i+2])=='L' && toupper(pcInp[i+3])=='R' && pcInp[i+4]==';') {
+            pcOut[o]=C_DLR;
+            i+=5; o++;
+         } else if (toupper(pcInp[i+1])=='A' && toupper(pcInp[i+2])=='T' && toupper(pcInp[i+3])=='S' && pcInp[i+4]==';') {
+            pcOut[o]=C_ATS;
+            i+=5; o++;
+         } else if (toupper(pcInp[i+1])=='S' && toupper(pcInp[i+2])=='B' && toupper(pcInp[i+3])=='O' && pcInp[i+4]==';') {
+            pcOut[o]=C_SBO;
+            i+=5; o++;
+         } else if (toupper(pcInp[i+1])=='B' && toupper(pcInp[i+2])=='S' && toupper(pcInp[i+3])=='L' && pcInp[i+4]==';') {
+            pcOut[o]=C_BSL;
+            i+=5; o++;
+         } else if (toupper(pcInp[i+1])=='S' && toupper(pcInp[i+2])=='B' && toupper(pcInp[i+3])=='C' && pcInp[i+4]==';') {
+            pcOut[o]=C_SBC;
+            i+=5; o++;
+         } else if (toupper(pcInp[i+1])=='C' && toupper(pcInp[i+2])=='R' && toupper(pcInp[i+3])=='T' && pcInp[i+4]==';') {
+            pcOut[o]=C_CRT;
+            i+=5; o++;
+         } else if (toupper(pcInp[i+1])=='G' && toupper(pcInp[i+2])=='R' && toupper(pcInp[i+3])=='V' && pcInp[i+4]==';') {
+            pcOut[o]=C_GRV;
+            i+=5; o++;
+         } else if (toupper(pcInp[i+1])=='C' && toupper(pcInp[i+2])=='B' && toupper(pcInp[i+3])=='O' && pcInp[i+4]==';') {
+            pcOut[o]=C_CBO;
+            i+=5; o++;
+         } else if (toupper(pcInp[i+1])=='V' && toupper(pcInp[i+2])=='B' && toupper(pcInp[i+3])=='R' && pcInp[i+4]==';') {
+            pcOut[o]=C_VBR;
+            i+=5; o++;
+         } else if (toupper(pcInp[i+1])=='C' && toupper(pcInp[i+2])=='B' && toupper(pcInp[i+3])=='C' && pcInp[i+4]==';') {
+            pcOut[o]=C_CBC;
+            i+=5; o++;
+         } else if (toupper(pcInp[i+1])=='T' && toupper(pcInp[i+2])=='L' && toupper(pcInp[i+3])=='D' && pcInp[i+4]==';') {
+            pcOut[o]=C_TLD;
+            i+=5; o++;
+         } else if (isdigit(pcInp[i+1])) {
+            int   x,y;
+            char  acHlp[8];
+            acHlp[0]=pcInp[i+1];
+            for (x=i+2,y=1;y<6 && isdigit(pcInp[x]);x++) {
+               acHlp[y]=pcInp[x];
+            }
+            if (pcInp[x]=='<') {
+               int      l=0;
+               TsDiaChr stDiaChr;
+               acHlp[y]=EOS;
+               init_diachr(&stDiaChr,atoi(acHlp));
+               i=x+1;
+               while(pcInp[i] && (pcInp[i]!='>' || (pcInp[i]=='>' && pcInp[i+1]=='>') || l)) {
+                  if (pcInp[i]==stDiaChr.exc[0]) {
+                     pcOut[o]=C_EXC;
+                     i++; o++;
+                  } else if (pcInp[i]==stDiaChr.hsh[0]) {
+                     pcOut[o]=C_HSH;
+                     i++; o++;
+                  } else if (pcInp[i]==stDiaChr.dlr[0]) {
+                     pcOut[o]=C_DLR;
+                     i++; o++;
+                  } else if (pcInp[i]==stDiaChr.ats[0]) {
+                     pcOut[o]=C_ATS;
+                     i++; o++;
+                  } else if (pcInp[i]==stDiaChr.sbo[0]) {
+                     pcOut[o]=C_SBO;
+                     i++; o++;
+                  } else if (pcInp[i]==stDiaChr.bsl[0]) {
+                     pcOut[o]=C_BSL;
+                     i++; o++;
+                  } else if (pcInp[i]==stDiaChr.sbc[0]) {
+                     pcOut[o]=C_SBC;
+                     i++; o++;
+                  } else if (pcInp[i]==stDiaChr.crt[0]) {
+                     pcOut[o]=C_CRT;
+                     i++; o++;
+                  } else if (pcInp[i]==stDiaChr.grv[0]) {
+                     pcOut[o]=C_GRV;
+                     i++; o++;
+                  } else if (pcInp[i]==stDiaChr.cbo[0]) {
+                     pcOut[o]=C_CBO;
+                     i++; o++;
+                  } else if (pcInp[i]==stDiaChr.vbr[0]) {
+                     pcOut[o]=C_VBR;
+                     i++; o++;
+                  } else if (pcInp[i]==stDiaChr.cbc[0]) {
+                     pcOut[o]=C_CBC;
+                     i++; o++;
+                  } else if (pcInp[i]==stDiaChr.tld[0]) {
+                     pcOut[o]=C_TLD;
+                     i++; o++;
+                  } else if (pcInp[i]=='<') {
+                     if (pcInp[i+1]=='<') {
+                        pcOut[o]='<';
+                        i+=2; o++;
+                     } else {
+                        pcOut[o]=pcInp[i];
+                        i++; o++; l++;
+                     }
+                  } else if (pcInp[i]=='>') {
+                     if (pcInp[i+1]=='>') {
+                        pcOut[o]='>';
+                        i+=2; o++;
+                     } else {
+                        pcOut[o]=pcInp[i];
+                        i++; o++; l--;
+                     }
+                  } else if (pcInp[i]=='&') {
+                     if (pcInp[i+1]=='&') {
+                        pcOut[o]='&';
+                        i+=2; o++;
+                     } else if (toupper(pcInp[i+1])=='E' && toupper(pcInp[i+2])=='X' && toupper(pcInp[i+3])=='C' && pcInp[i+4]==';') {
+                        pcOut[o]=C_EXC;
+                        i+=5; o++;
+                     } else if (toupper(pcInp[i+1])=='H' && toupper(pcInp[i+2])=='S' && toupper(pcInp[i+3])=='H' && pcInp[i+4]==';') {
+                        pcOut[o]=C_HSH;
+                        i+=5; o++;
+                     } else if (toupper(pcInp[i+1])=='D' && toupper(pcInp[i+2])=='L' && toupper(pcInp[i+3])=='R' && pcInp[i+4]==';') {
+                        pcOut[o]=C_DLR;
+                        i+=5; o++;
+                     } else if (toupper(pcInp[i+1])=='A' && toupper(pcInp[i+2])=='T' && toupper(pcInp[i+3])=='S' && pcInp[i+4]==';') {
+                        pcOut[o]=C_ATS;
+                        i+=5; o++;
+                     } else if (toupper(pcInp[i+1])=='S' && toupper(pcInp[i+2])=='B' && toupper(pcInp[i+3])=='O' && pcInp[i+4]==';') {
+                        pcOut[o]=C_SBO;
+                        i+=5; o++;
+                     } else if (toupper(pcInp[i+1])=='B' && toupper(pcInp[i+2])=='S' && toupper(pcInp[i+3])=='L' && pcInp[i+4]==';') {
+                        pcOut[o]=C_BSL;
+                        i+=5; o++;
+                     } else if (toupper(pcInp[i+1])=='S' && toupper(pcInp[i+2])=='B' && toupper(pcInp[i+3])=='C' && pcInp[i+4]==';') {
+                        pcOut[o]=C_SBC;
+                        i+=5; o++;
+                     } else if (toupper(pcInp[i+1])=='C' && toupper(pcInp[i+2])=='R' && toupper(pcInp[i+3])=='T' && pcInp[i+4]==';') {
+                        pcOut[o]=C_CRT;
+                        i+=5; o++;
+                     } else if (toupper(pcInp[i+1])=='G' && toupper(pcInp[i+2])=='R' && toupper(pcInp[i+3])=='V' && pcInp[i+4]==';') {
+                        pcOut[o]=C_GRV;
+                        i+=5; o++;
+                     } else if (toupper(pcInp[i+1])=='C' && toupper(pcInp[i+2])=='B' && toupper(pcInp[i+3])=='O' && pcInp[i+4]==';') {
+                        pcOut[o]=C_CBO;
+                        i+=5; o++;
+                     } else if (toupper(pcInp[i+1])=='V' && toupper(pcInp[i+2])=='B' && toupper(pcInp[i+3])=='R' && pcInp[i+4]==';') {
+                        pcOut[o]=C_VBR;
+                        i+=5; o++;
+                     } else if (toupper(pcInp[i+1])=='C' && toupper(pcInp[i+2])=='B' && toupper(pcInp[i+3])=='C' && pcInp[i+4]==';') {
+                        pcOut[o]=C_CBC;
+                        i+=5; o++;
+                     } else if (toupper(pcInp[i+1])=='T' && toupper(pcInp[i+2])=='L' && toupper(pcInp[i+3])=='D' && pcInp[i+4]==';') {
+                        pcOut[o]=C_TLD;
+                        i+=5; o++;
+                     } else {
+                        pcOut[o]=pcInp[i];
+                        i++; o++;
+                     }
+                  } else {
+                     pcOut[o]=pcInp[i];
+                     i++; o++;
+                  }
+               }
+               if (pcInp[i]==EOS) {
+                  pcOut [o]=EOS;
+                  return(pcOut);
+               }
+               if (pcInp[i]=='>' && l==0) {
+                  i++;
+               }
+            } else {
+               pcOut[o]=pcInp[i];
+               i++; o++;
+            }
+         } else {
+            pcOut[o]=pcInp[i];
+            i++; o++;
+         }
+      } else {
+         pcOut[o]=pcInp[i];
+         i++; o++;
+      }
    }
 }
 
@@ -4020,9 +4252,7 @@ static int siClpPrsFil(
    TsSym*                        psArg)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
-   // TODO: Stack Allokation mit unbegrenzter Größe = Potenzielle Sicherheitslücke
    char                          acSrc[strlen(psHdl->pcSrc)+1];
-   char*                         pcFil;
    char*                         pcPar=NULL;
    int                           siRow,siCnt,siErr,siSiz=0;
    const char*                   pcCur;
@@ -4037,34 +4267,31 @@ static int siClpPrsFil(
    if (psHdl->siTok!=CLPTOK_STR) {
       return CLPERR(psHdl,CLPERR_SYN,"After object/overlay/array assignment '%s.%s=' parameter file ('filename') expected",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
    }
-   pcFil=dcpmapfil(psHdl->pcLex+2);
-   if (pcFil==NULL) {
-      return CLPERR(psHdl,CLPERR_MEM,"Dynamic allocation of parameter file string (%s) for argument '%s.%s' failed",psHdl->pcLex+2,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
-   }
 
-   siErr=psHdl->pfF2s(psHdl->pvF2s,pcFil,&pcPar,&siSiz,acMsg,sizeof(acMsg));
+   siErr=psHdl->pfF2s(psHdl->pvF2s,psHdl->pcLex+2,&pcPar,&siSiz,acMsg,sizeof(acMsg));
    if (siErr<0) {
       siErr=CLPERR(psHdl,CLPERR_SYS,"Parameter file: %s",acMsg);
-      if (pcPar!=NULL) free(pcPar);
-      free(pcFil);
+      SAFE_FREE(pcPar);
       return(siErr);
    }
 
-   if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"PARAMETER-FILE-PARSER-BEGIN(FILE=%s)\n",pcFil);
+   if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"PARAMETER-FILE-PARSER-BEGIN(FILE=%s)\n",psHdl->pcLex+2);
    strcpy(acSrc,psHdl->pcSrc);
-   srprintf(&psHdl->pcSrc,&psHdl->szSrc,strlen(CLPSRC_PAF)+strlen(pcFil),"%s%s",CLPSRC_PAF,pcFil);
-   pcCur=psHdl->pcCur; psHdl->pcCur=pcPar;
-   pcInp=psHdl->pcInp; psHdl->pcInp=pcPar;
-   pcOld=psHdl->pcOld; psHdl->pcOld=pcPar;
-   pcRow=psHdl->pcRow; psHdl->pcRow=pcPar;
+   srprintf(&psHdl->pcSrc,&psHdl->szSrc,strlen(CLPSRC_PAF)+strlen(psHdl->pcLex+2),"%s%s",CLPSRC_PAF,psHdl->pcLex+2);
+
+   pcInp=psHdl->pcInp; psHdl->pcInp=pcClpUnEscape(pvHdl,pcPar);
+   SAFE_FREE(pcPar);
+   if (psHdl->pcInp==NULL) {
+      siErr=CLPERR(psHdl,CLPERR_MEM,"Un-escaping of parameter file (%s) failed",psHdl->pcLex+2);
+      return(siErr);
+   }
+   pcCur=psHdl->pcCur; psHdl->pcCur=psHdl->pcInp;
+   pcOld=psHdl->pcOld; psHdl->pcOld=psHdl->pcInp;
+   pcRow=psHdl->pcRow; psHdl->pcRow=psHdl->pcInp;
    siRow=psHdl->siRow; psHdl->siRow=1;
    psHdl->siBuf++;
    psHdl->siTok=siClpScnSrc(pvHdl,psArg->psFix->siTyp,psArg);
-   if (psHdl->siTok<0) {
-      if (pcPar!=NULL) free(pcPar);
-      free(pcFil);
-      return(psHdl->siTok);
-   }
+   if (psHdl->siTok<0) return(psHdl->siTok);
    if (isAry) {
       switch (psArg->psFix->siTyp) {
       case CLPTYP_NUMBER: siCnt=siClpPrsValLst(pvHdl,siLev,CLPTOK_NUM,psArg); break;
@@ -4073,57 +4300,29 @@ static int siClpPrsFil(
       case CLPTYP_OBJECT: siCnt=siClpPrsObjLst(pvHdl,siLev,psArg); break;
       case CLPTYP_OVRLAY: siCnt=siClpPrsOvlLst(pvHdl,siLev,psArg); break;
       default:
-         if (pcPar!=NULL) free(pcPar);
-         free(pcFil);
          return CLPERR(psHdl,CLPERR_SEM,"Type (%d) of parameter '%s.%s' is not supported with arrays",psArg->psFix->siTyp,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
       }
-      if (siCnt<0) {
-         if (pcPar!=NULL) free(pcPar);
-         free(pcFil);
-         return(siCnt);
-      }
+      if (siCnt<0) return(siCnt);
       psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
-      if (psHdl->siTok<0) {
-         if (pcPar!=NULL) free(pcPar);
-         free(pcFil);
-         return(psHdl->siTok);
-      }
+      if (psHdl->siTok<0) return(psHdl->siTok);
    } else {
       if (psHdl->siTok==CLPTOK_RBO) {
          siCnt=siClpPrsObj(pvHdl,siLev,siPos,psArg);
-         if (siCnt<0) {
-            if (pcPar!=NULL) free(pcPar);
-            free(pcFil);
-            return(siCnt);
-         }
+         if (siCnt<0) return(siCnt);
       } else if (psHdl->siTok==CLPTOK_DOT) {
          psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
          if (psHdl->siTok<0) {
-            if (pcPar!=NULL) free(pcPar);
-            free(pcFil);
             return(psHdl->siTok);
          }
          siCnt=siClpPrsOvl(pvHdl,siLev,siPos,psArg);
-         if (siCnt<0) {
-            if (pcPar!=NULL) free(pcPar);
-            free(pcFil);
-            return(siCnt);
-         }
+         if (siCnt<0) return(siCnt);
       } else {
          if (psArg->psFix->siTyp==CLPTYP_OBJECT) {
             siCnt=siClpPrsObjWob(pvHdl,siLev,siPos,psArg);
-            if (siCnt<0) {
-               if (pcPar!=NULL) free(pcPar);
-               free(pcFil);
-               return(siCnt);
-            }
+            if (siCnt<0) return(siCnt);
          } else {
             siCnt=siClpPrsOvl(pvHdl,siLev,siPos,psArg);
-            if (siCnt<0) {
-               if (pcPar!=NULL) free(pcPar);
-               free(pcFil);
-               return(siCnt);
-            }
+            if (siCnt<0) return(siCnt);
          }
       }
    }
@@ -4131,18 +4330,13 @@ static int siClpPrsFil(
       psHdl->siBuf--;
       psHdl->pcLex[0]=EOS;
       strcpy(psHdl->pcSrc,acSrc);
-      psHdl->pcCur=pcCur; psHdl->pcInp=pcInp; psHdl->pcOld=pcOld; psHdl->pcRow=pcRow; psHdl->siRow=siRow;
-      if (pcPar!=NULL) free(pcPar);
-      if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"PARAMETER-FILE-PARSER-END(FILE=%s CNT=%d)\n",pcFil,siCnt);
-      free(pcFil);
+      psHdl->pcInp=pcInp; psHdl->pcCur=pcCur; psHdl->pcOld=pcOld; psHdl->pcRow=pcRow; psHdl->siRow=siRow;
+      if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"PARAMETER-FILE-PARSER-END(FILE=%s CNT=%d)\n",psHdl->pcLex+2,siCnt);
       psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
       if (psHdl->siTok<0) return(psHdl->siTok);
       return(siCnt);
    } else {
-      siErr=CLPERR(psHdl,CLPERR_SYN,"Last token (%s) of parameter file '%s' is not EOF",apClpTok[psHdl->siTok],pcFil);
-      if (pcPar!=NULL) free(pcPar);
-      free(pcFil);
-      return(siErr);
+      return(CLPERR(psHdl,CLPERR_SYN,"Last token (%s) of parameter file '%s' is not EOF",apClpTok[psHdl->siTok],psHdl->pcLex+2));
    }
 }
 
@@ -5753,62 +5947,56 @@ static int siClpBldLit(
          const char*                   pcInp;
          const char*                   pcOld;
          const char*                   pcRow;
-         // TODO: Stack Allokation mit unbegrenzter Größe = Potenzielle Sicherheitslücke
          char                          acSrc[strlen(psHdl->pcSrc)+1];
          size_t                        szLex=CLPINI_LEXSIZ;
          char*                         pcLex=(char*)calloc(1,szLex);
-         char*                         pcFil=dcpmapfil(pcVal+2);
          char                          acMsg[1024]="";
-         if (pcLex==NULL || pcFil==NULL) {
-            if (pcLex!=NULL) free(pcLex);
-            if (pcFil!=NULL) free(pcFil);
+         if (pcLex==NULL) {
             return(CLPERR(psHdl,CLPERR_MEM,"Allocation of memory to store the lexem or file name failed"));
          }
-         siErr=psHdl->pfF2s(psHdl->pvF2s,pcFil,&pcDat,&siSiz,acMsg,sizeof(acMsg));
+         siErr=psHdl->pfF2s(psHdl->pvF2s,pcVal+2,&pcDat,&siSiz,acMsg,sizeof(acMsg));
          if (siErr<0) {
             siErr=CLPERR(psHdl,CLPERR_SYS,"String file: %s",acMsg);
-            if (pcDat!=NULL) free(pcDat);
-            free(pcLex); free(pcFil);
+            SAFE_FREE(pcDat); free(pcLex);
             return(siErr);
          }
-         if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"STRING-FILE-BEGIN(%s)\n",pcFil);
+         if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"STRING-FILE-BEGIN(%s)\n",pcVal+2);
          strcpy(acSrc,psHdl->pcSrc);
-         srprintf(&psHdl->pcSrc,&psHdl->szSrc,strlen(CLPSRC_SRF)+strlen(pcFil),"%s%s",CLPSRC_SRF,pcFil);
-         pcCur=psHdl->pcCur; psHdl->pcCur=pcDat;
-         pcInp=psHdl->pcInp; psHdl->pcInp=pcDat;
-         pcOld=psHdl->pcOld; psHdl->pcOld=pcDat;
-         pcRow=psHdl->pcRow; psHdl->pcRow=pcDat;
+         srprintf(&psHdl->pcSrc,&psHdl->szSrc,strlen(CLPSRC_SRF)+strlen(pcVal+2),"%s%s",CLPSRC_SRF,pcVal+2);
+
+         pcInp=psHdl->pcInp; psHdl->pcInp=pcClpUnEscape(pvHdl,pcDat);
+         SAFE_FREE(pcDat);
+         if (psHdl->pcInp==NULL) {
+            siErr=CLPERR(psHdl,CLPERR_MEM,"Un-escaping of string file (%s) failed",pcVal+2);
+            free(pcLex);
+            return(siErr);
+         }
+         pcCur=psHdl->pcCur; psHdl->pcCur=psHdl->pcInp;
+         pcOld=psHdl->pcOld; psHdl->pcOld=psHdl->pcInp;
+         pcRow=psHdl->pcRow; psHdl->pcRow=psHdl->pcInp;
          siRow=psHdl->siRow; psHdl->siRow=1;
          psHdl->siBuf++;
          siTok=siClpScnNat(pvHdl,psHdl->pfErr,psHdl->pfScn,&psHdl->pcCur,&szLex,&pcLex,CLPTYP_STRING,psArg,NULL,NULL);
          if (siTok<0) {
-            free(pcDat);
             free(pcLex);
-            free(pcFil);
             return(siTok);
          }
          if (siTok!=CLPTOK_STR) {
             siErr=CLPERR(psHdl,CLPERR_SYN,"The token (%s(%s)) is not allowed in a string file (%c(%s)) of '%s.%s'",apClpTok[siTok],pcLex,pcVal[0],pcVal+2,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
-            free(pcDat);
             free(pcLex);
-            free(pcFil);
             return(siErr);
          }
          if (pcLex[0]=='f') {
             siErr=CLPERR(psHdl,CLPERR_SYN,"Define a string file (%c(%s)) in a string file (%c(%s)) is not allowed (%s.%s)",pcLex[0],pcLex+2,pcVal[0],pcVal+2,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
-            free(pcDat);
             free(pcLex);
-            free(pcFil);
             return(siErr);
          }
          siErr=siClpBldLit(pvHdl,siLev,siPos,psArg,pcLex);
          psHdl->siBuf--;
          strcpy(psHdl->pcSrc,acSrc);
-         psHdl->pcCur=pcCur; psHdl->pcInp=pcInp; psHdl->pcOld=pcOld; psHdl->pcRow=pcRow; psHdl->siRow=siRow;
-         if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"STRING-FILE-END(%s)\n",pcFil);
-         free(pcDat);
+         psHdl->pcInp=pcInp; psHdl->pcCur=pcCur; psHdl->pcOld=pcOld; psHdl->pcRow=pcRow; psHdl->siRow=siRow;
+         if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"STRING-FILE-END(%s)\n",pcVal+2);
          free(pcLex);
-         free(pcFil);
          return(siErr);
       }
       case 'd':
@@ -6470,7 +6658,6 @@ static int siClpSetDefault(
    TsSym*                        psVal=NULL;
    size_t                        szVal=CLPINI_VALSIZ;
    char*                         pcVal=(char*)calloc(1,szVal);
-   // TODO: Stack Allokation mit unbegrenzter Größe = Potenzielle Sicherheitslücke
    char                          acSrc[strlen(psHdl->pcSrc)+1];
    char                          acLex[strlen(psHdl->pcLex)+1];
    TsVar                         asSav[CLPMAX_TABCNT];
@@ -6485,10 +6672,10 @@ static int siClpSetDefault(
       strcpy(acSrc,psHdl->pcSrc);
       strcpy(acLex,psHdl->pcLex);
       srprintf(&psHdl->pcSrc,&psHdl->szSrc,strlen(psArg->psFix->pcSrc),"%s",psArg->psFix->pcSrc);
-      pcCur=psHdl->pcCur; psHdl->pcCur=psArg->psFix->pcDft;
       pcInp=psHdl->pcInp; psHdl->pcInp=psArg->psFix->pcDft;
-      pcOld=psHdl->pcOld; psHdl->pcOld=psArg->psFix->pcDft;
-      pcRow=psHdl->pcRow; psHdl->pcRow=psArg->psFix->pcDft;
+      pcCur=psHdl->pcCur; psHdl->pcCur=psHdl->pcInp;
+      pcOld=psHdl->pcOld; psHdl->pcOld=psHdl->pcInp;
+      pcRow=psHdl->pcRow; psHdl->pcRow=psHdl->pcInp;
       siRow=psHdl->siRow; psHdl->siRow=psArg->psFix->siRow;
       siTok=psHdl->siTok;
       psHdl->siBuf++;
@@ -6543,7 +6730,7 @@ static int siClpSetDefault(
       psHdl->siTok=siTok;
       strcpy(psHdl->pcLex,acLex);
       strcpy(psHdl->pcSrc,acSrc);
-      psHdl->pcCur=pcCur; psHdl->pcInp=pcInp; psHdl->pcOld=pcOld; psHdl->pcRow=pcRow; psHdl->siRow=siRow;
+      psHdl->pcInp=pcInp; psHdl->pcCur=pcCur; psHdl->pcOld=pcOld; psHdl->pcRow=pcRow; psHdl->siRow=siRow;
       if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"SUPPLEMENT-LIST-PARSER-END(%s.%s=%s)\n",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,psArg->psFix->pcDft);
    }
    free(pcVal);

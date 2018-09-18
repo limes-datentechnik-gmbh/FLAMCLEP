@@ -67,6 +67,277 @@ static inline int flzsym(const char* pcDat, const int* piSln, char* pcVal, int* 
 #  define fopen_nowarn     fopen
 #endif
 
+extern void init_diachr(TsDiaChr* psDiaChr,const unsigned int uiCcsid) {
+   switch (uiCcsid) {
+#ifdef __EBCDIC__
+   case 37:
+   case 424:
+   case 1140:
+      psDiaChr->exc[0]='\x5A';
+      psDiaChr->hsh[0]='\x7B';
+      psDiaChr->dlr[0]='\x5B';
+      psDiaChr->ats[0]='\x7C';
+      psDiaChr->sbo[0]='\xBA';
+      psDiaChr->bsl[0]='\xE0';
+      psDiaChr->sbc[0]='\xBB';
+      psDiaChr->crt[0]='\xB0';
+      psDiaChr->grv[0]='\x79';
+      psDiaChr->cbo[0]='\xC0';
+      psDiaChr->vbr[0]='\x4F';
+      psDiaChr->cbc[0]='\xD0';
+      psDiaChr->tld[0]='\xA1';
+      break;
+   case 273:
+   case 1141:
+      psDiaChr->exc[0]='\x4F';
+      psDiaChr->hsh[0]='\x7B';
+      psDiaChr->dlr[0]='\x5B';
+      psDiaChr->ats[0]='\xB5';
+      psDiaChr->sbo[0]='\x63';
+      psDiaChr->bsl[0]='\xEC';
+      psDiaChr->sbc[0]='\xFC';
+      psDiaChr->crt[0]='\x5F';
+      psDiaChr->grv[0]='\x79';
+      psDiaChr->cbo[0]='\x43';
+      psDiaChr->vbr[0]='\xBB';
+      psDiaChr->cbc[0]='\xDC';
+      psDiaChr->tld[0]='\x59';
+      break;
+   case 277:
+   case 1142:
+      psDiaChr->exc[0]='\x4F';
+      psDiaChr->hsh[0]='\x4A';
+      psDiaChr->dlr[0]='\x67';
+      psDiaChr->ats[0]='\x80';
+      psDiaChr->sbo[0]='\x9E';
+      psDiaChr->bsl[0]='\xE0';
+      psDiaChr->sbc[0]='\x9F';
+      psDiaChr->crt[0]='\x5F';
+      psDiaChr->grv[0]='\x79';
+      psDiaChr->cbo[0]='\x9C';
+      psDiaChr->vbr[0]='\xBB';
+      psDiaChr->cbc[0]='\x47';
+      psDiaChr->tld[0]='\xDC';
+      break;
+   case 278:
+   case 1143:
+      psDiaChr->exc[0]='\x4F';
+      psDiaChr->hsh[0]='\x63';
+      psDiaChr->dlr[0]='\x67';
+      psDiaChr->ats[0]='\xEC';
+      psDiaChr->sbo[0]='\xB5';
+      psDiaChr->bsl[0]='\x71';
+      psDiaChr->sbc[0]='\x9F';
+      psDiaChr->crt[0]='\x5F';
+      psDiaChr->grv[0]='\x51';
+      psDiaChr->cbo[0]='\x43';
+      psDiaChr->vbr[0]='\xBB';
+      psDiaChr->cbc[0]='\x47';
+      psDiaChr->tld[0]='\xDC';
+      break;
+   case 280:
+   case 1144:
+      psDiaChr->exc[0]='\x4F';
+      psDiaChr->hsh[0]='\xB1';
+      psDiaChr->dlr[0]='\x5B';
+      psDiaChr->ats[0]='\xB5';
+      psDiaChr->sbo[0]='\x90';
+      psDiaChr->bsl[0]='\x48';
+      psDiaChr->sbc[0]='\x51';
+      psDiaChr->crt[0]='\x5F';
+      psDiaChr->grv[0]='\xDD';
+      psDiaChr->cbo[0]='\x44';
+      psDiaChr->vbr[0]='\xBB';
+      psDiaChr->cbc[0]='\x54';
+      psDiaChr->tld[0]='\x58';
+      break;
+   case 284:
+   case 1145:
+      psDiaChr->exc[0]='\xBB';
+      psDiaChr->hsh[0]='\x69';
+      psDiaChr->dlr[0]='\x5B';
+      psDiaChr->ats[0]='\x7C';
+      psDiaChr->sbo[0]='\x4A';
+      psDiaChr->bsl[0]='\xE0';
+      psDiaChr->sbc[0]='\x5A';
+      psDiaChr->crt[0]='\xBA';
+      psDiaChr->grv[0]='\x79';
+      psDiaChr->cbo[0]='\xC0';
+      psDiaChr->vbr[0]='\x4F';
+      psDiaChr->cbc[0]='\xD0';
+      psDiaChr->tld[0]='\xBD';
+      break;
+   case 285:
+   case 1146:
+      psDiaChr->exc[0]='\x5A';
+      psDiaChr->hsh[0]='\x7B';
+      psDiaChr->dlr[0]='\x4A';
+      psDiaChr->ats[0]='\x7C';
+      psDiaChr->sbo[0]='\xB1';
+      psDiaChr->bsl[0]='\xE0';
+      psDiaChr->sbc[0]='\xBB';
+      psDiaChr->crt[0]='\xBA';
+      psDiaChr->grv[0]='\x79';
+      psDiaChr->cbo[0]='\xC0';
+      psDiaChr->vbr[0]='\x4F';
+      psDiaChr->cbc[0]='\xD0';
+      psDiaChr->tld[0]='\xBC';
+      break;
+   case 297:
+   case 1147:
+      psDiaChr->exc[0]='\x4F';
+      psDiaChr->hsh[0]='\xB1';
+      psDiaChr->dlr[0]='\x5B';
+      psDiaChr->ats[0]='\x44';
+      psDiaChr->sbo[0]='\x90';
+      psDiaChr->bsl[0]='\x48';
+      psDiaChr->sbc[0]='\xB5';
+      psDiaChr->crt[0]='\x5F';
+      psDiaChr->grv[0]='\xA0';
+      psDiaChr->cbo[0]='\x51';
+      psDiaChr->vbr[0]='\xBB';
+      psDiaChr->cbc[0]='\x54';
+      psDiaChr->tld[0]='\xBD';
+      break;
+   case 500:
+   case 875:
+   case 1148:
+      psDiaChr->exc[0]='\x4F';
+      psDiaChr->hsh[0]='\x7B';
+      psDiaChr->dlr[0]='\x5B';
+      psDiaChr->ats[0]='\x7C';
+      psDiaChr->sbo[0]='\x4A';
+      psDiaChr->bsl[0]='\xE0';
+      psDiaChr->sbc[0]='\x5A';
+      psDiaChr->crt[0]='\x5F';
+      psDiaChr->grv[0]='\x79';
+      psDiaChr->cbo[0]='\xC0';
+      psDiaChr->vbr[0]='\xBB';
+      psDiaChr->cbc[0]='\xD0';
+      psDiaChr->tld[0]='\xA1';
+      break;
+   case 871:
+   case 1149:
+      psDiaChr->exc[0]='\x4F';
+      psDiaChr->hsh[0]='\x7B';
+      psDiaChr->dlr[0]='\x5B';
+      psDiaChr->ats[0]='\xAC';
+      psDiaChr->sbo[0]='\xAE';
+      psDiaChr->bsl[0]='\xBE';
+      psDiaChr->sbc[0]='\x9E';
+      psDiaChr->crt[0]='\xEC';
+      psDiaChr->grv[0]='\x8C';
+      psDiaChr->cbo[0]='\x8E';
+      psDiaChr->vbr[0]='\xBB';
+      psDiaChr->cbc[0]='\x9C';
+      psDiaChr->tld[0]='\xCC';
+      break;
+   case 870:
+   case 1153:
+      psDiaChr->exc[0]='\x4F';
+      psDiaChr->hsh[0]='\x7B';
+      psDiaChr->dlr[0]='\x5B';
+      psDiaChr->ats[0]='\x7C';
+      psDiaChr->sbo[0]='\x4A';
+      psDiaChr->bsl[0]='\xE0';
+      psDiaChr->sbc[0]='\x5A';
+      psDiaChr->crt[0]='\x5F';
+      psDiaChr->grv[0]='\x79';
+      psDiaChr->cbo[0]='\xC0';
+      psDiaChr->vbr[0]='\x6A';
+      psDiaChr->cbc[0]='\xD0';
+      psDiaChr->tld[0]='\xA1';
+      break;
+   case 1025:
+   case 1154:
+      psDiaChr->exc[0]='\x4F';
+      psDiaChr->hsh[0]='\x7B';
+      psDiaChr->dlr[0]='\x5B';
+      psDiaChr->ats[0]='\x7C';
+      psDiaChr->sbo[0]='\x4A';
+      psDiaChr->bsl[0]='\xE0';
+      psDiaChr->sbc[0]='\x5A';
+      psDiaChr->crt[0]='\x5F';
+      psDiaChr->grv[0]='\x79';
+      psDiaChr->cbo[0]='\xC0';
+      psDiaChr->vbr[0]='\x6A';
+      psDiaChr->cbc[0]='\xD0';
+      psDiaChr->tld[0]='\xA1';
+      break;
+   case 1112:
+   case 1156:
+      psDiaChr->exc[0]='\x5A';
+      psDiaChr->hsh[0]='\x7B';
+      psDiaChr->dlr[0]='\x5B';
+      psDiaChr->ats[0]='\x7C';
+      psDiaChr->sbo[0]='\xBA';
+      psDiaChr->bsl[0]='\xE0';
+      psDiaChr->sbc[0]='\xBB';
+      psDiaChr->crt[0]='\xB0';
+      psDiaChr->grv[0]='\x79';
+      psDiaChr->cbo[0]='\xC0';
+      psDiaChr->vbr[0]='\x4F';
+      psDiaChr->cbc[0]='\xD0';
+      psDiaChr->tld[0]='\xA1';
+      break;
+   case 1157:
+   case 1122:
+      psDiaChr->exc[0]='\x4F';
+      psDiaChr->hsh[0]='\x63';
+      psDiaChr->dlr[0]='\x67';
+      psDiaChr->ats[0]='\xEC';
+      psDiaChr->sbo[0]='\xB5';
+      psDiaChr->bsl[0]='\x71';
+      psDiaChr->sbc[0]='\x9F';
+      psDiaChr->crt[0]='\x5F';
+      psDiaChr->grv[0]='\x51';
+      psDiaChr->cbo[0]='\x43';
+      psDiaChr->vbr[0]='\xBB';
+      psDiaChr->cbc[0]='\x47';
+      psDiaChr->tld[0]='\xDC';
+      break;
+   case 924:
+   case 1047:
+      psDiaChr->exc[0]='\x5A';
+      psDiaChr->hsh[0]='\x7B';
+      psDiaChr->dlr[0]='\x5B';
+      psDiaChr->ats[0]='\x7C';
+      psDiaChr->sbo[0]='\xAD';
+      psDiaChr->bsl[0]='\xE0';
+      psDiaChr->sbc[0]='\xBD';
+      psDiaChr->crt[0]='\x5F';
+      psDiaChr->grv[0]='\x79';
+      psDiaChr->cbo[0]='\xC0';
+      psDiaChr->vbr[0]='\x4F';
+      psDiaChr->cbc[0]='\xD0';
+      psDiaChr->tld[0]='\xA1';
+      break;
+#endif
+   default:
+      psDiaChr->exc[0]='!' ;/*nodiac*/
+      psDiaChr->hsh[0]='#' ;/*nodiac*/
+      psDiaChr->dlr[0]='$' ;/*nodiac*/
+      psDiaChr->ats[0]='@' ;/*nodiac*/
+      psDiaChr->sbo[0]='[' ;/*nodiac*/
+      psDiaChr->bsl[0]='\\';/*nodiac*/
+      psDiaChr->sbc[0]=']' ;/*nodiac*/
+      psDiaChr->crt[0]='^' ;/*nodiac*/
+      psDiaChr->grv[0]='`' ;/*nodiac*/
+      psDiaChr->cbo[0]='{' ;/*nodiac*/
+      psDiaChr->vbr[0]='|' ;/*nodiac*/
+      psDiaChr->cbc[0]='}' ;/*nodiac*/
+      psDiaChr->tld[0]='~' ;/*nodiac*/
+      break;
+   }
+   psDiaChr->svb[0]='=';
+   psDiaChr->svb[1]=psDiaChr->vbr[0];
+   psDiaChr->sbs[0]='/';
+   psDiaChr->sbs[1]=psDiaChr->bsl[0];
+   psDiaChr->idt[0]='-';
+   psDiaChr->idt[1]='-';
+   psDiaChr->idt[2]=psDiaChr->vbr[0];
+}
+
 #ifdef __EBCDIC__
 
 TsDiaChr gsDiaChr={{0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0},
@@ -75,267 +346,16 @@ TsDiaChr gsDiaChr={{0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0},
                    {0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0}};
 
 extern char init_char(char* p) {
-   unsigned int  ccsid=mapcdstr(mapl2c(TRUE));
-   if (ccsid==0) {
-      ccsid=CLEP_DEFAULT_CCSID_EBCDIC;
+   unsigned int  uiCcsId=mapcdstr(mapl2c(TRUE));
+   if (uiCcsId==0) {
+      uiCcsId=CLEP_DEFAULT_CCSID_EBCDIC;
 #ifdef __DEBUG__
-      fprintf(stderr,"run init_char with default CCSID %u(%s)\n",ccsid,mapccsid(ccsid));
+      fprintf(stderr,"run init_char with default CCSID %u(%s)\n",uiCcsId,mapccsid(uiCcsId));
    } else {
-      fprintf(stderr,"run init_char with determined CCSID %u(%s)\n",ccsid,mapccsid(ccsid));
+      fprintf(stderr,"run init_char with determined CCSID %u(%s)\n",uiCcsId,mapccsid(uiCcsId));
 #endif
    }
-   switch (ccsid) {
-   case 37:
-   case 424:
-   case 1140:
-      gsDiaChr.exc[0]='\x5A';
-      gsDiaChr.hsh[0]='\x7B';
-      gsDiaChr.dlr[0]='\x5B';
-      gsDiaChr.ats[0]='\x7C';
-      gsDiaChr.sbo[0]='\xBA';
-      gsDiaChr.bsl[0]='\xE0';
-      gsDiaChr.sbc[0]='\xBB';
-      gsDiaChr.crt[0]='\xB0';
-      gsDiaChr.grv[0]='\x79';
-      gsDiaChr.cbo[0]='\xC0';
-      gsDiaChr.vbr[0]='\x4F';
-      gsDiaChr.cbc[0]='\xD0';
-      gsDiaChr.tld[0]='\xA1';
-      break;
-   case 273:
-   case 1141:
-      gsDiaChr.exc[0]='\x4F';
-      gsDiaChr.hsh[0]='\x7B';
-      gsDiaChr.dlr[0]='\x5B';
-      gsDiaChr.ats[0]='\xB5';
-      gsDiaChr.sbo[0]='\x63';
-      gsDiaChr.bsl[0]='\xEC';
-      gsDiaChr.sbc[0]='\xFC';
-      gsDiaChr.crt[0]='\x5F';
-      gsDiaChr.grv[0]='\x79';
-      gsDiaChr.cbo[0]='\x43';
-      gsDiaChr.vbr[0]='\xBB';
-      gsDiaChr.cbc[0]='\xDC';
-      gsDiaChr.tld[0]='\x59';
-      break;
-   case 277:
-   case 1142:
-      gsDiaChr.exc[0]='\x4F';
-      gsDiaChr.hsh[0]='\x4A';
-      gsDiaChr.dlr[0]='\x67';
-      gsDiaChr.ats[0]='\x80';
-      gsDiaChr.sbo[0]='\x9E';
-      gsDiaChr.bsl[0]='\xE0';
-      gsDiaChr.sbc[0]='\x9F';
-      gsDiaChr.crt[0]='\x5F';
-      gsDiaChr.grv[0]='\x79';
-      gsDiaChr.cbo[0]='\x9C';
-      gsDiaChr.vbr[0]='\xBB';
-      gsDiaChr.cbc[0]='\x47';
-      gsDiaChr.tld[0]='\xDC';
-      break;
-   case 278:
-   case 1143:
-      gsDiaChr.exc[0]='\x4F';
-      gsDiaChr.hsh[0]='\x63';
-      gsDiaChr.dlr[0]='\x67';
-      gsDiaChr.ats[0]='\xEC';
-      gsDiaChr.sbo[0]='\xB5';
-      gsDiaChr.bsl[0]='\x71';
-      gsDiaChr.sbc[0]='\x9F';
-      gsDiaChr.crt[0]='\x5F';
-      gsDiaChr.grv[0]='\x51';
-      gsDiaChr.cbo[0]='\x43';
-      gsDiaChr.vbr[0]='\xBB';
-      gsDiaChr.cbc[0]='\x47';
-      gsDiaChr.tld[0]='\xDC';
-      break;
-   case 280:
-   case 1144:
-      gsDiaChr.exc[0]='\x4F';
-      gsDiaChr.hsh[0]='\xB1';
-      gsDiaChr.dlr[0]='\x5B';
-      gsDiaChr.ats[0]='\xB5';
-      gsDiaChr.sbo[0]='\x90';
-      gsDiaChr.bsl[0]='\x48';
-      gsDiaChr.sbc[0]='\x51';
-      gsDiaChr.crt[0]='\x5F';
-      gsDiaChr.grv[0]='\xDD';
-      gsDiaChr.cbo[0]='\x44';
-      gsDiaChr.vbr[0]='\xBB';
-      gsDiaChr.cbc[0]='\x54';
-      gsDiaChr.tld[0]='\x58';
-      break;
-   case 284:
-   case 1145:
-      gsDiaChr.exc[0]='\xBB';
-      gsDiaChr.hsh[0]='\x69';
-      gsDiaChr.dlr[0]='\x5B';
-      gsDiaChr.ats[0]='\x7C';
-      gsDiaChr.sbo[0]='\x4A';
-      gsDiaChr.bsl[0]='\xE0';
-      gsDiaChr.sbc[0]='\x5A';
-      gsDiaChr.crt[0]='\xBA';
-      gsDiaChr.grv[0]='\x79';
-      gsDiaChr.cbo[0]='\xC0';
-      gsDiaChr.vbr[0]='\x4F';
-      gsDiaChr.cbc[0]='\xD0';
-      gsDiaChr.tld[0]='\xBD';
-      break;
-   case 285:
-   case 1146:
-      gsDiaChr.exc[0]='\x5A';
-      gsDiaChr.hsh[0]='\x7B';
-      gsDiaChr.dlr[0]='\x4A';
-      gsDiaChr.ats[0]='\x7C';
-      gsDiaChr.sbo[0]='\xB1';
-      gsDiaChr.bsl[0]='\xE0';
-      gsDiaChr.sbc[0]='\xBB';
-      gsDiaChr.crt[0]='\xBA';
-      gsDiaChr.grv[0]='\x79';
-      gsDiaChr.cbo[0]='\xC0';
-      gsDiaChr.vbr[0]='\x4F';
-      gsDiaChr.cbc[0]='\xD0';
-      gsDiaChr.tld[0]='\xBC';
-      break;
-   case 297:
-   case 1147:
-      gsDiaChr.exc[0]='\x4F';
-      gsDiaChr.hsh[0]='\xB1';
-      gsDiaChr.dlr[0]='\x5B';
-      gsDiaChr.ats[0]='\x44';
-      gsDiaChr.sbo[0]='\x90';
-      gsDiaChr.bsl[0]='\x48';
-      gsDiaChr.sbc[0]='\xB5';
-      gsDiaChr.crt[0]='\x5F';
-      gsDiaChr.grv[0]='\xA0';
-      gsDiaChr.cbo[0]='\x51';
-      gsDiaChr.vbr[0]='\xBB';
-      gsDiaChr.cbc[0]='\x54';
-      gsDiaChr.tld[0]='\xBD';
-      break;
-   case 500:
-   case 875:
-   case 1148:
-      gsDiaChr.exc[0]='\x4F';
-      gsDiaChr.hsh[0]='\x7B';
-      gsDiaChr.dlr[0]='\x5B';
-      gsDiaChr.ats[0]='\x7C';
-      gsDiaChr.sbo[0]='\x4A';
-      gsDiaChr.bsl[0]='\xE0';
-      gsDiaChr.sbc[0]='\x5A';
-      gsDiaChr.crt[0]='\x5F';
-      gsDiaChr.grv[0]='\x79';
-      gsDiaChr.cbo[0]='\xC0';
-      gsDiaChr.vbr[0]='\xBB';
-      gsDiaChr.cbc[0]='\xD0';
-      gsDiaChr.tld[0]='\xA1';
-      break;
-   case 871:
-   case 1149:
-      gsDiaChr.exc[0]='\x4F';
-      gsDiaChr.hsh[0]='\x7B';
-      gsDiaChr.dlr[0]='\x5B';
-      gsDiaChr.ats[0]='\xAC';
-      gsDiaChr.sbo[0]='\xAE';
-      gsDiaChr.bsl[0]='\xBE';
-      gsDiaChr.sbc[0]='\x9E';
-      gsDiaChr.crt[0]='\xEC';
-      gsDiaChr.grv[0]='\x8C';
-      gsDiaChr.cbo[0]='\x8E';
-      gsDiaChr.vbr[0]='\xBB';
-      gsDiaChr.cbc[0]='\x9C';
-      gsDiaChr.tld[0]='\xCC';
-      break;
-   case 870:
-   case 1153:
-      gsDiaChr.exc[0]='\x4F';
-      gsDiaChr.hsh[0]='\x7B';
-      gsDiaChr.dlr[0]='\x5B';
-      gsDiaChr.ats[0]='\x7C';
-      gsDiaChr.sbo[0]='\x4A';
-      gsDiaChr.bsl[0]='\xE0';
-      gsDiaChr.sbc[0]='\x5A';
-      gsDiaChr.crt[0]='\x5F';
-      gsDiaChr.grv[0]='\x79';
-      gsDiaChr.cbo[0]='\xC0';
-      gsDiaChr.vbr[0]='\x6A';
-      gsDiaChr.cbc[0]='\xD0';
-      gsDiaChr.tld[0]='\xA1';
-      break;
-   case 1025:
-   case 1154:
-      gsDiaChr.exc[0]='\x4F';
-      gsDiaChr.hsh[0]='\x7B';
-      gsDiaChr.dlr[0]='\x5B';
-      gsDiaChr.ats[0]='\x7C';
-      gsDiaChr.sbo[0]='\x4A';
-      gsDiaChr.bsl[0]='\xE0';
-      gsDiaChr.sbc[0]='\x5A';
-      gsDiaChr.crt[0]='\x5F';
-      gsDiaChr.grv[0]='\x79';
-      gsDiaChr.cbo[0]='\xC0';
-      gsDiaChr.vbr[0]='\x6A';
-      gsDiaChr.cbc[0]='\xD0';
-      gsDiaChr.tld[0]='\xA1';
-      break;
-   case 1112:
-   case 1156:
-      gsDiaChr.exc[0]='\x5A';
-      gsDiaChr.hsh[0]='\x7B';
-      gsDiaChr.dlr[0]='\x5B';
-      gsDiaChr.ats[0]='\x7C';
-      gsDiaChr.sbo[0]='\xBA';
-      gsDiaChr.bsl[0]='\xE0';
-      gsDiaChr.sbc[0]='\xBB';
-      gsDiaChr.crt[0]='\xB0';
-      gsDiaChr.grv[0]='\x79';
-      gsDiaChr.cbo[0]='\xC0';
-      gsDiaChr.vbr[0]='\x4F';
-      gsDiaChr.cbc[0]='\xD0';
-      gsDiaChr.tld[0]='\xA1';
-      break;
-   case 1157:
-   case 1122:
-      gsDiaChr.exc[0]='\x4F';
-      gsDiaChr.hsh[0]='\x63';
-      gsDiaChr.dlr[0]='\x67';
-      gsDiaChr.ats[0]='\xEC';
-      gsDiaChr.sbo[0]='\xB5';
-      gsDiaChr.bsl[0]='\x71';
-      gsDiaChr.sbc[0]='\x9F';
-      gsDiaChr.crt[0]='\x5F';
-      gsDiaChr.grv[0]='\x51';
-      gsDiaChr.cbo[0]='\x43';
-      gsDiaChr.vbr[0]='\xBB';
-      gsDiaChr.cbc[0]='\x47';
-      gsDiaChr.tld[0]='\xDC';
-      break;
-   case 924:
-   case 1047:
-   default:
-      gsDiaChr.exc[0]='\x5A';
-      gsDiaChr.hsh[0]='\x7B';
-      gsDiaChr.dlr[0]='\x5B';
-      gsDiaChr.ats[0]='\x7C';
-      gsDiaChr.sbo[0]='\xAD';
-      gsDiaChr.bsl[0]='\xE0';
-      gsDiaChr.sbc[0]='\xBD';
-      gsDiaChr.crt[0]='\x5F';
-      gsDiaChr.grv[0]='\x79';
-      gsDiaChr.cbo[0]='\xC0';
-      gsDiaChr.vbr[0]='\x4F';
-      gsDiaChr.cbc[0]='\xD0';
-      gsDiaChr.tld[0]='\xA1';
-      break;
-   }
-   gsDiaChr.svb[0]='=';
-   gsDiaChr.svb[1]=gsDiaChr.vbr[0];
-   gsDiaChr.sbs[0]='/';
-   gsDiaChr.sbs[1]=gsDiaChr.bsl[0];
-   gsDiaChr.idt[0]='-';
-   gsDiaChr.idt[1]='-';
-   gsDiaChr.idt[2]=gsDiaChr.vbr[0];
+   init_diachr(&gsDiaChr,uiCcsId);
    return(p[0]);
 }
 

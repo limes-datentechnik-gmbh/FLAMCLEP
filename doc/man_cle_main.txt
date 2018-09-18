@@ -202,10 +202,10 @@ values.
    CRITICAL PUNCTUATION CHARACTERS: ! $ # @ [ \\ ] ^ ` { | } ~ 
 ------------------------------------------------------------------------
 
-These critical characters are interpreted dependent on the environment
-variable LANG. If the environment variable LANG is not defined then the
-default CCSID IBM1047 (Open Systems Latin 1) is used. Below is the
-current list of supported CCSIDs on EBCDIC systems.
+These critical characters are interpreted normally dependent on the
+environment variable LANG. If the environment variable LANG is not
+defined then the default CCSID IBM1047 (Open Systems Latin 1) is used.
+Below is the current list of supported CCSIDs on EBCDIC systems.
 
 ------------------------------------------------------------------------
    SUPPORTED EBCDIC CODE PAGES FOR COMMAND ENTRY:
@@ -222,7 +222,7 @@ current list of supported CCSIDs on EBCDIC systems.
 You can define the code page explicitly (LANG=de_DE.IBM-1141) or only the
 language code (LANG=de_DE, LANG=C). If only the language code defined
 then the CCSID is derived from the language code (DE=IBM-1141,
-US=IBM-1047, C=IBM-1047, ...).
+US=IBM-1140, C=IBM-1047, ...).
 
 If possible, these critical characters are also converted for print
 outs. At output it is not possible to convert anything correctly,
@@ -232,6 +232,65 @@ unknown variables such a conversion is not possible and CLEP expects that
 such strings are encoded in the correct system code page, but there is no
 guaranty for this.
 
+To be independent of the environment escaping of the CLP strings is
+possible for the critical punctuation characters on EBCDIC systems.
+See list below:
+
+------------------------------------------------------------------------
+   ! = &EXC;   - Exclamation mark
+   $ = &DLR;   - Dollar sign
+   # = &HSH;   - Hashtag (number sign)
+   @ = &ATS;   - At sign
+   [ = &SBO;   - Square bracket open
+   \\ = &BSL;   - Backslash
+   ] = &SBC;   - Square bracket close
+   ^ = &CRT;   - Caret (circumflex)
+   ` = &GRV;   - Grave accent
+   { = &CBO;   - Curly bracket open
+   | = &VBR;   - Vertical bar
+   } = &CBC;   - Curly bracket close
+   ~ = &TLD;   - Tilde
+------------------------------------------------------------------------
+
+A escape sequence starts with the ampersand (&) followed be 3 character
+(not case sensitive) and is terminated with semicolon (;). If such a
+sequence in the string required then the ampersand must be typed twice
+(&&). To mark a part or the of whole string in a certain CCSID the
+syntax below can be used:
+
+------------------------------------------------------------------------
+   &nnnnnn<.....>
+------------------------------------------------------------------------
+
+Such a replacement sequence starts also with an ampersand (&) followed
+by 1 to 6 digits (nnnnnn) and a open angle brace (<). Till to the
+corresponding close angle brace (>) the whole string is converted form
+the provided CCSID (nnnnnn) to the local character set used to interpret
+the command. If the CCSID not supported (unknown) 1047 is assumed. To
+determine the corresponding close angel brace (>) the opens and closes
+are counted and if the start level achieved the corresponding close is
+used. To exclude '>' or '<' from counting it must be typed twice. A
+CCSID based conversion can only be defined on one level. A recursive/
+hierarchical handling is not supported.
+
+The partial CCSID conversion are mainly useful for application
+programming interfaces. At compile time the CCSID for literals must be
+defined. This CCSID could be differ from the system CCSID (local
+character set) of variable parameter. In such a case a application can
+mark the literal part in the CCSID used for literals at compile time,
+and the variable part could be conform to the CCSID defined over the
+LANG variable. See the C example below:
+
+------------------------------------------------------------------------
+   snprintf(acCmd,sizeof(acCmd),"&1047<get.file='>%s&1047<'>",pcFilename);
+------------------------------------------------------------------------
+
+C-Code are normally in 1047 and if no literal conversion defined then
+the literals also in 1047. The file name is a parameter in local
+character set. In Cobol the default code page for literals is 1140.
+
 On ASCII/UTF-8 platforms a miss-interpretation of punctuation characters
 smaller than 128 is not possible. On such platforms the LANG variable is
-not used for command interpretation or printouts.
+not used for command interpretation or printouts. The escape and CCSID
+sequences are supported but have no effect on these platforms. This
+helps to develop platform independent code for CLP strings.

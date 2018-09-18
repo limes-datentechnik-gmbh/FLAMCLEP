@@ -692,9 +692,9 @@ extern int siCleExecute(
    i=siCnfPutEnv(psCnf,pcOwn,pcPgm);
    if (i) {
       if (i==1) {
-         if (pfOut!=NULL) fprintf(pfOut,"%d environment variable set\n",i);
+         if (pfOut!=NULL) fprintf(pfOut,"%d environment variable set using the configuration file\n",i);
       } else {
-         if (pfOut!=NULL) fprintf(pfOut,"%d environment variables set\n",i);
+         if (pfOut!=NULL) fprintf(pfOut,"%d environment variables set using the configuration file\n",i);
       }
    }
 #else
