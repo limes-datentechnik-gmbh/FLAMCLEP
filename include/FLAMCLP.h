@@ -73,7 +73,7 @@ To support critical punctuation characters on EBCDIC systems a complex
 support was implemented. This support make the whole source independent
 of the EBCDIC code page used. The code page used must defined over the
 environment variable LANG or only for CLP strings with the environment
-variable CLP_STRING_CCSID or inside the CLP string (&nnnn;). Additional
+variable CLP_STRING_CCSID or inside the CLP string ("&nnnn;"). Additional
 different kind of escaping ("&xxx;") are supported to handle this.
 
 In the command string (everywhere, where the scanner start to read a lexem)
