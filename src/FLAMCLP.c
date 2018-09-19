@@ -3451,7 +3451,7 @@ static char* pcClpUnEscape(
                acHlp[y]=EOS;
                init_diachr(&stDiaChr,atoi(acHlp));
                i=x+1;
-               while(pcInp[i] && (pcInp[i]!='>' || (pcInp[i]=='>' && pcInp[i+1]=='>') || l)) {
+               while(pcInp[i] && ((pcInp[i]!='>' || pcInp[i+1]=='>') || l)) {
                   if (pcInp[i]==stDiaChr.exc[0]) {
                      pcOut[o]=C_EXC;
                      i++; o++;
