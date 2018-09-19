@@ -3391,134 +3391,128 @@ static char* pcClpUnEscape(
    void*                         pvHdl,
    const char*                   pcInp)
 {
-   int      i=0;
-   int      o=0;
-   TsDiaChr stDiaChr;
-   char*    pcOut=(char*)pvClpAlloc(pvHdl,NULL,strlen(pcInp)+1,NULL);
+   const char*                   i=pcInp;
+   char*                         pcOut=(char*)pvClpAlloc(pvHdl,NULL,strlen(pcInp)+1,NULL);
+   char*                         o=pcOut;
+   TsDiaChr                      stDiaChr;
    if (pcOut==NULL) return(pcOut);
    init_diachr(&stDiaChr,mapcdstr(GETENV("CLP_STRING_CCSID")));
-   while(pcInp[i]) {
-      if (pcInp[i]=='&') {
-         if (pcInp[i+1]=='&') {
-            pcOut[o]='&';
+   while(i[0]) {
+      if (i[0]=='&') {
+         if (i[1]=='&') {
+            o[0]='&';
             i+=2; o++;
-         } else if (toupper(pcInp[i+1])=='E' && toupper(pcInp[i+2])=='X' && toupper(pcInp[i+3])=='C' && pcInp[i+4]==';') {
-            pcOut[o]=C_EXC;
+         } else if (toupper(i[1])=='E' && toupper(i[2])=='X' && toupper(i[3])=='C' && i[4]==';') {
+            o[0]=C_EXC;
             i+=5; o++;
-         } else if (toupper(pcInp[i+1])=='H' && toupper(pcInp[i+2])=='S' && toupper(pcInp[i+3])=='H' && pcInp[i+4]==';') {
-            pcOut[o]=C_HSH;
+         } else if (toupper(i[1])=='H' && toupper(i[2])=='S' && toupper(i[3])=='H' && i[4]==';') {
+            o[0]=C_HSH;
             i+=5; o++;
-         } else if (toupper(pcInp[i+1])=='D' && toupper(pcInp[i+2])=='L' && toupper(pcInp[i+3])=='R' && pcInp[i+4]==';') {
-            pcOut[o]=C_DLR;
+         } else if (toupper(i[1])=='D' && toupper(i[2])=='L' && toupper(i[3])=='R' && i[4]==';') {
+            o[0]=C_DLR;
             i+=5; o++;
-         } else if (toupper(pcInp[i+1])=='A' && toupper(pcInp[i+2])=='T' && toupper(pcInp[i+3])=='S' && pcInp[i+4]==';') {
-            pcOut[o]=C_ATS;
+         } else if (toupper(i[1])=='A' && toupper(i[2])=='T' && toupper(i[3])=='S' && i[4]==';') {
+            o[0]=C_ATS;
             i+=5; o++;
-         } else if (toupper(pcInp[i+1])=='S' && toupper(pcInp[i+2])=='B' && toupper(pcInp[i+3])=='O' && pcInp[i+4]==';') {
-            pcOut[o]=C_SBO;
+         } else if (toupper(i[1])=='S' && toupper(i[2])=='B' && toupper(i[3])=='O' && i[4]==';') {
+            o[0]=C_SBO;
             i+=5; o++;
-         } else if (toupper(pcInp[i+1])=='B' && toupper(pcInp[i+2])=='S' && toupper(pcInp[i+3])=='L' && pcInp[i+4]==';') {
-            pcOut[o]=C_BSL;
+         } else if (toupper(i[1])=='B' && toupper(i[2])=='S' && toupper(i[3])=='L' && i[4]==';') {
+            o[0]=C_BSL;
             i+=5; o++;
-         } else if (toupper(pcInp[i+1])=='S' && toupper(pcInp[i+2])=='B' && toupper(pcInp[i+3])=='C' && pcInp[i+4]==';') {
-            pcOut[o]=C_SBC;
+         } else if (toupper(i[1])=='S' && toupper(i[2])=='B' && toupper(i[3])=='C' && i[4]==';') {
+            o[0]=C_SBC;
             i+=5; o++;
-         } else if (toupper(pcInp[i+1])=='C' && toupper(pcInp[i+2])=='R' && toupper(pcInp[i+3])=='T' && pcInp[i+4]==';') {
-            pcOut[o]=C_CRT;
+         } else if (toupper(i[1])=='C' && toupper(i[2])=='R' && toupper(i[3])=='T' && i[4]==';') {
+            o[0]=C_CRT;
             i+=5; o++;
-         } else if (toupper(pcInp[i+1])=='G' && toupper(pcInp[i+2])=='R' && toupper(pcInp[i+3])=='V' && pcInp[i+4]==';') {
-            pcOut[o]=C_GRV;
+         } else if (toupper(i[1])=='G' && toupper(i[2])=='R' && toupper(i[3])=='V' && i[4]==';') {
+            o[0]=C_GRV;
             i+=5; o++;
-         } else if (toupper(pcInp[i+1])=='C' && toupper(pcInp[i+2])=='B' && toupper(pcInp[i+3])=='O' && pcInp[i+4]==';') {
-            pcOut[o]=C_CBO;
+         } else if (toupper(i[1])=='C' && toupper(i[2])=='B' && toupper(i[3])=='O' && i[4]==';') {
+            o[0]=C_CBO;
             i+=5; o++;
-         } else if (toupper(pcInp[i+1])=='V' && toupper(pcInp[i+2])=='B' && toupper(pcInp[i+3])=='R' && pcInp[i+4]==';') {
-            pcOut[o]=C_VBR;
+         } else if (toupper(i[1])=='V' && toupper(i[2])=='B' && toupper(i[3])=='R' && i[4]==';') {
+            o[0]=C_VBR;
             i+=5; o++;
-         } else if (toupper(pcInp[i+1])=='C' && toupper(pcInp[i+2])=='B' && toupper(pcInp[i+3])=='C' && pcInp[i+4]==';') {
-            pcOut[o]=C_CBC;
+         } else if (toupper(i[1])=='C' && toupper(i[2])=='B' && toupper(i[3])=='C' && i[4]==';') {
+            o[0]=C_CBC;
             i+=5; o++;
-         } else if (toupper(pcInp[i+1])=='T' && toupper(pcInp[i+2])=='L' && toupper(pcInp[i+3])=='D' && pcInp[i+4]==';') {
-            pcOut[o]=C_TLD;
+         } else if (toupper(i[1])=='T' && toupper(i[2])=='L' && toupper(i[3])=='D' && i[4]==';') {
+            o[0]=C_TLD;
             i+=5; o++;
-         } else if (toupper(pcInp[i+1])=='X' && isxdigit(pcInp[i+2]) && isxdigit(pcInp[i+3]) && pcInp[i+4]==';') {
+         } else if (toupper(i[1])=='X' && isxdigit(i[2]) && isxdigit(i[3]) && i[4]==';') {
             char h,l;
-            if (toupper(pcInp[i+2])>='A' && toupper(pcInp[i+2])<='F') {
-               h=(toupper(pcInp[i+2])-'A')+10;
+            if (toupper(i[2])>='A' && toupper(i[2])<='F') {
+               h=(toupper(i[2])-'A')+10;
             } else {
-               h=pcInp[i+2]-'0';
+               h=i[2]-'0';
             }
-            if (toupper(pcInp[i+3])>='A' && toupper(pcInp[i+3])<='F') {
-               l=(toupper(pcInp[i+3])-'A')+10;
+            if (toupper(i[3])>='A' && toupper(i[3])<='F') {
+               l=(toupper(i[3])-'A')+10;
             } else {
-               l=pcInp[i+3]-'0';
+               l=i[3]-'0';
             }
-            pcOut[o]=(h<<4)+l;
+            o[0]=(h<<4)+l;
             i+=5; o++;
-         } else if (isdigit(pcInp[i+1])) {
-            int   x,y;
-            char  acHlp[8];
-            acHlp[0]=pcInp[i+1];
-            for (x=i+2,y=1;y<6 && isdigit(pcInp[x]);x++,y++) {
-               acHlp[y]=pcInp[x];
-            }
-            if (pcInp[x]==';') {
-               acHlp[y]=EOS;
-               init_diachr(&stDiaChr,atoi(acHlp));
+         } else if (isdigit(i[1])) {
+            const char* x=i;
+            init_diachr(&stDiaChr,strtol(i+1,(char**)&x,10));
+            if (x[0]==';') {
                i=x+1;
             } else {
-               pcOut[o]=pcInp[i];
+               o[0]=i[0];
                i++; o++;
             }
          } else {
-            pcOut[o]=pcInp[i];
+            o[0]=i[0];
             i++; o++;
          }
-      } else if (pcInp[i]==stDiaChr.exc[0]) {
-         pcOut[o]=C_EXC;
+      } else if (i[0]==stDiaChr.exc[0]) {
+         o[0]=C_EXC;
          i++; o++;
-      } else if (pcInp[i]==stDiaChr.hsh[0]) {
-         pcOut[o]=C_HSH;
+      } else if (i[0]==stDiaChr.hsh[0]) {
+         o[0]=C_HSH;
          i++; o++;
-      } else if (pcInp[i]==stDiaChr.dlr[0]) {
-         pcOut[o]=C_DLR;
+      } else if (i[0]==stDiaChr.dlr[0]) {
+         o[0]=C_DLR;
          i++; o++;
-      } else if (pcInp[i]==stDiaChr.ats[0]) {
-         pcOut[o]=C_ATS;
+      } else if (i[0]==stDiaChr.ats[0]) {
+         o[0]=C_ATS;
          i++; o++;
-      } else if (pcInp[i]==stDiaChr.sbo[0]) {
-         pcOut[o]=C_SBO;
+      } else if (i[0]==stDiaChr.sbo[0]) {
+         o[0]=C_SBO;
          i++; o++;
-      } else if (pcInp[i]==stDiaChr.bsl[0]) {
-         pcOut[o]=C_BSL;
+      } else if (i[0]==stDiaChr.bsl[0]) {
+         o[0]=C_BSL;
          i++; o++;
-      } else if (pcInp[i]==stDiaChr.sbc[0]) {
-         pcOut[o]=C_SBC;
+      } else if (i[0]==stDiaChr.sbc[0]) {
+         o[0]=C_SBC;
          i++; o++;
-      } else if (pcInp[i]==stDiaChr.crt[0]) {
-         pcOut[o]=C_CRT;
+      } else if (i[0]==stDiaChr.crt[0]) {
+         o[0]=C_CRT;
          i++; o++;
-      } else if (pcInp[i]==stDiaChr.grv[0]) {
-         pcOut[o]=C_GRV;
+      } else if (i[0]==stDiaChr.grv[0]) {
+         o[0]=C_GRV;
          i++; o++;
-      } else if (pcInp[i]==stDiaChr.cbo[0]) {
-         pcOut[o]=C_CBO;
+      } else if (i[0]==stDiaChr.cbo[0]) {
+         o[0]=C_CBO;
          i++; o++;
-      } else if (pcInp[i]==stDiaChr.vbr[0]) {
-         pcOut[o]=C_VBR;
+      } else if (i[0]==stDiaChr.vbr[0]) {
+         o[0]=C_VBR;
          i++; o++;
-      } else if (pcInp[i]==stDiaChr.cbc[0]) {
-         pcOut[o]=C_CBC;
+      } else if (i[0]==stDiaChr.cbc[0]) {
+         o[0]=C_CBC;
          i++; o++;
-      } else if (pcInp[i]==stDiaChr.tld[0]) {
-         pcOut[o]=C_TLD;
+      } else if (i[0]==stDiaChr.tld[0]) {
+         o[0]=C_TLD;
          i++; o++;
       } else {
-         pcOut[o]=pcInp[i];
+         o[0]=i[0];
          i++; o++;
       }
    }
-   pcOut[o]=EOS;
+   o[0]=EOS;
    return(pcOut);
 }
 
