@@ -1184,10 +1184,12 @@ extern int siClpParseCmd(
    } else {
       srprintf(&psHdl->pcSrc,&psHdl->szSrc,strlen(CLPSRC_CMD),"%s",CLPSRC_CMD);
    }
+   printd("-->parse-command before un-escaping (%s)\n",pcCmd);
    psHdl->pcInp=pcClpUnEscape(pvHdl,pcCmd);
    if (psHdl->pcInp==NULL) {
       return CLPERR(psHdl,CLPERR_MEM,"Un-escaping of command string failed");
    }
+   printd("-->parse-command after un-escaping  (%s)\n",psHdl->pcInp);
    psHdl->pcCur=psHdl->pcInp;
    psHdl->pcOld=psHdl->pcInp;
    psHdl->pcRow=psHdl->pcInp;
@@ -2928,8 +2930,10 @@ extern int siClpLexem(
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"    '|' = '&VBR;'   - Vertical bar                                          \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"    '}' = '&CBC;'   - Curly bracket close                                   \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"    '~' = '&TLD;'   - Tilde                                                 \n");
-      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," Define CCSIDs for certain areas in CLP strings on EBCDIC systems           \n");
-      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"    '&' [:digit:]+ '<' [:print:]* '>'  (..\"&1047<get.file='>%%s&1047<'>\",f..)\n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," Define CCSIDs for certain areas in CLP strings on EBCDIC systems (0-reset) \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"    '&' [:digit:]+ ';  (...\"&1047;get.file='&0;%%s&1047;'\",f)                \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," Escape sequences for hexadecimal byte values                               \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"    '&' ['X''x'] :xdigit: :xdigit: ';' (\"&xF5;\")                            \n");
    }
    return(CLP_OK);
 }
@@ -3387,15 +3391,14 @@ static char* pcClpUnEscape(
    void*                         pvHdl,
    const char*                   pcInp)
 {
-   int   i=0;
-   int   o=0;
-   char* pcOut=(char*)pvClpAlloc(pvHdl,NULL,strlen(pcInp)+1,NULL);
+   int      i=0;
+   int      o=0;
+   TsDiaChr stDiaChr;
+   char*    pcOut=(char*)pvClpAlloc(pvHdl,NULL,strlen(pcInp)+1,NULL);
    if (pcOut==NULL) return(pcOut);
-   while(1) {
-      if (pcInp[i]==EOS) {
-         pcOut[o]=EOS;
-         return(pcOut);
-      } else if (pcInp[i]=='&') {
+   init_diachr(&stDiaChr,mapcdstr(GETENV("CLP_STRING_CCSID")));
+   while(pcInp[i]) {
+      if (pcInp[i]=='&') {
          if (pcInp[i+1]=='&') {
             pcOut[o]='&';
             i+=2; o++;
@@ -3438,134 +3441,31 @@ static char* pcClpUnEscape(
          } else if (toupper(pcInp[i+1])=='T' && toupper(pcInp[i+2])=='L' && toupper(pcInp[i+3])=='D' && pcInp[i+4]==';') {
             pcOut[o]=C_TLD;
             i+=5; o++;
+         } else if (toupper(pcInp[i+1])=='X' && isxdigit(pcInp[i+2]) && isxdigit(pcInp[i+3]) && pcInp[i+4]==';') {
+            char h,l;
+            if (toupper(pcInp[i+2])>='A' && toupper(pcInp[i+2])<='F') {
+               h=(toupper(pcInp[i+2])-'A')+10;
+            } else {
+               h=pcInp[i+2]-'0';
+            }
+            if (toupper(pcInp[i+3])>='A' && toupper(pcInp[i+3])<='F') {
+               l=(toupper(pcInp[i+3])-'A')+10;
+            } else {
+               l=pcInp[i+3]-'0';
+            }
+            pcOut[o]=(h<<4)+l;
+            i+=5; o++;
          } else if (isdigit(pcInp[i+1])) {
             int   x,y;
             char  acHlp[8];
             acHlp[0]=pcInp[i+1];
-            for (x=i+2,y=1;y<6 && isdigit(pcInp[x]);x++) {
+            for (x=i+2,y=1;y<6 && isdigit(pcInp[x]);x++,y++) {
                acHlp[y]=pcInp[x];
             }
-            if (pcInp[x]=='<') {
-               int      l=0;
-               TsDiaChr stDiaChr;
+            if (pcInp[x]==';') {
                acHlp[y]=EOS;
                init_diachr(&stDiaChr,atoi(acHlp));
                i=x+1;
-               while(pcInp[i] && ((pcInp[i]!='>' || pcInp[i+1]=='>') || l)) {
-                  if (pcInp[i]==stDiaChr.exc[0]) {
-                     pcOut[o]=C_EXC;
-                     i++; o++;
-                  } else if (pcInp[i]==stDiaChr.hsh[0]) {
-                     pcOut[o]=C_HSH;
-                     i++; o++;
-                  } else if (pcInp[i]==stDiaChr.dlr[0]) {
-                     pcOut[o]=C_DLR;
-                     i++; o++;
-                  } else if (pcInp[i]==stDiaChr.ats[0]) {
-                     pcOut[o]=C_ATS;
-                     i++; o++;
-                  } else if (pcInp[i]==stDiaChr.sbo[0]) {
-                     pcOut[o]=C_SBO;
-                     i++; o++;
-                  } else if (pcInp[i]==stDiaChr.bsl[0]) {
-                     pcOut[o]=C_BSL;
-                     i++; o++;
-                  } else if (pcInp[i]==stDiaChr.sbc[0]) {
-                     pcOut[o]=C_SBC;
-                     i++; o++;
-                  } else if (pcInp[i]==stDiaChr.crt[0]) {
-                     pcOut[o]=C_CRT;
-                     i++; o++;
-                  } else if (pcInp[i]==stDiaChr.grv[0]) {
-                     pcOut[o]=C_GRV;
-                     i++; o++;
-                  } else if (pcInp[i]==stDiaChr.cbo[0]) {
-                     pcOut[o]=C_CBO;
-                     i++; o++;
-                  } else if (pcInp[i]==stDiaChr.vbr[0]) {
-                     pcOut[o]=C_VBR;
-                     i++; o++;
-                  } else if (pcInp[i]==stDiaChr.cbc[0]) {
-                     pcOut[o]=C_CBC;
-                     i++; o++;
-                  } else if (pcInp[i]==stDiaChr.tld[0]) {
-                     pcOut[o]=C_TLD;
-                     i++; o++;
-                  } else if (pcInp[i]=='<') {
-                     if (pcInp[i+1]=='<') {
-                        pcOut[o]='<';
-                        i+=2; o++;
-                     } else {
-                        pcOut[o]=pcInp[i];
-                        i++; o++; l++;
-                     }
-                  } else if (pcInp[i]=='>') {
-                     if (pcInp[i+1]=='>') {
-                        pcOut[o]='>';
-                        i+=2; o++;
-                     } else {
-                        pcOut[o]=pcInp[i];
-                        i++; o++; l--;
-                     }
-                  } else if (pcInp[i]=='&') {
-                     if (pcInp[i+1]=='&') {
-                        pcOut[o]='&';
-                        i+=2; o++;
-                     } else if (toupper(pcInp[i+1])=='E' && toupper(pcInp[i+2])=='X' && toupper(pcInp[i+3])=='C' && pcInp[i+4]==';') {
-                        pcOut[o]=C_EXC;
-                        i+=5; o++;
-                     } else if (toupper(pcInp[i+1])=='H' && toupper(pcInp[i+2])=='S' && toupper(pcInp[i+3])=='H' && pcInp[i+4]==';') {
-                        pcOut[o]=C_HSH;
-                        i+=5; o++;
-                     } else if (toupper(pcInp[i+1])=='D' && toupper(pcInp[i+2])=='L' && toupper(pcInp[i+3])=='R' && pcInp[i+4]==';') {
-                        pcOut[o]=C_DLR;
-                        i+=5; o++;
-                     } else if (toupper(pcInp[i+1])=='A' && toupper(pcInp[i+2])=='T' && toupper(pcInp[i+3])=='S' && pcInp[i+4]==';') {
-                        pcOut[o]=C_ATS;
-                        i+=5; o++;
-                     } else if (toupper(pcInp[i+1])=='S' && toupper(pcInp[i+2])=='B' && toupper(pcInp[i+3])=='O' && pcInp[i+4]==';') {
-                        pcOut[o]=C_SBO;
-                        i+=5; o++;
-                     } else if (toupper(pcInp[i+1])=='B' && toupper(pcInp[i+2])=='S' && toupper(pcInp[i+3])=='L' && pcInp[i+4]==';') {
-                        pcOut[o]=C_BSL;
-                        i+=5; o++;
-                     } else if (toupper(pcInp[i+1])=='S' && toupper(pcInp[i+2])=='B' && toupper(pcInp[i+3])=='C' && pcInp[i+4]==';') {
-                        pcOut[o]=C_SBC;
-                        i+=5; o++;
-                     } else if (toupper(pcInp[i+1])=='C' && toupper(pcInp[i+2])=='R' && toupper(pcInp[i+3])=='T' && pcInp[i+4]==';') {
-                        pcOut[o]=C_CRT;
-                        i+=5; o++;
-                     } else if (toupper(pcInp[i+1])=='G' && toupper(pcInp[i+2])=='R' && toupper(pcInp[i+3])=='V' && pcInp[i+4]==';') {
-                        pcOut[o]=C_GRV;
-                        i+=5; o++;
-                     } else if (toupper(pcInp[i+1])=='C' && toupper(pcInp[i+2])=='B' && toupper(pcInp[i+3])=='O' && pcInp[i+4]==';') {
-                        pcOut[o]=C_CBO;
-                        i+=5; o++;
-                     } else if (toupper(pcInp[i+1])=='V' && toupper(pcInp[i+2])=='B' && toupper(pcInp[i+3])=='R' && pcInp[i+4]==';') {
-                        pcOut[o]=C_VBR;
-                        i+=5; o++;
-                     } else if (toupper(pcInp[i+1])=='C' && toupper(pcInp[i+2])=='B' && toupper(pcInp[i+3])=='C' && pcInp[i+4]==';') {
-                        pcOut[o]=C_CBC;
-                        i+=5; o++;
-                     } else if (toupper(pcInp[i+1])=='T' && toupper(pcInp[i+2])=='L' && toupper(pcInp[i+3])=='D' && pcInp[i+4]==';') {
-                        pcOut[o]=C_TLD;
-                        i+=5; o++;
-                     } else {
-                        pcOut[o]=pcInp[i];
-                        i++; o++;
-                     }
-                  } else {
-                     pcOut[o]=pcInp[i];
-                     i++; o++;
-                  }
-               }
-               if (pcInp[i]==EOS) {
-                  pcOut [o]=EOS;
-                  return(pcOut);
-               }
-               if (pcInp[i]=='>' && l==0) {
-                  i++;
-               }
             } else {
                pcOut[o]=pcInp[i];
                i++; o++;
@@ -3574,11 +3474,52 @@ static char* pcClpUnEscape(
             pcOut[o]=pcInp[i];
             i++; o++;
          }
+      } else if (pcInp[i]==stDiaChr.exc[0]) {
+         pcOut[o]=C_EXC;
+         i++; o++;
+      } else if (pcInp[i]==stDiaChr.hsh[0]) {
+         pcOut[o]=C_HSH;
+         i++; o++;
+      } else if (pcInp[i]==stDiaChr.dlr[0]) {
+         pcOut[o]=C_DLR;
+         i++; o++;
+      } else if (pcInp[i]==stDiaChr.ats[0]) {
+         pcOut[o]=C_ATS;
+         i++; o++;
+      } else if (pcInp[i]==stDiaChr.sbo[0]) {
+         pcOut[o]=C_SBO;
+         i++; o++;
+      } else if (pcInp[i]==stDiaChr.bsl[0]) {
+         pcOut[o]=C_BSL;
+         i++; o++;
+      } else if (pcInp[i]==stDiaChr.sbc[0]) {
+         pcOut[o]=C_SBC;
+         i++; o++;
+      } else if (pcInp[i]==stDiaChr.crt[0]) {
+         pcOut[o]=C_CRT;
+         i++; o++;
+      } else if (pcInp[i]==stDiaChr.grv[0]) {
+         pcOut[o]=C_GRV;
+         i++; o++;
+      } else if (pcInp[i]==stDiaChr.cbo[0]) {
+         pcOut[o]=C_CBO;
+         i++; o++;
+      } else if (pcInp[i]==stDiaChr.vbr[0]) {
+         pcOut[o]=C_VBR;
+         i++; o++;
+      } else if (pcInp[i]==stDiaChr.cbc[0]) {
+         pcOut[o]=C_CBC;
+         i++; o++;
+      } else if (pcInp[i]==stDiaChr.tld[0]) {
+         pcOut[o]=C_TLD;
+         i++; o++;
       } else {
          pcOut[o]=pcInp[i];
          i++; o++;
       }
    }
+   pcOut[o]=EOS;
+   return(pcOut);
 }
 
 static int siClpScnNat(

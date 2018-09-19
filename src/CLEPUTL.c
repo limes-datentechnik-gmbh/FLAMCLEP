@@ -67,8 +67,15 @@ static inline int flzsym(const char* pcDat, const int* piSln, char* pcVal, int* 
 #  define fopen_nowarn     fopen
 #endif
 
-extern void init_diachr(TsDiaChr* psDiaChr,const unsigned int uiCcsid) {
-   switch (uiCcsid) {
+extern void init_diachr(TsDiaChr* psDiaChr,const unsigned int uiCcsId) {
+#ifdef __DEBUG__
+#  ifdef __EBCDIC__
+   fprintf(stderr,"run init_diachr with CCSID %u(%s) - %p/%p\n",uiCcsId,mapccsid(uiCcsId),psDiaChr,&gsDiaChr);
+#  else
+   fprintf(stderr,"run init_diachr with CCSID %u(%s) - %p\n",uiCcsId,mapccsid(uiCcsId),psDiaChr);
+#  endif
+#endif
+   switch (uiCcsId) {
 #ifdef __EBCDIC__
    case 37:
    case 424:
@@ -314,19 +321,39 @@ extern void init_diachr(TsDiaChr* psDiaChr,const unsigned int uiCcsid) {
       break;
 #endif
    default:
-      psDiaChr->exc[0]='!' ;/*nodiac*/
-      psDiaChr->hsh[0]='#' ;/*nodiac*/
-      psDiaChr->dlr[0]='$' ;/*nodiac*/
-      psDiaChr->ats[0]='@' ;/*nodiac*/
-      psDiaChr->sbo[0]='[' ;/*nodiac*/
-      psDiaChr->bsl[0]='\\';/*nodiac*/
-      psDiaChr->sbc[0]=']' ;/*nodiac*/
-      psDiaChr->crt[0]='^' ;/*nodiac*/
-      psDiaChr->grv[0]='`' ;/*nodiac*/
-      psDiaChr->cbo[0]='{' ;/*nodiac*/
-      psDiaChr->vbr[0]='|' ;/*nodiac*/
-      psDiaChr->cbc[0]='}' ;/*nodiac*/
-      psDiaChr->tld[0]='~' ;/*nodiac*/
+#ifdef __EBCDIC__
+      if (psDiaChr==&gsDiaChr) {
+#endif
+         psDiaChr->exc[0]='!' ;/*nodiac*/
+         psDiaChr->hsh[0]='#' ;/*nodiac*/
+         psDiaChr->dlr[0]='$' ;/*nodiac*/
+         psDiaChr->ats[0]='@' ;/*nodiac*/
+         psDiaChr->sbo[0]='[' ;/*nodiac*/
+         psDiaChr->bsl[0]='\\';/*nodiac*/
+         psDiaChr->sbc[0]=']' ;/*nodiac*/
+         psDiaChr->crt[0]='^' ;/*nodiac*/
+         psDiaChr->grv[0]='`' ;/*nodiac*/
+         psDiaChr->cbo[0]='{' ;/*nodiac*/
+         psDiaChr->vbr[0]='|' ;/*nodiac*/
+         psDiaChr->cbc[0]='}' ;/*nodiac*/
+         psDiaChr->tld[0]='~' ;/*nodiac*/
+#ifdef __EBCDIC__
+      } else {
+         psDiaChr->exc[0]=C_EXC;
+         psDiaChr->hsh[0]=C_HSH;
+         psDiaChr->dlr[0]=C_DLR;
+         psDiaChr->ats[0]=C_ATS;
+         psDiaChr->sbo[0]=C_SBO;
+         psDiaChr->bsl[0]=C_BSL;
+         psDiaChr->sbc[0]=C_SBC;
+         psDiaChr->crt[0]=C_CRT;
+         psDiaChr->grv[0]=C_GRV;
+         psDiaChr->cbo[0]=C_CBO;
+         psDiaChr->vbr[0]=C_VBR;
+         psDiaChr->cbc[0]=C_CBC;
+         psDiaChr->tld[0]=C_TLD;
+      }
+#endif
       break;
    }
    psDiaChr->svb[0]='=';

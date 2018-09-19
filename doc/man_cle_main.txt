@@ -40,6 +40,7 @@ USED ENVIRONMENT VARIABLES
  * ENVID   - for the current environment qualifier (D/T/P) if key label template mapping used (default is 'T')
  * OWNERID - used for current owner if not already defined
  * CLP_NOW - The current point in time used for predefined constants (0tYYYY/MM/DD.HH:MM:SS)
+ * CLP_STRING_CCSID - CCSID used for interpretation of critical punctuation character on EBCDIC systems (default is taken from LANG)
  * &{PGM}_CONFIG_FILE - the configuration filename (default is '$HOME/.&{pgm}.config' on UNIX/WIN or '&SYSUID..&{PGM}.CONFIG' on mainframes)
  * &{PGM}_DEFAULT_OWNER_ID - the default owner ID (default is '&{oWn}')
  * owner_&{PGM}_command_PROPERTY_FILENAME - To overrule default property file names
@@ -196,7 +197,7 @@ SPECIAL EBCDIC CODE PAGE SUPPORT
 
 To interpret commands correctly the punctuation characters below are on
 different code points depending on the EBCDIC CCSID used to enter these
-values. 
+values.
 
 ------------------------------------------------------------------------
    CRITICAL PUNCTUATION CHARACTERS: ! $ # @ [ \\ ] ^ ` { | } ~ 
@@ -219,9 +220,9 @@ Below is the current list of supported CCSIDs on EBCDIC systems.
       "IBM-1157"
 ------------------------------------------------------------------------
 
-You can define the code page explicitly (LANG=de_DE.IBM-1141) or only the
-language code (LANG=de_DE, LANG=C). If only the language code defined
-then the CCSID is derived from the language code (DE=IBM-1141,
+You can define the code page explicitly (LANG=de_DE.IBM-1141) or only
+the language code (LANG=de_DE, LANG=C). If only the language code
+defined then the CCSID is derived from the language code (DE=IBM-1141,
 US=IBM-1140, C=IBM-1047, ...).
 
 If possible, these critical characters are also converted for print
@@ -253,25 +254,26 @@ See list below:
 ------------------------------------------------------------------------
 
 A escape sequence starts with the ampersand (&) followed be 3 character
-(not case sensitive) and is terminated with semicolon (;). If such a
-sequence in the string required then the ampersand must be typed twice
-(&&). To mark a part or the of whole string in a certain CCSID the
-syntax below can be used:
+(not case sensitive) and is terminated with semicolon (;). With an X and
+2 hexadecimal digit the definition of a binary byte value are possible.
+If such a sequence in the string required then the ampersand must be
+typed twice (&&). To mark a part or the of whole string in a certain
+CCSID the escape sequence must contain 1 to 6 digits. Few samples can
+be found below:
 
 ------------------------------------------------------------------------
-   &nnnnnn<.....>
+   &1047; all in 1047 &0; reset to system code page &1140; no in 1140
 ------------------------------------------------------------------------
 
-Such a replacement sequence starts also with an ampersand (&) followed
-by 1 to 6 digits (nnnnnn) and a open angle brace (<). Till to the
-corresponding close angle brace (>) the whole string is converted form
-the provided CCSID (nnnnnn) to the local character set used to interpret
-the command. If the CCSID not supported (unknown) 1047 is assumed. To
-determine the corresponding close angel brace (>) the opens and closes
-are counted and if the start level achieved the corresponding close is
-used. To exclude '>' or '<' from counting it must be typed twice. A
-CCSID based conversion can only be defined on one level. A recursive/
-hierarchical handling is not supported.
+At the beginning the system code page is active except the environment
+variable CLP_STRING_CCSID is defined. The defined CCSID is valid till
+the next CCSID definition. An unsupported CCSID (0) can be used to
+restore the interpretation to the system code page.
+
+*ATTENTION:* This is no character set conversion, only the UNICODE code
+points 0-127 which are on different code points in the different EBCDIC
+code pages are replaced. All other higher code points (e.g. German
+Umlauts ('ä','ü','Ö')) are not touched. 
 
 The partial CCSID conversion are mainly useful for application
 programming interfaces. At compile time the CCSID for literals must be
@@ -282,12 +284,16 @@ and the variable part could be conform to the CCSID defined over the
 LANG variable. See the C example below:
 
 ------------------------------------------------------------------------
-   snprintf(acCmd,sizeof(acCmd),"&1047<get.file='>%s&1047<'>",pcFilename);
+   snprintf(acCmd,sizeof(acCmd),"&1047;get.file='&0;%s&1047'",pcFilename);
 ------------------------------------------------------------------------
 
 C-Code are normally in 1047 and if no literal conversion defined then
 the literals also in 1047. The file name is a parameter in local
 character set. In Cobol the default code page for literals is 1140.
+To define the CCSID for CLP strings from outside, the environment
+variable CLP_STRING_CCSID can be defined. This is useful if an
+application cannot recompile with the correct code page for the
+literals.
 
 On ASCII/UTF-8 platforms a miss-interpretation of punctuation characters
 smaller than 128 is not possible. On such platforms the LANG variable is

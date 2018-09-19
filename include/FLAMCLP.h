@@ -69,6 +69,13 @@ To handle passwords and passphrase more secure, you can provide a filename
 as string (PASSWD=f'filename'), which contains the corresponding string
 value. This prevents for example passwords from logging.
 
+To support critical punctuation characters on EBCDIC systems a complex
+support was implemented. This support make the whole source independent
+of the EBCDIC code page used. The code page used must defined over the
+environment variable LANG or only for CLP strings with the environment
+variable CLP_STRING_CCSID or inside the CLP string (&nnnn;). Additional
+different kind of escaping ("&xxx;") are supported to handle this.
+
 In the command string (everywhere, where the scanner start to read a lexem)
 each value in angle brackets will be transparently replaced by the corresponding
 environment variable, except in strings.
@@ -255,84 +262,140 @@ and grammar. The list below could be a older state of the implementation.
 Lexeme
 ------
 
-    END  0x00\n
-    CMT  '#' [:print:]* '#'\n
-    LCT  ';' [:print:]* 'nl'\n
-    SEP  [:SPACE: | :CNTR: | ',']*\n
-    SGN  '='\n
-    DOT  '.'\n
-    RBO  '('\n
-    RBC  ')'\n
-    SBO  '['\n
-    SBC  ']'\n
-    KYW  [-[-]][:alpha:]+[:alnum: | '_' ]*\n
-    NUM  ([+|-]  [ :digit:]+) |                           decimal (default)\n
-         ([+|-]0b[ :digit:]+) |                           binary\n
-         ([+|-]0o[ :digit:]+) |                           octal\n
-         ([+|-]0d[ :digit:]+) |                           decimal\n
-         ([+|-]0x[:xdigit:]+) |                           hexadecimal\n
-         ([+|-]0t(yyyy/mm/tt.hh:mm:ss) |                  relative or absolute time\n
-    FLT  ([+|-]  [ :digit:]+.[:digit:]+e|E[:digit:]+) |\n
-         ([+|-]0d[ :digit:]+.[:digit:]+e|E[:digit:]+)\n
-    STR       ''' [:print:]* ''' |     string with null termination (local character set)\n
-         [s|S]''' [:print:]* ''' |     string with null termination (local character set)\n
-         [c|C]''' [:print:]* ''' |     string in local character set (no null termination)\n
-         [x|X]''' [:print:]* ''' |     binary hexadecimal\n
-         [a|A]''' [:print:]* ''' |     binary ascii (no null termination)\n
-         [e|E]''' [:print:]* ''' |     binary ebcdic (no null termination)\n
-         [f|F]''' [:print:]* ''' |     read string from file (for passwords)\n
-         Strings can contain two '' to represent one '\n
-         Strings can also be enclosed in " instead of '\n"
-         Strings can directly start behind a '=' without enclosing '/"\n
-            In this case the string ends at the next separator or operator\n
-            and keywords are preferred. To use keywords, separators or\n
-            operators in strings, enclosing quotes are required\n
-    SUP       '"' [:print:]* '"' |     string with null termination (local character set) for supplement syntax (properties)\n
-         Supplements can contain two "" to represent one "\n
-         Supplements can also be enclosed in ' instead of "\n"
-
+Lexemes (regular expressions) for argument list or parameter file:
+--| COMMENT   '#' [:print:]* '#'                              (will be ignored)
+--| LCOMMENT  ';' [:print:]* 'nl'                             (will be ignored)
+--| SEPARATOR [:space: | :cntr: | ',']*                  (abbreviated with SEP)
+--| OPERATOR1 '=' | '.' | '(' | ')' | '[' | ']'  (SGN, DOT, RBO, RBC, SBO, SBC)
+--| OPERATOR2 '+' | '-' | '*' | '/'                        (ADD, SUB, MUL, DIV)
+--| KEYWORD   ['-'['-']][:alpha:]+[:alnum: | '_']*          (always predefined)
+--| NUMBER    ([+|-]  [ :digit:]+)  |                       (decimal (default))
+--| num       ([+|-]0b[ :digit:]+)  |                                  (binary)
+--| num       ([+|-]0o[ :digit:]+)  |                                   (octal)
+--| num       ([+|-]0d[ :digit:]+)  |                                 (decimal)
+--| num       ([+|-]0x[ :xdigit:]+) |                             (hexadecimal)
+--| num       ([+|-]0t(yyyy/mm/tt.hh:mm:ss)) |  (relativ (+|-) or absolut time)
+--| FLOAT     ([+|-]  [ :digit:]+.[:digit:]+e|E[:digit:]+) | (decimal(default))
+--| flt       ([+|-]0d[ :digit:]+.[:digit:]+e|E[:digit:]+)            (decimal)
+--| STRING         ''' [:print:]* ''' |          (default (if binary c else s))
+--| str       [s|S]''' [:print:]* ''' |                (null-terminated string)
+--| str       [c|C]''' [:print:]* ''' |  (binary string in local character set)
+--| str       [a|A]''' [:print:]* ''' |                (binary string in ASCII)
+--| str       [e|E]''' [:print:]* ''' |               (binary string in EBCDIC)
+--| str       [x|X]''' [:print:]* ''' |         (binary string in hex notation)
+--| str       [f|F]''' [:print:]* ''' | (read string from file (for passwords))
+--|           Strings can contain two '' to represent one '
+--|           Strings can also be enclosed in " or ` instead of '
+--|           Strings can directly start behind a '=' without enclosing '/"
+--|              In this case the string ends at the next separator or operator
+--|              and keywords are preferred. To use keywords, separators or
+--|              operators in strings, enclosing quotes are required.
+--|
+--| The predefined constant keyword below can be used in a value expressions
+--| NOW       NUMBER - current time in seconds since 1970 (+0t0000)
+--| MINUTE    NUMBER - minute in seconds (60)
+--| HOUR      NUMBER - hour in seconds   (60*60)
+--| DAY       NUMBER - day in seconds    (24*60*60)
+--| YEAR      NUMBER - year in seconds   (365*24*60*60)
+--| KiB       NUMBER - kilobyte          (1024)
+--| MiB       NUMBER - megabyte          (1024*1024)
+--| GiB       NUMBER - gigabyte          (1024*1024*1024)
+--| TiB       NUMBER - terrabyte         (1024*1024*1024*1024)
+--| RNDn      NUMBER - simple random number with n * 8 bit in length (1,2,4,8)
+--| PI        FLOAT  - PI (3.14159265359)
+--| LCSTAMP   STRING - current local stamp in format:           YYYYMMDD.HHMMSS
+--| LCDATE    STRING - current local date in format:            YYYYMMDD
+--| LCYEAR    STRING - current local year in format:            YYYY
+--| LCYEAR2   STRING - current local year in format:            YY
+--| LCMONTH   STRING - current local month in format:           MM
+--| LCDAY     STRING - current local day in format:             DD
+--| LCTIME    STRING - current local time in format:            HHMMSS
+--| LCHOUR    STRING - current local hour in format:            HH
+--| LCMINUTE  STRING - current local minute in format:          MM
+--| LCSECOND  STRING - current local second in format:          SS
+--| GMSTAMP   STRING - current Greenwich mean stamp in format:  YYYYMMDD.HHMMSS
+--| GMDATE    STRING - current Greenwich mean date in format:   YYYYMMDD
+--| GMYEAR    STRING - current Greenwich mean year in format:   YYYY
+--| GMYEAR2   STRING - current Greenwich mean year in format:   YY
+--| GMMONTH   STRING - current Greenwich mean month in format:  MM
+--| GMDAY     STRING - current Greenwich mean day in format:    DD
+--| GMTIME    STRING - current Greenwich mean time in format:   HHMMSS
+--| GMHOUR    STRING - current Greenwich mean hour in format:   HH
+--| GMMINUTE  STRING - current Greenwich mean minute in format: MM
+--| GMSECOND  STRING - current Greenwich mean second in format: SS
+--| GMSECOND  STRING - current Greenwich mean second in format: SS
+--| SnRND10   STRING - decimal random number of length n (1 to 8)
+--| SnRND16   STRING - hexadecimal random number of length n (1 to 8)
+--|
+--| SUPPLEMENT     '"' [:print:]* '"' |   (null-terminated string (properties))
+--|           Supplements can contain two "" to represent one "
+--|           Supplements can also be enclosed in ' or ` instead of "
+--|           Supplements can also be enclosed in ' or ` instead of "
+--| ENVIRONMENT VARIABLES '<'varnam'>' will replaced by the corresponding value
+--| Escape sequences for critical punctuation characters on EBCDIC systems
+--|    '!' = "&EXC;"   - Exclamation mark
+--|    '$' = "&DLR;"   - Dollar sign
+--|    '#' = "&HSH;"   - Hashtag (number sign)
+--|    '@' = "&ATS;"   - At sign
+--|    '[' = "&SBO;"   - Square bracket open
+--|    '\' = "&BSL;"   - Backslash
+--|    ']' = "&SBC;"   - Square bracket close
+--|    '^' = "&CRT;"   - Caret (circumflex)
+--|    '`' = "&GRV;"   - Grave accent
+--|    '{' = "&CBO;"   - Curly bracket open
+--|    '|' = "&VBR;"   - Vertical bar
+--|    '}' = "&CBC;"   - Curly bracket close
+--|    '~' = "&TLD;"   - Tilde
+--| Define CCSIDs for certain areas in CLP strings on EBCDIC systems
+--|    '&' [:digit:]+ ';  (..."&1047;get.file='&0;%s&1047;'",f)
+--| Escape sequences for hexadecimal byte values
+--|    '&' ['X''x'] :xdigit: :xdigit: ';' ("&xF5;")
 
 Grammar for command line
 ------------------------
 
-    cmd      -> INI parlst END
-
-    parlst   -> par SEP parlst\n
-             |  @
-
-    par      -> swt\n
-             |  sgn\n
-             |  obj\n
-             |  ovl\n
-             |  ary
-
-    swt      -> KEYWRD
-
-    sgn      -> KEYWRD '=' val
-
-    obj      -> KEYWRD ['('] parlst [')']
-             |  KEYWORD '=' STRING # parameter file #
-
-    ovl      -> KEYWRD ['.'] par
-             |  KEYWORD '=' STRING # parameter file #
-
-    ary      -> KEYWRD '[' vallst ']'\n
-             |  KEYWRD '[' objlst ']'\n
-             |  KEYWRD '[' ovllst ']'
-
-    vallst   -> val SEP vallst\n
-             |  @
-
-    objlst   -> '(' parlst ')' SEP objlst\n
-             |  @
-
-    ovllst   -> par SEP ovllst\n
-             |  @
-
-    val      -> NUM                             * integer\n
-             |  FLT                             * floating number\n
-             |  STR                             * string literal\n
-             |  KYW                             * constant definition
+Grammar for argument list or parameter file
+--| Command Line Parser
+--| command        -> ['('] parameter_list [')']       (main=object)
+--|                |  ['.'] parameter                  (main=overlay)
+--| parameter_list -> parameter SEP parameter_list
+--|                |  EMPTY
+--| parameter      -> switch | assignment | object | overlay | array
+--| switch         -> KEYWORD
+--| assignment     -> KEYWORD '=' value
+--|                |  KEYWORD '=' KEYWORD # SELECTION #
+--| object         -> KEYWORD ['('] parameter_list [')']
+--|                |  KEYWORD '=' STRING # parameter file #
+--| overlay        -> KEYWORD ['.'] parameter
+--|                |  KEYWORD '=' STRING # parameter file #
+--| array          -> KEYWORD '[' value_list   ']'
+--|                |  KEYWORD '[' object_list  ']'
+--|                |  KEYWORD '[' overlay_list ']'
+--|                |  KEYWORD '[=' STRING ']' # parameter file #
+--| value_list     -> value SEP value_list
+--|                |  EMPTY
+--| object_list    -> object SEP object_list
+--|                |  EMPTY
+--| overlay_list   -> overlay SEP overlay_list
+--|                |  EMPTY
+--| A list of objects requires parenthesis to enclose the arguments
+--|
+--| value          -> term '+' value
+--|                |  term '-' value
+--|                |  term
+--| term           -> factor '*' term
+--|                |  factor '/' term
+--|                |  factor
+--| factor         -> NUMBER | FLOAT | STRING
+--|                |  selection | variable | constant
+--|                |  '(' value ')'
+--| selection      -> KEYWORD # value from a selection table        #
+--| variable       -> KEYWORD # value from a previous assignment    #
+--|                |  KEYWORD '[' value ']' # with index for arrays #
+--| constant       -> KEYWORD # see predefined constants at lexem   #
+--| For strings only the operator '+' is implemented as concatenation
+--| Strings without an operator in between are also concatenated
+--| A number followed by a constant is a multiplication (4KiB=4*1024)
 
 A list of objects requires parenthesis to enclose the arguments. Only
 for one object of a certain level you can omit the round brackets. If
@@ -344,15 +407,15 @@ The same is valid for the parenthesis '(...)' of an object.
 Grammar for property file
 -------------------------
 
-    proper   -> INI prolst END
-
-    prolst   -> pro SEP prolst\n
-             |  @
-
-    pro      -> kywlst '=' SUP
-
-    kywlst   -> KYW '.' kywlst\n
-             |  KYW
+Grammar for property file
+--| Property File Parser
+--| properties     -> property_list
+--| property_list  -> property SEP property_list
+--|                |  EMPTY
+--| property       -> keyword_list '=' SUPPLEMENT
+--| keyword_list   -> KEYWORD '.' keyword_list
+--|                |  KEYWORD
+--| SUPPLEMENT is a string in double quotation marks ("property")
 
 Compiler switches
 -----------------
