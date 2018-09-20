@@ -68,13 +68,6 @@ static inline int flzsym(const char* pcDat, const int* piSln, char* pcVal, int* 
 #endif
 
 extern void init_diachr(TsDiaChr* psDiaChr,const unsigned int uiCcsId) {
-#ifdef __DEBUG__
-#  ifdef __EBCDIC__
-   fprintf(stderr,"run init_diachr with CCSID %u(%s) - %p/%p\n",uiCcsId,mapccsid(uiCcsId),psDiaChr,&gsDiaChr);
-#  else
-   fprintf(stderr,"run init_diachr with CCSID %u(%s) - %p\n",uiCcsId,mapccsid(uiCcsId),psDiaChr);
-#  endif
-#endif
    switch (uiCcsId) {
 #ifdef __EBCDIC__
    case 37:
@@ -373,16 +366,7 @@ TsDiaChr gsDiaChr={{0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0},
                    {0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0}};
 
 extern char init_char(char* p) {
-   unsigned int  uiCcsId=mapcdstr(mapl2c(TRUE));
-   if (uiCcsId==0) {
-      uiCcsId=CLEP_DEFAULT_CCSID_EBCDIC;
-#ifdef __DEBUG__
-      fprintf(stderr,"run init_char with default CCSID %u(%s)\n",uiCcsId,mapccsid(uiCcsId));
-   } else {
-      fprintf(stderr,"run init_char with determined CCSID %u(%s)\n",uiCcsId,mapccsid(uiCcsId));
-#endif
-   }
-   init_diachr(&gsDiaChr,uiCcsId);
+   init_diachr(&gsDiaChr,sysccsid());
    return(p[0]);
 }
 
