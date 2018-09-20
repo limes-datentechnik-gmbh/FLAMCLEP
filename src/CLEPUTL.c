@@ -366,7 +366,7 @@ TsDiaChr gsDiaChr={{0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0},
                    {0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0}};
 
 extern char init_char(char* p) {
-   init_diachr(&gsDiaChr,sysccsid());
+   init_diachr(&gsDiaChr,localccsid());
    return(p[0]);
 }
 
@@ -745,7 +745,7 @@ extern void fprintm(FILE* file,const char* own, const char* pgm, const char* man
    efprintf(file,"%s",ptr);
 }
 
-extern unsigned int sysccsid(void) {
+extern unsigned int localccsid(void) {
    unsigned int ccsid = 0;
    const char* charset;
 #ifdef __UNIX__

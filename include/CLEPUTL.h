@@ -388,13 +388,13 @@ extern char* cpmaplab(char* label, int size,const char* templ, const char* value
 extern char* dcpmaplab(const char* templ, const char* values, int method);
 
 /**
- * Determines the system default CCSID by querying nl_langinfo() (POSIX) or GetCPInfoEx() (Windows).
+ * Determines the local CCSID by querying nl_langinfo() (POSIX) or GetCPInfoEx() (Windows).
  * If none of both are available or no valid CCSID can be determined,
  * mapl2c() is called. If it also fails to determine the system default CSSID,
  * the CCSID for ASCII (ISO8859-1) or IBM-1047 (EBCDIC platforms) is returned.
  * @return A supported CCSID > 0
  */
-extern unsigned int sysccsid(void);
+extern unsigned int localccsid(void);
 
 /**
  * Map environment variable LANG to CCSID
