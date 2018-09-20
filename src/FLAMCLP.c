@@ -1184,12 +1184,10 @@ extern int siClpParseCmd(
    } else {
       srprintf(&psHdl->pcSrc,&psHdl->szSrc,strlen(CLPSRC_CMD),"%s",CLPSRC_CMD);
    }
-   printd("-->parse-command before un-escaping (%s)\n",pcCmd);
    psHdl->pcInp=pcClpUnEscape(pvHdl,pcCmd);
    if (psHdl->pcInp==NULL) {
       return CLPERR(psHdl,CLPERR_MEM,"Un-escaping of command string failed");
    }
-   printd("-->parse-command after un-escaping  (%s)\n",psHdl->pcInp);
    psHdl->pcCur=psHdl->pcInp;
    psHdl->pcOld=psHdl->pcInp;
    psHdl->pcRow=psHdl->pcInp;
