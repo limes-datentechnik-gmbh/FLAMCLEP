@@ -570,7 +570,7 @@ extern int siCleExecute(
 
    if (isEnv) {
       siErr = readEnvars(NULL,pfOut,pfErr,NULL);
-      if (siErr) return(siErr);
+      if (siErr<0) return(-1*siErr);
    }
 
    pcHom=dhomedir(TRUE);

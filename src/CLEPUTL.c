@@ -2935,15 +2935,17 @@ extern int envarInsert(TsEnVarList** ppList,const char* pcName,const char* pcVal
    return(CLERTC_OK);
 }
 
-extern void resetEnvars(TsEnVarList** ppList) {
+extern int resetEnvars(TsEnVarList** ppList) {
+   int r=0;
+   int c=0;
    if (ppList!=NULL) {
       while(*ppList!=NULL) {
          TsEnVarList* psHelp=(*ppList);
          (*ppList)=(*ppList)->psNext;
          if (psHelp->pcValue!=NULL) {
-            SETENV(psHelp->pcName,psHelp->pcValue);
+            if (SETENV(psHelp->pcName,psHelp->pcValue)) r--; else c++;
          } else {
-            UNSETENV(psHelp->pcName);
+            if (UNSETENV(psHelp->pcName)) r--; c++;;
          }
          SAFE_FREE(psHelp->pcName);
          SAFE_FREE(psHelp->pcValue);
@@ -2951,9 +2953,11 @@ extern void resetEnvars(TsEnVarList** ppList) {
       }
       *ppList=NULL;
    }
+   if (r) return(-1*CLERTC_SYS); else return(c);
 }
 
 extern int readEnvars(const char* pcFil, FILE* pfOut, FILE* pfErr, TsEnVarList** ppList) {
+   int   c=0;
    char* pcCnf;
    char* pcTmp;
    char  acCnf[1024];
@@ -3030,7 +3034,7 @@ extern int readEnvars(const char* pcFil, FILE* pfOut, FILE* pfErr, TsEnVarList**
                      fprintf(pfErr,"Build envar list for reset failed (%s)\n",pcTmp);
                   }
                   fclose(pfTmp);
-                  return siErr;
+                  return(-1*siErr);
                }
                if (SETENV(pcTmp,pcCnf+1)) {
                   if(pfErr!=NULL){
@@ -3039,7 +3043,7 @@ extern int readEnvars(const char* pcFil, FILE* pfOut, FILE* pfErr, TsEnVarList**
                            pcTmp,pcCnf+1,errno,strerror(errno));
                   }
                   fclose(pfTmp);
-                  return CLERTC_SYS;
+                  return(-1*CLERTC_SYS);
                } else {
                   if (strcmp(pcCnf+1,GETENV(pcTmp))) {
                      if(pfErr!=NULL){
@@ -3048,13 +3052,14 @@ extern int readEnvars(const char* pcFil, FILE* pfOut, FILE* pfErr, TsEnVarList**
                               pcTmp,pcCnf+1,pcCnf+1,pcTmp);
                      }
                      fclose(pfTmp);
-                     return CLERTC_SYS;
+                     return(-1*CLERTC_SYS);
                   } else {
                      if(pfOut!=NULL){
                         fprintf(pfOut,
                               "Put variable (%s=%s) to environment was successful\n",
                               pcTmp,pcCnf+1);
                      }
+                     c++;
                   }
                }
             }
@@ -3062,7 +3067,7 @@ extern int readEnvars(const char* pcFil, FILE* pfOut, FILE* pfErr, TsEnVarList**
       }
       fclose(pfTmp);
    }
-   return CLERTC_OK;
+   return c;
 }
 
 /**********************************************************************/

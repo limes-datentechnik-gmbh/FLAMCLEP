@@ -561,7 +561,7 @@ extern char* cstime(signed long long t, char* p);
  * @param[in] pfErr File pointer for error messages
  * @param[out] ppList Pointer to an optional envar list for reset (the list and each string must freed by caller)
  *
- * @return    0 for successful else CLERTCs
+ * @return    >=0 amount of successful defined environment variables else -1*CLERTCs
  */
 extern int readEnvars(const char* pcFil, FILE* pfOut, FILE* pfErr, TsEnVarList** ppList);
 
@@ -578,8 +578,9 @@ extern int envarInsert(TsEnVarList** ppList,const char* pcName,const char* pcVal
  * Reset list of environment variables
  *
  * @param[in] ppList Pointer to envar lisl
+ * @return  amount of envars reset or -1*CLERTCs
  */
-extern void resetEnvars(TsEnVarList** ppList);
+extern int resetEnvars(TsEnVarList** ppList);
 
 
 /**********************************************************************/
