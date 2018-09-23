@@ -2945,7 +2945,7 @@ extern int resetEnvars(TsEnVarList** ppList) {
          if (psHelp->pcValue!=NULL) {
             if (SETENV(psHelp->pcName,psHelp->pcValue)) r--; else c++;
          } else {
-            if (UNSETENV(psHelp->pcName)) r--; c++;;
+            if (UNSETENV(psHelp->pcName)) r--; else c++;
          }
          SAFE_FREE(psHelp->pcName);
          SAFE_FREE(psHelp->pcValue);
