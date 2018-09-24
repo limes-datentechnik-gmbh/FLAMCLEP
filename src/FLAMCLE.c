@@ -688,18 +688,16 @@ extern int siCleExecute(
       }
    }
 
-#ifdef __DEBUG__
    i=siCnfPutEnv(psCnf,pcOwn,pcPgm);
-   if (i) {
-      if (i==1) {
-         if (pfOut!=NULL) fprintf(pfOut,"%d environment variable set using the configuration file\n",i);
-      } else {
-         if (pfOut!=NULL) fprintf(pfOut,"%d environment variables set using the configuration file\n",i);
+   if (pfOut!=NULL) {
+      if (i) {
+         if (i==1) {
+            fprintf(pfOut,"Load successfully %d environment variable using the configuration file.\n",i);
+         } else {
+            fprintf(pfOut,"Load successfully %d environment variables using the configuration file.\n",i);
+         }
       }
    }
-#else
-   siCnfPutEnv(psCnf,pcOwn,pcPgm);
-#endif
 
    m=GETENV("OWNERID");
    if (m==NULL || *m==0x00) {
@@ -722,10 +720,11 @@ extern int siCleExecute(
       isEnvOwn=FALSE;
    }
 
-#ifdef __DEBUG__
-   if (pfOut!=NULL)  fprintf(pfOut,"Complete load of environment ...\n");
-   if (pfOut!=NULL) efprintf(pfOut,"Initialize dia-critical character (!$#@[\\]^`{|}~) conversion\n");
-#endif
+   if (pfOut!=NULL) {
+      fprintf( pfOut,"Complete load of environment ...\n");
+      efprintf(pfOut,"Initialize dia-critical character (!$#@[\\]^`{|}~) conversion (%s)\n",mapccsid(localccsid()));
+   }
+
    char  acDep[strlen(pcDep)+1];
    char  acOpt[strlen(pcOpt)+1];
    char  acEnt[strlen(pcEnt)+1];
