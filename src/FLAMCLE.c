@@ -779,7 +779,7 @@ extern int siCleExecute(
          ppArg=malloc((argc+1)*sizeof(*ppArg));
          if (ppArg == NULL) {
             if (pfErr!=NULL) fprintf(pfErr,"Memory allocation for argument list to run the default command '%s' failed\n",pcDef);
-            ERROR(CLERTC_SYS,NULL);
+            ERROR(CLERTC_MEM,NULL);
          }
          ppArg[0]=argv[0]; ppArg[1]=(char*)pcDef; argc=2; argv=ppArg;
       } else {
@@ -1832,7 +1832,7 @@ EVALUATE:
                char*  pcPro=(char*)calloc(1,szPro);
                if (pcPro==NULL) {
                   fprintf(pfOut,"Memory allocation for property list failed\n");
-                  ERROR(CLERTC_SYS,pcPro);
+                  ERROR(CLERTC_MEM,pcPro);
                }
                for (j=3;j<argc;j++) {
                   if (j>3) {
@@ -1861,7 +1861,7 @@ EVALUATE:
                char*  pcPro=calloc(1,szPro);
                if (pcPro==NULL) {
                   fprintf(pfOut,"Memory allocation for property list failed\n");
-                  ERROR(CLERTC_SYS,pcPro);
+                  ERROR(CLERTC_MEM,pcPro);
                }
                for (j=2;j<argc;j++) {
                   if (j>2) {
@@ -2324,7 +2324,7 @@ EVALUATE:
          ppArg=malloc((argc+1)*sizeof(*ppArg));
          if (ppArg == NULL) {
             if (pfErr!=NULL) fprintf(pfErr,"Memory allocation for argument list to run the default command '%s' failed\n",pcDef);
-            siErr=CLERTC_SYS;
+            siErr=CLERTC_MEM;
             ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
          }
          for (i=argc;i>1;i--) ppArg[i]=argv[i-1];
@@ -3109,7 +3109,7 @@ static int siCleGetCommand(
          if (*ppCmd!=NULL) { free(*ppCmd); *ppCmd=NULL; }
          switch(siErr) {
          case -1: if (pfErr!=NULL) fprintf(pfErr,"Illegal parameters passed to arry2str() (Bug)\n");                                 return(CLERTC_FAT);
-         case -2: if (pfErr!=NULL) fprintf(pfErr,"Allocation of memory for command line failed (%d - %s).\n",errno,strerror(errno)); return(CLERTC_SYS);
+         case -2: if (pfErr!=NULL) fprintf(pfErr,"Allocation of memory for command line failed (%d - %s).\n",errno,strerror(errno)); return(CLERTC_MEM);
          default: if (pfErr!=NULL) fprintf(pfErr,"An unknown error occurred while reading command line.\n");                         return(CLERTC_FAT);
          }
       }
@@ -3120,7 +3120,7 @@ static int siCleGetCommand(
          if (*ppCmd!=NULL) { free(*ppCmd); *ppCmd=NULL; }
          switch(siErr) {
          case -1: if (pfErr!=NULL) fprintf(pfErr,"Illegal parameters passed to arry2str() (Bug)\n");                                 return(CLERTC_FAT);
-         case -2: if (pfErr!=NULL) fprintf(pfErr,"Allocation of memory for command line failed (%d - %s).\n",errno,strerror(errno)); return(CLERTC_SYS);
+         case -2: if (pfErr!=NULL) fprintf(pfErr,"Allocation of memory for command line failed (%d - %s).\n",errno,strerror(errno)); return(CLERTC_MEM);
          default: if (pfErr!=NULL) fprintf(pfErr,"An unknown error occurred while reading command line.\n");                         return(CLERTC_FAT);
          }
       }
