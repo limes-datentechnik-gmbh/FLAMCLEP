@@ -3502,9 +3502,7 @@ extern int siCleParseString(
    TsClpError                    stErr;
 
 #ifdef __ZOS__
-   char                    acTmpNam[64];
-   snprintf(acTmpNam,sizeof(acTmpNam),"CLPTEMP.P%7.7d",((unsigned int)getpid())%10000000);
-   pfTmp=fopen(acTmpNam,"wb+,type=memory");
+   pfTmp=fopen("*","wb+,type=memory(hiperspace)");
 #else
    pfTmp=tmpfile();
 #endif
