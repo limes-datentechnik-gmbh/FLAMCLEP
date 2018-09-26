@@ -104,6 +104,14 @@ extern int win_unsetenv(const char* name);
 #define ISPATHNAME(p)   (strchr((p),'/')!=NULL)
 #define ISDSNAME(p)     (strlen(p)>2 && toupper((p)[0])=='/' && toupper((p)[1])=='/')
 
+#ifdef __ZOS__
+#  define fopen_tmp(x)   (x)?fopen("*","wb+,type=memory(hiperspace)"):fopen("*","wb+,type=memory")
+   extern int fclose_tmp(FILE* fp);
+#else
+#  define fopen_tmp(x)   tmpfile()
+#  define fclose_tmp(fp) fclose((fp))
+#endif
+
 /* Definition of return/condition/exit codes **************************/
 
 /** 0  - command line, command syntax, mapping, execution and finish of the command was successful*/

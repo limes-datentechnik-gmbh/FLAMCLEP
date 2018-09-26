@@ -44,6 +44,21 @@
 #ifdef __WIN__
 #  include <windows.h>
 #endif
+#ifdef __ZOS__
+   extern int fclose_tmp(FILE* fp) {
+      int      r;
+      C08      fn[FILENAME_MAX]="";
+      fldata_t fi={0};
+      fldata((fp),fn,&fi);
+      r=fclose((fp));
+      if (remove(fn)) {
+         printd("---> remove(%s) failed\n");
+      } else {
+         printd("---> remove(%s) successful\n");
+      }
+      return(r);
+   }
+#endif
 #if defined(__ZOS__) && defined(__FL5__)
 #  include "FLZASM31.h"
 #  define flzsym FLZSYM

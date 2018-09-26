@@ -3501,18 +3501,14 @@ extern int siCleParseString(
    FILE*                         pfTmp;
    TsClpError                    stErr;
 
-#ifdef __ZOS__
-   pfTmp=fopen("*","wb+,type=memory");
-#else
-   pfTmp=tmpfile();
-#endif
+   pfTmp=fopen_tmp(FALSE);
 
    pvHdl=pvClpOpen(isCas,isPfl,isRpl,siMkl,pcOwn,pcPgm,pcCmd,pcMan,pcHlp,isOvl,
                    psTab,pvDat,pfTmp,pfTmp,NULL,NULL,NULL,NULL,
                    pcDep,pcOpt,pcEnt,&stErr,pvF2S,pfF2S);
    if (pvHdl==NULL) {
       snprintf(pcErr,uiErr,"CTX-MESSAGE : Open of string parser for command '%s' failed\n",pcCmd);
-      if (pfTmp!=NULL) {rewind(pfTmp); size_t l=strlen(pcErr); size_t r=fread(pcErr+l,1,uiErr-(l+1),pfTmp); fclose(pfTmp); pcErr[l+r]=0x00;}
+      if (pfTmp!=NULL) {rewind(pfTmp); size_t l=strlen(pcErr); size_t r=fread(pcErr+l,1,uiErr-(l+1),pfTmp); fclose_tmp(pfTmp); pcErr[l+r]=0x00;}
       return -1;
    }
    siErr=siClpParseCmd(pvHdl,NULL,pcStr,TRUE,TRUE,(int*)piMod,NULL);
@@ -3525,11 +3521,11 @@ extern int siCleParseString(
             "CLP-SOURCE  : %s (ROW: %d COL: %d)\n",
             pcCmd,pcStr,siErr,pcClpError(siErr),
             *stErr.ppMsg,*stErr.ppSrc,*stErr.piRow,*stErr.piCol);
-      if (pfTmp!=NULL) {rewind(pfTmp); size_t l=strlen(pcErr); size_t r=fread(pcErr+l,1,uiErr-(l+1),pfTmp); fclose(pfTmp); pcErr[l+r]=0x00;}
+      if (pfTmp!=NULL) {rewind(pfTmp); size_t l=strlen(pcErr); size_t r=fread(pcErr+l,1,uiErr-(l+1),pfTmp); fclose_tmp(pfTmp); pcErr[l+r]=0x00;}
       vdClpClose(pvHdl,CLPCLS_MTD_ALL);
       return siErr;
    }
-   if (pfTmp!=NULL) fclose(pfTmp);
+   if (pfTmp!=NULL) fclose_tmp(pfTmp);
    vdClpClose(pvHdl,CLPCLS_MTD_ALL);
    return 0;
 }
