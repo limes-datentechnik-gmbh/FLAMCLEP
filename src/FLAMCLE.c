@@ -3502,7 +3502,7 @@ extern int siCleParseString(
    TsClpError                    stErr;
 
 #ifdef __ZOS__
-   pfTmp=fopen("*","wb+,type=memory(hiperspace)");
+   pfTmp=fopen("*","wb+,type=memory");
 #else
    pfTmp=tmpfile();
 #endif
