@@ -74,11 +74,7 @@ static inline int flzsym(const char* pcDat, const int* piSln, char* pcVal, int* 
       fldata_t fi={0};
       fldata((fp),fn,&fi);
       r=fclose((fp));
-      if (remove(fn)) {
-         printd("---> remove(%s) failed\n",fn);
-      } else {
-         printd("---> remove(%s) successful\n",fn);
-      }
+      remove(fn);
       return(r);
    }
 #endif
