@@ -3455,7 +3455,7 @@ static char* pcClpUnEscape(
             i+=5; o++;
          } else if (isdigit(i[1])) {
             const char* x=i;
-            init_diachr(&stDiaChr,strtol(i+1,(char**)&x,10));
+            init_diachr(&stDiaChr,(unsigned int)strtol(i+1,(char**)&x,10));
             if (x[0]==';') {
                i=x+1;
             } else {
