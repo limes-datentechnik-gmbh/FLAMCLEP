@@ -428,20 +428,50 @@ extern int ebcdic_sprintf(char* string, const char* format, ...) {
 }
 
 extern int ebcdic_fprintf(FILE* file, const char* format, ...) {
-   va_list  argv;
-   char*    help;
    char     temp[65536];
-   int      r=0;
-   *temp='\0';
+   size_t   bufSiz = sizeof(temp);
+   va_list  argv;
+   int      result, rc = 0;
+   char*    buf = NULL;
+
    va_start(argv, format);
-   vsnprintf(temp,sizeof(temp),format,argv);
+   result = vsnprintf(temp, bufSiz, format, argv);
    va_end(argv);
-   temp[sizeof(temp)-1]='\0';
-   if (*temp) {
-      RPLDIAC(temp);
-      r=fprintf(file,"%s",temp);
+   if (result < 0) {
+      rc = result;
+   } else if (result < bufSiz) {
+      if (*temp) {
+         RPLDIAC(temp);
+         rc=fprintf(file, "%s", temp);
+      }
+   } else {
+      while (result >= bufSiz) {
+         bufSiz = result+1;
+         char* hlp = (char*)realloc(buf, bufSiz);
+         if (hlp == NULL) {
+            SAFE_FREE(buf);
+            errno = ENOMEM;
+            rc = -1;
+            break;
+         }
+         buf = hlp;
+         va_start(argv, format);
+         result = vsnprintf(buf, bufSiz, format, argv);
+         va_end(argv);
+         if (result < 0) {
+            rc = result;
+            break;
+         }
+      }
+      if (rc == 0) {
+         if (*buf) {
+            RPLDIAC(buf);
+            rc=fprintf(file, "%s", buf);
+         }
+      }
+      SAFE_FREE(buf);
    }
-   return(r);
+   return rc;
 }
 
 #endif
