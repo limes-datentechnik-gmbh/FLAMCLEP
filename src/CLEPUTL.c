@@ -2710,6 +2710,421 @@ extern unsigned int chr2ebc(
    return(i);
 }
 
+extern unsigned int asc2chr(
+   const char*          asc,
+         char*          chr,
+   const unsigned int   len)
+{
+   unsigned int         i;
+   const char           asc_map[256]={
+   0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,'\n',0x0,0x0,'\r',0x0,0x0,
+   0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
+   ' ','!','\"','#','$','%','&','\'','(',')','*','+',',','-','.','/',   /*nodiac*/
+   '0','1','2','3','4','5','6','7','8','9',':',';','<','=','>','?',     /*nodiac*/
+   '@','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O',     /*nodiac*/
+   'P','Q','R','S','T','U','V','W','X','Y','Z','[','\\',']','^','_',    /*nodiac*/
+   '`','a','b','c','d','e','f','g','h','i','j','k','l','m','n','o',     /*nodiac*/
+   'p','q','r','s','t','u','v','w','x','y','z','{','|','}','~',0x0,     /*nodiac*/
+   0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
+   0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
+   0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
+   0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
+   0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
+   0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
+   0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
+   0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0};
+   for (i=0;i<len;i++) {
+      chr[i]=asc_map[*((unsigned char*)(asc+i))];
+      if (chr[i]==0x0) return(i);
+   }
+   return(i);
+}
+
+extern void asc_chr(
+   const char*          asc,
+         char*          chr,
+   const unsigned int   len)
+{
+   unsigned int         i;
+   const char           asc_map[256]={
+   '_','_','_','_','_','_','_','_','_','_','\n','_','_','\r','_','_',
+   '_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_',
+   ' ','!','\"','#','$','%','&','\'','(',')','*','+',',','-','.','/',   /*nodiac*/
+   '0','1','2','3','4','5','6','7','8','9',':',';','<','=','>','?',     /*nodiac*/
+   '@','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O',     /*nodiac*/
+   'P','Q','R','S','T','U','V','W','X','Y','Z','[','\\',']','^','_',    /*nodiac*/
+   '`','a','b','c','d','e','f','g','h','i','j','k','l','m','n','o',     /*nodiac*/
+   'p','q','r','s','t','u','v','w','x','y','z','{','|','}','~','_',     /*nodiac*/
+   '_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_',
+   '_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_',
+   '_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_',
+   '_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_',
+   '_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_',
+   '_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_',
+   '_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_',
+   '_','_','_','_','_','_','_','_','_','_','_','_','_','_','_','_'};
+   for (i=0;i<len;i++) {
+      chr[i]=asc_map[*((unsigned char*)(asc+i))];
+   }
+}
+
+extern void chr_asc(
+   const char*          chr,
+         char*          asc,
+   const unsigned int   len)
+{
+   unsigned int         i;
+   for (i=0;i<len;i++) {
+      switch (chr[i]) {
+         case 0x00 : asc[i]=0x00; break;
+         case '\n' : asc[i]=0x0A; break;
+         case '\r' : asc[i]=0x0D; break;
+
+         case ' '  : asc[i]=0x20; break;
+         case '\"' : asc[i]=0x22; break;
+         case '%'  : asc[i]=0x25; break;
+         case '&'  : asc[i]=0x26; break;
+         case '\'' : asc[i]=0x27; break;
+         case '('  : asc[i]=0x28; break;
+         case ')'  : asc[i]=0x29; break;
+         case '*'  : asc[i]=0x2A; break;
+         case '+'  : asc[i]=0x2B; break;
+         case ','  : asc[i]=0x2C; break;
+         case '-'  : asc[i]=0x2D; break;
+         case '.'  : asc[i]=0x2E; break;
+         case '/'  : asc[i]=0x2F; break;
+
+         case '0'  : asc[i]=0x30; break;
+         case '1'  : asc[i]=0x31; break;
+         case '2'  : asc[i]=0x32; break;
+         case '3'  : asc[i]=0x33; break;
+         case '4'  : asc[i]=0x34; break;
+         case '5'  : asc[i]=0x35; break;
+         case '6'  : asc[i]=0x36; break;
+         case '7'  : asc[i]=0x37; break;
+         case '8'  : asc[i]=0x38; break;
+         case '9'  : asc[i]=0x39; break;
+         case ':'  : asc[i]=0x3A; break;
+         case ';'  : asc[i]=0x3B; break;
+         case '<'  : asc[i]=0x3C; break;
+         case '='  : asc[i]=0x3D; break;
+         case '>'  : asc[i]=0x3E; break;
+         case '?'  : asc[i]=0x3F; break;
+
+         case 'A'  : asc[i]=0x41; break;
+         case 'B'  : asc[i]=0x42; break;
+         case 'C'  : asc[i]=0x43; break;
+         case 'D'  : asc[i]=0x44; break;
+         case 'E'  : asc[i]=0x45; break;
+         case 'F'  : asc[i]=0x46; break;
+         case 'G'  : asc[i]=0x47; break;
+         case 'H'  : asc[i]=0x48; break;
+         case 'I'  : asc[i]=0x49; break;
+         case 'J'  : asc[i]=0x4A; break;
+         case 'K'  : asc[i]=0x4B; break;
+         case 'L'  : asc[i]=0x4C; break;
+         case 'M'  : asc[i]=0x4D; break;
+         case 'N'  : asc[i]=0x4E; break;
+         case 'O'  : asc[i]=0x4F; break;
+
+         case 'P'  : asc[i]=0x50; break;
+         case 'Q'  : asc[i]=0x51; break;
+         case 'R'  : asc[i]=0x52; break;
+         case 'S'  : asc[i]=0x53; break;
+         case 'T'  : asc[i]=0x54; break;
+         case 'U'  : asc[i]=0x55; break;
+         case 'V'  : asc[i]=0x56; break;
+         case 'W'  : asc[i]=0x57; break;
+         case 'X'  : asc[i]=0x58; break;
+         case 'Y'  : asc[i]=0x59; break;
+         case 'Z'  : asc[i]=0x5A; break;
+         case '_'  : asc[i]=0x5F; break;
+
+         case 'a'  : asc[i]=0x61; break;
+         case 'b'  : asc[i]=0x62; break;
+         case 'c'  : asc[i]=0x63; break;
+         case 'd'  : asc[i]=0x64; break;
+         case 'e'  : asc[i]=0x65; break;
+         case 'f'  : asc[i]=0x66; break;
+         case 'g'  : asc[i]=0x67; break;
+         case 'h'  : asc[i]=0x68; break;
+         case 'i'  : asc[i]=0x69; break;
+         case 'j'  : asc[i]=0x6A; break;
+         case 'k'  : asc[i]=0x6B; break;
+         case 'l'  : asc[i]=0x6C; break;
+         case 'm'  : asc[i]=0x6D; break;
+         case 'n'  : asc[i]=0x6E; break;
+         case 'o'  : asc[i]=0x6F; break;
+
+         case 'p'  : asc[i]=0x70; break;
+         case 'q'  : asc[i]=0x71; break;
+         case 'r'  : asc[i]=0x72; break;
+         case 's'  : asc[i]=0x73; break;
+         case 't'  : asc[i]=0x74; break;
+         case 'u'  : asc[i]=0x75; break;
+         case 'v'  : asc[i]=0x76; break;
+         case 'w'  : asc[i]=0x77; break;
+         case 'x'  : asc[i]=0x78; break;
+         case 'y'  : asc[i]=0x79; break;
+         case 'z'  : asc[i]=0x7A; break;
+         default   :
+            if (chr[i]==C_EXC) {
+               asc[i]=0x21;
+            } else if (chr[i]==C_HSH) {
+               asc[i]=0x23;
+            } else if (chr[i]==C_DLR) {
+               asc[i]=0x24;
+            } else if (chr[i]==C_ATS) {
+               asc[i]=0x40;
+            } else if (chr[i]==C_SBO) {
+               asc[i]=0x5B;
+            } else if (chr[i]==C_BSL) {
+               asc[i]=0x5C;
+            } else if (chr[i]==C_SBC) {
+               asc[i]=0x5D;
+            } else if (chr[i]==C_CRT) {
+               asc[i]=0x5E;
+            } else if (chr[i]==C_GRV) {
+               asc[i]=0x60;
+            } else if (chr[i]==C_CBO) {
+               asc[i]=0x7B;
+            } else if (chr[i]==C_VBR) {
+               asc[i]=0x7C;
+            } else if (chr[i]==C_CBC) {
+               asc[i]=0x7D;
+            } else if (chr[i]==C_TLD) {
+               asc[i]=0x7E;
+            } else {
+               asc[i]=0x5F;
+            }
+            break;
+      }
+   }
+}
+
+extern unsigned int ebc2chr(
+   const char*          ebc,
+         char*          chr,
+   const unsigned int   len)
+{
+   unsigned int         i;
+   const char           ebc_map[256]={
+   0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,'\r',0x0, 0x0,
+   0x0,0x0,0x0,0x0,0x0,'\n',0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0, 0x0, 0x0,
+   0x0,0x0,0x0,0x0,0x0,'\n',0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0, 0x0, 0x0,
+   0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0, 0x0, 0x0,
+   ' ',0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,'.','<','(', '+', '|',   /*nodiac*/
+   '&',0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,'!','$','*',')', ';', '^',   /*nodiac*/
+   '-','/',0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,',','%','_', '>', '\?',  /*nodiac*/
+   0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,'`',':','#','@','\'','=','\"',   /*nodiac*/
+   0x0,'a','b','c','d','e','f','g','h','i',0x0,0x0,0x0,0x0, 0x0, 0x0,   /*nodiac*/
+   0x0,'j','k','l','m','n','o','p','q','r',0x0,0x0,0x0,0x0, 0x0, 0x0,   /*nodiac*/
+   0x0,'~','s','t','u','v','w','x','y','z',0x0,0x0,0x0,'[', 0x0, 0x0,   /*nodiac*/
+   0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,']', 0x0, 0x0,   /*nodiac*/
+   '{','A','B','C','D','E','F','G','H','I',0x0,0x0,0x0,0x0, 0x0, 0x0,   /*nodiac*/
+   '}','J','K','L','M','N','O','P','Q','R',0x0,0x0,0x0,0x0, 0x0, 0x0,   /*nodiac*/
+   '\\',0x0,'S','T','U','V','W','X','Y','Z',0x0,0x0,0x0,0x0, 0x0, 0x0,  /*nodiac*/
+   '0','1','2','3','4','5','6','7','8','9',0x0,0x0,0x0,0x0, 0x0, 0x0};  /*nodiac*/
+   for (i=0;i<len;i++) {
+      chr[i]=ebc_map[*((unsigned char*)(ebc+i))];
+      switch (chr[i]) {
+      case '!' : chr[i]=C_EXC; break;  /*nodiac*/
+      case '$' : chr[i]=C_DLR; break;  /*nodiac*/
+      case '#' : chr[i]=C_HSH; break;  /*nodiac*/
+      case '@' : chr[i]=C_ATS; break;  /*nodiac*/
+      case '[' : chr[i]=C_SBO; break;  /*nodiac*/
+      case '\\': chr[i]=C_BSL; break;  /*nodiac*/
+      case ']' : chr[i]=C_SBC; break;  /*nodiac*/
+      case '^' : chr[i]=C_CRT; break;  /*nodiac*/
+      case '`' : chr[i]=C_GRV; break;  /*nodiac*/
+      case '{' : chr[i]=C_CBO; break;  /*nodiac*/
+      case '|' : chr[i]=C_VBR; break;  /*nodiac*/
+      case '}' : chr[i]=C_CBC; break;  /*nodiac*/
+      case '~' : chr[i]=C_TLD; break;  /*nodiac*/
+      case 0x0 : return(i);
+      }
+   }
+   return(i);
+}
+
+extern void ebc_chr(
+   const char*          ebc,
+         char*          chr,
+   const unsigned int   len)
+{
+   unsigned int         i;
+   const char           ebc_map[256]={
+   '_','_','_','_','_','_','_','_','_','_','_','_','_','\r', '_', '_',  /*nodiac*/
+   '_','_','_','_','_','\n','_','_','_','_','_','_','_','_', '_', '_',  /*nodiac*/
+   '_','_','_','_','_','\n','_','_','_','_','_','_','_','_', '_', '_',  /*nodiac*/
+   '_','_','_','_','_','_','_','_','_','_','_','_','_','_', '_', '_',   /*nodiac*/
+   ' ','_','_','_','_','_','_','_','_','_','_','.','<','(', '+', '|',   /*nodiac*/
+   '&','_','_','_','_','_','_','_','_','_','!','$','*',')', ';', '^',   /*nodiac*/
+   '-','/','_','_','_','_','_','_','_','_','_',',','%','_', '>', '\?',  /*nodiac*/
+   '_','_','_','_','_','_','_','_','_','`',':','#','@','\'','=','\"',   /*nodiac*/
+   '_','a','b','c','d','e','f','g','h','i','_','_','_','_', '_', '_',   /*nodiac*/
+   '_','j','k','l','m','n','o','p','q','r','_','_','_','_', '_', '_',   /*nodiac*/
+   '_','~','s','t','u','v','w','x','y','z','_','_','_','[', '_', '_',   /*nodiac*/
+   '_','_','_','_','_','_','_','_','_','_','_','_','_',']', '_', '_',   /*nodiac*/
+   '{','A','B','C','D','E','F','G','H','I','_','_','_','_', '_', '_',   /*nodiac*/
+   '}','J','K','L','M','N','O','P','Q','R','_','_','_','_', '_', '_',   /*nodiac*/
+   '\\','_','S','T','U','V','W','X','Y','Z','_','_','_','_', '_', '_',  /*nodiac*/
+   '0','1','2','3','4','5','6','7','8','9','_','_','_','_', '_', '_'};  /*nodiac*/
+   for (i=0;i<len;i++) {
+      chr[i]=ebc_map[*((unsigned char*)(ebc+i))];
+      switch (chr[i]) {
+      case '!' : chr[i]=C_EXC; break;  /*nodiac*/
+      case '$' : chr[i]=C_DLR; break;  /*nodiac*/
+      case '#' : chr[i]=C_HSH; break;  /*nodiac*/
+      case '@' : chr[i]=C_ATS; break;  /*nodiac*/
+      case '[' : chr[i]=C_SBO; break;  /*nodiac*/
+      case '\\': chr[i]=C_BSL; break;  /*nodiac*/
+      case ']' : chr[i]=C_SBC; break;  /*nodiac*/
+      case '^' : chr[i]=C_CRT; break;  /*nodiac*/
+      case '`' : chr[i]=C_GRV; break;  /*nodiac*/
+      case '{' : chr[i]=C_CBO; break;  /*nodiac*/
+      case '|' : chr[i]=C_VBR; break;  /*nodiac*/
+      case '}' : chr[i]=C_CBC; break;  /*nodiac*/
+      case '~' : chr[i]=C_TLD; break;  /*nodiac*/
+      }
+   }
+}
+
+extern void chr_ebc(
+   const char*          chr,
+         char*          ebc,
+   const unsigned int   len)
+{
+   unsigned int         i;
+   for (i=0;i<len;i++) {
+      switch (chr[i]) {
+      case 0x00 : ebc[i]=0x00; break;
+      case '\n' : ebc[i]=0x25; break;
+      case '\r' : ebc[i]=0x0D; break;
+
+      case ' '  : ebc[i]=0x40; break;
+      case '\"' : ebc[i]=0x7F; break;
+      case '%'  : ebc[i]=0x6C; break;
+      case '&'  : ebc[i]=0x50; break;
+      case '\'' : ebc[i]=0x7D; break;
+      case '('  : ebc[i]=0x4D; break;
+      case ')'  : ebc[i]=0x5D; break;
+      case '*'  : ebc[i]=0x5C; break;
+      case '+'  : ebc[i]=0x4E; break;
+      case ','  : ebc[i]=0x6B; break;
+      case '-'  : ebc[i]=0x60; break;
+      case '.'  : ebc[i]=0x4B; break;
+      case '/'  : ebc[i]=0x61; break;
+
+      case '0'  : ebc[i]=0xF0; break;
+      case '1'  : ebc[i]=0xF1; break;
+      case '2'  : ebc[i]=0xF2; break;
+      case '3'  : ebc[i]=0xF3; break;
+      case '4'  : ebc[i]=0xF4; break;
+      case '5'  : ebc[i]=0xF5; break;
+      case '6'  : ebc[i]=0xF6; break;
+      case '7'  : ebc[i]=0xF7; break;
+      case '8'  : ebc[i]=0xF8; break;
+      case '9'  : ebc[i]=0xF9; break;
+      case ':'  : ebc[i]=0x7A; break;
+      case ';'  : ebc[i]=0x5E; break;
+      case '<'  : ebc[i]=0x4C; break;
+      case '='  : ebc[i]=0x7E; break;
+      case '>'  : ebc[i]=0x6E; break;
+      case '?'  : ebc[i]=0x6F; break;
+
+      case 'A'  : ebc[i]=0xC1; break;
+      case 'B'  : ebc[i]=0xC2; break;
+      case 'C'  : ebc[i]=0xC3; break;
+      case 'D'  : ebc[i]=0xC4; break;
+      case 'E'  : ebc[i]=0xC5; break;
+      case 'F'  : ebc[i]=0xC6; break;
+      case 'G'  : ebc[i]=0xC7; break;
+      case 'H'  : ebc[i]=0xC8; break;
+      case 'I'  : ebc[i]=0xC9; break;
+      case 'J'  : ebc[i]=0xD1; break;
+      case 'K'  : ebc[i]=0xD2; break;
+      case 'L'  : ebc[i]=0xD3; break;
+      case 'M'  : ebc[i]=0xD4; break;
+      case 'N'  : ebc[i]=0xD5; break;
+      case 'O'  : ebc[i]=0xD6; break;
+
+      case 'P'  : ebc[i]=0xD7; break;
+      case 'Q'  : ebc[i]=0xD8; break;
+      case 'R'  : ebc[i]=0xD9; break;
+      case 'S'  : ebc[i]=0xE2; break;
+      case 'T'  : ebc[i]=0xE3; break;
+      case 'U'  : ebc[i]=0xE4; break;
+      case 'V'  : ebc[i]=0xE5; break;
+      case 'W'  : ebc[i]=0xE6; break;
+      case 'X'  : ebc[i]=0xE7; break;
+      case 'Y'  : ebc[i]=0xE8; break;
+      case 'Z'  : ebc[i]=0xE9; break;
+      case '_'  : ebc[i]=0x6D; break;
+
+      case 'a'  : ebc[i]=0x81; break;
+      case 'b'  : ebc[i]=0x82; break;
+      case 'c'  : ebc[i]=0x83; break;
+      case 'd'  : ebc[i]=0x84; break;
+      case 'e'  : ebc[i]=0x85; break;
+      case 'f'  : ebc[i]=0x86; break;
+      case 'g'  : ebc[i]=0x87; break;
+      case 'h'  : ebc[i]=0x88; break;
+      case 'i'  : ebc[i]=0x89; break;
+      case 'j'  : ebc[i]=0x91; break;
+      case 'k'  : ebc[i]=0x92; break;
+      case 'l'  : ebc[i]=0x93; break;
+      case 'm'  : ebc[i]=0x94; break;
+      case 'n'  : ebc[i]=0x95; break;
+      case 'o'  : ebc[i]=0x96; break;
+
+      case 'p'  : ebc[i]=0x97; break;
+      case 'q'  : ebc[i]=0x98; break;
+      case 'r'  : ebc[i]=0x99; break;
+      case 's'  : ebc[i]=0xA2; break;
+      case 't'  : ebc[i]=0xA3; break;
+      case 'u'  : ebc[i]=0xA4; break;
+      case 'v'  : ebc[i]=0xA5; break;
+      case 'w'  : ebc[i]=0xA6; break;
+      case 'x'  : ebc[i]=0xA7; break;
+      case 'y'  : ebc[i]=0xA8; break;
+      case 'z'  : ebc[i]=0xA9; break;
+
+      default   :
+         if (chr[i]==C_EXC) {
+            ebc[i]=0x5A;
+         } else if (chr[i]==C_HSH) {
+            ebc[i]=0x7B;
+         } else if (chr[i]==C_DLR) {
+            ebc[i]=0x5B;
+         } else if (chr[i]==C_ATS) {
+            ebc[i]=0x7C;
+         } else if (chr[i]==C_SBO) {
+            ebc[i]=0xAD;
+         } else if (chr[i]==C_BSL) {
+            ebc[i]=0xE0;
+         } else if (chr[i]==C_SBC) {
+            ebc[i]=0xBD;
+         } else if (chr[i]==C_CRT) {
+            ebc[i]=0x5F;
+         } else if (chr[i]==C_GRV) {
+            ebc[i]=0x79;
+         } else if (chr[i]==C_CBO) {
+            ebc[i]=0xC0;
+         } else if (chr[i]==C_VBR) {
+            ebc[i]=0x4F;
+         } else if (chr[i]==C_CBC) {
+            ebc[i]=0xD0;
+         } else if (chr[i]==C_TLD) {
+            ebc[i]=0xA1;
+         } else {
+            ebc[i]=0x6D;
+         }
+         break;
+      }
+   }
+}
+
 extern int file2str(void* hdl, const char* filename, char** buf, int* bufsize, char* errmsg, const int msgsiz) {
    int siLen=0, siHlp;
    char* pcHlp;
@@ -2999,11 +3414,8 @@ extern int resetEnvars(TsEnVarList** ppList) {
 }
 
 extern int readEnvars(const char* pcFil, FILE* pfOut, FILE* pfErr, TsEnVarList** ppList) {
-   int   c=0;
-   char* pcCnf;
-   char* pcTmp;
-   char  acCnf[1024];
-   FILE* pfTmp;
+   int            c=0;
+   FILE*          pfTmp;
 #if defined(__ZOS__)
    if(pcFil==NULL || pcFil[0]=='\0'){
       pfTmp = fopen_nowarn("DD:STDENV","r");
@@ -3040,27 +3452,57 @@ extern int readEnvars(const char* pcFil, FILE* pfOut, FILE* pfErr, TsEnVarList**
    }
 #else
    if(pcFil==NULL || pcFil[0]=='\0') {
-      pfTmp = fopen_nowarn(".stdenv","r");
-      if (pfTmp==NULL) {
-         char* pcHom=dhomedir(TRUE);
-         if (pcHom!=NULL) {
-            char*    pcFil=NULL;
-            size_t   szFil=0;
-            srprintf(&pcFil,&szFil,strlen(pcHom),"%s.stdenv",pcHom);
-            if (pcFil!=NULL) {
-               pfTmp = fopen_nowarn(pcFil,"r");
-               free(pcFil);
+#if !defined(__USS__) && !defined(__ZOS__) && defined(__FL5__)
+      if (siGetMFNameNative("DD:STDENV", &pcFil, NULL)==0) {
+         pfTmp = fopen_nowarn(pcFil,"r");
+         if (pfTmp==NULL) {
+#endif
+            pfTmp = fopen_nowarn(".stdenv","r");
+            if (pfTmp==NULL) {
+               char* pcHom=dhomedir(TRUE);
+               if (pcHom!=NULL) {
+                  char*    pcFil=NULL;
+                  size_t   szFil=0;
+                  srprintf(&pcFil,&szFil,strlen(pcHom),"%s.stdenv",pcHom);
+                  if (pcFil!=NULL) {
+                     pfTmp = fopen_nowarn(pcFil,"r");
+                     free(pcFil);
+                  }
+                  free(pcHom);
+               }
             }
-            free(pcHom);
+#if !defined(__USS__) && !defined(__ZOS__) && defined(__FL5__)
          }
       }
+#endif
    } else {
       pfTmp=fopen_nowarn(pcFil,"r");
    }
 #endif
    if (pfTmp!=NULL) { /*Ignore if open failed*/
-      memset(acCnf,0,sizeof(acCnf));
+      int            x=0;
+      int            a=0;
+      int            e=0;
+      char*          pcCnf;
+      char*          pcTmp;
+      char           acCnf[1024]="";
+      unsigned char* pcHlp;
       while (fgets(acCnf,sizeof(acCnf)-1,pfTmp)!=NULL) {
+         for (e=0,pcHlp=(unsigned char*)acCnf;*pcHlp;pcHlp++) {
+            if (*pcHlp>=0x80) x++;
+            if (*pcHlp==0x7E) e++;
+            if (*pcHlp==0x3D) a++;
+         }
+         if (!a && e && x) {
+            if ('0'!=0xF0) {
+               ebc_chr(acCnf,acCnf,strlen(acCnf));
+            }
+         } else {
+            if ('0'!=0x30) {
+               asc_chr(acCnf,acCnf,strlen(acCnf));
+            }
+         }
+
          pcCnf=acCnf+strlen(acCnf);
          while (isspace(*(pcCnf-1))) {
             pcCnf--; *pcCnf=EOS;

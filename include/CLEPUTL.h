@@ -472,13 +472,81 @@ extern unsigned int chr2asc(
    const unsigned int   len);
 
 /**
- * Convert character string to EBCDIC(only non variant characters) and stops at not convertible chars
+ * Convert character string to EBCDIC (only non variant characters) and stops at not convertible chars
  * @param chr  character string
  * @param ebc  EBCDIC string
  * @param len  length
  * @return     amount of converted bytes
  */
 extern unsigned int chr2ebc(
+   const char*          chr,
+         char*          ebc,
+   const unsigned int   len);
+
+/**
+ * Convert ASCII to character string (only non variant characters) and stops at not convertible chars
+ * @param asc  ASCII string
+ * @param chr  character string
+ * @param len  length
+ * @return     amount of converted bytes
+ */
+extern unsigned int asc2chr(
+   const char*          asc,
+         char*          chr,
+   const unsigned int   len);
+
+/**
+ * Convert ASCII to character string (only non variant characters) and replace not convertible chars with '_'
+ * @param asc  ASCII string
+ * @param chr  character string
+ * @param len  length
+ */
+extern void asc_chr(
+   const char*          asc,
+         char*          chr,
+   const unsigned int   len);
+
+/**
+ * Convert character string to US-ASCII(UTF-8) and replace not convertible chars with '_'
+ * @param chr  character string
+ * @param asc  ASCII string
+ * @param len  length
+ */
+extern void chr_asc(
+   const char*          chr,
+         char*          asc,
+   const unsigned int   len);
+
+/**
+ * Convert EBCDIC to character string (only non variant characters) and stops at not convertible chars
+ * @param ebc  EBCDIC string
+ * @param chr  character string
+ * @param len  length
+ * @return     amount of converted bytes
+ */
+extern unsigned int ebc2chr(
+   const char*          ebc,
+         char*          chr,
+   const unsigned int   len);
+
+/**
+ * Convert EBCDIC to character string (only non variant characters) and replace not convertible chars with '_'
+ * @param ebc  EBCDIC string
+ * @param chr  character string
+ * @param len  length
+ */
+extern void ebc_chr(
+   const char*          ebc,
+         char*          chr,
+   const unsigned int   len);
+
+/**
+ * Convert character string to EBCDIC (only non variant characters) and replace not convertible chars with '_'
+ * @param chr  character string
+ * @param ebc  EBCDIC string
+ * @param len  length
+ */
+extern void chr_ebc(
    const char*          chr,
          char*          ebc,
    const unsigned int   len);
