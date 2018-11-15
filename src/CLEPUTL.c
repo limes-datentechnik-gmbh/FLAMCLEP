@@ -3415,7 +3415,7 @@ extern int resetEnvars(TsEnVarList** ppList) {
 
 extern int readEnvars(const char* pcFil, FILE* pfOut, FILE* pfErr, TsEnVarList** ppList) {
    int            c=0;
-   FILE*          pfTmp;
+   FILE*          pfTmp=NULL;
 #if defined(__ZOS__)
    if(pcFil==NULL || pcFil[0]=='\0'){
       pfTmp = fopen_nowarn("DD:STDENV","r");
@@ -3455,26 +3455,24 @@ extern int readEnvars(const char* pcFil, FILE* pfOut, FILE* pfErr, TsEnVarList**
 #if !defined(__USS__) && !defined(__ZOS__) && defined(__FL5__)
       if (siGetMFNameNative("DD:STDENV", &pcFil, NULL)==0) {
          pfTmp = fopen_nowarn(pcFil,"r");
-         if (pfTmp==NULL) {
-#endif
-            pfTmp = fopen_nowarn(".stdenv","r");
-            if (pfTmp==NULL) {
-               char* pcHom=dhomedir(TRUE);
-               if (pcHom!=NULL) {
-                  char*    pcFil=NULL;
-                  size_t   szFil=0;
-                  srprintf(&pcFil,&szFil,strlen(pcHom),"%s.stdenv",pcHom);
-                  if (pcFil!=NULL) {
-                     pfTmp = fopen_nowarn(pcFil,"r");
-                     free(pcFil);
-                  }
-                  free(pcHom);
-               }
-            }
-#if !defined(__USS__) && !defined(__ZOS__) && defined(__FL5__)
-         }
       }
 #endif
+      if (pfTmp==NULL) {
+         pfTmp = fopen_nowarn(".stdenv","r");
+         if (pfTmp==NULL) {
+            char* pcHom=dhomedir(TRUE);
+            if (pcHom!=NULL) {
+               char*    pcFil=NULL;
+               size_t   szFil=0;
+               srprintf(&pcFil,&szFil,strlen(pcHom),"%s.stdenv",pcHom);
+               if (pcFil!=NULL) {
+                  pfTmp = fopen_nowarn(pcFil,"r");
+                  free(pcFil);
+               }
+               free(pcHom);
+            }
+         }
+      }
    } else {
       pfTmp=fopen_nowarn(pcFil,"r");
    }
