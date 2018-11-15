@@ -3481,73 +3481,117 @@ extern int readEnvars(const char* pcFil, FILE* pfOut, FILE* pfErr, TsEnVarList**
       int            x=0;
       int            a=0;
       int            e=0;
-      char*          pcCnf;
-      char*          pcTmp;
-      char           acCnf[1024]="";
-      unsigned char* pcHlp;
-      while (fgets(acCnf,sizeof(acCnf)-1,pfTmp)!=NULL) {
-         for (e=0,pcHlp=(unsigned char*)acCnf;*pcHlp;pcHlp++) {
-            if (*pcHlp>=0x80) x++;
-            if (*pcHlp==0x7E) e++;
-            if (*pcHlp==0x3D) a++;
+      unsigned int   uiLen;
+      unsigned int   uiPos=0;
+      unsigned int   uiSiz=4096;
+      char*          pcBuf=malloc(uiSiz+1);
+      char*          pcHlp;
+      char*          pcKey;
+      char*          pcVal;
+      char*          pcEnd;
+      char*          pcTws;
+// read the file into buffer
+      if (pcBuf==NULL) {
+         fclose(pfTmp);
+         return(-1*CLERTC_MEM);
+      }
+      uiLen=fread(pcBuf+uiPos,1,4096,pfTmp);
+      while(uiLen==4096) {
+         uiSiz+=4096;
+         pcHlp=realloc(pcBuf,uiSiz+1);
+         if (pcHlp==NULL) {
+            free(pcBuf);
+            fclose(pfTmp);
+            return(-1*CLERTC_MEM);
          }
-         if (!a && e && x) {
-            if ('0'!=0xF0) {
-               ebc_chr(acCnf,acCnf,strlen(acCnf));
-            }
-         } else {
-            if ('0'!=0x30) {
-               asc_chr(acCnf,acCnf,strlen(acCnf));
-            }
+         pcBuf=pcHlp; uiPos+=uiLen;
+         uiLen=fread(pcBuf+uiPos,1,4096,pfTmp);
+      }
+      uiLen+=uiPos; pcBuf[uiLen]=0x00;
+      fclose(pfTmp);
+// EBcdic/ASCII detection and conversion to local chatacter set
+      for (pcHlp=pcBuf;*pcHlp && e==0 && a==0;pcHlp++) {
+         if ((unsigned char)(*pcHlp)>=0x80U) x++;
+         if ((unsigned char)(*pcHlp)==0x7EU) e++;
+         if ((unsigned char)(*pcHlp)==0x3DU) a++;
+      }
+      if (!a && e && x) {
+         // cppcheck-suppress knownConditionTrueFalse
+         if ('0'!=0xF0) {
+            ebc_chr(pcBuf,pcBuf,uiLen);
          }
+      } else {
+         // cppcheck-suppress knownConditionTrueFalse
+         if ('0'!=0x30) {
+            asc_chr(pcBuf,pcBuf,uiLen);
+         }
+      }
+// parse and set environment variables
 
-         pcCnf=acCnf+strlen(acCnf);
-         while (isspace(*(pcCnf-1))) {
-            pcCnf--; *pcCnf=EOS;
+      pcHlp=pcBuf;
+      pcEnd=pcBuf+uiLen;
+      while(pcHlp<pcEnd) {
+         while (pcHlp<pcEnd && isspace(*pcHlp)) {
+            pcHlp++;
          }
-         pcCnf=strchr(acCnf,'=');
-         if (pcCnf!=NULL) {
-            *pcCnf=0x00;
-            for (pcTmp=acCnf;isspace(*pcTmp);pcTmp++);
-            if (*pcTmp) {
-               int siErr=envarInsert(ppList,pcTmp,GETENV(pcTmp));
-               if (siErr) {
-                  if(pfErr!=NULL){
-                     fprintf(pfErr,"Build envar list for reset failed (%s)\n",pcTmp);
-                  }
-                  fclose(pfTmp);
-                  return(-1*siErr);
+         if (pcHlp<pcEnd) {
+            pcKey=pcHlp;
+            while(pcHlp<pcEnd && *pcHlp!='=') pcHlp++;
+            if (*pcHlp=='=') {
+               *pcHlp=0x00; pcHlp++;
+               pcTws=pcKey+strlen(pcKey);
+               while (isspace(*(pcTws-1))) {
+                  pcTws--; *pcTws=EOS;
                }
-               if (SETENV(pcTmp,pcCnf+1)) {
-                  if(pfErr!=NULL){
-                     fprintf(pfErr,
-                           "Put variable (%s=%s) to environment failed (%d - %s)\n",
-                           pcTmp,pcCnf+1,errno,strerror(errno));
-                  }
-                  fclose(pfTmp);
-                  return(-1*CLERTC_SYS);
-               } else {
-                  if (strcmp(pcCnf+1,GETENV(pcTmp))) {
-                     if(pfErr!=NULL){
-                        fprintf(pfErr,
-                              "Put variable (%s=%s) to environment failed (strcmp(%s,GETENV(%s)))\n",
-                              pcTmp,pcCnf+1,pcCnf+1,pcTmp);
+               while(pcHlp<pcEnd && isspace(*pcHlp)) pcHlp++;
+               if (pcHlp<pcEnd) {
+                  pcVal=pcHlp;
+#ifdef __EBCDIC__
+                  while(pcHlp<pcEnd && (*pcHlp!=';' && *pcHlp!=0x15 && *pcHlp!=0x25  && *pcHlp!=0x0D && *pcHlp!='\f')) pcHlp++;
+                  if                   (*pcHlp==';' || *pcHlp==0x15 || *pcHlp==0x25  || *pcHlp==0x0D || *pcHlp=='\f') {
+#else
+                  while(pcHlp<pcEnd && (*pcHlp!=';' && *pcHlp!='\n' && *pcHlp!='\r' && *pcHlp!='\f')) pcHlp++;
+                  if                   (*pcHlp==';' || *pcHlp=='\n' || *pcHlp=='\r' || *pcHlp=='\f') {
+#endif
+                     *pcHlp=0x00; pcHlp++;
+                     pcTws=pcVal+strlen(pcVal);
+                     while (isspace(*(pcTws-1))) {
+                        pcTws--; *pcTws=EOS;
                      }
-                     fclose(pfTmp);
-                     return(-1*CLERTC_SYS);
-                  } else {
-                     if(pfOut!=NULL){
-                        fprintf(pfOut,
-                              "Put variable (%s=%s) to environment was successful\n",
-                              pcTmp,pcCnf+1);
+                     int siErr=envarInsert(ppList,pcKey,GETENV(pcKey));
+                     if (siErr) {
+                        if(pfErr!=NULL){
+                           fprintf(pfErr,"Build envar list for reset failed (%s)\n",pcKey);
+                        }
+                        free(pcBuf);
+                        return(-1*siErr);
                      }
-                     c++;
+                     if (SETENV(pcKey,pcVal)) {
+                        if (pfErr!=NULL) {
+                           fprintf(pfErr,"Put variable (%s=%s) to environment failed (%d - %s)\n",pcKey,pcVal,errno,strerror(errno));
+                        }
+                        free(pcBuf);
+                        return(-1*CLERTC_SYS);
+                     } else {
+                        if (strcmp(pcVal,GETENV(pcKey))) {
+                           if (pfErr!=NULL) {
+                              fprintf(pfErr,"Put variable (%s=%s) to environment failed (strcmp(%s,GETENV(%s)))\n",pcKey,pcVal,pcVal,pcKey);
+                           }
+                           free(pcBuf);
+                           return(-1*CLERTC_SYS);
+                        } else {
+                           if (pfOut!=NULL) {
+                              fprintf(pfOut,"Put variable (%s=%s) to environment was successful\n",pcKey,pcVal);
+                           }
+                           c++;
+                        }
+                     }
                   }
                }
             }
          }
       }
-      fclose(pfTmp);
+      free(pcBuf);
    }
    return c;
 }
