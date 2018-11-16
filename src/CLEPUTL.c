@@ -3416,17 +3416,13 @@ extern int resetEnvars(TsEnVarList** ppList) {
 extern int readEnvars(const char* pcFil, FILE* pfOut, FILE* pfErr, TsEnVarList** ppList) {
    int            c=0;
    FILE*          pfTmp=NULL;
-#if defined(__ZOS__)
    if(pcFil==NULL || pcFil[0]=='\0'){
+#if defined(__ZOS__)
       pfTmp = fopen_nowarn("DD:STDENV","r");
       if (pfTmp==NULL) {
          pfTmp = fopen_nowarn("STDENV","r");
       }
-   } else {
-      pfTmp=fopen_nowarn(pcFil,"r");
-   }
 #elif defined (__USS__)
-   if(pcFil==NULL || pcFil[0]=='\0'){
       pfTmp = fopen_nowarn("DD:STDENV","r");
       if (pfTmp==NULL) {
          pfTmp = fopen_nowarn(".stdenv","r");
@@ -3447,16 +3443,12 @@ extern int readEnvars(const char* pcFil, FILE* pfOut, FILE* pfErr, TsEnVarList**
             }
          }
       }
-   } else {
-      pfTmp=fopen_nowarn(pcFil,"r");
-   }
 #else
-   if(pcFil==NULL || pcFil[0]=='\0') {
-#if !defined(__USS__) && !defined(__ZOS__) && defined(__FL5__)
+#  if !defined(__USS__) && !defined(__ZOS__) && defined(__FL5__)
       if (siGetMFNameNative("DD:STDENV", &pcFil, NULL)==0) {
          pfTmp = fopen_nowarn(pcFil,"r");
       }
-#endif
+#  endif
       if (pfTmp==NULL) {
          pfTmp = fopen_nowarn(".stdenv","r");
          if (pfTmp==NULL) {
@@ -3473,10 +3465,14 @@ extern int readEnvars(const char* pcFil, FILE* pfOut, FILE* pfErr, TsEnVarList**
             }
          }
       }
-   } else {
-      pfTmp=fopen_nowarn(pcFil,"r");
-   }
 #endif
+   } else {
+      char* pcHlp=dcpmapfil(pcFil);
+      if (pcHlp!=NULL) {
+         pfTmp=fopen_nowarn(pcHlp,"r");
+         free(pcHlp);
+      }
+   }
    if (pfTmp!=NULL) { /*Ignore if open failed*/
       int            x=0;
       int            a=0;
@@ -3527,7 +3523,6 @@ extern int readEnvars(const char* pcFil, FILE* pfOut, FILE* pfErr, TsEnVarList**
          }
       }
 // parse and set environment variables
-
       pcHlp=pcBuf;
       pcEnd=pcBuf+uiLen;
       while(pcHlp<pcEnd) {
