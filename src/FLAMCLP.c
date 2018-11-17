@@ -3593,7 +3593,7 @@ static int siClpScnNat(
             return CLPERR(psHdl,CLPERR_LEX,"Environment variable not terminated with '>'");
          }
          (*ppCur)++;
-         pcEnv=getenvar(pcHlp,sizeof(acHlp),acHlp);
+         pcEnv=getenvar(pcHlp,0,sizeof(acHlp),acHlp);
          pcLex=(*ppLex);
          if (pcEnv!=NULL) {
             size_t l=pcCur-psHdl->pcInp;

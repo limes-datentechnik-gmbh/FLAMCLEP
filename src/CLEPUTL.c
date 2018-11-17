@@ -1624,12 +1624,19 @@ static const char* systemsymbol(const char* symbol, int size, char* value)
    return(NULL);
 }
 
-extern char* getenvar(const char* name,size_t size,char* string)
+extern char* getenvar(const char* name,const size_t length,const size_t size,char* string)
 {
-   char acVal[255];
+   char  acNam[length+1];
+   if (length) {
+      memcpy(acNam,name,length);
+      acNam[length]=0x00;
+      name=acNam;
+   }
+   char acVal[256];
    const char* v=GETENV(name);
-   if (v==NULL) v=getjclvar(name,sizeof(acVal),acVal);
-   if (v==NULL) v=systemsymbol(name,sizeof(acVal),acVal);
+   memset(acVal,0,sizeof(acVal));
+   if (v==NULL) v=getjclvar(name,sizeof(acVal)-1,acVal);
+   if (v==NULL) v=systemsymbol(name,sizeof(acVal)-1,acVal);
    if (v!=NULL && *v) {
       size_t lv=strlen(v);
       while(lv>0 && isspace(v[lv-1])) {
@@ -1708,7 +1715,7 @@ static void rplenvar(char* name,const size_t size,const char opn, const char cls
             b[0]=c[0]=0;
             hlen=strlcpy(h,c+1,size);
             match = 1;
-            v=getenvar(b+1,size,x);
+            v=getenvar(b+1,0,size,x);
             if (v==NULL) {
                b[0]=opn; c[0]=cls; a=c+1;
                match = 0;
@@ -1741,9 +1748,10 @@ static void rplenvar(char* name,const size_t size,const char opn, const char cls
 static char* drplenvar(const char* string,const char opn, const char cls)
 {
    const char* p=string;
-   size_t      s=strlen(p)+1;
+   size_t      s=strlen(string)+1;
    char*       b=malloc(s);
    char*       r=b;
+
    if (b==NULL) return(NULL);
 
    while(p[0]) {
@@ -1754,12 +1762,9 @@ static char* drplenvar(const char* string,const char opn, const char cls)
          } else {
             char* c=strchr(p+1,cls);
             if (c!=NULL) {
-               char e[1024];
-               c[0]=0x00;
-               int    x=strlen(p)+1;
-               char*  v=getenvar(p+1,sizeof(e),e);
-               // cppcheck-suppress redundantAssignment
-               c[0]=cls;
+               char  e[1024];
+               int   x=c-(p+1);
+               char* v=getenvar(p+1,x,sizeof(e),e);
                if (v!=NULL) {
                   int   l=strlen(v);
                   char* h=realloc_nowarn(b,s+(l-x));
@@ -1817,7 +1822,7 @@ static char* rpltpl(char* string,int size,const char* templ,const char* values) 
 // dynamic version of template replacement
 static char* drpltpl(const char* templ,const char* values) {
    const char* p=templ;
-   size_t      s=strlen(p)+1;
+   size_t      s=strlen(templ)+1;
    char*       b=malloc(s);
    char*       r=b;
    if (b==NULL) return(NULL);

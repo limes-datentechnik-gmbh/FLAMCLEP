@@ -289,11 +289,12 @@ extern size_t strlcpy(char *dest, const char *src, size_t n);
 /**
  * Get environment variable and handle HOME, USER, CUSEr, Cuser, cuser, OWNER, ENVID if not defined
  * @param name environment variable name
+ * @param length optional length of the name if no zero termination (0 if zero termination)
  * @param size size of string
  * @param string containing the value for the corresponding environment variable
  * @return pointer to string
  */
-extern char* getenvar(const char* name,size_t size,char* string);
+extern char* getenvar(const char* name,const size_t length,const size_t size,char* string);
 
 /**
  * Replace all environment variables enclosed with '<' and '>' to build a string
