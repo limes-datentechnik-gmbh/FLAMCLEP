@@ -1703,18 +1703,18 @@ static void rplenvar(char* name,const size_t size,const char opn, const char cls
    char*       v;
    char*       p;
    int         match;
-   size_t      catlen, hlen, vlen;
+   ssize_t     catlen, hlen, vlen;
 
    for (b=strchr(a,opn); b!=NULL ;b=strchr(a,opn)) {
       if (b[1]==opn) {
          for (p=b;*p;p++) p[0]=p[1];
+         p[0]=0x00;
          a=b+1;
       } else {
          c=strchr(b,cls);
          if (c!=NULL) {
-            b[0]=c[0]=0;
+            b[0]=c[0]=0; match=1;
             hlen=strlcpy(h,c+1,size);
-            match = 1;
             v=getenvar(b+1,0,size,x);
             if (v==NULL) {
                b[0]=opn; c[0]=cls; a=c+1;
@@ -1722,20 +1722,12 @@ static void rplenvar(char* name,const size_t size,const char opn, const char cls
             }
             if (match) {
                vlen = strlen(v);
-               catlen = size - strlen(name) - 1;
-               if (catlen > 0)
-                  strncat(a, v, catlen);
-               else
-                  catlen = 0;
-               if (vlen >= catlen)
-                  name[size-1] = 0;
-               catlen = size - strlen(name) - 1;
-               if (catlen > 0)
-                  strncat(a, h, catlen);
-               else
-                  catlen = 0;
-               if (hlen >= catlen)
-                  name[size-1] = 0;
+               catlen = (ssize_t)size - (ssize_t)strlen(name) - 1;
+               if (catlen > 0) strncat(a, v, catlen); else catlen = 0;
+               if (vlen >= catlen) name[size-1] = 0;
+               catlen = (ssize_t)size - (ssize_t)strlen(name) - 1;
+               if (catlen > 0) strncat(a, h, catlen); else catlen = 0;
+               if (hlen >= catlen) name[size-1] = 0;
                a=b+vlen;
             }
          } else {

@@ -155,12 +155,13 @@
  * 1.2.109: Use new file2str interface
  * 1.2.110: Support callback function for file to string
  * 1.2.111: Support escaping of CLP string (&xxx; or &nnnn<...>)
+ * 1.2.112: Fix replacement of environment variables and increase amount from 32 to 256
 **/
 
-#define CLP_VSN_STR       "1.2.111"
+#define CLP_VSN_STR       "1.2.112"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        2
-#define CLP_VSN_REVISION       111
+#define CLP_VSN_REVISION       112
 
 /* Definition der Konstanten ******************************************/
 
@@ -168,7 +169,7 @@
 #define CLPMAX_HDEPTH            128
 #define CLPMAX_KYWLEN            63
 #define CLPMAX_KYWSIZ            64
-#define CLPMAX_BUFCNT            32
+#define CLPMAX_BUFCNT            256
 
 #define CLPINI_LEXSIZ            1024
 #define CLPINI_LSTSIZ            1024
@@ -3593,12 +3594,12 @@ static int siClpScnNat(
             return CLPERR(psHdl,CLPERR_LEX,"Environment variable not terminated with '>'");
          }
          (*ppCur)++;
-         pcEnv=getenvar(pcHlp,0,sizeof(acHlp),acHlp);
          pcLex=(*ppLex);
+         pcEnv=getenvar(pcLex,0,sizeof(acHlp),acHlp);
          if (pcEnv!=NULL) {
             size_t l=pcCur-psHdl->pcInp;
             if (psHdl->siBuf>=CLPMAX_BUFCNT) {
-               return CLPERR(psHdl,CLPERR_LEX,"Environment variable replacement (%s=%s) not possible (more than %d recursions)",pcLex,pcEnv,CLPMAX_BUFCNT);
+               return CLPERR(psHdl,CLPERR_LEX,"Environment variable replacement (%s=%s) not possible (more than %d replacements)",pcLex,pcEnv,CLPMAX_BUFCNT);
             }
             srprintf(&psHdl->apBuf[psHdl->siBuf],&psHdl->pzBuf[psHdl->siBuf],l+strlen(pcEnv)+strlen((*ppCur)),"%.*s%s%s",(int)l,psHdl->pcInp,pcEnv,(*ppCur));
             if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-ENVARREP\n%s %s\n%s %s\n",fpcPre(psHdl,0),psHdl->pcInp,fpcPre(psHdl,0),psHdl->apBuf[psHdl->siBuf]);
@@ -3606,6 +3607,7 @@ static int siClpScnNat(
             psHdl->pcInp=psHdl->apBuf[psHdl->siBuf];
             psHdl->pcOld=psHdl->apBuf[psHdl->siBuf]+(psHdl->pcOld-psHdl->pcInp);
             psHdl->pcRow=psHdl->apBuf[psHdl->siBuf]+(psHdl->pcRow-psHdl->pcInp);
+            psHdl->siBuf++;
             isEnv=TRUE;
          } else {
             isEnv=FALSE;
