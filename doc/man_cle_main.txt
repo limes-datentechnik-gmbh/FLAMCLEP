@@ -205,7 +205,7 @@ values.
 
 These critical characters are interpreted normally dependent on the
 environment variable LANG. If the environment variable LANG is not
-defined then the default CCSID IBM1047 (Open Systems Latin 1) is used.
+defined then the default CCSID IBM1047 (Open Systems Latin-1) is used.
 Below is the current list of supported CCSIDs on EBCDIC systems.
 
 ------------------------------------------------------------------------

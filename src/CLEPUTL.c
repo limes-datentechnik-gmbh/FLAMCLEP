@@ -822,9 +822,9 @@ extern unsigned int localccsid(void) {
          // fallback to platform default (aka. we don't know any better)
          // cppcheck-suppress knownConditionTrueFalse
          if (' ' == 0x40)
-            return CLEP_DEFAULT_CCSID_EBCDIC; // IBM-1047 (EBCDIC (Open Systems Latin 1))
+            return CLEP_DEFAULT_CCSID_EBCDIC; // IBM-1047 (EBCDIC (Open Systems Latin-1))
          else
-            return CLEP_DEFAULT_CCSID_ASCII; // ISO-8859-1 (ASCII (Latin 1))
+            return CLEP_DEFAULT_CCSID_ASCII; // ISO-8859-1 (ASCII (Latin-1))
       }
    }
 

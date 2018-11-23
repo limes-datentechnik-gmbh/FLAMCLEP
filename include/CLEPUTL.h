@@ -54,8 +54,8 @@
 #  define __PRINTF_CHECK__(A,B)
 #endif
 
-#define CLEP_DEFAULT_CCSID_ASCII     819  // "ISO8859-1" Latin 1
-#define CLEP_DEFAULT_CCSID_EBCDIC    1047 // "IBM-1047"  Open Systems Latin 1
+#define CLEP_DEFAULT_CCSID_ASCII     819  // "ISO8859-1" Latin-1
+#define CLEP_DEFAULT_CCSID_EBCDIC    1047 // "IBM-1047"  Open Systems Latin-1
 
 /** Free memory space */
 #define SAFE_FREE(x) do { if ((x) != NULL) {free((void*)(x)); (x)=NULL;} } while(0)
