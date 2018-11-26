@@ -631,6 +631,19 @@ extern int strxcmp(
 extern char* cstime(signed long long t, char* p);
 
 /**
+ * Load environment variables from buffer
+ *
+ * @param[in] uiLen Length of the buffer with environment variables
+ * @param[in] pcBuf Buffer containing list of environment variables (ASCII or EBCDIC separated by new line or semicolon)
+ * @param[in] pfOut File pointer for output messages
+ * @param[in] pfErr File pointer for error messages
+ * @param[out] ppList Pointer to an optional envar list for reset (the list and each string must freed by caller)
+ *
+ * @return    >=0 amount of successful defined environment variables else -1*CLERTCs
+ */
+extern int loadEnvars(const char uiLen, const char* pcBuf, FILE* pfOut, FILE* pfErr, TsEnVarList** ppList);
+
+/**
  * Read and set environment variables from file
  *
  * @param[in] pcFil Filename, if pcFil==NULL use "DD:STDENV" instead
