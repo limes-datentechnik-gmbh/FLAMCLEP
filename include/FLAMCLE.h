@@ -772,7 +772,8 @@ extern int siCleExecute(
     int*                          piMod,
     void*                         pvDat,
     void*                         pvF2S,
-    tpfF2S                        pfF2S);
+    tpfF2S                        pfF2S,
+    void**                        ppClp);
  /*! @endcond */
 
 #endif /*INC_CLE_H*/

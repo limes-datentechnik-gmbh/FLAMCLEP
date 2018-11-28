@@ -3494,7 +3494,8 @@ extern int siCleParseString(
    int*                          piMod,
    void*                         pvDat,
    void*                         pvF2S,
-   tpfF2S                        pfF2S)
+   tpfF2S                        pfF2S,
+   void**                        ppClp)
 {
    int                           siErr=0;
    void*                         pvHdl;
@@ -3526,7 +3527,12 @@ extern int siCleParseString(
       return siErr;
    }
    if (pfTmp!=NULL) fclose_tmp(pfTmp);
-   vdClpClose(pvHdl,CLPCLS_MTD_ALL);
+   if(ppClp==NULL){
+      vdClpClose(pvHdl,CLPCLS_MTD_ALL);
+   }else{
+      vdClpClose(pvHdl,CLPCLS_MTD_KEP);
+      *ppClp=pvHdl;
+   }
    return 0;
 }
 
