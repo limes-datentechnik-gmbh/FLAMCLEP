@@ -749,32 +749,32 @@ extern int siCleExecute(
    void*                         pvF2S,
    tpfF2S                        pfF2S);
 
- /**********************************************************************/
- /*! @cond PRIVATE */
- extern int siCleParseString(
-    const int                     uiErr,
-    char*                         pcErr,
-    const int                     isCas,
-    const int                     isPfl,
-    const int                     isEnv,
-    const int                     siMkl,
-    const char*                   pcOwn,
-    const char*                   pcPgm,
-    const char*                   pcCmd,
-    const char*                   pcMan,
-    const char*                   pcHlp,
-    const int                     isOvl,
-    const char*                   pcStr,
-    const TsClpArgument*          psTab,
-    const char*                   pcDep,
-    const char*                   pcOpt,
-    const char*                   pcEnt,
-    int*                          piMod,
-    void*                         pvDat,
-    void*                         pvF2S,
-    tpfF2S                        pfF2S,
-    void**                        ppClp);
- /*! @endcond */
+/**********************************************************************/
+/*! @cond PRIVATE */
+extern int siCleParseString(
+   const int                     uiErr,
+   char*                         pcErr,
+   const int                     isCas,
+   const int                     isPfl,
+   const int                     isEnv,
+   const int                     siMkl,
+   const char*                   pcOwn,
+   const char*                   pcPgm,
+   const char*                   pcCmd,
+   const char*                   pcMan,
+   const char*                   pcHlp,
+   const int                     isOvl,
+   const char*                   pcStr,
+   const TsClpArgument*          psTab,
+   const char*                   pcDep,
+   const char*                   pcOpt,
+   const char*                   pcEnt,
+   int*                          piMod,
+   void*                         pvDat,
+   void*                         pvF2S,
+   tpfF2S                        pfF2S,
+   void**                        ppClp);
+/*! @endcond */
 
 #endif /*INC_CLE_H*/
 
