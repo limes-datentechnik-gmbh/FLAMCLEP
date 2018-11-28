@@ -3454,7 +3454,6 @@ extern int loadEnvars(const unsigned int uiLen, const char* pcBuf, FILE* pfOut, 
          }
       }
       pcEnv[uiLen]=0x00;
-      printd("LOAD-ENVARS-BEGIN:\n%s\nLOAD-ENVARS-END\n",pcEnv);
    // parse and set environment variables
       pcHlp=pcEnv;
       pcEnd=pcEnv+uiLen;
