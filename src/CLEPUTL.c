@@ -3416,9 +3416,8 @@ extern int resetEnvars(TsEnVarList** ppList) {
 #  define IS_ENVAR_LE(c)  ((c)==';' || (c)=='\n' || (c)=='\r' || (c)=='\f')
 #endif
 
-
-
-extern int loadEnvars(const char uiLen, const char* pcBuf, FILE* pfOut, FILE* pfErr, TsEnVarList** ppList) {
+extern int loadEnvars(const unsigned int uiLen, const char* pcBuf, FILE* pfOut, FILE* pfErr, TsEnVarList** ppList) {
+   int            siErr=0;
    int            c=0;
    if (uiLen && pcBuf!=NULL) {
       int            x=0;
@@ -3454,6 +3453,8 @@ extern int loadEnvars(const char uiLen, const char* pcBuf, FILE* pfOut, FILE* pf
             memcpy(pcEnv,pcBuf,uiLen);
          }
       }
+      pcEnv[uiLen]=0x00;
+      printd("LOAD-ENVARS-BEGIN:\n%s\nLOAD-ENVARS-END\n",pcEnv);
    // parse and set environment variables
       pcHlp=pcEnv;
       pcEnd=pcEnv+uiLen;
@@ -3469,35 +3470,50 @@ extern int loadEnvars(const char uiLen, const char* pcBuf, FILE* pfOut, FILE* pf
                   pcTws--; *pcTws=0x00;
                }
                if (pcHlp<pcEnd) {
+                  while(pcHlp<pcEnd && isspace(*pcHlp) && !IS_ENVAR_LE(*pcHlp)) pcHlp++;
                   pcVal=pcHlp;
                   while(pcHlp<pcEnd && !IS_ENVAR_LE(*pcHlp)) pcHlp++;
                   *pcHlp=0x00; pcHlp++;
-                  int siErr=envarInsert(ppList,pcKey,GETENV(pcKey));
+                  pcTws=pcVal+strlen(pcVal);
+                  while (isspace(*(pcTws-1))) {
+                     pcTws--; *pcTws=EOS;
+                  }
+                  siErr=envarInsert(ppList,pcKey,GETENV(pcKey));
                   if (siErr) {
                      if(pfErr!=NULL){
                         fprintf(pfErr,"Build envar list for reset failed (%s)\n",pcKey);
                      }
-                     free(pcEnv);
-                     return(-1*siErr);
                   }
                   if (SETENV(pcKey,pcVal)) {
                      if (pfErr!=NULL) {
                         fprintf(pfErr,"Put variable (%s=%s) to environment failed (%d - %s)\n",pcKey,pcVal,errno,strerror(errno));
                      }
-                     free(pcEnv);
-                     return(-1*CLERTC_SYS);
+                     siErr=CLERTC_SYS;
                   } else {
-                     if (strcmp(pcVal,GETENV(pcKey))) {
-                        if (pfErr!=NULL) {
-                           fprintf(pfErr,"Put variable (%s=%s) to environment failed (strcmp(%s,GETENV(%s)))\n",pcKey,pcVal,pcVal,pcKey);
+                     if (strlen(pcVal)) {
+                        if (strcmp(pcVal,GETENV(pcKey))) {
+                           if (pfErr!=NULL) {
+                              fprintf(pfErr,"Put variable (%s=%s) to environment failed (strcmp(%s,GETENV(%s)))\n",pcKey,pcVal,pcVal,pcKey);
+                           }
+                           siErr=CLERTC_SYS;
+                        } else {
+                           if (pfOut!=NULL) {
+                              fprintf(pfOut,"Put variable (%s=%s) to environment was successful\n",pcKey,pcVal);
+                           }
+                           c++;
                         }
-                        free(pcEnv);
-                        return(-1*CLERTC_SYS);
                      } else {
-                        if (pfOut!=NULL) {
-                           fprintf(pfOut,"Put variable (%s=%s) to environment was successful\n",pcKey,pcVal);
+                        if (GETENV(pcKey)!=NULL) {
+                           if (pfErr!=NULL) {
+                              fprintf(pfErr,"Put variable (%s=%s(EMPTY->UNSET)) to environment failed (GETENV(%s)%c=NULL)\n",pcKey,pcVal,pcKey,C_EXC);
+                           }
+                           siErr=CLERTC_SYS;
+                        } else {
+                           if (pfOut!=NULL) {
+                              fprintf(pfOut,"Un-set variable (%s=%s(EMPTY->UNSET)) from environment was successful\n",pcKey,pcVal);
+                           }
+                           c++;
                         }
-                        c++;
                      }
                   }
                }
@@ -3506,7 +3522,7 @@ extern int loadEnvars(const char uiLen, const char* pcBuf, FILE* pfOut, FILE* pf
       }
       free(pcEnv);
    }
-   return c;
+   return((siErr)?(-1*siErr):c);
 }
 
 extern int readEnvars(const char* pcFil, FILE* pfOut, FILE* pfErr, TsEnVarList** ppList) {

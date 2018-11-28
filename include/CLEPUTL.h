@@ -641,7 +641,7 @@ extern char* cstime(signed long long t, char* p);
  *
  * @return    >=0 amount of successful defined environment variables else -1*CLERTCs
  */
-extern int loadEnvars(const char uiLen, const char* pcBuf, FILE* pfOut, FILE* pfErr, TsEnVarList** ppList);
+extern int loadEnvars(const unsigned int uiLen, const char* pcBuf, FILE* pfOut, FILE* pfErr, TsEnVarList** ppList);
 
 /**
  * Read and set environment variables from file
