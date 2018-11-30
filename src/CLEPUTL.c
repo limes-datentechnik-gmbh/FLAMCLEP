@@ -3483,13 +3483,13 @@ extern int loadEnvars(const unsigned int uiLen, const char* pcBuf, FILE* pfOut, 
                         fprintf(pfErr,"Build envar list for reset failed (%s)\n",pcKey);
                      }
                   }
-                  if (SETENV(pcKey,pcVal)) {
-                     if (pfErr!=NULL) {
-                        fprintf(pfErr,"Put variable (%s=%s) to environment failed (%d - %s)\n",pcKey,pcVal,errno,strerror(errno));
-                     }
-                     siErr=CLERTC_SYS;
-                  } else {
-                     if (strlen(pcVal)) {
+                  if (*pcVal) {
+                     if (SETENV(pcKey,pcVal)) {
+                        if (pfErr!=NULL) {
+                           fprintf(pfErr,"Put variable (%s=%s) to environment failed (%d - %s)\n",pcKey,pcVal,errno,strerror(errno));
+                        }
+                        siErr=CLERTC_SYS;
+                     } else {
                         if (strcmp(pcVal,GETENV(pcKey))) {
                            if (pfErr!=NULL) {
                               fprintf(pfErr,"Put variable (%s=%s) to environment failed (strcmp(%s,GETENV(%s)))\n",pcKey,pcVal,pcVal,pcKey);
@@ -3501,15 +3501,23 @@ extern int loadEnvars(const unsigned int uiLen, const char* pcBuf, FILE* pfOut, 
                            }
                            c++;
                         }
+                     }
+
+                  } else {
+                     if (UNSETENV(pcKey)) {
+                        if (pfErr!=NULL) {
+                           fprintf(pfErr,"Remove variable (%s=%s(EMPTY->UNSET)) from environment failed (%d - %s)\n",pcKey,pcVal,errno,strerror(errno));
+                        }
+                        siErr=CLERTC_SYS;
                      } else {
                         if (GETENV(pcKey)!=NULL) {
                            if (pfErr!=NULL) {
-                              fprintf(pfErr,"Put variable (%s=%s(EMPTY->UNSET)) to environment failed (GETENV(%s)%c=NULL)\n",pcKey,pcVal,pcKey,C_EXC);
+                              fprintf(pfErr,"Remove variable (%s=%s(EMPTY->UNSET)) from environment failed (GETENV(%s)%c=NULL)\n",pcKey,pcVal,pcKey,C_EXC);
                            }
                            siErr=CLERTC_SYS;
                         } else {
                            if (pfOut!=NULL) {
-                              fprintf(pfOut,"Un-set variable (%s=%s(EMPTY->UNSET)) from environment was successful\n",pcKey,pcVal);
+                              fprintf(pfOut,"Remove variable (%s=%s(EMPTY->UNSET)) from environment was successful\n",pcKey,pcVal);
                            }
                            c++;
                         }
