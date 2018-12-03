@@ -734,6 +734,137 @@ extern char* safe_getenv(const char* name, char* buffer, size_t bufsiz) {
 
 /**********************************************************************/
 
+extern char* unEscape(const char* input, char* output)
+{
+   const char*                   i=input;
+   char*                         o=output;
+   TsDiaChr                      stDiaChr;
+   init_diachr(&stDiaChr,mapcdstr(GETENV("CLP_STRING_CCSID")));
+   while(i[0]) {
+      if (i[0]=='&') {
+         if (i[1]=='&') {
+            o[0]='&';
+            i+=2; o++;
+         } else if (toupper(i[1])=='E' && toupper(i[2])=='X' && toupper(i[3])=='C' && i[4]==';') {
+            o[0]=C_EXC;
+            i+=5; o++;
+         } else if (toupper(i[1])=='H' && toupper(i[2])=='S' && toupper(i[3])=='H' && i[4]==';') {
+            o[0]=C_HSH;
+            i+=5; o++;
+         } else if (toupper(i[1])=='D' && toupper(i[2])=='L' && toupper(i[3])=='R' && i[4]==';') {
+            o[0]=C_DLR;
+            i+=5; o++;
+         } else if (toupper(i[1])=='A' && toupper(i[2])=='T' && toupper(i[3])=='S' && i[4]==';') {
+            o[0]=C_ATS;
+            i+=5; o++;
+         } else if (toupper(i[1])=='S' && toupper(i[2])=='B' && toupper(i[3])=='O' && i[4]==';') {
+            o[0]=C_SBO;
+            i+=5; o++;
+         } else if (toupper(i[1])=='B' && toupper(i[2])=='S' && toupper(i[3])=='L' && i[4]==';') {
+            o[0]=C_BSL;
+            i+=5; o++;
+         } else if (toupper(i[1])=='S' && toupper(i[2])=='B' && toupper(i[3])=='C' && i[4]==';') {
+            o[0]=C_SBC;
+            i+=5; o++;
+         } else if (toupper(i[1])=='C' && toupper(i[2])=='R' && toupper(i[3])=='T' && i[4]==';') {
+            o[0]=C_CRT;
+            i+=5; o++;
+         } else if (toupper(i[1])=='G' && toupper(i[2])=='R' && toupper(i[3])=='V' && i[4]==';') {
+            o[0]=C_GRV;
+            i+=5; o++;
+         } else if (toupper(i[1])=='C' && toupper(i[2])=='B' && toupper(i[3])=='O' && i[4]==';') {
+            o[0]=C_CBO;
+            i+=5; o++;
+         } else if (toupper(i[1])=='V' && toupper(i[2])=='B' && toupper(i[3])=='R' && i[4]==';') {
+            o[0]=C_VBR;
+            i+=5; o++;
+         } else if (toupper(i[1])=='C' && toupper(i[2])=='B' && toupper(i[3])=='C' && i[4]==';') {
+            o[0]=C_CBC;
+            i+=5; o++;
+         } else if (toupper(i[1])=='T' && toupper(i[2])=='L' && toupper(i[3])=='D' && i[4]==';') {
+            o[0]=C_TLD;
+            i+=5; o++;
+         } else if (toupper(i[1])=='X' && isxdigit(i[2]) && isxdigit(i[3]) && i[4]==';') {
+            char h,l;
+            if (toupper(i[2])>='A' && toupper(i[2])<='F') {
+               h=(toupper(i[2])-'A')+10;
+            } else {
+               h=i[2]-'0';
+            }
+            if (toupper(i[3])>='A' && toupper(i[3])<='F') {
+               l=(toupper(i[3])-'A')+10;
+            } else {
+               l=i[3]-'0';
+            }
+            o[0]=(h<<4)+l;
+            i+=5; o++;
+         } else if (isdigit(i[1])) {
+            const char* x=i;
+            init_diachr(&stDiaChr,(unsigned int)strtol(i+1,(char**)&x,10));
+            if (x[0]==';') {
+               i=x+1;
+            } else {
+               o[0]=i[0];
+               i++; o++;
+            }
+         } else {
+            o[0]=i[0];
+            i++; o++;
+         }
+      } else if (i[0]==stDiaChr.exc[0]) {
+         o[0]=C_EXC;
+         i++; o++;
+      } else if (i[0]==stDiaChr.hsh[0]) {
+         o[0]=C_HSH;
+         i++; o++;
+      } else if (i[0]==stDiaChr.dlr[0]) {
+         o[0]=C_DLR;
+         i++; o++;
+      } else if (i[0]==stDiaChr.ats[0]) {
+         o[0]=C_ATS;
+         i++; o++;
+      } else if (i[0]==stDiaChr.sbo[0]) {
+         o[0]=C_SBO;
+         i++; o++;
+      } else if (i[0]==stDiaChr.bsl[0]) {
+         o[0]=C_BSL;
+         i++; o++;
+      } else if (i[0]==stDiaChr.sbc[0]) {
+         o[0]=C_SBC;
+         i++; o++;
+      } else if (i[0]==stDiaChr.crt[0]) {
+         o[0]=C_CRT;
+         i++; o++;
+      } else if (i[0]==stDiaChr.grv[0]) {
+         o[0]=C_GRV;
+         i++; o++;
+      } else if (i[0]==stDiaChr.cbo[0]) {
+         o[0]=C_CBO;
+         i++; o++;
+      } else if (i[0]==stDiaChr.vbr[0]) {
+         o[0]=C_VBR;
+         i++; o++;
+      } else if (i[0]==stDiaChr.cbc[0]) {
+         o[0]=C_CBC;
+         i++; o++;
+      } else if (i[0]==stDiaChr.tld[0]) {
+         o[0]=C_TLD;
+         i++; o++;
+      } else {
+         o[0]=i[0];
+         i++; o++;
+      }
+   }
+   o[0]=EOS;
+   return(output);
+}
+
+extern char* dynUnEscape(const char* input) {
+   char* output=malloc(strlen(input)+1);
+   if (output==NULL) return(NULL);
+   return(unEscape(input,output));
+}
+
 extern void fprintm(FILE* file,const char* own, const char* pgm, const char* man, const int cnt) {
    char*       hlp;
    char*       ptr;
@@ -2024,36 +2155,48 @@ static char* dadjpfx(const char* file,char** tilde)
 
 extern char* mapstr(char* string,int size)
 {
+   unEscape(string,string);
    rplenvar(string,size,'<','>');
    return(string);
 }
 
 extern char* dmapstr(const char* string,int method)
 {
-   char* h1=drplenvar(string,'<','>');
-   if (h1!=NULL){
-      switch (method) {
-      case 1: for(char* p=h1;*p;p++) *p=toupper(*p); break;
-      case 2: for(char* p=h1;*p;p++) *p=tolower(*p); break;
+   char* h0=dynUnEscape(string);
+   if (h0!=NULL) {
+      char* h1=drplenvar(h0,'<','>');
+      free(h0);
+      if (h1!=NULL){
+         switch (method) {
+         case 1: for(char* p=h1;*p;p++) *p=toupper(*p); break;
+         case 2: for(char* p=h1;*p;p++) *p=tolower(*p); break;
+         }
       }
+      return(h1);
    }
-   return(h1);
+   return(NULL);
 }
 
 extern char* dmapxml(const char* string,int method)
 {
-   char* h1=drplenvar(string,'(',')');
-   if (h1!=NULL){
-      switch (method) {
-      case 1: for(char* p=h1;*p;p++) *p=toupper(*p); break;
-      case 2: for(char* p=h1;*p;p++) *p=tolower(*p); break;
+   char* h0=dynUnEscape(string);
+   if (h0!=NULL) {
+      char* h1=drplenvar(h0,'(',')');
+      free(h0);
+      if (h1!=NULL){
+         switch (method) {
+         case 1: for(char* p=h1;*p;p++) *p=toupper(*p); break;
+         case 2: for(char* p=h1;*p;p++) *p=tolower(*p); break;
+         }
       }
+      return(h1);
    }
-   return(h1);
+   return(NULL);
 }
 
 extern char* mapfil(char* file,int size)
 {
+   unEscape(file,file);
    rplchar(file,size,C_TLD,adjpfx(file,size));
    rplenvar(file,size,'<','>');
    return(file);
@@ -2062,20 +2205,24 @@ extern char* mapfil(char* file,int size)
 extern char* dmapfil(const char* file, int method)
 {
    char* pfx="";
-   char* h1=dadjpfx(file,&pfx);
-   if (h1!=NULL) {
-      char* h2=drplchar(h1,C_TLD,pfx);
-      free(h1);
-      if (h2!=NULL) {
-         char* h3=drplenvar(h2,'<','>');
-         free(h2);
-         if (h3!=NULL){
-            switch (method) {
-            case 1: for(char* p=h3;*p;p++) *p=toupper(*p); break;
-            case 2: for(char* p=h3;*p;p++) *p=tolower(*p); break;
+   char* h0=dynUnEscape(file);
+   if (h0!=NULL) {
+      char* h1=dadjpfx(h0,&pfx);
+      free(h0);
+      if (h1!=NULL) {
+         char* h2=drplchar(h1,C_TLD,pfx);
+         free(h1);
+         if (h2!=NULL) {
+            char* h3=drplenvar(h2,'<','>');
+            free(h2);
+            if (h3!=NULL){
+               switch (method) {
+               case 1: for(char* p=h3;*p;p++) *p=toupper(*p); break;
+               case 2: for(char* p=h3;*p;p++) *p=tolower(*p); break;
+               }
             }
+            return(h3);
          }
-         return(h3);
       }
    }
    return(NULL);
@@ -2215,6 +2362,7 @@ extern char* filemode(const char* mode) {
 #endif
 
 extern char* maplab(char* label,int size, int toUpper) {
+   unEscape(label,label);
    rplchar(label,size,C_EXC,"<ENVID>");
    rplchar(label,size,C_TLD,"<SYSUID>");
    rplchar(label,size,C_CRT,"<OWNERID>");
@@ -2229,23 +2377,27 @@ extern char* maplab(char* label,int size, int toUpper) {
 
 extern char* dmaplab(const char* label, int method)
 {
-   char* h1=drplchar(label,C_EXC,"<ENVID>");
-   if (h1!=NULL) {
-      char* h2=drplchar(h1,C_TLD,"<SYSUID>");
-      free(h1);
-      if (h2!=NULL) {
-         char* h3=drplchar(h2,C_CRT,"<OWNERID>");
-         free(h2);
-         if (h3!=NULL) {
-            char* h4=drplenvar(h3,'<','>');
-            free(h3);
-            if (h4!=NULL){
-               switch (method) {
-               case 1: for(char* p=h4;*p;p++) *p=toupper(*p); break;
-               case 2: for(char* p=h4;*p;p++) *p=tolower(*p); break;
+   char* h0=dynUnEscape(label);
+   if (h0!=NULL) {
+      char* h1=drplchar(h0,C_EXC,"<ENVID>");
+      free(h0);
+      if (h1!=NULL) {
+         char* h2=drplchar(h1,C_TLD,"<SYSUID>");
+         free(h1);
+         if (h2!=NULL) {
+            char* h3=drplchar(h2,C_CRT,"<OWNERID>");
+            free(h2);
+            if (h3!=NULL) {
+               char* h4=drplenvar(h3,'<','>');
+               free(h3);
+               if (h4!=NULL){
+                  switch (method) {
+                  case 1: for(char* p=h4;*p;p++) *p=toupper(*p); break;
+                  case 2: for(char* p=h4;*p;p++) *p=tolower(*p); break;
+                  }
                }
+               return(h4);
             }
-            return(h4);
          }
       }
    }
@@ -2253,23 +2405,39 @@ extern char* dmaplab(const char* label, int method)
 }
 
 extern char* cpmaplab(char* label, int size,const char* templ, const char* values, int toUpper) {
-   rpltpl(label,size,templ,values);
-   maplab(label,size,toUpper);
-   return(label);
+   char* t0=dynUnEscape(templ);
+   char* v0=dynUnEscape(values);
+   if (t0!=NULL) {
+      if (v0!=NULL) {
+         rpltpl(label,size,t0,v0);
+         maplab(label,size,toUpper);
+         free(t0); free(v0);
+         return(label);
+      }
+      free(t0);
+   }
+   return(NULL);
 }
 
 extern char* dcpmaplab(const char* templ, const char* values, int method) {
-   char* h1=drpltpl(templ,values);
-   if (h1!=NULL) {
-      char* h2=dmaplab(h1,method);
-      free(h1);
-      return(h2);
+   char* t0=dynUnEscape(templ);
+   char* v0=dynUnEscape(values);
+   if (t0!=NULL) {
+      if (v0!=NULL) {
+         char* h1=drpltpl(t0,v0);
+         free(t0); free(v0);
+         if (h1!=NULL) {
+            char* h2=dmaplab(h1,method);
+            free(h1);
+            return(h2);
+         }
+      }
+      free(t0);
    }
    return(NULL);
 }
 
 /* implementation of the external functions ***********************************/
-
 
 extern const char* prsdstr(const char** hdl, const char* str, int len)
 {

@@ -208,6 +208,20 @@ extern char* dhomedir(const int flag);
  */
 extern char* safe_getenv(const char* name, char* buffer, size_t bufsiz);
 
+/**
+ * Un-escape a string as part of special character support in EBCDIC codepages (static version).
+ * @param input     pointer to the input string containing the escape sequences
+ * @param output    pointer to the output string for un-escaping (could be equal to the input pointer)
+ * @return          pointer to the un-escaped output or NULL if error
+ */
+extern char* unEscape(const char* input, char* output);
+
+/**
+ * Un-escape a string as part of special character support in EBCDIC codepages (dynamic version).
+ * @param input     pointer to the input string containing the escape sequences
+ * @return          pointer to the un-escaped output or NULL if error (calling application must free the memory)
+ */
+extern char* dynUnEscape(const char* input);
 
 /**
  * Works like printf but print only in debug mode.
@@ -243,7 +257,6 @@ extern int srprintc(char** buffer,size_t* size,const size_t expansion,const char
  * @return          amount of characters printed (0 are mainly a error)
  */
 extern int srprintf(char** buffer,size_t* size,const size_t expansion,const char* format,...) __PRINTF_CHECK__(4, 5);
-
 
 /**
  * Prints man pages to a file, inserting owner and program name into placeholders
