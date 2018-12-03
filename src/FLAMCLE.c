@@ -476,9 +476,9 @@ static inline const char* pcMapCleRtc(int siRtc) {
       }\
    } else {\
       if (pcBld!=NULL && *pcBld) {\
-         if (pfErr!=NULL) efprintf(pfErr,"Program '%s' (Build: %s (%s %s)) run successfully\n",pcProgram,pcBld,__DATE__,__TIME__);\
+         if (pfOut!=NULL) efprintf(pfOut,"Program '%s' (Build: %s (%s %s)) run successfully\n",pcProgram,pcBld,__DATE__,__TIME__);\
       } else {\
-         if (pfErr!=NULL) efprintf(pfErr,"Program '%s' (Build: %s %s) run successfully\n",pcProgram,__DATE__,__TIME__);\
+         if (pfOut!=NULL) efprintf(pfOut,"Program '%s' (Build: %s %s) run successfully\n",pcProgram,__DATE__,__TIME__);\
       }\
    }\
    SAFE_FREE(pcHom); \
@@ -564,7 +564,7 @@ extern int siCleExecute(
 
    if (psTab==NULL || argc==0     || argv==NULL  ||  pcOwner==NULL ||  pcProgram==NULL ||  pcHlp==NULL ||
        pcDep==NULL || pcOpt==NULL || pcEnt==NULL || *pcOwner==0x00 || *pcProgram==0x00 || *pcHlp==0   ) {
-      if (pfErr!=NULL) fprintf(pfErr,"CLE parameter incorrect\n");
+      if (pfErr!=NULL) fprintf(pfErr,"CLE call parameter incorrect (NULL pointer or empty strings)\n");
       ERROR(CLERTC_FAT,NULL);
    }
 
@@ -702,10 +702,10 @@ extern int siCleExecute(
    m=GETENV("OWNERID");
    if (m==NULL || *m==0x00) {
       if (SETENV("OWNERID",pcOwn)) {
-         if (pfOut!=NULL) fprintf(pfOut,"Put variable (%s=%s) to environment failed (%d - %s)\n","OWNERID",pcOwn,errno,strerror(errno));
+         if (pfErr!=NULL) fprintf(pfErr,"Put variable (%s=%s) to environment failed (%d - %s)\n","OWNERID",pcOwn,errno,strerror(errno));
       } else {
          if (strcmp(pcOwn,GETENV("OWNERID"))) {
-            if (pfOut!=NULL) fprintf(pfOut,"Put variable (%s=%s) to environment failed (strcmp(%s,GETENV(%s)))\n","OWNERID",pcOwn,pcOwn,"OWNERID");
+            if (pfErr!=NULL) fprintf(pfErr,"Put variable (%s=%s) to environment failed (strcmp(%s,GETENV(%s)))\n","OWNERID",pcOwn,pcOwn,"OWNERID");
          } else {
 #ifdef __DEBUG__
             if (pfOut!=NULL) fprintf(pfOut,"Put variable (%s=%s) to environment was successful\n","OWNERID",pcOwn);
@@ -753,7 +753,7 @@ extern int siCleExecute(
          if (pcFil!=NULL) {
             pfTrh=fopen(pcFil,filemode("w"));
             if (pfTrh==NULL) {
-               if (pfOut!=NULL) fprintf(pfOut,"Open of trace file (\"%s\",\"%s\") failed\n",pcFil,filemode("w"));
+               if (pfErr!=NULL) fprintf(pfErr,"Open of trace file (\"%s\",\"%s\") failed\n",pcFil,filemode("w"));
             } else pfTrc=pfTrh;
             SAFE_FREE(pcFil);
          }
@@ -796,7 +796,7 @@ extern int siCleExecute(
 EVALUATE:
    if (strxcmp(isCas,argv[1],"LICENSE",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
-      //if (pfErr==NULL) pfErr=pfStd; (never read)
+      if (pfErr==NULL) pfErr=pfStd;
       if (argc==2) {
          fprintf(pfOut,"License of program '%s':\n",pcPgm);
          if (pcLic==NULL) {
@@ -806,12 +806,12 @@ EVALUATE:
          }
          ERROR(CLERTC_OK,NULL);
       }
-      fprintf(pfOut,"Syntax for built-in function 'LICENSE' not valid\n");
-      fprintf(pfOut,"%s %s LICENSE\n",pcDep,argv[0]);
+      fprintf(pfErr,"Syntax for built-in function 'LICENSE' not valid\n");
+      fprintf(pfErr,"%s %s LICENSE\n",pcDep,argv[0]);
       ERROR(CLERTC_CMD,NULL);
    } else if (strxcmp(isCas,argv[1],"VERSION",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
-      //if (pfErr==NULL) pfErr=pfStd; (never read)
+      if (pfErr==NULL) pfErr=pfStd;
       if (argc==2) {
          fprintf(pfOut,"Version for program '%s':\n",pcPgm);
          if (pcVsn==NULL) {
@@ -821,12 +821,12 @@ EVALUATE:
          }
          ERROR(CLERTC_OK,NULL);
       }
-      fprintf(pfOut,"Syntax for built-in function 'VERSION' not valid\n");
-      fprintf(pfOut,"%s %s VERSION\n",pcDep,argv[0]);
+      fprintf(pfErr,"Syntax for built-in function 'VERSION' not valid\n");
+      fprintf(pfErr,"%s %s VERSION\n",pcDep,argv[0]);
       ERROR(CLERTC_CMD,NULL);
    } else if (strxcmp(isCas,argv[1],"ABOUT",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
-      //if (pfErr==NULL) pfErr=pfStd; (never read)
+      if (pfErr==NULL) pfErr=pfStd;
       if (argc==2) {
          fprintf(pfOut,"About program '%s':\n",pcPgm);
          if (pcAbo==NULL) {
@@ -836,8 +836,8 @@ EVALUATE:
          }
          ERROR(CLERTC_OK,NULL);
       }
-      fprintf(pfOut,"Syntax for built-in function 'ABOUT' not valid\n");
-      fprintf(pfOut,"%s %s ABOUT\n",pcDep,argv[0]);
+      fprintf(pfErr,"Syntax for built-in function 'ABOUT' not valid\n");
+      fprintf(pfErr,"%s %s ABOUT\n",pcDep,argv[0]);
       ERROR(CLERTC_CMD,NULL);
    } else if (strxcmp(isCas,argv[1],"LEXEM",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
@@ -849,8 +849,8 @@ EVALUATE:
          siErr=siClpLexem(pvHdl,pfOut);
          if (siErr<0) ERROR(CLERTC_SYN,NULL); else ERROR(CLERTC_OK,NULL);
       }
-      fprintf(pfOut,"Syntax for built-in function 'LEXEM' not valid\n");
-      fprintf(pfOut,"%s %s LEXEM\n",pcDep,argv[0]);
+      fprintf(pfErr,"Syntax for built-in function 'LEXEM' not valid\n");
+      fprintf(pfErr,"%s %s LEXEM\n",pcDep,argv[0]);
       ERROR(CLERTC_CMD,NULL);
    } else if (strxcmp(isCas,argv[1],"GRAMMAR",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
@@ -862,12 +862,12 @@ EVALUATE:
          siErr=siClpGrammar(pvHdl,pfOut);
          if (siErr<0) ERROR(CLERTC_SYN,NULL); else ERROR(CLERTC_OK,NULL);
       }
-      fprintf(pfOut,"Syntax for built-in function 'GRAMMAR' not valid\n");
-      fprintf(pfOut,"%s %s GRAMMAR\n",pcDep,argv[0]);
+      fprintf(pfErr,"Syntax for built-in function 'GRAMMAR' not valid\n");
+      fprintf(pfErr,"%s %s GRAMMAR\n",pcDep,argv[0]);
       ERROR(CLERTC_CMD,NULL);
    } else if (strxcmp(isCas,argv[1],"ERRORS",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
-      //if (pfErr==NULL) pfErr=pfStd; (never read)
+      if (pfErr==NULL) pfErr=pfStd;
       if (argc==2) {
          fprintf(pfOut,"\n");
          fprintf(pfOut,"Return/condition/exit codes of the executable\n");
@@ -884,17 +884,15 @@ EVALUATE:
          }
          ERROR(CLERTC_OK,NULL);
       }
-      fprintf(pfOut,"Syntax for built-in function 'ERRORS' not valid\n");
-      fprintf(pfOut,"%s %s ERRORS\n",pcDep,argv[0]);
+      fprintf(pfErr,"Syntax for built-in function 'ERRORS' not valid\n");
+      fprintf(pfErr,"%s %s ERRORS\n",pcDep,argv[0]);
       ERROR(CLERTC_CMD,NULL);
    } else if (strxcmp(isCas,argv[1],"SYNTAX",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
       if (pfErr==NULL) pfErr=pfStd;
       if (argc==2) {
-         if (pfOut!=NULL) {
-            fprintf(pfOut,"Syntax for program '%s':\n",pcPgm);
-            vdPrnStaticSyntax(pfOut,psTab,argv[0],pcDep,pcOpt);
-         }
+         fprintf(pfOut,"Syntax for program '%s':\n",pcPgm);
+         vdPrnStaticSyntax(pfOut,psTab,argv[0],pcDep,pcOpt);
          ERROR(CLERTC_OK,NULL);
       } else if (argc>=3) {
          if (argc==3) {
@@ -923,21 +921,21 @@ EVALUATE:
             } else if (strxcmp(isCas,argv[3],"DEPTH9",0,0,FALSE)==0) {
                siDep=9;
             } else {
-               fprintf(pfOut,"Syntax for built-in function 'SYNTAX' not valid\n");
+               fprintf(pfErr,"Syntax for built-in function 'SYNTAX' not valid\n");
                for (i=0;psTab[i].pcKyw!=NULL ;i++) {
                   if (psTab[i].siFlg) {
-                     fprintf(pfOut,"%s %s SYNTAX %s",pcDep,argv[0],psTab[i].pcKyw);
-                     efprintf(pfOut,"[.path] [DEPTH1 | DEPTH2 | ... | DEPTH9 | ALL]\n");
+                     fprintf(pfErr,"%s %s SYNTAX %s",pcDep,argv[0],psTab[i].pcKyw);
+                     efprintf(pfErr,"[.path] [DEPTH1 | DEPTH2 | ... | DEPTH9 | ALL]\n");
                   }
                }
                ERROR(CLERTC_CMD,NULL);
             }
          } else {
-            fprintf(pfOut,"Syntax for built-in function 'SYNTAX' not valid\n");
+            fprintf(pfErr,"Syntax for built-in function 'SYNTAX' not valid\n");
             for (i=0;psTab[i].pcKyw!=NULL ;i++) {
                if (psTab[i].siFlg) {
-                  fprintf(pfOut,"%s %s SYNTAX %s",pcDep,argv[0],psTab[i].pcKyw);
-                  efprintf(pfOut,"[.path] [DEPTH1 | DEPTH2 | ... | DEPTH9 | ALL]\n");
+                  fprintf(pfErr,"%s %s SYNTAX %s",pcDep,argv[0],psTab[i].pcKyw);
+                  efprintf(pfErr,"[.path] [DEPTH1 | DEPTH2 | ... | DEPTH9 | ALL]\n");
                }
             }
             ERROR(CLERTC_CMD,NULL);
@@ -971,11 +969,11 @@ EVALUATE:
             }
          }
       }
-      fprintf(pfOut,"Syntax for built-in function 'SYNTAX' not valid\n");
+      fprintf(pfErr,"Syntax for built-in function 'SYNTAX' not valid\n");
       for (i=0;psTab[i].pcKyw!=NULL ;i++) {
          if (psTab[i].siFlg) {
-            fprintf(pfOut,"%s %s SYNTAX %s\n",pcDep,argv[0],psTab[i].pcKyw);
-            efprintf(pfOut,"[.path] [DEPTH1 | DEPTH2 | ... | DEPTH9 | ALL]\n");
+            fprintf(pfErr,"%s %s SYNTAX %s\n",pcDep,argv[0],psTab[i].pcKyw);
+            efprintf(pfErr,"[.path] [DEPTH1 | DEPTH2 | ... | DEPTH9 | ALL]\n");
          }
       }
       ERROR(CLERTC_CMD,NULL);
@@ -1019,21 +1017,21 @@ EVALUATE:
             } else if (strxcmp(isCas,argv[3],"ALL",0,0,FALSE)==0) {
                siDep=10;
             } else {
-               fprintf(pfOut,"Syntax for built-in function 'HELP' not valid\n");
+               fprintf(pfErr,"Syntax for built-in function 'HELP' not valid\n");
                for (i=0;psTab[i].pcKyw!=NULL ;i++) {
                   if (psTab[i].siFlg) {
-                     fprintf(pfOut,"%s %s HELP %s",pcDep,argv[0],psTab[i].pcKyw);
-                     efprintf(pfOut,"[.path] [DEPTH1 | DEPTH2 | ... | DEPTH9 | ALL] [MAN]\n");
+                     fprintf(pfErr,"%s %s HELP %s",pcDep,argv[0],psTab[i].pcKyw);
+                     efprintf(pfErr,"[.path] [DEPTH1 | DEPTH2 | ... | DEPTH9 | ALL] [MAN]\n");
                   }
                }
                ERROR(CLERTC_CMD,NULL);
             }
          } else {
-            fprintf(pfOut,"Syntax for built-in function 'HELP' not valid\n");
+            fprintf(pfErr,"Syntax for built-in function 'HELP' not valid\n");
             for (i=0;psTab[i].pcKyw!=NULL ;i++) {
                if (psTab[i].siFlg) {
-                  fprintf(pfOut,"%s %s HELP %s",pcDep,argv[0],psTab[i].pcKyw);
-                  efprintf(pfOut,"[.path] [DEPTH1 | DEPTH2 | ... | DEPTH9 | ALL] [MAN]\n");
+                  fprintf(pfErr,"%s %s HELP %s",pcDep,argv[0],psTab[i].pcKyw);
+                  efprintf(pfErr,"[.path] [DEPTH1 | DEPTH2 | ... | DEPTH9 | ALL] [MAN]\n");
                }
             }
             ERROR(CLERTC_CMD,NULL);
@@ -1077,11 +1075,11 @@ EVALUATE:
             }
          }
       }
-      fprintf(pfOut,"Syntax for built-in function 'HELP' not valid\n");
+      fprintf(pfErr,"Syntax for built-in function 'HELP' not valid\n");
       for (i=0;psTab[i].pcKyw!=NULL ;i++) {
          if (psTab[i].siFlg) {
-            fprintf(pfOut,"%s %s HELP %s\n",pcDep,argv[0],psTab[i].pcKyw);
-            efprintf(pfOut,"[.path] [DEPTH1 | DEPTH2 | ... | DEPTH9 | ALL] [MAN]\n");
+            fprintf(pfErr,"%s %s HELP %s\n",pcDep,argv[0],psTab[i].pcKyw);
+            efprintf(pfErr,"[.path] [DEPTH1 | DEPTH2 | ... | DEPTH9 | ALL] [MAN]\n");
          }
       }
       ERROR(CLERTC_CMD,NULL);
@@ -1104,13 +1102,13 @@ EVALUATE:
             *((char*)pcSgn)=EOS; pcSgn++; pcCmd=argv[2]; isMan=TRUE;
             pcFil=dcpmapfil(pcSgn);
             if (pcFil==NULL) {
-               fprintf(pfOut,"Allocation of memory for file name (%s) failed\n",pcSgn);
+               fprintf(pfErr,"Allocation of memory for file name (%s) failed\n",pcSgn);
                ERROR(CLERTC_MEM,NULL);
             }
             szFil=strlen(pcFil)+1;
             pfDoc=fopen(pcFil,filemode("w"));
             if (pfDoc==NULL) {
-               fprintf(pfOut,"Open of manual page file (\"%s\",\"%s\") failed (%d - %s)\n",pcFil,filemode("w"),errno,strerror(errno));
+               fprintf(pfErr,"Open of manual page file (\"%s\",\"%s\") failed (%d - %s)\n",pcFil,filemode("w"),errno,strerror(errno));
                ERROR(CLERTC_SYS,NULL);
             }
          } else {
@@ -1119,7 +1117,7 @@ EVALUATE:
             pfDoc=pfOut;
             srprintf(&pcFil,&szFil,0,":STDOUT:");
             if (pcFil==NULL) {
-               fprintf(pfOut,"Allocation of memory for file name (:STDOUT:) failed\n");
+               fprintf(pfErr,"Allocation of memory for file name (:STDOUT:) failed\n");
                ERROR(CLERTC_MEM,NULL);
             }
          }
@@ -1302,7 +1300,7 @@ EVALUATE:
                                          isCas,isPfl,isRpl,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg,pvF2S,pfF2S);
                   if (siErr) ERROR(siErr,NULL);
                   sprintf(acPat,"%s.%s",pcDef,pcCmd);
-                  fprintf(pfOut,"Manual page fo'argument '%s':\n\n",acPat);
+                  if (pfOut!=NULL)fprintf(pfOut,"Manual page fo'argument '%s':\n\n",acPat);
                   vdPrnCommandManpage(pvHdl,pfDoc,acPat,i,isMan,TRUE);
                   if (isMan==TRUE) {
                      fprintf(pfOut,"Manual page for argument '%s' successfully written to file (%s)\n",acPat,pcFil);
@@ -1316,29 +1314,29 @@ EVALUATE:
 
          pcFil=dcpmapfil(argv[2]);
          if (pcFil==NULL) {
-            fprintf(pfOut,"Allocation of memory for file name (%s) failed\n",argv[2]);
+            fprintf(pfErr,"Allocation of memory for file name (%s) failed\n",argv[2]);
             ERROR(CLERTC_MEM,NULL);
          }
          szFil=strlen(pcFil)+1;
          isMan=TRUE;
          pfDoc=fopen(pcFil,filemode("w"));
          if (pfDoc==NULL) {
-            fprintf(pfOut,"Open of manual page file (\"%s\",\"%s\") failed (%d - %s)\n",pcFil,filemode("w"),errno,strerror(errno));
+            fprintf(pfErr,"Open of manual page file (\"%s\",\"%s\") failed (%d - %s)\n",pcFil,filemode("w"),errno,strerror(errno));
             ERROR(CLERTC_SYS,NULL);
          }
          vdCleManProgram(pfDoc,psTab,pcOwn,pcPgm,pcHlp,pcMan,pcDep,pcOpt,isMan,TRUE);
-         fprintf(pfOut,"Manual page for program '%s' successfully written to file (%s)\n",pcPgm,pcFil);
+         if (pfOut!=NULL) fprintf(pfOut,"Manual page for program '%s' successfully written to file (%s)\n",pcPgm,pcFil);
          ERROR(CLERTC_OK,NULL);
       }
-      fprintf(pfOut,"Syntax for built-in function 'MANPAGE' not valid\n");
+      fprintf(pfErr,"Syntax for built-in function 'MANPAGE' not valid\n");
       for (i=0;psTab[i].pcKyw!=NULL ;i++) {
          if (psTab[i].siFlg) {
-            fprintf(pfOut,"%s %s MANPAGE %s",pcDep,argv[0],psTab[i].pcKyw);
-            efprintf(pfOut,"[.path]\n");
+            fprintf(pfErr,"%s %s MANPAGE %s",pcDep,argv[0],psTab[i].pcKyw);
+            efprintf(pfErr,"[.path]\n");
          }
       }
-      fprintf(pfOut,"%s %s MANPAGE function\n",pcDep,argv[0]);
-      fprintf(pfOut,"%s %s MANPAGE\n",pcDep,argv[0]);
+      fprintf(pfErr,"%s %s MANPAGE function\n",pcDep,argv[0]);
+      fprintf(pfErr,"%s %s MANPAGE\n",pcDep,argv[0]);
       ERROR(CLERTC_CMD,NULL);
    } else if (strxcmp(isCas,argv[1],"GENDOCU",0,0,FALSE)==0) {
       const char*                pcCmd=NULL;
@@ -1355,14 +1353,14 @@ EVALUATE:
             if (strxcmp(isCas,argv[3],"NONBR",0,0,FALSE)==0) {
                isNbr=FALSE;
             } else {
-               fprintf(pfOut,"Syntax for built-in function 'GENDOCU' not valid\n");
+               fprintf(pfErr,"Syntax for built-in function 'GENDOCU' not valid\n");
                for (i=0;psTab[i].pcKyw!=NULL ;i++) {
                   if (psTab[i].siFlg) {
-                     fprintf(pfOut,"%s %s GENDOCU %s",pcDep,argv[0],psTab[i].pcKyw);
-                     efprintf(pfOut,"[.path]=filename [NONBR]\n");
+                     fprintf(pfErr,"%s %s GENDOCU %s",pcDep,argv[0],psTab[i].pcKyw);
+                     efprintf(pfErr,"[.path]=filename [NONBR]\n");
                   }
                }
-               fprintf(pfOut,"%s %s GENDOCU filename %cNONBR%c\n",pcDep,argv[0],C_SBO,C_SBC);
+               fprintf(pfErr,"%s %s GENDOCU filename %cNONBR%c\n",pcDep,argv[0],C_SBO,C_SBC);
                ERROR(CLERTC_CMD,NULL);
             }
          }
@@ -1374,13 +1372,13 @@ EVALUATE:
          }
          pcFil=dcpmapfil(pcSgn);
          if (pcFil==NULL) {
-            fprintf(pfOut,"Allocation of memory for file name (%s) failed\n",pcSgn);
+            fprintf(pfErr,"Allocation of memory for file name (%s) failed\n",pcSgn);
             ERROR(CLERTC_MEM,NULL);
          }
          szFil=strlen(pcFil)+1;
          pfDoc=fopen(pcFil,filemode("w"));
          if (pfDoc==NULL) {
-            fprintf(pfOut,"Open of documentation file (\"%s\",\"%s\") failed (%d - %s)\n",pcFil,filemode("w"),errno,strerror(errno));
+            fprintf(pfErr,"Open of documentation file (\"%s\",\"%s\") failed (%d - %s)\n",pcFil,filemode("w"),errno,strerror(errno));
             ERROR(CLERTC_SYS,NULL);
          }
          if (pcCmd!=NULL) {
@@ -1392,7 +1390,7 @@ EVALUATE:
                   snprintf(acNum,sizeof(acNum),"2.%d.",i+1);
                   siErr=siClpDocu(pvHdl,pfDoc,pcCmd,NULL,acNum,"COMMAND",TRUE,FALSE,isNbr);
                   if (siErr<0) {
-                     fprintf(pfOut,"Creation of documentation file (%s) failed (%d - %s)\n",pcFil,errno,strerror(errno));
+                     fprintf(pfErr,"Creation of documentation file (%s) failed (%d - %s)\n",pcFil,errno,strerror(errno));
                      ERROR(CLERTC_SYN,NULL);
                   } else {
                      if (strlen(pcCmd)==strlen(psTab[i].pcKyw)) {
@@ -1415,7 +1413,7 @@ EVALUATE:
                      sprintf(acPat,"%s.%s",pcDef,pcCmd);
                      siErr=siClpDocu(pvHdl,pfDoc,acPat,NULL,acNum,"COMMAND",TRUE,FALSE,isNbr);
                      if (siErr<0) {
-                        fprintf(pfOut,"Creation of documentation file (%s) failed (%d - %s)\n",pcFil,errno,strerror(errno));
+                        fprintf(pfErr,"Creation of documentation file (%s) failed (%d - %s)\n",pcFil,errno,strerror(errno));
                         ERROR(CLERTC_SYN,NULL);
                      } else {
                         fprintf(pfOut,"Documentation for argument '%s' successfully created\n",acPat);
@@ -1518,13 +1516,13 @@ EVALUATE:
                for (i=0;psApx[i].pcHdl!=NULL;i++) {
                   pvHdl=pvClpOpen(isCas,isPfl,isRpl,siMkl,pcOwn,psApx[i].pcRot,psApx[i].pcKyw,psApx[i].pcMan,psApx[i].pcHlp,psApx[i].isOvl,psApx[i].psTab,NULL,pfOut,pfErr,pfTrc,pfTrc,pfTrc,pfTrc,pcDep,pcOpt,pcEnt,NULL,pvF2S,pfF2S);
                   if (pvHdl==NULL) {
-                     fprintf(pfOut,"Open of parser for CLP string of appendix '%s' failed\n",psApx[i].pcRot);
+                     fprintf(pfErr,"Open of parser for CLP string of appendix '%s' failed\n",psApx[i].pcRot);
                      return(CLERTC_TAB);
                   }
                   snprintf(acNum,sizeof(acNum),"A.%d.",i+1);
                   siErr=siClpDocu(pvHdl,pfDoc,psApx[i].pcKyw,psApx[i].pcHdl,acNum,"Appendix",TRUE,FALSE,isNbr);
                   if (siErr<0) {
-                     fprintf(pfOut,"Creation of documentation file (%s) failed (%d - %s)\n",pcFil,errno,strerror(errno));
+                     fprintf(pfErr,"Creation of documentation file (%s) failed (%d - %s)\n",pcFil,errno,strerror(errno));
                      ERROR(CLERTC_SYN,NULL);
                   }
                   vdClpClose(pvHdl,CLPCLS_MTD_ALL); pvHdl=NULL;
@@ -1546,7 +1544,7 @@ EVALUATE:
             fprintf(pfDoc,"------------------------------------------------------------------------\n\n");
             efprintf(pfDoc,"indexterm:[Appendix Lexem]\n\n\n");
             if (siErr<0) {
-               fprintf(pfOut,"Creation of documentation file (%s) failed (%d - %s)\n",pcFil,errno,strerror(errno));
+               fprintf(pfErr,"Creation of documentation file (%s) failed (%d - %s)\n",pcFil,errno,strerror(errno));
                ERROR(CLERTC_SYN,NULL);
             }
 
@@ -1562,7 +1560,7 @@ EVALUATE:
             fprintf(pfDoc,"------------------------------------------------------------------------\n\n");
             efprintf(pfDoc,"indexterm:[Appendix Grammar]\n\n\n");
             if (siErr<0) {
-               fprintf(pfOut,"Creation of documentation file (%s) failed (%d - %s)\n",pcFil,errno,strerror(errno));
+               fprintf(pfErr,"Creation of documentation file (%s) failed (%d - %s)\n",pcFil,errno,strerror(errno));
                ERROR(CLERTC_SYN,NULL);
             }
             efprintf(pfDoc,"[[appendix-properties]]\n");
@@ -1587,7 +1585,7 @@ EVALUATE:
                vdClpClose(pvHdl,CLPCLS_MTD_ALL); pvHdl=NULL;
             }
             if (siErr<0) {
-               fprintf(pfOut,"Creation of documentation file (%s) failed (%d - %s)\n",pcFil,errno,strerror(errno));
+               fprintf(pfErr,"Creation of documentation file (%s) failed (%d - %s)\n",pcFil,errno,strerror(errno));
                ERROR(CLERTC_SYN,NULL);
             }
 
@@ -1608,7 +1606,7 @@ EVALUATE:
             }
             fprintf(pfDoc,"------------------------------------------------------------------------\n\n");
             if (siErr<0) {
-               fprintf(pfOut,"Creation of documentation file (%s) failed (%d - %s)\n",pcFil,errno,strerror(errno));
+               fprintf(pfErr,"Creation of documentation file (%s) failed (%d - %s)\n",pcFil,errno,strerror(errno));
                ERROR(CLERTC_SYN,NULL);
             }
             efprintf(pfDoc,"indexterm:[Appendix Properties]\n\n\n");
@@ -1686,14 +1684,14 @@ EVALUATE:
             ERROR(CLERTC_OK,NULL);
          }
       }
-      fprintf(pfOut,"Syntax for built-in function 'GENDOCU' not valid\n");
+      fprintf(pfErr,"Syntax for built-in function 'GENDOCU' not valid\n");
       for (i=0;psTab[i].pcKyw!=NULL ;i++) {
          if (psTab[i].siFlg) {
-            fprintf(pfOut,"%s %s GENDOCU %s",pcDep,argv[0],psTab[i].pcKyw);
-            efprintf(pfOut,"[.path]=filename [NONBR]\n");
+            fprintf(pfErr,"%s %s GENDOCU %s",pcDep,argv[0],psTab[i].pcKyw);
+            efprintf(pfErr,"[.path]=filename [NONBR]\n");
          }
       }
-      fprintf(pfOut,"%s %s GENDOCU filename %cNONBR%c\n",pcDep,argv[0],C_SBO,C_SBC);
+      fprintf(pfErr,"%s %s GENDOCU filename %cNONBR%c\n",pcDep,argv[0],C_SBO,C_SBC);
       ERROR(CLERTC_CMD,NULL);
    } else if (strxcmp(isCas,argv[1],"GENPROP",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
@@ -1709,13 +1707,13 @@ EVALUATE:
          }
          pcFil=dcpmapfil(pcSgn);
          if (pcFil==NULL) {
-            fprintf(pfOut,"Allocation of memory for file name (%s) failed\n",pcSgn);
+            fprintf(pfErr,"Allocation of memory for file name (%s) failed\n",pcSgn);
             ERROR(CLERTC_MEM,NULL);
          }
          szFil=strlen(pcFil)+1;
          pfPro=fopen(pcFil,filemode("w"));
          if (pfPro==NULL) {
-            fprintf(pfOut,"Open of property file (\"%s\",\"%s\") failed (%d-%s)\n",pcFil,filemode("w"),errno,strerror(errno));
+            fprintf(pfErr,"Open of property file (\"%s\",\"%s\") failed (%d-%s)\n",pcFil,filemode("w"),errno,strerror(errno));
             ERROR(CLERTC_SYS,NULL);
          }
          if (pcCmd==NULL) fprintf(pfPro,"\n%c Property file for: %s.%s %c\n\n",C_HSH,pcOwn,pcPgm,C_HSH);
@@ -1731,7 +1729,7 @@ EVALUATE:
                vdClpClose(pvHdl,CLPCLS_MTD_ALL); pvHdl=NULL;
             }
             if (siErr<0) {
-               fprintf(pfOut,"Write property file (%s) for program '%s' failed (%d-%s)\n",pcFil,pcPgm,errno,strerror(errno));
+               fprintf(pfErr,"Write property file (%s) for program '%s' failed (%d-%s)\n",pcFil,pcPgm,errno,strerror(errno));
                ERROR(CLERTC_SYN,NULL);
             } else {
                fprintf(pfOut,"Property file (%s) for program '%s' successfully written\n",pcFil,pcPgm);
@@ -1746,7 +1744,7 @@ EVALUATE:
                   siErr=siClpProperties(pvHdl,CLPPRO_MTD_CMT,10,psTab[i].pcKyw,pfPro);
                   vdClpClose(pvHdl,CLPCLS_MTD_ALL); pvHdl=NULL;
                   if (siErr<0) {
-                     fprintf(pfOut,"Write property file (%s) for command '%s' failed (%d-%s)\n",pcFil,pcCmd,errno,strerror(errno));
+                     fprintf(pfErr,"Write property file (%s) for command '%s' failed (%d-%s)\n",pcFil,pcCmd,errno,strerror(errno));
                      ERROR(CLERTC_SYN,NULL);
                   } else {
                      fprintf(pfOut,"Property file (%s) for command '%s' successfully written\n",pcFil,pcCmd);
@@ -1756,17 +1754,17 @@ EVALUATE:
             }
          }
       }
-      fprintf(pfOut,"Syntax for built-in function 'GENPROP' not valid\n");
+      fprintf(pfErr,"Syntax for built-in function 'GENPROP' not valid\n");
       for (i=0;psTab[i].pcKyw!=NULL ;i++) {
          if (psTab[i].siFlg) {
-            fprintf(pfOut,"%s %s GENPROP %s=filename\n",pcDep,argv[0],psTab[i].pcKyw);
+            fprintf(pfErr,"%s %s GENPROP %s=filename\n",pcDep,argv[0],psTab[i].pcKyw);
          }
       }
-      fprintf(pfOut,"%s %s GENPROP filename\n",pcDep,argv[0]);
+      fprintf(pfErr,"%s %s GENPROP filename\n",pcDep,argv[0]);
       ERROR(CLERTC_CMD,NULL);
    } else if (strxcmp(isCas,argv[1],"SETPROP",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
-      //if (pfErr==NULL) pfErr=pfStd; (never read)
+      if (pfErr==NULL) pfErr=pfStd;
       if (argc==3) {
          const char* pcSgn;
          const char* pcCmd;
@@ -1775,35 +1773,35 @@ EVALUATE:
             *((char*)pcSgn)=EOS; pcSgn++; pcCmd=argv[2];
             for (i=0;psTab[i].pcKyw!=NULL && strxcmp(isCas,pcCmd,psTab[i].pcKyw,0,0,FALSE);i++);
             if (psTab[i].pcKyw==NULL) {
-               fprintf(pfOut,"Syntax for built-in function 'SETPROP' not valid\n");
+               fprintf(pfErr,"Syntax for built-in function 'SETPROP' not valid\n");
                for (i=0;psTab[i].pcKyw!=NULL;i++) {
                   if (psTab[i].siFlg) {
-                     fprintf(pfOut,"%s %s SETPROP %s=filename\n",pcDep,argv[0],psTab[i].pcKyw);
+                     fprintf(pfErr,"%s %s SETPROP %s=filename\n",pcDep,argv[0],psTab[i].pcKyw);
                   }
                }
                ERROR(CLERTC_CMD,NULL);
             }
             srprintf(&pcCnf,&szCnf,strlen(pcOwn)+strlen(pcPgm)+strlen(pcCmd),"%s.%s.%s.property.file",pcOwn,pcPgm,pcCmd);
             if (pcCnf==NULL) {
-               fprintf(pfOut,"Allocation of memory for property string failed\n");
+               fprintf(pfErr,"Allocation of memory for property string failed\n");
                ERROR(CLERTC_MEM,NULL);
             }
          } else {
             pcSgn=argv[2]; pcCmd=NULL;
             srprintf(&pcCnf,&szCnf,strlen(pcOwn)+strlen(pcPgm),"%s.%s.property.file",pcOwn,pcPgm);
             if (pcCnf==NULL) {
-               fprintf(pfOut,"Allocation of memory for property string failed\n");
+               fprintf(pfErr,"Allocation of memory for property string failed\n");
                ERROR(CLERTC_MEM,NULL);
             }
          }
          if (*pcSgn==0) {
-            fprintf(pfOut,"Syntax for built-in function 'SETPROP' not valid\n");
+            fprintf(pfErr,"Syntax for built-in function 'SETPROP' not valid\n");
             for (i=0;psTab[i].pcKyw!=NULL;i++) {
                if (psTab[i].siFlg) {
-                  fprintf(pfOut,"%s %s SETPROP %s=filename\n",pcDep,argv[0],psTab[i].pcKyw);
+                  fprintf(pfErr,"%s %s SETPROP %s=filename\n",pcDep,argv[0],psTab[i].pcKyw);
                }
             }
-            fprintf(pfOut,"File name was not specified.\n"
+            fprintf(pfErr,"File name was not specified.\n"
                           "To delete a property file from the list, please use the function DELPROP %ccommand%c\n",C_SBO,C_SBC);
             ERROR(CLERTC_CMD,NULL);
          }
@@ -1813,13 +1811,13 @@ EVALUATE:
             ERROR(CLERTC_OK,NULL);
          }
       }
-      fprintf(pfOut,"Syntax for built-in function 'SETPROP' not valid\n");
+      fprintf(pfErr,"Syntax for built-in function 'SETPROP' not valid\n");
       for (i=0;psTab[i].pcKyw!=NULL;i++) {
          if (psTab[i].siFlg) {
-            fprintf(pfOut,"%s %s SETPROP %s=filename\n",pcDep,argv[0],psTab[i].pcKyw);
+            fprintf(pfErr,"%s %s SETPROP %s=filename\n",pcDep,argv[0],psTab[i].pcKyw);
          }
       }
-      fprintf(pfOut,"%s %s SETPROP filename\n",pcDep,argv[0]);
+      fprintf(pfErr,"%s %s SETPROP filename\n",pcDep,argv[0]);
       ERROR(CLERTC_CMD,NULL);
    } else if (strxcmp(isCas,argv[1],"CHGPROP",0,0,FALSE)==0 || (pcDef!=NULL && strxcmp(isCas,pcDef,"flam",0,0,FALSE)==0 && strxcmp(isCas,argv[1],"DEFAULTS",0,0,FALSE)==0)) {
       if (pfOut==NULL) pfOut=pfStd;
@@ -1830,7 +1828,7 @@ EVALUATE:
                size_t szPro=CLEINI_PROSIZ;
                char*  pcPro=(char*)calloc(1,szPro);
                if (pcPro==NULL) {
-                  fprintf(pfOut,"Memory allocation for property list failed\n");
+                  fprintf(pfErr,"Memory allocation for property list failed\n");
                   ERROR(CLERTC_MEM,pcPro);
                }
                for (j=3;j<argc;j++) {
@@ -1859,7 +1857,7 @@ EVALUATE:
                size_t szPro=CLEINI_PROSIZ;
                char*  pcPro=calloc(1,szPro);
                if (pcPro==NULL) {
-                  fprintf(pfOut,"Memory allocation for property list failed\n");
+                  fprintf(pfErr,"Memory allocation for property list failed\n");
                   ERROR(CLERTC_MEM,pcPro);
                }
                for (j=2;j<argc;j++) {
@@ -1882,47 +1880,47 @@ EVALUATE:
             }
          }
       }
-      fprintf(pfOut,"Syntax for built-in function 'CHGPROP' not valid\n");
+      fprintf(pfErr,"Syntax for built-in function 'CHGPROP' not valid\n");
       for (i=0;psTab[i].pcKyw!=NULL;i++) {
          if (psTab[i].siFlg) {
-            fprintf(pfOut,"%s %s CHGPROP %s",pcDep,argv[0],psTab[i].pcKyw);
-            efprintf(pfOut," [path[=value]]*\n");
+            fprintf(pfErr,"%s %s CHGPROP %s",pcDep,argv[0],psTab[i].pcKyw);
+            efprintf(pfErr," [path[=value]]*\n");
          }
       }
       ERROR(CLERTC_CMD,NULL);
    } else if (strxcmp(isCas,argv[1],"DELPROP",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
-      //if (pfErr==NULL) pfErr=pfStd; (never read)
+      if (pfErr==NULL) pfErr=pfStd;
       if (argc==2) {
          srprintf(&pcCnf,&szCnf,strlen(pcOwn)+strlen(pcPgm),"%s.%s.property.file",pcOwn,pcPgm);
           if (pcCnf==NULL) {
-             fprintf(pfOut,"Allocation of memory for property string failed\n");
+             fprintf(pfErr,"Allocation of memory for property string failed\n");
              ERROR(CLERTC_MEM,NULL);
           }
       } else if (argc==3) {
          for (i=0;psTab[i].pcKyw!=NULL && strxcmp(isCas,argv[2],psTab[i].pcKyw,0,0,FALSE);i++);
          if (psTab[i].pcKyw==NULL) {
-            fprintf(pfOut,"Syntax for built-in function 'DELPROP' not valid\n");
+            fprintf(pfErr,"Syntax for built-in function 'DELPROP' not valid\n");
             for (i=0;psTab[i].pcKyw!=NULL;i++) {
                if (psTab[i].siFlg) {
-                  fprintf(pfOut,"%s %s DELPROP %s\n",pcDep,argv[0],psTab[i].pcKyw);
+                  fprintf(pfErr,"%s %s DELPROP %s\n",pcDep,argv[0],psTab[i].pcKyw);
                }
             }
             ERROR(CLERTC_CMD,NULL);
          }
          srprintf(&pcCnf,&szCnf,strlen(pcOwn)+strlen(pcPgm)+strlen(argv[2]),"%s.%s.%s.property.file",pcOwn,pcPgm,argv[2]);
          if (pcCnf==NULL) {
-            fprintf(pfOut,"Allocation of memory for property string failed\n");
+            fprintf(pfErr,"Allocation of memory for property string failed\n");
             ERROR(CLERTC_MEM,NULL);
          }
       } else {
-         fprintf(pfOut,"Syntax for built-in function 'DELPROP' not valid\n");
+         fprintf(pfErr,"Syntax for built-in function 'DELPROP' not valid\n");
          for (i=0;psTab[i].pcKyw!=NULL ;i++) {
             if (psTab[i].siFlg) {
-               fprintf(pfOut,"%s %s DELPROP %s\n",pcDep,argv[0],psTab[i].pcKyw);
+               fprintf(pfErr,"%s %s DELPROP %s\n",pcDep,argv[0],psTab[i].pcKyw);
             }
          }
-         fprintf(pfOut,"%s %s DELPROP\n",pcDep,argv[0]);
+         fprintf(pfErr,"%s %s DELPROP\n",pcDep,argv[0]);
          ERROR(CLERTC_CMD,NULL);
       }
       siErr=siCnfSet(psCnf,pfOut,pcCnf,"",TRUE);
@@ -1973,21 +1971,21 @@ EVALUATE:
             } else if (strxcmp(isCas,argv[3],"DEPTH9",0,0,FALSE)==0) {
                   siDep=9; isSet=FALSE;
             } else {
-               fprintf(pfOut,"Syntax for built-in function 'GETPROP' not valid\n");
+               fprintf(pfErr,"Syntax for built-in function 'GETPROP' not valid\n");
                for (i=0;psTab[i].pcKyw!=NULL ;i++) {
                   if (psTab[i].siFlg) {
-                     fprintf(pfOut,"%s %s GETPROP %s",pcDep,argv[0],psTab[i].pcKyw);
-                     efprintf(pfOut,"[.path] [DEPTH1 | DEPTH2 | ... | DEPTH9 | DEPALL | DEFALL]\n");
+                     fprintf(pfErr,"%s %s GETPROP %s",pcDep,argv[0],psTab[i].pcKyw);
+                     efprintf(pfErr,"[.path] [DEPTH1 | DEPTH2 | ... | DEPTH9 | DEPALL | DEFALL]\n");
                   }
                }
                ERROR(CLERTC_CMD,NULL);
             }
          } else {
-            fprintf(pfOut,"Syntax for built-in function 'GETPROP' not valid\n");
+            fprintf(pfErr,"Syntax for built-in function 'GETPROP' not valid\n");
             for (i=0;psTab[i].pcKyw!=NULL ;i++) {
                if (psTab[i].siFlg) {
-                  fprintf(pfOut,"%s %s GETPROP %s",pcDep,argv[0],psTab[i].pcKyw);
-                  efprintf(pfOut,"[.path] [DEPTH1 | DEPTH2 | ... | DEPTH9 | DEPALL | DEFALL]\n");
+                  fprintf(pfErr,"%s %s GETPROP %s",pcDep,argv[0],psTab[i].pcKyw);
+                  efprintf(pfErr,"[.path] [DEPTH1 | DEPTH2 | ... | DEPTH9 | DEPALL | DEFALL]\n");
                }
             }
             ERROR(CLERTC_CMD,NULL);
@@ -2023,22 +2021,22 @@ EVALUATE:
             }
          }
       }
-      fprintf(pfOut,"Syntax for built-in function 'GETPROP' not valid\n");
+      fprintf(pfErr,"Syntax for built-in function 'GETPROP' not valid\n");
       for (i=0;psTab[i].pcKyw!=NULL ;i++) {
          if (psTab[i].siFlg) {
-            fprintf(pfOut,"%s %s GETPROP %s",pcDep,argv[0],psTab[i].pcKyw);
-            efprintf(pfOut,"[.path] [DEPTH1 | DEPTH2 | ... | DEPTH9 | DEPALL | DEFALL]\n");
+            fprintf(pfErr,"%s %s GETPROP %s",pcDep,argv[0],psTab[i].pcKyw);
+            efprintf(pfErr,"[.path] [DEPTH1 | DEPTH2 | ... | DEPTH9 | DEPALL | DEFALL]\n");
          }
       }
-      fprintf(pfOut,"%s %s GETPROP\n",pcDep,argv[0]);
+      fprintf(pfErr,"%s %s GETPROP\n",pcDep,argv[0]);
       ERROR(CLERTC_CMD,NULL);
    } else if (strxcmp(isCas,argv[1],"SETOWNER",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
-      //if (pfErr==NULL) pfErr=pfStd; (unused)
+      if (pfErr==NULL) pfErr=pfStd;
       if (argc==3) {
          srprintf(&pcCnf,&szCnf,strlen(pcPgm),"%s.owner.id",pcPgm);
          if (pcCnf==NULL) {
-            fprintf(pfOut,"Allocation of memory for owner string failed\n");
+            fprintf(pfErr,"Allocation of memory for owner string failed\n");
             ERROR(CLERTC_MEM,NULL);
          }
          siErr=siCnfSet(psCnf,pfOut,pcCnf,argv[2],TRUE);
@@ -2047,22 +2045,22 @@ EVALUATE:
             ERROR(CLERTC_OK,NULL);
          }
       }
-      fprintf(pfOut,"Syntax for built-in function 'SETOWNER' not valid\n");
-      fprintf(pfOut,"%s %s SETOWNER name\n",pcDep,argv[0]);
+      fprintf(pfErr,"Syntax for built-in function 'SETOWNER' not valid\n");
+      fprintf(pfErr,"%s %s SETOWNER name\n",pcDep,argv[0]);
       ERROR(CLERTC_CMD,NULL);
    } else if (strxcmp(isCas,argv[1],"GETOWNER",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
-      //if (pfErr==NULL) pfErr=pfStd; (unused)
+      if (pfErr==NULL) pfErr=pfStd;
       if (argc==2) {
          fprintf(pfOut,"Current owner id for '%s' is: %s\n",argv[0],pcOwn);
          ERROR(CLERTC_OK,NULL);
       }
-      fprintf(pfOut,"Syntax for built-in function 'GETOWNER' not valid\n");
-      fprintf(pfOut,"%s %s GETOWNER\n",pcDep,argv[0]);
+      fprintf(pfErr,"Syntax for built-in function 'GETOWNER' not valid\n");
+      fprintf(pfErr,"%s %s GETOWNER\n",pcDep,argv[0]);
       ERROR(CLERTC_CMD,NULL);
    } else if (strxcmp(isCas,argv[1],"SETENV",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
-      //if (pfErr==NULL) pfErr=pfStd; (never read)
+      if (pfErr==NULL) pfErr=pfStd;
       if (argc==3) {
          const char* pcVal;
          const char* pcEnv;
@@ -2070,13 +2068,13 @@ EVALUATE:
          if (pcVal!=NULL) {
             *((char*)pcVal)=EOS; pcVal++; pcEnv=argv[2];
          } else {
-            fprintf(pfOut,"Syntax for built-in function 'SETENV' not valid\n");
-            fprintf(pfOut,"%s %s SETENV variable=value\n",pcDep,argv[0]);
+            fprintf(pfErr,"Syntax for built-in function 'SETENV' not valid\n");
+            fprintf(pfErr,"%s %s SETENV variable=value\n",pcDep,argv[0]);
             ERROR(CLERTC_CMD,NULL);
          }
          srprintf(&pcCnf,&szCnf,strlen(pcOwn)+strlen(pcPgm)+strlen(pcEnv),"%s.%s.envar.%s",pcOwn,pcPgm,pcEnv);
          if (pcCnf==NULL) {
-            fprintf(pfOut,"Allocation of memory for envar string failed\n");
+            fprintf(pfErr,"Allocation of memory for envar string failed\n");
             ERROR(CLERTC_MEM,NULL);
          }
          siErr=siCnfSet(psCnf,pfOut,pcCnf,pcVal,TRUE);
@@ -2085,12 +2083,12 @@ EVALUATE:
             ERROR(CLERTC_OK,NULL);
          }
       }
-      fprintf(pfOut,"Syntax for built-in function 'SETENV' not valid\n");
-      fprintf(pfOut,"%s %s SETENV variable=value\n",pcDep,argv[0]);
+      fprintf(pfErr,"Syntax for built-in function 'SETENV' not valid\n");
+      fprintf(pfErr,"%s %s SETENV variable=value\n",pcDep,argv[0]);
       ERROR(CLERTC_CMD,NULL);
    } else if (strxcmp(isCas,argv[1],"GETENV",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
-      //if (pfErr==NULL) pfErr=pfStd; (never read)
+      if (pfErr==NULL) pfErr=pfStd;
       if (argc==2) {
          fprintf(pfOut,"Current environment variables for owner '%s':\n",pcOwn);
          siCnt=siCnfPrnEnv(psCnf,pfOut,pcDep,pcOwn,pcPgm);
@@ -2101,16 +2099,16 @@ EVALUATE:
          }
          ERROR(CLERTC_OK,NULL);
       }
-      fprintf(pfOut,"Syntax for built-in function 'GETENV' not valid\n");
-      fprintf(pfOut,"%s %s GETENV\n",pcDep,argv[0]);
+      fprintf(pfErr,"Syntax for built-in function 'GETENV' not valid\n");
+      fprintf(pfErr,"%s %s GETENV\n",pcDep,argv[0]);
       ERROR(CLERTC_CMD,NULL);
    } else if (strxcmp(isCas,argv[1],"DELENV",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
-      //if (pfErr==NULL) pfErr=pfStd; (never read)
+      if (pfErr==NULL) pfErr=pfStd;
       if (argc==3) {
          srprintf(&pcCnf,&szCnf,strlen(pcOwn)+strlen(pcPgm)+strlen(argv[2]),"%s.%s.envar.%s",pcOwn,pcPgm,argv[2]);
          if (pcCnf==NULL) {
-            fprintf(pfOut,"Allocation of memory for envar string failed\n");
+            fprintf(pfErr,"Allocation of memory for envar string failed\n");
             ERROR(CLERTC_MEM,NULL);
          }
          siErr=siCnfSet(psCnf,pfOut,pcCnf,"",TRUE);
@@ -2119,17 +2117,17 @@ EVALUATE:
             ERROR(CLERTC_OK,NULL);
          }
       }
-      fprintf(pfOut,"Syntax for built-in function 'DELENV' not valid\n");
-      fprintf(pfOut,"%s %s DELENV variable\n",pcDep,argv[0]);
+      fprintf(pfErr,"Syntax for built-in function 'DELENV' not valid\n");
+      fprintf(pfErr,"%s %s DELENV variable\n",pcDep,argv[0]);
       ERROR(CLERTC_CMD,NULL);
    } else if (strxcmp(isCas,argv[1],"TRACE",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
-      //if (pfErr==NULL) pfErr=pfStd; (never read)
+      if (pfErr==NULL) pfErr=pfStd;
       if (argc==3) {
          if (strxcmp(isCas,argv[2],"ON",0,0,FALSE)==0 || strxcmp(isCas,argv[2],"-ON",0,0,FALSE)==0 || strxcmp(isCas,argv[2],"--ON",0,0,FALSE)==0) {
             srprintf(&pcCnf,&szCnf,strlen(pcOwn)+strlen(pcPgm),"%s.%s.trace",pcOwn,pcPgm);
             if (pcCnf==NULL) {
-               fprintf(pfOut,"Allocation of memory for envar string failed\n");
+               fprintf(pfErr,"Allocation of memory for envar string failed\n");
                ERROR(CLERTC_MEM,NULL);
             }
             siErr=siCnfSet(psCnf,pfOut,pcCnf,"ON",TRUE);
@@ -2140,7 +2138,7 @@ EVALUATE:
          } else if (strxcmp(isCas,argv[2],"OFF",0,0,FALSE)==0 || strxcmp(isCas,argv[2],"-OFF",0,0,FALSE)==0 || strxcmp(isCas,argv[2],"--OFF",0,0,FALSE)==0) {
             srprintf(&pcCnf,&szCnf,strlen(pcOwn)+strlen(pcPgm),"%s.%s.trace",pcOwn,pcPgm);
             if (pcCnf==NULL) {
-               fprintf(pfOut,"Allocation of memory for envar string failed\n");
+               fprintf(pfErr,"Allocation of memory for envar string failed\n");
                ERROR(CLERTC_MEM,NULL);
             }
             siErr=siCnfSet(psCnf,pfOut,pcCnf,"OFF",TRUE);
@@ -2157,7 +2155,7 @@ EVALUATE:
                if (strxcmp(isCas,pcCmd,"FILE",0,0,FALSE)==0) {
                   srprintf(&pcCnf,&szCnf,strlen(pcOwn)+strlen(pcPgm),"%s.%s.trace.file",pcOwn,pcPgm);
                   if (pcCnf==NULL) {
-                     fprintf(pfOut,"Allocation of memory for envar string failed\n");
+                     fprintf(pfErr,"Allocation of memory for envar string failed\n");
                      ERROR(CLERTC_MEM,NULL);
                   }
                   siErr=siCnfSet(psCnf,pfOut,pcCnf,pcSgn,TRUE);
@@ -2173,13 +2171,13 @@ EVALUATE:
             }
          }
       }
-      fprintf(pfOut,"Syntax for built-in function 'TRACE' not valid\n");
-      fprintf(pfOut,"%s %s TRACE ON/OFF\n",pcDep,argv[0]);
-      fprintf(pfOut,"%s %s TRACE FILE=filenam\n",pcDep,argv[0]);
+      fprintf(pfErr,"Syntax for built-in function 'TRACE' not valid\n");
+      fprintf(pfErr,"%s %s TRACE ON/OFF\n",pcDep,argv[0]);
+      fprintf(pfErr,"%s %s TRACE FILE=filenam\n",pcDep,argv[0]);
       ERROR(CLERTC_CMD,NULL);
    } else if (strxcmp(isCas,argv[1],"CONFIG",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
-      //if (pfErr==NULL) pfErr=pfStd; (never read)
+      if (pfErr==NULL) pfErr=pfStd;
       if (argc==2) {
          fprintf(pfOut,"Current configuration data:\n");
          siCnt=siCnfPrn(psCnf,pfOut,pcDep);
@@ -2202,9 +2200,9 @@ EVALUATE:
             ERROR(CLERTC_OK,NULL);
          }
       }
-      fprintf(pfOut,"Syntax for built-in function 'CONFIG' not valid\n");
-      fprintf(pfOut,"%s %s CONFIG\n",pcDep,argv[0]);
-      fprintf(pfOut,"%s %s CONFIG CLEAR\n",pcDep,argv[0]);
+      fprintf(pfErr,"Syntax for built-in function 'CONFIG' not valid\n");
+      fprintf(pfErr,"%s %s CONFIG\n",pcDep,argv[0]);
+      fprintf(pfErr,"%s %s CONFIG CLEAR\n",pcDep,argv[0]);
       ERROR(CLERTC_CMD,NULL);
    } else {
       int siMaxCC=0x0FFFFFFF;
