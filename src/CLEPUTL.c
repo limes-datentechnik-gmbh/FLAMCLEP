@@ -2433,8 +2433,9 @@ extern char* dcpmaplab(const char* templ, const char* values, int method) {
             free(h1);
             return(h2);
          }
+      } else {
+         free(t0);
       }
-      free(t0);
    }
    return(NULL);
 }
