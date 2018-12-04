@@ -378,7 +378,9 @@ TsDiaChr gsDiaChr={{0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0},
                    {0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0}};
 
 extern char init_char(char* p) {
-   init_diachr(&gsDiaChr,localccsid());
+   unsigned int uiCcsId=localccsid();
+   printd("Initialize gsDiaChr structure with CCSID %u\n",uiCcsId);
+   init_diachr(&gsDiaChr,uiCcsId);
    return(p[0]);
 }
 

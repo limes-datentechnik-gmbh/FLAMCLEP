@@ -722,6 +722,9 @@ extern int siCleExecute(
 
    if (pfOut!=NULL) {
       fprintf( pfOut,"Complete load of environment ...\n");
+#ifdef __EBCDIC__
+      init_char(gsDiaChr.exc);
+#endif
       efprintf(pfOut,"Initialize dia-critical character (!$#@[\\]^`{|}~) conversion (%s)\n",mapccsid(localccsid()));
    }
 
