@@ -1313,7 +1313,6 @@ EVALUATE:
             }
          }
          SAFE_FREE(pcFil);
-         szFil=0;
 
          pcFil=dcpmapfil(argv[2]);
          if (pcFil==NULL) {
