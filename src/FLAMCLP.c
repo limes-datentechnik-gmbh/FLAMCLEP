@@ -157,12 +157,13 @@
  * 1.2.111: Support escaping of CLP string (&xxx; or &nnnn<...>)
  * 1.2.112: Fix replacement of environment variables and increase amount from 32 to 256
  * 1.2.113: Support critical character escape sequences for strings, file names and key labels
+ * 1.2.114: Fix reallocation with pointer change for lexem if key word at scanning detected
 **/
 
-#define CLP_VSN_STR       "1.2.113"
+#define CLP_VSN_STR       "1.2.114"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        2
-#define CLP_VSN_REVISION       113
+#define CLP_VSN_REVISION       114
 
 /* Definition der Konstanten ******************************************/
 
@@ -3578,10 +3579,8 @@ static int siClpScnNat(
       } else if (siTyp==CLPTYP_STRING && isStr((*ppCur)[0])     &&
                         (*ppCur)[0]!='('    && (*ppCur)[0]!=')' && (*ppCur)[0]!='+' &&
                         (*ppCur)[0]!=C_SBO  && (*ppCur)[0]!=C_SBC) {/*required string*/
-         char*             pcKyw;
          *pcLex='d'; pcLex++;
          *pcLex='\''; pcLex++;
-         pcKyw=pcLex;
          if (psArg!=NULL) {
             *pcLex=*(*ppCur);
             (*ppCur)++; pcLex++;
@@ -3591,9 +3590,9 @@ static int siClpScnNat(
                (*ppCur)++; pcLex++;
             }
             *pcLex=EOS;
-            if (isClpKyw(pvHdl,pfErr,pfTrc,pcKyw,2,CLPTYP_STRING,psArg,ppVal)) {
+            if (isClpKyw(pvHdl,pfErr,pfTrc,(*ppLex)+2,2,CLPTYP_STRING,psArg,ppVal)) {
                char* p1=pcHlp;
-               char* p2=pcKyw;
+               char* p2=(*ppLex)+2;
                while (*p2) {
                   *p1++=*p2++;
                }
