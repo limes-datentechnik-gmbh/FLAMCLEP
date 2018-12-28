@@ -1319,7 +1319,7 @@ EVALUATE:
             fprintf(pfErr,"Allocation of memory for file name (%s) failed\n",argv[2]);
             ERROR(CLERTC_MEM,NULL);
          }
-         szFil=strlen(pcFil)+1;
+//       szFil=strlen(pcFil)+1; not used
          isMan=TRUE;
          pfDoc=fopen(pcFil,filemode("w"));
          if (pfDoc==NULL) {
