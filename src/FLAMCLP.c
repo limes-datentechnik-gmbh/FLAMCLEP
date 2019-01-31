@@ -158,12 +158,13 @@
  * 1.2.112: Fix replacement of environment variables and increase amount from 32 to 256
  * 1.2.113: Support critical character escape sequences for strings, file names and key labels
  * 1.2.114: Fix reallocation with pointer change for lexem if key word at scanning detected
+ * 1.2.115: Support empty strings behind assignments (comment= ...)
 **/
 
-#define CLP_VSN_STR       "1.2.114"
+#define CLP_VSN_STR       "1.2.115"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        2
-#define CLP_VSN_REVISION       114
+#define CLP_VSN_REVISION       115
 
 /* Definition der Konstanten ******************************************/
 
@@ -4601,9 +4602,16 @@ static int siClpPrsFac(
       } else {
          return CLPERR(psHdl,CLPERR_SYN,"Character ')' missing (%s)",fpcPat(pvHdl,siLev));
       }
-   default:
-      return(CLPERR(psHdl,CLPERR_SYN,"After assignment '%s.%s=' number(-123), float(+123.45e78), string('abc') expression expected",
-            fpcPat(pvHdl,siLev),psArg->psStd->pcKyw));
+   default://Empty string behind = and infront of the next not matching token
+      if (CLPISF_SEL(psArg->psStd->uiFlg)) {
+         CLPERR(psHdl,CLPERR_SEM,"The argument '%s.%s' requires one of the defined keywords as value",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+         CLPERRADD(psHdl,0,"Please use one of the following arguments:%s","");
+         vdClpPrnArgTab(pvHdl,psHdl->pfErr,1,psArg->psFix->siTyp,psArg->psDep);
+         return(CLPERR_SEM);
+      }
+      srprintf(ppVal,pzVal,0,"d'");
+      if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d NUM/FLT/STR(%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,*ppVal);
+      return(CLP_OK);
    }
 }
 
@@ -4862,6 +4870,11 @@ static int siClpPrsExp(
          if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d ADD-FLT(%f+%f=%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,flVal1,flVal2,*ppVal);
          break;
       case CLPTYP_STRING:
+         if (pcVal[1]!=STRCHR) {
+            siErr=CLPERR(psHdl,CLPERR_SEM,"The provided value (%s) is not a string literal",pcVal);
+            free(pcVal);
+            return(siErr);
+         }
          if ((*ppVal)[0]==pcVal[0]) {
          } else if (((*ppVal)[0]=='d' && pcVal[0]=='s') || ((*ppVal)[0]=='s' && pcVal[0]=='d')){
             (*ppVal)[0]='s';
@@ -4973,6 +4986,11 @@ static int siClpPrsExp(
          if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d AUTO-ADD-FLT(%f+%f=%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,flVal1,flVal2,*ppVal);
          break;
       case CLPTYP_STRING:
+         if (pcVal[1]!=STRCHR) {
+            siErr=CLPERR(psHdl,CLPERR_SEM,"The provided value (%s) is not a string literal",pcVal);
+            free(pcVal);
+            return(siErr);
+         }
          if ((*ppVal)[0]==pcVal[0]) {
          } else if (((*ppVal)[0]=='d' && pcVal[0]=='s') || ((*ppVal)[0]=='s' && pcVal[0]=='d')){
             (*ppVal)[0]='s';
