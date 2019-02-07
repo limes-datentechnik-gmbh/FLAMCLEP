@@ -112,7 +112,7 @@ GENERATION OF PROPERTY FILE::
    to activate the property file. For each parameter a property entry
    is written to a text file. The definition of properties can be
    found directly at the top of the text file. Note that a special
-   property file overrules the general property file and that you
+   property file overrides the general property file and that you
    should delete expendable properties.
 HELP::
    Online Computer help links you in general to a database or similar

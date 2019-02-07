@@ -51,7 +51,7 @@
  * 1.1.4: Support of dummy (DMY) flag for parameter which are not visible on command line and property file
  * 1.1.5: Support the use of different symbol tables for property and command line parsing
  * 1.1.6: Add pcClpError to provide an error message for an error code
- * 1.1.7: Add possibility to use getenv to overrule hard coded default values
+ * 1.1.7: Add possibility to use getenv to override hard coded default values
  * 1.1.8: An empty path "" are handled like NULL pointer path
  * 1.1.9: Allow strings without ' like keyword=...SPACE/SEP and switch between " and '
  * 1.1.10: Add new flag to prevent print outs in clear form for passwords or other critical information
