@@ -103,7 +103,7 @@ Below, you can find a possibly incomplete list of FLAMCLE feature:
  * * Aliases for each argument can also be defined and are handled as options for the same value.
  * * Available and usable on each platform including WIN, UNIX, USS, ZOS, ...
  * * Support of STDENV as DD name for environment variables on mainframes
- * * Support property definitions over environment variables to overrule hard coded default properties
+ * * Support property definitions over environment variables to override hard coded default properties
  * * Keywords (commands, built-in functions, ON, OFF, ALL, DEPTH1, ...) can start optional with "-" or "--"
  * * Support for parameter files per command, object, overlay or array
  * * File name mapping and DD:NAME support (see man_cle_main.txt)

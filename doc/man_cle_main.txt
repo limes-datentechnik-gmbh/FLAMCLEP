@@ -43,8 +43,8 @@ USED ENVIRONMENT VARIABLES
  * CLP_STRING_CCSID - CCSID used for interpretation of critical punctuation character on EBCDIC systems (default is taken from LANG)
  * &{PGM}_CONFIG_FILE - the configuration filename (default is '$HOME/.&{pgm}.config' on UNIX/WIN or '&SYSUID..&{PGM}.CONFIG' on mainframes)
  * &{PGM}_DEFAULT_OWNER_ID - the default owner ID (default is '&{oWn}')
- * owner_&{PGM}_command_PROPERTY_FILENAME - To overrule default property file names
- * path_argument - to overrule the hard coded default property value
+ * owner_&{PGM}_command_PROPERTY_FILENAME - To override default property file names
+ * path_argument - to override the hard coded default property value
  
 Environment variables can be set from the system or in the program
 configuration file with the build-in function 'SETENV'. Particularly on
@@ -101,9 +101,9 @@ done and the angle bracket keep still in place.
 ------------------------------------------------------------------------
 
 Beside all the environment variables managed by CLE it is possible to
-set all properties as environment variables to overrule the hard coded
+set all properties as environment variables to override the hard coded
 default values with CLP. If a property is defined as environment variable
-and in a property file, then the value in the property file overrules the
+and in a property file, then the value in the property file overrides the
 setting in the environment. The environment variable name for each
 property is build by the rules below:
 
@@ -113,8 +113,8 @@ property is build by the rules below:
 To get a list and help for all properties please use the built-in
 function 'GENPROP' to generate property files. The properties can be
 defined per owner, per program and general. The owner specific
-definition overrules the program specific definition and the program
-specific definition overrules the general definition. Examples:
+definition overrides the program specific definition and the program
+specific definition overrides the general definition. Examples:
 
 -----------------------------------------------------------------------
 CONV_READ_TEXT_ENL2LF=OFF #in general the 0x15 to 0x25 conversion is off#

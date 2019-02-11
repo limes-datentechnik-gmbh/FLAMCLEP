@@ -7,8 +7,8 @@ editing the properties. A property file can be activated with the
 built-in function SETPROP.
 
 Property files will be activated by their owner. A property file
-overrules hard coded properties and properties defined over environment
-variables. A specific property file overrules the general property file.
+overrides hard coded properties and properties defined over environment
+variables. A specific property file overrides the general property file.
 At time of generation all current default settings are written to the
 property file.
 

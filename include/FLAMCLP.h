@@ -934,7 +934,7 @@ typedef struct ClpArgument {
     *
     *  For arrays of these types a list of the corresponding values (literals or key words) can be defined
     *  The default values are displayed in context sensitive help messages (PROPERTY: [value_list])
-    *  This value can be overruled by corresponding environment variable or property definition*/
+    *  This value can be overrided by corresponding environment variable or property definition*/
    const char*                   pcDft;
    /** Pointer to a zero-terminated string for a detailed description of this argument (in ASCIIDOC format, content
     *  behind .DESCRIPTION, mainly simply some paragraphs). Can be a NULL pointer or empty string for constant definition
