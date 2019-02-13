@@ -159,6 +159,7 @@
  * 1.2.113: Support critical character escape sequences for strings, file names and key labels
  * 1.2.114: Fix reallocation with pointer change for lexem if key word at scanning detected
  * 1.2.115: Support empty strings behind assignments (comment= ...)
+ * 1.2.116: Don't parse but accept parameter files if isPfl==2 and pvDat==NULL
 **/
 
 #define CLP_VSN_STR       "1.2.115"
@@ -491,6 +492,13 @@ static int siClpPrsSgn(
    TsSym*                        psArg);
 
 static int siClpPrsFil(
+   void*                         pvHdl,
+   const int                     siLev,
+   const int                     siPos,
+   const int                     isAry,
+   TsSym*                        psArg);
+
+static int siClpAcpFil(
    void*                         pvHdl,
    const int                     siLev,
    const int                     siPos,
@@ -3994,7 +4002,11 @@ static int siClpPrsPar(
       if (psHdl->siTok<0) return(psHdl->siTok);
       if (psHdl->siTok==CLPTOK_SGN) {
          if (psHdl->isPfl && (psArg->psFix->siTyp==CLPTYP_OBJECT || psArg->psFix->siTyp==CLPTYP_OVRLAY)) {
-            return(siClpPrsFil(pvHdl,siLev,siPos,FALSE,psArg));
+            if (psHdl->isPfl==2 && psHdl->pvDat==NULL) {
+               return(siClpAcpFil(pvHdl,siLev,siPos,FALSE,psArg));
+            } else {
+               return(siClpPrsFil(pvHdl,siLev,siPos,FALSE,psArg));
+            }
          } else {
             return(siClpPrsSgn(pvHdl,siLev,siPos,psArg));
          }
@@ -4058,6 +4070,23 @@ static int siClpPrsSgn(
    psHdl->siTok=siClpScnSrc(pvHdl,psArg->psFix->siTyp,psArg);
    if (psHdl->siTok<0) return(psHdl->siTok);
    return(siClpPrsVal(pvHdl,siLev,siPos,FALSE,psArg));
+}
+
+static int siClpAcpFil(
+   void*                         pvHdl,
+   const int                     siLev,
+   const int                     siPos,
+   const int                     isAry,
+   TsSym*                        psArg)
+{
+   TsHdl*                        psHdl=(TsHdl*)pvHdl;
+   if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d PARFIL(%s=val)\n",fpcPre(pvHdl,siLev),siLev,siPos,psArg->psStd->pcKyw);
+   psHdl->siTok=siClpScnSrc(pvHdl,CLPTYP_STRING,psArg);
+   if (psHdl->siTok<0) return(psHdl->siTok);
+   if (psHdl->siTok!=CLPTOK_STR) {
+      return CLPERR(psHdl,CLPERR_SYN,"After object/overlay/array assignment '%s.%s=' parameter file ('filename') expected",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+   }
+   return(CLP_OK);
 }
 
 static int siClpPrsFil(
@@ -4281,7 +4310,11 @@ static int siClpPrsAry(
    psHdl->siTok=siClpScnSrc(pvHdl,psArg->psFix->siTyp,psArg);
    if (psHdl->siTok<0) return(psHdl->siTok);
    if (psHdl->isPfl && psHdl->siTok==CLPTOK_SGN) {
-      siCnt=siClpPrsFil(pvHdl,siLev,siPos,TRUE,psArg);
+      if (psHdl->isPfl==2 && psHdl->pvDat==NULL) {
+         siCnt=siClpAcpFil(pvHdl,siLev,siPos,TRUE,psArg);
+      } else {
+         siCnt=siClpPrsFil(pvHdl,siLev,siPos,TRUE,psArg);
+      }
       if (siCnt<0) return(siCnt);
    } else {
       switch (psArg->psFix->siTyp) {

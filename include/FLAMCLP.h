@@ -1096,7 +1096,7 @@ typedef int (*tpfF2S)(
  * The function uses the argument table and corresponding structure and creates the handle for the command line parser (FLAMCLP)
  *
  * @param[in]  isCas Boolean to enable case sensitive parsing of keywords (recommended is FALSE)
- * @param[in]  isPfl Boolean to enable parameter files per object and overlay (recommended is TRUE)
+ * @param[in]  isPfl Boolean to enable parameter files per object and overlay (recommended is TRUE(1), if you provide 2 and pvDat is NULL the parameter file is not parsed but the syntax is accepted)
  * @param[in]  isEnv Boolean to enable replacement of environment variables (recommended is TRUE)
  * @param[in]  siMkl Integer defining the minimal key word length (siMkl<=0 --> full length, no auto abbreviation)
  * @param[in]  pcOwn String constant containing the owner name for the root in the path ("limes")
