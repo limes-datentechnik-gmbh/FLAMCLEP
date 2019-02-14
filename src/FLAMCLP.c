@@ -159,13 +159,13 @@
  * 1.2.113: Support critical character escape sequences for strings, file names and key labels
  * 1.2.114: Fix reallocation with pointer change for lexem if key word at scanning detected
  * 1.2.115: Support empty strings behind assignments (comment= ...)
- * 1.2.116: Don't parse but accept parameter files if isPfl==2 and pvDat==NULL
+ * 1.2.116: Don't parse but accept parameter files if isPfl==2
 **/
 
-#define CLP_VSN_STR       "1.2.115"
+#define CLP_VSN_STR       "1.2.116"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        2
-#define CLP_VSN_REVISION       115
+#define CLP_VSN_REVISION       116
 
 /* Definition der Konstanten ******************************************/
 
@@ -4002,7 +4002,7 @@ static int siClpPrsPar(
       if (psHdl->siTok<0) return(psHdl->siTok);
       if (psHdl->siTok==CLPTOK_SGN) {
          if (psHdl->isPfl && (psArg->psFix->siTyp==CLPTYP_OBJECT || psArg->psFix->siTyp==CLPTYP_OVRLAY)) {
-            if (psHdl->isPfl==2 && psHdl->pvDat==NULL) {
+            if (psHdl->isPfl==2) {
                return(siClpAcpFil(pvHdl,siLev,siPos,FALSE,psArg));
             } else {
                return(siClpPrsFil(pvHdl,siLev,siPos,FALSE,psArg));
@@ -4086,6 +4086,8 @@ static int siClpAcpFil(
    if (psHdl->siTok!=CLPTOK_STR) {
       return CLPERR(psHdl,CLPERR_SYN,"After object/overlay/array assignment '%s.%s=' parameter file ('filename') expected",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
    }
+   psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
+   if (psHdl->siTok<0) return(psHdl->siTok);
    return(CLP_OK);
 }
 
@@ -4310,7 +4312,7 @@ static int siClpPrsAry(
    psHdl->siTok=siClpScnSrc(pvHdl,psArg->psFix->siTyp,psArg);
    if (psHdl->siTok<0) return(psHdl->siTok);
    if (psHdl->isPfl && psHdl->siTok==CLPTOK_SGN) {
-      if (psHdl->isPfl==2 && psHdl->pvDat==NULL) {
+      if (psHdl->isPfl==2) {
          siCnt=siClpAcpFil(pvHdl,siLev,siPos,TRUE,psArg);
       } else {
          siCnt=siClpPrsFil(pvHdl,siLev,siPos,TRUE,psArg);
