@@ -4080,12 +4080,14 @@ static int siClpAcpFil(
    TsSym*                        psArg)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
+   const char*                   pcPat=fpcPat(pvHdl,siLev);
    if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d PARFIL(%s=val)\n",fpcPre(pvHdl,siLev),siLev,siPos,psArg->psStd->pcKyw);
    psHdl->siTok=siClpScnSrc(pvHdl,CLPTYP_STRING,psArg);
    if (psHdl->siTok<0) return(psHdl->siTok);
    if (psHdl->siTok!=CLPTOK_STR) {
-      return CLPERR(psHdl,CLPERR_SYN,"After object/overlay/array assignment '%s.%s=' parameter file ('filename') expected",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+      return CLPERR(psHdl,CLPERR_SYN,"After object/overlay/array assignment '%s.%s=' parameter file ('filename') expected",pcPat,psArg->psStd->pcKyw);
    }
+   srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcPat)+strlen(psArg->psStd->pcKyw)+strlen(isPrnLex2(psArg,psHdl->pcLex)),"%s.%s=%s\n",pcPat,psArg->psStd->pcKyw,isPrnLex2(psArg,psHdl->pcLex));
    psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
    if (psHdl->siTok<0) return(psHdl->siTok);
    return(CLP_OK);
