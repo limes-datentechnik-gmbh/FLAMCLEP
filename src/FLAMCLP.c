@@ -160,12 +160,13 @@
  * 1.2.114: Fix reallocation with pointer change for lexem if key word at scanning detected
  * 1.2.115: Support empty strings behind assignments (comment= ...)
  * 1.2.116: Don't parse but accept parameter files if isPfl==2
+ * 1.2.117: Required strings are only terminated with separation characters (space or comma), comment or close bracket on level 0
 **/
 
-#define CLP_VSN_STR       "1.2.116"
+#define CLP_VSN_STR       "1.2.117"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        2
-#define CLP_VSN_REVISION       116
+#define CLP_VSN_REVISION       117
 
 /* Definition der Konstanten ******************************************/
 
@@ -2948,11 +2949,13 @@ extern int siClpLexem(
    return(CLP_OK);
 }
 
-#define isPrintF(p)    (((p)!=NULL)?(CLPISF_PWD((p)->psStd->uiFlg)==FALSE):(TRUE))
-#define isPrnLex(p,l)  (isPrintF(p)?(l):("***SECRET***"))
-#define isPrintF2(p)   (CLPISF_PWD((p)->psStd->uiFlg)==FALSE)
-#define isPrnLex2(p,l) (isPrintF2(p)?(l):("***SECRET***"))
+#define isPrintF(p)     (((p)!=NULL)?(CLPISF_PWD((p)->psStd->uiFlg)==FALSE):(TRUE))
+#define isPrnLex(p,l)   (isPrintF(p)?(l):("***SECRET***"))
+#define isPrintF2(p)    (CLPISF_PWD((p)->psStd->uiFlg)==FALSE)
+#define isPrnLex2(p,l)  (isPrintF2(p)?(l):("***SECRET***"))
 #define isSeparation(c) (isspace((c)) || iscntrl((c)) || ((c))==',')
+#define isOperator1(c)  ((c)=='+' || (c)==')' || (c)==C_SBC)
+#define isOperator2(c)  ((c)==';' || (c)==C_HSH)
 
 #define LEX_REALLOC \
    if (pcLex>=(pcEnd-4)) {\
@@ -3432,6 +3435,8 @@ static int siClpScnNat(
    struct tm                     stAkt;
    struct tm                     *tmAkt;
    char                          acHlp[1024];
+   int                           siRbc=0;
+   int                           siSbc=0;
 
    if (siTyp!=CLPTYP_NUMBER && siTyp!=CLPTYP_FLOATN && siTyp!=CLPTYP_STRING) siTyp=0;
    if (piSep!=NULL) *piSep=FALSE;
@@ -3585,12 +3590,19 @@ static int siClpScnNat(
             if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(KYW)-LEXEM(%s)\n",pcHlp);
             return(CLPTOK_KYW);
          }
-      } else if (siTyp==CLPTYP_STRING && isStr((*ppCur)[0])     &&
-                        (*ppCur)[0]!='('    && (*ppCur)[0]!=')' && (*ppCur)[0]!='+' &&
-                        (*ppCur)[0]!=C_SBO  && (*ppCur)[0]!=C_SBC) {/*required string*/
+      } else if (siTyp==CLPTYP_STRING && isStr((*ppCur)[0]) && !isSeparation((*ppCur)[0]) && !isOperator1((*ppCur)[0])) {/*required string*/
+         if ((*ppCur)[0]=='(') {
+            siRbc++;
+         } else if ((*ppCur)[0]==C_SBO) {
+            siSbc++;
+         } else if ((*ppCur)[0]==')') {
+            siRbc--;
+         } else if ((*ppCur)[0]==C_SBC) {
+            siSbc--;
+         }
          *pcLex='d'; pcLex++;
          *pcLex='\''; pcLex++;
-         if (psArg!=NULL) {
+         if (psArg!=NULL && isalpha(*(*ppCur))) {
             *pcLex=*(*ppCur);
             (*ppCur)++; pcLex++;
             while (isCon(*(*ppCur))) {
@@ -3610,9 +3622,17 @@ static int siClpScnNat(
                return(CLPTOK_KYW);
             }
          }
-         while ((*ppCur)[0]!=EOS && isStr((*ppCur)[0]) && !isSeparation((*ppCur)[0]) &&
-                           (*ppCur)[0]!='('    && (*ppCur)[0]!=')'   &&
-                           (*ppCur)[0]!=C_SBO  && (*ppCur)[0]!=C_SBC) {
+         while ((*ppCur)[0]!=EOS && isStr((*ppCur)[0]) && !isSeparation((*ppCur)[0]) && !isOperator2((*ppCur)[0]) &&
+                (siRbc>0 || (*ppCur)[0]!=')') && (siSbc>0 || (*ppCur)[0]!=C_SBC)) {
+            if ((*ppCur)[0]=='(') {
+               siRbc++;
+            } else if ((*ppCur)[0]==C_SBO) {
+               siSbc++;
+            } else if ((*ppCur)[0]==')') {
+               siRbc--;
+            } else if ((*ppCur)[0]==C_SBC) {
+               siSbc--;
+            }
             LEX_REALLOC
             *pcLex=*(*ppCur);
             pcLex++; (*ppCur)++;
