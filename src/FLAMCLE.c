@@ -140,11 +140,12 @@
  * 1.2.70: Support callback function for file to string
  * 1.2.71: Fix memory leak if GETPROP used without command
  * 1.2.72: Fix several issues concerning dia-critical character support for EBCDIC
+ * 1.2.73: Support DD:FLAMPAR for FLAM command on z/OS
  */
-#define CLE_VSN_STR       "1.2.72"
+#define CLE_VSN_STR       "1.2.73"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        2
-#define CLE_VSN_REVISION       72
+#define CLE_VSN_REVISION       73
 
 /* Definition der Konstanten ******************************************/
 
@@ -378,7 +379,8 @@ static int siCleGetCommand(
    char**                        ppFil,
    char**                        ppCmd,
    void*                         pvF2S,
-   tpfF2S                        pfF2S);
+   tpfF2S                        pfF2S,
+   const char*                   pcDpa);
 
 static TsCnfHdl* psCnfOpn(
    FILE*                         pfErr,
@@ -522,7 +524,8 @@ extern int siCleExecute(
    const char*                   pcApx,
    const TsCleAppendix*          psApx,
    void*                         pvF2S,
-   tpfF2S                        pfF2S)
+   tpfF2S                        pfF2S,
+   const char*                   pcDpa)
 {
    int                           i,j,l,s,siErr,siDep,siCnt,isSet=0;
    TsCnfHdl*                     psCnf=NULL;
@@ -2247,7 +2250,7 @@ EVALUATE:
                siErr=siCleCommandInit(psTab[i].pfIni,psTab[i].pvClp,pcOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,
                                       isCas,isPfl,isRpl,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg,pvF2S,pfF2S);
                if (siErr) ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
-               siErr=siCleGetCommand(pvHdl,pfOut,pcDep,psTab[i].pcKyw,argc,argv,&pcFil,&pcCmd,pvF2S,pfF2S);
+               siErr=siCleGetCommand(pvHdl,pfOut,pcDep,psTab[i].pcKyw,argc,argv,&pcFil,&pcCmd,pvF2S,pfF2S,pcDpa);
                if (siErr) ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
                siErr=siClpParseCmd(pvHdl,pcFil,pcCmd,TRUE,TRUE,psTab[i].piOid,&pcTls);
                if (siErr<0) {
@@ -3097,26 +3100,35 @@ static int siCleGetCommand(
    char**                  ppFil,
    char**                  ppCmd,
    void*                   pvF2S,
-   tpfF2S                  pfF2S)
+   tpfF2S                  pfF2S,
+   const char*             pcDpa)
 {
    int                     siErr,siSiz=0;
    int                     l=strlen(pcFct);
    SAFE_FREE(*ppFil);
    if (argv[1][l]==EOS) {
-      siErr=arry2str(argv+2,argc-2," ",1,ppCmd,&siSiz);
-      if (siErr<0) {
-         if (*ppCmd!=NULL) { free(*ppCmd); *ppCmd=NULL; }
-         switch(siErr) {
-         case -1: if (pfErr!=NULL) fprintf(pfErr,"Illegal parameters passed to arry2str() (Bug)\n");                                 return(CLERTC_FAT);
-         case -2: if (pfErr!=NULL) fprintf(pfErr,"Allocation of memory for command line failed (%d - %s).\n",errno,strerror(errno)); return(CLERTC_MEM);
-         default: if (pfErr!=NULL) fprintf(pfErr,"An unknown error occurred while reading command line.\n");                         return(CLERTC_FAT);
+      if (pcDpa!=NULL && *pcDpa) {
+         siErr=pfF2S(pvF2S,pcDpa,ppCmd,&siSiz,NULL,0);
+         if(siErr>0 && pfErr!=NULL) fprintf(pfErr,"Read parameter in length %d from '%s'\n",siErr,pcDpa);
+      } else {
+         siErr=-1;
+      }
+      if (siErr<0 || argc>2) {
+         siErr=arry2str(argv+2,argc-2," ",1,ppCmd,&siSiz);
+         if (siErr<0) {
+            SAFE_FREE(*ppCmd);
+            switch(siErr) {
+            case -1: if (pfErr!=NULL) fprintf(pfErr,"Illegal parameters passed to arry2str() (Bug)\n");                                 return(CLERTC_FAT);
+            case -2: if (pfErr!=NULL) fprintf(pfErr,"Allocation of memory for command line failed (%d - %s).\n",errno,strerror(errno)); return(CLERTC_MEM);
+            default: if (pfErr!=NULL) fprintf(pfErr,"An unknown error occurred while reading command line.\n");                         return(CLERTC_FAT);
+            }
          }
       }
    } else if (argv[1][l]=='.' || argv[1][l]=='(') {
       argv[1]=&argv[1][l];
       siErr=arry2str(argv+1,argc-1," ",1,ppCmd,&siSiz);
       if (siErr<0) {
-         if (*ppCmd!=NULL) { free(*ppCmd); *ppCmd=NULL; }
+         SAFE_FREE(*ppCmd);
          switch(siErr) {
          case -1: if (pfErr!=NULL) fprintf(pfErr,"Illegal parameters passed to arry2str() (Bug)\n");                                 return(CLERTC_FAT);
          case -2: if (pfErr!=NULL) fprintf(pfErr,"Allocation of memory for command line failed (%d - %s).\n",errno,strerror(errno)); return(CLERTC_MEM);

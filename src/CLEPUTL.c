@@ -3361,15 +3361,22 @@ extern int file2str(void* hdl, const char* filename, char** buf, int* bufsize, c
 }
 
 extern int arry2str(char* array[], const int count, const char* separ, const int separLen, char** out, int* outlen) {
-   size_t uiSumLen=((count-1)*separLen)+1;
-   size_t uiLens[count];
+   if (count<0 || array==NULL || out==NULL || outlen==NULL || (separLen>0 && separ==NULL))
+      return -1; // bad args
+   size_t uiSumLen=((count)*separLen)+1;
+   size_t uiLens[count+1];
    char*  pcHlp;
    char*  pcOut;
+   size_t uiOut;
 
-   if (array==NULL || out==NULL || outlen==NULL || (separLen>0 && separ==NULL))
-      return -1; // bad args
-   if (*out==NULL)
+
+   if (*out==NULL) {
       *outlen=0;
+      uiOut=0;
+   } else {
+      uiOut=strlen(*out);
+      uiSumLen+=uiOut;
+   }
 
    size_t i;
    for (i=0; i<count; i++) {
@@ -3389,8 +3396,14 @@ extern int arry2str(char* array[], const int count, const char* separ, const int
    }
 
 
-   pcOut=*out;
+   pcOut=(*out)+uiOut;
    if (count>0) {
+      if (uiOut) {
+         if (separLen>0) {
+            memcpy(pcOut, separ, separLen);
+            pcOut+=separLen;
+         }
+      }
       memcpy(pcOut, array[0], uiLens[0]);
       pcOut+=uiLens[0];
       for (i=1; i<count; i++) {

@@ -593,6 +593,7 @@ extern int file2str(void* hdl, const char* filename, char** buf, int* bufsize, c
  * Takes an array of null-terminated strings and concatenates all strings
  * into one single string separated by the specified separator. The resulting
  * string is put into the out buffer which may be reallocated if necessary.
+ * If the buffer already contain a string the remaining strings are concatenated.
  * @param array Input array of null-terminated strings.
  * @param count Number of string in array
  * @param separ Separator of arbitrary length (may be NULL if separLen=0)
