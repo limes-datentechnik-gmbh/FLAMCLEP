@@ -3590,7 +3590,7 @@ static int siClpScnNat(
             if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(KYW)-LEXEM(%s)\n",pcHlp);
             return(CLPTOK_KYW);
          }
-      } else if (siTyp==CLPTYP_STRING && isStr((*ppCur)[0]) && !isSeparation((*ppCur)[0]) && !isOperator1((*ppCur)[0])) {/*required string*/
+      } else if (siTyp==CLPTYP_STRING && isStr((*ppCur)[0]) && !isOperator1((*ppCur)[0])) {/*required string*/
          if ((*ppCur)[0]=='(') {
             siRbc++;
          } else if ((*ppCur)[0]==C_SBO) {
