@@ -208,6 +208,7 @@
 #define isPrnLen(p,v) (CLPISF_PWD(p->psStd->uiFlg)?((int)0):(v))
 
 #define GETALI(sym) (((sym)->psStd->psAli!=NULL)?(sym)->psStd->psAli->psStd->pcKyw:NULL)
+#define GETKYW(sym) (((sym)->psStd->psAli!=NULL)?(sym)->psStd->psAli->psStd->pcKyw:(sym)->psStd->pcKyw)
 
 #ifndef realloc_nowarn
 #  define realloc_nowarn      realloc
@@ -4107,7 +4108,7 @@ static int siClpAcpFil(
    if (psHdl->siTok!=CLPTOK_STR) {
       return CLPERR(psHdl,CLPERR_SYN,"After object/overlay/array assignment '%s.%s=' parameter file ('filename') expected",pcPat,psArg->psStd->pcKyw);
    }
-   srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcPat)+strlen(psArg->psStd->pcKyw)+strlen(isPrnLex2(psArg,psHdl->pcLex)),"%s.%s=%s\n",pcPat,psArg->psStd->pcKyw,isPrnLex2(psArg,psHdl->pcLex));
+   srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcPat)+strlen(psArg->psStd->pcKyw)+strlen(isPrnLex2(psArg,psHdl->pcLex)),"%s.%s=%s\n",pcPat,GETKYW(psArg),isPrnLex2(psArg,psHdl->pcLex));
    psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
    if (psHdl->siTok<0) return(psHdl->siTok);
    return(CLP_OK);
@@ -5406,7 +5407,7 @@ static int siClpBldSwt(
    psArg->psVar->siCnt++;
 
    pcPat=fpcPat(pvHdl,siLev);
-   srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcPat)+strlen(psArg->psStd->pcKyw),"%s.%s=ON\n",pcPat,psArg->psStd->pcKyw);
+   srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcPat)+strlen(psArg->psStd->pcKyw),"%s.%s=ON\n",pcPat,GETKYW(psArg));
 
    siErr=siClpBldLnk(pvHdl,siLev,siPos,psArg->psVar->siCnt,psArg->psFix->psCnt,FALSE);
    if (siErr<0) return(siErr);
@@ -5499,7 +5500,7 @@ static int siClpBldNum(
    psArg->psVar->siCnt++;
 
    pcPat=fpcPat(pvHdl,siLev);
-   srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcPat)+strlen(psArg->psStd->pcKyw)+16,"%s.%s=DEFAULT(%d)\n",pcPat,psArg->psStd->pcKyw,(int)siVal);
+   srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcPat)+strlen(psArg->psStd->pcKyw)+16,"%s.%s=DEFAULT(%d)\n",pcPat,GETKYW(psArg),(int)siVal);
 
    siErr=siClpBldLnk(pvHdl,siLev,siPos,psArg->psVar->siCnt,psArg->psFix->psCnt,FALSE);
    if (siErr<0) return(siErr);
@@ -6093,15 +6094,15 @@ static int siClpBldLit(
    pcPat=fpcPat(pvHdl,siLev);
    if (pcKyw!=NULL) {
       if (psArg->psFix->siTyp==CLPTYP_NUMBER && (CLPISF_TIM(psArg->psStd->uiFlg) || pcVal[0]=='t')) {
-         srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcPat)+strlen(psArg->psStd->pcKyw)+strlen(isPrnStr(psArg,pcVal))+strlen(cstime(siVal,acTim)),"%s.%s=%s(%s(%s))\n",pcPat,psArg->psStd->pcKyw,pcKyw,isPrnStr(psArg,pcVal),acTim);
+         srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcPat)+strlen(psArg->psStd->pcKyw)+strlen(isPrnStr(psArg,pcVal))+strlen(cstime(siVal,acTim)),"%s.%s=%s(%s(%s))\n",pcPat,GETKYW(psArg),pcKyw,isPrnStr(psArg,pcVal),acTim);
       } else {
-         srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcPat)+strlen(psArg->psStd->pcKyw)+strlen(isPrnStr(psArg,pcVal)),"%s.%s=%s(%s)\n",pcPat,psArg->psStd->pcKyw,pcKyw,isPrnStr(psArg,pcVal));
+         srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcPat)+strlen(psArg->psStd->pcKyw)+strlen(isPrnStr(psArg,pcVal)),"%s.%s=%s(%s)\n",pcPat,GETKYW(psArg),pcKyw,isPrnStr(psArg,pcVal));
       }
    } else {
       if (psArg->psFix->siTyp==CLPTYP_NUMBER && (CLPISF_TIM(psArg->psStd->uiFlg) || pcVal[0]=='t')) {
-         srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcPat)+strlen(psArg->psStd->pcKyw)+strlen(isPrnStr(psArg,pcVal))+strlen(cstime(siVal,acTim)),"%s.%s=%s(%s)\n",pcPat,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),acTim);
+         srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcPat)+strlen(psArg->psStd->pcKyw)+strlen(isPrnStr(psArg,pcVal))+strlen(cstime(siVal,acTim)),"%s.%s=%s(%s)\n",pcPat,GETKYW(psArg),isPrnStr(psArg,pcVal),acTim);
       } else {
-         srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcPat)+strlen(psArg->psStd->pcKyw)+strlen(isPrnStr(psArg,pcVal)),"%s.%s=%s\n",pcPat,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal));
+         srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcPat)+strlen(psArg->psStd->pcKyw)+strlen(isPrnStr(psArg,pcVal)),"%s.%s=%s\n",pcPat,GETKYW(psArg),isPrnStr(psArg,pcVal));
       }
    }
 
@@ -6326,7 +6327,7 @@ static int siClpIniObj(
                            fpcPre(pvHdl,siLev),psArg->psStd->pcKyw,psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst);
 
    pcPat=fpcPat(pvHdl,siLev);
-   srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcPat)+strlen(psArg->psStd->pcKyw),"%s.%s(\n",pcPat,psArg->psStd->pcKyw);
+   srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcPat)+strlen(psArg->psStd->pcKyw),"%s.%s(\n",pcPat,GETKYW(psArg));
 
    psHdl->apPat[siLev]=psArg;
    *ppDep=psArg->psDep;
@@ -6392,7 +6393,7 @@ static int siClpFinObj(
                            fpcPre(pvHdl,siLev),psArg->psStd->pcKyw,psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst);
 
    pcPat=fpcPat(pvHdl,siLev);
-   srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcPat)+strlen(psArg->psStd->pcKyw),"%s.%s)\n",pcPat,psArg->psStd->pcKyw);
+   srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcPat)+strlen(psArg->psStd->pcKyw),"%s.%s)\n",pcPat,GETKYW(psArg));
 
    siErr=siClpBldLnk(pvHdl,siLev,siPos,psArg->psVar->siCnt,psArg->psFix->psCnt,FALSE);
    if (siErr<0) return(siErr);
