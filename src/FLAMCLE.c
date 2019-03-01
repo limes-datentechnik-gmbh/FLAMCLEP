@@ -3107,13 +3107,7 @@ static int siCleGetCommand(
    int                     l=strlen(pcFct);
    SAFE_FREE(*ppFil);
    if (argv[1][l]==EOS) {
-      if (pcDpa!=NULL && *pcDpa) {
-         siErr=pfF2S(pvF2S,pcDpa,ppCmd,&siSiz,NULL,0);
-         if(siErr>0 && pfErr!=NULL) fprintf(pfErr,"Read parameter in length %d from '%s'\n",siErr,pcDpa);
-      } else {
-         siErr=-1;
-      }
-      if (siErr<0 || argc>2) {
+      if (argc>2) {
          siErr=arry2str(argv+2,argc-2," ",1,ppCmd,&siSiz);
          if (siErr<0) {
             SAFE_FREE(*ppCmd);
@@ -3122,6 +3116,11 @@ static int siCleGetCommand(
             case -2: if (pfErr!=NULL) fprintf(pfErr,"Allocation of memory for command line failed (%d - %s).\n",errno,strerror(errno)); return(CLERTC_MEM);
             default: if (pfErr!=NULL) fprintf(pfErr,"An unknown error occurred while reading command line.\n");                         return(CLERTC_FAT);
             }
+         }
+      } else {
+         if (pcDpa!=NULL && *pcDpa) {
+            siErr=pfF2S(pvF2S,pcDpa,ppCmd,&siSiz,NULL,0);
+            if(siErr>0 && pfErr!=NULL) fprintf(pfErr,"Read parameter in length %d from file '%s'\n",siErr,pcDpa);
          }
       }
    } else if (argv[1][l]=='.' || argv[1][l]=='(') {

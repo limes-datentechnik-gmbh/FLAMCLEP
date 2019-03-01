@@ -696,7 +696,8 @@ typedef struct CleAppendix {
  * @param[in]  psApx Pointer to the table with other CLP strings to print as appendix (optional could be NULL)
  * @param[in]  pvF2S Pointer to a handle which can be used in file 2 string callback function (if not required then NULL)
  * @param[in]  pfF2S Callback function which reads a file into a null-terminated string in memory (if NULL then default implementation is used)
- * @param[in]  pcDpa Pointer to a file name for a default parameter file (e.g. "DD:FLAMPAR") or NULL/empty string for nothing, read if only a command provided, append additional parameter to the parameter file
+ * @param[in]  pcDpa Pointer to a file name for a default parameter file (e.g. "DD:FLAMPAR") or NULL/empty string for nothing,
+ *                   The file name is used if only a command without assignment or parameter provided
  *
  * @return signed integer with the condition codes below:\n
  * 0  - command line, command syntax, mapping, execution and finish of the command was successful\n
