@@ -3120,7 +3120,25 @@ static int siCleGetCommand(
       } else {
          if (pcDpa!=NULL && *pcDpa) {
             siErr=pfF2S(pvF2S,pcDpa,ppCmd,&siSiz,NULL,0);
-            if(siErr>0 && pfErr!=NULL) fprintf(pfErr,"Read parameter in length %d from file '%s'\n",siErr,pcDpa);
+            if(siErr>0) {
+               if (pfErr!=NULL) fprintf(pfErr,"Read parameter in length %d from file '%s'\n",siErr,pcDpa);
+            } else {
+               char* pcHlp=(char*)realloc(*ppCmd,1);
+               if (pcHlp==NULL) {
+                  if (pfErr!=NULL) fprintf(pfErr,"Allocation of memory for command line failed (%d - %s).\n",errno,strerror(errno));
+                  return(CLERTC_MEM);
+               }
+               pcHlp[0]=0x00;
+               *ppCmd=pcHlp;
+            }
+         } else {
+            char* pcHlp=(char*)realloc(*ppCmd,1);
+            if (pcHlp==NULL) {
+               if (pfErr!=NULL) fprintf(pfErr,"Allocation of memory for command line failed (%d - %s).\n",errno,strerror(errno));
+               return(CLERTC_MEM);
+            }
+            pcHlp[0]=0x00;
+            *ppCmd=pcHlp;
          }
       }
    } else if (argv[1][l]=='.' || argv[1][l]=='(') {

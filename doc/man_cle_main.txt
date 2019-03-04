@@ -189,8 +189,10 @@ KEY LABEL NAME MAPPING
 ~~~~~~~~~~~~~~~~~~~~~~
 
 The key label name mapping works like the file name mapping, but you can
-additional use `^` to replace it with the OWNERID (`^=<ONWERID>`) and `~`
-is only replaced with login user id.
+additional use `^` to replace it with the OWNERID (`^=<ONWERID>`), `!`
+to replace it with the environment identifier (`!=<ENVID>`) and `~` is
+only replaced with login user id. If the environment ID not defined then
+`T` for test is used by default.
 
 SPECIAL EBCDIC CODE PAGE SUPPORT
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
