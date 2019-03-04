@@ -161,12 +161,13 @@
  * 1.2.115: Support empty strings behind assignments (comment= ...)
  * 1.2.116: Don't parse but accept parameter files if isPfl==2
  * 1.2.117: Required strings are only terminated with separation characters (space or comma), comment or close bracket on level 0
+ * 1.2.118: Use main keyword instead of alias in parsed parameter list
 **/
 
-#define CLP_VSN_STR       "1.2.117"
+#define CLP_VSN_STR       "1.2.118"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        2
-#define CLP_VSN_REVISION       117
+#define CLP_VSN_REVISION       118
 
 /* Definition der Konstanten ******************************************/
 
