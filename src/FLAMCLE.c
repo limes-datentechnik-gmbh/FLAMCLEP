@@ -141,7 +141,7 @@
  * 1.2.71: Fix memory leak if GETPROP used without command
  * 1.2.72: Fix several issues concerning dia-critical character support for EBCDIC
  * 1.2.73: Support DD:FLAMPAR for FLAM command on z/OS
- * 1.2.74: Support no run reason code (siNrn)
+ * 1.2.74: Support no run reason code (siNoR)
  */
 #define CLE_VSN_STR       "1.2.74"
 #define CLE_VSN_MAJOR      1
@@ -527,7 +527,7 @@ extern int siCleExecute(
    void*                         pvF2S,
    tpfF2S                        pfF2S,
    const char*                   pcDpa,
-   const int                     siNrn)
+   const int                     siNoR)
 {
    int                           i,j,l,s,siErr,siDep,siCnt,isSet=0;
    TsCnfHdl*                     psCnf=NULL;
@@ -2270,7 +2270,7 @@ EVALUATE:
                vdClpClose(pvHdl,CLPCLS_MTD_KEP);
                siErr=psTab[i].pfMap(pvHdl,pfErr,pfTrc,psTab[i].piOid,psTab[i].pvClp,psTab[i].pvPar);
                if (siErr) {
-                  if (siErr!=siNrn) {
+                  if (siErr!=siNoR) {
                      if (pfMsg!=NULL && (pcMsg=pfMsg(siErr))!=NULL) {
                         if (pfErr!=NULL) fprintf(pfErr,"Mapping of CLP structure for command '%s' failed (Return code: %d / Reason code: %d (%s))\n",psTab[i].pcKyw,CLERTC_MAP,siErr,pcMsg);
                      } else {

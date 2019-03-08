@@ -116,7 +116,7 @@ Below, you can find a possibly incomplete list of FLAMCLE feature:
  * * Special condition code handling (incl. description for manual and built-in function ERRORS)
  * * Strings can be read from files to increase protection and prevent logging of passwords
  * * Default parameter file name for system supporting static file allocation ("DD:MYPAR")
- * * You can exclude the run after mapping if you provide the corresponding return code (siNrn)
+ * * You can exclude the run after mapping if you provide the corresponding return code (siNoR)
  * * Own file to string callback function for parameter files
 
 Built-in Functions
@@ -703,7 +703,7 @@ typedef struct CleAppendix {
  * @param[in]  pfF2S Callback function which reads a file into a null-terminated string in memory (if NULL then default implementation is used)
  * @param[in]  pcDpa Pointer to a file name for a default parameter file (e.g. "DD:FLAMPAR") or NULL/empty string for nothing,
  *                   The file name is used if only a command without assignment or parameter provided
- * @param[in]  siNrn Define this reason code to the values the mapping function returns if no run is requested (0 is nothing)
+ * @param[in]  siNoR Define this reason code to the values the mapping function returns if no run is requested (0 is nothing)
  *
  * @return signed integer with the condition codes below:\n
  * 0  - command line, command syntax, mapping, execution and finish of the command was successful\n
@@ -757,7 +757,7 @@ extern int siCleExecute(
    void*                         pvF2S,
    tpfF2S                        pfF2S,
    const char*                   pcDpa,
-   const int                     siNrn);
+   const int                     siNoR);
 
 /**********************************************************************/
 /*! @cond PRIVATE */
