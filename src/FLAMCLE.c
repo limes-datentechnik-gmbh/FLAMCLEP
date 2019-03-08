@@ -141,11 +141,12 @@
  * 1.2.71: Fix memory leak if GETPROP used without command
  * 1.2.72: Fix several issues concerning dia-critical character support for EBCDIC
  * 1.2.73: Support DD:FLAMPAR for FLAM command on z/OS
+ * 1.2.74: Support no run reason code (siNrn)
  */
-#define CLE_VSN_STR       "1.2.73"
+#define CLE_VSN_STR       "1.2.74"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        2
-#define CLE_VSN_REVISION       73
+#define CLE_VSN_REVISION       74
 
 /* Definition der Konstanten ******************************************/
 
@@ -525,7 +526,8 @@ extern int siCleExecute(
    const TsCleAppendix*          psApx,
    void*                         pvF2S,
    tpfF2S                        pfF2S,
-   const char*                   pcDpa)
+   const char*                   pcDpa,
+   const int                     siNrn)
 {
    int                           i,j,l,s,siErr,siDep,siCnt,isSet=0;
    TsCnfHdl*                     psCnf=NULL;
@@ -2268,14 +2270,18 @@ EVALUATE:
                vdClpClose(pvHdl,CLPCLS_MTD_KEP);
                siErr=psTab[i].pfMap(pvHdl,pfErr,pfTrc,psTab[i].piOid,psTab[i].pvClp,psTab[i].pvPar);
                if (siErr) {
-                  if (pfMsg!=NULL && (pcMsg=pfMsg(siErr))!=NULL) {
-                     if (pfErr!=NULL) fprintf(pfErr,"Mapping of CLP structure for command '%s' failed (Return code: %d / Reason code: %d (%s))\n",psTab[i].pcKyw,CLERTC_MAP,siErr,pcMsg);
+                  if (siErr!=siNrn) {
+                     if (pfMsg!=NULL && (pcMsg=pfMsg(siErr))!=NULL) {
+                        if (pfErr!=NULL) fprintf(pfErr,"Mapping of CLP structure for command '%s' failed (Return code: %d / Reason code: %d (%s))\n",psTab[i].pcKyw,CLERTC_MAP,siErr,pcMsg);
+                     } else {
+                        if (pfErr!=NULL) fprintf(pfErr,"Mapping of CLP structure for command '%s' failed (Return code: %d / Reason code: %d)\n",psTab[i].pcKyw,CLERTC_MAP,siErr);
+                     }
+                     siErr=CLERTC_MAP;
                   } else {
-                     if (pfErr!=NULL) fprintf(pfErr,"Mapping of CLP structure for command '%s' failed (Return code: %d / Reason code: %d)\n",psTab[i].pcKyw,CLERTC_MAP,siErr);
+                     siErr=CLERTC_OK;
                   }
                   SAFE_FREE(pcCmd); SAFE_FREE(pcLst);
                   psTab[i].pfFin(pfErr,pfTrc,psTab[i].pvPar);
-                  siErr=CLERTC_MAP;
                   ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
                }
                siErr=psTab[i].pfRun(pvHdl,pfErr,pfTrc,pcOwn,pcPgm,pcVsn,pcAbo,pcLic,psTab[i].pcKyw,pcCmd,pcLst,psTab[i].pvPar,&isWrn,&siScc);

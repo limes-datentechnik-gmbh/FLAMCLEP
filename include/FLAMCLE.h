@@ -102,7 +102,7 @@ Below, you can find a possibly incomplete list of FLAMCLE feature:
  * * Keyword, help message and detailed description can be freely defined for the program, each command, argument or constant definition
  * * Aliases for each argument can also be defined and are handled as options for the same value.
  * * Available and usable on each platform including WIN, UNIX, USS, ZOS, ...
- * * Support of STDENV as DD name for environment variables on mainframes
+ * * Support of 'STDENV' as DD name or DSN '&SYSUID..STDENV' for environment variables on mainframes
  * * Support property definitions over environment variables to override hard coded default properties
  * * Keywords (commands, built-in functions, ON, OFF, ALL, DEPTH1, ...) can start optional with "-" or "--"
  * * Support for parameter files per command, object, overlay or array
@@ -111,9 +111,13 @@ Below, you can find a possibly incomplete list of FLAMCLE feature:
  * * On EBCDIC systems we use a code page specific interpretation of punctuation characters (<pre>!$#@[\]^`{|}~</pre>) dependent on the environment variable LANG
  * * Extensive manual page management including replacement of owner (&{OWN}) and program name (&{PGM})
  * * * Own tool to generate description strings from text files including replacement of constant definitions (${__VERSION__})
- * * Definition of maximum condition code (MAXCC) for command execution
+ * * Definition of maximum and minimum condition code (MAXCC) for command execution
+ * * Support SILENT and QUITE to control outputs
  * * Special condition code handling (incl. description for manual and built-in function ERRORS)
  * * Strings can be read from files to increase protection and prevent logging of passwords
+ * * Default parameter file name for system supporting static file allocation ("DD:MYPAR")
+ * * You can exclude the run after mapping if you provide the corresponding return code (siNrn)
+ * * Own file to string callback function for parameter files
 
 Built-in Functions
 ------------------
@@ -419,7 +423,8 @@ typedef int (*tpfIni)(
  * @param[in]  pvClp Pointer to the filled FLAMCLP structure (output from the command line parser)
  * @param[out] pvPar Pointer to the parameter structure, which will be filled based on the FLAMCLP structure with this function
  *
- * @return     Reason code (!=0) for termination or 0 for success
+ * @return     Reason code (!=0) for termination or 0 for success.
+ *             If a no run reason code (!=0) defined then the run function is not executed
  */
 typedef int (*tpfMap)(
    void*                         pvHdl,
@@ -698,6 +703,7 @@ typedef struct CleAppendix {
  * @param[in]  pfF2S Callback function which reads a file into a null-terminated string in memory (if NULL then default implementation is used)
  * @param[in]  pcDpa Pointer to a file name for a default parameter file (e.g. "DD:FLAMPAR") or NULL/empty string for nothing,
  *                   The file name is used if only a command without assignment or parameter provided
+ * @param[in]  siNrn Define this reason code to the values the mapping function returns if no run is requested (0 is nothing)
  *
  * @return signed integer with the condition codes below:\n
  * 0  - command line, command syntax, mapping, execution and finish of the command was successful\n
@@ -750,7 +756,8 @@ extern int siCleExecute(
    const TsCleAppendix*          psApx,
    void*                         pvF2S,
    tpfF2S                        pfF2S,
-   const char*                   pcDpa);
+   const char*                   pcDpa,
+   const int                     siNrn);
 
 /**********************************************************************/
 /*! @cond PRIVATE */
