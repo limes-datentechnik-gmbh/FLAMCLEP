@@ -144,16 +144,16 @@ at each starting point of a lexem and inside of a normal string.
 
 If the environment variable not defined the replacements below are still
 possible:
- ** <SYSUID> - Current user id in upper case
- ** <USER>   - Current user id (case sensitive)
- ** <CUSER>  - Current user id in upper case == <SYSUID>
- ** <Cuser>  - Current user id in title case
- ** <cuser>  - Current user id in lower case
- ** <HOME>   - Replaces with the users data directory, if this not
+ * <SYSUID> - Current user id in upper case
+ * <USER>   - Current user id (case sensitive)
+ * <CUSER>  - Current user id in upper case == <SYSUID>
+ * <Cuser>  - Current user id in title case
+ * <cuser>  - Current user id in lower case
+ * <HOME>   - Replaces with the users data directory, if this not
                available the replacements below are done:
- *** On UNIX with /home/<USER>
- *** On USS with /u/<USER>
- *** On ZOS with <SYSUID>
+ ** On UNIX with /home/<USER>
+ ** On USS with /u/<USER>
+ ** On ZOS with <SYSUID>
 
 FILENAME MAPPING
 ~~~~~~~~~~~~~~~~
