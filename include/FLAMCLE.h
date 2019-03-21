@@ -638,7 +638,7 @@ typedef struct CleAppendix {
 
 /** Ends a table with appendix definitions
  */
-#define CLEAPX_CLS                    { NULL, NULL, NULL, NULL, 0}
+#define CLEAPX_CLS                    { NULL, NULL, NULL, NULL, NULL, NULL, 0}
 
 /**
  * Execute command line
