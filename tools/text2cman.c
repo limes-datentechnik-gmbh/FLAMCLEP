@@ -200,6 +200,11 @@ int main(int argc, char* argv[])
                         n = strlen(linebuf);
                 }
                 fclose(inFile);
+                strcpy(pageName, "#ifdef __SHOW_TEXT_SOURCE\n");
+                fputs(pageName, outFile);
+                n = (strncmp(inputName, "../", 3) == 0) ? 3 : 0;
+                sprintf(pageName, "\"\\000%s\"\n#endif\n", inputName+n);/* skip leading ../ */
+                fputs(pageName, outFile);
                 strcpy(linebuf, ";\n\n");
                 fputs(linebuf, outFile);
                 if (singleFiles) {
