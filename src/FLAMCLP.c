@@ -1251,7 +1251,7 @@ extern int siClpSyntax(
    const char*                   pcKyw=NULL;
    char                          acKyw[CLPMAX_KYWSIZ];
    int                           siErr,siLev,i;
-   int                           l=strlen(psHdl->pcCmd);
+   unsigned int                  l=strlen(psHdl->pcCmd);
 
    if (psHdl->pcLst!=NULL) psHdl->pcLst[0]=0x00;
 
@@ -1309,7 +1309,7 @@ extern const char* pcClpInfo(
    const char*                   pcKyw=NULL;
    char                          acKyw[CLPMAX_KYWSIZ];
    int                           siErr,siLev,i;
-   int                           l=strlen(psHdl->pcCmd);
+   unsigned int                  l=strlen(psHdl->pcCmd);
 
    if (psHdl->pcLst!=NULL) psHdl->pcLst[0]=0x00;
 
@@ -1357,7 +1357,7 @@ extern int siClpHelp(
    const char*                   pcKyw=NULL;
    char                          acKyw[CLPMAX_KYWSIZ];
    int                           siErr,siLev,i;
-   int                           l=strlen(psHdl->pcCmd);
+   unsigned int                  l=strlen(psHdl->pcCmd);
 
    if (psHdl->pcLst!=NULL) psHdl->pcLst[0]=0x00;
 
@@ -1540,9 +1540,9 @@ extern int siClpDocu(
          const char*                   pcPtr=NULL;
          const char*                   pcKyw=NULL;
          char                          acKyw[CLPMAX_KYWSIZ];
-         int                           siErr=0,siLev,siPos,i;
+         int                           siErr=0,siLev,siPos;
          const char*                   pcSta=(pcHdl!=NULL&&*pcHdl)?pcHdl:psHdl->pcCmd;
-         int                           l=strlen(psHdl->pcCmd);
+         unsigned int                  i,l=strlen(psHdl->pcCmd);
          char                          acNum[strlen(pcNum)+10];
          char                          acArg[20];
          const char*                   p;
@@ -1824,7 +1824,7 @@ extern int siClpProperties(
    const char*                   pcKyw=NULL;
    char                          acKyw[CLPMAX_KYWSIZ];
    int                           siErr,siLev,i;
-   int                           l=strlen(psHdl->pcCmd);
+   unsigned int                  l=strlen(psHdl->pcCmd);
    const char*                   pcArg=NULL;
 
    if (psHdl->pcLst!=NULL) psHdl->pcLst[0]=0x00;
@@ -2694,7 +2694,7 @@ static int siClpSymCal(
          if (psSym->psStd->siKwl<=0) {
             return CLPERR(psHdl,CLPERR_TAB,"Required keyword length (%d) of argument '%s.%s' is smaller or equal to zero",psSym->psStd->siKwl,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
          }
-         if (psSym->psStd->siKwl>strlen(psSym->psStd->pcKyw)) {
+         if (psSym->psStd->siKwl>(int)strlen(psSym->psStd->pcKyw)) {
             return CLPERR(psHdl,CLPERR_TAB,"Required keyword length (%d) of argument '%s.%s' is greater then keyword length",psSym->psStd->siKwl,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
          }
       }

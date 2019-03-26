@@ -1006,7 +1006,7 @@ extern const char* lng2ccsd(const char* pcLang, unsigned isEbcdic) {
 
    pcPtr=strpbrk(pcLang, ATS_PBRK);
    if (pcPtr!=NULL) {
-      if (((pcPtr-pcLang)+4 < uiLen) && tolower(pcPtr[1])=='e' && tolower(pcPtr[2])=='u' && tolower(pcPtr[3])=='r' && tolower(pcPtr[4])=='o') {
+      if (((pcPtr-pcLang)+4 < (int)uiLen) && tolower(pcPtr[1])=='e' && tolower(pcPtr[2])=='u' && tolower(pcPtr[3])=='r' && tolower(pcPtr[4])=='o') {
          isEuro=TRUE;
       }
    }
@@ -2484,7 +2484,8 @@ extern int printd(const char* format,...)
 extern int snprintc(char* buffer,size_t size,const char* format,...)
 {
    va_list  argv;
-   int      r, h = strlen(buffer);
+   int      r;
+   unsigned int h = strlen(buffer);
    if (size > (h+1)) {
       va_start(argv, format);
       r = vsnprintf(buffer+h, size-h, format, argv);
@@ -3378,13 +3379,13 @@ extern int arry2str(char* array[], const int count, const char* separ, const int
       uiSumLen+=uiOut;
    }
 
-   size_t i;
+   long i;
    for (i=0; i<count; i++) {
       uiLens[i]=strlen(array[i]);
       uiSumLen+=uiLens[i];
    }
 
-   if (*outlen<uiSumLen || *out==NULL) {
+   if (*outlen<(int)uiSumLen || *out==NULL) {
       if (uiSumLen < 1)
          uiSumLen = 4;
       pcHlp=(char*)realloc_nowarn(*out, uiSumLen);
