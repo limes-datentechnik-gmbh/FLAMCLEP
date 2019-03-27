@@ -2,12 +2,7 @@
 
 CFLAGS = -Wall
 
-CLE_DOCF = main     about  delprop  getowner  grammar  lexem    setowner  syntax     version    config  genprop
-CLE_DOCF += getprop  help   manpage  setprop   trace    gendocu  commands  functions  main_help  main_syntax
-CLE_DOCF += appendix_lexem  appendix_grammar  appendix_properties  appendix_version  appendix_about  glossary
-CLE_DOCF += setenv   getenv delenv   license  chgprop  appendix_returncodes  appendix_reasoncodes errors
-
-CLE_DOCFILES = $(addsuffix .txt, $(CLE_DOCF))
+include docFiles.mk
 
 CLE_DOCS = $(addprefix ../doc/man_cle_, $(CLE_DOCFILES))
 
