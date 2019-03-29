@@ -361,6 +361,18 @@ extern const char* pcCleVersion(const int l, const int s, char* b);
 extern const char* pcCleAbout(const int l, const int s, char* b);
 
 /**
+ * @brief vdClePrnBuiltInDocu print Docu of Builtin functions
+ *
+ * The Documentation of the builtin functions is printed to the specified file.
+ *
+ * @param pfDoc file pointer to write to
+ * @param pcOwn owner name to use
+ * @param pcPgm program name to use
+ * @param isNbr flag to number the output
+ */
+extern void vdClePrnBuiltInDocu(FILE* pfDoc, const char* pcOwn, char* pcPgm, int isNbr);
+
+/**
  * Type definition for initialization function
  *
  * This function is used to initialize the FLAMCLP structure for a command.
