@@ -2848,6 +2848,19 @@ static void vdCleManProgram(
    }
 }
 
+extern void vdClePrnDocProgram(
+   FILE*                         pfOut,
+   const TsCleCommand*           psTab,
+   const char*                   pcOwn,
+   const char*                   pcPgm,
+   const char*                   pcHlp,
+   const char*                   pcMan,
+   const char*                   pcDep,
+   const char*                   pcSep)
+{
+   vdCleManProgram(pfOut, psTab, pcOwn, pcPgm, pcHlp, pcMan, pcDep, pcSep, 0, 0);
+}
+
 static void vdCleManFunction(
    FILE*                         pfOut,
    const char*                   pcLev,

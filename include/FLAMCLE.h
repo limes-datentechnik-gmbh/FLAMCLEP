@@ -796,6 +796,17 @@ extern int siCleParseString(
    void*                         pvF2S,
    tpfF2S                        pfF2S,
    void**                        ppClp);
+
+extern void vdClePrnDocProgram(
+   FILE*                         pfOut,
+   const TsCleCommand*           psTab,
+   const char*                   pcOwn,
+   const char*                   pcPgm,
+   const char*                   pcHlp,
+   const char*                   pcMan,
+   const char*                   pcDep,
+   const char*                   pcSep);
+
 /*! @endcond */
 
 #endif /*INC_CLE_H*/
