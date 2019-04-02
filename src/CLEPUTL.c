@@ -1738,12 +1738,13 @@ static const char* systemsymbol(const char* symbol, int size, char* value)
    int        err=0;
    int        siSln;
    int        siVln=size-1;
-   char       acCpy[128]={0};
+   char       acCpy[strlen(symbol)+2];
    if(symbol[0]!='&'){
-      snprintf(acCpy,sizeof(acCpy),"&%s",symbol);
+      siSln=snprintf(acCpy,sizeof(acCpy),"&%s",symbol);
       symbol=acCpy;
+   } else {
+      siSln=strlen(symbol);
    }
-   siSln=strlen(symbol);
    err=flzsym(symbol,&siSln,value,&siVln);
    if (err==0) {
       if (siVln!=siSln || memcmp(symbol,value,siVln)) {                  // check if real replacement
