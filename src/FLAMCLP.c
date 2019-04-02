@@ -729,7 +729,8 @@ static int siClpPrnDoc(
    const int                     isNbr,
    const char*                   pcNum,
    const TsSym*                  psArg,
-   const TsSym*                  psTab);
+   const TsSym*                  psTab,
+   const int                     isDep);
 
 static int siClpPrnPro(
    void*                         pvHdl,
@@ -1637,10 +1638,8 @@ extern int siClpDocu(
                               fprintf(pfDoc,"No detailed description available for this argument.\n\n");
                            }
                            fprintf(pfDoc,"indexterm:%cArgument %s%c\n\n\n",C_SBO,psArg->psStd->pcKyw,C_SBC);
-                           if (isDep) {
-                              siErr=siClpPrnDoc(pvHdl,pfDoc,siLev,isNbr,acNum,psArg,psTab);
-                              if (siErr<0) return(siErr);
-                           }
+                           siErr=siClpPrnDoc(pvHdl,pfDoc,siLev,isNbr,acNum,psArg,psTab,isDep);
+                           if (siErr<0) return(siErr);
                         }
                      } else if (CLPISF_CON(psArg->psStd->uiFlg)) {
                         if (isMan) {
@@ -1798,10 +1797,8 @@ extern int siClpDocu(
                fprintf(pfDoc,"No detailed description available for this command.\n\n");
             }
             fprintf(pfDoc,   "indexterm:%c%s %s%c\n\n\n",C_SBO,pcCmd,pcSta,C_SBC);
-            if (isDep) {
-               siPos=siClpPrnDoc(pvHdl,pfDoc,0,isNbr,pcNum,NULL,psTab);
-               if (siPos<0) return(siPos);
-            }
+            siPos=siClpPrnDoc(pvHdl,pfDoc,0,isNbr,pcNum,NULL,psTab,isDep);
+            if (siPos<0) return(siPos);
          }
       }
    } else {
@@ -7255,7 +7252,8 @@ static int siClpPrnDoc(
    const int                     isNbr,
    const char*                   pcNum,
    const TsSym*                  psArg,
-   const TsSym*                  psTab)
+   const TsSym*                  psTab,
+   const int                     isDep)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
 
@@ -7307,7 +7305,7 @@ static int siClpPrnDoc(
                }
                fprintf(pfDoc,"\n");
             }
-            if (siMan) {
+            if (isDep && siMan) {
                for (k=m=0;m<siMan;m++) {
                   snprintf(acNum,sizeof(acNum),"%s%d.",pcNum,k+1);
                   if (isNbr) {
@@ -7346,7 +7344,7 @@ static int siClpPrnDoc(
             }
             fprintf(pfDoc,"\n");
          }
-         if (siMan) {
+         if (isDep && siMan) {
             for (k=m=0;m<siMan;m++) {
                psHdl->apPat[siLev]=apMan[m];
                switch (apMan[m]->psFix->siTyp){
@@ -7384,7 +7382,7 @@ static int siClpPrnDoc(
                }
                fprintf(pfDoc,"indexterm:%cArgument %s%c\n\n\n",C_SBO,apMan[m]->psStd->pcKyw,C_SBC);
                if (apMan[m]->psDep!=NULL) {
-                  siErr=siClpPrnDoc(pvHdl,pfDoc,siLev+1,isNbr,acNum,apMan[m],apMan[m]->psDep);
+                  siErr=siClpPrnDoc(pvHdl,pfDoc,siLev+1,isNbr,acNum,apMan[m],apMan[m]->psDep,isDep);
                   if (siErr<0) return(siErr);
                }
                k++;
