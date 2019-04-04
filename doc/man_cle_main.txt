@@ -2,8 +2,8 @@ This command line parser provides a list of commands and some
 built-in functions, please use 'MANPAGE', 'HELP' and 'SYNTAX' to get
 extensive information about these capabilities.
 
-Additionally the build-in function 'GENDOCU' to generate a complete or
-parts of the user manual can be used.
+Additionally the build-in function 'GENDOCU' can generate a complete or
+a part of the user manual.
 
 To read the parameter of a command, a compiler (command line processor
 CLP) is applied. To see the regular expressions (lexems) and the
