@@ -1,2 +1,2 @@
-This is the about information for the program (&{pGm}). Its content
+This is the about information for the program (&{pgm}). Its content
 is printed on the screen if the built-in function 'ABOUT' is used.
