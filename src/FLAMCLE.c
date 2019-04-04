@@ -1582,14 +1582,7 @@ EVALUATE:
             fprintf(pfDoc,"----------\n\n");
             fprintm(pfDoc,pcOwn,pcPgm,MAN_CLE_APPENDIX_PROPERTIES,1);
 
-            fprintf(pfDoc ,"REMAINING DOCUMENTATION\n");
-            efprintf(pfDoc,"~~~~~~~~~~~~~~~~~~~~~~~\n\n");
-            fprintf(pfDoc,"Below you can find the documentation for all parameter which are only\n"
-                          "available over the property definitions. These parameters are not a part\n"
-                          "of the description for each command above. This list is generated and\n"
-                          "can be empty. In this case all parameter are available over the\n"
-                          "command line. If a manual page available a description in other case\n"
-                          "the help message is printed.\n\n");
+            efprintf(pfDoc,MAN_CLE_REMAINING);
             for (siErr=CLP_OK, i=0;psTab[i].pcKyw!=NULL && siErr==CLP_OK;i++) {
                siErr=siClePropertyInit(psTab[i].pfIni,psTab[i].pvClp,pcOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,
                                        psTab[i].piOid,psTab[i].psTab,isCas,isPfl,isRpl,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,NULL,NULL,pfMsg,pvF2S,pfF2S);
@@ -1602,11 +1595,7 @@ EVALUATE:
                ERROR(CLERTC_SYN,NULL);
             }
 
-            fprintf(pfDoc ,"PREDEFINED DEFAULTS\n");
-            efprintf(pfDoc,"~~~~~~~~~~~~~~~~~~~\n\n");
-            fprintf(pfDoc,"Below you can find a sample property file which contains all predefined\n"
-                          "default values for all supported commands when this documentation was\n"
-                          "created.\n\n");
+            efprintf(pfDoc,MAN_CLE_DEFAULTS);
             fprintf(pfDoc,"------------------------------------------------------------------------\n");
             fprintf(pfDoc,"\n%c Property file for: %s.%s %c\n",C_HSH,pcOwn,pcPgm,C_HSH);
             efprintf(pfDoc,"%s",HLP_CLE_PROPFIL);
