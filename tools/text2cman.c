@@ -36,6 +36,7 @@
 
 static const int FALSE = 0;
 static const int TRUE = 1;
+static int  quiet=0;
 
 int escape_file(char* inputName, FILE* inFile, FILE* outFile, int count)
 {
@@ -75,8 +76,8 @@ int escape_file(char* inputName, FILE* inFile, FILE* outFile, int count)
                 if (n > 2 && linebuf[0] != '\n' && linebuf[0] != '\r')
                         break;
         }
-        if (linecount > 1) {
-                fprintf(stderr, "%s:1:1: skipped %d empty lines.\n", inputName, linecount);
+        if (!quiet && linecount > 1) {
+                fprintf(stderr, "%s:1:1: skipped %d empty lines.\n", inputName, linecount-1);
         }
         isCommentBlock=0;
         while (1) {
@@ -173,7 +174,6 @@ int main(int argc, char* argv[])
         FILE* outFile = NULL;
         char* inputName = NULL;
         char* outputName = NULL;
-        int  quiet=0;
         char linebuf[1024];
         char pageName[2048];
         char stringName[512];
