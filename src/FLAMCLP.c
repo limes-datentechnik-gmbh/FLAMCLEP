@@ -162,6 +162,7 @@
  * 1.2.116: Don't parse but accept parameter files if isPfl==2
  * 1.2.117: Required strings are only terminated with separation characters (space or comma), comment or close bracket on level 0
  * 1.2.118: Use main keyword instead of alias in parsed parameter list
+ * 1.2.119: Support parameter files for arguments (keyword=>filename)
 **/
 
 #define CLP_VSN_STR       "1.2.118"
@@ -202,6 +203,7 @@
 #define CLPTOK_STR               13
 #define CLPTOK_NUM               14
 #define CLPTOK_FLT               15
+#define CLPTOK_SAB               16
 
 #define isPrnInt(p,v) (CLPISF_PWD(p->psStd->uiFlg)?((I64)0):(v))
 #define isPrnFlt(p,v) (CLPISF_PWD(p->psStd->uiFlg)?((F64)0.0):(v))
@@ -2857,7 +2859,7 @@ extern int siClpLexem(
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," LCOMMENT  ';' [:print:]* 'nl'                             (will be ignored)\n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," SEPARATOR [:space: | :cntr: | ',']*                  (abbreviated with SEP)\n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," OPERATOR1 '=' | '.' | '(' | ')' | '[' | ']'  (SGN, DOT, RBO, RBC, SBO, SBC)\n");
-      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," OPERATOR2 '+' | '-' | '*' | '/'                        (ADD, SUB, MUL, DIV)\n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," OPERATOR2 '=>'| '+' | '-' | '*' | '/' |           (SAB, ADD, SUB, MUL, DIV)\n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," KEYWORD   ['-'['-']][:alpha:]+[:alnum: | '_']*          (always predefined)\n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," NUMBER    ([+|-]  [ :digit:]+)  |                       (decimal (default))\n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," num       ([+|-]0b[ :digit:]+)  |                                  (binary)\n");
@@ -2949,7 +2951,7 @@ extern int siClpLexem(
 #define isPrintF2(p)    (CLPISF_PWD((p)->psStd->uiFlg)==FALSE)
 #define isPrnLex2(p,l)  (isPrintF2(p)?(l):("***SECRET***"))
 #define isSeparation(c) (isspace((c)) || iscntrl((c)) || ((c))==',')
-#define isOperator1(c)  ((c)=='+' || (c)==')' || (c)==C_SBC)
+#define isOperator1(c)  ((c)=='=' || (c)=='+' || (c)==')' || (c)==C_SBC)
 #define isOperator2(c)  ((c)==';' || (c)==C_HSH)
 
 #define LEX_REALLOC \
@@ -3843,10 +3845,16 @@ static int siClpScnNat(
             if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(NUM)-LEXEM(%s)\n",isPrnLex(psArg,pcHlp));
             return((siTyp==CLPTOK_FLT)?CLPTOK_FLT:CLPTOK_NUM);
          }
-      } else if (*(*ppCur)=='=') { /*sign*/
-         pcLex[0]='='; pcLex[1]=EOS; (*ppCur)++;
-         if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(SGN)-LEXEM(%s)\n",pcHlp);
-         return(CLPTOK_SGN);
+      } else if (*(*ppCur)=='=') { /*sign or sign with agle breckets*/
+         if ((*ppCur)[1]=='>') {
+            pcLex[0]='='; pcLex[1]='>'; pcLex[2]=EOS; (*ppCur)+=2;
+            if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(SAB)-LEXEM(%s)\n",pcHlp);
+            return(CLPTOK_SAB);
+         } else {
+            pcLex[0]='='; pcLex[1]=EOS; (*ppCur)++;
+            if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(SGN)-LEXEM(%s)\n",pcHlp);
+            return(CLPTOK_SGN);
+         }
       } else if (*(*ppCur)=='.') { /*dot*/
          pcLex[0]='.'; pcLex[1]=EOS; (*ppCur)++;
          if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(DOT)-LEXEM(%s)\n",pcHlp);
@@ -3927,19 +3935,25 @@ extern int siClpGrammar(
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," switch         -> KEYWORD                                        \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," assignment     -> KEYWORD '=' value                              \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  KEYWORD '=' KEYWORD # SELECTION #              \n");
+   if (psHdl->isPfl) {
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  KEYWORD '=>' STRING # parameter file #         \n");
+   }
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," object         -> KEYWORD ['('] parameter_list [')']             \n");
    if (psHdl->isPfl) {
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  KEYWORD '=' STRING # parameter file #          \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  KEYWORD '=>' STRING # parameter file #         \n");
    }
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," overlay        -> KEYWORD ['.'] parameter                        \n");
    if (psHdl->isPfl) {
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  KEYWORD '=' STRING # parameter file #          \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  KEYWORD '=>' STRING # parameter file #         \n");
    }
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," array          -> KEYWORD '[' value_list   ']'                   \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  KEYWORD '[' object_list  ']'                   \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  KEYWORD '[' overlay_list ']'                   \n");
    if (psHdl->isPfl) {
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  KEYWORD '[=' STRING ']' # parameter file #     \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  KEYWORD '[=>' STRING ']' # parameter file #    \n");
    }
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," value_list     -> value SEP value_list                           \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  EMPTY                                          \n");
@@ -4023,6 +4037,17 @@ static int siClpPrsPar(
             }
          } else {
             return(siClpPrsSgn(pvHdl,siLev,siPos,psArg));
+         }
+      } else if (psHdl->siTok==CLPTOK_SAB) {
+         if (psHdl->isPfl) {
+            if (psHdl->isPfl==2) {
+               return(siClpAcpFil(pvHdl,siLev,siPos,FALSE,psArg));
+            } else {
+               return(siClpPrsFil(pvHdl,siLev,siPos,FALSE,psArg));
+            }
+         } else {
+            CLPERR(psHdl,CLPERR_SEM,"Parameter files not allowed (%s.?)",fpcPat(pvHdl,siLev));
+            return(CLPERR_SEM);
          }
       } else if (psHdl->siTok==CLPTOK_RBO) {
          return(siClpPrsObj(pvHdl,siLev,siPos,psArg));
@@ -4132,21 +4157,23 @@ static int siClpPrsFil(
       return CLPERR(psHdl,CLPERR_SYN,"After object/overlay/array assignment '%s.%s=' parameter file ('filename') expected",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
    }
 
-   siErr=psHdl->pfF2s(psHdl->pvF2s,psHdl->pcLex+2,&pcPar,&siSiz,acMsg,sizeof(acMsg));
+   char acFil[strlen(psHdl->pcLex)];
+   strcpy(acFil,psHdl->pcLex+2);
+   siErr=psHdl->pfF2s(psHdl->pvF2s,acFil,&pcPar,&siSiz,acMsg,sizeof(acMsg));
    if (siErr<0) {
       siErr=CLPERR(psHdl,CLPERR_SYS,"Parameter file: %s",acMsg);
       SAFE_FREE(pcPar);
       return(siErr);
    }
 
-   if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"PARAMETER-FILE-PARSER-BEGIN(FILE=%s)\n",psHdl->pcLex+2);
+   if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"PARAMETER-FILE-PARSER-BEGIN(FILE=%s)\n",acFil);
    strcpy(acSrc,psHdl->pcSrc);
-   srprintf(&psHdl->pcSrc,&psHdl->szSrc,strlen(CLPSRC_PAF)+strlen(psHdl->pcLex+2),"%s%s",CLPSRC_PAF,psHdl->pcLex+2);
+   srprintf(&psHdl->pcSrc,&psHdl->szSrc,strlen(CLPSRC_PAF)+strlen(acFil),"%s%s",CLPSRC_PAF,acFil);
 
    pcInp=psHdl->pcInp; psHdl->pcInp=pcClpUnEscape(pvHdl,pcPar);
    SAFE_FREE(pcPar);
    if (psHdl->pcInp==NULL) {
-      siErr=CLPERR(psHdl,CLPERR_MEM,"Un-escaping of parameter file (%s) failed",psHdl->pcLex+2);
+      siErr=CLPERR(psHdl,CLPERR_MEM,"Un-escaping of parameter file (%s) failed",acFil);
       return(siErr);
    }
    pcCur=psHdl->pcCur; psHdl->pcCur=psHdl->pcInp;
@@ -4198,12 +4225,12 @@ static int siClpPrsFil(
       psHdl->pcLex[0]=EOS;
       strcpy(psHdl->pcSrc,acSrc);
       psHdl->pcInp=pcInp; psHdl->pcCur=pcCur; psHdl->pcOld=pcOld; psHdl->pcRow=pcRow; psHdl->siRow=siRow;
-      if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"PARAMETER-FILE-PARSER-END(FILE=%s CNT=%d)\n",psHdl->pcLex+2,siCnt);
+      if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"PARAMETER-FILE-PARSER-END(FILE=%s CNT=%d)\n",acFil,siCnt);
       psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
       if (psHdl->siTok<0) return(psHdl->siTok);
       return(siCnt);
    } else {
-      return(CLPERR(psHdl,CLPERR_SYN,"Last token (%s) of parameter file '%s' is not EOF",apClpTok[psHdl->siTok],psHdl->pcLex+2));
+      return(CLPERR(psHdl,CLPERR_SYN,"Last token (%s) of parameter file '%s' is not EOF",apClpTok[psHdl->siTok],acFil));
    }
 }
 
@@ -4331,7 +4358,7 @@ static int siClpPrsAry(
    if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d ARY(%s%ctyplst%c)-OPN)\n",fpcPre(pvHdl,siLev),siLev,siPos,psArg->psStd->pcKyw,C_SBO,C_SBC);
    psHdl->siTok=siClpScnSrc(pvHdl,psArg->psFix->siTyp,psArg);
    if (psHdl->siTok<0) return(psHdl->siTok);
-   if (psHdl->isPfl && psHdl->siTok==CLPTOK_SGN) {
+   if (psHdl->isPfl && (psHdl->siTok==CLPTOK_SGN || psHdl->siTok==CLPTOK_SAB)) {
       if (psHdl->isPfl==2) {
          siCnt=siClpAcpFil(pvHdl,siLev,siPos,TRUE,psArg);
       } else {

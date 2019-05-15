@@ -34,7 +34,7 @@ Description
 The command line parser (FLAMCLP) is a complier which reads a command
 string using the lexems and grammar below to fill a structure with the
 corresponding values given in this line. The FLAMCLP works only in memory
-(except parameter files are used for objects, overlays, arrays or
+(except parameter files are used for objects, overlays, arrays, arguments or
 string files) and the syntax and semantic will be defined by a tree of
 tables. Such a table can represent an object (struct) or an overlay (union).
 Each argument in such a table can be a object or overlay again in using
@@ -55,7 +55,8 @@ structure must be free by the application.
 
 For object, overlays and arrays you can provide parameter files (OBJECT='filename')
 containing the parameter string in the corresponding syntax for these object,
-overlay or array (KYW[='filename']).
+overlay or array (KYW[='filename']). With '=>' you can also use parameter files
+for normal arguments.
 
 To read such a parameter file as string into the memory a handle and a
 callback function can be provided. If the parameter NULL a default
