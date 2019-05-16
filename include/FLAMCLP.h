@@ -56,7 +56,8 @@ structure must be free by the application.
 For object, overlays and arrays you can provide parameter files (OBJECT='filename')
 containing the parameter string in the corresponding syntax for these object,
 overlay or array (KYW[='filename']). With '=>' you can also use parameter files
-for normal arguments.
+for normal arguments. The operator '=>' is also permitted for objects, overlays
+and arrays.
 
 To read such a parameter file as string into the memory a handle and a
 callback function can be provided. If the parameter NULL a default
@@ -197,12 +198,14 @@ terminated strings. This means that the FLAMCLP does not know whether the
 command line results from a file or argc/argv.
 
 If the isPfl (is parameter file) flag TRUE: For objects, overlays and arrays
-you can use the assignment letter '=' to define a parameter file containing
-the command string for this object, overlay or array. This means that for
-each object, overlay or array a dedicated parameter file can be used. The
+you can use the assignment letter '=' or '=>' to define a parameter file containing
+the command string for this object, overlay or array. For simple arguments
+you must use '=>' to define a parameter file but all these capabilities are
+only supported if the flag defined to true. This means that for each object,
+overlay, array or argument a dedicated parameter file can be used. The
 parameter file must contain a command string which syntax is valid for the
-certain object, overlay or array. CLP open the file with format string "r".
-To use DD names on mainframes the file name must like "DD:name".
+certain object, overlay, array or argument. CLP open the file with format
+string "r". To use DD names on mainframes the file name must like "DD:name".
 
 If the flag CLPFLG_PWD is used, string outputs containing passwords will
 result in "###SECRECT###" and float or number outputs in a value of 0.
@@ -268,7 +271,7 @@ Lexemes (regular expressions) for argument list or parameter file:
 --| LCOMMENT  ';' [:print:]* 'nl'                             (will be ignored)
 --| SEPARATOR [:space: | :cntr: | ',']*                  (abbreviated with SEP)
 --| OPERATOR1 '=' | '.' | '(' | ')' | '[' | ']'  (SGN, DOT, RBO, RBC, SBO, SBC)
---| OPERATOR2 '+' | '-' | '*' | '/'                        (ADD, SUB, MUL, DIV)
+--| OPERATOR2 '=>'| '+' | '-' | '*' | '/' |           (SAB, ADD, SUB, MUL, DIV)
 --| KEYWORD   ['-'['-']][:alpha:]+[:alnum: | '_']*          (always predefined)
 --| NUMBER    ([+|-]  [ :digit:]+)  |                       (decimal (default))
 --| num       ([+|-]0b[ :digit:]+)  |                                  (binary)
@@ -334,20 +337,20 @@ Lexemes (regular expressions) for argument list or parameter file:
 --|           Supplements can also be enclosed in ' or ` instead of "
 --| ENVIRONMENT VARIABLES '<'varnam'>' will replaced by the corresponding value
 --| Escape sequences for critical punctuation characters on EBCDIC systems
---|    '!' = "&EXC;"   - Exclamation mark
---|    '$' = "&DLR;"   - Dollar sign
---|    '#' = "&HSH;"   - Hashtag (number sign)
---|    '@' = "&ATS;"   - At sign
---|    '[' = "&SBO;"   - Square bracket open
---|    '\' = "&BSL;"   - Backslash
---|    ']' = "&SBC;"   - Square bracket close
---|    '^' = "&CRT;"   - Caret (circumflex)
---|    '`' = "&GRV;"   - Grave accent
---|    '{' = "&CBO;"   - Curly bracket open
---|    '|' = "&VBR;"   - Vertical bar
---|    '}' = "&CBC;"   - Curly bracket close
---|    '~' = "&TLD;"   - Tilde
---| Define CCSIDs for certain areas in CLP strings on EBCDIC systems
+--|    '!' = '&EXC;'   - Exclamation mark
+--|    '$' = '&DLR;'   - Dollar sign
+--|    '#' = '&HSH;'   - Hashtag (number sign)
+--|    '@' = '&ATS;'   - At sign
+--|    '[' = '&SBO;'   - Square bracket open
+--|    '\' = '&BSL;'   - Backslash
+--|    ']' = '&SBC;'   - Square bracket close
+--|    '^' = '&CRT;'   - Caret (circumflex)
+--|    '`' = '&GRV;'   - Grave accent
+--|    '{' = '&CBO;'   - Curly bracket open
+--|    '|' = '&VBR;'   - Vertical bar
+--|    '}' = '&CBC;'   - Curly bracket close
+--|    '~' = '&TLD;'   - Tilde
+--| Define CCSIDs for certain areas in CLP strings on EBCDIC systems (0-reset)
 --|    '&' [:digit:]+ ';  (..."&1047;get.file='&0;%s&1047;'",f)
 --| Escape sequences for hexadecimal byte values
 --|    '&' ['X''x'] :xdigit: :xdigit: ';' ("&xF5;")
@@ -365,14 +368,18 @@ Grammar for argument list or parameter file
 --| switch         -> KEYWORD
 --| assignment     -> KEYWORD '=' value
 --|                |  KEYWORD '=' KEYWORD # SELECTION #
+--|                |  KEYWORD '=>' STRING # parameter file #
 --| object         -> KEYWORD ['('] parameter_list [')']
 --|                |  KEYWORD '=' STRING # parameter file #
+--|                |  KEYWORD '=>' STRING # parameter file #
 --| overlay        -> KEYWORD ['.'] parameter
 --|                |  KEYWORD '=' STRING # parameter file #
+--|                |  KEYWORD '=>' STRING # parameter file #
 --| array          -> KEYWORD '[' value_list   ']'
 --|                |  KEYWORD '[' object_list  ']'
 --|                |  KEYWORD '[' overlay_list ']'
 --|                |  KEYWORD '[=' STRING ']' # parameter file #
+--|                |  KEYWORD '[=>' STRING ']' # parameter file #
 --| value_list     -> value SEP value_list
 --|                |  EMPTY
 --| object_list    -> object SEP object_list
@@ -908,7 +915,7 @@ typedef struct ClpArgument {
    const char*                   pcAli;
    /** Minimum amount of entries for this argument (0-optional n-required) */
    int                           siMin;
-   /** Maximum amount of entries for this argument (1-scalar n-array) */
+   /** Maximum amount of entries for this argument (1-scalar n-array (n=0 unlimited array, n>1 limited array)) */
    int                           siMax;
    /** If fixed size type (switch, number, float, object, overlay) then size of this type else (string) available size in memory
     *  String type can be defined as FIX with CLPFLG_FIX but this requires a typedef for this string size
