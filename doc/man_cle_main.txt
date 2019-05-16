@@ -31,6 +31,18 @@ information about the program.
 
 This is the ${__BUILD__} build version of the FLAMCLEP.
 
+COMMAND LINE CONSIDERATIONS
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The command line parser supports abbreviation of key words depending on
+the unique first characters. This is only useful if you work in dialog.
+If the command used in a persistent way (e.g. in a script) please write
+the complete keyword, to ensure that the script must not be changed in a
+later version. The same is valid for the required string support. The
+CLP supports strings without enclosing. These strings depending on the
+keywords used in a name space. In future new key words could be added,
+in such case the string could be damaged and must be enclosed.
+
 USED ENVIRONMENT VARIABLES
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
