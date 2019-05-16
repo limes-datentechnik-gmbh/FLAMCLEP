@@ -4029,11 +4029,16 @@ static int siClpPrsPar(
       psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
       if (psHdl->siTok<0) return(psHdl->siTok);
       if (psHdl->siTok==CLPTOK_SGN) {
-         if (psHdl->isPfl && (psArg->psFix->siTyp==CLPTYP_OBJECT || psArg->psFix->siTyp==CLPTYP_OVRLAY)) {
-            if (psHdl->isPfl==2) {
-               return(siClpAcpFil(pvHdl,siLev,siPos,FALSE,psArg));
+         if (psArg->psFix->siTyp==CLPTYP_OBJECT || psArg->psFix->siTyp==CLPTYP_OVRLAY) {
+            if (psHdl->isPfl) {
+               if (psHdl->isPfl==2) {
+                  return(siClpAcpFil(pvHdl,siLev,siPos,FALSE,psArg));
+               } else {
+                  return(siClpPrsFil(pvHdl,siLev,siPos,FALSE,psArg));
+               }
             } else {
-               return(siClpPrsFil(pvHdl,siLev,siPos,FALSE,psArg));
+               CLPERR(psHdl,CLPERR_SEM,"Parameter files not allowed (%s.?)",fpcPat(pvHdl,siLev));
+               return(CLPERR_SEM);
             }
          } else {
             return(siClpPrsSgn(pvHdl,siLev,siPos,psArg));
@@ -4358,13 +4363,18 @@ static int siClpPrsAry(
    if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d ARY(%s%ctyplst%c)-OPN)\n",fpcPre(pvHdl,siLev),siLev,siPos,psArg->psStd->pcKyw,C_SBO,C_SBC);
    psHdl->siTok=siClpScnSrc(pvHdl,psArg->psFix->siTyp,psArg);
    if (psHdl->siTok<0) return(psHdl->siTok);
-   if (psHdl->isPfl && (psHdl->siTok==CLPTOK_SGN || psHdl->siTok==CLPTOK_SAB)) {
-      if (psHdl->isPfl==2) {
-         siCnt=siClpAcpFil(pvHdl,siLev,siPos,TRUE,psArg);
+   if (psHdl->siTok==CLPTOK_SGN || psHdl->siTok==CLPTOK_SAB) {
+      if (psHdl->isPfl) {
+         if (psHdl->isPfl==2) {
+            siCnt=siClpAcpFil(pvHdl,siLev,siPos,TRUE,psArg);
+         } else {
+            siCnt=siClpPrsFil(pvHdl,siLev,siPos,TRUE,psArg);
+         }
+         if (siCnt<0) return(siCnt);
       } else {
-         siCnt=siClpPrsFil(pvHdl,siLev,siPos,TRUE,psArg);
+         CLPERR(psHdl,CLPERR_SEM,"Parameter files not allowed (%s.?)",fpcPat(pvHdl,siLev));
+         return(CLPERR_SEM);
       }
-      if (siCnt<0) return(siCnt);
    } else {
       switch (psArg->psFix->siTyp) {
       case CLPTYP_NUMBER: siCnt=siClpPrsValLst(pvHdl,siLev,CLPTOK_NUM,psArg); break;
