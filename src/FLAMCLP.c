@@ -6745,7 +6745,7 @@ static void vdClpPrnArgTab(
       }
    }
    for (psHlp=psTab;psHlp!=NULL;psHlp=psHlp->psNxt) {
-      if ((psHlp->psFix->siTyp==siTyp || siTyp<0) && !CLPISF_LNK(psHlp->psStd->uiFlg)) {
+      if ((psHlp->psFix->siTyp==siTyp || siTyp<0) && !CLPISF_LNK(psHlp->psStd->uiFlg) && !CLPISF_HID(psHlp->psStd->uiFlg)) {
          vdClpPrnArg(pvHdl,pfOut,siLev,psHlp->psStd->pcKyw,GETALI(psHlp),psHlp->psStd->siKwl,psHlp->psFix->siTyp,psHlp->psFix->pcHlp,psHlp->psFix->pcDft,
                      CLPISF_SEL(psHlp->psStd->uiFlg),CLPISF_CON(psHlp->psStd->uiFlg));
       }
