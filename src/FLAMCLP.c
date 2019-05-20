@@ -2134,6 +2134,13 @@ static TsSym* psClpSymIns(
          psSym->psStd->uiFlg|=CLPFLG_UNS;
       }
    }
+   pcEnv=GETENV("CLEP_NO_SECRETS");
+   if (pcEnv!=NULL) {
+      if (strcmp(pcEnv,"OFF")==0) {
+         psSym->psStd->uiFlg&=~CLPFLG_PWD;
+      }
+      pcEnv=NULL;
+   }
    psSym->psStd->psAli=NULL;
    psSym->psStd->siKwl=strlen(psSym->psStd->pcKyw);
    psSym->psStd->siLev=siLev;
@@ -3003,9 +3010,9 @@ extern int siClpLexem(
 #define isPrintF2(p)    (CLPISF_PWD((p)->psStd->uiFlg)==FALSE)
 #define isPrnLex2(p,l)  (isPrintF2(p)?(l):("***SECRET***"))
 #define isSeparation(c) (isspace((c)) || iscntrl((c)) || ((c))==',')
-#define isOperator1(c)  ((c)=='=' || (c)=='+' || (c)==')' || (c)==C_SBC)                           // required string cannot start with this characters
-#define isOperator2(c)  ((c)==';' || (c)==C_HSH)                                                   // required string must end at this
-#define isOperator3(c)  ((c)=='=' || (c)=='(' || (c)==')' || (c)=='.' || (c)==C_SBO || (c)==C_SBC) // required string must end at key word if one of this follows
+#define isOperator1(c)  ((c)=='=' || (c)=='+' || (c)=='-' || (c)==')' || (c)==C_SBC) // required string cannot start with this characters
+#define isOperator2(c)  ((c)==';' || (c)==C_HSH)                                     // required string must end at this
+#define isOperator3(c)  (isOperator1(c) || (c)=='('  || (c)=='.' || (c)==C_SBO)      // required string must end at key word if one of this follows
 
 #define LEX_REALLOC \
    if (pcLex>=(pcEnd-4)) {\
@@ -3423,28 +3430,31 @@ static int siClpConNat(
    }
 }
 
-static inline int isClpKyw (
-   void*                         pvHdl,
-   FILE*                         pfErr,
-   FILE*                         pfTrc,
-   const char*                   pcKyw,
-   const int                     siFlg,
-   const int                     siTyp,
-   const TsSym*                  psArg,
-   const TsSym**                 ppVal)
+static inline int siClpNxtOpr(
+   const char*                   pcCur)
 {
-   const TsSym*                  psVal=NULL;
-   if (siFlg>0 && psArg!=NULL && psArg->psDep!=NULL) {
-      psVal=psClpFndSym(pvHdl,pcKyw,psArg->psDep);
-   }
-   if (siFlg>1 && psArg!=NULL && psVal==NULL && !CLPISF_SEL(psArg->psStd->uiFlg)) {
-      psVal=psClpFndSym2(pvHdl,pcKyw,psArg);
-   }
-   if (psVal!=NULL && ((((siTyp>0 && psVal->psFix->siTyp==siTyp && psVal->psVar->siCnt)) || siTyp<=0))) {
-      if (ppVal!=NULL) *ppVal=psVal;
-      return(TRUE);
-   } else {
-      return(CLPTOK_KYW!=siClpConNat(pvHdl,pfErr,pfTrc,pcKyw,NULL,NULL,siTyp,psArg));
+   while (1) {
+      if (*pcCur==EOS) { /*end*/
+         return(0x00);
+      } else if (isSeparation(*pcCur)) { /*separation*/
+         pcCur++;
+      } else if (*pcCur==C_HSH) { /*comment*/
+         pcCur++;
+         while (*pcCur!=C_HSH && *pcCur!=EOS) {
+            pcCur++;
+         }
+         if (*pcCur!=C_HSH) {
+            return(0x00);
+         }
+         pcCur++;
+      } else if (*pcCur==';') { /*line comment*/
+         pcCur++;
+         while (*pcCur!='\n' && *pcCur!=EOS) {
+            pcCur++;
+         }
+      } else {
+         return(*pcCur);
+      }
    }
 }
 
@@ -3456,13 +3466,13 @@ static inline int isClpKywTyp(
    const TsSym*                  psArg)
 {
    const TsSym*                  psVal=NULL;
-   if (psArg->psDep!=NULL) {
+   if (psArg->psDep!=NULL) { // selection
       psVal=psClpFndSym(pvHdl,pcKyw,psArg->psDep);
    }
    if (psVal==NULL && !CLPISF_SEL(psArg->psStd->uiFlg)) {
       psVal=psClpFndSym2(pvHdl,pcKyw,psArg);
    }
-   if (psVal!=NULL && psVal->psFix->siTyp==psArg->psFix->siTyp && psVal->psVar->siCnt) {
+   if (psVal!=NULL && psVal->psFix->siTyp==psArg->psFix->siTyp) {
       return(TRUE);
    }
    return(CLPTOK_KYW!=siClpConNat(pvHdl,pfErr,pfTrc,pcKyw,NULL,NULL,psArg->psFix->siTyp,psArg));
@@ -3478,15 +3488,15 @@ static inline int isClpKywVal(
 {
    const TsSym*                  psVal=NULL;
    if (psArg!=NULL) {
-      if (psArg->psDep!=NULL) {
+      if (psArg->psDep!=NULL) { // selection
          psVal=psClpFndSym(pvHdl,pcKyw,psArg->psDep);
       }
       if (psVal==NULL && !CLPISF_SEL(psArg->psStd->uiFlg)) {
          psVal=psClpFndSym2(pvHdl,pcKyw,psArg);
       }
-      if (ppVal!=NULL) *ppVal=psVal;
-      if (psVal!=NULL) return(TRUE);
    }
+   if (ppVal!=NULL) *ppVal=psVal;
+   if (psVal!=NULL) return(TRUE);
    return(CLPTOK_KYW!=siClpConNat(pvHdl,pfErr,pfTrc,pcKyw,NULL,NULL,-1,psArg));
 }
 
@@ -3496,9 +3506,11 @@ static inline int isClpKywStr(
    FILE*                         pfTrc,
    const char*                   pcKyw,
    const TsSym*                  psArg,
-   const TsSym**                 ppVal)
+   const TsSym**                 ppVal,
+   const char                    scOpr)
 {
    const TsSym*                  psVal=NULL;
+   if (ppVal!=NULL) *ppVal=NULL;
    if (psArg!=NULL) {
       if (psArg->psDep!=NULL) { // selection
          psVal=psClpFndSym(pvHdl,pcKyw,psArg->psDep);
@@ -3506,10 +3518,67 @@ static inline int isClpKywStr(
       if (psVal==NULL && !CLPISF_SEL(psArg->psStd->uiFlg)) {
          psVal=psClpFndSym2(pvHdl,pcKyw,psArg);
       }
-      if (ppVal!=NULL) *ppVal=psVal;
-      if (psVal!=NULL) return(TRUE);
+   }
+   if (psVal!=NULL) {
+      switch (scOpr) {
+      case '(': // required string ends only if type is an object
+         if (psVal->psFix->siTyp==CLPTYP_OBJECT) {
+            if (ppVal!=NULL) *ppVal=psVal;
+            return(TRUE);
+         }
+         break;
+      case '.': // required string ends only if type is an overlay
+         if (psVal->psFix->siTyp==CLPTYP_OVRLAY) {
+            if (ppVal!=NULL) *ppVal=psVal;
+            return(TRUE);
+         }
+         break;
+      default: // at each other operator or separator the required string must end
+         if (ppVal!=NULL) *ppVal=psVal;
+         return(TRUE);
+      }
    }
    return(CLPTOK_KYW!=siClpConNat(pvHdl,pfErr,pfTrc,pcKyw,NULL,NULL,CLPTYP_STRING,psArg));
+}
+
+static inline int isClpKywAry(
+   void*                         pvHdl,
+   const int                     siTok,
+   const char*                   pcKyw,
+   const TsSym*                  psArg,
+   const TsSym**                 ppVal)
+{
+   TsHdl*                        psHdl=(TsHdl*)pvHdl;
+   const TsSym*                  psVal=NULL;
+   if (ppVal!=NULL) {
+      if (*ppVal!=NULL) {
+         int siOpr=siClpNxtOpr(psHdl->pcCur);
+         if ((*ppVal)->psFix->siTyp==psArg->psFix->siTyp && siOpr!='=' && siOpr!='(' && siOpr!='.') {
+            return(TRUE);
+         } else {
+            return(FALSE);
+         }
+      }
+   }
+   if (psArg!=NULL) {
+      if (psArg->psDep!=NULL) { // selection
+         psVal=psClpFndSym(pvHdl,pcKyw,psArg->psDep);
+      }
+      if (psVal==NULL && !CLPISF_SEL(psArg->psStd->uiFlg)) {
+         psVal=psClpFndSym2(pvHdl,pcKyw,psArg);
+      }
+      if (psVal!=NULL) {
+         if (ppVal!=NULL) *ppVal=psVal;
+         int siOpr=siClpNxtOpr(psHdl->pcCur);
+         if (psVal->psFix->siTyp==psArg->psFix->siTyp && siOpr!='=' && siOpr!='(' && siOpr!='.') {
+            return(TRUE);
+         } else {
+            return(FALSE);
+         }
+      }
+      return(siTok==siClpConNat(pvHdl,psHdl->pfErr,NULL,pcKyw,NULL,NULL,psArg->psFix->siTyp,psArg));
+   }
+   return(FALSE);
 }
 
 static char* pcClpUnEscape(
@@ -3689,7 +3758,7 @@ static int siClpScnNat(
             (*ppCur)++; pcLex++;
          }
          *pcLex=EOS;
-         if(pcCur[0]=='-' && pcCur[1]!='-' && psArg!=NULL && isClpKywTyp(pvHdl,pfErr,pfTrc,pcHlp,psArg)) {
+         if(pcCur[0]=='-' && pcCur[1]!='-' && psArg!=NULL && psArg->psFix->siTyp==siTyp && isClpKywTyp(pvHdl,pfErr,pfTrc,pcHlp,psArg)) {
             (*ppCur)=pcCur+1;
             pcLex[0]='-'; pcLex[1]=EOS;
             if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(SUB)-LEXEM(%s)\n",pcHlp);
@@ -3723,13 +3792,8 @@ static int siClpScnNat(
                (*ppCur)++; pcLex++;
             }
             *pcLex=EOS;
-            //TODO: Wenn operator '(' dann muss ppVal ein object sein.
-            //      Bei '.' ein overlay
-            //      Bei '=' ein num,flt,str
-            //      Bei '=>' kann es alles sein
-            //      Bei einem Separator oder schließnder Klammer ein Switch oder argument
             if (isOperator3(*(*ppCur)) || isSeparation(*(*ppCur))) {
-               if (isClpKywStr(pvHdl,pfErr,pfTrc,(*ppLex)+2,psArg,ppVal)) {
+               if (isClpKywStr(pvHdl,pfErr,pfTrc,(*ppLex)+2,psArg,ppVal,*(*ppCur))) {
                   char* p1=pcHlp;
                   char* p2=(*ppLex)+2;
                   while (*p2) {
@@ -4564,9 +4628,7 @@ static int siClpPrsValLstOnlyArg(
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    int                           siErr,siPos=0;
-//   printd("----------->keyword(%s/%s)%d/%d(%p(%d/%d))\n",psArg->psStd->pcKyw,psHdl->pcLex,siTok,psHdl->siTok,psHdl->psVal,psArg->psFix->siTyp,psHdl->psVal?psHdl->psVal->psFix->siTyp:0);
-// TODO: improve peformance
-   while (psHdl->siTok==siTok || (psHdl->siTok==CLPTOK_KYW && psArg->psDep!=NULL && NULL!=psClpFndSym(pvHdl,psHdl->pcLex,psArg->psDep))/* || (psHdl->siTok==CLPTOK_KYW && psHdl->psVal!=NULL && psHdl->psVal->psFix->siTyp==psArg->psFix->siTyp)*/) {
+   while (psHdl->siTok==siTok || (psHdl->siTok==CLPTOK_KYW && isClpKywAry(pvHdl,siTok,psHdl->pcLex,psArg,&psHdl->psVal))) {
       siErr=siClpPrsVal(pvHdl,siLev,siPos,TRUE,psArg);
       if (siErr<0) return(siErr);
       siPos++;
@@ -4715,22 +4777,23 @@ static int siClpPrsFac(
       return(CLP_OK);
    case CLPTOK_KYW:
       siInd=0;
-      psHdl->siTok=siClpScnSrc(pvHdl,(isAry)?psArg->psFix->siTyp:0,psArg);
-      if (psHdl->siTok<0) return(psHdl->siTok);
-      if (psHdl->siTok==CLPTOK_SBO) {
+      if (siClpNxtOpr(psHdl->pcCur)==C_SBO) {
          psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
          if (psHdl->siTok<0) return(psHdl->siTok);
-         siErr=siClpPrsExp(pvHdl,siLev,siPos,isAry,psArg,pzVal,ppVal);
-         if (siErr) return(siErr);
-         if (psHdl->siTok==CLPTOK_SBC) {
-            psHdl->siTok=siClpScnSrc(pvHdl,(isAry)?psArg->psFix->siTyp:0,psArg);
+         if (psHdl->siTok==CLPTOK_SBO) {
+            psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
             if (psHdl->siTok<0) return(psHdl->siTok);
-         } else {
-            return CLPERR(psHdl,CLPERR_SYN,"Character '%c' missing (%s)",C_SBC,fpcPat(pvHdl,siLev));
+            siErr=siClpPrsExp(pvHdl,siLev,siPos,isAry,psArg,pzVal,ppVal);
+            if (siErr) return(siErr);
+            if (psHdl->siTok!=CLPTOK_SBC) {
+               return CLPERR(psHdl,CLPERR_SYN,"Character '%c' missing (%s)",C_SBC,fpcPat(pvHdl,siLev));
+            }
+            siErr=siFromNumberLexem(pvHdl,siLev,siPos,psArg,*ppVal,&siInd);
+            if (siErr) return(siErr);
          }
-         siErr=siFromNumberLexem(pvHdl,siLev,siPos,psArg,*ppVal,&siInd);
-         if (siErr) return(siErr);
       }
+      psHdl->siTok=siClpScnSrc(pvHdl,(isAry)?psArg->psFix->siTyp:0,psArg);
+      if (psHdl->siTok<0) return(psHdl->siTok);
       if (psVal==NULL) { // not already find in scanner
          psVal=psClpFndSym(pvHdl,acLex,psArg->psDep);
          if (psVal==NULL) {
