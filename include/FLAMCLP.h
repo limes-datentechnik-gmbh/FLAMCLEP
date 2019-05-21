@@ -270,8 +270,8 @@ Lexemes (regular expressions) for argument list or parameter file:
 --| COMMENT   '#' [:print:]* '#'                              (will be ignored)
 --| LCOMMENT  ';' [:print:]* 'nl'                             (will be ignored)
 --| SEPARATOR [:space: | :cntr: | ',']*                  (abbreviated with SEP)
---| OPERATOR1 '=' | '.' | '(' | ')' | '[' | ']'  (SGN, DOT, RBO, RBC, SBO, SBC)
---| OPERATOR2 '=>'| '+' | '-' | '*' | '/' |           (SAB, ADD, SUB, MUL, DIV)
+--| OPERATOR '=' | '.' | '(' | ')' | '[' | ']' | (SGN, DOT, RBO, RBC, SBO, SBC)
+--|  '=>'| '+' | '-' | '*' | '/' | '{' | '}' (SAB, ADD, SUB, MUL, DIV, CBO,CBC)
 --| KEYWORD   ['-'['-']][:alpha:]+[:alnum: | '_']*          (always predefined)
 --| NUMBER    ([+|-]  [ :digit:]+)  |                       (decimal (default))
 --| num       ([+|-]0b[ :digit:]+)  |                                  (binary)
@@ -378,6 +378,7 @@ Grammar for argument list or parameter file
 --| array          -> KEYWORD '[' value_list   ']'
 --|                |  KEYWORD '[' object_list  ']'
 --|                |  KEYWORD '[' overlay_list ']'
+--|                |  KEYWORD '=' value_list # with certain limitations #
 --|                |  KEYWORD '[=' STRING ']' # parameter file #
 --|                |  KEYWORD '[=>' STRING ']' # parameter file #
 --| value_list     -> value SEP value_list
@@ -399,7 +400,7 @@ Grammar for argument list or parameter file
 --|                |  '(' value ')'
 --| selection      -> KEYWORD # value from a selection table        #
 --| variable       -> KEYWORD # value from a previous assignment    #
---|                |  KEYWORD '[' value ']' # with index for arrays #
+--|                |  KEYWORD '{' NUMBER '}' # with index for arrays #
 --| constant       -> KEYWORD # see predefined constants at lexem   #
 --| For strings only the operator '+' is implemented as concatenation
 --| Strings without an operator in between are also concatenated

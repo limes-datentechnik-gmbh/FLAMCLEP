@@ -164,12 +164,13 @@
  * 1.2.118: Use main keyword instead of alias in parsed parameter list
  * 1.2.119: Support parameter files for arguments (keyword=>filename)
  * 1.2.120: Support arrays of simple values after assignment (keyword=hugo,berta detlef)
+ * 1.2.121: Index for variables in expressions must be enclosed in curly brackets and only a number is useless
 **/
 
-#define CLP_VSN_STR       "1.2.118"
+#define CLP_VSN_STR       "1.2.121"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        2
-#define CLP_VSN_REVISION       118
+#define CLP_VSN_REVISION       121
 
 /* Definition der Konstanten ******************************************/
 
@@ -205,6 +206,8 @@
 #define CLPTOK_NUM               14
 #define CLPTOK_FLT               15
 #define CLPTOK_SAB               16
+#define CLPTOK_CBO               17
+#define CLPTOK_CBC               18
 
 #define isPrnInt(p,v) (CLPISF_PWD(p->psStd->uiFlg)?((I64)0):(v))
 #define isPrnFlt(p,v) (CLPISF_PWD(p->psStd->uiFlg)?((F64)0.0):(v))
@@ -234,7 +237,10 @@ static const char*               apClpTok[]={
       "DIV",
       "STRING",
       "NUMBER",
-      "FLOAT"};
+      "FLOAT",
+      "SIGN-ANGEL-BRACKET",
+      "CURLY-BRACKET-OPEN",
+      "CURLY-BRACKET-CLOSE"};
 
 static const char*        apClpTyp[]={
       "NO-TYP",
@@ -542,6 +548,7 @@ static int siClpPrsValLstFlexible(
 static int siClpPrsValLstOnlyArg(
    void*                         pvHdl,
    const int                     siLev,
+   const int                     isEnd,
    const int                     siTok,
    TsSym*                        psArg);
 
@@ -2441,7 +2448,10 @@ static int siClpSymIni(
          switch (psTab[i].siTyp) {
          case CLPTYP_SWITCH:
             if (psTab[i].psTab!=NULL) {
-               return CLPERR(psHdl,CLPERR_TAB,"Parameter table of argument '%s.%s' is defined (NULL for psTab required)",fpcPat(pvHdl,siLev),psTab[i].pcKyw);
+               return CLPERR(psHdl,CLPERR_TAB,"Parameter table of argument '%s.%s' of type switch is defined (NULL for psTab required)",fpcPat(pvHdl,siLev),psTab[i].pcKyw);
+            }
+            if (psTab[i].siMax!=1) {
+               return CLPERR(psHdl,CLPERR_TAB,"Array definition not possible for a switch (%s.%s)",fpcPat(pvHdl,siLev),psTab[i].pcKyw);
             }
             break;
          case CLPTYP_NUMBER:
@@ -2917,8 +2927,8 @@ extern int siClpLexem(
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," COMMENT   '#' [:print:]* '#'                              (will be ignored)\n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," LCOMMENT  ';' [:print:]* 'nl'                             (will be ignored)\n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," SEPARATOR [:space: | :cntr: | ',']*                  (abbreviated with SEP)\n");
-      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," OPERATOR1 '=' | '.' | '(' | ')' | '[' | ']'  (SGN, DOT, RBO, RBC, SBO, SBC)\n");
-      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," OPERATOR2 '=>'| '+' | '-' | '*' | '/' |           (SAB, ADD, SUB, MUL, DIV)\n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," OPERATOR '=' | '.' | '(' | ')' | '[' | ']' | (SGN, DOT, RBO, RBC, SBO, SBC)\n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"  '=>'| '+' | '-' | '*' | '/' | '{' | '}' (SAB, ADD, SUB, MUL, DIV, CBO,CBC)\n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," KEYWORD   ['-'['-']][:alpha:]+[:alnum: | '_']*          (always predefined)\n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," NUMBER    ([+|-]  [ :digit:]+)  |                       (decimal (default))\n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," num       ([+|-]0b[ :digit:]+)  |                                  (binary)\n");
@@ -3011,9 +3021,9 @@ extern int siClpLexem(
 #define isPrnLex2(p,l)  (isPrintF2(p)?(l):("***SECRET***"))
 #define isStringChr(c)  ((c)==STRCHR || (c)==SPMCHR || (c)==ALTCHR)
 #define isSeparation(c) (isspace((c)) || iscntrl((c)) || ((c))==',')
-#define isReqStrOpr1(c) ((c)=='=' || (c)=='+' || (c)==')' || (c)==C_SBC)                          // required string cannot start with this characters
-#define isReqStrOpr2(c) ((c)==';' || (c)==C_HSH)                                                  // required string must end at this
-#define isReqStrOpr3(c) (isReqStrOpr1(c) || (c)=='('  || (c)=='.' || (c)==C_SBO || isStringChr(c))// required string must end at key word if one of this follows
+#define isReqStrOpr1(c) ((c)=='=' || (c)=='+' || (c)==')' || (c)==C_SBC || (c)==C_CBC)                          // required string cannot start with this characters
+#define isReqStrOpr2(c) ((c)==';' || (c)==C_HSH)                                                                // required string must end at this
+#define isReqStrOpr3(c) (isReqStrOpr1(c) || (c)=='('  || (c)=='.' || (c)==C_SBO || (c)==C_CBO || isStringChr(c))// required string must end at key word if one of this follows
 
 #define LEX_REALLOC \
    if (pcLex>=(pcEnd-4)) {\
@@ -3554,7 +3564,7 @@ static inline int isClpKywAry(
    if (ppVal!=NULL) {
       if (*ppVal!=NULL) {
          int siOpr=siClpNxtOpr(psHdl->pcCur);
-         if ((*ppVal)->psFix->siTyp==psArg->psFix->siTyp && siOpr!='=' && siOpr!='(' && siOpr!='.') {
+         if ((*ppVal)->psFix->siTyp==psArg->psFix->siTyp && siOpr!='=' && siOpr!='(' && siOpr!='.' && siOpr!=C_SBO) {
             return(TRUE);
          } else {
             return(FALSE);
@@ -3571,7 +3581,7 @@ static inline int isClpKywAry(
       if (psVal!=NULL) {
          if (ppVal!=NULL) *ppVal=psVal;
          int siOpr=siClpNxtOpr(psHdl->pcCur);
-         if (psVal->psFix->siTyp==psArg->psFix->siTyp && siOpr!='=' && siOpr!='(' && siOpr!='.') {
+         if (psVal->psFix->siTyp==psArg->psFix->siTyp && siOpr!='=' && siOpr!='(' && siOpr!='.' && siOpr!=C_SBO) {
             return(TRUE);
          } else {
             return(FALSE);
@@ -3619,6 +3629,7 @@ static int siClpScnNat(
    char                          acHlp[1024];
    int                           siRbc=0;
    int                           siSbc=0;
+   int                           siCbc=0;
 
    if (siTyp!=CLPTYP_NUMBER && siTyp!=CLPTYP_FLOATN && siTyp!=CLPTYP_STRING) siTyp=0;
    if (piSep!=NULL) *piSep=FALSE;
@@ -3630,9 +3641,7 @@ static int siClpScnNat(
          if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(END)-LEXEM(%s)\n",isPrnLex(psArg,pcHlp));
          return(CLPTOK_END);
       } else if (isSeparation(*(*ppCur))) { /*separation*/
-         if (piSep!=NULL) {
-            if (*piSep<*(*ppCur)) *piSep=*(*ppCur);
-         }
+         if (piSep!=NULL) *piSep=*(*ppCur);
          if (*(*ppCur)=='\n') {
             psHdl->siRow++;
             psHdl->pcRow=(*ppCur)+1;
@@ -3779,10 +3788,14 @@ static int siClpScnNat(
             siRbc++;
          } else if ((*ppCur)[0]==C_SBO) {
             siSbc++;
+         } else if ((*ppCur)[0]==C_CBO) {
+            siCbc++;
          } else if ((*ppCur)[0]==')') {
             siRbc--;
          } else if ((*ppCur)[0]==C_SBC) {
             siSbc--;
+         } else if ((*ppCur)[0]==C_CBC) {
+            siCbc--;
          }
          *pcLex='d'; pcLex++;
          *pcLex='\''; pcLex++;
@@ -3809,15 +3822,19 @@ static int siClpScnNat(
             }
          }
          while ((*ppCur)[0]!=EOS && isStr((*ppCur)[0]) && !isSeparation((*ppCur)[0]) && !isReqStrOpr2((*ppCur)[0]) &&
-                (siRbc>0 || (*ppCur)[0]!=')') && (siSbc>0 || (*ppCur)[0]!=C_SBC)) {
+                (siRbc>0 || (*ppCur)[0]!=')') && (siSbc>0 || (*ppCur)[0]!=C_SBC) && (siCbc>0 || (*ppCur)[0]!=C_CBC)) {
             if ((*ppCur)[0]=='(') {
                siRbc++;
             } else if ((*ppCur)[0]==C_SBO) {
                siSbc++;
+            } else if ((*ppCur)[0]==C_CBO) {
+               siCbc++;
             } else if ((*ppCur)[0]==')') {
                siRbc--;
             } else if ((*ppCur)[0]==C_SBC) {
                siSbc--;
+            } else if ((*ppCur)[0]==C_CBC) {
+               siCbc--;
             }
             LEX_REALLOC
             *pcLex=*(*ppCur);
@@ -4080,6 +4097,14 @@ static int siClpScnNat(
          pcLex[0]=C_SBC; pcLex[1]=EOS; (*ppCur)++;
          if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(SBC)-LEXEM(%s)\n",pcHlp);
          return(CLPTOK_SBC);
+      } else if (*(*ppCur)==C_CBO) { /*curly bracket open*/
+         pcLex[0]=C_CBO; pcLex[1]=EOS; (*ppCur)++;
+         if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(CBO)-LEXEM(%s)\n",pcHlp);
+         return(CLPTOK_CBO);
+      } else if (*(*ppCur)==C_CBC) { /*curly bracket close*/
+         pcLex[0]=C_CBC; pcLex[1]=EOS; (*ppCur)++;
+         if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(CBC)-LEXEM(%s)\n",pcHlp);
+         return(CLPTOK_CBC);
       } else { /*lexical error*/
          pcLex[0]=EOS; (*ppCur)++;
          return CLPERR(psHdl,CLPERR_LEX,"Character ('%c') not valid",*((*ppCur)-1));
@@ -4140,6 +4165,8 @@ extern int siClpGrammar(
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," array          -> KEYWORD '[' value_list   ']'                   \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  KEYWORD '[' object_list  ']'                   \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  KEYWORD '[' overlay_list ']'                   \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  KEYWORD '=' value_list # with certain limitations #\n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," It is recommended to use only enclosed array lists to know the end\n");
    if (psHdl->isPfl) {
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  KEYWORD '[=' STRING ']' # parameter file #     \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  KEYWORD '[=>' STRING ']' # parameter file #    \n");
@@ -4163,7 +4190,7 @@ extern int siClpGrammar(
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  '(' value ')'                                  \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," selection      -> KEYWORD # value from a selection table        #\n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," variable       -> KEYWORD # value from a previous assignment    #\n");
-      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  KEYWORD '[' value ']' # with index for arrays #\n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  KEYWORD '{' NUMBER '}' # with index for arrays#\n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," constant       -> KEYWORD # see predefined constants at lexem   #\n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," For strings only the operator '+' is implemented as concatenation\n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," Strings without an operator in between are also concatenated     \n");
@@ -4302,12 +4329,11 @@ static int siClpPrsSgn(
    if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d SGN(%s=val)\n",fpcPre(pvHdl,siLev),siLev,siPos,psArg->psStd->pcKyw);
    psHdl->siTok=siClpScnSrc(pvHdl,psArg->psFix->siTyp,psArg);
    if (psHdl->siTok<0) return(psHdl->siTok);
-   /*--------------*/
    if (psArg->psFix->siMax>1) { // ARRAY
       switch (psArg->psFix->siTyp) {
-      case CLPTYP_NUMBER: return(siClpPrsValLstOnlyArg(pvHdl,siLev,CLPTOK_NUM,psArg));
-      case CLPTYP_FLOATN: return(siClpPrsValLstOnlyArg(pvHdl,siLev,CLPTOK_FLT,psArg));
-      case CLPTYP_STRING: return(siClpPrsValLstOnlyArg(pvHdl,siLev,CLPTOK_STR,psArg));
+      case CLPTYP_NUMBER: return(siClpPrsValLstOnlyArg(pvHdl,siLev,FALSE,CLPTOK_NUM,psArg));
+      case CLPTYP_FLOATN: return(siClpPrsValLstOnlyArg(pvHdl,siLev,FALSE,CLPTOK_FLT,psArg));
+      case CLPTYP_STRING: return(siClpPrsValLstOnlyArg(pvHdl,siLev,FALSE,CLPTOK_STR,psArg));
       default:
          return CLPERR(psHdl,CLPERR_SEM,"Type (%d) of parameter '%s.%s' is not supported with arrays",psArg->psFix->siTyp,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
       }
@@ -4422,9 +4448,9 @@ static int siClpPrsFil(
          } else {
             if (psArg->psFix->siMax>1) { // ARRAY
                switch (psArg->psFix->siTyp) {
-               case CLPTYP_NUMBER: siCnt=siClpPrsValLstOnlyArg(pvHdl,siLev,CLPTOK_NUM,psArg); break;
-               case CLPTYP_FLOATN: siCnt=siClpPrsValLstOnlyArg(pvHdl,siLev,CLPTOK_FLT,psArg); break;
-               case CLPTYP_STRING: siCnt=siClpPrsValLstOnlyArg(pvHdl,siLev,CLPTOK_STR,psArg); break;
+               case CLPTYP_NUMBER: siCnt=siClpPrsValLstOnlyArg(pvHdl,siLev,TRUE,CLPTOK_NUM,psArg); break;
+               case CLPTYP_FLOATN: siCnt=siClpPrsValLstOnlyArg(pvHdl,siLev,TRUE,CLPTOK_FLT,psArg); break;
+               case CLPTYP_STRING: siCnt=siClpPrsValLstOnlyArg(pvHdl,siLev,TRUE,CLPTOK_STR,psArg); break;
                default:
                   return CLPERR(psHdl,CLPERR_SEM,"Type (%d) of parameter '%s.%s' is not supported with arrays",psArg->psFix->siTyp,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
                }
@@ -4489,7 +4515,7 @@ static int siClpPrsObj(
       if (psHdl->siTok<0) return(psHdl->siTok);
       if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d CNT=%d OBJ(%s(parlst))-CLS)\n",fpcPre(pvHdl,siLev),siLev,siPos,siCnt,psArg->psStd->pcKyw);
    } else {
-      return CLPERR(psHdl,CLPERR_SYN,"Character ')' missing (%s)",fpcPat(pvHdl,siLev));
+      return CLPERR(psHdl,CLPERR_SYN,"Character ')' missing to enclose object (%s)",fpcPat(pvHdl,siLev));
    }
    return(CLP_OK);
 }
@@ -4549,7 +4575,7 @@ static int siClpPrsMain(
             psHdl->siTok=siClpScnSrc(pvHdl,0,NULL);
             if (psHdl->siTok<0) return(psHdl->siTok);
          } else {
-            return CLPERR(psHdl,CLPERR_SYN,"Character ')' missing (MAIN)%s","");
+            return CLPERR(psHdl,CLPERR_SYN,"Character ')' missing to enclose object (%s)","***MAIN***");
          }
       } else {
          siCnt=siClpPrsParLst(pvHdl,0,psTab);
@@ -4603,7 +4629,7 @@ static int siClpPrsAry(
       if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d CNT=%d ARY(%s%ctyplst%c)-CLS)\n",fpcPre(pvHdl,siLev),siLev,siPos,siCnt,psArg->psStd->pcKyw,C_SBO,C_SBC);
       return(CLP_OK);
    } else {
-      return CLPERR(psHdl,CLPERR_SYN,"Character '%c' missing (%s)",C_SBC,fpcPat(pvHdl,siLev));
+      return CLPERR(psHdl,CLPERR_SYN,"Character '%c' missing to enclose the array (%s)",C_SBC,fpcPat(pvHdl,siLev));
    }
 }
 
@@ -4626,14 +4652,14 @@ static int siClpPrsValLstFlexible(
 static int siClpPrsValLstOnlyArg(
    void*                         pvHdl,
    const int                     siLev,
+   const int                     isEnd,
    const int                     siTok,
    TsSym*                        psArg)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    int                           siErr,siPos=0;
-   while ((siPos==0 || psHdl->isSep==',') &&
-          (psHdl->siTok==siTok ||
-          (psHdl->siTok==CLPTOK_KYW && isClpKywAry(pvHdl,siTok,psHdl->pcLex,psArg,&psHdl->psVal)))) {
+   while ((isEnd || siPos==0 || psHdl->isSep==',' || psHdl->isSep=='\n') &&
+          (psHdl->siTok==siTok || (psHdl->siTok==CLPTOK_KYW && isClpKywAry(pvHdl,siTok,psHdl->pcLex,psArg,&psHdl->psVal)))) {
       siErr=siClpPrsVal(pvHdl,siLev,siPos,TRUE,psArg);
       if (siErr<0) return(siErr);
       siPos++;
@@ -4782,19 +4808,22 @@ static int siClpPrsFac(
       return(CLP_OK);
    case CLPTOK_KYW:
       siInd=0;
-      if (siClpNxtOpr(psHdl->pcCur)==C_SBO) {
+      if (siClpNxtOpr(psHdl->pcCur)==C_CBO) {
          psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
          if (psHdl->siTok<0) return(psHdl->siTok);
-         if (psHdl->siTok==CLPTOK_SBO) {
+         if (psHdl->siTok==CLPTOK_CBO) {
             psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
             if (psHdl->siTok<0) return(psHdl->siTok);
-            siErr=siClpPrsExp(pvHdl,siLev,siPos,isAry,psArg,pzVal,ppVal);
-            if (siErr) return(siErr);
-            if (psHdl->siTok!=CLPTOK_SBC) {
-               return CLPERR(psHdl,CLPERR_SYN,"Character '%c' missing (%s)",C_SBC,fpcPat(pvHdl,siLev));
+            if (psHdl->siTok!=CLPTOK_NUM) {
+               return CLPERR(psHdl,CLPERR_SYN,"Index number expected (%s)",fpcPat(pvHdl,siLev));
             }
-            siErr=siFromNumberLexem(pvHdl,siLev,siPos,psArg,*ppVal,&siInd);
+            siErr=siFromNumberLexem(pvHdl,siLev,siPos,psArg,psHdl->pcLex,&siInd);
             if (siErr) return(siErr);
+            psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
+            if (psHdl->siTok<0) return(psHdl->siTok);
+            if (psHdl->siTok!=CLPTOK_CBC) {
+               return CLPERR(psHdl,CLPERR_SYN,"Character '%c' missing to define the index (%s)",C_CBC,fpcPat(pvHdl,siLev));
+            }
          }
       }
       psHdl->siTok=siClpScnSrc(pvHdl,(isAry)?psArg->psFix->siTyp:0,psArg);
@@ -4922,7 +4951,7 @@ static int siClpPrsFac(
          if (psHdl->siTok<0) return(psHdl->siTok);
          return(CLP_OK);
       } else {
-         return CLPERR(psHdl,CLPERR_SYN,"Character ')' missing (%s)",fpcPat(pvHdl,siLev));
+         return CLPERR(psHdl,CLPERR_SYN,"Character ')' missing to enclose expression (%s)",fpcPat(pvHdl,siLev));
       }
    default://Empty string behind = and infront of the next not matching token
       if (CLPISF_SEL(psArg->psStd->uiFlg)) {

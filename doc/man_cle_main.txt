@@ -38,10 +38,28 @@ The command line parser supports abbreviation of key words depending on
 the unique first characters. This is only useful if you work in dialog.
 If the command used in a persistent way (e.g. in a script) please write
 the complete keyword, to ensure that the script must not be changed in a
-later version. The same is valid for the required string support. The
-CLP supports strings without enclosing. These strings depending on the
-keywords used in a name space. In future new key words could be added,
-in such case the string could be damaged and must be enclosed.
+later version of the program.
+
+The same is valid for the required string support. The CLP supports
+strings without enclosing. These strings depending on the keywords used
+in a name space. In future new key words could be added, in such case
+the string could be damaged and must be enclosed. Concerning this it is
+recommended to enclose string if the command defined in a script.
+
+The last item which could be result in a damaged command syntax after a
+program update is the use of implicit array definitions after a
+assignment, because the end of such an array could be changed, for
+example if a arrays a of numbers defined an a switch is the end. In a
+new version such switch could be a number with a default value, if only
+the keyword defined. In this case the defined number referenced by this
+keyword is then part of the number array and the parameter is lost.
+Concerning this it is recommended to use enclosed array definitions.
+
+All these capabilities are implemented to be compatible with several
+existing command lines syntaxes and to limit the effort to port old
+commands or to simplify the commands if dialog shell used. But in
+certain cases, the command interpretation could fail, if not the
+unique variant of keywords, strings and arrays are used.
 
 USED ENVIRONMENT VARIABLES
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
