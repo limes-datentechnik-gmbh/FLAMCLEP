@@ -3009,10 +3009,11 @@ extern int siClpLexem(
 #define isPrnLex(p,l)   (isPrintF(p)?(l):("***SECRET***"))
 #define isPrintF2(p)    (CLPISF_PWD((p)->psStd->uiFlg)==FALSE)
 #define isPrnLex2(p,l)  (isPrintF2(p)?(l):("***SECRET***"))
+#define isStringChr(c)  ((c)==STRCHR || (c)==SPMCHR || (c)==ALTCHR)
 #define isSeparation(c) (isspace((c)) || iscntrl((c)) || ((c))==',')
-#define isOperator1(c)  ((c)=='=' || (c)=='+' || (c)=='-' || (c)==')' || (c)==C_SBC) // required string cannot start with this characters
-#define isOperator2(c)  ((c)==';' || (c)==C_HSH)                                     // required string must end at this
-#define isOperator3(c)  (isOperator1(c) || (c)=='('  || (c)=='.' || (c)==C_SBO)      // required string must end at key word if one of this follows
+#define isReqStrOpr1(c) ((c)=='=' || (c)=='+' || (c)==')' || (c)==C_SBC)                          // required string cannot start with this characters
+#define isReqStrOpr2(c) ((c)==';' || (c)==C_HSH)                                                  // required string must end at this
+#define isReqStrOpr3(c) (isReqStrOpr1(c) || (c)=='('  || (c)=='.' || (c)==C_SBO || isStringChr(c))// required string must end at key word if one of this follows
 
 #define LEX_REALLOC \
    if (pcLex>=(pcEnd-4)) {\
@@ -3629,7 +3630,9 @@ static int siClpScnNat(
          if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(END)-LEXEM(%s)\n",isPrnLex(psArg,pcHlp));
          return(CLPTOK_END);
       } else if (isSeparation(*(*ppCur))) { /*separation*/
-         if (piSep!=NULL) *piSep=TRUE;
+         if (piSep!=NULL) {
+            if (*piSep<*(*ppCur)) *piSep=*(*ppCur);
+         }
          if (*(*ppCur)=='\n') {
             psHdl->siRow++;
             psHdl->pcRow=(*ppCur)+1;
@@ -3690,7 +3693,7 @@ static int siClpScnNat(
             isEnv=FALSE;
             (*ppCur)=pcCur;
          }
-      } else if ((*ppCur)[0]==SPMCHR || (*ppCur)[0]==STRCHR || (*ppCur)[0]==ALTCHR) {/*simple string*/
+      } else if (isStringChr((*ppCur)[0])) {/*simple string*/
          char USECHR=(*ppCur)[0];
          *pcLex= 'd'; pcLex++;
          *pcLex='\''; pcLex++;
@@ -3713,11 +3716,11 @@ static int siClpScnNat(
             return CLPERR(psHdl,CLPERR_LEX,"String literal not terminated with '%c'",USECHR);
          }
          (*ppCur)++;
-         if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(STR)-LEXEM(%s)\n",isPrnLex(psArg,pcHlp));
+         if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(STR)-LEXEM(%s)-SIMPLE\n",isPrnLex(psArg,pcHlp));
          return(CLPTOK_STR);
-      } else if ((tolower((*ppCur)[0])=='x' || tolower((*ppCur)[0])=='a' || tolower((*ppCur)[0])=='e' ||
+      } else if ((tolower((*ppCur)[0])=='x' || tolower((*ppCur)[0])=='a' || tolower((*ppCur)[0])=='e'  ||
                   tolower((*ppCur)[0])=='c' || tolower((*ppCur)[0])=='s' || tolower((*ppCur)[0])=='f') &&
-                 ((*ppCur)[1]==SPMCHR || (*ppCur)[1]==STRCHR || (*ppCur)[1]==ALTCHR)) {/*defined string '...'*/
+                  isStringChr((*ppCur)[1])) {/*defined string '...'*/
          char USECHR=(*ppCur)[1];
          *pcLex=tolower(*(*ppCur)); pcLex++;
          *pcLex='\''; pcLex++;
@@ -3740,7 +3743,7 @@ static int siClpScnNat(
             return CLPERR(psHdl,CLPERR_LEX,"String literal not terminated with '%c'",USECHR);
          }
          (*ppCur)++;
-         if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(STR)-LEXEM(%s)\n",isPrnLex(psArg,pcHlp));
+         if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(STR)-LEXEM(%s)-DEFINED\n",isPrnLex(psArg,pcHlp));
          return(CLPTOK_STR);
       } else if (siTyp==0 && (((*ppCur)[0]=='-' && isalpha((*ppCur)[1])) || ((*ppCur)[0]=='-' && (*ppCur)[1]=='-' && isalpha((*ppCur)[2])))) { /*defined keyword*/
          while ((*ppCur)[0]=='-') {
@@ -3761,17 +3764,17 @@ static int siClpScnNat(
          if(pcCur[0]=='-' && pcCur[1]!='-' && psArg!=NULL && psArg->psFix->siTyp==siTyp && isClpKywTyp(pvHdl,pfErr,pfTrc,pcHlp,psArg)) {
             (*ppCur)=pcCur+1;
             pcLex[0]='-'; pcLex[1]=EOS;
-            if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(SUB)-LEXEM(%s)\n",pcHlp);
+            if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(SUB)-LEXEM(%s)-NOKYW\n",pcHlp);
             return(CLPTOK_SUB);
          } else {
             if (pcOld!=NULL && !isClpKywVal(pvHdl,pfErr,pfTrc,pcHlp,psArg,ppVal)) {
                *pcZro=0x00;
                *ppCur=pcOld;
             }
-            if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(KYW)-LEXEM(%s)\n",pcHlp);
+            if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(KYW)-LEXEM(%s)-DEFINED\n",pcHlp);
             return(CLPTOK_KYW);
          }
-      } else if (siTyp==CLPTYP_STRING && isStr((*ppCur)[0]) && !isOperator1((*ppCur)[0])) {/*required string*/
+      } else if (siTyp==CLPTYP_STRING && isStr((*ppCur)[0]) && !isReqStrOpr1((*ppCur)[0])) {/*required string*/
          if ((*ppCur)[0]=='(') {
             siRbc++;
          } else if ((*ppCur)[0]==C_SBO) {
@@ -3792,7 +3795,7 @@ static int siClpScnNat(
                (*ppCur)++; pcLex++;
             }
             *pcLex=EOS;
-            if (isOperator3(*(*ppCur)) || isSeparation(*(*ppCur))) {
+            if (isReqStrOpr3(*(*ppCur)) || isSeparation(*(*ppCur))) {
                if (isClpKywStr(pvHdl,pfErr,pfTrc,(*ppLex)+2,psArg,ppVal,*(*ppCur))) {
                   char* p1=pcHlp;
                   char* p2=(*ppLex)+2;
@@ -3800,12 +3803,12 @@ static int siClpScnNat(
                      *p1++=*p2++;
                   }
                   *p1=EOS;
-                  if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(KYW)-LEXEM(%s)\n",pcHlp);
+                  if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(KYW)-LEXEM(%s)-REQSTR\n",pcHlp);
                   return(CLPTOK_KYW);
                }
             }
          }
-         while ((*ppCur)[0]!=EOS && isStr((*ppCur)[0]) && !isSeparation((*ppCur)[0]) && !isOperator2((*ppCur)[0]) &&
+         while ((*ppCur)[0]!=EOS && isStr((*ppCur)[0]) && !isSeparation((*ppCur)[0]) && !isReqStrOpr2((*ppCur)[0]) &&
                 (siRbc>0 || (*ppCur)[0]!=')') && (siSbc>0 || (*ppCur)[0]!=C_SBC)) {
             if ((*ppCur)[0]=='(') {
                siRbc++;
@@ -3821,7 +3824,7 @@ static int siClpScnNat(
             pcLex++; (*ppCur)++;
          }
          *pcLex=EOS;
-         if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(STR)-LEXEM(%s)\n",isPrnLex(psArg,pcHlp));
+         if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(STR)-LEXEM(%s)-REQUIRED\n",isPrnLex(psArg,pcHlp));
          return(CLPTOK_STR);
       } else if (isalpha((*ppCur)[0])) { /*simple keyword*/
          *pcLex=*(*ppCur);
@@ -3840,7 +3843,7 @@ static int siClpScnNat(
             *pcZro=0x00;
             *ppCur=pcOld;
          }
-         if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(KYW)-LEXEM(%s)\n",pcHlp);
+         if (pfTrc!=NULL) fprintf(pfTrc,"SCANNER-TOKEN(KYW)-LEXEM(%s)-SIMPLE\n",pcHlp);
          return(CLPTOK_KYW);
       } else if ((((*ppCur)[0]=='+' || (*ppCur)[0]=='-') && isdigit((*ppCur)[1])) || isdigit((*ppCur)[0])) { /*number*/
          if ((*ppCur)[0]=='+' || (*ppCur)[0]=='-') {
@@ -3955,8 +3958,8 @@ static int siClpScnNat(
                }
             } else {
                if (tm.tm_year>=1900) tm.tm_year-=1900;
-               if (tm.tm_mon >=   1) tm.tm_mon-=1;
-               if (tm.tm_mday ==  0) tm.tm_mday++;
+               if (tm.tm_mon >=   1) tm.tm_mon -=1;
+               if (tm.tm_mday==   0) tm.tm_mday++;
                t=mktime(&tm);
                if (t==-1) {
                   return CLPERR(psHdl,CLPERR_LEX,"The given time value (0t%4.4d/%2.2d/%2.2d.%2.2d:%2.2d:%2.2d) cannot be converted to a number",
@@ -4628,7 +4631,9 @@ static int siClpPrsValLstOnlyArg(
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    int                           siErr,siPos=0;
-   while (psHdl->siTok==siTok || (psHdl->siTok==CLPTOK_KYW && isClpKywAry(pvHdl,siTok,psHdl->pcLex,psArg,&psHdl->psVal))) {
+   while ((siPos==0 || psHdl->isSep==',') &&
+          (psHdl->siTok==siTok ||
+          (psHdl->siTok==CLPTOK_KYW && isClpKywAry(pvHdl,siTok,psHdl->pcLex,psArg,&psHdl->psVal)))) {
       siErr=siClpPrsVal(pvHdl,siLev,siPos,TRUE,psArg);
       if (siErr<0) return(siErr);
       siPos++;
