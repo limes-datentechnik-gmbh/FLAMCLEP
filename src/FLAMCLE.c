@@ -298,6 +298,7 @@ static void vdCleManProgram(
    const char*                   pcMan,
    const char*                   pcDep,
    const char*                   pcSep,
+   const char*                   pcDpa,
    const int                     isMan,
    const int                     isNbr);
 
@@ -319,7 +320,8 @@ static void vdPrnStaticSyntax(
    const TsCleCommand*           psTab,
    const char*                   pcPgm,
    const char*                   pcDep,
-   const char*                   pcSep);
+   const char*                   pcSep,
+   const char*                   pcDpa);
 
 static void vdPrnStaticHelp(
    FILE*                         pfOut,
@@ -832,7 +834,7 @@ extern int siCleExecute(
       } else {
          if (pfErr!=NULL) {
             fprintf(pfErr,"Command or built-in function required\n");
-            vdPrnStaticSyntax(pfErr,psTab,argv[0],pcDep,pcOpt);
+            vdPrnStaticSyntax(pfErr,psTab,argv[0],pcDep,pcOpt,pcDpa);
          }
          ERROR(CLERTC_CMD,NULL);
       }
@@ -940,7 +942,7 @@ EVALUATE:
       if (pfErr==NULL) pfErr=pfStd;
       if (argc==2) {
          fprintf(pfOut,"Syntax for program '%s':\n",pcPgm);
-         vdPrnStaticSyntax(pfOut,psTab,argv[0],pcDep,pcOpt);
+         vdPrnStaticSyntax(pfOut,psTab,argv[0],pcDep,pcOpt,pcDpa);
          ERROR(CLERTC_OK,NULL);
       } else if (argc>=3) {
          if (argc==3) {
@@ -1137,7 +1139,7 @@ EVALUATE:
       if (argc==2) {
          if (pfOut!=NULL) {
             fprintf(pfOut,"Manual page for program '%s':\n\n",pcPgm);
-            vdCleManProgram(pfOut,psTab,pcOwn,pcPgm,pcHlp,pcMan,pcDep,pcOpt,FALSE,TRUE);
+            vdCleManProgram(pfOut,psTab,pcOwn,pcPgm,pcHlp,pcMan,pcDep,pcOpt,pcDpa,FALSE,TRUE);
          }
          ERROR(CLERTC_OK,NULL);
       } else if (argc==3) {
@@ -1172,7 +1174,7 @@ EVALUATE:
          if (strxcmp(isCas,pcCmd,"ALL",0,0,FALSE)==0 || strxcmp(isCas,pcCmd,"-ALL",0,0,FALSE)==0 || strxcmp(isCas,pcCmd,"--ALL",0,0,FALSE)==0) {
             isAll=TRUE;
             if (isMan==FALSE) fprintf(pfOut,"Manual page for program '%s':\n\n",pcPgm);
-            vdCleManProgram(pfDoc,psTab,pcOwn,pcPgm,pcHlp,pcMan,pcDep,pcOpt,isMan,TRUE);
+            vdCleManProgram(pfDoc,psTab,pcOwn,pcPgm,pcHlp,pcMan,pcDep,pcOpt,pcDpa,isMan,TRUE);
             if (isMan==TRUE) fprintf(pfOut,"Manual page for program '%s' successfully written to file (%s)\n",pcPgm,pcFil);
          }
          if (strxcmp(isCas,pcCmd,"SYNTAX",0,0,FALSE)==0 || isAll) {
@@ -1371,7 +1373,7 @@ EVALUATE:
             fprintf(pfErr,"Open of manual page file (\"%s\",\"%s\") failed (%d - %s)\n",pcFil,filemode("w"),errno,strerror(errno));
             ERROR(CLERTC_SYS,NULL);
          }
-         vdCleManProgram(pfDoc,psTab,pcOwn,pcPgm,pcHlp,pcMan,pcDep,pcOpt,isMan,TRUE);
+         vdCleManProgram(pfDoc,psTab,pcOwn,pcPgm,pcHlp,pcMan,pcDep,pcOpt,pcDpa,isMan,TRUE);
          if (pfOut!=NULL) fprintf(pfOut,"Manual page for program '%s' successfully written to file (%s)\n",pcPgm,pcFil);
          ERROR(CLERTC_OK,NULL);
       }
@@ -1489,7 +1491,7 @@ EVALUATE:
             fprintm(pfDoc,pcOwn,pcPgm,MAN_CLE_MAIN,2);
             efprintf(pfDoc,"indexterm:[Command line processor]\n\n\n");
 
-            vdCleManProgram(pfDoc,psTab,pcOwn,pcPgm,pcHlp,pcMan,pcDep,pcOpt,FALSE,isNbr);
+            vdCleManProgram(pfDoc,psTab,pcOwn,pcPgm,pcHlp,pcMan,pcDep,pcOpt,pcDpa,FALSE,isNbr);
 
             if (isNbr) {
                snprintf(acHdl,sizeof(acHdl),"3. Available commands"); l=strlen(acHdl); fprintf(pfDoc,"%s\n",acHdl);
@@ -2336,7 +2338,7 @@ EVALUATE:
       }
       if (pfErr!=NULL) {
          fprintf(pfErr,"Command or built-in function '%s' not supported\n",argv[1]);
-         vdPrnStaticSyntax(pfErr,psTab,argv[0],pcDep,pcOpt);
+         vdPrnStaticSyntax(pfErr,psTab,argv[0],pcDep,pcOpt,pcDpa);
       }
       siErr=CLERTC_CMD;
       ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
@@ -2717,6 +2719,7 @@ static void vdCleManProgram(
    const char*                   pcMan,
    const char*                   pcDep,
    const char*                   pcSep,
+   const char*                   pcDpa,
    const int                     isMan,
    const int                     isNbr)
 {
@@ -2815,7 +2818,7 @@ static void vdCleManProgram(
       fprintm(pfOut,pcOwn,pcPgm,MAN_CLE_MAIN_SYNTAX,1);
       fprintf(pfOut,"------------------------------------------------------------------------\n");
       fprintf(pfOut,"Syntax for program '%s':\n",pcPgm);
-      vdPrnStaticSyntax(pfOut,psTab,pcPgm,pcDep,pcSep);
+      vdPrnStaticSyntax(pfOut,psTab,pcPgm,pcDep,pcSep,pcDpa);
       fprintf(pfOut,"------------------------------------------------------------------------\n\n");
       fprintf(pfOut,"indexterm:%cSyntax for program %s%c\n\n\n",C_SBO,pcPgm,C_SBC);
 
@@ -2847,7 +2850,7 @@ extern void vdClePrnDocProgram(
    const char*                   pcDep,
    const char*                   pcSep)
 {
-   vdCleManProgram(pfOut, psTab, pcOwn, pcPgm, pcHlp, pcMan, pcDep, pcSep, 0, 0);
+   vdCleManProgram(pfOut, psTab, pcOwn, pcPgm, pcHlp, pcMan, pcDep, pcSep, NULL, 0, 0);
 }
 
 static void vdCleManFunction(
@@ -2922,7 +2925,8 @@ static void vdPrnStaticSyntax(
    const TsCleCommand*           psTab,
    const char*                   pcPgm,
    const char*                   pcDep,
-   const char*                   pcSep)
+   const char*                   pcSep,
+   const char*                   pcDpa)
 {
    int                           i,f=FALSE;
    fprintf(pfOut,"%s Commands: ",pcDep);
@@ -2936,12 +2940,16 @@ static void vdPrnStaticSyntax(
    fprintf(pfOut,"\n");
    fprintf(pfOut,"%s%s %s %cOWNER=oid%c command \"... argument list ...\" %cMAXCC=%cmax%c%c-min%c%c %cQUIET/SILENT%c\n",pcDep,pcDep,pcPgm,C_SBO,C_SBC,C_SBO,C_SBO,C_SBC,C_SBO,C_SBC,C_SBC,C_SBO,C_SBC);
    fprintf(pfOut,"%s%s %s %cOWNER=oid%c command=\" parameter file name \" %cMAXCC=%cmax%c%c-min%c%c %cQUIET/SILENT%c\n",pcDep,pcDep,pcPgm,C_SBO,C_SBC,C_SBO,C_SBO,C_SBC,C_SBO,C_SBC,C_SBC,C_SBO,C_SBC);
+   fprintf(pfOut,"%s%s %s %cOWNER=oid%c command=>\"parameter file name \" %cMAXCC=%cmax%c%c-min%c%c %cQUIET/SILENT%c\n",pcDep,pcDep,pcPgm,C_SBO,C_SBC,C_SBO,C_SBO,C_SBC,C_SBO,C_SBC,C_SBC,C_SBO,C_SBC);
    fprintf(pfOut,"%s%s You can optionally specify:\n",pcDep,pcDep);
    fprintf(pfOut,"%s%s%s the owner id for this command (to use custom configuration files)\n",pcDep,pcDep,pcDep);
    fprintf(pfOut,"%s%s%s the maximum condition code (max) to suppress warnings\n",pcDep,pcDep,pcDep);
    fprintf(pfOut,"%s%s%s the minimum condition code (min), zero is returned if the condition code would be smaller\n",pcDep,pcDep,pcDep);
    fprintf(pfOut,"%s%s%s QUIET disables the normal log output of the command line executer\n",pcDep,pcDep,pcDep);
    fprintf(pfOut,"%s%s%s SILENT disables log and errors messages of the command line executer\n",pcDep,pcDep,pcDep);
+if (pcDpa!=NULL) {
+   fprintf(pfOut,"%s%s Additional the default parameter file '%s' is supported if only the command provided\n",pcDep,pcDep,pcDpa);
+}
    fprintf(pfOut,"%s Built-in functions:\n",pcDep);
    fprintf(pfOut,"%s%s %s ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",SYN_CLE_SYNTAX  );
    fprintf(pfOut,"%s%s %s ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",SYN_CLE_HELP    );
@@ -3167,6 +3175,7 @@ static int siCleGetCommand(
          }
       }
    } else if (argv[1][l]=='=') {
+      int o=(argv[1][l+1]=='>')?l+2:l+1;
       if (argc!=2) {
          if (pfErr!=NULL) fprintf(pfErr,"The expected parameter file name for '%s' is split into more than one parameter\n",pcFct);
          if (pfErr!=NULL) fprintf(pfErr,"The parameter file name must start with \" and end with \" to join anything into one parameter\n");
@@ -3175,7 +3184,7 @@ static int siCleGetCommand(
          if (pfErr!=NULL) fprintf(pfErr,"Please use '%s SYNTAX %s%c.path%c' for more information\n",argv[0],pcFct,C_SBO,C_SBC);
          return(CLERTC_CMD);
       }
-      *ppFil=dcpmapfil(argv[1]+l+1);
+      *ppFil=dcpmapfil(argv[1]+o);
       if (*ppFil==NULL) {
          if (pfErr!=NULL) fprintf(pfErr,"Allocation of memory for command file (%s) failed\n",argv[1]+l+1);
          return(CLERTC_MEM);
