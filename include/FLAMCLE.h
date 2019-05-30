@@ -803,6 +803,7 @@ extern int siCleParseString(
    const char*                   pcEnt,
    int*                          piMod,
    void*                         pvDat,
+   void*                         pvBbx,
    void*                         pvF2S,
    tpfF2S                        pfF2S,
    void**                        ppClp);

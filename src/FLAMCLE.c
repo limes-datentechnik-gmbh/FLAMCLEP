@@ -373,6 +373,7 @@ static int siCleGetProperties(
    char**                        ppFil,
    char**                        ppPro,
    int*                          piFlg,
+   void*                         pvBbx,
    void*                         pvF2S,
    tpfF2S                        pfF2S);
 
@@ -385,6 +386,7 @@ static int siCleGetCommand(
    char*                         argv[],
    char**                        ppFil,
    char**                        ppCmd,
+   void*                         pvBbx,
    void*                         pvF2S,
    tpfF2S                        pfF2S,
    const char*                   pcDpa);
@@ -1534,7 +1536,7 @@ EVALUATE:
                fprintf(pfDoc,"-----------------\n\n");
                if (pcApx!=NULL && *pcApx) fprintm(pfDoc,pcOwn,pcPgm,pcApx,1);
                for (i=0;psApx[i].pcHdl!=NULL;i++) {
-                  pvHdl=pvClpOpen(isCas,isPfl,isRpl,siMkl,pcOwn,psApx[i].pcRot,psApx[i].pcKyw,psApx[i].pcMan,psApx[i].pcHlp,psApx[i].isOvl,psApx[i].psTab,NULL,pfOut,pfErr,pfTrc,pfTrc,pfTrc,pfTrc,pcDep,pcOpt,pcEnt,NULL,pvF2S,pfF2S);
+                  pvHdl=pvClpOpen(isCas,isPfl,isRpl,siMkl,pcOwn,psApx[i].pcRot,psApx[i].pcKyw,psApx[i].pcMan,psApx[i].pcHlp,psApx[i].isOvl,psApx[i].psTab,NULL,pfOut,pfErr,pfTrc,pfTrc,pfTrc,pfTrc,pcDep,pcOpt,pcEnt,NULL,pvBbx,pvF2S,pfF2S);
                   if (pvHdl==NULL) {
                      fprintf(pfErr,"Open of parser for CLP string of appendix '%s' failed\n",psApx[i].pcRot);
                      return(CLERTC_TAB);
@@ -2254,7 +2256,7 @@ EVALUATE:
                siErr=siCleCommandInit(pvBbx,psTab[i].pfIni,psTab[i].pvClp,pcOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,
                                       isCas,isPfl,isRpl,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg,pvF2S,pfF2S);
                if (siErr) ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
-               siErr=siCleGetCommand(pvHdl,pfOut,pcDep,psTab[i].pcKyw,argc,argv,&pcFil,&pcCmd,pvF2S,pfF2S,pcDpa);
+               siErr=siCleGetCommand(pvHdl,pfOut,pcDep,psTab[i].pcKyw,argc,argv,&pcFil,&pcCmd,pvBbx,pvF2S,pfF2S,pcDpa);
                if (siErr) ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
                siErr=siClpParseCmd(pvHdl,pcFil,pcCmd,TRUE,TRUE,psTab[i].piOid,&pcTls);
                if (siErr<0) {
@@ -2391,7 +2393,7 @@ static int siClePropertyInit(
 
    if (piFil!=NULL) *piFil=0;
    if (ppFil!=NULL) *ppFil=NULL;
-   *ppHdl=pvClpOpen(isCas,isPfl,isRpl,siMkl,pcOwn,pcPgm,pcCmd,pcMan,pcHlp,isOvl,psTab,pvClp,pfOut,pfErr,pfTrc,pfTrc,pfTrc,pfTrc,pcDep,pcOpt,pcEnt,NULL,pvF2S,pfF2S);
+   *ppHdl=pvClpOpen(isCas,isPfl,isRpl,siMkl,pcOwn,pcPgm,pcCmd,pcMan,pcHlp,isOvl,psTab,pvClp,pfOut,pfErr,pfTrc,pfTrc,pfTrc,pfTrc,pcDep,pcOpt,pcEnt,NULL,pvBbx,pvF2S,pfF2S);
    if (*ppHdl==NULL) {
       if (pfErr!=NULL) fprintf(pfErr,"Open of property parser for command '%s' failed\n",pcCmd);
       return(CLERTC_TAB);
@@ -2406,7 +2408,7 @@ static int siClePropertyInit(
       vdClpClose(*ppHdl,CLPCLS_MTD_ALL);*ppHdl=NULL;
       return(CLERTC_INI);
    }
-   siErr=siCleGetProperties(*ppHdl,pfErr,psCnf,pcOwn,pcPgm,pcCmd,&pcFil,&pcPro,&siFil,pvF2S,pfF2S);
+   siErr=siCleGetProperties(*ppHdl,pfErr,psCnf,pcOwn,pcPgm,pcCmd,&pcFil,&pcPro,&siFil,pvBbx,pvF2S,pfF2S);
    if (siErr) {
       if (pcPro!=NULL) free(pcPro); SAFE_FREE(pcFil);
       vdClpClose(*ppHdl,CLPCLS_MTD_ALL);*ppHdl=NULL;
@@ -2574,7 +2576,7 @@ static int siCleCommandInit(
    char*                         pcPro=NULL;
    const char*                   pcMsg;
 
-   *ppHdl=pvClpOpen(isCas,isPfl,isRpl,siMkl,pcOwn,pcPgm,pcCmd,pcMan,pcHlp,isOvl,psTab,pvClp,pfOut,pfErr,pfTrc,pfTrc,pfTrc,pfTrc,pcDep,pcOpt,pcEnt,NULL,pvF2S,pfF2S);
+   *ppHdl=pvClpOpen(isCas,isPfl,isRpl,siMkl,pcOwn,pcPgm,pcCmd,pcMan,pcHlp,isOvl,psTab,pvClp,pfOut,pfErr,pfTrc,pfTrc,pfTrc,pfTrc,pcDep,pcOpt,pcEnt,NULL,pvBbx,pvF2S,pfF2S);
    if (*ppHdl==NULL) {
       if (pfErr!=NULL) fprintf(pfErr,"Open of parser for command '%s' failed\n",pcCmd);
       return(CLERTC_TAB);
@@ -2589,7 +2591,7 @@ static int siCleCommandInit(
       vdClpClose(*ppHdl,CLPCLS_MTD_ALL);*ppHdl=NULL;
       return(CLERTC_INI);
    }
-   siErr=siCleGetProperties(*ppHdl,pfErr,psCnf,pcOwn,pcPgm,pcCmd,&pcFil,&pcPro,&siFil,pvF2S,pfF2S);
+   siErr=siCleGetProperties(*ppHdl,pfErr,psCnf,pcOwn,pcPgm,pcCmd,&pcFil,&pcPro,&siFil,pvBbx,pvF2S,pfF2S);
    if (siErr) {
       vdClpClose(*ppHdl,CLPCLS_MTD_ALL);*ppHdl=NULL;
       SAFE_FREE(pcPro); SAFE_FREE(pcFil);
@@ -2623,7 +2625,7 @@ static int siCleSimpleInit(
          {CLPTYP_NUMBER,"XX",NULL,0,1,1,0,0,CLPFLG_NON,NULL,NULL,NULL,"XX",0,0.0,NULL,"NUMBER"},
          {CLPTYP_NON   ,NULL,NULL,0,0,0,0,0,CLPFLG_NON,NULL,NULL,NULL,NULL,0,0.0,NULL,NULL}
    };
-   *ppHdl=pvClpOpen(FALSE,isPfl,isRpl,0,"","","","","",FALSE,asTab,"",pfOut,pfErr,NULL,NULL,NULL,NULL,pcDep,pcOpt,pcEnt,NULL,NULL,NULL);
+   *ppHdl=pvClpOpen(FALSE,isPfl,isRpl,0,"","","","","",FALSE,asTab,"",pfOut,pfErr,NULL,NULL,NULL,NULL,pcDep,pcOpt,pcEnt,NULL,NULL,NULL,NULL);
    if (*ppHdl==NULL) {
       if (pfErr!=NULL) fprintf(pfErr,"Open of command line parser for grammar and lexem print out failed\n");
       return(CLERTC_TAB);
@@ -3082,6 +3084,7 @@ static int siCleGetProperties(
    char**                  ppFil,
    char**                  ppPro,
    int*                    piFlg,
+   void*                   pvBbx,
    void*                   pvF2S,
    tpfF2S                  pfF2S)
 {
@@ -3110,7 +3113,7 @@ static int siCleGetProperties(
       if (pfErr!=NULL) fprintf(pfErr,"Allocation of memory for property file name (%s) failed)\n",pcHlp);
       return(CLERTC_MEM);
    }
-   siErr=pfF2S(pvF2S,*ppFil,ppPro,&siSiz,acMsg,sizeof(acMsg));
+   siErr=pfF2S(pvBbx,pvF2S,*ppFil,ppPro,&siSiz,acMsg,sizeof(acMsg));
    if (siErr<0) {
       if (pfErr!=NULL) fprintf(pfErr,"Property file: %s\n",acMsg);
       SAFE_FREE(*ppFil);
@@ -3129,6 +3132,7 @@ static int siCleGetCommand(
    char*                   argv[],
    char**                  ppFil,
    char**                  ppCmd,
+   void*                   pvBbx,
    void*                   pvF2S,
    tpfF2S                  pfF2S,
    const char*             pcDpa)
@@ -3149,7 +3153,7 @@ static int siCleGetCommand(
          }
       } else {
          if (pcDpa!=NULL && *pcDpa) {
-            siErr=pfF2S(pvF2S,pcDpa,ppCmd,&siSiz,NULL,0);
+            siErr=pfF2S(pvBbx,pvF2S,pcDpa,ppCmd,&siSiz,NULL,0);
             if(siErr>0) {
                if (pfErr!=NULL) fprintf(pfErr,"Read parameter in length %d from file '%s'\n",siErr,pcDpa);
             } else {
@@ -3199,7 +3203,7 @@ static int siCleGetCommand(
       }
 
       char acMsg[1024]="";
-      siErr=pfF2S(pvF2S,*ppFil,ppCmd,&siSiz,acMsg,sizeof(acMsg));
+      siErr=pfF2S(pvBbx,pvF2S,*ppFil,ppCmd,&siSiz,acMsg,sizeof(acMsg));
       if (siErr<0) {
          if (pfErr!=NULL) fprintf(pfErr,"Command file: %s\n",acMsg);
          SAFE_FREE(*ppFil);
@@ -3553,6 +3557,7 @@ extern int siCleParseString(
    const char*                   pcEnt,
    int*                          piMod,
    void*                         pvDat,
+   void*                         pvBbx,
    void*                         pvF2S,
    tpfF2S                        pfF2S,
    void**                        ppClp)
@@ -3566,7 +3571,7 @@ extern int siCleParseString(
 
    pvHdl=pvClpOpen(isCas,isPfl,isRpl,siMkl,pcOwn,pcPgm,pcCmd,pcMan,pcHlp,isOvl,
                    psTab,pvDat,pfTmp,pfTmp,NULL,NULL,NULL,NULL,
-                   pcDep,pcOpt,pcEnt,&stErr,pvF2S,pfF2S);
+                   pcDep,pcOpt,pcEnt,&stErr,pvBbx,pvF2S,pfF2S);
    if (pvHdl==NULL) {
       snprintf(pcErr,uiErr,"CTX-MESSAGE : Open of string parser for command '%s' failed\n",pcCmd);
       if (pfTmp!=NULL) {rewind(pfTmp); size_t l=strlen(pcErr); size_t r=fread(pcErr+l,1,uiErr-(l+1),pfTmp); fclose_tmp(pfTmp); pcErr[l+r]=0x00;}
