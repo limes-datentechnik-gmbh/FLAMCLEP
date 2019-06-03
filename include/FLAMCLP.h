@@ -1083,7 +1083,7 @@ typedef struct ClpError {
  * into the supplied buffer. The buffer is reallocated and buffer size
  * updated, if necessary.
  *
- * @param[in]     pvBbx Pointer to to the black box (global handle) given with CleExecute
+ * @param[in]     pvGbl Pointer to to the global handle as black box given with CleExecute
  * @param[in]     pvHdl Pointer to a handle given for this callback
  * @param[in]     pcFil File name to read
  * @param[inout]  ppBuf Pointer to a buffer pointer for reallocation
@@ -1093,7 +1093,7 @@ typedef struct ClpError {
  * @return              bytes read or negative value if error
  */
 typedef int (*tpfF2S)(
-   void*                         pvBbx,
+   void*                         pvGbl,
    void*                         pvHdl,
    const char*                   pcFil,
    char**                        ppBuf,
@@ -1131,7 +1131,7 @@ typedef int (*tpfF2S)(
  *                   certain error information in the CLP handle. If pfErr defined all error information are printed
  *                   by CLP. In this case these structure is not required. If pfErr==NULL you can use these structure
  *                   to gather all error information of CLP in memory. The pointer are only valid until vsClpClose().
- * @param[in]  pvBbx Pointer to the black box (global handle) given over CleExecute
+ * @param[in]  pvGbl Pointer to the global handle as black box given over CleExecute
  * @param[in]  pvF2S Pointer to a handle which can be used in file 2 string callback function (if not required then NULL)
  * @param[in]  pfF2S Callback function which reads a file into a variable null-terminated string in memory (if NULL then default implementation is used)
  *
@@ -1160,7 +1160,7 @@ extern void* pvClpOpen(
    const char*                   pcOpt,
    const char*                   pcEnt,
    TsClpError*                   psErr,
-   void*                         pvBbx,
+   void*                         pvGbl,
    void*                         pvF2S,
    tpfF2S                        pfF2S);
 

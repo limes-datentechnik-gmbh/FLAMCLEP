@@ -383,7 +383,7 @@ typedef struct Hdl {
    int                           szPtr;
    TsPtr*                        psPtr;
    const TsSym*                  psVal;
-   void*                         pvBbx;
+   void*                         pvGbl;
    void*                         pvF2s;
    tpfF2S                        pfF2s;
 } TsHdl;
@@ -986,8 +986,8 @@ extern char* pcClpError(
    }
 }
 
-static int siClpFile2String(void* bbx, void* hdl, const char* filename, char** buf, int* bufsize, char* errmsg, const int msgsiz) {
-   (void)bbx;
+static int siClpFile2String(void* gbl, void* hdl, const char* filename, char** buf, int* bufsize, char* errmsg, const int msgsiz) {
+   (void)gbl;
    char* pcFil=dcpmapfil(filename);
    if (pcFil==NULL) return(-1);
    int siErr=file2str(hdl, pcFil, buf, bufsize, errmsg, msgsiz);
@@ -1018,7 +1018,7 @@ extern void* pvClpOpen(
    const char*                   pcOpt,
    const char*                   pcEnt,
    TsClpError*                   psErr,
-   void*                         pvBbx,
+   void*                         pvGbl,
    void*                         pvF2S,
    tpfF2S                        pfF2S)
 {
@@ -1076,11 +1076,11 @@ extern void* pvClpOpen(
          if (pfF2S!=NULL) {
             psHdl->pfF2s=pfF2S;
             psHdl->pvF2s=pvF2S;
-            psHdl->pvBbx=pvBbx;
+            psHdl->pvGbl=pvGbl;
          } else {
             psHdl->pfF2s=siClpFile2String;
             psHdl->pvF2s=NULL;
-            psHdl->pvBbx=NULL;
+            psHdl->pvGbl=NULL;
          }
          siErr=siClpSymIni(psHdl,0,NULL,psTab,NULL,&psHdl->psTab);
          if (siErr<0) {
@@ -4395,7 +4395,7 @@ static int siClpPrsFil(
 
    char acFil[strlen(psHdl->pcLex)];
    strcpy(acFil,psHdl->pcLex+2);
-   siErr=psHdl->pfF2s(psHdl->pvBbx,psHdl->pvF2s,acFil,&pcPar,&siSiz,acMsg,sizeof(acMsg));
+   siErr=psHdl->pfF2s(psHdl->pvGbl,psHdl->pvF2s,acFil,&pcPar,&siSiz,acMsg,sizeof(acMsg));
    if (siErr<0) {
       siErr=CLPERR(psHdl,CLPERR_SYS,"Parameter file: %s",acMsg);
       SAFE_FREE(pcPar);
@@ -6143,7 +6143,7 @@ static int siClpBldLit(
          if (pcLex==NULL) {
             return(CLPERR(psHdl,CLPERR_MEM,"Allocation of memory to store the lexem or file name failed"));
          }
-         siErr=psHdl->pfF2s(psHdl->pvBbx,psHdl->pvF2s,pcVal+2,&pcDat,&siSiz,acMsg,sizeof(acMsg));
+         siErr=psHdl->pfF2s(psHdl->pvGbl,psHdl->pvF2s,pcVal+2,&pcDat,&siSiz,acMsg,sizeof(acMsg));
          if (siErr<0) {
             siErr=CLPERR(psHdl,CLPERR_SYS,"String file: %s",acMsg);
             SAFE_FREE(pcDat); free(pcLex);

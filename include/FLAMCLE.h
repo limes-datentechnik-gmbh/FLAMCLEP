@@ -388,7 +388,7 @@ extern void vdClePrnBuiltInDocu(FILE* pfDoc, const char* pcOwn, char* pcPgm, int
  * @param[in]  pvHdl Pointer to the CLP handle for allocation of memory in the CLP structure
  * @param[in]  pfOut File pointer for outputs (given over CleExecute)
  * @param[in]  pfTrc File pointer for tracing (given over CleExecute)
- * @param[in]  pvBbx Pointer to a global handle as black box pass through (given over CleExecute)
+ * @param[in]  pvGbl Pointer to a global handle as black box pass through (given over CleExecute)
  * @param[in]  pcOwn Current owner name (given over CleExecute)
  * @param[in]  pcPgm Current program name (given over CleExecute)
  * @param[out] pvClp Pointer to the corresonding FLAMCLP structure for initialisation
@@ -399,7 +399,7 @@ typedef int (*tpfIni)(
    void*                         pvHdl,
    FILE*                         pfOut,
    FILE*                         pfTrc,
-   void*                         pvBbx,
+   void*                         pvGbl,
    const char*                   pcOwn,
    const char*                   pcPgm,
    void*                         pvClp);
@@ -433,7 +433,7 @@ typedef int (*tpfIni)(
  * @param[in]  pvClp Pointer to the CLP handle for allocation of memory in the CLP structure
  * @param[in]  pfOut File pointer for outputs (mainly error messages, given over CleExecute)
  * @param[in]  pfTrc File pointer for tracing (mainly for complex stuff, given over CleExecute)
- * @param[in]  pvBbx Pointer to a global handle as black box pass through (given over CleExecute)
+ * @param[in]  pvGbl Pointer to a global handle as black box pass through (given over CleExecute)
  * @param[in]  piOid Pointer to the object identifier for overlay commands, if the pointer set at siCleExecute()
  * @param[in]  pvClp Pointer to the filled FLAMCLP structure (output from the command line parser)
  * @param[out] pvPar Pointer to the parameter structure, which will be filled based on the FLAMCLP structure with this function
@@ -445,7 +445,7 @@ typedef int (*tpfMap)(
    void*                         pvHdl,
    FILE*                         pfOut,
    FILE*                         pfTrc,
-   void*                         pvBbx,
+   void*                         pvGbl,
    int*                          piOid,
    void*                         pvClp,
    void*                         pvPar);
@@ -470,7 +470,7 @@ typedef int (*tpfMap)(
  * @param[in]  pvHdl Pointer to the CLP handle for allocation of memory in the FLC structure
  * @param[in]  pfOut File pointer for outputs (given over CleExecute)
  * @param[in]  pfTrc File pointer for tracing (given over CleExecute)
- * @param[in]  pvBbx Pointer to a global handle as black box pass through (given over CleExecute)
+ * @param[in]  pvGbl Pointer to a global handle as black box pass through (given over CleExecute)
  * @param[in]  pcOwn Current owner name (given over CleExecute)
  * @param[in]  pcPgm Current program name (given over CleExecute)
  * @param[in]  pcVsn Current version information (given from CleExecute)
@@ -489,7 +489,7 @@ typedef int (*tpfRun)(
    void*                         pvHdl,
    FILE*                         pfOut,
    FILE*                         pfTrc,
-   void*                         pvBbx,
+   void*                         pvGbl,
    const char*                   pcOwn,
    const char*                   pcPgm,
    const char*                   pcVsn,
@@ -511,14 +511,14 @@ typedef int (*tpfRun)(
  *
  * @param[in]  pfOut File pointer for outputs (given over CleExecute)
  * @param[in]  pfTrc File pointer for tracing (given over CleExecute)
- * @param[in]  pvBbx Pointer to a global handle as black box pass through (given over CleExecute)
+ * @param[in]  pvGbl Pointer to a global handle as black box pass through (given over CleExecute)
  * @param[in]  pvPar Pointer to the filled parameter structure for cleanup
  * @return     Reason code (!=0) for termination or 0 for success
  */
 typedef int (*tpfFin)(
    FILE*                         pfOut,
    FILE*                         pfTrc,
-   void*                         pvBbx,
+   void*                         pvGbl,
    void*                         pvPar);
 
 /**
@@ -688,7 +688,7 @@ typedef struct CleAppendix {
  * - ABOUT
  * - ERRORS
  *
- * @param[in]  pvBbx Pointer to a global handle given to called functions in the command table
+ * @param[in]  pvGbl Pointer to a global handle given to called functions in the command table
  * @param[in]  psTab Pointer to the table which defines the commands
  * @param[in]  argc  Number of command line parameters (argc of main(int argc, char* argv[]))
  * @param[in]  argv  List of pointers to the command line parameters (argv of main(int argc, char* argv[]))
@@ -746,7 +746,7 @@ typedef struct CleAppendix {
  *>64 - Special condition code for job control\n
  */
 extern int siCleExecute(
-   void*                         pvBbx,
+   void*                         pvGbl,
    const TsCleCommand*           psTab,
    int                           argc,
    char*                         argv[],
@@ -803,7 +803,7 @@ extern int siCleParseString(
    const char*                   pcEnt,
    int*                          piMod,
    void*                         pvDat,
-   void*                         pvBbx,
+   void*                         pvGbl,
    void*                         pvF2S,
    tpfF2S                        pfF2S,
    void**                        ppClp);
