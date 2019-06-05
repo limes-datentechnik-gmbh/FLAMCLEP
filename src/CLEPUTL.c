@@ -49,6 +49,7 @@
 #  define flzsym FLZSYM
 #else
 static inline int flzsym(const char* pcDat, const int* piSln, char* pcVal, int* piVln) {
+   (void)pcDat; (void)piSln;
    memset(pcVal,0,*piVln);
    *piVln=0;
    return(8);
@@ -1728,6 +1729,7 @@ static const char* getjclvar(const char* symbol, int size, char* value) {
 #else
 
 static const char* getjclvar(const char* symbol, int size, char* value) {
+   (void)symbol; (void)size; (void)value;
    return(NULL);
 }
 
@@ -2478,6 +2480,7 @@ extern int printd(const char* format,...)
    fflush(stderr);
    return r;
 #else
+   (void)format;
    return 0;
 #endif
 }

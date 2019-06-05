@@ -331,7 +331,6 @@ static void vdPrnStaticHelp(
    FILE*                         pfOut,
    const TsCleCommand*           psTab,
    const char*                   pcPgm,
-   const int                     isCas,
    const char*                   pcDep);
 
 static void vdPrnCommandSyntax(
@@ -360,11 +359,9 @@ static void vdPrnCommandManpage(
 static void vdPrnProperties(
    void*                         pvHdl,
    const char*                   pcPat,
-   const int                     isSet,
    const int                     siDep);
 
 static int siCleGetProperties(
-   void*                         pvHdl,
    FILE*                         pfErr,
    TsCnfHdl*                     psCnf,
    const char*                   pcOwn,
@@ -378,7 +375,6 @@ static int siCleGetProperties(
    tpfF2S                        pfF2S);
 
 static int siCleGetCommand(
-   void*                         pvHdl,
    FILE*                         pfErr,
    const char*                   pcDep,
    const char*                   pcFct,
@@ -426,9 +422,7 @@ static int siCnfPrn(
    const char*                   pcPre);
 
 static int siCnfClr(
-   TsCnfHdl*                     psHdl,
-   FILE*                         pfErr,
-   const char*                   pcPre);
+   TsCnfHdl*                     psHdl);
 
 static void vdCnfCls(
    TsCnfHdl*                     psHdl);
@@ -578,7 +572,7 @@ extern int siCleExecute(
    const char*                   pcDpa,
    const int                     siNoR)
 {
-   int                           i,j,l,s,siErr,siDep,siCnt,isSet=0;
+   int                           i,j,l,s,siErr,siDep,siCnt;
    TsCnfHdl*                     psCnf=NULL;
    size_t                        szCnf=0;
    char*                         pcCnf=NULL;
@@ -1039,7 +1033,7 @@ EVALUATE:
       if (pfErr==NULL) pfErr=pfStd;
       if (argc==2) {
          fprintf(pfOut,"Help for program '%s':\n",pcPgm);
-         vdPrnStaticHelp(pfOut,psTab,argv[0],isCas,pcDep);
+         vdPrnStaticHelp(pfOut,psTab,argv[0],pcDep);
          ERROR(CLERTC_OK,NULL);
       } else if (argc>=3) {
          if (argc==3) {
@@ -1949,38 +1943,38 @@ EVALUATE:
                                     psTab[i].piOid,psTab[i].psTab,isCas,isPfl,isRpl,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,
                                     &pvHdl,NULL,NULL,pfMsg,pvF2S,pfF2S);
             if (siErr) ERROR(siErr,NULL);
-            vdPrnProperties(pvHdl,psTab[i].pcKyw,TRUE,10);
+            vdPrnProperties(pvHdl,psTab[i].pcKyw,10);
             vdClpClose(pvHdl,CLPCLS_MTD_ALL); pvHdl=NULL;
          }
          ERROR(CLERTC_OK,NULL);
       } else if (argc>=3) {
          if (argc==3) {
-            siDep=1;  isSet=FALSE;
+            siDep=1;
          } else if (argc==4) {
             if (argv[3][0]=='-') argv[3]++;
             if (argv[3][0]=='-') argv[3]++;
             if (strxcmp(isCas,argv[3],"DEFALL",0,0,FALSE)==0) {
-               siDep=10; isSet=TRUE;
+               siDep=10;
             } else if (strxcmp(isCas,argv[3],"DEPALL",0,0,FALSE)==0) {
-                  siDep=10; isSet=FALSE;
+                  siDep=10;
             } else if (strxcmp(isCas,argv[3],"DEPTH1",0,0,FALSE)==0) {
-                  siDep=1; isSet=FALSE;
+                  siDep=1;
             } else if (strxcmp(isCas,argv[3],"DEPTH2",0,0,FALSE)==0) {
-                  siDep=2; isSet=FALSE;
+                  siDep=2;
             } else if (strxcmp(isCas,argv[3],"DEPTH3",0,0,FALSE)==0) {
-                  siDep=3; isSet=FALSE;
+                  siDep=3;
             } else if (strxcmp(isCas,argv[3],"DEPTH4",0,0,FALSE)==0) {
-                  siDep=4; isSet=FALSE;
+                  siDep=4;
             } else if (strxcmp(isCas,argv[3],"DEPTH5",0,0,FALSE)==0) {
-                  siDep=5; isSet=FALSE;
+                  siDep=5;
             } else if (strxcmp(isCas,argv[3],"DEPTH6",0,0,FALSE)==0) {
-                  siDep=6; isSet=FALSE;
+                  siDep=6;
             } else if (strxcmp(isCas,argv[3],"DEPTH7",0,0,FALSE)==0) {
-                  siDep=7; isSet=FALSE;
+                  siDep=7;
             } else if (strxcmp(isCas,argv[3],"DEPTH8",0,0,FALSE)==0) {
-                  siDep=8; isSet=FALSE;
+                  siDep=8;
             } else if (strxcmp(isCas,argv[3],"DEPTH9",0,0,FALSE)==0) {
-                  siDep=9; isSet=FALSE;
+                  siDep=9;
             } else {
                fprintf(pfErr,"Syntax for built-in function 'GETPROP' not valid\n");
                for (i=0;psTab[i].pcKyw!=NULL ;i++) {
@@ -2012,7 +2006,7 @@ EVALUATE:
                } else {
                   fprintf(pfOut,"Properties for argument '%s':\n",argv[2]);
                }
-               vdPrnProperties(pvHdl,argv[2],isSet,siDep);
+               vdPrnProperties(pvHdl,argv[2],siDep);
                ERROR(CLERTC_OK,NULL);
             }
          }
@@ -2026,7 +2020,7 @@ EVALUATE:
                   if (siErr) ERROR(siErr,NULL);
                   sprintf(acPat,"%s.%s",pcDef,argv[2]);
                   fprintf(pfOut,"Properties for argument '%s':\n",acPat);
-                  vdPrnProperties(pvHdl,acPat,isSet,siDep);
+                  vdPrnProperties(pvHdl,acPat,siDep);
                   ERROR(CLERTC_OK,NULL);
                }
             }
@@ -2202,7 +2196,7 @@ EVALUATE:
          if (argv[2][0]=='-') argv[2]++;
          if (argv[2][0]=='-') argv[2]++;
          if (strxcmp(isCas,argv[2],"CLEAR",0,0,FALSE)==0) {
-            siCnt=siCnfClr(psCnf,pfOut,pcDep);
+            siCnt=siCnfClr(psCnf);
             if (siCnt) {
                fprintf(pfOut,"Delete %d elements from file \"%s\"\n",siCnt,psCnf->pcFil);
             } else {
@@ -2256,7 +2250,7 @@ EVALUATE:
                siErr=siCleCommandInit(pvGbl,psTab[i].pfIni,psTab[i].pvClp,pcOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,
                                       isCas,isPfl,isRpl,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg,pvF2S,pfF2S);
                if (siErr) ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
-               siErr=siCleGetCommand(pvHdl,pfOut,pcDep,psTab[i].pcKyw,argc,argv,&pcFil,&pcCmd,pvGbl,pvF2S,pfF2S,pcDpa);
+               siErr=siCleGetCommand(pfOut,pcDep,psTab[i].pcKyw,argc,argv,&pcFil,&pcCmd,pvGbl,pvF2S,pfF2S,pcDpa);
                if (siErr) ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
                siErr=siClpParseCmd(pvHdl,pcFil,pcCmd,TRUE,TRUE,psTab[i].piOid,&pcTls);
                if (siErr<0) {
@@ -2408,7 +2402,7 @@ static int siClePropertyInit(
       vdClpClose(*ppHdl,CLPCLS_MTD_ALL);*ppHdl=NULL;
       return(CLERTC_INI);
    }
-   siErr=siCleGetProperties(*ppHdl,pfErr,psCnf,pcOwn,pcPgm,pcCmd,&pcFil,&pcPro,&siFil,pvGbl,pvF2S,pfF2S);
+   siErr=siCleGetProperties(pfErr,psCnf,pcOwn,pcPgm,pcCmd,&pcFil,&pcPro,&siFil,pvGbl,pvF2S,pfF2S);
    if (siErr) {
       if (pcPro!=NULL) free(pcPro); SAFE_FREE(pcFil);
       vdClpClose(*ppHdl,CLPCLS_MTD_ALL);*ppHdl=NULL;
@@ -2444,6 +2438,7 @@ static int siClePropertyFinish(
    const char*                   pcFil,
    const int                     siFil)
 {
+   (void)                        pfTrc;
    int                           siErr,i;
    FILE*                         pfPro;
    char                          acEnv[((pcHom!=NULL)?strlen(pcHom):0)+strlen(pcOwn)+strlen(pcPgm)+strlen(pcCmd)+64];
@@ -2591,7 +2586,7 @@ static int siCleCommandInit(
       vdClpClose(*ppHdl,CLPCLS_MTD_ALL);*ppHdl=NULL;
       return(CLERTC_INI);
    }
-   siErr=siCleGetProperties(*ppHdl,pfErr,psCnf,pcOwn,pcPgm,pcCmd,&pcFil,&pcPro,&siFil,pvGbl,pvF2S,pfF2S);
+   siErr=siCleGetProperties(pfErr,psCnf,pcOwn,pcPgm,pcCmd,&pcFil,&pcPro,&siFil,pvGbl,pvF2S,pfF2S);
    if (siErr) {
       vdClpClose(*ppHdl,CLPCLS_MTD_ALL);*ppHdl=NULL;
       SAFE_FREE(pcPro); SAFE_FREE(pcFil);
@@ -2844,7 +2839,7 @@ static void vdCleManProgram(
       fprintm(pfOut,pcOwn,pcPgm,MAN_CLE_MAIN_HELP,1);
       fprintf(pfOut,"------------------------------------------------------------------------\n");
       fprintf(pfOut,"Help for program '%s':\n",pcPgm);
-      vdPrnStaticHelp(pfOut,psTab,pcPgm,FALSE,pcDep);
+      vdPrnStaticHelp(pfOut,psTab,pcPgm,pcDep);
       fprintf(pfOut,"------------------------------------------------------------------------\n\n");
       fprintf(pfOut,"indexterm:%cHelp for program %s%c\n\n\n",C_SBO,pcPgm,C_SBC);
    }
@@ -2989,7 +2984,6 @@ static void vdPrnStaticHelp(
    FILE*                         pfOut,
    const TsCleCommand*           psTab,
    const char*                   pcPgm,
-   const int                     isCas,
    const char*                   pcDep)
 {
    int                           i;
@@ -3068,14 +3062,12 @@ static void vdPrnCommandManpage(
 static void vdPrnProperties(
    void*                   pvHdl,
    const char*             pcPat,
-   const int               isSet,
    const int               siDep)
 {
    siClpProperties(pvHdl,CLPPRO_MTD_SET,siDep,pcPat,NULL);
 }
 
 static int siCleGetProperties(
-   void*                   pvHdl,
    FILE*                   pfErr,
    TsCnfHdl*               psCnf,
    const char*             pcOwn,
@@ -3124,7 +3116,6 @@ static int siCleGetProperties(
 }
 
 static int siCleGetCommand(
-   void*                   pvHdl,
    FILE*                   pfErr,
    const char*             pcDep,
    const char*             pcFct,
@@ -3485,9 +3476,7 @@ static int siCnfPrn(
 }
 
 static int siCnfClr(
-   TsCnfHdl*                     psHdl,
-   FILE*                         pfErr,
-   const char*                   pcPre)
+   TsCnfHdl*                     psHdl)
 {
    int                           i=0;
    TsCnfEnt*                     psEnt;

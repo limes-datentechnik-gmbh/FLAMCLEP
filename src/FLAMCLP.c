@@ -576,7 +576,6 @@ static int siClpPrsProLst(
 
 static int siClpPrsPro(
    void*                         pvHdl,
-   const int                     siPos,
    const TsSym*                  psTab);
 
 static int siClpPrsKywLst(
@@ -759,7 +758,6 @@ static int siClpPrnPro(
 static int siFromNumberLexem(
    void*                         pvHdl,
    const int                     siLev,
-   const int                     siPos,
    TsSym*                        psArg,
    const char*                   pcVal,
    I64*                          piVal);
@@ -767,7 +765,6 @@ static int siFromNumberLexem(
 static int siFromFloatLexem(
    void*                         pvHdl,
    const int                     siLev,
-   const int                     siPos,
    TsSym*                        psArg,
    const char*                   pcVal,
    double*                       pfVal);
@@ -1120,7 +1117,7 @@ extern void* pvClpOpen(
          if (pcNow!=NULL && *pcNow) {
             siErr=siClpScnNat(psHdl,psHdl->pfErr,psHdl->pfScn,&pcNow,&psHdl->szLex,&psHdl->pcLex,CLPTYP_NUMBER,NULL,NULL,NULL);
             if (siErr==CLPTOK_NUM) {
-               siErr=siFromNumberLexem(psHdl,0,0,NULL,psHdl->pcLex,&siNow);
+               siErr=siFromNumberLexem(psHdl,0,NULL,psHdl->pcLex,&siNow);
                if (siErr==0 && siNow>0) {
                   siErr=siClpScnNat(psHdl,psHdl->pfErr,psHdl->pfScn,&pcNow,&psHdl->szLex,&psHdl->pcLex,0,NULL,NULL,NULL);
                   if (siErr==CLPTOK_END) {
@@ -4706,14 +4703,12 @@ static int siClpPrsOvlLst(
 static int siFromNumberLexem(
    void*                         pvHdl,
    const int                     siLev,
-   const int                     siPos,
    TsSym*                        psArg,
    const char*                   pcVal,
    I64*                          piVal)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    char*                         pcHlp=NULL;
-   (void)siPos;
 
    errno=0;
    switch (pcVal[0]) {
@@ -4737,14 +4732,12 @@ static int siFromNumberLexem(
 static int siFromFloatLexem(
    void*                         pvHdl,
    const int                     siLev,
-   const int                     siPos,
    TsSym*                        psArg,
    const char*                   pcVal,
    double*                       pfVal)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    char*                         pcHlp=NULL;
-   (void)siPos;
 
    errno=0;
    switch (pcVal[0]) {
@@ -4822,7 +4815,7 @@ static int siClpPrsFac(
             if (psHdl->siTok!=CLPTOK_NUM) {
                return CLPERR(psHdl,CLPERR_SYN,"Index number expected (%s)",fpcPat(pvHdl,siLev));
             }
-            siErr=siFromNumberLexem(pvHdl,siLev,siPos,psArg,psHdl->pcLex,&siInd);
+            siErr=siFromNumberLexem(pvHdl,siLev,psArg,psHdl->pcLex,&siInd);
             if (siErr) return(siErr);
             psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
             if (psHdl->siTok<0) return(psHdl->siTok);
@@ -5006,9 +4999,9 @@ static int siClpPrsTrm(
       if (siErr) { free(pcVal); return(siErr); }
       switch(psArg->psFix->siTyp) {
       case CLPTYP_NUMBER:
-         siErr=siFromNumberLexem(pvHdl,siLev,siPos,psArg,*ppVal,&siVal1);
+         siErr=siFromNumberLexem(pvHdl,siLev,psArg,*ppVal,&siVal1);
          if (siErr) { free(pcVal); return(siErr); }
-         siErr=siFromNumberLexem(pvHdl,siLev,siPos,psArg,pcVal,&siVal2);
+         siErr=siFromNumberLexem(pvHdl,siLev,psArg,pcVal,&siVal2);
          if (siErr) { free(pcVal); return(siErr); }
          siVal=siVal1*siVal2;
          if (siVal>=0) {
@@ -5019,9 +5012,9 @@ static int siClpPrsTrm(
          if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d MUL-NUM(%"PRIi64"*%"PRIi64"=%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,siVal1,siVal2,*ppVal);
          break;
       case CLPTYP_FLOATN:
-         siErr=siFromFloatLexem(pvHdl,siLev,siPos,psArg,*ppVal,&flVal1);
+         siErr=siFromFloatLexem(pvHdl,siLev,psArg,*ppVal,&flVal1);
          if (siErr) { free(pcVal); return(siErr); }
-         siErr=siFromFloatLexem(pvHdl,siLev,siPos,psArg,pcVal,&flVal2);
+         siErr=siFromFloatLexem(pvHdl,siLev,psArg,pcVal,&flVal2);
          if (siErr) { free(pcVal); return(siErr); }
          flVal=flVal1*flVal2;
          if (flVal>=0) {
@@ -5055,9 +5048,9 @@ static int siClpPrsTrm(
       if (siErr) { free(pcVal); return(siErr); }
       switch(psArg->psFix->siTyp) {
       case CLPTYP_NUMBER:
-         siErr=siFromNumberLexem(pvHdl,siLev,siPos,psArg,*ppVal,&siVal1);
+         siErr=siFromNumberLexem(pvHdl,siLev,psArg,*ppVal,&siVal1);
          if (siErr) { free(pcVal); return(siErr); }
-         siErr=siFromNumberLexem(pvHdl,siLev,siPos,psArg,pcVal,&siVal2);
+         siErr=siFromNumberLexem(pvHdl,siLev,psArg,pcVal,&siVal2);
          if (siErr) { free(pcVal); return(siErr); }
          if (siVal2==0) {
             free(pcVal);
@@ -5072,9 +5065,9 @@ static int siClpPrsTrm(
          if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d DIV-NUM(%"PRIi64"/%"PRIi64"=%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,siVal1,siVal2,*ppVal);
          break;
       case CLPTYP_FLOATN:
-         siErr=siFromFloatLexem(pvHdl,siLev,siPos,psArg,*ppVal,&flVal1);
+         siErr=siFromFloatLexem(pvHdl,siLev,psArg,*ppVal,&flVal1);
          if (siErr) { free(pcVal); return(siErr); }
-         siErr=siFromFloatLexem(pvHdl,siLev,siPos,psArg,pcVal,&flVal2);
+         siErr=siFromFloatLexem(pvHdl,siLev,psArg,pcVal,&flVal2);
          if (siErr) { free(pcVal); return(siErr); }
          if (flVal2==0) {
             free(pcVal);
@@ -5110,9 +5103,9 @@ static int siClpPrsTrm(
       if (siErr) { free(pcVal); return(siErr); }
       switch(psArg->psFix->siTyp) {
       case CLPTYP_NUMBER:
-         siErr=siFromNumberLexem(pvHdl,siLev,siPos,psArg,*ppVal,&siVal1);
+         siErr=siFromNumberLexem(pvHdl,siLev,psArg,*ppVal,&siVal1);
          if (siErr) { free(pcVal); return(siErr); }
-         siErr=siFromNumberLexem(pvHdl,siLev,siPos,psArg,pcVal,&siVal2);
+         siErr=siFromNumberLexem(pvHdl,siLev,psArg,pcVal,&siVal2);
          if (siErr) { free(pcVal); return(siErr); }
          siVal=siVal1*siVal2;
          if (siVal>=0) {
@@ -5123,9 +5116,9 @@ static int siClpPrsTrm(
          if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d AUTO-MUL-NUM(%"PRIi64"*%"PRIi64"=%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,siVal1,siVal2,*ppVal);
          break;
       case CLPTYP_FLOATN:
-         siErr=siFromFloatLexem(pvHdl,siLev,siPos,psArg,*ppVal,&flVal1);
+         siErr=siFromFloatLexem(pvHdl,siLev,psArg,*ppVal,&flVal1);
          if (siErr) { free(pcVal); return(siErr); }
-         siErr=siFromFloatLexem(pvHdl,siLev,siPos,psArg,pcVal,&flVal2);
+         siErr=siFromFloatLexem(pvHdl,siLev,psArg,pcVal,&flVal2);
          if (siErr) { free(pcVal); return(siErr); }
          flVal=flVal1*flVal2;
          if (flVal>=0) {
@@ -5197,9 +5190,9 @@ static int siClpPrsExp(
       if (siErr) { free(pcVal); return(siErr); }
       switch(psArg->psFix->siTyp) {
       case CLPTYP_NUMBER:
-         siErr=siFromNumberLexem(pvHdl,siLev,siPos,psArg,*ppVal,&siVal1);
+         siErr=siFromNumberLexem(pvHdl,siLev,psArg,*ppVal,&siVal1);
          if (siErr) { free(pcVal); return(siErr); }
-         siErr=siFromNumberLexem(pvHdl,siLev,siPos,psArg,pcVal,&siVal2);
+         siErr=siFromNumberLexem(pvHdl,siLev,psArg,pcVal,&siVal2);
          if (siErr) { free(pcVal); return(siErr); }
          siVal=siVal1+siVal2;
          if (siVal>=0) {
@@ -5210,9 +5203,9 @@ static int siClpPrsExp(
          if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d ADD-NUM(%"PRIi64"+%"PRIi64"=%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,siVal1,siVal2,*ppVal);
          break;
       case CLPTYP_FLOATN:
-         siErr=siFromFloatLexem(pvHdl,siLev,siPos,psArg,*ppVal,&flVal1);
+         siErr=siFromFloatLexem(pvHdl,siLev,psArg,*ppVal,&flVal1);
          if (siErr) { free(pcVal); return(siErr); }
-         siErr=siFromFloatLexem(pvHdl,siLev,siPos,psArg,pcVal,&flVal2);
+         siErr=siFromFloatLexem(pvHdl,siLev,psArg,pcVal,&flVal2);
          if (siErr) { free(pcVal); return(siErr); }
          flVal=flVal1+flVal2;
          if (flVal>=0) {
@@ -5266,9 +5259,9 @@ static int siClpPrsExp(
       if (siErr) { free(pcVal); return(siErr); }
       switch(psArg->psFix->siTyp) {
       case CLPTYP_NUMBER:
-         siErr=siFromNumberLexem(pvHdl,siLev,siPos,psArg,*ppVal,&siVal1);
+         siErr=siFromNumberLexem(pvHdl,siLev,psArg,*ppVal,&siVal1);
          if (siErr) { free(pcVal); return(siErr); }
-         siErr=siFromNumberLexem(pvHdl,siLev,siPos,psArg,pcVal,&siVal2);
+         siErr=siFromNumberLexem(pvHdl,siLev,psArg,pcVal,&siVal2);
          if (siErr) { free(pcVal); return(siErr); }
          siVal=siVal1-siVal2;
          if (siVal>=0) {
@@ -5279,9 +5272,9 @@ static int siClpPrsExp(
          if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d SUB-NUM(%"PRIi64"-%"PRIi64"=%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,siVal1,siVal2,*ppVal);
          break;
       case CLPTYP_FLOATN:
-         siErr=siFromFloatLexem(pvHdl,siLev,siPos,psArg,*ppVal,&flVal1);
+         siErr=siFromFloatLexem(pvHdl,siLev,psArg,*ppVal,&flVal1);
          if (siErr) { free(pcVal); return(siErr); }
-         siErr=siFromFloatLexem(pvHdl,siLev,siPos,psArg,pcVal,&flVal2);
+         siErr=siFromFloatLexem(pvHdl,siLev,psArg,pcVal,&flVal2);
          if (siErr) { free(pcVal); return(siErr); }
          flVal=flVal1-flVal2;
          if (flVal>=0) {
@@ -5313,9 +5306,9 @@ static int siClpPrsExp(
       if (siErr) { free(pcVal); return(siErr); }
       switch(psArg->psFix->siTyp) {
       case CLPTYP_NUMBER:
-         siErr=siFromNumberLexem(pvHdl,siLev,siPos,psArg,*ppVal,&siVal1);
+         siErr=siFromNumberLexem(pvHdl,siLev,psArg,*ppVal,&siVal1);
          if (siErr) { free(pcVal); return(siErr); }
-         siErr=siFromNumberLexem(pvHdl,siLev,siPos,psArg,pcVal,&siVal2);
+         siErr=siFromNumberLexem(pvHdl,siLev,psArg,pcVal,&siVal2);
          if (siErr) { free(pcVal); return(siErr); }
          siVal=siVal1+siVal2;
          if (siVal>=0) {
@@ -5326,9 +5319,9 @@ static int siClpPrsExp(
          if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d AUTO-ADD-NUM(%"PRIi64"+%"PRIi64"=%s))\n",fpcPre(pvHdl,siLev),siLev,siPos,siVal1,siVal2,*ppVal);
          break;
       case CLPTYP_FLOATN:
-         siErr=siFromFloatLexem(pvHdl,siLev,siPos,psArg,*ppVal,&flVal1);
+         siErr=siFromFloatLexem(pvHdl,siLev,psArg,*ppVal,&flVal1);
          if (siErr) { free(pcVal); return(siErr); }
-         siErr=siFromFloatLexem(pvHdl,siLev,siPos,psArg,pcVal,&flVal2);
+         siErr=siFromFloatLexem(pvHdl,siLev,psArg,pcVal,&flVal2);
          if (siErr) { free(pcVal); return(siErr); }
          flVal=flVal1+flVal2;
          if (flVal>=0) {
@@ -5400,7 +5393,7 @@ static int siClpPrsProLst(
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    int                           siErr,siPos=0;
    while (psHdl->siTok==CLPTOK_KYW) {
-      siErr=siClpPrsPro(pvHdl,siPos,psTab);
+      siErr=siClpPrsPro(pvHdl,psTab);
       if (siErr<0) return(siErr);
       siPos++;
    }
@@ -5409,7 +5402,6 @@ static int siClpPrsProLst(
 
 static int siClpPrsPro(
    void*                         pvHdl,
-   const int                     siPos,
    const TsSym*                  psTab)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
@@ -5859,7 +5851,7 @@ static int siClpBldLit(
             return CLPERR(psHdl,CLPERR_TAB,"Keyword (%s.%s) and type (%s) of argument are defined but write pointer not set",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
          }
       }
-      siErr=siFromNumberLexem(pvHdl,siLev,siPos,psArg,pcVal,&siVal);
+      siErr=siFromNumberLexem(pvHdl,siLev,psArg,pcVal,&siVal);
       if (siErr) return(siErr);
       if (siVal<0 && CLPISF_UNS(psArg->psStd->uiFlg)) {
          return CLPERR(psHdl,CLPERR_SEM,"Literal number (%s) of '%s.%s' is negative (%"PRIi64") but marked as unsigned",isPrnStr(psArg,pcVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,siVal);
@@ -5919,7 +5911,7 @@ static int siClpBldLit(
             return CLPERR(psHdl,CLPERR_TAB,"Keyword (%s.%s) and type (%s) of argument are defined but write pointer not set",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
          }
       }
-      siErr=siFromFloatLexem(pvHdl,siLev,siPos,psArg,pcVal,&flVal);
+      siErr=siFromFloatLexem(pvHdl,siLev,psArg,pcVal,&flVal);
       if (siErr) return(siErr);
       if (flVal<0 && CLPISF_UNS(psArg->psStd->uiFlg)) {
          return CLPERR(psHdl,CLPERR_SEM,"Literal number (%s) of '%s.%s' is negative (%f) but marked as unsigned",isPrnStr(psArg,pcVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,flVal);
