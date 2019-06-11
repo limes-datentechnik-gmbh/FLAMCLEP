@@ -1085,6 +1085,7 @@ extern void* pvClpOpen(
          }
 #ifdef __DEBUG__
          U32 uiBeginCurHeapSize=CUR_HEAP_SIZE();
+         guiSymCnt=0;
 #endif
          siErr=siClpSymIni(psHdl,0,NULL,psTab,NULL,&psHdl->psTab);
          if (siErr<0) {
