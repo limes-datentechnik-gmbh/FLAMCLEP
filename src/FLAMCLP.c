@@ -269,10 +269,6 @@ static const char* pcClpErr(int siErr) {
    }
 }
 
-#ifdef __DEBUG__
-   static U32 guiSymCnt=0;
-#endif
-
 /* Definition der Strukturen ******************************************/
 
 typedef struct Std {
@@ -390,6 +386,7 @@ typedef struct Hdl {
    void*                         pvGbl;
    void*                         pvF2s;
    tpfF2S                        pfF2s;
+   U32                           uiSym;
 } TsHdl;
 
 /* Deklaration der internen Funktionen ********************************/
@@ -1085,7 +1082,6 @@ extern void* pvClpOpen(
          }
 #ifdef __DEBUG__
          U32 uiBeginCurHeapSize=CUR_HEAP_SIZE();
-         guiSymCnt=0;
 #endif
          siErr=siClpSymIni(psHdl,0,NULL,psTab,NULL,&psHdl->psTab);
          if (siErr<0) {
@@ -1101,7 +1097,7 @@ extern void* pvClpOpen(
          }
 #ifdef __DEBUG__
          U32 uiEndCurHeapSize=CUR_HEAP_SIZE();
-         printd("----------CLP-SYMTAB-CUR_HEAP_SIZE(%u)=>%u(%u) Count==%u(%u)\n",uiBeginCurHeapSize,uiEndCurHeapSize,uiEndCurHeapSize-uiBeginCurHeapSize,guiSymCnt,(uiEndCurHeapSize-uiBeginCurHeapSize)/guiSymCnt);
+         printd("----------CLP-SYMTAB-CUR_HEAP_SIZE(%u)=>%u(%u) Count==%u(%u)\n",uiBeginCurHeapSize,uiEndCurHeapSize,uiEndCurHeapSize-uiBeginCurHeapSize,psHdl->uiSym,(uiEndCurHeapSize-uiBeginCurHeapSize)/psHdl->uiSym);
 #endif
          siErr=siClpSymCal(psHdl,0,NULL,psHdl->psTab);
          if (siErr<0) {
@@ -2415,9 +2411,7 @@ static TsSym* psClpSymIns(
    }
    psSym->psDep=NULL;
    psSym->psHih=psHih;
-#ifdef __DEBUG__
-   guiSymCnt++;
-#endif
+   psHdl->uiSym++;
    return(psSym);
 }
 #undef ERROR
