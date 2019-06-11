@@ -269,6 +269,10 @@ static const char* pcClpErr(int siErr) {
    }
 }
 
+#ifdef __DEBUG__
+   static U32 guiSymCnt=0;
+#endif
+
 /* Definition der Strukturen ******************************************/
 
 typedef struct Std {
@@ -276,8 +280,8 @@ typedef struct Std {
    struct Sym*                   psAli;
    unsigned int                  uiFlg;
    int                           siKwl;
-   int                           siLev;
-   int                           siPos;
+//   int                           siLev;
+//   int                           siPos;
 }TsStd;
 
 typedef struct Fix {
@@ -1079,6 +1083,9 @@ extern void* pvClpOpen(
             psHdl->pvF2s=NULL;
             psHdl->pvGbl=NULL;
          }
+#ifdef __DEBUG__
+         U32 uiBeginCurHeapSize=CUR_HEAP_SIZE();
+#endif
          siErr=siClpSymIni(psHdl,0,NULL,psTab,NULL,&psHdl->psTab);
          if (siErr<0) {
             vdClpSymDel(psHdl->psTab);
@@ -1091,6 +1098,10 @@ extern void* pvClpOpen(
             free(psHdl);
             return(NULL);
          }
+#ifdef __DEBUG__
+         U32 uiEndCurHeapSize=CUR_HEAP_SIZE();
+         printd("----------CLP-SYMTAB-CUR_HEAP_SIZE(%u)=>%u(%u) Count==%u(%u)\n",uiBeginCurHeapSize,uiEndCurHeapSize,uiEndCurHeapSize-uiBeginCurHeapSize,guiSymCnt,(uiEndCurHeapSize-uiBeginCurHeapSize)/guiSymCnt);
+#endif
          siErr=siClpSymCal(psHdl,0,NULL,psHdl->psTab);
          if (siErr<0) {
             vdClpSymDel(psHdl->psTab);
@@ -1168,11 +1179,18 @@ extern int siClpParsePro(
    psHdl->siCol=0;
    psHdl->pcLex[0]=EOS;
    if (psHdl->siTok==CLPTOK_INI) {
+#ifdef __DEBUG__
+      U32 uiBeginCurHeapSize=CUR_HEAP_SIZE();
+#endif
       if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"PROPERTY-PARSER-BEGIN\n");
       psHdl->siTok=siClpScnSrc(pvHdl,0,NULL);
       if (psHdl->siTok<0) return(psHdl->siTok);
       siCnt=siClpPrsProLst(pvHdl,psHdl->psTab);
       if (siCnt<0) return(siCnt);
+#ifdef __DEBUG__
+      U32 uiEndCurHeapSize=CUR_HEAP_SIZE();
+      printd("----------CLP-PRSPRO-CUR_HEAP_SIZE(%u)=>%u(%u)\n",uiBeginCurHeapSize,uiEndCurHeapSize,uiEndCurHeapSize-uiBeginCurHeapSize);
+#endif
       if (psHdl->siTok==CLPTOK_END) {
          psHdl->siTok=CLPTOK_INI;
          psHdl->pcInp=NULL;
@@ -1228,11 +1246,18 @@ extern int siClpParseCmd(
    psHdl->siCol=0;
    psHdl->pcLex[0]=EOS;
    if (psHdl->siTok==CLPTOK_INI) {
+#ifdef __DEBUG__
+      U32 uiBeginCurHeapSize=CUR_HEAP_SIZE();
+#endif
       if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"COMMAND-PARSER-BEGIN\n");
       psHdl->siTok=siClpScnSrc(pvHdl,0,NULL);
       if (psHdl->siTok<0) return(psHdl->siTok);
       siCnt=siClpPrsMain(pvHdl,psHdl->psTab,piOid);
       if (siCnt<0) return (siCnt);
+#ifdef __DEBUG__
+      U32 uiEndCurHeapSize=CUR_HEAP_SIZE();
+      printd("----------CLP-PRSCMD-CUR_HEAP_SIZE(%u)=>%u(%u)\n",uiBeginCurHeapSize,uiEndCurHeapSize,uiEndCurHeapSize-uiBeginCurHeapSize);
+#endif
       if (psHdl->siTok==CLPTOK_END) {
          psHdl->siTok=CLPTOK_INI;
          psHdl->pcInp=NULL;
@@ -2152,8 +2177,8 @@ static TsSym* psClpSymIns(
    }
    psSym->psStd->psAli=NULL;
    psSym->psStd->siKwl=strlen(psSym->psStd->pcKyw);
-   psSym->psStd->siLev=siLev;
-   psSym->psStd->siPos=siPos;
+//   psSym->psStd->siLev=siLev;
+//   psSym->psStd->siPos=siPos;
    psSym->psFix->pcMan=psArg->pcMan;
    psSym->psFix->pcHlp=psArg->pcHlp;
    if (CLPISF_ARG(psArg->uiFlg)) {
@@ -2389,6 +2414,9 @@ static TsSym* psClpSymIns(
    }
    psSym->psDep=NULL;
    psSym->psHih=psHih;
+#ifdef __DEBUG__
+   guiSymCnt++;
+#endif
    return(psSym);
 }
 #undef ERROR
@@ -2580,13 +2608,13 @@ static int siClpSymCal(
    int                           siErr,siPos,k,h;
 
    for (siPos=0,psSym=psTab;psSym!=NULL;psSym=psSym->psNxt,siPos++) {
-      if (psSym->psStd->siLev!=siLev) {
-         if (psArg==NULL) {
-            return CLPERR(psHdl,CLPERR_INT,"Argument table not in sync with symbol table%s","");
-         } else {
-            return CLPERR(psHdl,CLPERR_INT,"Parameter table of argument '%s.%s' not in sync with symbol table",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
-         }
-      }
+//      if (psSym->psStd->siLev!=siLev) {
+//         if (psArg==NULL) {
+//            return CLPERR(psHdl,CLPERR_INT,"Argument table not in sync with symbol table%s","");
+//         } else {
+//            return CLPERR(psHdl,CLPERR_INT,"Parameter table of argument '%s.%s' not in sync with symbol table",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+//         }
+//      }
 
       if (CLPISF_ALI(psSym->psStd->uiFlg)) {
          isPar=TRUE;
@@ -2859,8 +2887,8 @@ static void vdClpSymPrn(
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    TsSym*                        psHlp=psSym;
    while (psHlp!=NULL) {
-      if (psHdl->pfSym!=NULL) efprintf(psHdl->pfSym,"%s %3.3d - %s (KWL=%d TYP=%s MIN=%d MAX=%d SIZ=%d OFS=%d OID=%d FLG=%8.8X (NXT=%p BAK=%p DEP=%p HIH=%p ALI=%p CNT=%p OID=%p IND=%p ELN=%p SLN=%p TLN=%p LNK=%p)) - %s\n",
-            fpcPre(pvHdl,siLev),psHlp->psStd->siPos+1,psHlp->psStd->pcKyw,psHlp->psStd->siKwl,apClpTyp[psHlp->psFix->siTyp],psHlp->psFix->siMin,psHlp->psFix->siMax,psHlp->psFix->siSiz,
+      if (psHdl->pfSym!=NULL) efprintf(psHdl->pfSym,"%s - %s (KWL=%d TYP=%s MIN=%d MAX=%d SIZ=%d OFS=%d OID=%d FLG=%8.8X (NXT=%p BAK=%p DEP=%p HIH=%p ALI=%p CNT=%p OID=%p IND=%p ELN=%p SLN=%p TLN=%p LNK=%p)) - %s\n",
+            fpcPre(pvHdl,siLev)/*,psHlp->psStd->siPos+1*/,psHlp->psStd->pcKyw,psHlp->psStd->siKwl,apClpTyp[psHlp->psFix->siTyp],psHlp->psFix->siMin,psHlp->psFix->siMax,psHlp->psFix->siSiz,
             psHlp->psFix->siOfs,psHlp->psFix->siOid,psHlp->psStd->uiFlg,psHlp->psNxt,psHlp->psBak,psHlp->psDep,psHlp->psHih,psHlp->psStd->psAli,psHlp->psFix->psCnt,psHlp->psFix->psOid,
             psHlp->psFix->psInd,psHlp->psFix->psEln,psHlp->psFix->psSln,psHlp->psFix->psTln,psHlp->psFix->psLnk,psHlp->psFix->pcHlp);
       if (psHlp->psDep!=NULL) {
