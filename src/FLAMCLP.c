@@ -1080,7 +1080,7 @@ extern void* pvClpOpen(
             psHdl->pvF2s=NULL;
             psHdl->pvGbl=NULL;
          }
-#ifdef __DEBUG__
+#if defined(__DEBUG__) && defined(__HEAP_STATISTIC__)
          U32 uiBeginCurHeapSize=CUR_HEAP_SIZE();
 #endif
          siErr=siClpSymIni(psHdl,0,NULL,psTab,NULL,&psHdl->psTab);
@@ -1095,7 +1095,7 @@ extern void* pvClpOpen(
             free(psHdl);
             return(NULL);
          }
-#ifdef __DEBUG__
+#if defined(__DEBUG__) && defined(__HEAP_STATISTIC__)
          U32 uiEndCurHeapSize=CUR_HEAP_SIZE();
          printd("----------CLP-SYMTAB-CUR_HEAP_SIZE(%u)=>%u(%u) Count==%u(%u)\n",uiBeginCurHeapSize,uiEndCurHeapSize,uiEndCurHeapSize-uiBeginCurHeapSize,psHdl->uiSym,(uiEndCurHeapSize-uiBeginCurHeapSize)/psHdl->uiSym);
 #endif
@@ -1176,7 +1176,7 @@ extern int siClpParsePro(
    psHdl->siCol=0;
    psHdl->pcLex[0]=EOS;
    if (psHdl->siTok==CLPTOK_INI) {
-#ifdef __DEBUG__
+#if defined(__DEBUG__) && defined(__HEAP_STATISTIC__)
       U32 uiBeginCurHeapSize=CUR_HEAP_SIZE();
 #endif
       if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"PROPERTY-PARSER-BEGIN\n");
@@ -1184,7 +1184,7 @@ extern int siClpParsePro(
       if (psHdl->siTok<0) return(psHdl->siTok);
       siCnt=siClpPrsProLst(pvHdl,psHdl->psTab);
       if (siCnt<0) return(siCnt);
-#ifdef __DEBUG__
+#if defined(__DEBUG__) && defined(__HEAP_STATISTIC__)
       U32 uiEndCurHeapSize=CUR_HEAP_SIZE();
       printd("----------CLP-PRSPRO-CUR_HEAP_SIZE(%u)=>%u(%u)\n",uiBeginCurHeapSize,uiEndCurHeapSize,uiEndCurHeapSize-uiBeginCurHeapSize);
 #endif
@@ -1243,7 +1243,7 @@ extern int siClpParseCmd(
    psHdl->siCol=0;
    psHdl->pcLex[0]=EOS;
    if (psHdl->siTok==CLPTOK_INI) {
-#ifdef __DEBUG__
+#if defined(__DEBUG__) && defined(__HEAP_STATISTIC__)
       U32 uiBeginCurHeapSize=CUR_HEAP_SIZE();
 #endif
       if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"COMMAND-PARSER-BEGIN\n");
@@ -1251,7 +1251,7 @@ extern int siClpParseCmd(
       if (psHdl->siTok<0) return(psHdl->siTok);
       siCnt=siClpPrsMain(pvHdl,psHdl->psTab,piOid);
       if (siCnt<0) return (siCnt);
-#ifdef __DEBUG__
+#if defined(__DEBUG__) && defined(__HEAP_STATISTIC__)
       U32 uiEndCurHeapSize=CUR_HEAP_SIZE();
       printd("----------CLP-PRSCMD-CUR_HEAP_SIZE(%u)=>%u(%u)\n",uiBeginCurHeapSize,uiEndCurHeapSize,uiEndCurHeapSize-uiBeginCurHeapSize);
 #endif
