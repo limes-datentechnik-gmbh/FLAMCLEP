@@ -71,6 +71,11 @@ To handle passwords and passphrase more secure, you can provide a filename
 as string (PASSWD=f'filename'), which contains the corresponding string
 value. This prevents for example passwords from logging.
 
+An optional callback function with handle for additional authorization
+checking can be provided. The resource will be each path written to the
+CLP structure. If the pointer to the callback function NULL then the
+function is not called. This feature is mainly for RACF on z/OS.
+
 To support critical punctuation characters on EBCDIC systems a complex
 support was implemented. This support make the whole source independent
 of the EBCDIC code page used. The code page used must defined over the
@@ -587,6 +592,8 @@ extern const char* pcClpAbout(const int l, const int s, char* b);
 #define CLPERR_INT               -9
 /** CLPERR_SYS System error (internal error with argument tables and data structures)*/
 #define CLPERR_SYS               -10
+/** CLPERR_AUT Authorization request failed*/
+#define CLPERR_AUT               -11
 
 /**
 * Data types of parameter in the argument table
@@ -1102,6 +1109,22 @@ typedef int (*tpfF2S)(
    const int                     siMsg);
 
 /**
+ * Type definition for resource access check
+ *
+ * The function is called with the complete path and the standard lexem as value
+ * in front of each wrte of data to the CLP structure.
+ *
+ * @param[in]     pvGbl Pointer to to the global handle as black box given with CleExecute
+ * @param[in]     pvHdl Pointer to a handle given for this callback
+ * @param[in]     pcVal Path=Value as resource
+ * @return        0 if write allowed else a authorization error
+ */
+typedef int (*tpfSaf) (
+   void*                         pvGbl,
+   void*                         pvHdl,
+   const char*                   pcVal);
+
+/**
  * Open command line parser
  *
  * The function uses the argument table and corresponding structure and creates the handle for the command line parser (FLAMCLP)
@@ -1134,6 +1157,8 @@ typedef int (*tpfF2S)(
  * @param[in]  pvGbl Pointer to the global handle as black box given over CleExecute
  * @param[in]  pvF2S Pointer to a handle which can be used in file 2 string callback function (if not required then NULL)
  * @param[in]  pfF2S Callback function which reads a file into a variable null-terminated string in memory (if NULL then default implementation is used)
+ * @param[in]  pvSaf Pointer to a handle which can be used in authorization callback function (if not required then NULL)
+ * @param[in]  pfSaf Callback function to authorize each write to CLP structure or NULL for no additional check
  *
  * @return void pointer to the memory containing the handle
  */
@@ -1162,7 +1187,9 @@ extern void* pvClpOpen(
    TsClpError*                   psErr,
    void*                         pvGbl,
    void*                         pvF2S,
-   tpfF2S                        pfF2S);
+   tpfF2S                        pfF2S,
+   void*                         pvSaf,
+   tpfSaf                        pfSaf);
 
 /**
  * Parse the property list

@@ -165,12 +165,13 @@
  * 1.2.119: Support parameter files for arguments (keyword=>filename)
  * 1.2.120: Support arrays of simple values after assignment (keyword=hugo,berta detlef)
  * 1.2.121: Index for variables in expressions must be enclosed in curly brackets and only a number is useless
+ * 1.2.122: Support additional access control check possibility for each write in CLP structure
 **/
 
-#define CLP_VSN_STR       "1.2.121"
+#define CLP_VSN_STR       "1.2.122"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        2
-#define CLP_VSN_REVISION       121
+#define CLP_VSN_REVISION       122
 
 /* Definition der Konstanten ******************************************/
 
@@ -265,6 +266,7 @@ static const char* pcClpErr(int siErr) {
    case CLPERR_MEM: return("MEMORY-ERROR");
    case CLPERR_INT: return("INTERNAL-ERROR");
    case CLPERR_SYS: return("SYSTEM-ERROR");
+   case CLPERR_AUT: return("AUTHORIZATION-ERROR");
    default        : return("UNKNOWN-ERROR");
    }
 }
@@ -276,8 +278,8 @@ typedef struct Std {
    struct Sym*                   psAli;
    unsigned int                  uiFlg;
    int                           siKwl;
-//   int                           siLev;
-//   int                           siPos;
+   int                           siLev;
+   int                           siPos;
 }TsStd;
 
 typedef struct Fix {
@@ -386,6 +388,8 @@ typedef struct Hdl {
    void*                         pvGbl;
    void*                         pvF2s;
    tpfF2S                        pfF2s;
+   void*                         pvSaf;
+   tpfSaf                        pfSaf;
    U32                           uiSym;
 } TsHdl;
 
@@ -1018,7 +1022,9 @@ extern void* pvClpOpen(
    TsClpError*                   psErr,
    void*                         pvGbl,
    void*                         pvF2S,
-   tpfF2S                        pfF2S)
+   tpfF2S                        pfF2S,
+   void*                         pvSaf,
+   tpfSaf                        pfSaf)
 {
    TsHdl*                        psHdl=NULL;
    const char*                   pcNow=NULL;
@@ -1071,15 +1077,17 @@ extern void* pvClpOpen(
          psHdl->pcDep=pcDep;
          psHdl->pcOpt=pcOpt;
          psHdl->pcEnt=pcEnt;
+         psHdl->pvGbl=pvGbl;
          if (pfF2S!=NULL) {
             psHdl->pfF2s=pfF2S;
             psHdl->pvF2s=pvF2S;
-            psHdl->pvGbl=pvGbl;
          } else {
             psHdl->pfF2s=siClpFile2String;
             psHdl->pvF2s=NULL;
-            psHdl->pvGbl=NULL;
          }
+         psHdl->pvSaf=pvSaf;
+         psHdl->pfSaf=pfSaf;
+
 #if defined(__DEBUG__) && defined(__HEAP_STATISTIC__)
          U32 uiBeginCurHeapSize=CUR_HEAP_SIZE();
 #endif
@@ -2174,8 +2182,8 @@ static TsSym* psClpSymIns(
    }
    psSym->psStd->psAli=NULL;
    psSym->psStd->siKwl=strlen(psSym->psStd->pcKyw);
-//   psSym->psStd->siLev=siLev;
-//   psSym->psStd->siPos=siPos;
+   psSym->psStd->siLev=siLev;
+   psSym->psStd->siPos=siPos;
    psSym->psFix->pcMan=psArg->pcMan;
    psSym->psFix->pcHlp=psArg->pcHlp;
    if (CLPISF_ARG(psArg->uiFlg)) {
@@ -2603,13 +2611,13 @@ static int siClpSymCal(
    int                           siErr,siPos,k,h;
 
    for (siPos=0,psSym=psTab;psSym!=NULL;psSym=psSym->psNxt,siPos++) {
-//      if (psSym->psStd->siLev!=siLev) {
-//         if (psArg==NULL) {
-//            return CLPERR(psHdl,CLPERR_INT,"Argument table not in sync with symbol table%s","");
-//         } else {
-//            return CLPERR(psHdl,CLPERR_INT,"Parameter table of argument '%s.%s' not in sync with symbol table",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
-//         }
-//      }
+      if (psSym->psStd->siLev!=siLev) {
+         if (psArg==NULL) {
+            return CLPERR(psHdl,CLPERR_INT,"Argument table not in sync with symbol table%s","");
+         } else {
+            return CLPERR(psHdl,CLPERR_INT,"Parameter table of argument '%s.%s' not in sync with symbol table",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+         }
+      }
 
       if (CLPISF_ALI(psSym->psStd->uiFlg)) {
          isPar=TRUE;
@@ -2882,8 +2890,8 @@ static void vdClpSymPrn(
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    TsSym*                        psHlp=psSym;
    while (psHlp!=NULL) {
-      if (psHdl->pfSym!=NULL) efprintf(psHdl->pfSym,"%s - %s (KWL=%d TYP=%s MIN=%d MAX=%d SIZ=%d OFS=%d OID=%d FLG=%8.8X (NXT=%p BAK=%p DEP=%p HIH=%p ALI=%p CNT=%p OID=%p IND=%p ELN=%p SLN=%p TLN=%p LNK=%p)) - %s\n",
-            fpcPre(pvHdl,siLev)/*,psHlp->psStd->siPos+1*/,psHlp->psStd->pcKyw,psHlp->psStd->siKwl,apClpTyp[psHlp->psFix->siTyp],psHlp->psFix->siMin,psHlp->psFix->siMax,psHlp->psFix->siSiz,
+      if (psHdl->pfSym!=NULL) efprintf(psHdl->pfSym,"%s %3.3d - %s (KWL=%d TYP=%s MIN=%d MAX=%d SIZ=%d OFS=%d OID=%d FLG=%8.8X (NXT=%p BAK=%p DEP=%p HIH=%p ALI=%p CNT=%p OID=%p IND=%p ELN=%p SLN=%p TLN=%p LNK=%p)) - %s\n",
+            fpcPre(pvHdl,siLev),psHlp->psStd->siPos+1,psHlp->psStd->pcKyw,psHlp->psStd->siKwl,apClpTyp[psHlp->psFix->siTyp],psHlp->psFix->siMin,psHlp->psFix->siMax,psHlp->psFix->siSiz,
             psHlp->psFix->siOfs,psHlp->psFix->siOid,psHlp->psStd->uiFlg,psHlp->psNxt,psHlp->psBak,psHlp->psDep,psHlp->psHih,psHlp->psStd->psAli,psHlp->psFix->psCnt,psHlp->psFix->psOid,
             psHlp->psFix->psInd,psHlp->psFix->psEln,psHlp->psFix->psSln,psHlp->psFix->psTln,psHlp->psFix->psLnk,psHlp->psFix->pcHlp);
       if (psHlp->psDep!=NULL) {
@@ -4383,7 +4391,7 @@ static int siClpAcpFil(
    if (psHdl->siTok!=CLPTOK_STR) {
       return CLPERR(psHdl,CLPERR_SYN,"After object/overlay/array assignment '%s.%s=' parameter file ('filename') expected",pcPat,psArg->psStd->pcKyw);
    }
-   srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcPat)+strlen(psArg->psStd->pcKyw)+strlen(isPrnLex2(psArg,psHdl->pcLex)),"%s.%s=%s\n",pcPat,GETKYW(psArg),isPrnLex2(psArg,psHdl->pcLex));
+   srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcPat)+strlen(GETKYW(psArg))+strlen(isPrnLex2(psArg,psHdl->pcLex)),"%s.%s=%s\n",pcPat,GETKYW(psArg),isPrnLex2(psArg,psHdl->pcLex));
    psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
    if (psHdl->siTok<0) return(psHdl->siTok);
    return(CLP_OK);
@@ -5651,39 +5659,47 @@ static int siClpBldSwt(
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    const int                     siTyp=CLPTYP_SWITCH;
    I64                           siVal=psArg->psFix->siOid;
-   const char*                   pcPat=NULL;
+   const char*                   pcPat=fpcPat(pvHdl,siLev);
    int                           siErr;
 
    if (psArg->psFix->siTyp!=siTyp) {
-      return CLPERR(psHdl,CLPERR_SEM,"The type (%s) of switch '%s.%s' don't match the expected type (%s)",apClpTyp[siTyp],fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
+      return CLPERR(psHdl,CLPERR_SEM,"The type (%s) of switch '%s.%s' don't match the expected type (%s)",apClpTyp[siTyp],pcPat,psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
    }
    if (psArg->psVar->siCnt>=psArg->psFix->siMax) {
-      return CLPERR(psHdl,CLPERR_SEM,"Too many (>%d) occurrences of switch '%s.%s' with type '%s'",psArg->psFix->siMax,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[siTyp]);
+      return CLPERR(psHdl,CLPERR_SEM,"Too many (>%d) occurrences of switch '%s.%s' with type '%s'",psArg->psFix->siMax,pcPat,psArg->psStd->pcKyw,apClpTyp[siTyp]);
    }
    if (psArg->psVar->pvDat==NULL) {
-      return CLPERR(psHdl,CLPERR_TAB,"Keyword (%s.%s) and type (%s) of switch defined but data pointer not set",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
+      return CLPERR(psHdl,CLPERR_TAB,"Keyword (%s.%s) and type (%s) of switch defined but data pointer not set",pcPat,psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
+   }
+
+   if (psHdl->pfSaf!=NULL) {
+      char acEnt[strlen(pcPat)+strlen(GETKYW(psArg))+2];
+      snprintf(acEnt,sizeof(acEnt),"%s.%s",pcPat,GETKYW(psArg));
+      if (psHdl->pfSaf(psHdl->pvGbl,psHdl->pvSaf,acEnt)) {
+         return CLPERR(psHdl,CLPERR_AUT,"Authorization request for entity '%s' failed",acEnt);
+      }
    }
 
    if (CLPISF_DYN(psArg->psStd->uiFlg)) {
       void** ppDat=(void**)psArg->psVar->pvDat;
       (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+((((CLPISF_DLM(psArg->psStd->uiFlg))?2:1)*psArg->psFix->siSiz)),&psArg->psVar->siInd);
       if ((*ppDat)==NULL) {
-         return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d) for switch '%s.%s' failed",psArg->psVar->siLen+psArg->psFix->siSiz,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+         return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d) for switch '%s.%s' failed",psArg->psVar->siLen+psArg->psFix->siSiz,pcPat,psArg->psStd->pcKyw);
       }
       psArg->psVar->pvPtr=((char*)(*ppDat))+psArg->psVar->siLen;
    } else {
       if (psArg->psVar->siRst<psArg->psFix->siSiz) {
-         return CLPERR(psHdl,CLPERR_SIZ,"Rest of space (%d) is not big enough for switch '%s.%s' with type '%s'",psArg->psVar->siRst,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[siTyp]);
+         return CLPERR(psHdl,CLPERR_SIZ,"Rest of space (%d) is not big enough for switch '%s.%s' with type '%s'",psArg->psVar->siRst,pcPat,psArg->psStd->pcKyw,apClpTyp[siTyp]);
       }
       if (psArg->psVar->pvPtr==NULL) {
-         return CLPERR(psHdl,CLPERR_TAB,"Keyword (%s.%s) and type (%s) of switch are defined but write pointer not set",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
+         return CLPERR(psHdl,CLPERR_TAB,"Keyword (%s.%s) and type (%s) of switch are defined but write pointer not set",pcPat,psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
       }
   }
 
    switch (psArg->psFix->siSiz) {
    case 1:
       if (siVal<(-128) || siVal>65535) {
-         return CLPERR(psHdl,CLPERR_SEM,"Object identifier (%"PRIi64") of '%s.%s' need more than 8 Bit",isPrnInt(psArg,siVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+         return CLPERR(psHdl,CLPERR_SEM,"Object identifier (%"PRIi64") of '%s.%s' need more than 8 Bit",isPrnInt(psArg,siVal),pcPat,psArg->psStd->pcKyw);
       }
       *((I08*)psArg->psVar->pvPtr)=(I08)siVal;
       if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-SWITCH-I08(PTR=%p CNT=%d LEN=%d RST=%d)%s=%"PRIi64"\n",
@@ -5691,7 +5707,7 @@ static int siClpBldSwt(
       break;
    case 2:
       if (siVal<(-32768) || siVal>65535) {
-         return CLPERR(psHdl,CLPERR_SEM,"Object identifier (%"PRIi64") of '%s.%s' need more than 16 Bit",isPrnInt(psArg,siVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+         return CLPERR(psHdl,CLPERR_SEM,"Object identifier (%"PRIi64") of '%s.%s' need more than 16 Bit",isPrnInt(psArg,siVal),pcPat,psArg->psStd->pcKyw);
       }
       *((I16*)psArg->psVar->pvPtr)=(I16)siVal;
       if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-SWITCH-I16(PTR=%p CNT=%d LEN=%d RST=%d)%s=%"PRIi64"\n",
@@ -5699,7 +5715,7 @@ static int siClpBldSwt(
       break;
    case 4:
       if (siVal<(-2147483648LL) || siVal>4294967295LL) {
-         return CLPERR(psHdl,CLPERR_SEM,"Object identifier (%"PRIi64") of '%s.%s' need more than 32 Bit",isPrnInt(psArg,siVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+         return CLPERR(psHdl,CLPERR_SEM,"Object identifier (%"PRIi64") of '%s.%s' need more than 32 Bit",isPrnInt(psArg,siVal),pcPat,psArg->psStd->pcKyw);
       }
       *((I32*)psArg->psVar->pvPtr)=(I32)siVal;
       if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-SWITCH-I32(PTR=%p CNT=%d LEN=%d RST=%d)%s=%"PRIi64"\n",
@@ -5711,7 +5727,7 @@ static int siClpBldSwt(
                               fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnInt(psArg,siVal));
       break;
    default:
-      return CLPERR(psHdl,CLPERR_SIZ,"Size (%d) for the value (%"PRIi64") of '%s.%s' is not 1, 2, 4 or 8)",psArg->psFix->siSiz,isPrnInt(psArg,siVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+      return CLPERR(psHdl,CLPERR_SIZ,"Size (%d) for the value (%"PRIi64") of '%s.%s' is not 1, 2, 4 or 8)",psArg->psFix->siSiz,isPrnInt(psArg,siVal),pcPat,psArg->psStd->pcKyw);
    }
 
    psArg->psVar->pvPtr=((char*)psArg->psVar->pvPtr)+psArg->psFix->siSiz;
@@ -5719,8 +5735,7 @@ static int siClpBldSwt(
    psArg->psVar->siRst-=CLPISF_DYN(psArg->psStd->uiFlg)?0:psArg->psFix->siSiz;
    psArg->psVar->siCnt++;
 
-   pcPat=fpcPat(pvHdl,siLev);
-   srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcPat)+strlen(psArg->psStd->pcKyw),"%s.%s=ON\n",pcPat,GETKYW(psArg));
+   srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcPat)+strlen(GETKYW(psArg)),"%s.%s=ON\n",pcPat,GETKYW(psArg));
 
    siErr=siClpBldLnk(pvHdl,siLev,siPos,psArg->psVar->siCnt,psArg->psFix->psCnt,FALSE);
    if (siErr<0) return(siErr);
@@ -5744,39 +5759,47 @@ static int siClpBldNum(
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    const int                     siTyp=CLPTYP_NUMBER;
    I64                           siVal=psArg->psFix->siOid;
-   const char*                   pcPat=NULL;
+   const char*                   pcPat=fpcPat(pvHdl,siLev);
    int                           siErr;
 
    if (psArg->psFix->siTyp!=siTyp) {
-      return CLPERR(psHdl,CLPERR_SEM,"The type (%s) of argument '%s.%s' don't match the expected type (%s)",apClpTyp[siTyp],fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
+      return CLPERR(psHdl,CLPERR_SEM,"The type (%s) of argument '%s.%s' don't match the expected type (%s)",apClpTyp[siTyp],pcPat,psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
    }
    if (psArg->psVar->siCnt>=psArg->psFix->siMax) {
-      return CLPERR(psHdl,CLPERR_SEM,"Too many (>%d) occurrences of argument '%s.%s' with type '%s'",psArg->psFix->siMax,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[siTyp]);
+      return CLPERR(psHdl,CLPERR_SEM,"Too many (>%d) occurrences of argument '%s.%s' with type '%s'",psArg->psFix->siMax,pcPat,psArg->psStd->pcKyw,apClpTyp[siTyp]);
    }
    if (psArg->psVar->pvDat==NULL) {
-      return CLPERR(psHdl,CLPERR_TAB,"Keyword (%s.%s) and type (%s) of argument defined but data pointer not set",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
+      return CLPERR(psHdl,CLPERR_TAB,"Keyword (%s.%s) and type (%s) of argument defined but data pointer not set",pcPat,psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
+   }
+
+   if (psHdl->pfSaf!=NULL) {
+      char acEnt[strlen(pcPat)+strlen(GETKYW(psArg))+2];
+      snprintf(acEnt,sizeof(acEnt),"%s.%s",pcPat,GETKYW(psArg));
+      if (psHdl->pfSaf(psHdl->pvGbl,psHdl->pvSaf,acEnt)) {
+         return CLPERR(psHdl,CLPERR_AUT,"Authorization request for entity '%s' failed",acEnt);
+      }
    }
 
    if (CLPISF_DYN(psArg->psStd->uiFlg)) {
       void** ppDat=(void**)psArg->psVar->pvDat;
       (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+((((CLPISF_DLM(psArg->psStd->uiFlg))?2:1)*psArg->psFix->siSiz)),&psArg->psVar->siInd);
       if ((*ppDat)==NULL) {
-         return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d) for argument '%s.%s' failed",psArg->psVar->siLen+psArg->psFix->siSiz,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+         return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d) for argument '%s.%s' failed",psArg->psVar->siLen+psArg->psFix->siSiz,pcPat,psArg->psStd->pcKyw);
       }
       psArg->psVar->pvPtr=((char*)(*ppDat))+psArg->psVar->siLen;
    } else {
       if (psArg->psVar->siRst<psArg->psFix->siSiz) {
-         return CLPERR(psHdl,CLPERR_SIZ,"Rest of space (%d) is not big enough for argument '%s.%s' with type '%s'",psArg->psVar->siRst,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[siTyp]);
+         return CLPERR(psHdl,CLPERR_SIZ,"Rest of space (%d) is not big enough for argument '%s.%s' with type '%s'",psArg->psVar->siRst,pcPat,psArg->psStd->pcKyw,apClpTyp[siTyp]);
       }
       if (psArg->psVar->pvPtr==NULL) {
-         return CLPERR(psHdl,CLPERR_TAB,"Keyword (%s.%s) and type (%s) of argument defined but write pointer not set",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
+         return CLPERR(psHdl,CLPERR_TAB,"Keyword (%s.%s) and type (%s) of argument defined but write pointer not set",pcPat,psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
       }
   }
 
    switch (psArg->psFix->siSiz) {
    case 1:
       if (siVal<(-128) || siVal>65535) {
-         return CLPERR(psHdl,CLPERR_SEM,"Default value (%"PRIi64") of '%s.%s' need more than 8 Bit",isPrnInt(psArg,siVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+         return CLPERR(psHdl,CLPERR_SEM,"Default value (%"PRIi64") of '%s.%s' need more than 8 Bit",isPrnInt(psArg,siVal),pcPat,psArg->psStd->pcKyw);
       }
       *((I08*)psArg->psVar->pvPtr)=(I08)siVal;
       if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-NUMBER-I08(PTR=%p CNT=%d LEN=%d RST=%d)%s=%"PRIi64"\n",
@@ -5784,7 +5807,7 @@ static int siClpBldNum(
       break;
    case 2:
       if (siVal<(-32768) || siVal>65535) {
-         return CLPERR(psHdl,CLPERR_SEM,"Default value (%"PRIi64") of '%s.%s' need more than 16 Bit",isPrnInt(psArg,siVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+         return CLPERR(psHdl,CLPERR_SEM,"Default value (%"PRIi64") of '%s.%s' need more than 16 Bit",isPrnInt(psArg,siVal),pcPat,psArg->psStd->pcKyw);
       }
       *((I16*)psArg->psVar->pvPtr)=(I16)siVal;
       if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-NUMBER-I16(PTR=%p CNT=%d LEN=%d RST=%d)%s=%"PRIi64"\n",
@@ -5792,7 +5815,7 @@ static int siClpBldNum(
       break;
    case 4:
       if (siVal<(-2147483648LL) || siVal>4294967295LL) {
-         return CLPERR(psHdl,CLPERR_SEM,"Default value (%"PRIi64") of '%s.%s' need more than 32 Bit",isPrnInt(psArg,siVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+         return CLPERR(psHdl,CLPERR_SEM,"Default value (%"PRIi64") of '%s.%s' need more than 32 Bit",isPrnInt(psArg,siVal),pcPat,psArg->psStd->pcKyw);
       }
       *((I32*)psArg->psVar->pvPtr)=(I32)siVal;
       if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-NUMBER-I32(PTR=%p CNT=%d LEN=%d RST=%d)%s=%"PRIi64"\n",
@@ -5804,7 +5827,7 @@ static int siClpBldNum(
                               fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnInt(psArg,siVal));
       break;
    default:
-      return CLPERR(psHdl,CLPERR_SIZ,"Size (%d) for the value (%"PRIi64") of '%s.%s' is not 1, 2, 4 or 8)",psArg->psFix->siSiz,isPrnInt(psArg,siVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+      return CLPERR(psHdl,CLPERR_SIZ,"Size (%d) for the value (%"PRIi64") of '%s.%s' is not 1, 2, 4 or 8)",psArg->psFix->siSiz,isPrnInt(psArg,siVal),pcPat,psArg->psStd->pcKyw);
    }
 
    psArg->psVar->pvPtr=((char*)psArg->psVar->pvPtr)+psArg->psFix->siSiz;
@@ -5812,8 +5835,7 @@ static int siClpBldNum(
    psArg->psVar->siRst-=CLPISF_DYN(psArg->psStd->uiFlg)?0:psArg->psFix->siSiz;
    psArg->psVar->siCnt++;
 
-   pcPat=fpcPat(pvHdl,siLev);
-   srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcPat)+strlen(psArg->psStd->pcKyw)+16,"%s.%s=DEFAULT(%d)\n",pcPat,GETKYW(psArg),(int)siVal);
+   srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcPat)+strlen(GETKYW(psArg))+16,"%s.%s=DEFAULT(%d)\n",pcPat,GETKYW(psArg),(int)siVal);
 
    siErr=siClpBldLnk(pvHdl,siLev,siPos,psArg->psVar->siCnt,psArg->psFix->psCnt,FALSE);
    if (siErr<0) return(siErr);
@@ -5845,15 +5867,23 @@ static int siClpBldLit(
    F64                           flVal=0;
    char*                         pcHlp=NULL;
    const char*                   pcKyw=NULL;
-   const char*                   pcPat=NULL;
+   const char*                   pcPat=fpcPat(pvHdl,siLev);
    TsSym*                        psCon;
    C08                           acTim[CSTIME_BUFSIZ];
 
    if (psArg->psVar->siCnt>=psArg->psFix->siMax) {
-      return CLPERR(psHdl,CLPERR_SEM,"Too many (>%d) occurrences of argument '%s.%s' with type '%s'",psArg->psFix->siMax,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
+      return CLPERR(psHdl,CLPERR_SEM,"Too many (>%d) occurrences of argument '%s.%s' with type '%s'",psArg->psFix->siMax,pcPat,psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
    }
    if (psArg->psVar->pvDat==NULL) {
-      return CLPERR(psHdl,CLPERR_TAB,"Keyword (%s.%s) and type (%s) of argument defined but data pointer not set",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
+      return CLPERR(psHdl,CLPERR_TAB,"Keyword (%s.%s) and type (%s) of argument defined but data pointer not set",pcPat,psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
+   }
+
+   if (psHdl->pfSaf!=NULL) {
+      char acEnt[strlen(pcPat)+strlen(GETKYW(psArg))+2];
+      snprintf(acEnt,sizeof(acEnt),"%s.%s",pcPat,GETKYW(psArg));
+      if (psHdl->pfSaf(psHdl->pvGbl,psHdl->pvSaf,acEnt)) {
+         return CLPERR(psHdl,CLPERR_AUT,"Authorization request for entity '%s' failed",acEnt);
+      }
    }
 
    switch (psArg->psFix->siTyp) {
@@ -5863,26 +5893,26 @@ static int siClpBldLit(
          void** ppDat=(void**)psArg->psVar->pvDat;
          (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+((((CLPISF_DLM(psArg->psStd->uiFlg))?2:1)*psArg->psFix->siSiz)),&psArg->psVar->siInd);
          if ((*ppDat)==NULL) {
-            return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d) for argument '%s.%s' failed",psArg->psVar->siLen+psArg->psFix->siSiz,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+            return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d) for argument '%s.%s' failed",psArg->psVar->siLen+psArg->psFix->siSiz,pcPat,psArg->psStd->pcKyw);
          }
          psArg->psVar->pvPtr=((char*)(*ppDat))+psArg->psVar->siLen;
       } else {
          if (psArg->psVar->siRst<psArg->psFix->siSiz) {
-            return CLPERR(psHdl,CLPERR_SIZ,"Rest of space (%d) is not big enough for argument '%s.%s' with type '%s'",psArg->psVar->siRst,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
+            return CLPERR(psHdl,CLPERR_SIZ,"Rest of space (%d) is not big enough for argument '%s.%s' with type '%s'",psArg->psVar->siRst,pcPat,psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
          }
          if (psArg->psVar->pvPtr==NULL) {
-            return CLPERR(psHdl,CLPERR_TAB,"Keyword (%s.%s) and type (%s) of argument are defined but write pointer not set",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
+            return CLPERR(psHdl,CLPERR_TAB,"Keyword (%s.%s) and type (%s) of argument are defined but write pointer not set",pcPat,psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
          }
       }
       siErr=siFromNumberLexem(pvHdl,siLev,psArg,pcVal,&siVal);
       if (siErr) return(siErr);
       if (siVal<0 && CLPISF_UNS(psArg->psStd->uiFlg)) {
-         return CLPERR(psHdl,CLPERR_SEM,"Literal number (%s) of '%s.%s' is negative (%"PRIi64") but marked as unsigned",isPrnStr(psArg,pcVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,siVal);
+         return CLPERR(psHdl,CLPERR_SEM,"Literal number (%s) of '%s.%s' is negative (%"PRIi64") but marked as unsigned",isPrnStr(psArg,pcVal),pcPat,psArg->psStd->pcKyw,siVal);
       }
       switch (psArg->psFix->siSiz) {
       case 1:
          if (siVal<(-128) || siVal>255) {
-            return CLPERR(psHdl,CLPERR_SEM,"Literal number (%s) of '%s.%s' need more than 8 Bit",isPrnStr(psArg,pcVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+            return CLPERR(psHdl,CLPERR_SEM,"Literal number (%s) of '%s.%s' need more than 8 Bit",isPrnStr(psArg,pcVal),pcPat,psArg->psStd->pcKyw);
          }
          *((I08*)psArg->psVar->pvPtr)=(I08)siVal;
          if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-LITERAL-I08(PTR=%p CNT=%d LEN=%d RST=%d)%s=%"PRIi64"\n",
@@ -5890,7 +5920,7 @@ static int siClpBldLit(
          break;
       case 2:
          if (siVal<(-32768) || siVal>65535) {
-            return CLPERR(psHdl,CLPERR_SEM,"Literal number (%s) of '%s.%s' need more than 16 Bit",isPrnStr(psArg,pcVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+            return CLPERR(psHdl,CLPERR_SEM,"Literal number (%s) of '%s.%s' need more than 16 Bit",isPrnStr(psArg,pcVal),pcPat,psArg->psStd->pcKyw);
          }
          *((I16*)psArg->psVar->pvPtr)=(I16)siVal;
          if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-LITERAL-I16(PTR=%p CNT=%d LEN=%d RST=%d)%s=%"PRIi64"\n",
@@ -5898,7 +5928,7 @@ static int siClpBldLit(
          break;
       case 4:
          if (siVal<(-2147483648LL) || siVal>4294967295LL) {
-            return CLPERR(psHdl,CLPERR_SEM,"Literal number (%s) of '%s.%s' need more than 32 Bit",isPrnStr(psArg,pcVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+            return CLPERR(psHdl,CLPERR_SEM,"Literal number (%s) of '%s.%s' need more than 32 Bit",isPrnStr(psArg,pcVal),pcPat,psArg->psStd->pcKyw);
          }
          *((I32*)psArg->psVar->pvPtr)=(I32)siVal;
          if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-LITERAL-I32(PTR=%p CNT=%d LEN=%d RST=%d)%s=%"PRIi64"\n",
@@ -5910,7 +5940,7 @@ static int siClpBldLit(
                                  fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnInt(psArg,siVal));
          break;
       default:
-         return CLPERR(psHdl,CLPERR_SIZ,"Size (%d) for the value (%s) of '%s.%s' is not 1, 2, 4 or 8)",psArg->psFix->siSiz,isPrnStr(psArg,pcVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+         return CLPERR(psHdl,CLPERR_SIZ,"Size (%d) for the value (%s) of '%s.%s' is not 1, 2, 4 or 8)",psArg->psFix->siSiz,isPrnStr(psArg,pcVal),pcPat,psArg->psStd->pcKyw);
       }
       psArg->psVar->pvPtr=((char*)psArg->psVar->pvPtr)+psArg->psFix->siSiz;
       psArg->psVar->siLen+=psArg->psFix->siSiz;
@@ -5923,21 +5953,21 @@ static int siClpBldLit(
          void** ppDat=(void**)psArg->psVar->pvDat;
          (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+((((CLPISF_DLM(psArg->psStd->uiFlg))?2:1)*psArg->psFix->siSiz)),&psArg->psVar->siInd);
          if ((*ppDat)==NULL) {
-            return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d) for argument '%s.%s' failed",psArg->psVar->siLen+psArg->psFix->siSiz,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+            return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d) for argument '%s.%s' failed",psArg->psVar->siLen+psArg->psFix->siSiz,pcPat,psArg->psStd->pcKyw);
          }
          psArg->psVar->pvPtr=((char*)(*ppDat))+psArg->psVar->siLen;
       } else {
          if (psArg->psVar->siRst<psArg->psFix->siSiz) {
-            return CLPERR(psHdl,CLPERR_SIZ,"Rest of space (%d) is not big enough for argument '%s.%s' with type '%s'",psArg->psVar->siRst,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
+            return CLPERR(psHdl,CLPERR_SIZ,"Rest of space (%d) is not big enough for argument '%s.%s' with type '%s'",psArg->psVar->siRst,pcPat,psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
          }
          if (psArg->psVar->pvPtr==NULL) {
-            return CLPERR(psHdl,CLPERR_TAB,"Keyword (%s.%s) and type (%s) of argument are defined but write pointer not set",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
+            return CLPERR(psHdl,CLPERR_TAB,"Keyword (%s.%s) and type (%s) of argument are defined but write pointer not set",pcPat,psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
          }
       }
       siErr=siFromFloatLexem(pvHdl,siLev,psArg,pcVal,&flVal);
       if (siErr) return(siErr);
       if (flVal<0 && CLPISF_UNS(psArg->psStd->uiFlg)) {
-         return CLPERR(psHdl,CLPERR_SEM,"Literal number (%s) of '%s.%s' is negative (%f) but marked as unsigned",isPrnStr(psArg,pcVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,flVal);
+         return CLPERR(psHdl,CLPERR_SEM,"Literal number (%s) of '%s.%s' is negative (%f) but marked as unsigned",isPrnStr(psArg,pcVal),pcPat,psArg->psStd->pcKyw,flVal);
       }
       switch (psArg->psFix->siSiz) {
       case 4:
@@ -5950,7 +5980,7 @@ static int siClpBldLit(
          if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-LITERAL-F64(PTR=%p CNT=%d LEN=%d RST=%d)%s=%f\n",
                                  fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnFlt(psArg,flVal));
          break;
-      default: return CLPERR(psHdl,CLPERR_SIZ,"Size (%d) for the value (%s) of '%s.%s' is not 4 (float) or 8 (double))",psArg->psFix->siSiz,isPrnStr(psArg,pcVal),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+      default: return CLPERR(psHdl,CLPERR_SIZ,"Size (%d) for the value (%s) of '%s.%s' is not 4 (float) or 8 (double))",psArg->psFix->siSiz,isPrnStr(psArg,pcVal),pcPat,psArg->psStd->pcKyw);
       }
       psArg->psVar->pvPtr=((char*)psArg->psVar->pvPtr)+psArg->psFix->siSiz;
       psArg->psVar->siLen+=psArg->psFix->siSiz;
@@ -5965,22 +5995,22 @@ static int siClpBldLit(
             void** ppDat=(void**)psArg->psVar->pvDat;
             (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+((((CLPISF_DLM(psArg->psStd->uiFlg))?2:1)*psArg->psFix->siSiz)),&psArg->psVar->siInd);
             if ((*ppDat)==NULL) {
-               return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d) for argument '%s.%s' failed",psArg->psVar->siLen+psArg->psFix->siSiz,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+               return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d) for argument '%s.%s' failed",psArg->psVar->siLen+psArg->psFix->siSiz,pcPat,psArg->psStd->pcKyw);
             }
             psArg->psVar->pvPtr=((char*)(*ppDat))+psArg->psVar->siLen;
          } else {
             if (psArg->psVar->siRst<psArg->psFix->siSiz) {
-               return CLPERR(psHdl,CLPERR_SIZ,"Rest of space (%d) is not big enough for argument '%s.%s' with type '%s'",psArg->psVar->siRst,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
+               return CLPERR(psHdl,CLPERR_SIZ,"Rest of space (%d) is not big enough for argument '%s.%s' with type '%s'",psArg->psVar->siRst,pcPat,psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
             }
             if (psArg->psVar->pvPtr==NULL) {
-               return CLPERR(psHdl,CLPERR_TAB,"Keyword (%s.%s) and type (%s) of argument are defined but write pointer not set",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
+               return CLPERR(psHdl,CLPERR_TAB,"Keyword (%s.%s) and type (%s) of argument are defined but write pointer not set",pcPat,psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
             }
          }
       } else {
          l0=psArg->psVar->siRst;
          if (!CLPISF_DYN(psArg->psStd->uiFlg)) {
             if (psArg->psVar->pvPtr==NULL) {
-               return CLPERR(psHdl,CLPERR_TAB,"Keyword (%s.%s) and type (%s) of argument are defined but write pointer not set",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
+               return CLPERR(psHdl,CLPERR_TAB,"Keyword (%s.%s) and type (%s) of argument are defined but write pointer not set",pcPat,psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
             }
          }
       }
@@ -5989,32 +6019,32 @@ static int siClpBldLit(
          l1=strlen(pcVal+2);
          if (CLPISF_BIN(psArg->psStd->uiFlg)) {
             if (l1%2) {
-               return CLPERR(psHdl,CLPERR_LEX,"Length of hexadecimal string (%c(%s)) for '%s.%s' is not a multiple of 2",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+               return CLPERR(psHdl,CLPERR_LEX,"Length of hexadecimal string (%c(%s)) for '%s.%s' is not a multiple of 2",pcVal[0],isPrnStr(psArg,pcVal+2),pcPat,psArg->psStd->pcKyw);
             }
             if ((l1/2)>l0) {
                if (CLPISF_DYN(psArg->psStd->uiFlg) && !CLPISF_FIX(psArg->psStd->uiFlg)) {
                   void** ppDat=(void**)psArg->psVar->pvDat;
                   if (psArg->psVar->siLen+(l1/2)>psArg->psFix->siSiz) {
-                     return CLPERR(psHdl,CLPERR_MEM,"Size limit (%d) reached for argument '%s.%s'",psArg->psFix->siSiz,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+                     return CLPERR(psHdl,CLPERR_MEM,"Size limit (%d) reached for argument '%s.%s'",psArg->psFix->siSiz,pcPat,psArg->psStd->pcKyw);
                   }
                   (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+(l1/2)+4,&psArg->psVar->siInd);
                   if ((*ppDat)==NULL) {
-                     return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d) for argument '%s.%s' failed",psArg->psVar->siLen+(l1/2)+4,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+                     return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d) for argument '%s.%s' failed",psArg->psVar->siLen+(l1/2)+4,pcPat,psArg->psStd->pcKyw);
                   }
                   psArg->psVar->pvPtr=((char*)(*ppDat))+psArg->psVar->siLen;
                } else {
-                  return CLPERR(psHdl,CLPERR_LEX,"Hexadecimal string (%c(%s)) of '%s.%s' is longer than %d",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,2*l0);
+                  return CLPERR(psHdl,CLPERR_LEX,"Hexadecimal string (%c(%s)) of '%s.%s' is longer than %d",pcVal[0],isPrnStr(psArg,pcVal+2),pcPat,psArg->psStd->pcKyw,2*l0);
                }
             }
             l2=hex2bin(pcVal+2,(U08*)psArg->psVar->pvPtr,l1);
             if (l2!=l1/2) {
-               return CLPERR(psHdl,CLPERR_SEM,"Hexadecimal string (%c(%s)) of '%s.%s' cannot be converted from hex to bin",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+               return CLPERR(psHdl,CLPERR_SEM,"Hexadecimal string (%c(%s)) of '%s.%s' cannot be converted from hex to bin",pcVal[0],isPrnStr(psArg,pcVal+2),pcPat,psArg->psStd->pcKyw);
             }
             siSln=l2;
             if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-LITERAL-HEX(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
                                     fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),isPrnLen(psArg,l2));
          } else {
-            return CLPERR(psHdl,CLPERR_SEM,"String literal (%c(%s)) for '%s.%s' is binary (only null-terminated character string permitted)",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+            return CLPERR(psHdl,CLPERR_SEM,"String literal (%c(%s)) for '%s.%s' is binary (only null-terminated character string permitted)",pcVal[0],isPrnStr(psArg,pcVal+2),pcPat,psArg->psStd->pcKyw);
          }
          break;
       case 'a':
@@ -6024,26 +6054,26 @@ static int siClpBldLit(
                if (CLPISF_DYN(psArg->psStd->uiFlg)&& !CLPISF_FIX(psArg->psStd->uiFlg)) {
                   void** ppDat=(void**)psArg->psVar->pvDat;
                   if (psArg->psVar->siLen+l1>psArg->psFix->siSiz) {
-                     return CLPERR(psHdl,CLPERR_MEM,"Size limit (%d) reached for argument '%s.%s'",psArg->psFix->siSiz,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+                     return CLPERR(psHdl,CLPERR_MEM,"Size limit (%d) reached for argument '%s.%s'",psArg->psFix->siSiz,pcPat,psArg->psStd->pcKyw);
                   }
                   (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+l1+4,&psArg->psVar->siInd);
                   if ((*ppDat)==NULL) {
-                     return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d) for argument '%s.%s' failed",psArg->psVar->siLen+l1+4,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+                     return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d) for argument '%s.%s' failed",psArg->psVar->siLen+l1+4,pcPat,psArg->psStd->pcKyw);
                   }
                   psArg->psVar->pvPtr=((char*)(*ppDat))+psArg->psVar->siLen;
                } else {
-                  return CLPERR(psHdl,CLPERR_LEX,"ASCII string (%c(%s)) of '%s.%s' is longer than %d",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,l0);
+                  return CLPERR(psHdl,CLPERR_LEX,"ASCII string (%c(%s)) of '%s.%s' is longer than %d",pcVal[0],isPrnStr(psArg,pcVal+2),pcPat,psArg->psStd->pcKyw,l0);
                }
             }
             l2=chr2asc(pcVal+2,(C08*)psArg->psVar->pvPtr,l1);
             if (l2!=l1) {
-               return CLPERR(psHdl,CLPERR_SEM,"ASCII string (%c(%s)) of '%s.%s' cannot be converted to ASCII",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+               return CLPERR(psHdl,CLPERR_SEM,"ASCII string (%c(%s)) of '%s.%s' cannot be converted to ASCII",pcVal[0],isPrnStr(psArg,pcVal+2),pcPat,psArg->psStd->pcKyw);
             }
             siSln=l1;
             if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-LITERAL-ASC(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
                                     fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),isPrnLen(psArg,l2));
          } else {
-            return CLPERR(psHdl,CLPERR_SEM,"String literal (%c(%s)) for '%s.%s' is binary (only null-terminated character string permitted)",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+            return CLPERR(psHdl,CLPERR_SEM,"String literal (%c(%s)) for '%s.%s' is binary (only null-terminated character string permitted)",pcVal[0],isPrnStr(psArg,pcVal+2),pcPat,psArg->psStd->pcKyw);
          }
          break;
       case 'e':
@@ -6053,26 +6083,26 @@ static int siClpBldLit(
                if (CLPISF_DYN(psArg->psStd->uiFlg) && !CLPISF_FIX(psArg->psStd->uiFlg)) {
                   void** ppDat=(void**)psArg->psVar->pvDat;
                   if (psArg->psVar->siLen+l1>psArg->psFix->siSiz) {
-                     return CLPERR(psHdl,CLPERR_MEM,"Size limit (%d) reached for argument '%s.%s'",psArg->psFix->siSiz,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+                     return CLPERR(psHdl,CLPERR_MEM,"Size limit (%d) reached for argument '%s.%s'",psArg->psFix->siSiz,pcPat,psArg->psStd->pcKyw);
                   }
                   (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+l1+4,&psArg->psVar->siInd);
                   if ((*ppDat)==NULL) {
-                     return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d) for argument '%s.%s' failed",psArg->psVar->siLen+l1+4,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+                     return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d) for argument '%s.%s' failed",psArg->psVar->siLen+l1+4,pcPat,psArg->psStd->pcKyw);
                   }
                   psArg->psVar->pvPtr=((char*)(*ppDat))+psArg->psVar->siLen;
                } else {
-                  return CLPERR(psHdl,CLPERR_LEX,"EBCDIC string (%c(%s)) of '%s.%s' is longer than %d",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,l0);
+                  return CLPERR(psHdl,CLPERR_LEX,"EBCDIC string (%c(%s)) of '%s.%s' is longer than %d",pcVal[0],isPrnStr(psArg,pcVal+2),pcPat,psArg->psStd->pcKyw,l0);
                }
             }
             l2=chr2ebc(pcVal+2,(C08*)psArg->psVar->pvPtr,l1);
             if (l2!=l1) {
-               return CLPERR(psHdl,CLPERR_SEM,"EBCDIC string (%c(%s)) of '%s.%s' cannot be converted to EBCDIC",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+               return CLPERR(psHdl,CLPERR_SEM,"EBCDIC string (%c(%s)) of '%s.%s' cannot be converted to EBCDIC",pcVal[0],isPrnStr(psArg,pcVal+2),pcPat,psArg->psStd->pcKyw);
             }
             siSln=l1;
             if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-LITERAL-EBC(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
                                     fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),isPrnLen(psArg,l2));
          } else {
-            return CLPERR(psHdl,CLPERR_SEM,"String literal (%c(%s)) for '%s.%s' is binary (only null-terminated character string permitted)",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+            return CLPERR(psHdl,CLPERR_SEM,"String literal (%c(%s)) for '%s.%s' is binary (only null-terminated character string permitted)",pcVal[0],isPrnStr(psArg,pcVal+2),pcPat,psArg->psStd->pcKyw);
          }
          break;
       case 'c':
@@ -6082,15 +6112,15 @@ static int siClpBldLit(
                if (CLPISF_DYN(psArg->psStd->uiFlg)&& !CLPISF_FIX(psArg->psStd->uiFlg)) {
                   void** ppDat=(void**)psArg->psVar->pvDat;
                   if (psArg->psVar->siLen+l1>psArg->psFix->siSiz) {
-                     return CLPERR(psHdl,CLPERR_MEM,"Size limit (%d) reached for argument '%s.%s'",psArg->psFix->siSiz,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+                     return CLPERR(psHdl,CLPERR_MEM,"Size limit (%d) reached for argument '%s.%s'",psArg->psFix->siSiz,pcPat,psArg->psStd->pcKyw);
                   }
                   (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+l1+4,&psArg->psVar->siInd);
                   if ((*ppDat)==NULL) {
-                     return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d) for argument '%s.%s' failed",psArg->psVar->siLen+l1+4,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+                     return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d) for argument '%s.%s' failed",psArg->psVar->siLen+l1+4,pcPat,psArg->psStd->pcKyw);
                   }
                   psArg->psVar->pvPtr=((char*)(*ppDat))+psArg->psVar->siLen;
                } else {
-                  return CLPERR(psHdl,CLPERR_LEX,"Character string (%c(%s)) of '%s.%s' is longer than %d",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,l0);
+                  return CLPERR(psHdl,CLPERR_LEX,"Character string (%c(%s)) of '%s.%s' is longer than %d",pcVal[0],isPrnStr(psArg,pcVal+2),pcPat,psArg->psStd->pcKyw,l0);
                }
             }
             memcpy(psArg->psVar->pvPtr,pcVal+2,l1); l2=l1;
@@ -6098,7 +6128,7 @@ static int siClpBldLit(
             if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-LITERAL-CHR(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
                                     fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),isPrnLen(psArg,l2));
          } else {
-            return CLPERR(psHdl,CLPERR_SEM,"String literal (%c(%s)) for '%s.%s' is binary (only null-terminated character string permitted)",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+            return CLPERR(psHdl,CLPERR_SEM,"String literal (%c(%s)) for '%s.%s' is binary (only null-terminated character string permitted)",pcVal[0],isPrnStr(psArg,pcVal+2),pcPat,psArg->psStd->pcKyw);
          }
          break;
       case 's':
@@ -6112,7 +6142,7 @@ static int siClpBldLit(
             pcHlp=dmapstr(pcVal+2,CLPISF_UPP(psArg->psStd->uiFlg)?1:CLPISF_LOW(psArg->psStd->uiFlg)?2:0);
          }
          if (pcHlp==NULL) {
-            return CLPERR(psHdl,CLPERR_MEM,"String mapping (memory allocation) for argument '%s.%s' failed",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+            return CLPERR(psHdl,CLPERR_MEM,"String mapping (memory allocation) for argument '%s.%s' failed",pcPat,psArg->psStd->pcKyw);
          }
          l1=strlen(pcHlp);
          if (l1+1>l0) {
@@ -6120,16 +6150,16 @@ static int siClpBldLit(
                void** ppDat=(void**)psArg->psVar->pvDat;
                if (psArg->psVar->siLen+l1+1>psArg->psFix->siSiz) {
                   free(pcHlp);
-                  return CLPERR(psHdl,CLPERR_MEM,"Size limit (%d) reached for argument '%s.%s'",psArg->psFix->siSiz,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+                  return CLPERR(psHdl,CLPERR_MEM,"Size limit (%d) reached for argument '%s.%s'",psArg->psFix->siSiz,pcPat,psArg->psStd->pcKyw);
                }
                (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+l1+4,&psArg->psVar->siInd);
                if ((*ppDat)==NULL) {
                   free(pcHlp);
-                  return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d) for argument '%s.%s' failed",psArg->psVar->siLen+l1+4,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+                  return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d) for argument '%s.%s' failed",psArg->psVar->siLen+l1+4,pcPat,psArg->psStd->pcKyw);
                }
                psArg->psVar->pvPtr=((char*)(*ppDat))+psArg->psVar->siLen;
             } else {
-               siErr=CLPERR(psHdl,CLPERR_LEX,"Character string (%c(%s)) of '%s.%s' is longer than %d",pcVal[0],isPrnStr(psArg,pcHlp),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,l0-1);
+               siErr=CLPERR(psHdl,CLPERR_LEX,"Character string (%c(%s)) of '%s.%s' is longer than %d",pcVal[0],isPrnStr(psArg,pcHlp),pcPat,psArg->psStd->pcKyw,l0-1);
                free(pcHlp);
                return(siErr);
             }
@@ -6186,12 +6216,12 @@ static int siClpBldLit(
             return(siTok);
          }
          if (siTok!=CLPTOK_STR) {
-            siErr=CLPERR(psHdl,CLPERR_SYN,"The token (%s(%s)) is not allowed in a string file (%c(%s)) of '%s.%s'",apClpTok[siTok],pcLex,pcVal[0],pcVal+2,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+            siErr=CLPERR(psHdl,CLPERR_SYN,"The token (%s(%s)) is not allowed in a string file (%c(%s)) of '%s.%s'",apClpTok[siTok],pcLex,pcVal[0],pcVal+2,pcPat,psArg->psStd->pcKyw);
             free(pcLex);
             return(siErr);
          }
          if (pcLex[0]=='f') {
-            siErr=CLPERR(psHdl,CLPERR_SYN,"Define a string file (%c(%s)) in a string file (%c(%s)) is not allowed (%s.%s)",pcLex[0],pcLex+2,pcVal[0],pcVal+2,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+            siErr=CLPERR(psHdl,CLPERR_SYN,"Define a string file (%c(%s)) in a string file (%c(%s)) is not allowed (%s.%s)",pcLex[0],pcLex+2,pcVal[0],pcVal+2,pcPat,psArg->psStd->pcKyw);
             free(pcLex);
             return(siErr);
          }
@@ -6208,26 +6238,26 @@ static int siClpBldLit(
             if (CLPISF_HEX(psArg->psStd->uiFlg)) {
                l1=strlen(pcVal+2);
                if (l1%2) {
-                  return CLPERR(psHdl,CLPERR_LEX,"Length of hexadecimal string (%c(%s)) for '%s.%s' is not a multiple of 2",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+                  return CLPERR(psHdl,CLPERR_LEX,"Length of hexadecimal string (%c(%s)) for '%s.%s' is not a multiple of 2",pcVal[0],isPrnStr(psArg,pcVal+2),pcPat,psArg->psStd->pcKyw);
                }
                if ((l1/2)>l0) {
                   if (CLPISF_DYN(psArg->psStd->uiFlg)&& !CLPISF_FIX(psArg->psStd->uiFlg)) {
                      void** ppDat=(void**)psArg->psVar->pvDat;
                      if (psArg->psVar->siLen+(l1/2)>psArg->psFix->siSiz) {
-                        return CLPERR(psHdl,CLPERR_MEM,"Size limit (%d) reached for argument '%s.%s'",psArg->psFix->siSiz,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+                        return CLPERR(psHdl,CLPERR_MEM,"Size limit (%d) reached for argument '%s.%s'",psArg->psFix->siSiz,pcPat,psArg->psStd->pcKyw);
                      }
                      (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+(l1/2)+4,&psArg->psVar->siInd);
                      if ((*ppDat)==NULL) {
-                        return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d) for argument '%s.%s' failed",psArg->psVar->siLen+(l1/2)+4,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+                        return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d) for argument '%s.%s' failed",psArg->psVar->siLen+(l1/2)+4,pcPat,psArg->psStd->pcKyw);
                      }
                      psArg->psVar->pvPtr=((char*)(*ppDat))+psArg->psVar->siLen;
                   } else {
-                     return CLPERR(psHdl,CLPERR_LEX,"Hexadecimal string (%c(%s)) of '%s.%s' is longer than %d",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,2*l0);
+                     return CLPERR(psHdl,CLPERR_LEX,"Hexadecimal string (%c(%s)) of '%s.%s' is longer than %d",pcVal[0],isPrnStr(psArg,pcVal+2),pcPat,psArg->psStd->pcKyw,2*l0);
                   }
                }
                l2=hex2bin(pcVal+2,(U08*)psArg->psVar->pvPtr,l1);
                if (l2!=l1/2) {
-                  return CLPERR(psHdl,CLPERR_SEM,"Hexadecimal string (%c(%s)) of '%s.%s' cannot be converted from hex to bin",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+                  return CLPERR(psHdl,CLPERR_SEM,"Hexadecimal string (%c(%s)) of '%s.%s' cannot be converted from hex to bin",pcVal[0],isPrnStr(psArg,pcVal+2),pcPat,psArg->psStd->pcKyw);
                }
                siSln=l2;
                if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-LITERAL-HEX(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
@@ -6238,20 +6268,20 @@ static int siClpBldLit(
                   if (CLPISF_DYN(psArg->psStd->uiFlg)&& !CLPISF_FIX(psArg->psStd->uiFlg)) {
                      void** ppDat=(void**)psArg->psVar->pvDat;
                      if (psArg->psVar->siLen+l1>psArg->psFix->siSiz) {
-                        return CLPERR(psHdl,CLPERR_MEM,"Size limit (%d) reached for argument '%s.%s'",psArg->psFix->siSiz,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+                        return CLPERR(psHdl,CLPERR_MEM,"Size limit (%d) reached for argument '%s.%s'",psArg->psFix->siSiz,pcPat,psArg->psStd->pcKyw);
                      }
                      (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+l1+4,&psArg->psVar->siInd);
                      if ((*ppDat)==NULL) {
-                        return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d) for argument '%s.%s' failed",psArg->psVar->siLen+l1+4,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+                        return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d) for argument '%s.%s' failed",psArg->psVar->siLen+l1+4,pcPat,psArg->psStd->pcKyw);
                      }
                      psArg->psVar->pvPtr=((char*)(*ppDat))+psArg->psVar->siLen;
                   } else {
-                     return CLPERR(psHdl,CLPERR_LEX,"ASCII string (%c(%s)) of '%s.%s' is longer than %d",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,l0);
+                     return CLPERR(psHdl,CLPERR_LEX,"ASCII string (%c(%s)) of '%s.%s' is longer than %d",pcVal[0],isPrnStr(psArg,pcVal+2),pcPat,psArg->psStd->pcKyw,l0);
                   }
                }
                l2=chr2asc(pcVal+2,(C08*)psArg->psVar->pvPtr,l1);
                if (l2!=l1) {
-                  return CLPERR(psHdl,CLPERR_SEM,"ASCII string (%c(%s)) of '%s.%s' cannot be converted to ASCII",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+                  return CLPERR(psHdl,CLPERR_SEM,"ASCII string (%c(%s)) of '%s.%s' cannot be converted to ASCII",pcVal[0],isPrnStr(psArg,pcVal+2),pcPat,psArg->psStd->pcKyw);
                }
                siSln=l1;
                if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-LITERAL-ASC(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
@@ -6262,20 +6292,20 @@ static int siClpBldLit(
                   if (CLPISF_DYN(psArg->psStd->uiFlg)&& !CLPISF_FIX(psArg->psStd->uiFlg)) {
                      void** ppDat=(void**)psArg->psVar->pvDat;
                      if (psArg->psVar->siLen+l1>psArg->psFix->siSiz) {
-                        return CLPERR(psHdl,CLPERR_MEM,"Size limit (%d) reached for argument '%s.%s'",psArg->psFix->siSiz,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+                        return CLPERR(psHdl,CLPERR_MEM,"Size limit (%d) reached for argument '%s.%s'",psArg->psFix->siSiz,pcPat,psArg->psStd->pcKyw);
                      }
                      (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+l1+4,&psArg->psVar->siInd);
                      if ((*ppDat)==NULL) {
-                        return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d) for argument '%s.%s' failed",psArg->psVar->siLen+l1+4,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+                        return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d) for argument '%s.%s' failed",psArg->psVar->siLen+l1+4,pcPat,psArg->psStd->pcKyw);
                      }
                      psArg->psVar->pvPtr=((char*)(*ppDat))+psArg->psVar->siLen;
                   } else {
-                     return CLPERR(psHdl,CLPERR_LEX,"EBCDIC string (%c(%s)) of '%s.%s' is longer than %d",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,l0);
+                     return CLPERR(psHdl,CLPERR_LEX,"EBCDIC string (%c(%s)) of '%s.%s' is longer than %d",pcVal[0],isPrnStr(psArg,pcVal+2),pcPat,psArg->psStd->pcKyw,l0);
                   }
                }
                l2=chr2ebc(pcVal+2,(C08*)psArg->psVar->pvPtr,l1);
                if (l2!=l1) {
-                  return CLPERR(psHdl,CLPERR_SEM,"EBCDIC string (%c(%s)) of '%s.%s' cannot be converted to EBCDIC",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+                  return CLPERR(psHdl,CLPERR_SEM,"EBCDIC string (%c(%s)) of '%s.%s' cannot be converted to EBCDIC",pcVal[0],isPrnStr(psArg,pcVal+2),pcPat,psArg->psStd->pcKyw);
                }
                siSln=l1;
                if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-LITERAL-EBC(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
@@ -6286,15 +6316,15 @@ static int siClpBldLit(
                   if (CLPISF_DYN(psArg->psStd->uiFlg)&& !CLPISF_FIX(psArg->psStd->uiFlg)) {
                      void** ppDat=(void**)psArg->psVar->pvDat;
                      if (psArg->psVar->siLen+l1>psArg->psFix->siSiz) {
-                        return CLPERR(psHdl,CLPERR_MEM,"Size limit (%d) reached for argument '%s.%s'",psArg->psFix->siSiz,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+                        return CLPERR(psHdl,CLPERR_MEM,"Size limit (%d) reached for argument '%s.%s'",psArg->psFix->siSiz,pcPat,psArg->psStd->pcKyw);
                      }
                      (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+l1+4,&psArg->psVar->siInd);
                      if ((*ppDat)==NULL) {
-                        return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d) for argument '%s.%s' failed",psArg->psVar->siLen+l1+4,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+                        return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d) for argument '%s.%s' failed",psArg->psVar->siLen+l1+4,pcPat,psArg->psStd->pcKyw);
                      }
                      psArg->psVar->pvPtr=((char*)(*ppDat))+psArg->psVar->siLen;
                   } else {
-                     return CLPERR(psHdl,CLPERR_LEX,"Character string (%c(%s)) of '%s.%s' is longer than %d",pcVal[0],isPrnStr(psArg,pcVal+2),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,l0);
+                     return CLPERR(psHdl,CLPERR_LEX,"Character string (%c(%s)) of '%s.%s' is longer than %d",pcVal[0],isPrnStr(psArg,pcVal+2),pcPat,psArg->psStd->pcKyw,l0);
                   }
                }
                memcpy(psArg->psVar->pvPtr,pcVal+2,l1); l2=l1;
@@ -6313,7 +6343,7 @@ static int siClpBldLit(
                pcHlp=dmapstr(pcVal+2,CLPISF_UPP(psArg->psStd->uiFlg)?1:CLPISF_LOW(psArg->psStd->uiFlg)?2:0);
             }
             if (pcHlp==NULL) {
-               return CLPERR(psHdl,CLPERR_MEM,"String mapping (memory allocation) for argument '%s.%s' failed",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+               return CLPERR(psHdl,CLPERR_MEM,"String mapping (memory allocation) for argument '%s.%s' failed",pcPat,psArg->psStd->pcKyw);
             }
             l1=strlen(pcHlp);
             if (l1+1>l0) {
@@ -6321,16 +6351,16 @@ static int siClpBldLit(
                   void** ppDat=(void**)psArg->psVar->pvDat;
                   if (psArg->psVar->siLen+l1+1>psArg->psFix->siSiz) {
                      free(pcHlp);
-                     return CLPERR(psHdl,CLPERR_MEM,"Size limit (%d) reached for argument '%s.%s'",psArg->psFix->siSiz,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+                     return CLPERR(psHdl,CLPERR_MEM,"Size limit (%d) reached for argument '%s.%s'",psArg->psFix->siSiz,pcPat,psArg->psStd->pcKyw);
                   }
                   (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+l1+4,&psArg->psVar->siInd);
                   if ((*ppDat)==NULL) {
                      free(pcHlp);
-                     return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d) for argument '%s.%s' failed",psArg->psVar->siLen+l1+4,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+                     return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d) for argument '%s.%s' failed",psArg->psVar->siLen+l1+4,pcPat,psArg->psStd->pcKyw);
                   }
                   psArg->psVar->pvPtr=((char*)(*ppDat))+psArg->psVar->siLen;
                } else {
-                  siErr=CLPERR(psHdl,CLPERR_LEX,"Character string (%c(%s)) of '%s.%s' is longer than %d",pcVal[0],isPrnStr(psArg,pcHlp),fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,l0-1);
+                  siErr=CLPERR(psHdl,CLPERR_LEX,"Character string (%c(%s)) of '%s.%s' is longer than %d",pcVal[0],isPrnStr(psArg,pcHlp),pcPat,psArg->psStd->pcKyw,l0-1);
                   free(pcHlp);
                   return(siErr);
                }
@@ -6344,7 +6374,7 @@ static int siClpBldLit(
          }
          break;
       default:
-         CLPERR(psHdl,CLPERR_LEX,"String prefix (%c) of '%s.%s' is not supported",pcVal[0],fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+         CLPERR(psHdl,CLPERR_LEX,"String prefix (%c) of '%s.%s' is not supported",pcVal[0],pcPat,psArg->psStd->pcKyw);
          CLPERRADD(psHdl,0,"Please use one of the following values:%s","");
          CLPERRADD(psHdl,1,"x - for conversion from hex to bin%s","");
          CLPERRADD(psHdl,1,"a - for conversion in ASCII%s","");
@@ -6375,7 +6405,7 @@ static int siClpBldLit(
       siErr=siClpBldLnk(pvHdl,siLev,siPos,siSln,psArg->psFix->psSln,TRUE);
       if (siErr<0) return(siErr);
       break;
-   default: return CLPERR(psHdl,CLPERR_TYP,"Type (%d) of parameter '%s.%s' not supported in this case (literal)",psArg->psFix->siTyp,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+   default: return CLPERR(psHdl,CLPERR_TYP,"Type (%d) of parameter '%s.%s' not supported in this case (literal)",psArg->psFix->siTyp,pcPat,psArg->psStd->pcKyw);
    }
    psArg->psVar->siCnt++;
 
@@ -6404,18 +6434,18 @@ static int siClpBldLit(
          }
       }
    }
-   pcPat=fpcPat(pvHdl,siLev);
+
    if (pcKyw!=NULL) {
       if (psArg->psFix->siTyp==CLPTYP_NUMBER && (CLPISF_TIM(psArg->psStd->uiFlg) || pcVal[0]=='t')) {
-         srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcPat)+strlen(psArg->psStd->pcKyw)+strlen(isPrnStr(psArg,pcVal))+strlen(cstime(siVal,acTim)),"%s.%s=%s(%s(%s))\n",pcPat,GETKYW(psArg),pcKyw,isPrnStr(psArg,pcVal),acTim);
+         srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcPat)+strlen(GETKYW(psArg))+strlen(isPrnStr(psArg,pcVal))+strlen(cstime(siVal,acTim)),"%s.%s=%s(%s(%s))\n",pcPat,GETKYW(psArg),pcKyw,isPrnStr(psArg,pcVal),acTim);
       } else {
-         srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcPat)+strlen(psArg->psStd->pcKyw)+strlen(isPrnStr(psArg,pcVal)),"%s.%s=%s(%s)\n",pcPat,GETKYW(psArg),pcKyw,isPrnStr(psArg,pcVal));
+         srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcPat)+strlen(GETKYW(psArg))+strlen(isPrnStr(psArg,pcVal)),"%s.%s=%s(%s)\n",pcPat,GETKYW(psArg),pcKyw,isPrnStr(psArg,pcVal));
       }
    } else {
       if (psArg->psFix->siTyp==CLPTYP_NUMBER && (CLPISF_TIM(psArg->psStd->uiFlg) || pcVal[0]=='t')) {
-         srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcPat)+strlen(psArg->psStd->pcKyw)+strlen(isPrnStr(psArg,pcVal))+strlen(cstime(siVal,acTim)),"%s.%s=%s(%s)\n",pcPat,GETKYW(psArg),isPrnStr(psArg,pcVal),acTim);
+         srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcPat)+strlen(GETKYW(psArg))+strlen(isPrnStr(psArg,pcVal))+strlen(cstime(siVal,acTim)),"%s.%s=%s(%s)\n",pcPat,GETKYW(psArg),isPrnStr(psArg,pcVal),acTim);
       } else {
-         srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcPat)+strlen(psArg->psStd->pcKyw)+strlen(isPrnStr(psArg,pcVal)),"%s.%s=%s\n",pcPat,GETKYW(psArg),isPrnStr(psArg,pcVal));
+         srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcPat)+strlen(GETKYW(psArg))+strlen(isPrnStr(psArg,pcVal)),"%s.%s=%s\n",pcPat,GETKYW(psArg),isPrnStr(psArg,pcVal));
       }
    }
 
@@ -6641,7 +6671,7 @@ static int siClpIniObj(
                            fpcPre(pvHdl,siLev),psArg->psStd->pcKyw,psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst);
 
    pcPat=fpcPat(pvHdl,siLev);
-   srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcPat)+strlen(psArg->psStd->pcKyw),"%s.%s(\n",pcPat,GETKYW(psArg));
+   srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcPat)+strlen(GETKYW(psArg)),"%s.%s(\n",pcPat,GETKYW(psArg));
 
    psHdl->apPat[siLev]=psArg;
    *ppDep=psArg->psDep;
@@ -6707,7 +6737,7 @@ static int siClpFinObj(
                            fpcPre(pvHdl,siLev),psArg->psStd->pcKyw,psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst);
 
    pcPat=fpcPat(pvHdl,siLev);
-   srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcPat)+strlen(psArg->psStd->pcKyw),"%s.%s)\n",pcPat,GETKYW(psArg));
+   srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcPat)+strlen(GETKYW(psArg)),"%s.%s)\n",pcPat,GETKYW(psArg));
 
    siErr=siClpBldLnk(pvHdl,siLev,siPos,psArg->psVar->siCnt,psArg->psFix->psCnt,FALSE);
    if (siErr<0) return(siErr);

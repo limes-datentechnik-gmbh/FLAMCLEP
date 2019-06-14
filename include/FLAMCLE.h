@@ -722,6 +722,8 @@ typedef struct CleAppendix {
  * @param[in]  psApx Pointer to the table with other CLP strings to print as appendix (optional could be NULL)
  * @param[in]  pvF2S Pointer to a handle which can be used in file 2 string callback function (if not required then NULL)
  * @param[in]  pfF2S Callback function which reads a file into a null-terminated string in memory (if NULL then default implementation is used)
+ * @param[in]  pvSaf Pointer to a handle which can be used in authorization callback function (if not required then NULL)
+ * @param[in]  pfSaf Callback function for additional authorization by CLP or NULL if no authorization requested
  * @param[in]  pcDpa Pointer to a file name for a default parameter file (e.g. "DD:FLAMPAR") or NULL/empty string for nothing,
  *                   The file name is used if only a command without assignment or parameter provided
  * @param[in]  siNoR Define this reason code to the values the mapping function returns if no run is requested (0 is nothing)
@@ -778,35 +780,39 @@ extern int siCleExecute(
    const TsCleAppendix*          psApx,
    void*                         pvF2S,
    tpfF2S                        pfF2S,
+   void*                         pvSaf,
+   tpfSaf                        pfSaf,
    const char*                   pcDpa,
    const int                     siNoR);
 
 /**********************************************************************/
 /*! @cond PRIVATE */
-extern int siCleParseString(
-   const int                     uiErr,
-   char*                         pcErr,
-   const int                     isCas,
-   const int                     isPfl,
-   const int                     isEnv,
-   const int                     siMkl,
-   const char*                   pcOwn,
-   const char*                   pcPgm,
-   const char*                   pcCmd,
-   const char*                   pcMan,
-   const char*                   pcHlp,
-   const int                     isOvl,
-   const char*                   pcStr,
-   const TsClpArgument*          psTab,
-   const char*                   pcDep,
-   const char*                   pcOpt,
-   const char*                   pcEnt,
-   int*                          piMod,
-   void*                         pvDat,
-   void*                         pvGbl,
-   void*                         pvF2S,
-   tpfF2S                        pfF2S,
-   void**                        ppClp);
+ extern int siCleParseString(
+    const int                     uiErr,
+    char*                         pcErr,
+    const int                     isCas,
+    const int                     isPfl,
+    const int                     isRpl,
+    const int                     siMkl,
+    const char*                   pcOwn,
+    const char*                   pcPgm,
+    const char*                   pcCmd,
+    const char*                   pcMan,
+    const char*                   pcHlp,
+    const int                     isOvl,
+    const char*                   pcStr,
+    const TsClpArgument*          psTab,
+    const char*                   pcDep,
+    const char*                   pcOpt,
+    const char*                   pcEnt,
+    int*                          piMod,
+    void*                         pvDat,
+    void*                         pvGbl,
+    void*                         pvF2S,
+    tpfF2S                        pfF2S,
+    void*                         pvSaf,
+    tpfSaf                        pfSaf,
+    void**                        ppClp);
 
 extern void vdClePrnDocProgram(
    FILE*                         pfOut,
