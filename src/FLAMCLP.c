@@ -6466,10 +6466,17 @@ static int siClpIniMainObj(
    TsVar*                        psSav)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
+   const char*                   pcPat=fpcPat(pvHdl,0);
    TsSym*                        psHlp;
 
    if (psTab->psBak!=NULL) {
-      return CLPERR(psHdl,CLPERR_INT,"Entry '%s.%s' not at beginning of a table",fpcPat(pvHdl,0),psTab->psStd->pcKyw);
+      return CLPERR(psHdl,CLPERR_INT,"Entry '%s.%s' not at beginning of a table",pcPat,psTab->psStd->pcKyw);
+   }
+
+   if (psHdl->pfSaf!=NULL) {
+      if (psHdl->pfSaf(psHdl->pvGbl,psHdl->pvSaf,pcPat)) {
+         return CLPERR(psHdl,CLPERR_AUT,"Authorization request for entity '%s' failed",pcPat);
+      }
    }
 
    if (psHdl->pvDat!=NULL) {
@@ -6484,7 +6491,7 @@ static int siClpIniMainObj(
          if (CLPISF_FIX(psHlp->psStd->uiFlg)) psHlp->psVar->siRst*=psHlp->psFix->siMax;
       }
    } else {
-      return CLPERR(psHdl,CLPERR_PAR,"Pointer to CLP data structure is NULL (%s.%s)",fpcPat(pvHdl,0),psTab->psStd->pcKyw);
+      return CLPERR(psHdl,CLPERR_PAR,"Pointer to CLP data structure is NULL (%s.%s)",pcPat,psTab->psStd->pcKyw);
    }
 
    if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"BUILD-BEGIN-MAIN-ARGUMENT-LIST\n");
@@ -6543,10 +6550,17 @@ static int siClpIniMainOvl(
    TsVar*                        psSav)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
+   const char*                   pcPat=fpcPat(pvHdl,0);
    TsSym*                        psHlp;
 
    if (psTab->psBak!=NULL) {
-      return CLPERR(psHdl,CLPERR_INT,"Entry '%s.%s' not at beginning of a table",fpcPat(pvHdl,0),psTab->psStd->pcKyw);
+      return CLPERR(psHdl,CLPERR_INT,"Entry '%s.%s' not at beginning of a table",pcPat,psTab->psStd->pcKyw);
+   }
+
+   if (psHdl->pfSaf!=NULL) {
+      if (psHdl->pfSaf(psHdl->pvGbl,psHdl->pvSaf,pcPat)) {
+         return CLPERR(psHdl,CLPERR_AUT,"Authorization request for entity '%s' failed",pcPat);
+      }
    }
 
    if (psHdl->pvDat!=NULL) {
@@ -6561,7 +6575,7 @@ static int siClpIniMainOvl(
          if (CLPISF_FIX(psHlp->psStd->uiFlg)) psHlp->psVar->siRst*=psHlp->psFix->siMax;
       }
    } else {
-      return CLPERR(psHdl,CLPERR_PAR,"Pointer to CLP data structure is NULL (%s.%s)",fpcPat(pvHdl,0),psTab->psStd->pcKyw);
+      return CLPERR(psHdl,CLPERR_PAR,"Pointer to CLP data structure is NULL (%s.%s)",pcPat,psTab->psStd->pcKyw);
    }
 
    if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"BUILD-BEGIN-MAIN-ARGUMENT\n");
@@ -6629,30 +6643,38 @@ static int siClpIniObj(
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    const int                     siTyp=CLPTYP_OBJECT;
+   const char*                   pcPat=fpcPat(pvHdl,siLev);
    TsSym*                        psHlp;
-   const char*                   pcPat;
    (void)siPos;
 
    if (psArg->psFix->siTyp!=siTyp) {
-      return CLPERR(psHdl,CLPERR_SEM,"The type (%s) of argument '%s.%s' don't match the expected type (%s)",apClpTyp[siTyp],fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
+      return CLPERR(psHdl,CLPERR_SEM,"The type (%s) of argument '%s.%s' don't match the expected type (%s)",apClpTyp[siTyp],pcPat,psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
    }
    if (psArg->psVar->siCnt>=psArg->psFix->siMax) {
-      return CLPERR(psHdl,CLPERR_SEM,"Too many (>%d) occurrences of '%s.%s' with type '%s'",psArg->psFix->siMax,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
+      return CLPERR(psHdl,CLPERR_SEM,"Too many (>%d) occurrences of '%s.%s' with type '%s'",psArg->psFix->siMax,pcPat,psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
    }
    if (psArg->psDep==NULL) {
-      return CLPERR(psHdl,CLPERR_TAB,"Keyword (%s.%s) and type (%s) of argument defined but pointer to parameter table not set",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[siTyp]);
+      return CLPERR(psHdl,CLPERR_TAB,"Keyword (%s.%s) and type (%s) of argument defined but pointer to parameter table not set",pcPat,psArg->psStd->pcKyw,apClpTyp[siTyp]);
+   }
+
+   if (psHdl->pfSaf!=NULL) {
+      char acEnt[strlen(pcPat)+strlen(GETKYW(psArg))+2];
+      snprintf(acEnt,sizeof(acEnt),"%s.%s",pcPat,GETKYW(psArg));
+      if (psHdl->pfSaf(psHdl->pvGbl,psHdl->pvSaf,acEnt)) {
+         return CLPERR(psHdl,CLPERR_AUT,"Authorization request for entity '%s' failed",acEnt);
+      }
    }
 
    if (CLPISF_DYN(psArg->psStd->uiFlg)) {
       void** ppDat=(void**)psArg->psVar->pvDat;
       (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+((((CLPISF_DLM(psArg->psStd->uiFlg))?2:1)*psArg->psFix->siSiz)),&psArg->psVar->siInd);
       if ((*ppDat)==NULL) {
-         return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d) for argument '%s.%s' failed",psArg->psVar->siLen+psArg->psFix->siSiz,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+         return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d) for argument '%s.%s' failed",psArg->psVar->siLen+psArg->psFix->siSiz,pcPat,psArg->psStd->pcKyw);
       }
       psArg->psVar->pvPtr=((char*)(*ppDat))+psArg->psVar->siLen;
    } else {
       if (psArg->psVar->siRst<psArg->psFix->siSiz) {
-         return CLPERR(psHdl,CLPERR_SIZ,"Rest of space (%d) is not big enough for argument '%s.%s' with type '%s'",psArg->psVar->siRst,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[siTyp]);
+         return CLPERR(psHdl,CLPERR_SIZ,"Rest of space (%d) is not big enough for argument '%s.%s' with type '%s'",psArg->psVar->siRst,pcPat,psArg->psStd->pcKyw,apClpTyp[siTyp]);
       }
    }
 
@@ -6670,7 +6692,6 @@ static int siClpIniObj(
    if (psHdl->pfBld!=NULL) fprintf(psHdl->pfBld,"%s BUILD-BEGIN-OBJECT-%s(PTR=%p CNT=%d LEN=%d RST=%d)\n",
                            fpcPre(pvHdl,siLev),psArg->psStd->pcKyw,psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst);
 
-   pcPat=fpcPat(pvHdl,siLev);
    srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcPat)+strlen(GETKYW(psArg)),"%s.%s(\n",pcPat,GETKYW(psArg));
 
    psHdl->apPat[siLev]=psArg;
@@ -6762,29 +6783,38 @@ static int siClpIniOvl(
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    const int                     siTyp=CLPTYP_OVRLAY;
+   const char*                   pcPat=fpcPat(pvHdl,siLev);
    TsSym*                        psHlp;
    (void)siPos;
 
    if (psArg->psFix->siTyp!=siTyp) {
-      return CLPERR(psHdl,CLPERR_SEM,"The type (%s) of argument '%s.%s' don't match the expected type (%s)",apClpTyp[siTyp],fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
+      return CLPERR(psHdl,CLPERR_SEM,"The type (%s) of argument '%s.%s' don't match the expected type (%s)",apClpTyp[siTyp],pcPat,psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
    }
    if (psArg->psVar->siCnt>=psArg->psFix->siMax) {
-      return CLPERR(psHdl,CLPERR_SEM,"Too many (>%d) occurrences of '%s.%s' with type '%s'",psArg->psFix->siMax,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
+      return CLPERR(psHdl,CLPERR_SEM,"Too many (>%d) occurrences of '%s.%s' with type '%s'",psArg->psFix->siMax,pcPat,psArg->psStd->pcKyw,apClpTyp[psArg->psFix->siTyp]);
    }
    if (psArg->psDep==NULL) {
-      return CLPERR(psHdl,CLPERR_TAB,"Keyword (%s.%s) and type (%s) of argument defined but pointer to parameter table not set",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[siTyp]);
+      return CLPERR(psHdl,CLPERR_TAB,"Keyword (%s.%s) and type (%s) of argument defined but pointer to parameter table not set",pcPat,psArg->psStd->pcKyw,apClpTyp[siTyp]);
+   }
+
+   if (psHdl->pfSaf!=NULL) {
+      char acEnt[strlen(pcPat)+strlen(GETKYW(psArg))+2];
+      snprintf(acEnt,sizeof(acEnt),"%s.%s",pcPat,GETKYW(psArg));
+      if (psHdl->pfSaf(psHdl->pvGbl,psHdl->pvSaf,acEnt)) {
+         return CLPERR(psHdl,CLPERR_AUT,"Authorization request for entity '%s' failed",acEnt);
+      }
    }
 
    if (CLPISF_DYN(psArg->psStd->uiFlg)) {
       void** ppDat=(void**)psArg->psVar->pvDat;
       (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+((((CLPISF_DLM(psArg->psStd->uiFlg))?2:1)*psArg->psFix->siSiz)),&psArg->psVar->siInd);
       if ((*ppDat)==NULL) {
-         return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d) for argument '%s.%s' failed",psArg->psVar->siLen+psArg->psFix->siSiz,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+         return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d) for argument '%s.%s' failed",psArg->psVar->siLen+psArg->psFix->siSiz,pcPat,psArg->psStd->pcKyw);
       }
       psArg->psVar->pvPtr=((char*)(*ppDat))+psArg->psVar->siLen;
    } else {
       if (psArg->psVar->siRst<psArg->psFix->siSiz) {
-         return CLPERR(psHdl,CLPERR_SIZ,"Rest of space (%d) is not big enough for argument '%s.%s' with type '%s'",psArg->psVar->siRst,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,apClpTyp[siTyp]);
+         return CLPERR(psHdl,CLPERR_SIZ,"Rest of space (%d) is not big enough for argument '%s.%s' with type '%s'",psArg->psVar->siRst,pcPat,psArg->psStd->pcKyw,apClpTyp[siTyp]);
       }
    }
 
