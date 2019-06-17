@@ -166,16 +166,17 @@
  * 1.2.120: Support arrays of simple values after assignment (keyword=hugo,berta detlef)
  * 1.2.121: Index for variables in expressions must be enclosed in curly brackets and only a number is useless
  * 1.2.122: Support additional access control check possibility for each write in CLP structure
+ * 1.2.123: Increase maximal amount of parameter per object from 256 to 512 (CLPMAX_TABCNT)
 **/
 
-#define CLP_VSN_STR       "1.2.122"
+#define CLP_VSN_STR       "1.2.123"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        2
-#define CLP_VSN_REVISION       122
+#define CLP_VSN_REVISION       123
 
 /* Definition der Konstanten ******************************************/
 
-#define CLPMAX_TABCNT            256
+#define CLPMAX_TABCNT            512
 #define CLPMAX_HDEPTH            128
 #define CLPMAX_KYWLEN            63
 #define CLPMAX_KYWSIZ            64
