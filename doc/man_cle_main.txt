@@ -1,22 +1,22 @@
-The COMMAND LINE PROCESSOR is a user interface on any available platform
-that simplifies and standardizes operation.
+The COMMAND LINE PROCESSOR (CLEP) is a user application programming
+interface for several platforms including Windows, Unix and z/OS that
+simplifies and standardizes parameter string processing.
 
-The COMMAND LINE PROCESSOR provides two separate functions: 
+The CLEP provides two separate functions:
 
- * command line parser   - providing information about commands
- * command line executor - supporting execution of entered commands
+ * COMMAND LINE PARSER (CLP)   - Compiles a parameter string from a command to a data structure
+ * COMMAND LINE EXECUTOR (CLE) - Supporting execution of different commands with parameter strings
 
-The command line parser provides a list of commands and some
+The COMMAND LINE EXECUTOR provides a list of commands and some
 built-in functions, please use 'MANPAGE', 'HELP' and 'SYNTAX' to get
 extensive information about these capabilities.
 
 Additionally the build-in function 'GENDOCU' can generate a complete or
 a part of the user manual.
 
-To read the parameter of a command, a compiler (command line processor
-CLP) is applied. To see the regular expressions (lexems) and the
-corresponding grammar, please use the built-in functions 'LEXEM' and
-'GRAMMAR'.
+To read the parameter of a command, a compiler (CLP) is applied. To see
+the regular expressions (lexems) and the corresponding grammar, please
+use the built-in functions 'LEXEM' and 'GRAMMAR'.
 
 The return/condition/exit codes of the executable and the reason codes
 of the different commands can be reviewed with the built-in function
@@ -24,9 +24,9 @@ of the different commands can be reviewed with the built-in function
 See <<appendix-returncodes>> and, if available, <<appendix-reasoncodes>>
 for the meaning of the used return and reason codes.
 
-The command line executer (CLE) uses an owner management in order to
-separate the settings for different clients and a property management
-for each command. If problems occur, a trace might be activated.
+The CLE uses an owner management in order to separate the settings for
+different clients and a property management for each command. If
+problems occur, a trace might be activated.
 
 For each command execution the owner and environment variables can be
 defined in the configuration file.
