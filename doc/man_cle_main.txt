@@ -1,4 +1,12 @@
-This command line parser provides a list of commands and some
+The COMMAND LINE PROCESSOR is a user interface on any available platform
+that simplifies and standardizes operation.
+
+The COMMAND LINE PROCESSOR provides two separate functions: 
+
+ * command line parser   - providing information about commands
+ * command line executor - supporting execution of entered commands
+
+The command line parser provides a list of commands and some
 built-in functions, please use 'MANPAGE', 'HELP' and 'SYNTAX' to get
 extensive information about these capabilities.
 

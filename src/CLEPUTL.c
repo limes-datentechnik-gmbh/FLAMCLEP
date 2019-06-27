@@ -746,8 +746,39 @@ extern char* unEscape(const char* input, char* output)
    while(i[0]) {
       if (i[0]=='&') {
          if (i[1]=='&') {
-            o[0]='&';
-            i+=2; o++;
+            if ((toupper(i[2])=='E' && toupper(i[3])=='X' && toupper(i[4])=='C' && i[5]==';') ||
+                (toupper(i[2])=='H' && toupper(i[3])=='S' && toupper(i[4])=='H' && i[5]==';') ||
+                (toupper(i[2])=='D' && toupper(i[3])=='L' && toupper(i[4])=='R' && i[5]==';') ||
+                (toupper(i[2])=='A' && toupper(i[3])=='T' && toupper(i[4])=='S' && i[5]==';') ||
+                (toupper(i[2])=='S' && toupper(i[3])=='B' && toupper(i[4])=='O' && i[5]==';') ||
+                (toupper(i[2])=='B' && toupper(i[3])=='S' && toupper(i[4])=='L' && i[5]==';') ||
+                (toupper(i[2])=='S' && toupper(i[3])=='B' && toupper(i[4])=='C' && i[5]==';') ||
+                (toupper(i[2])=='C' && toupper(i[3])=='R' && toupper(i[4])=='T' && i[5]==';') ||
+                (toupper(i[2])=='G' && toupper(i[3])=='R' && toupper(i[4])=='V' && i[5]==';') ||
+                (toupper(i[2])=='C' && toupper(i[3])=='B' && toupper(i[4])=='O' && i[5]==';') ||
+                (toupper(i[2])=='V' && toupper(i[3])=='B' && toupper(i[4])=='R' && i[5]==';') ||
+                (toupper(i[2])=='C' && toupper(i[3])=='B' && toupper(i[4])=='C' && i[5]==';') ||
+                (toupper(i[2])=='T' && toupper(i[3])=='L' && toupper(i[4])=='D' && i[5]==';') ||
+                (toupper(i[2])=='X' && isxdigit(i[3])     && isxdigit(i[4])     && i[5]==';'))
+            {
+               o[0]='&';
+               i+=2; o++;
+            } else if (isdigit(i[2])) {
+               const char* x=i;
+               strtol(i+2,(char**)&x,10);
+               if (x[0]==';') {
+                  o[0]='&';
+                  i+=2; o++;
+               } else {
+                  o[0]=i[0];
+                  o[1]=i[1];
+                  i+=2; o+=2;
+               }
+            } else {
+               o[0]=i[0];
+               o[1]=i[1];
+               i+=2; o+=2;
+            }
          } else if (toupper(i[1])=='E' && toupper(i[2])=='X' && toupper(i[3])=='C' && i[4]==';') {
             o[0]=C_EXC;
             i+=5; o++;
