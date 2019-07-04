@@ -7,7 +7,7 @@ done for the current owner.
 
 We recommend to work only with command specific property files.
 
-See <<appendix-properties>> for the current property file content.
+See <<appendix-Properties>> for the current property file content.
 
 .EXAMPLES
 

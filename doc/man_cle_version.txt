@@ -2,7 +2,7 @@ The version of the software product is shown. This string is
 provided to the command line executer (CLE) by the calling program and
 should reflect the current version information for this program.
 
-See <<appendix-version>> for the output of this command.
+See <<appendix-Version>> for the output of this command.
 
 .EXAMPLES
 

@@ -2,7 +2,7 @@ The grammar used for interpreting the command line and property files
 is shown. This is helpful for understanding how the commands and
 property files are interpreted by the command line processor.
 
-See <<appendix-grammar>> for an explanation and the output of this
+See <<appendix-Grammar>> for an explanation and the output of this
 command.
 
 .EXAMPLES

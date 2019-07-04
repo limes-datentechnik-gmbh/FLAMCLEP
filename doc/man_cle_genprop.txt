@@ -22,7 +22,7 @@ and filename.
 To optimize the program performance, one can remove all unnecessary
 properties.
 
-See <<appendix-properties>> for the current property file content. 
+See <<appendix-Properties>> for the current property file content. 
 
 .EXAMPLES
 

@@ -21,7 +21,7 @@ use the built-in functions 'LEXEM' and 'GRAMMAR'.
 The return/condition/exit codes of the executable and the reason codes
 of the different commands can be reviewed with the built-in function
 'ERRORS'.
-See <<appendix-returncodes>> and, if available, <<appendix-reasoncodes>>
+See <<appendix-Returncodes>> and, if available, <<appendix-Reasoncodes>>
 for the meaning of the used return and reason codes.
 
 The CLE uses an owner management in order to separate the settings for
@@ -171,7 +171,7 @@ FLCL_ICNV_FROM='IBM-1141'         # this is the best solution
 FLCL_ICNV_TO=UTF-8                # "UTF-8" could result in errors
 -----------------------------------------------------------------------
 
-See <<appendix-properties>> for the current property file content.
+See <<appendix-Properties>> for the current property file content.
 
 ENVIRONMENT VARIABLE MAPPING
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
