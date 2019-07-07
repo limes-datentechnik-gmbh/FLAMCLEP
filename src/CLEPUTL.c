@@ -3816,7 +3816,7 @@ extern int readEnvars(const char* pcFil, FILE* pfOut, FILE* pfErr, TsEnVarList**
       unsigned int   uiLen;
       unsigned int   uiPos=0;
       unsigned int   uiSiz=4096;
-      char*          pcBuf=malloc(uiSiz);
+      char*          pcBuf=malloc(uiSiz+1);
       char*          pcHlp;
 // read the file into buffer
       if (pcBuf==NULL) {
@@ -3824,18 +3824,19 @@ extern int readEnvars(const char* pcFil, FILE* pfOut, FILE* pfErr, TsEnVarList**
          return(-1*CLERTC_MEM);
       }
       uiLen=fread(pcBuf+uiPos,1,4096,pfTmp);
-      while(uiLen==4096) {
-         uiSiz+=4096;
-         pcHlp=realloc(pcBuf,uiSiz);
+      while(uiLen) {
+         uiSiz+=(uiLen>=4096)?4096:uiLen;
+         pcHlp=realloc(pcBuf,uiSiz+1);
          if (pcHlp==NULL) {
             free(pcBuf);
             fclose(pfTmp);
             return(-1*CLERTC_MEM);
          }
          pcBuf=pcHlp; uiPos+=uiLen;
-         uiLen=fread(pcBuf+uiPos,1,4096,pfTmp);
+         uiLen=fread(pcBuf+uiPos,1,uiSiz-uiPos,pfTmp);
       }
       uiLen+=uiPos;
+      pcBuf[uiLen]=0x00;
       fclose(pfTmp);
       // load the environment
       c=loadEnvars(uiLen,pcBuf,pfOut,pfErr,ppList);
