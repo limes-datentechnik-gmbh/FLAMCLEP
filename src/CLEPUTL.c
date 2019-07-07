@@ -1800,8 +1800,8 @@ extern char* getenvar(const char* name,const size_t length,const size_t size,cha
       name=acNam;
    }
    char acVal[256];
-   const char* v=GETENV(name);
    memset(acVal,0,sizeof(acVal));
+   const char* v=GETENV(name);
    if (v==NULL) v=getjclvar(name,sizeof(acVal)-1,acVal);
    if (v==NULL) v=systemsymbol(name,sizeof(acVal)-1,acVal);
    if (v!=NULL && *v) {
