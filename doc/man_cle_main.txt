@@ -1,3 +1,4 @@
+[[CLEP.MAIN]]
 The COMMAND LINE PROCESSOR (CLEP) is a user application programming
 interface for several platforms including Windows, Unix and z/OS that
 simplifies and standardizes parameter string processing.
@@ -193,6 +194,7 @@ possible:
  ** On USS with /u/<USER>
  ** On ZOS with <SYSUID>
 
+[[CLEP.FNMAPPING]]
 FILENAME MAPPING
 ~~~~~~~~~~~~~~~~
 
