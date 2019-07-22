@@ -295,7 +295,7 @@ Lexemes (regular expressions) for argument list or parameter file:
 --| str       [f|F]''' [:print:]* ''' | (read string from file (for passwords))
 --|           Strings can contain two '' to represent one '
 --|           Strings can also be enclosed in " or ` instead of '
---|           Strings can directly start behind a '=' without enclosing '/"
+--|           Strings can directly start behind a '=' without enclosing ('`")
 --|              In this case the string ends at the next separator or operator
 --|              and keywords are preferred. To use keywords, separators or
 --|              operators in strings, enclosing quotes are required.
