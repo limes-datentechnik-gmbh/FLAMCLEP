@@ -1,3 +1,4 @@
+[[appendix-Returncodes]]
 The return codes of the program are also called completion codes and
 returned at program termination. This content is printed on the screen
 with the built-in function 'ERRORS'.
