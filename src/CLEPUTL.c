@@ -69,6 +69,13 @@ static inline int flzsym(const char* pcDat, const int* piSln, char* pcVal, int* 
 #endif
 
 #ifdef __ZOS__
+   extern FILE* fopen_tmp(void) {
+      FILE* f=fopen("*","wb+,type=memory(hiperspace)");
+      if (f==NULL) {
+         f=fopen("*","wb+,type=memory");
+      }
+      return(f);
+   }
    extern int fclose_tmp(FILE* fp) {
       int      r;
       char     fn[FILENAME_MAX]="";

@@ -3575,7 +3575,7 @@ extern int siCleParseString(
    FILE*                         pfTmp;
    TsClpError                    stErr;
 
-   pfTmp=fopen_tmp(FALSE);
+   pfTmp=fopen_tmp();
 
    pvHdl=pvClpOpen(isCas,isPfl,isRpl,siMkl,pcOwn,pcPgm,pcCmd,pcMan,pcHlp,isOvl,
                    psTab,pvDat,pfTmp,pfTmp,NULL,NULL,NULL,NULL,
