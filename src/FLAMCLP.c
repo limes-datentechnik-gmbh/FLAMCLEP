@@ -167,12 +167,13 @@
  * 1.2.121: Index for variables in expressions must be enclosed in curly brackets and only a number is useless
  * 1.2.122: Support additional access control check possibility for each write in CLP structure
  * 1.2.123: Increase maximal amount of parameter per object from 256 to 512 (CLPMAX_TABCNT)
+ * 1.2.124: Use type of function and not type of pointer to function (usable for pragma's)
 **/
 
-#define CLP_VSN_STR       "1.2.123"
+#define CLP_VSN_STR       "1.2.124"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        2
-#define CLP_VSN_REVISION       123
+#define CLP_VSN_REVISION       124
 
 /* Definition der Konstanten ******************************************/
 
@@ -388,9 +389,9 @@ typedef struct Hdl {
    const TsSym*                  psVal;
    void*                         pvGbl;
    void*                         pvF2s;
-   tpfF2S                        pfF2s;
+   TfF2S*                        pfF2s;
    void*                         pvSaf;
-   tpfSaf                        pfSaf;
+   TfSaf*                        pfSaf;
    U32                           uiSym;
 } TsHdl;
 
@@ -1023,9 +1024,9 @@ extern void* pvClpOpen(
    TsClpError*                   psErr,
    void*                         pvGbl,
    void*                         pvF2S,
-   tpfF2S                        pfF2S,
+   TfF2S*                        pfF2S,
    void*                         pvSaf,
-   tpfSaf                        pfSaf)
+   TfSaf*                        pfSaf)
 {
    TsHdl*                        psHdl=NULL;
    const char*                   pcNow=NULL;

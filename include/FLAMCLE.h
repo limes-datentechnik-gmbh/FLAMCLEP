@@ -395,7 +395,7 @@ extern void vdClePrnBuiltInDocu(FILE* pfDoc, const char* pcOwn, char* pcPgm, int
  *
  * @return     Reason code (!=0) for termination or 0 for success
  */
-typedef int (*tpfIni)(
+typedef int (TfIni)(
    void*                         pvHdl,
    FILE*                         pfOut,
    FILE*                         pfTrc,
@@ -441,7 +441,7 @@ typedef int (*tpfIni)(
  * @return     Reason code (!=0) for termination or 0 for success.
  *             If a no run reason code (!=0) defined then the run function is not executed
  */
-typedef int (*tpfMap)(
+typedef int (TfMap)(
    void*                         pvHdl,
    FILE*                         pfOut,
    FILE*                         pfTrc,
@@ -485,7 +485,7 @@ typedef int (*tpfMap)(
  *
  * @return     Reason code (!=0) for termination or warning, 0 for success
  */
-typedef int (*tpfRun)(
+typedef int (TfRun)(
    void*                         pvHdl,
    FILE*                         pfOut,
    FILE*                         pfTrc,
@@ -515,7 +515,7 @@ typedef int (*tpfRun)(
  * @param[in]  pvPar Pointer to the filled parameter structure for cleanup
  * @return     Reason code (!=0) for termination or 0 for success
  */
-typedef int (*tpfFin)(
+typedef int (TfFin)(
    FILE*                         pfOut,
    FILE*                         pfTrc,
    void*                         pvGbl,
@@ -536,7 +536,7 @@ typedef int (*tpfFin)(
  * @param[in]  siRsn Reason code from INI, MAP, RUN and FIN function
  * @return     Pointer to the corresponding message
  */
-typedef const char* (*tpfMsg)(const int siRsn);
+typedef const char* (TfMsg)(const int siRsn);
 
 /**
  * \struct TsCleCommand
@@ -571,10 +571,10 @@ typedef struct CleCommand {
    void*                         pvClp;
    void*                         pvPar;
    int*                          piOid;
-   tpfIni                        pfIni;
-   tpfMap                        pfMap;
-   tpfRun                        pfRun;
-   tpfFin                        pfFin;
+   TfIni*                        pfIni;
+   TfMap*                        pfMap;
+   TfRun*                        pfRun;
+   TfFin*                        pfFin;
    int                           siFlg;
    const char*                   pcMan;
    const char*                   pcHlp;
@@ -622,11 +622,11 @@ typedef struct CleAppendix {
  *  *par* Pointer to the corresponding parameter structure.\n
  *  *oid* Pointer to an integer to define the main table as overlay or NULL to define the main table as object
  *        If the pointer set then the object identifier of the chosen argument of the overlay is given back.\n
- *  *ini* Pointer to the initialization function for the FLAMCLP structure (see tpfIni)\n
- *  *map* Pointer to mapping function (see tpfMap).
+ *  *ini* Pointer to the initialization function for the FLAMCLP structure (see TfIni)\n
+ *  *map* Pointer to mapping function (see TfMap).
  *        The mapping functions maps the parsed content of the FLAMCLP structure in the PAR structure.\n
- *  *run* Pointer to the run function to execute the subprogram with the PAR structure (see tpfRun).\n
- *  *fin* Pointer to the finalization function to clean up the parameter structure (see tpfFin)\n
+ *  *run* Pointer to the run function to execute the subprogram with the PAR structure (see TfRun).\n
+ *  *fin* Pointer to the finalization function to clean up the parameter structure (see TfFin)\n
  *  *flg* Flag to indicate a hidden (==0) or visible (!=0) command,
  *        For correct numbering, put hidden commands to the end of the table\n
  *  *man* Pointer to a null-terminated string for a detailed description of this command.
@@ -775,13 +775,13 @@ extern int siCleExecute(
    const char*                   pcFin,
    const char*                   pcScc,
    const char*                   pcDef,
-   tpfMsg                        pfMsg,
+   TfMsg*                        pfMsg,
    const char*                   pcApx,
    const TsCleAppendix*          psApx,
    void*                         pvF2S,
-   tpfF2S                        pfF2S,
+   TfF2S*                        pfF2S,
    void*                         pvSaf,
-   tpfSaf                        pfSaf,
+   TfSaf*                        pfSaf,
    const char*                   pcDpa,
    const int                     siNoR);
 
@@ -809,9 +809,9 @@ extern int siCleExecute(
     void*                         pvDat,
     void*                         pvGbl,
     void*                         pvF2S,
-    tpfF2S                        pfF2S,
+    TfF2S*                        pfF2S,
     void*                         pvSaf,
-    tpfSaf                        pfSaf,
+    TfSaf*                        pfSaf,
     void**                        ppClp);
 
 extern void vdClePrnDocProgram(

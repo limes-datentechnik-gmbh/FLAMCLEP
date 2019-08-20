@@ -144,11 +144,12 @@
  * 1.2.74: Support no run reason code (siNoR)
  * 1.2.75: Add black box (handle) for all call back functions
  * 1.2.76: Support additional authorization for CLP path
+ * 1.2.77: Use type of function and not type of pointer to function (usable for pragma's)
  */
-#define CLE_VSN_STR       "1.2.76"
+#define CLE_VSN_STR       "1.2.77"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        2
-#define CLE_VSN_REVISION       76
+#define CLE_VSN_REVISION       77
 
 /* Definition der Konstanten ******************************************/
 
@@ -179,7 +180,7 @@ typedef struct CnfHdl {
 
 static int siClePropertyInit(
    void*                         pvGbl,
-   tpfIni                        pfIni,
+   TfIni*                        pfIni,
    void*                         pvClp,
    const char*                   pcOwn,
    const char*                   pcPgm,
@@ -202,11 +203,11 @@ static int siClePropertyInit(
    void**                        ppHdl,
    char**                        ppFil,
    int*                          piFil,
-   tpfMsg                        pfMsg,
+   TfMsg*                        pfMsg,
    void*                         pvF2S,
-   tpfF2S                        pfF2S,
+   TfF2S*                        pfF2S,
    void*                         pvSaf,
-   tpfSaf                        pfSaf);
+   TfSaf*                        pfSaf);
 
 static int siClePropertyFinish(
    const char*                   pcHom,
@@ -223,7 +224,7 @@ static int siClePropertyFinish(
 
 static int siCleChangeProperties(
    void*                         pvGbl,
-   tpfIni                        pfIni,
+   TfIni*                        pfIni,
    void*                         pvClp,
    const char*                   pcHom,
    const char*                   pcOwn,
@@ -245,15 +246,15 @@ static int siCleChangeProperties(
    const char*                   pcOpt,
    const char*                   pcEnt,
    TsCnfHdl*                     psCnf,
-   tpfMsg                        pfMsg,
+   TfMsg*                        pfMsg,
    void*                         pvF2S,
-   tpfF2S                        pfF2S,
+   TfF2S*                        pfF2S,
    void*                         pvSaf,
-   tpfSaf                        pfSaf);
+   TfSaf*                        pfSaf);
 
 static int siCleCommandInit(
    void*                         pvGbl,
-   tpfIni                        pfIni,
+   TfIni*                        pfIni,
    void*                         pvClp,
    const char*                   pcOwn,
    const char*                   pcPgm,
@@ -274,11 +275,11 @@ static int siCleCommandInit(
    const char*                   pcEnt,
    TsCnfHdl*                     psCnf,
    void**                        ppHdl,
-   tpfMsg                        pfMsg,
+   TfMsg*                        pfMsg,
    void*                         pvF2S,
-   tpfF2S                        pfF2S,
+   TfF2S*                        pfF2S,
    void*                         pvSaf,
-   tpfSaf                        pfSaf);
+   TfSaf*                        pfSaf);
 
 static int siCleSimpleInit(
    FILE*                         pfOut,
@@ -379,7 +380,7 @@ static int siCleGetProperties(
    int*                          piFlg,
    void*                         pvGbl,
    void*                         pvF2S,
-   tpfF2S                        pfF2S);
+   TfF2S*                        pfF2S);
 
 static int siCleGetCommand(
    FILE*                         pfErr,
@@ -391,7 +392,7 @@ static int siCleGetCommand(
    char**                        ppCmd,
    void*                         pvGbl,
    void*                         pvF2S,
-   tpfF2S                        pfF2S,
+   TfF2S*                        pfF2S,
    const char*                   pcDpa);
 
 static TsCnfHdl* psCnfOpn(
@@ -571,13 +572,13 @@ extern int siCleExecute(
    const char*                   pcFin,
    const char*                   pcScc,
    const char*                   pcDef,
-   tpfMsg                        pfMsg,
+   TfMsg*                        pfMsg,
    const char*                   pcApx,
    const TsCleAppendix*          psApx,
    void*                         pvF2S,
-   tpfF2S                        pfF2S,
+   TfF2S*                        pfF2S,
    void*                         pvSaf,
-   tpfSaf                        pfSaf,
+   TfSaf*                        pfSaf,
    const char*                   pcDpa,
    const int                     siNoR)
 {
@@ -2362,7 +2363,7 @@ EVALUATE:
 
 static int siClePropertyInit(
    void*                         pvGbl,
-   tpfIni                        pfIni,
+   TfIni*                        pfIni,
    void*                         pvClp,
    const char*                   pcOwn,
    const char*                   pcPgm,
@@ -2385,11 +2386,11 @@ static int siClePropertyInit(
    void**                        ppHdl,
    char**                        ppFil,
    int*                          piFil,
-   tpfMsg                        pfMsg,
+   TfMsg*                        pfMsg,
    void*                         pvF2S,
-   tpfF2S                        pfF2S,
+   TfF2S*                        pfF2S,
    void*                         pvSaf,
-   tpfSaf                        pfSaf)
+   TfSaf*                        pfSaf)
 {
    int                           siErr;
    int                           isOvl=(piOid==NULL)?FALSE:TRUE;
@@ -2553,7 +2554,7 @@ static int siClePropertyFinish(
 
 static int siCleCommandInit(
    void*                         pvGbl,
-   tpfIni                        pfIni,
+   TfIni*                        pfIni,
    void*                         pvClp,
    const char*                   pcOwn,
    const char*                   pcPgm,
@@ -2574,11 +2575,11 @@ static int siCleCommandInit(
    const char*                   pcEnt,
    TsCnfHdl*                     psCnf,
    void**                        ppHdl,
-   tpfMsg                        pfMsg,
+   TfMsg*                        pfMsg,
    void*                         pvF2S,
-   tpfF2S                        pfF2S,
+   TfF2S*                        pfF2S,
    void*                         pvSaf,
-   tpfSaf                        pfSaf)
+   TfSaf*                        pfSaf)
 {
    int                           siErr,siFil=0;
    int                           isOvl=(piOid==NULL)?FALSE:TRUE;
@@ -2645,7 +2646,7 @@ static int siCleSimpleInit(
 
 static int siCleChangeProperties(
    void*                         pvGbl,
-   tpfIni                        pfIni,
+   TfIni*                        pfIni,
    void*                         pvClp,
    const char*                   pcHom,
    const char*                   pcOwn,
@@ -2667,11 +2668,11 @@ static int siCleChangeProperties(
    const char*                   pcOpt,
    const char*                   pcEnt,
    TsCnfHdl*                     psCnf,
-   tpfMsg                        pfMsg,
+   TfMsg*                        pfMsg,
    void*                         pvF2S,
-   tpfF2S                        pfF2S,
+   TfF2S*                        pfF2S,
    void*                         pvSaf,
-   tpfSaf                        pfSaf)
+   TfSaf*                        pfSaf)
 {
    int                           siErr;
    void*                         pvHdl=NULL;
@@ -3095,7 +3096,7 @@ static int siCleGetProperties(
    int*                    piFlg,
    void*                   pvGbl,
    void*                   pvF2S,
-   tpfF2S                  pfF2S)
+   TfF2S*                  pfF2S)
 {
    int                     siErr,siSiz=0;
    const char*             pcHlp=NULL;
@@ -3142,7 +3143,7 @@ static int siCleGetCommand(
    char**                  ppCmd,
    void*                   pvGbl,
    void*                   pvF2S,
-   tpfF2S                  pfF2S,
+   TfF2S*                  pfF2S,
    const char*             pcDpa)
 {
    int                     siErr,siSiz=0;
@@ -3565,9 +3566,9 @@ extern int siCleParseString(
    void*                         pvDat,
    void*                         pvGbl,
    void*                         pvF2S,
-   tpfF2S                        pfF2S,
+   TfF2S*                        pfF2S,
    void*                         pvSaf,
-   tpfSaf                        pfSaf,
+   TfSaf*                        pfSaf,
    void**                        ppClp)
 {
    int                           siErr=0;

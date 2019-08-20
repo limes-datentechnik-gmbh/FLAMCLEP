@@ -1099,7 +1099,7 @@ typedef struct ClpError {
  * @param[in]     siMsg Size of the message buffer (should be 1024)
  * @return              bytes read or negative value if error
  */
-typedef int (*tpfF2S)(
+typedef int (TfF2S)(
    void*                         pvGbl,
    void*                         pvHdl,
    const char*                   pcFil,
@@ -1119,7 +1119,7 @@ typedef int (*tpfF2S)(
  * @param[in]     pcVal Path=Value as resource
  * @return        0 if write allowed else a authorization error
  */
-typedef int (*tpfSaf) (
+typedef int (TfSaf) (
    void*                         pvGbl,
    void*                         pvHdl,
    const char*                   pcVal);
@@ -1187,9 +1187,9 @@ extern void* pvClpOpen(
    TsClpError*                   psErr,
    void*                         pvGbl,
    void*                         pvF2S,
-   tpfF2S                        pfF2S,
+   TfF2S*                        pfF2S,
    void*                         pvSaf,
-   tpfSaf                        pfSaf);
+   TfSaf*                        pfSaf);
 
 /**
  * Parse the property list
