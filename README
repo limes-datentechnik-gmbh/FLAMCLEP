@@ -39,7 +39,7 @@ Features
 
 Below, you can find a possibly incomplete list of FLAMCLE feature:
 
- * * Support of an unlimited amount of commands
+ * * Support of an unlimited number of commands
  * * Support of hidden commands (not documented)
  * * Support of a default command (optional)
  * * Includes a lot of useful built-in functions

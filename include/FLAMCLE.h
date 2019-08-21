@@ -621,16 +621,16 @@ typedef struct CleAppendix {
  *  *clp* Pointer to the corresponding FLAMCLP structure (generated with the CLPMAC.h marcros).\n
  *  *par* Pointer to the corresponding parameter structure.\n
  *  *oid* Pointer to an integer to define the main table as overlay or NULL to define the main table as object
- *        If the pointer set then the object identifier of the chosen argument of the overlay is given back.\n
+ *        If the pointer is set the object identifier of the chosen argument of the overlay is given back.\n
  *  *ini* Pointer to the initialization function for the FLAMCLP structure (see TfIni)\n
- *  *map* Pointer to mapping function (see TfMap).
+ *  *map* Pointer to the mapping function (see TfMap).
  *        The mapping functions maps the parsed content of the FLAMCLP structure in the PAR structure.\n
  *  *run* Pointer to the run function to execute the subprogram with the PAR structure (see TfRun).\n
  *  *fin* Pointer to the finalization function to clean up the parameter structure (see TfFin)\n
  *  *flg* Flag to indicate a hidden (==0) or visible (!=0) command,
  *        For correct numbering, put hidden commands to the end of the table\n
  *  *man* Pointer to a null-terminated string for a detailed description of this command.
- *        (in ASCIDOC format, content behind .DESCRIPTION, mainly simply some paragraphs plus .OPTIONS and/or .EXAMPLES)
+ *        (in ASCIDOC format, content behind .DESCRIPTION, usually some paragraphs plus .OPTIONS and/or .EXAMPLES)
  *        It is recommended to use a header file with a define for this long string)\n
  *  *hlp* String for a short context sensitive help to this command\n
  */
@@ -723,9 +723,9 @@ typedef struct CleAppendix {
  * @param[in]  pvF2S Pointer to a handle which can be used in file 2 string callback function (if not required then NULL)
  * @param[in]  pfF2S Callback function which reads a file into a null-terminated string in memory (if NULL then default implementation is used)
  * @param[in]  pvSaf Pointer to a handle which can be used in authorization callback function (if not required then NULL)
- * @param[in]  pfSaf Callback function for additional authorization by CLP or NULL if no authorization requested
+ * @param[in]  pfSaf Callback function for additional authorization by CLP or NULL if no authorization is requested
  * @param[in]  pcDpa Pointer to a file name for a default parameter file (e.g. "DD:FLAMPAR") or NULL/empty string for nothing,
- *                   The file name is used if only a command without assignment or parameter provided
+ *                   The file name is used if only a command without assignment or parameter is provided
  * @param[in]  siNoR Define this reason code to the values the mapping function returns if no run is requested (0 is nothing)
  *
  * @return signed integer with the condition codes below:\n

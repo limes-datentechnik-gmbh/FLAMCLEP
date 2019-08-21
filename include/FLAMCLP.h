@@ -73,15 +73,15 @@ value. This prevents for example passwords from logging.
 
 An optional callback function with handle for additional authorization
 checking can be provided. The resource will be each path written to the
-CLP structure. If the pointer to the callback function NULL then the
+CLP structure. If the pointer to the callback function is NULL then the
 function is not called. This feature is mainly for RACF on z/OS.
 
 To support critical punctuation characters on EBCDIC systems a complex
-support was implemented. This support make the whole source independent
-of the EBCDIC code page used. The code page used must defined over the
-environment variable LANG or only for CLP strings with the environment
-variable CLP_STRING_CCSID or inside the CLP string ("&nnnn;"). Additional
-different kind of escaping ("&xxx;") are supported to handle this.
+support was implemented to make the whole source independent of the
+used EBCDIC code page. The code page to use must be defined in the
+environment variable LANG or just for CLP strings with the environment
+variable CLP_STRING_CCSID or inside the CLP string ("&nnnn;"). Last but
+not least single character escaping ("&xxx;") is supported as well.
 
 In the command string (everywhere, where the scanner start to read a lexem)
 each value in angle brackets will be transparently replaced by the corresponding

@@ -269,12 +269,12 @@ extern int srprintf(char** buffer,size_t* size,const size_t expansion,const char
 extern void fprintm(FILE* file,const char* own, const char* pgm, const char* man, const int cnt);
 
 /**
- * This function parse a zero terminated string array of a certain length or terminated with 0xFF.
- * Such a string array is the result of a variable (not fix) array of strings provided by CLP.
+ * This function parses a zero terminated string array of a certain length or terminated with 0xFF.
+ * Such a string array is the result of a variable length array of strings provided by CLP.
  * If you don't know the length, please provide a negative number to look for 0xFF termination.
  * For 0xFF termination you must define the CLPFLG_DLM. This is useful if there is no capability
- * to use the ELN link to determine the length of the string array. Each call give the pointer to
- * the next string in the array if no string found anymore, then NULL is returned.
+ * to use the ELN link to determine the length of the string array. Each call returns the pointer to
+ * the next string in the array, if no string is found anymore NULL is returned.
  * @param hdl     pointer of pointer to string initialized with NULL at beginning
  * @param str     pointer to the string arrays from CLP
  * @param len     -1 for 0xFF delimiter parsing or the ELN of the string array
