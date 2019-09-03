@@ -492,39 +492,39 @@ For compilation the defines below must be set:
  * Please use this defines for the data types in the tables to be ensure
  * the correct size for the parser.
  */
-   #ifndef I08
-         #define I08             int8_t
-   #endif
-   #ifndef I16
-         #define I16             int16_t
-   #endif
-   #ifndef I32
-         #define I32             int32_t
-   #endif
-   #ifndef I64
-         #define I64             int64_t
-   #endif
-   #ifndef U08
-         #define U08             uint8_t
-   #endif
-   #ifndef U16
-         #define U16             uint16_t
-   #endif
-   #ifndef U32
-         #define U32             uint32_t
-   #endif
-   #ifndef U64
-         #define U64             uint64_t
-   #endif
-   #ifndef C08
-      #define C08                char
-   #endif
-   #ifndef F32
-      #define F32                float
-   #endif
-   #ifndef F64
-      #define F64                double
-   #endif
+#ifndef I08
+   #define I08             int8_t
+#endif
+#ifndef I16
+   #define I16             int16_t
+#endif
+#ifndef I32
+   #define I32             int32_t
+#endif
+#ifndef I64
+   #define I64             int64_t
+#endif
+#ifndef U08
+   #define U08             uint8_t
+#endif
+#ifndef U16
+   #define U16             uint16_t
+#endif
+#ifndef U32
+   #define U32             uint32_t
+#endif
+#ifndef U64
+   #define U64             uint64_t
+#endif
+#ifndef C08
+   #define C08                char
+#endif
+#ifndef F32
+   #define F32                float
+#endif
+#ifndef F64
+   #define F64                double
+#endif
 
 /**
  * @brief Get version information
