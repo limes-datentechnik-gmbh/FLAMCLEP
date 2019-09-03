@@ -38,6 +38,8 @@
 #ifndef INC_CLEPUTL_H
 #define INC_CLEPUTL_H
 
+#include <stdio.h>
+
 #ifndef TRUE
 #  define TRUE             (1)
 #endif

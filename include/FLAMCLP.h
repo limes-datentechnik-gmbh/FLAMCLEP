@@ -470,7 +470,7 @@ For compilation the defines below must be set:
    #define pcClpError            FLCLPERR
 #endif
 
-#include <stdint.h>
+#include <stdio.h>
 #include <inttypes.h>
 
 /* Standard defines ***************************************************/

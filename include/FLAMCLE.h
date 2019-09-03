@@ -315,6 +315,8 @@ in this case.
 #ifndef INC_CLE_H
 #define INC_CLE_H
 
+#include "FLAMCLP.h"
+
 #ifdef __HOSTSHORTING__
 #  define pcCleVersion          FLCLEVSN
 #  define pcCleAbout            FLCLEABO

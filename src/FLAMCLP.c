@@ -392,7 +392,7 @@ typedef struct Hdl {
    TfF2S*                        pfF2s;
    void*                         pvSaf;
    TfSaf*                        pfSaf;
-   U32                           uiSym;
+   long                          siSym;
 } TsHdl;
 
 /* Deklaration der internen Funktionen ********************************/
@@ -1091,7 +1091,7 @@ extern void* pvClpOpen(
          psHdl->pfSaf=pfSaf;
 
 #if defined(__DEBUG__) && defined(__HEAP_STATISTIC__)
-         U32 uiBeginCurHeapSize=CUR_HEAP_SIZE();
+         long uiBeginCurHeapSize=CUR_HEAP_SIZE();
 #endif
          siErr=siClpSymIni(psHdl,0,NULL,psTab,NULL,&psHdl->psTab);
          if (siErr<0) {
@@ -1106,8 +1106,8 @@ extern void* pvClpOpen(
             return(NULL);
          }
 #if defined(__DEBUG__) && defined(__HEAP_STATISTIC__)
-         U32 uiEndCurHeapSize=CUR_HEAP_SIZE();
-         printd("----------CLP-SYMTAB-CUR_HEAP_SIZE(%u)=>%u(%u) Count==%u(%u)\n",uiBeginCurHeapSize,uiEndCurHeapSize,uiEndCurHeapSize-uiBeginCurHeapSize,psHdl->uiSym,(uiEndCurHeapSize-uiBeginCurHeapSize)/psHdl->uiSym);
+         long uiEndCurHeapSize=CUR_HEAP_SIZE();
+         printd("----------CLP-SYMTAB-CUR_HEAP_SIZE(%u)=>%u(%u) Count==%u(%u)\n",uiBeginCurHeapSize,uiEndCurHeapSize,uiEndCurHeapSize-uiBeginCurHeapSize,psHdl->siSym,(uiEndCurHeapSize-uiBeginCurHeapSize)/psHdl->siSym);
 #endif
          siErr=siClpSymCal(psHdl,0,NULL,psHdl->psTab);
          if (siErr<0) {
@@ -1187,7 +1187,7 @@ extern int siClpParsePro(
    psHdl->pcLex[0]=EOS;
    if (psHdl->siTok==CLPTOK_INI) {
 #if defined(__DEBUG__) && defined(__HEAP_STATISTIC__)
-      U32 uiBeginCurHeapSize=CUR_HEAP_SIZE();
+      long uiBeginCurHeapSize=CUR_HEAP_SIZE();
 #endif
       if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"PROPERTY-PARSER-BEGIN\n");
       psHdl->siTok=siClpScnSrc(pvHdl,0,NULL);
@@ -1195,7 +1195,7 @@ extern int siClpParsePro(
       siCnt=siClpPrsProLst(pvHdl,psHdl->psTab);
       if (siCnt<0) return(siCnt);
 #if defined(__DEBUG__) && defined(__HEAP_STATISTIC__)
-      U32 uiEndCurHeapSize=CUR_HEAP_SIZE();
+      long uiEndCurHeapSize=CUR_HEAP_SIZE();
       printd("----------CLP-PRSPRO-CUR_HEAP_SIZE(%u)=>%u(%u)\n",uiBeginCurHeapSize,uiEndCurHeapSize,uiEndCurHeapSize-uiBeginCurHeapSize);
 #endif
       if (psHdl->siTok==CLPTOK_END) {
@@ -1254,7 +1254,7 @@ extern int siClpParseCmd(
    psHdl->pcLex[0]=EOS;
    if (psHdl->siTok==CLPTOK_INI) {
 #if defined(__DEBUG__) && defined(__HEAP_STATISTIC__)
-      U32 uiBeginCurHeapSize=CUR_HEAP_SIZE();
+      long uiBeginCurHeapSize=CUR_HEAP_SIZE();
 #endif
       if (psHdl->pfPrs!=NULL) fprintf(psHdl->pfPrs,"COMMAND-PARSER-BEGIN\n");
       psHdl->siTok=siClpScnSrc(pvHdl,0,NULL);
@@ -1262,7 +1262,7 @@ extern int siClpParseCmd(
       siCnt=siClpPrsMain(pvHdl,psHdl->psTab,piOid);
       if (siCnt<0) return (siCnt);
 #if defined(__DEBUG__) && defined(__HEAP_STATISTIC__)
-      U32 uiEndCurHeapSize=CUR_HEAP_SIZE();
+      long uiEndCurHeapSize=CUR_HEAP_SIZE();
       printd("----------CLP-PRSCMD-CUR_HEAP_SIZE(%u)=>%u(%u)\n",uiBeginCurHeapSize,uiEndCurHeapSize,uiEndCurHeapSize-uiBeginCurHeapSize);
 #endif
       if (psHdl->siTok==CLPTOK_END) {
@@ -2421,7 +2421,7 @@ static TsSym* psClpSymIns(
    }
    psSym->psDep=NULL;
    psSym->psHih=psHih;
-   psHdl->uiSym++;
+   psHdl->siSym++;
    return(psSym);
 }
 #undef ERROR
