@@ -533,12 +533,14 @@ extern char* dhomedir(int flag) {
 }
 
 extern int win_setenv(const char* name, const char* value){
+   // TODO: don't use stack allocation because strings can be larger than stack size (user input)
    char envstr[strlen(name) + strlen(value) + 2];
    sprintf(envstr,"%s=%s",name,value);
    return  _putenv(envstr);
 }
 
 extern int win_unsetenv(const char* name){
+   // TODO: don't use stack allocation because string can be larger than stack size (user input)
   char envstr[strlen(name) + 2];
   sprintf(envstr,"%s=",name);
   return _putenv(envstr);
@@ -2287,6 +2289,7 @@ extern char* dcpmapfil(const char* file) {
    } else if(ISDDNAME(file) || file[0]=='\'' || file[0]==':') {
       return dmapfil(file,1);
    } else {
+      // TODO: don't use stack allocation because strings can be larger than stack size
       char f[strlen(file)+4];
       sprintf(f,"'%s'",file);
       return dmapfil(f,1);
