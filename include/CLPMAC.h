@@ -22,6 +22,8 @@
  *
  ******************************************************************************/
 
+#include <stddef.h>
+
 #undef CLPARGTAB_SKALAR
 #undef CLPARGTAB_STRING
 #undef CLPARGTAB_ARRAY

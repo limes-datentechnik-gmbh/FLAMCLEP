@@ -39,6 +39,7 @@
 #define INC_CLEPUTL_H
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #ifndef TRUE
 #  define TRUE             (1)
