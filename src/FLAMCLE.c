@@ -41,11 +41,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <stdarg.h>
 #include <errno.h>
-#ifndef __WIN__
-#include <unistd.h>
-#endif
 
 /* Include eigener Bibliotheken  **************************************/
 

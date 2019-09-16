@@ -31,7 +31,6 @@
 #include <stdio.h>
 #include <errno.h>
 #include <ctype.h>
-#include <string.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
@@ -2512,7 +2511,7 @@ extern size_t strlcpy(char *dest, const char *src, size_t n)
 
 extern int printd(const char* format,...)
 {
-#ifdef __DEBUG__
+#if defined(__DEBUG__) && !defined(__METAL__)
    int r;
    va_list  argv;
    va_start(argv, format);
