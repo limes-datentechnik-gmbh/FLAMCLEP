@@ -33,10 +33,36 @@
 #include <fcntl.h>
 #include <string.h>
 #include <errno.h>
+#ifdef __FL5__
+#include "../CINC/FLMVSN.h"
+#endif
 
 static const int FALSE = 0;
 static const int TRUE = 1;
 static int  quiet=0;
+
+struct var_map_entry {
+        char* name;
+        char* value;
+};
+static struct var_map_entry vmap[] = {
+#ifdef __FL5__
+        { "FLM_VSN_STR",   FLM_VSN_STR   },
+        { "FLM_VSN_DATE",  FLM_VSN_DATE  },
+        { "FLM_VSN_STATE", FLM_VSN_STATE },
+#endif
+        { NULL, NULL }
+};
+
+static char* getVarValue(char* name)
+{
+        struct var_map_entry* vP = vmap;
+        for(; vP->name != NULL; vP++) {
+                if (strcmp(vP->name, name) == 0)
+                        return vP->value;
+        }
+        return NULL;
+}
 
 int escape_file(char* inputName, FILE* inFile, FILE* outFile, int count, FILE* depFile)
 {
@@ -130,16 +156,36 @@ int escape_file(char* inputName, FILE* inFile, FILE* outFile, int count, FILE* d
                                         } else if (linebuf[i] == '"') { /* escape quotation mark */
                                                 pageName[k++] = '\\';
                                                 pageName[k++] = '"';
-                                        } else if (linebuf[i] == '$' && linebuf[i+1] == '{') { /* skip variables */
-                                                pageName[k++] = '"';
-                                                pageName[k++] = ' ';
-                                                for (i+=2 ; i < n ; i++) {
-                                                        if (linebuf[i] == '}') {
-                                                                pageName[k++] = ' ';
-                                                                pageName[k++] = '"';
-                                                                break;
+                                        } else if (linebuf[i] == '$' && linebuf[i+1] == '{') { /* replace or skip variables */
+                                                char vName[128];
+                                                int ri, ni;
+                                                for(ni=0,ri=i+2; linebuf[ri] != '}' ; ni++,ri++) {
+                                                        vName[ni] = linebuf[ri];
+                                                        if (ni == 126) {
+                                                                vName[127] = 0;
+                                                                fprintf(stderr, "name of variable %s... is to long\n", vName);
+                                                                exit(-1);
                                                         }
-                                                        pageName[k++] = linebuf[i];
+                                                }
+                                                vName[ni] = 0;
+                                                char* vP = getVarValue(vName);
+                                                if (vP != NULL) {
+                                                        for(; *vP != 0 ; vP++) {
+                                                                pageName[k++] = *vP;
+                                                        }
+                                                        i += ni+3;
+                                                } else {
+                                                        fprintf(stderr, "%s:%d:%d: warning: Unknown variable name %s\n", inputName, linecount, i, vName);
+                                                        pageName[k++] = '"';
+                                                        pageName[k++] = ' ';
+                                                        for (i+=2 ; i < n ; i++) {
+                                                                if (linebuf[i] == '}') {
+                                                                        pageName[k++] = ' ';
+                                                                        pageName[k++] = '"';
+                                                                        break;
+                                                                }
+                                                                pageName[k++] = linebuf[i];
+                                                        }
                                                 }
                                         } else {
                                                 pageName[k++] = linebuf[i];
