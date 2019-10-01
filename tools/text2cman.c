@@ -67,8 +67,6 @@ static char* getVarValue(char* name)
 int escape_file(char* inputName, FILE* inFile, FILE* outFile, int count, FILE* depFile)
 {
         int n,i,k;
-        int startcomment;
-        int isCommentBlock = 0;
         char linebuf[1024];
         char pageName[2048];
         int linecount = count;
@@ -105,109 +103,101 @@ int escape_file(char* inputName, FILE* inFile, FILE* outFile, int count, FILE* d
         if (!quiet && linecount > 1) {
                 fprintf(stderr, "%s:1:1: skipped %d empty lines.\n", inputName, linecount-1);
         }
-        isCommentBlock=0;
         while (1) {
-                if (n>=4 && strncmp(linebuf,"////", 4)==0) {
-                        isCommentBlock=isCommentBlock?0:1;
-                        if (isCommentBlock)
-                                startcomment = linecount;
-                }
-                if (!isCommentBlock && !(n>=2 && strncmp(linebuf,"//", 2)==0)) {
-                        if (strncmp(linebuf, "#include ", 9) == 0) {
-                                int l = 0, c = 0;
-                                FILE* incFile;
-                                char includeName[1024];
-                                int j = 8;
-                                while (linebuf[++j] == ' ');
-                                if (linebuf[j] != '/') { /* prepend dirname if filename is NOT absolut */
-                                        char* p2inf = inputName;
-                                        char* p2f = strrchr(inputName, '/');
-                                        if (NULL != p2f) {
-                                                while (p2inf != p2f)
-                                                        includeName[c++] = *p2inf++;
-                                                includeName[c++] = '/';
-                                        }
+                if (strncmp(linebuf, "#include ", 9) == 0) {
+                        int l = 0, c = 0;
+                        FILE* incFile;
+                        char includeName[1024];
+                        int j = 8;
+                        while (linebuf[++j] == ' ');
+                        if (linebuf[j] != '/') { /* prepend dirname if filename is NOT absolut */
+                                char* p2inf = inputName;
+                                char* p2f = strrchr(inputName, '/');
+                                if (NULL != p2f) {
+                                        while (p2inf != p2f)
+                                                includeName[c++] = *p2inf++;
+                                        includeName[c++] = '/';
                                 }
-                                while (linebuf[j] != '\n' && linebuf[j] != 0) {
-                                        includeName[c++] = linebuf[j++];
-                                        l++;
-                                }
-                                includeName[c] = 0;
-                                if (l) {
-                                        incFile = fopen(includeName, "r");
-                                        if (NULL == incFile) {
-                                                fprintf(stderr, "%s:%d:%d: open of include file %s failed.\n%s\n", inputName, linecount, j,
-                                                        includeName, strerror(errno));
-                                        } else {
-                                                fprintf(depFile, " %s", includeName);
-                                                escape_file(includeName, incFile, outFile, 0, depFile);
-                                        }
+                        }
+                        while (linebuf[j] != '\n' && linebuf[j] != 0) {
+                                includeName[c++] = linebuf[j++];
+                                l++;
+                        }
+                        includeName[c] = 0;
+                        if (l) {
+                                incFile = fopen(includeName, "r");
+                                if (NULL == incFile) {
+                                        fprintf(stderr, "%s:%d:%d: open of include file %s failed.\n%s\n", inputName, linecount, j,
+                                                includeName, strerror(errno));
                                 } else {
-                                        fprintf(stderr, "%s:%d:%d: missing name of include file\n", inputName, linecount, j);
+                                        fprintf(depFile, " %s", includeName);
+                                        escape_file(includeName, incFile, outFile, 0, depFile);
                                 }
                         } else {
-                                pageName[0] = '"';
-                                for (i=0, k=1 ; i < n ; i++) {
-                                        if (linebuf[i] == '\n') { /* escape literal newline */
-                                                pageName[k++] = '\\';
-                                                pageName[k++] = 'n';
-                                                pageName[k++] = '"';
-                                                pageName[k++] = '\n';
-                                        } else if (linebuf[i] == '"') { /* escape quotation mark */
-                                                pageName[k++] = '\\';
-                                                pageName[k++] = '"';
-                                        } else if (linebuf[i] == '$' && linebuf[i+1] == '{') { /* replace or skip variables */
-                                                char vName[128];
-                                                int ri, ni;
-                                                for(ni=0,ri=i+2; linebuf[ri] != '}' ; ni++,ri++) {
-                                                        vName[ni] = linebuf[ri];
-                                                        if (ni == 126) {
-                                                                vName[127] = 0;
-                                                                fprintf(stderr, "name of variable %s... is to long\n", vName);
-                                                                exit(-1);
-                                                        }
-                                                }
-                                                vName[ni] = 0;
-                                                char* vP = getVarValue(vName);
-                                                if (vP != NULL) {
-                                                        for(; *vP != 0 ; vP++) {
-                                                                pageName[k++] = *vP;
-                                                        }
-                                                        i += ni+3;
-                                                } else {
-                                                        fprintf(stderr, "%s:%d:%d: warning: Unknown variable name %s\n", inputName, linecount, i, vName);
-                                                        pageName[k++] = '"';
-                                                        pageName[k++] = ' ';
-                                                        for (i+=2 ; i < n ; i++) {
-                                                                if (linebuf[i] == '}') {
-                                                                        pageName[k++] = ' ';
-                                                                        pageName[k++] = '"';
-                                                                        break;
-                                                                }
-                                                                pageName[k++] = linebuf[i];
-                                                        }
-                                                }
-                                        } else {
-                                                pageName[k++] = linebuf[i];
-                                        }
-                                }
-                                if (pageName[k-1] != '\n') { /* add newline if it is missing at end of line */
+                                fprintf(stderr, "%s:%d:%d: missing name of include file\n", inputName, linecount, j);
+                        }
+                } else {
+                        pageName[0] = '"';
+                        for (i=0, k=1 ; i < n ; i++) {
+                                if (linebuf[i] == '\n') { /* escape literal newline */
                                         pageName[k++] = '\\';
                                         pageName[k++] = 'n';
                                         pageName[k++] = '"';
                                         pageName[k++] = '\n';
+                                } else if (linebuf[i] == '\\') { /* escape backslash */
+                                        pageName[k++] = '\\';
+                                        pageName[k++] = '\\';
+                                } else if (linebuf[i] == '"') { /* escape quotation mark */
+                                        pageName[k++] = '\\';
+                                        pageName[k++] = '"';
+                                } else if (linebuf[i] == '$' && linebuf[i+1] == '{') { /* replace or skip variables */
+                                        char vName[128];
+                                        int ri, ni;
+                                        for(ni=0,ri=i+2; linebuf[ri] != '}' ; ni++,ri++) {
+                                                vName[ni] = linebuf[ri];
+                                                if (ni == 126) {
+                                                        vName[127] = 0;
+                                                        fprintf(stderr, "name of variable %s... is to long\n", vName);
+                                                        exit(-1);
+                                                }
+                                        }
+                                        vName[ni] = 0;
+                                        char* vP = getVarValue(vName);
+                                        if (vP != NULL) {
+                                                for(; *vP != 0 ; vP++) {
+                                                        pageName[k++] = *vP;
+                                                }
+                                                i += ni+3;
+                                        } else {
+                                                fprintf(stderr, "%s:%d:%d: warning: Unknown variable name %s\n", inputName, linecount, i, vName);
+                                                pageName[k++] = '"';
+                                                pageName[k++] = ' ';
+                                                for (i+=2 ; i < n ; i++) {
+                                                        if (linebuf[i] == '}') {
+                                                                pageName[k++] = ' ';
+                                                                pageName[k++] = '"';
+                                                                break;
+                                                        }
+                                                        pageName[k++] = linebuf[i];
+                                                }
+                                        }
+                                } else {
+                                        pageName[k++] = linebuf[i];
                                 }
-                                pageName[k++] = 0;
-                                fputs(pageName, outFile);
                         }
+                        if (pageName[k-1] != '\n') { /* add newline if it is missing at end of line */
+                                pageName[k++] = '\\';
+                                pageName[k++] = 'n';
+                                pageName[k++] = '"';
+                                pageName[k++] = '\n';
+                        }
+                        pageName[k++] = 0;
+                        fputs(pageName, outFile);
                 }
                 if (NULL == fgets(linebuf, sizeof(linebuf), inFile))
                         break;
                 linecount++;
                 n = strlen(linebuf);
-        }
-        if (isCommentBlock) {
-                fprintf(stderr, "%s:%d:1: Error: Unclosed comment block. Comment blocks must be closed by \"////\" on the start of a line!\n", inputName, startcomment);
         }
         return linecount;
 }
