@@ -54,6 +54,13 @@ static struct var_map_entry vmap[] = {
         { NULL, NULL }
 };
 
+struct include_list {
+        unsigned long size;
+        unsigned long len;
+        char* start;
+};
+typedef struct include_list incList;
+
 static char* getVarValue(char* name)
 {
         struct var_map_entry* vP = vmap;
@@ -64,13 +71,34 @@ static char* getVarValue(char* name)
         return NULL;
 }
 
-int escape_file(char* inputName, FILE* inFile, FILE* outFile, int count, FILE* depFile)
+unsigned long append_inc_name(incList* iList, char* incname)
+{
+        unsigned long l = strlen(incname) + 5;
+        if (iList->size < (l + iList->len)) {
+            char* newList = realloc(iList->start, iList->size << 1);
+            if (NULL == newList) {
+                    perror("realloc");
+                    return 0;
+            }
+            iList->start = newList;
+            iList->size <<= 1;
+        }
+        char* end = iList->start + iList->len;
+        int n = (strncmp(incname, "../", 3) == 0) ? 3 : 0;
+        sprintf(end, "\"%s\\n\"\n", incname + n);
+        l -= (unsigned long)n;
+        iList->len += l;
+        return l;
+}
+
+int escape_file(char* inputName, FILE* inFile, FILE* outFile, int count, FILE* depFile, incList* iList)
 {
         int n,i,k;
         char linebuf[1024];
         char pageName[2048];
         int linecount = count;
 
+        append_inc_name(iList, inputName);
         if (NULL == fgets(linebuf, sizeof(linebuf), inFile))
                 return 0;
 
@@ -131,7 +159,7 @@ int escape_file(char* inputName, FILE* inFile, FILE* outFile, int count, FILE* d
                                                 includeName, strerror(errno));
                                 } else {
                                         fprintf(depFile, " %s", includeName);
-                                        escape_file(includeName, incFile, outFile, 0, depFile);
+                                        escape_file(includeName, incFile, outFile, 0, depFile, iList);
                                 }
                         } else {
                                 fprintf(stderr, "%s:%d:%d: missing name of include file\n", inputName, linecount, j);
@@ -218,6 +246,7 @@ int main(int argc, char* argv[])
         char stringName[512];
         char* prefix = "";
         int linecount = 0;
+        incList iList;
 
         while ((n = getopt(argc, argv, "d:o:p:q")) != -1) {
                 switch (n) {
@@ -246,8 +275,16 @@ int main(int argc, char* argv[])
                         return -1;
                 }
         }
+        iList.len = 0;
+        iList.size = 4096;
+        iList.start = malloc(iList.size);
+        if (NULL == iList.start) {
+                perror("malloc");
+                return -1;
+        }
         for (j=optind ; j < argc ; j++) {
                 linecount = 0;
+                iList.len = 0;
                 inputName = argv[j];
                 if (singleFiles) {
                         n = strlen(inputName);
@@ -303,12 +340,11 @@ int main(int argc, char* argv[])
                 }
                 sprintf(pageName, "static const char %s%s[] =\n", prefix, stringName);
                 fputs(pageName, outFile);
-                linecount = escape_file(inputName, inFile, outFile, linecount, depFile);
+                linecount = escape_file(inputName, inFile, outFile, linecount, depFile, &iList);
                 fclose(inFile);
                 strcpy(pageName, "#ifdef __SHOW_TEXT_SOURCE\n");
                 fputs(pageName, outFile);
-                n = (strncmp(inputName, "../", 3) == 0) ? 3 : 0;
-                sprintf(pageName, "\"\\000%s\"\n#endif\n", inputName+n);/* skip leading ../ */
+                sprintf(pageName, "\"\\000\"\n%s#endif\n", iList.start);/* skip leading ../ */
                 fputs(pageName, outFile);
                 strcpy(linebuf, ";\n\n");
                 fputs(linebuf, outFile);
