@@ -168,12 +168,13 @@
  * 1.2.122: Support additional access control check possibility for each write in CLP structure
  * 1.2.123: Increase maximal amount of parameter per object from 256 to 512 (CLPMAX_TABCNT)
  * 1.2.124: Use type of function and not type of pointer to function (usable for pragma's)
+ * 1.2.125: Add vdClpReset function to reset after an application handled error
 **/
 
-#define CLP_VSN_STR       "1.2.124"
+#define CLP_VSN_STR       "1.2.125"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        2
-#define CLP_VSN_REVISION       124
+#define CLP_VSN_REVISION       125
 
 /* Definition der Konstanten ******************************************/
 
@@ -1152,6 +1153,15 @@ extern void* pvClpOpen(
       if (pfErr!=NULL) fprintf(pfErr,"Parameter psTab is NULL\n");
    }
    return((void*)psHdl);
+}
+
+extern void vdClpReset(
+   void*                         pvHdl)
+{
+   TsHdl*                        psHdl=(TsHdl*)pvHdl;
+   if (psHdl!=NULL) {
+      psHdl->siTok=CLPTOK_INI;
+   }
 }
 
 extern int siClpParsePro(

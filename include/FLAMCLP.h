@@ -1192,6 +1192,16 @@ extern void* pvClpOpen(
    TfSaf*                        pfSaf);
 
 /**
+ * Reset command line parser
+ *
+ * Required after an error which was handled by the calling application to parse properties or commands correctly
+ *
+ * @param pvHdl Pointer to the corresponding handle created with \a pvClpOpen
+ */
+extern void vdClpReset(
+   void*                         pvHdl);
+
+/**
  * Parse the property list
  *
  * The function parses the property list
