@@ -71,34 +71,39 @@ static char* getVarValue(char* name)
         return NULL;
 }
 
-unsigned long append_inc_name(incList* iList, char* incname)
+unsigned long append_inc_name(incList* iList, char* incname, unsigned long level)
 {
-        unsigned long l = strlen(incname) + 5;
+    unsigned long l = strlen(incname) + 5 + ((level) ? level + 1 : 0);
         if (iList->size < (l + iList->len)) {
-            char* newList = realloc(iList->start, iList->size << 1);
+            char* newList = realloc(iList->start, iList->size * 2);
             if (NULL == newList) {
                     perror("realloc");
                     return 0;
             }
             iList->start = newList;
-            iList->size <<= 1;
+            iList->size *= 2;
         }
         char* end = iList->start + iList->len;
+        *end++ = '"';
+        for (int i=(int)level; i ; i--)
+            *end++ = '*';
+        if (level)
+            *end++ = ' ';
         int n = (strncmp(incname, "../", 3) == 0) ? 3 : 0;
-        sprintf(end, "\"%s\\n\"\n", incname + n);
+        sprintf(end, "%s\\n\"\n", incname + n);
         l -= (unsigned long)n;
         iList->len += l;
         return l;
 }
 
-int escape_file(char* inputName, FILE* inFile, FILE* outFile, int count, FILE* depFile, incList* iList)
+int escape_file(char* inputName, FILE* inFile, FILE* outFile, int count, FILE* depFile, incList* iList, unsigned long level)
 {
         int n,i,k;
         char linebuf[1024];
         char pageName[2048];
         int linecount = count;
 
-        append_inc_name(iList, inputName);
+        append_inc_name(iList, inputName, level);
         if (NULL == fgets(linebuf, sizeof(linebuf), inFile))
                 return 0;
 
@@ -159,7 +164,7 @@ int escape_file(char* inputName, FILE* inFile, FILE* outFile, int count, FILE* d
                                                 includeName, strerror(errno));
                                 } else {
                                         fprintf(depFile, " %s", includeName);
-                                        escape_file(includeName, incFile, outFile, 0, depFile, iList);
+                                        escape_file(includeName, incFile, outFile, 0, depFile, iList, level + 1);
                                 }
                         } else {
                                 fprintf(stderr, "%s:%d:%d: missing name of include file\n", inputName, linecount, j);
@@ -340,7 +345,7 @@ int main(int argc, char* argv[])
                 }
                 sprintf(pageName, "static const char %s%s[] =\n", prefix, stringName);
                 fputs(pageName, outFile);
-                linecount = escape_file(inputName, inFile, outFile, linecount, depFile, &iList);
+                linecount = escape_file(inputName, inFile, outFile, linecount, depFile, &iList, 0);
                 fclose(inFile);
                 strcpy(pageName, "#ifdef __SHOW_TEXT_SOURCE\n");
                 fputs(pageName, outFile);
