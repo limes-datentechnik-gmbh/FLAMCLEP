@@ -3777,12 +3777,12 @@ extern int readEnvars(const char* pcFil, FILE* pfOut, FILE* pfErr, TsEnVarList**
          if (pfTmp==NULL) {
             char* pcHom=dhomedir(TRUE);
             if (pcHom!=NULL) {
-               char*    pcFil=NULL;
-               size_t   szFil=0;
-               srprintf(&pcFil,&szFil,strlen(pcHom),"%s.stdenv",pcHom);
-               if (pcFil!=NULL) {
-                  pfTmp = fopen_nowarn(pcFil,"r");
-                  free(pcFil);
+               char*    pcHlp=NULL;
+               size_t   szHlp=0;
+               srprintf(&pcHlp,&szHlp,strlen(pcHom),"%s.stdenv",pcHom);
+               if (pcHlp!=NULL) {
+                  pfTmp = fopen_nowarn(pcHlp,"r");
+                  free(pcHlp);
                }
                free(pcHom);
             }
@@ -3802,12 +3802,12 @@ extern int readEnvars(const char* pcFil, FILE* pfOut, FILE* pfErr, TsEnVarList**
          if (pfTmp==NULL) {
             char* pcHom=dhomedir(TRUE);
             if (pcHom!=NULL) {
-               char*    pcFil=NULL;
-               size_t   szFil=0;
-               srprintf(&pcFil,&szFil,strlen(pcHom),"%s.stdenv",pcHom);
-               if (pcFil!=NULL) {
-                  pfTmp = fopen_nowarn(pcFil,"r");
-                  free(pcFil);
+               char*    pcHlp=NULL;
+               size_t   szHlp=0;
+               srprintf(&pcHlp,&szHlp,strlen(pcHom),"%s.stdenv",pcHom);
+               if (pcHlp!=NULL) {
+                  pfTmp = fopen_nowarn(pcHlp,"r");
+                  free(pcHlp);
                }
                free(pcHom);
             }
