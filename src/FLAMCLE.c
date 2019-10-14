@@ -3199,11 +3199,13 @@ static int siCleGetCommand(
    } else if (argv[1][l]=='=') {
       int o=(argv[1][l+1]=='>')?l+2:l+1;
       if (argc!=2) {
-         if (pfErr!=NULL) fprintf(pfErr,"The expected parameter file name for '%s' is split into more than one parameter\n",pcFct);
-         if (pfErr!=NULL) fprintf(pfErr,"The parameter file name must start with \" and end with \" to join anything into one parameter\n");
-         if (pfErr!=NULL) fprintf(pfErr,"Syntax for command '%s' not valid\n",pcFct);
-         if (pfErr!=NULL) fprintf(pfErr,"%s %s %s=\" parameter file name \"\n",pcDep,argv[0],pcFct);
-         if (pfErr!=NULL) fprintf(pfErr,"Please use '%s SYNTAX %s%c.path%c' for more information\n",argv[0],pcFct,C_SBO,C_SBC);
+         if (pfErr!=NULL) {
+            fprintf(pfErr,"The expected parameter file name for '%s' is split into more than one parameter\n",pcFct);
+            fprintf(pfErr,"The parameter file name must start with \" and end with \" to join anything into one parameter\n");
+            fprintf(pfErr,"Syntax for command '%s' not valid\n",pcFct);
+            fprintf(pfErr,"%s %s %s=\" parameter file name \"\n",pcDep,argv[0],pcFct);
+            fprintf(pfErr,"Please use '%s SYNTAX %s%c.path%c' for more information\n",argv[0],pcFct,C_SBO,C_SBC);
+         }
          return(CLERTC_CMD);
       }
       *ppFil=dcpmapfil(argv[1]+o);
@@ -3221,12 +3223,14 @@ static int siCleGetCommand(
          return(CLERTC_SYS);
       }
    } else {
-      if (pfErr!=NULL) fprintf(pfErr,"No blank space ' ', equal sign '=', dot '.' or bracket '(' behind '%s'\n",pcFct);
-      if (pfErr!=NULL) fprintf(pfErr,"Please use a blank space to define an argument list or an equal sign for a parameter file\n");
-      if (pfErr!=NULL) fprintf(pfErr,"Syntax for command '%s' not valid\n",pcFct);
-      if (pfErr!=NULL) fprintf(pfErr,"%s %s %cOWNER=oid%c %s \"... argument list ...\" %cMAXCC=%cmax%c%c-min%c%c %cQUIET%c\n",pcDep,argv[0],C_SBO,C_SBC,pcFct,C_SBO,C_SBO,C_SBC,C_SBO,C_SBC,C_SBC,C_SBO,C_SBC);
-      if (pfErr!=NULL) fprintf(pfErr,"%s %s %cOWNER=oid%c %s=\" parameter file name \" %cMAXCC=%cmax%c%c-min%c%c %cQUIET%c\n",pcDep,argv[0],C_SBO,C_SBC,pcFct,C_SBO,C_SBO,C_SBC,C_SBO,C_SBC,C_SBC,C_SBO,C_SBC);
-      if (pfErr!=NULL) fprintf(pfErr,"Please use '%s SYNTAX %s%c.path%c' for more information\n",argv[0],pcFct,C_SBO,C_SBC);
+      if (pfErr!=NULL) {
+         fprintf(pfErr,"No blank space ' ', equal sign '=', dot '.' or bracket '(' behind '%s'\n",pcFct);
+         fprintf(pfErr,"Please use a blank space to define an argument list or an equal sign for a parameter file\n");
+         fprintf(pfErr,"Syntax for command '%s' not valid\n",pcFct);
+         fprintf(pfErr,"%s %s %cOWNER=oid%c %s \"... argument list ...\" %cMAXCC=%cmax%c%c-min%c%c %cQUIET%c\n",pcDep,argv[0],C_SBO,C_SBC,pcFct,C_SBO,C_SBO,C_SBC,C_SBO,C_SBC,C_SBC,C_SBO,C_SBC);
+         fprintf(pfErr,"%s %s %cOWNER=oid%c %s=\" parameter file name \" %cMAXCC=%cmax%c%c-min%c%c %cQUIET%c\n",pcDep,argv[0],C_SBO,C_SBC,pcFct,C_SBO,C_SBO,C_SBC,C_SBO,C_SBC,C_SBC,C_SBO,C_SBC);
+         fprintf(pfErr,"Please use '%s SYNTAX %s%c.path%c' for more information\n",argv[0],pcFct,C_SBO,C_SBC);
+      }
       SAFE_FREE(*ppFil);
       return(CLERTC_CMD);
    }
