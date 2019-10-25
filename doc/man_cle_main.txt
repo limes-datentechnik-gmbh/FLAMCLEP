@@ -173,7 +173,7 @@ FLCL_ICNV_FROM='IBM-1141'         # this is the best solution
 FLCL_ICNV_TO=UTF-8                # "UTF-8" could result in errors
 -----------------------------------------------------------------------
 
-See <<appendix-Properties>> for the current property file content.
+See <<Properties,Properties>> for the current property file content.
 
 ENVIRONMENT VARIABLE MAPPING
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -316,7 +316,7 @@ restore the interpretation to the system code page.
 *ATTENTION:* This is no character set conversion, only the UNICODE code
 points 0-127 which are on different code points in the different EBCDIC
 code pages are replaced. All other higher code points (e.g. German
-Umlauts ('ä','ü','Ö')) are not touched. 
+Umlauts ('ä','ü','ö')) are not touched.
 
 The partial CCSID conversion are mainly useful for application
 programming interfaces. At compile time the CCSID for literals must be

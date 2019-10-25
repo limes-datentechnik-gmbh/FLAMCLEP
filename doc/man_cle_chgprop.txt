@@ -50,7 +50,7 @@ done for the current owner.
 To delete a property you can simply specify the path without the root
 and with out a sign.   
 
-See <<appendix-Properties>> for the current property file content.
+See <<Properties,Properties>> for the current property file content.
 
 .EXAMPLES
 

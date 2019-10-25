@@ -3,7 +3,7 @@ external libraries, license and other attributes. This string is
 provided to the command line executer (CLE) by the calling program and
 should reflect the current about information for this program (&{pGm}).
 
-See <<appendix-About>> for the output of this command.
+See <<About,About>> for the output of this command.
 
 .EXAMPLES
 

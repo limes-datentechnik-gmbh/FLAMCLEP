@@ -7,7 +7,7 @@ command.
 A help message for a certain parameter will also show the assigned
 property value.
 
-See <<appendix-Properties>> for the current property file content.
+See <<Properties,Properties>> for the current property file content.
 
 .OPTIONS
 
