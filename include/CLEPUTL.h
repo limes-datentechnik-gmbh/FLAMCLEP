@@ -106,6 +106,7 @@ extern int win_unsetenv(const char* name);
 #define ISDDNAME(p)     (strlen(p)>3 && toupper((p)[0])=='D' && toupper((p)[1])=='D' && (p)[2]==':')
 #define ISPATHNAME(p)   (strchr((p),'/')!=NULL)
 #define ISDSNAME(p)     (strlen(p)>2 && toupper((p)[0])=='/' && toupper((p)[1])=='/')
+#define ISGDGMBR(m)     ((m)[0]=='0' || (m)[0]=='+' || (m)[0]=='-')
 
 #ifdef __ZOS__
    extern FILE* fopen_tmp(void);
