@@ -110,8 +110,8 @@ extern int win_unsetenv(const char* name);
 #define ISDDN(c)        (isalnum(c) || (c)==C_DLR || (c)==C_HSH || (c)==C_ATS)
 
 #ifdef __ZOS__
-   extern fopen_hfq(const char* name, const char* mode);
-   extern fopen_hfq_nowarn(const char* name, const char* mode);
+   extern FILE* fopen_hfq(const char* name, const char* mode);
+   extern FILE* fopen_hfq_nowarn(const char* name, const char* mode);
    extern FILE* fopen_tmp(void);
    extern int fclose_tmp(FILE* fp);
    extern int remove_hfq(const char* name);
