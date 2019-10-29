@@ -141,11 +141,12 @@
  * 1.2.75: Add black box (handle) for all call back functions
  * 1.2.76: Support additional authorization for CLP path
  * 1.2.77: Use type of function and not type of pointer to function (usable for pragma's)
+ * 1.2.78: Support free defined appendix
  */
-#define CLE_VSN_STR       "1.2.77"
+#define CLE_VSN_STR       "1.2.78"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        2
-#define CLE_VSN_REVISION       77
+#define CLE_VSN_REVISION       78
 
 /* Definition der Konstanten ******************************************/
 
@@ -569,6 +570,7 @@ extern int siCleExecute(
    const char*                   pcScc,
    const char*                   pcDef,
    TfMsg*                        pfMsg,
+   const char*                   pcApp,
    const char*                   pcApx,
    const TsCleAppendix*          psApx,
    void*                         pvF2S,
@@ -1533,6 +1535,9 @@ EVALUATE:
             vdClePrnBuiltInDocu(pfDoc, pcOwn, pcPgm, isNbr);
             s=1;
 
+            if (pcApp!=NULL && *pcApp) {
+               fprintm(pfDoc,pcOwn,pcPgm,pcApp,1);
+            }
             if (psApx!=NULL) {
                efprintf(pfDoc,"[[appendix-clp-strings]]\n");
                efprintf(pfDoc,"[appendix]\n");
