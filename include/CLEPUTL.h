@@ -107,13 +107,20 @@ extern int win_unsetenv(const char* name);
 #define ISPATHNAME(p)   (strchr((p),'/')!=NULL)
 #define ISDSNAME(p)     (strlen(p)>2 && toupper((p)[0])=='/' && toupper((p)[1])=='/')
 #define ISGDGMBR(m)     ((m)[0]=='0' || (m)[0]=='+' || (m)[0]=='-')
+#define ISDDN(c)        (isalnum(c) || (c)==C_DLR || (c)==C_HSH || (c)==C_ATS)
 
 #ifdef __ZOS__
+   extern fopen_hfq(const char* name, const char* mode);
+   extern fopen_hfq_nowarn(const char* name, const char* mode);
    extern FILE* fopen_tmp(void);
    extern int fclose_tmp(FILE* fp);
+   extern int remove_hfq(const char* name);
 #else
-#  define fopen_tmp()   tmpfile()
-#  define fclose_tmp(fp) fclose((fp))
+#  define fopen_hfq(n,m)         fopen(n,m)
+#  define fopen_hfq_nowarn(n,m)  fopen_nowarn(n,m)
+#  define fopen_tmp()            tmpfile()
+#  define fclose_tmp(fp)         fclose((fp))
+#  define remove_hfq(n)          remove(n)
 #endif
 
 /* Definition of return/condition/exit codes **************************/
@@ -391,7 +398,7 @@ extern char* dcpmapfil(const char* file);
  * @param mode for fopen
  * @return mapped mode
  */
-extern char* filemode(const char* mode);
+extern const char* filemode(const char* mode);
 
 /**
  * Use rpltpl() and maplab() to build key label names, based on key label templates
