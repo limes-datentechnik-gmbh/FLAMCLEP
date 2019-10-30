@@ -376,6 +376,7 @@ int main(int argc, char * argv[])
             fread(&stHelp,sizeof(stMain),1,f);
             fclose(f);
             if (memcmp(&stMain,&stHelp,sizeof(stMain))) {
+               // cppcheck-suppress objectIndex
                for (i=0;i<sizeof(stMain) && ((char*)&stMain)[i]==((char*)&stHelp)[i];i++);
                printf("\n!!! Verification not successfull !!! Position: %d(%u)\n",i,(unsigned)sizeof(stMain));
                printf(  "                 ^^^                \n");

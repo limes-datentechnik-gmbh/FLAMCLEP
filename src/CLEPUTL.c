@@ -179,7 +179,7 @@ static inline int flzsym(const char* pcDat, const int* piSln, char* pcVal, int* 
       return(r);
    }
    extern int remove_hfq(const char* name) {
-      if (ISPATHNAME(name) || ISDDNAME(name) || name[0]=='\'' || name[0]==':') {
+      if (ISPATHNAME(name) || ISDDNAME(name) || name[0]=='\'' || name[0]=='(') {
          return(remove(name));
       } else {
          char help[strlen(name)+3];

@@ -873,16 +873,22 @@ static inline I64 ClpRndFnv(const I64 siRnd)
    unsigned char* p=(unsigned char*)&siRnd;
    U64            h=0xcbf29ce48422232LLU;
    h^=p[0]; h*=0x100000001b3LLU;
+   // cppcheck-suppress objectIndex
    h^=p[1]; h*=0x100000001b3LLU;
+   // cppcheck-suppress objectIndex
    h^=p[2]; h*=0x100000001b3LLU;
+   // cppcheck-suppress objectIndex
    h^=p[3]; h*=0x100000001b3LLU;
+   // cppcheck-suppress objectIndex
    h^=p[4]; h*=0x100000001b3LLU;
+   // cppcheck-suppress objectIndex
    h^=p[5]; h*=0x100000001b3LLU;
+   // cppcheck-suppress objectIndex
    h^=p[6]; h*=0x100000001b3LLU;
+   // cppcheck-suppress objectIndex
    h^=p[7]; h*=0x100000001b3LLU;
    return h;
 }
-
 extern void* pvClpAlloc(
    void*                         pvHdl,
    void*                         pvPtr,
@@ -2615,7 +2621,7 @@ static int siClpSymCal(
    TsSym*                        psTab)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
-   TsSym*                        psSym=psTab;
+   TsSym*                        psSym;
    TsSym*                        psHlp=NULL;
    int                           isPar=FALSE;
    int                           isCon=FALSE;
