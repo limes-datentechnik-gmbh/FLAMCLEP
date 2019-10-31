@@ -27,7 +27,7 @@
  **********************************************************************
  *
  * This interface provides utility function for CLE and CLP. It should
- * static linked to CLP and or CLE.
+ * static linked to CLP and/or CLE.
  *
  **********************************************************************/
 
