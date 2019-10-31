@@ -113,12 +113,14 @@ extern int win_unsetenv(const char* name);
    extern FILE* fopen_hfq(const char* name, const char* mode);
    extern FILE* fopen_hfq_nowarn(const char* name, const char* mode);
    extern FILE* fopen_tmp(void);
-   extern int fclose_tmp(FILE* fp);
-   extern int remove_hfq(const char* name);
+   extern FILE* freopen_hfq(const char* name, const char* mode, FILE* stream);
+   extern int   fclose_tmp(FILE* fp);
+   extern int   remove_hfq(const char* name);
 #else
 #  define fopen_hfq(n,m)         fopen(n,m)
 #  define fopen_hfq_nowarn(n,m)  fopen_nowarn(n,m)
 #  define fopen_tmp()            tmpfile()
+#  define freopen_hfq(n,m,s)     freopen(n,m,s)
 #  define fclose_tmp(fp)         fclose((fp))
 #  define remove_hfq(n)          remove(n)
 #endif

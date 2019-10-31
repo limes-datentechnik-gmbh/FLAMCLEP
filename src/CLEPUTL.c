@@ -162,6 +162,17 @@ static inline int flzsym(const char* pcDat, const int* piSln, char* pcVal, int* 
          }
       }
    }
+   extern FILE* freopen_hfq(const char* name, const char* mode, FILE* stream) {
+      if (name==NULL || *name==':') {
+         return(freopen("", mode, stream));
+      } else if (*name=='\'' || *name=='(' || ISPATHNAME(name) || ISDDNAME(name)) {
+         return(freopen(name, mode, stream));
+      }else {
+         char help[strlen(name)+3];
+         snprintf(help,sizeof(help),"'%s'",name);
+         return(freopen(help, mode, stream));
+      }
+   }
    extern FILE* fopen_tmp(void) {
       FILE* f=fopen("*","wb+,type=memory(hiperspace)");
       if (f==NULL) {
