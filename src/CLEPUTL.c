@@ -3910,7 +3910,7 @@ extern int readEnvars(const char* pcFil, FILE* pfOut, FILE* pfErr, TsEnVarList**
    } else {
       char* pcHlp=dcpmapfil(pcFil);
       if (pcHlp!=NULL) {
-         pfTmp=fopen_nowarn(pcHlp,"r");
+         pfTmp=fopen_hfq_nowarn(pcHlp,filemode("r"));
          free(pcHlp);
       }
    }
