@@ -68,9 +68,169 @@ static inline int flzsym(const char* pcDat, const int* piSln, char* pcVal, int* 
 #endif
 
 #ifdef __ZOS__
+   static inline const char* filemode(const char* mode) {
+      if(mode!=NULL) {
+         if(strcmp(mode,"r")==0){
+            return "r, noseek, samethread, abend=recover";
+         }
+         if(strcmp(mode,"r+")==0){
+            return "r+, noseek, samethread, abend=recover";
+         }
+         if(strcmp(mode,"rb")==0){
+            return "rb, noseek, samethread, abend=recover";
+         }
+         if(strcmp(mode,"rb+")==0 || strcmp(mode,"r+b")==0){
+            return "rb+, noseek, samethread, abend=recover";
+         }
+         if(strcmp(mode,"rs")==0){
+            return "r, byteseek, samethread, abend=recover";
+         }
+         if(strcmp(mode,"rs+")==0 || strcmp(mode,"r+s")==0){
+            return "r+, byteseek, samethread, abend=recover";
+         }
+         if(strcmp(mode,"rbs")==0){
+            return "rb, byteseek, samethread, abend=recover";
+         }
+         if(strcmp(mode,"rbs+")==0 || strcmp(mode,"r+bs")==0){
+            return "rb+, byteseek, samethread, abend=recover";
+         }
+
+         if(strcmp(mode,"w")==0){
+            return "w, noseek, samethread, abend=recover, recfm=*";
+         }
+         if(strcmp(mode,"w+")==0){
+            return "w+, noseek, samethread, abend=recover, recfm=*";
+         }
+         if(strcmp(mode,"wb")==0){
+            return "wb, noseek, samethread, abend=recover, recfm=*";
+         }
+         if(strcmp(mode,"wb+")==0 || strcmp(mode,"w+b")==0){
+            return "wb+, noseek, samethread, abend=recover, recfm=*";
+         }
+         if(strcmp(mode,"ws")==0){
+            return "w, byteseek, samethread, abend=recover, recfm=*";
+         }
+         if(strcmp(mode,"ws+")==0 || strcmp(mode,"w+s")==0){
+            return "w+, byteseek, samethread, abend=recover, recfm=*";
+         }
+         if(strcmp(mode,"wbs")==0){
+            return "wb, byteseek, samethread, abend=recover, recfm=*";
+         }
+         if(strcmp(mode,"wbs+")==0 || strcmp(mode,"w+bs")==0){
+            return "wb+, byteseek, samethread, abend=recover, recfm=*";
+         }
+
+         if(strcmp(mode,"a")==0){
+            return "a, noseek, samethread, abend=recover, recfm=*";
+         }
+         if(strcmp(mode,"a+")==0){
+            return "a+, noseek, samethread, abend=recover, recfm=*";
+         }
+         if(strcmp(mode,"ab")==0){
+            return "ab, noseek, samethread, abend=recover, recfm=*";
+         }
+         if(strcmp(mode,"ab+")==0 || strcmp(mode,"a+b")==0){
+            return "ab+, noseek, samethread, abend=recover, recfm=*";
+         }
+         if(strcmp(mode,"as")==0){
+            return "a, byteseek, samethread, abend=recover, recfm=*";
+         }
+         if(strcmp(mode,"as+")==0 || strcmp(mode,"a+s")==0){
+            return "a+, byteseek, samethread, abend=recover, recfm=*";
+         }
+         if(strcmp(mode,"abs")==0){
+            return "ab, byteseek, samethread, abend=recover, recfm=*";
+         }
+         if(strcmp(mode,"abs+")==0 || strcmp(mode,"a+bs")==0){
+            return "ab+, byteseek, samethread, abend=recover, recfm=*";
+         }
+      }
+      return mode;
+   }
+#  define DEFAULT_DCB "recfm=VB, lrecl=516"
+   static inline FILE* fopen_hst(const char* name, const char* mode) {
+      FILE* f;
+      char  acMode[strlen(mode)+32];
+      char* pcRecfm=NULL;
+      char* pcDefDcb=GETENV("CLP_DEFAULT_DCB");
+      if (pcDefDcb==NULL || *pcDefDcb) pcDefDcb=DEFAULT_DCB;
+      strcpy(acMode,mode);
+      if ((acMode[0]=='a' && acMode[1]=='b' && acMode[2]=='+') ||
+          (acMode[0]=='a' && acMode[1]=='t' && acMode[2]=='+') ||
+          (acMode[0]=='a' && acMode[1]=='+')) {
+         acMode[0]='r';
+         f=fopen(name, acMode);
+         if (f!=NULL) return(f);
+         acMode[0]='w';
+         pcRecfm=strstr(acMode,"recfm=*");
+         if (pcRecfm!=NULL) {
+            *pcRecfm=0x00;
+            strcat(acMode,pcDefDcb);
+         }
+      } else {
+         if (acMode[0]=='w' || acMode[0]=='a' ) {
+            pcRecfm=strstr(acMode,"recfm=*");
+            if (pcRecfm!=NULL) {
+               *pcRecfm=0x00;
+               acMode[0]='r';
+               f=fopen(name, acMode);
+               if (f!=NULL) {
+                  fclose(f);
+                  acMode[0]='w';
+                  *pcRecfm='r';
+               } else {
+                  acMode[0]='w';
+                  strcat(acMode,pcDefDcb);
+               }
+            }
+         }
+      }
+      f=fopen(name, acMode);
+      return(f);
+   }
+   static inline FILE* fopen_hst_nowarn(const char* name, const char* mode) {
+      FILE* f;
+      char  acMode[strlen(mode)+32];
+      char* pcRecfm=NULL;
+      char* pcDefDcb=GETENV("CLP_DEFAULT_DCB");
+      if (pcDefDcb==NULL || *pcDefDcb==0x00) pcDefDcb=DEFAULT_DCB;
+      strcpy(acMode,mode);
+      if ((acMode[0]=='a' && acMode[1]=='b' && acMode[2]=='+') ||
+          (acMode[0]=='a' && acMode[1]=='t' && acMode[2]=='+') ||
+          (acMode[0]=='a' && acMode[1]=='+')) {
+         acMode[0]='r';
+         f=fopen_nowarn(name, acMode);
+         if (f!=NULL) return(f);
+         acMode[0]='w';
+         pcRecfm=strstr(acMode,"recfm=*");
+         if (pcRecfm!=NULL) {
+            *pcRecfm=0x00;
+            strcat(acMode,pcDefDcb);
+         }
+      } else {
+         if (acMode[0]=='w' || acMode[0]=='a') {
+            pcRecfm=strstr(acMode,"recfm=*");
+            if (pcRecfm!=NULL) {
+               *pcRecfm=0x00;
+               acMode[0]='r';
+               f=fopen_nowarn(name, acMode);
+               if (f!=NULL) {
+                  fclose(f);
+                  acMode[0]='w';
+                  *pcRecfm='r';
+               } else {
+                  acMode[0]='w';
+                  strcat(acMode,pcDefDcb);
+               }
+            }
+         }
+      }
+      f=fopen_nowarn(name, acMode);
+      return(f);
+   }
    extern FILE* fopen_hfq(const char* name, const char* mode) {
       if (ISPATHNAME(name) || ISDDNAME(name)) {
-         return(fopen(name, mode));
+         return(fopen_hst(name, filemode(mode)));
       } else {
          if (name[0]=='\'') {
             FILE* f;
@@ -81,13 +241,13 @@ static inline int flzsym(const char* pcDat, const int* piSln, char* pcVal, int* 
                char path[12]="DD:";
                for(j=1;j<i;j++) path[j+2]=name[j];
                path[j+2]=0x00;
-               f=fopen(path, mode);
+               f=fopen_hst(path, filemode(mode));
                // cppcheck-suppress knownConditionTrueFalse
                if (f==NULL) { // no static allocation available -> try dynamic allocation of only one qualifier
-                  f=fopen(name, mode);
+                  f=fopen_hst(name, filemode(mode));
                }
             } else { // more than one qualifier
-               f=fopen(name, mode);
+               f=fopen_hst(name, filemode(mode));
             }
             return(f);
          } else {
@@ -99,17 +259,17 @@ static inline int flzsym(const char* pcDat, const int* piSln, char* pcVal, int* 
                char path[12]="DD:";
                for(j=0;j<i;j++) path[j+3]=name[j];
                path[j+3]=0x00;
-               f=fopen(path, mode);
+               f=fopen_hst(path, filemode(mode));
                // cppcheck-suppress knownConditionTrueFalse
                if (f==NULL) { // no static allocation available -> try dynamic allocation of only one qualifier
                   char help[strlen(name)+3];
                   snprintf(help,sizeof(help),"'%s'",name);
-                  f=fopen(help, mode);
+                  f=fopen_hst(help, filemode(mode));
                }
             } else { // more than one qualifier
                char help[strlen(name)+3];
                snprintf(help,sizeof(help),"'%s'",name);
-               f=fopen(help, mode);
+               f=fopen_hst(help, filemode(mode));
             }
             return(f);
          }
@@ -117,7 +277,7 @@ static inline int flzsym(const char* pcDat, const int* piSln, char* pcVal, int* 
    }
    extern FILE* fopen_hfq_nowarn(const char* name, const char* mode) {
       if (ISPATHNAME(name) || ISDDNAME(name)) {
-         return(fopen_nowarn(name, mode));
+         return(fopen_hst_nowarn(name, filemode(mode)));
       } else {
          if (name[0]=='\'') {
             FILE* f;
@@ -128,13 +288,13 @@ static inline int flzsym(const char* pcDat, const int* piSln, char* pcVal, int* 
                char path[12]="DD:";
                for(j=1;j<i;j++) path[j+2]=name[j];
                path[j+2]=0x00;
-               f=fopen_nowarn(path, mode);
+               f=fopen_hst_nowarn(path, filemode(mode));
                // cppcheck-suppress knownConditionTrueFalse
                if (f==NULL) { // no static allocation available -> try dynamic allocation of only one qualifier
-                  f=fopen_nowarn(name, mode);
+                  f=fopen_hst_nowarn(name, filemode(mode));
                }
             } else { // more than one qualifier
-               f=fopen_nowarn(name, mode);
+               f=fopen_hst_nowarn(name, filemode(mode));
             }
             return(f);
          } else {
@@ -146,17 +306,17 @@ static inline int flzsym(const char* pcDat, const int* piSln, char* pcVal, int* 
                char path[12]="DD:";
                for(j=0;j<i;j++) path[j+3]=name[j];
                path[j+3]=0x00;
-               f=fopen_nowarn(path, mode);
+               f=fopen_hst_nowarn(path, filemode(mode));
                // cppcheck-suppress knownConditionTrueFalse
                if (f==NULL) { // no static allocation available -> try dynamic allocation of only one qualifier
                   char help[strlen(name)+3];
                   snprintf(help,sizeof(help),"'%s'",name);
-                  f=fopen_nowarn(help, mode);
+                  f=fopen_hst_nowarn(help, filemode(mode));
                }
             } else { // more than one qualifier
                char help[strlen(name)+3];
                snprintf(help,sizeof(help),"'%s'",name);
-               f=fopen_nowarn(help, mode);
+               f=fopen_hst_nowarn(help, filemode(mode));
             }
             return(f);
          }
@@ -164,13 +324,13 @@ static inline int flzsym(const char* pcDat, const int* piSln, char* pcVal, int* 
    }
    extern FILE* freopen_hfq(const char* name, const char* mode, FILE* stream) {
       if (name==NULL || *name==':') {
-         return(freopen("", mode, stream));
+         return(freopen("", filemode(mode), stream));
       } else if (*name=='\'' || *name=='(' || ISPATHNAME(name) || ISDDNAME(name)) {
-         return(freopen(name, mode, stream));
+         return(freopen(name, filemode(mode), stream));
       }else {
          char help[strlen(name)+3];
          snprintf(help,sizeof(help),"'%s'",name);
-         return(freopen(help, mode, stream));
+         return(freopen(help, filemode(mode), stream));
       }
    }
    extern FILE* fopen_tmp(void) {
@@ -197,6 +357,87 @@ static inline int flzsym(const char* pcDat, const int* piSln, char* pcVal, int* 
          snprintf(help,sizeof(help),"'%s'",name);
          return(remove(help));
       }
+   }
+#else
+   static inline const char* filemode(const char* mode) {
+      if(mode!=NULL) {
+         if(strcmp(mode,"r")==0 || strcmp(mode,"rt")==0 || strcmp(mode,"rs")==0 || strcmp(mode,"rts")==0){
+            return "r";
+         }
+         if(strcmp(mode,"r+")==0 || strcmp(mode,"rs+")==0 || strcmp(mode,"rt+")==0 || strcmp(mode,"rts+")==0 || strcmp(mode,"r+t")==0 || strcmp(mode,"r+ts")==0){
+            return "r+";
+         }
+         if(strcmp(mode,"rb")==0 || strcmp(mode,"rbs")==0){
+            return "rb";
+         }
+         if(strcmp(mode,"rb+")==0 || strcmp(mode,"rbs+")==0 || strcmp(mode,"r+b")==0 || strcmp(mode,"r+bs")==0){
+            return "rb+";
+         }
+         if(strcmp(mode,"w")==0 || strcmp(mode,"wt")==0 || strcmp(mode,"ws")==0 || strcmp(mode,"wts")==0){
+            return "w";
+         }
+         if(strcmp(mode,"w+")==0 || strcmp(mode,"ws+")==0 || strcmp(mode,"wt+")==0 || strcmp(mode,"wts+")==0 || strcmp(mode,"w+t")==0 || strcmp(mode,"w+ts")==0){
+            return "w+";
+         }
+         if(strcmp(mode,"wb")==0 || strcmp(mode,"wbs")==0){
+            return "wb";
+         }
+         if(strcmp(mode,"wb+")==0 || strcmp(mode,"wbs+")==0 || strcmp(mode,"w+b")==0 || strcmp(mode,"w+bs")==0){
+            return "wb+";
+         }
+         if(strcmp(mode,"a")==0 || strcmp(mode,"at")==0 || strcmp(mode,"as")==0 || strcmp(mode,"ats")==0){
+            return "a";
+         }
+         if(strcmp(mode,"a+")==0 || strcmp(mode,"as+")==0 || strcmp(mode,"at+")==0 || strcmp(mode,"ats+")==0 || strcmp(mode,"a+t")==0 || strcmp(mode,"a+ts")==0){
+            return "a+";
+         }
+         if(strcmp(mode,"ab")==0 || strcmp(mode,"abs")==0){
+            return "ab";
+         }
+         if(strcmp(mode,"ab+")==0 || strcmp(mode,"abs+")==0 || strcmp(mode,"a+b")==0 || strcmp(mode,"a+bs")==0){
+            return "ab+";
+         }
+      }
+      return mode;
+   }
+   static inline FILE* fopen_opn(const char* name, const char* mode) {
+      FILE* f;
+      char  acMode[strlen(mode)+32];
+      strcpy(acMode,mode);
+      if ((acMode[0]=='a' && acMode[1]=='b' && acMode[2]=='+') ||
+          (acMode[0]=='a' && acMode[1]=='t' && acMode[2]=='+') ||
+          (acMode[0]=='a' && acMode[1]=='+')) {
+         acMode[0]='r';
+         f=fopen(name, acMode);
+         if (f!=NULL) return(f);
+         acMode[0]='w';
+      }
+      f=fopen(name, acMode);
+      return(f);
+   }
+   static inline FILE* fopen_opn_nowarn(const char* name, const char* mode) {
+      FILE* f;
+      char  acMode[strlen(mode)+32];
+      strcpy(acMode,mode);
+      if ((acMode[0]=='a' && acMode[1]=='b' && acMode[2]=='+') ||
+          (acMode[0]=='a' && acMode[1]=='t' && acMode[2]=='+') ||
+          (acMode[0]=='a' && acMode[1]=='+')) {
+         acMode[0]='r';
+         f=fopen_nowarn(name, acMode);
+         if (f!=NULL) return(f);
+         acMode[0]='w';
+      }
+      f=fopen_nowarn(name, acMode);
+      return(f);
+   }
+   extern FILE* fopen_hfq(const char* name, const char* mode) {
+      return(fopen_opn(name, filemode(mode)));
+   }
+   extern FILE* fopen_hfq_nowarn(const char* name, const char* mode) {
+      return(fopen_opn_nowarn(name, filemode(mode)));
+   }
+   extern FILE* freopen_hfq(const char* name, const char* mode, FILE* stream) {
+      return(freopen(name, filemode(mode), stream));
    }
 #endif
 
@@ -2396,111 +2637,10 @@ extern char* dcpmapfil(const char* file) {
    }
 }
 
-extern const char* filemode(const char* mode) {
-   if(mode!=NULL) {
-      if(strcmp(mode,"r")==0){
-         return "r, noseek, samethread, abend=recover";
-      }
-      if(strcmp(mode,"rb")==0){
-         return "rb, noseek, samethread, abend=recover";
-      }
-      if(strcmp(mode,"rb+")==0){
-         return "rb+, noseek, samethread, abend=recover";
-      }
-      if(strcmp(mode,"rs")==0){
-         return "r, byteseek, samethread, abend=recover";
-      }
-      if(strcmp(mode,"rbs")==0){
-         return "rb, byteseek, samethread, abend=recover";
-      }
-      if(strcmp(mode,"rbs+")==0){
-         return "rb+, byteseek, samethread, abend=recover";
-      }
-
-      if(strcmp(mode,"w")==0){
-         return "w, noseek, samethread, abend=recover, recfm=*";
-      }
-      if(strcmp(mode,"w+")==0){
-         return "w+, noseek, samethread, abend=recover, recfm=*";
-      }
-      if(strcmp(mode,"wb")==0){
-         return "wb, noseek, samethread, abend=recover, recfm=*";
-      }
-      if(strcmp(mode,"wb+")==0){
-         return "wb+, noseek, samethread, abend=recover, recfm=*";
-      }
-      if(strcmp(mode,"ws")==0){
-         return "w, byteseek, samethread, abend=recover, recfm=*";
-      }
-      if(strcmp(mode,"wbs")==0){
-         return "wb, byteseek, samethread, abend=recover, recfm=*";
-      }
-      if(strcmp(mode,"wbs+")==0){
-         return "wb+, byteseek, samethread, abend=recover, recfm=*";
-      }
-
-      if(strcmp(mode,"a")==0){
-         return "a, noseek, samethread, abend=recover, recfm=*";
-      }
-      if(strcmp(mode,"ab")==0){
-         return "ab, noseek, samethread, abend=recover, recfm=*";
-      }
-      if(strcmp(mode,"ab+")==0){
-         return "ab+, noseek, samethread, abend=recover, recfm=*";
-      }
-      if(strcmp(mode,"as")==0){
-         return "a, byteseek, samethread, abend=recover, recfm=*";
-      }
-      if(strcmp(mode,"abs")==0){
-         return "ab, byteseek, samethread, abend=recover, recfm=*";
-      }
-      if(strcmp(mode,"abs+")==0){
-         return "ab+, byteseek, samethread, abend=recover, recfm=*";
-      }
-   }
-   return mode;
-}
-
 #else
 
 extern char* dcpmapfil(const char* file) {
    return dmapfil(file,0);
-}
-
-extern const char* filemode(const char* mode) {
-   if(mode!=NULL) {
-      if(strcmp(mode,"r")==0 || strcmp(mode,"rs")==0){
-         return "r";
-      }
-      if(strcmp(mode,"rb")==0 || strcmp(mode,"rbs")==0){
-         return "rb";
-      }
-      if(strcmp(mode,"rb+")==0 || strcmp(mode,"rbs+")==0){
-         return "rb+";
-      }
-      if(strcmp(mode,"w")==0 || strcmp(mode,"ws")==0){
-         return "w";
-      }
-      if(strcmp(mode,"w+")==0 || strcmp(mode,"ws+")==0){
-         return "w+";
-      }
-      if(strcmp(mode,"wb")==0 || strcmp(mode,"wbs")==0){
-         return "wb";
-      }
-      if(strcmp(mode,"wb+")==0 || strcmp(mode,"wbs+")==0){
-         return "wb+";
-      }
-      if(strcmp(mode,"a")==0 || strcmp(mode,"as")==0){
-         return "a";
-      }
-      if(strcmp(mode,"ab")==0 || strcmp(mode,"abs")==0){
-         return "ab";
-      }
-      if(strcmp(mode,"ab+")==0 || strcmp(mode,"abs+")==0){
-         return "ab+";
-      }
-   }
-   return mode;
 }
 
 #endif
@@ -3466,7 +3606,7 @@ extern int file2str(void* hdl, const char* filename, char** buf, int* bufsize, c
       }
 #endif
    errno=0;
-   pfFile=fopen_hfq(filename, filemode("r"));
+   pfFile=fopen_hfq(filename, "r");
    if (pfFile == NULL) {
       if (errmsg!=NULL && msgsiz) {
          snprintf(errmsg,msgsiz,"Open of file (%s) failed (%d - %s)",filename,errno,strerror(errno));
@@ -3921,7 +4061,7 @@ extern int readEnvars(const char* pcFil, FILE* pfOut, FILE* pfErr, TsEnVarList**
    } else {
       char* pcHlp=dcpmapfil(pcFil);
       if (pcHlp!=NULL) {
-         pfTmp=fopen_hfq_nowarn(pcHlp,filemode("r"));
+         pfTmp=fopen_hfq_nowarn(pcHlp,"r");
          free(pcHlp);
       }
    }

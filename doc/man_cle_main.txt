@@ -81,6 +81,7 @@ USED ENVIRONMENT VARIABLES
  * OWNERID - used for current owner if not already defined
  * CLP_NOW - The current point in time used for predefined constants (0tYYYY/MM/DD.HH:MM:SS)
  * CLP_STRING_CCSID - CCSID used for interpretation of critical punctuation character on EBCDIC systems (default is taken from LANG)
+ * CLP_DEFAULT_DCB - The default record format and record length in C file mode format (default is 'recfm=VB, lrecl=516' only for z/OS)
  * &{PGM}_CONFIG_FILE - the configuration filename (default is '$HOME/.&{pgm}.config' on UNIX/WIN or '&SYSUID..&{PGM}.CONFIG' on mainframes)
  * &{PGM}_DEFAULT_OWNER_ID - the default owner ID (default is '&{oWn}')
  * owner_&{PGM}_command_PROPERTY_FILENAME - To override default property file names
@@ -174,6 +175,18 @@ FLCL_ICNV_TO=UTF-8                # "UTF-8" could result in errors
 -----------------------------------------------------------------------
 
 See <<Properties,Properties>> for the current property file content.
+
+For z/OS the default record format and record length for non-existing
+output files is 'recfm=VB, lrecl=512'. The file open function try first
+to open an existing file with 'recfm=*' to overwrite (DISP=OLD) and if
+this fails the 'recfm=*' in the file mode string is replaced with
+'recfm=VB, lrecl=512' and an open to write a new file (DISP=NEW) will be
+done. The environment variable CLP_DEFAULT_DCB can be used to change this
+file mode string. See 'Keyword Parameters for File Mode' for fopen() in
+'z/OS XL C/C++ Runtime Library Reference' for more information and for
+the correct syntax. Beside the 'recfm' with a valid record format (not
+'*' or '+') and the 'lrecl' you can also define the 'space' parameter.
+All other file mode parameter are managed by CLP.
 
 ENVIRONMENT VARIABLE MAPPING
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~

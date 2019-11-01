@@ -810,9 +810,9 @@ extern int siCleExecute(
       if (m!=NULL && *m) {
          pcFil=dcpmapfil(m);
          if (pcFil!=NULL) {
-            pfTrh=fopen_hfq(pcFil,filemode("w"));
+            pfTrh=fopen_hfq(pcFil,"w");
             if (pfTrh==NULL) {
-               if (pfErr!=NULL) fprintf(pfErr,"Open of trace file (\"%s\",\"%s\") failed\n",pcFil,filemode("w"));
+               if (pfErr!=NULL) fprintf(pfErr,"Open of trace file (\"%s\",\"%s\") failed\n",pcFil,"w");
             } else pfTrc=pfTrh;
             SAFE_FREE(pcFil);
          }
@@ -1167,9 +1167,9 @@ EVALUATE:
                ERROR(CLERTC_MEM,NULL);
             }
             szFil=strlen(pcFil)+1;
-            pfDoc=fopen_hfq(pcFil,filemode("w"));
+            pfDoc=fopen_hfq(pcFil,"w");
             if (pfDoc==NULL) {
-               fprintf(pfErr,"Open of manual page file (\"%s\",\"%s\") failed (%d - %s)\n",pcFil,filemode("w"),errno,strerror(errno));
+               fprintf(pfErr,"Open of manual page file (\"%s\",\"%s\") failed (%d - %s)\n",pcFil,"w",errno,strerror(errno));
                ERROR(CLERTC_SYS,NULL);
             }
          } else {
@@ -1380,9 +1380,9 @@ EVALUATE:
          }
 //       szFil=strlen(pcFil)+1; not used
          isMan=TRUE;
-         pfDoc=fopen_hfq(pcFil,filemode("w"));
+         pfDoc=fopen_hfq(pcFil,"w");
          if (pfDoc==NULL) {
-            fprintf(pfErr,"Open of manual page file (\"%s\",\"%s\") failed (%d - %s)\n",pcFil,filemode("w"),errno,strerror(errno));
+            fprintf(pfErr,"Open of manual page file (\"%s\",\"%s\") failed (%d - %s)\n",pcFil,"w",errno,strerror(errno));
             ERROR(CLERTC_SYS,NULL);
          }
          vdCleManProgram(pfDoc,psTab,pcOwn,pcPgm,pcHlp,pcMan,pcDep,pcOpt,pcDpa,isMan,TRUE);
@@ -1437,9 +1437,9 @@ EVALUATE:
             ERROR(CLERTC_MEM,NULL);
          }
          szFil=strlen(pcFil)+1;
-         pfDoc=fopen_hfq(pcFil,filemode("w"));
+         pfDoc=fopen_hfq(pcFil,"w");
          if (pfDoc==NULL) {
-            fprintf(pfErr,"Open of documentation file (\"%s\",\"%s\") failed (%d - %s)\n",pcFil,filemode("w"),errno,strerror(errno));
+            fprintf(pfErr,"Open of documentation file (\"%s\",\"%s\") failed (%d - %s)\n",pcFil,"w",errno,strerror(errno));
             ERROR(CLERTC_SYS,NULL);
          }
          if (pcCmd!=NULL) {
@@ -1733,9 +1733,9 @@ EVALUATE:
             ERROR(CLERTC_MEM,NULL);
          }
          szFil=strlen(pcFil)+1;
-         pfPro=fopen_hfq(pcFil,filemode("w"));
+         pfPro=fopen_hfq(pcFil,"w");
          if (pfPro==NULL) {
-            fprintf(pfErr,"Open of property file (\"%s\",\"%s\") failed (%d-%s)\n",pcFil,filemode("w"),errno,strerror(errno));
+            fprintf(pfErr,"Open of property file (\"%s\",\"%s\") failed (%d-%s)\n",pcFil,"w",errno,strerror(errno));
             ERROR(CLERTC_SYS,NULL);
          }
          if (pcCmd==NULL) fprintf(pfPro,"\n%c Property file for: %s.%s %c\n\n",C_HSH,pcOwn,pcPgm,C_HSH);
@@ -2524,9 +2524,9 @@ static int siClePropertyFinish(
       vdClpClose(pvHdl,CLPCLS_MTD_ALL);
       return(CLERTC_MEM);
    }
-   pfPro=fopen_hfq(pcHlp,filemode("w"));
+   pfPro=fopen_hfq(pcHlp,"w");
    if (pfPro==NULL) {
-      if (pfErr!=NULL) fprintf(pfErr,"Cannot open the property file (\"%s\",\"%s\") for write operation (%d-%s)\n",pcHlp,filemode("w"),errno,strerror(errno));
+      if (pfErr!=NULL) fprintf(pfErr,"Cannot open the property file (\"%s\",\"%s\") for write operation (%d-%s)\n",pcHlp,"w",errno,strerror(errno));
       SAFE_FREE(pcHlp); SAFE_FREE(pcEnv);
       vdClpClose(pvHdl,CLPCLS_MTD_ALL);
       return(CLERTC_SYS);
@@ -3275,7 +3275,7 @@ static TsCnfHdl* psCnfOpn(
    }
    strcpy(psHdl->pcFil,pcFil);
 
-   pfFil=fopen_hfq(psHdl->pcFil,filemode("r"));
+   pfFil=fopen_hfq(psHdl->pcFil,"r");
    if (pfFil==NULL && (errno==2 || errno==49 || errno==129)) return(psHdl);
    if (pfFil==NULL) {
       if (pfErr!=NULL) fprintf(pfErr,"Cannot open the configuration file (\"%s\",\"r\") for read operation (%d - %s)\n",psHdl->pcFil,errno,strerror(errno));
@@ -3533,7 +3533,7 @@ static void vdCnfCls(
    if (psHdl!=NULL) {
       if (psHdl->pcFil!=NULL) {
          if ((psHdl->isChg || psHdl->isClr) && psHdl->pcFil[0]) {
-            pfFil=fopen_hfq(psHdl->pcFil,filemode("w"));
+            pfFil=fopen_hfq(psHdl->pcFil,"w");
          }
          free(psHdl->pcFil);
       }

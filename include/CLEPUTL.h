@@ -109,18 +109,15 @@ extern int win_unsetenv(const char* name);
 #define ISGDGMBR(m)     ((m)[0]=='0' || (m)[0]=='+' || (m)[0]=='-')
 #define ISDDN(c)        (isalnum(c) || (c)==C_DLR || (c)==C_HSH || (c)==C_ATS)
 
+extern FILE* fopen_hfq(const char* name, const char* mode);
+extern FILE* fopen_hfq_nowarn(const char* name, const char* mode);
+extern FILE* freopen_hfq(const char* name, const char* mode, FILE* stream);
 #ifdef __ZOS__
-   extern FILE* fopen_hfq(const char* name, const char* mode);
-   extern FILE* fopen_hfq_nowarn(const char* name, const char* mode);
    extern FILE* fopen_tmp(void);
-   extern FILE* freopen_hfq(const char* name, const char* mode, FILE* stream);
    extern int   fclose_tmp(FILE* fp);
    extern int   remove_hfq(const char* name);
 #else
-#  define fopen_hfq(n,m)         fopen(n,m)
-#  define fopen_hfq_nowarn(n,m)  fopen_nowarn(n,m)
 #  define fopen_tmp()            tmpfile()
-#  define freopen_hfq(n,m,s)     freopen(n,m,s)
 #  define fclose_tmp(fp)         fclose((fp))
 #  define remove_hfq(n)          remove(n)
 #endif
@@ -394,13 +391,6 @@ extern char* cpmapfil(char* dest, int size,const char* source);
  * @return pointer to dynamic allocated string
  */
 extern char* dcpmapfil(const char* file);
-
-/**
- * set the right mode for fopen, private extension use 's' for fopen with seek
- * @param mode for fopen
- * @return mapped mode
- */
-extern const char* filemode(const char* mode);
 
 /**
  * Use rpltpl() and maplab() to build key label names, based on key label templates
