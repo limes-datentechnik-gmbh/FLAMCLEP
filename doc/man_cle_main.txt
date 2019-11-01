@@ -60,10 +60,11 @@ The last item which could result in a damaged command syntax after a
 program update is the use of implicit array definitions after an
 assignment, because the end of such an array might change, for
 example if an array of numbers defined an a switch is the end. In a
-new version such a switch could be a number with a default value, if only
-the keyword is defined. In this case the defined number referenced by this
-keyword is then part of the number array and the parameter is lost.
-Concerning this it is recommended to use enclosed array definitions.
+new version such a switch could be a number with a default value, if
+only the keyword is defined. In this case the defined number referenced
+by this keyword is then part of the number array and the parameter is
+lost. Concerning this it is recommended to use enclosed array
+definitions.
 
 All these capabilities are implemented to be compatible with several
 existing command lines syntaxes and to limit the effort to port old
@@ -176,17 +177,17 @@ FLCL_ICNV_TO=UTF-8                # "UTF-8" could result in errors
 
 See <<Properties,Properties>> for the current property file content.
 
-For z/OS the default record format and record length for non-existing
-output files is 'recfm=VB, lrecl=512'. The file open function try first
-to open an existing file with 'recfm=*' to overwrite (DISP=OLD) and if
-this fails the 'recfm=*' in the file mode string is replaced with
-'recfm=VB, lrecl=512' and an open to write a new file (DISP=NEW) will be
-done. The environment variable CLP_DEFAULT_DCB can be used to change this
-file mode string. See 'Keyword Parameters for File Mode' for fopen() in
-'z/OS XL C/C++ Runtime Library Reference' for more information and for
-the correct syntax. Beside the 'recfm' with a valid record format (not
-'*' or '+') and the 'lrecl' you can also define the 'space' parameter.
-All other file mode parameter are managed by CLP.
+For z/OS, the default record format and record length for non-existent
+output files is `recfm=VB, lrecl=512`. An attempt is made to open an
+existing file with `recfm=*` for overwriting (DISP=OLD). If this fails,
+another attempt is made with `recfm=VB, lrecl=512` to write a new file
+(DISP=NEW). The environment variable CLP_DEFAULT_DCB can be used to
+change this default file mode string.
+See 'Keyword Parameters for File Mode' for fopen() in
+_z/OS XL C/C++ Runtime Library Reference_ for more information and for
+the correct syntax. Beside 'recfm' with a valid record format (not
+'*' or '+') and 'lrecl', the 'space' parameter can be set.
+All other file mode parameters are managed by CLP.
 
 ENVIRONMENT VARIABLE MAPPING
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
