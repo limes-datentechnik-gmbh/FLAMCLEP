@@ -143,9 +143,9 @@ done and the angle bracket keep still in place.
 ------------------------------------------------------------------------
 
 For z/OS, the default record format and record length for non-existent
-output files is `recfm=VB, lrecl=512`. An attempt is made to open an
+output files is `recfm=VB, lrecl=516`. An attempt is made to open an
 existing file with `recfm=*` for overwriting (DISP=OLD). If this fails,
-another attempt is made with `recfm=VB, lrecl=512` to write a new file
+another attempt is made with `recfm=VB, lrecl=516` to write a new file
 (DISP=NEW). The environment variable CLP_DEFAULT_DCB can be used to
 change this default file mode string.
 See 'Keyword Parameters for File Mode' for fopen() in
