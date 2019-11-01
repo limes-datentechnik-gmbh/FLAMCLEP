@@ -149,10 +149,10 @@ static inline int flzsym(const char* pcDat, const int* piSln, char* pcVal, int* 
    }
 #  define DEFAULT_DCB "recfm=VB, lrecl=516"
    static inline FILE* fopen_hst(const char* name, const char* mode) {
-      FILE* f;
-      char  acMode[strlen(mode)+32];
-      char* pcRecfm=NULL;
-      char* pcDefDcb=GETENV("CLP_DEFAULT_DCB");
+      FILE*       f;
+      char        acMode[strlen(mode)+32];
+      char*       pcRecfm=NULL;
+      const char* pcDefDcb=GETENV("CLP_DEFAULT_DCB");
       if (pcDefDcb==NULL || *pcDefDcb) pcDefDcb=DEFAULT_DCB;
       strcpy(acMode,mode);
       if ((acMode[0]=='a' && acMode[1]=='b' && acMode[2]=='+') ||
@@ -189,10 +189,10 @@ static inline int flzsym(const char* pcDat, const int* piSln, char* pcVal, int* 
       return(f);
    }
    static inline FILE* fopen_hst_nowarn(const char* name, const char* mode) {
-      FILE* f;
-      char  acMode[strlen(mode)+32];
-      char* pcRecfm=NULL;
-      char* pcDefDcb=GETENV("CLP_DEFAULT_DCB");
+      FILE*       f;
+      char        acMode[strlen(mode)+32];
+      char*       pcRecfm=NULL;
+      const char* pcDefDcb=GETENV("CLP_DEFAULT_DCB");
       if (pcDefDcb==NULL || *pcDefDcb==0x00) pcDefDcb=DEFAULT_DCB;
       strcpy(acMode,mode);
       if ((acMode[0]=='a' && acMode[1]=='b' && acMode[2]=='+') ||
