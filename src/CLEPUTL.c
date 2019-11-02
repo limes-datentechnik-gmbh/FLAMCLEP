@@ -151,7 +151,7 @@ static inline int flzsym(const char* pcDat, const int* piSln, char* pcVal, int* 
    static inline FILE* fopen_hst(const char* name, const char* mode) {
       FILE*       f;
       char        acMode[strlen(mode)+32];
-      char*       pcRecfm=NULL;
+      char*       pcRecfm;
       const char* pcDefDcb=GETENV("CLP_DEFAULT_DCB");
       if (pcDefDcb==NULL || *pcDefDcb) pcDefDcb=DEFAULT_DCB;
       strcpy(acMode,mode);
@@ -164,22 +164,24 @@ static inline int flzsym(const char* pcDat, const int* piSln, char* pcVal, int* 
          acMode[0]='w';
          pcRecfm=strstr(acMode,"recfm=*");
          if (pcRecfm!=NULL) {
-            *pcRecfm=0x00;
+            pcRecfm[0]=0x00;
             strcat(acMode,pcDefDcb);
          }
       } else {
          if (acMode[0]=='w' || acMode[0]=='a' ) {
             pcRecfm=strstr(acMode,"recfm=*");
             if (pcRecfm!=NULL) {
-               *pcRecfm=0x00;
+               char r=pcRecfm[0];
+               char m=acMode[0];
+               pcRecfm[0]=0x00;
                acMode[0]='r';
                f=fopen(name, acMode);
                if (f!=NULL) {
                   fclose(f);
-                  acMode[0]='w';
-                  *pcRecfm='r';
+                  acMode[0]=m;
+                  pcRecfm[0]=r;
                } else {
-                  acMode[0]='w';
+                  acMode[0]=m;
                   strcat(acMode,pcDefDcb);
                }
             }
@@ -191,7 +193,7 @@ static inline int flzsym(const char* pcDat, const int* piSln, char* pcVal, int* 
    static inline FILE* fopen_hst_nowarn(const char* name, const char* mode) {
       FILE*       f;
       char        acMode[strlen(mode)+32];
-      char*       pcRecfm=NULL;
+      char*       pcRecfm;
       const char* pcDefDcb=GETENV("CLP_DEFAULT_DCB");
       if (pcDefDcb==NULL || *pcDefDcb==0x00) pcDefDcb=DEFAULT_DCB;
       strcpy(acMode,mode);
@@ -204,22 +206,24 @@ static inline int flzsym(const char* pcDat, const int* piSln, char* pcVal, int* 
          acMode[0]='w';
          pcRecfm=strstr(acMode,"recfm=*");
          if (pcRecfm!=NULL) {
-            *pcRecfm=0x00;
+            pcRecfm[0]=0x00;
             strcat(acMode,pcDefDcb);
          }
       } else {
          if (acMode[0]=='w' || acMode[0]=='a') {
             pcRecfm=strstr(acMode,"recfm=*");
             if (pcRecfm!=NULL) {
-               *pcRecfm=0x00;
+               char r=pcRecfm[0];
+               char m=acMode[0];
+               pcRecfm[0]=0x00;
                acMode[0]='r';
                f=fopen_nowarn(name, acMode);
                if (f!=NULL) {
                   fclose(f);
-                  acMode[0]='w';
-                  *pcRecfm='r';
+                  acMode[0]=m;
+                  pcRecfm[0]=r;
                } else {
-                  acMode[0]='w';
+                  acMode[0]=m;
                   strcat(acMode,pcDefDcb);
                }
             }
