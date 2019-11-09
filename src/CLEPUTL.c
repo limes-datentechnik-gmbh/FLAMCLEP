@@ -168,21 +168,23 @@ static inline int flzsym(const char* pcDat, const int* piSln, char* pcVal, int* 
             strcat(acMode,pcDefDcb);
          }
       } else {
-         if (acMode[0]=='w' || acMode[0]=='a' ) {
-            pcRecfm=strstr(acMode,"recfm=*");
-            if (pcRecfm!=NULL) {
-               char r=pcRecfm[0];
-               char m=acMode[0];
-               pcRecfm[0]=0x00;
-               acMode[0]='r';
-               f=fopen(name, acMode);
-               if (f!=NULL) {
-                  fclose(f);
-                  acMode[0]=m;
-                  pcRecfm[0]=r;
-               } else {
-                  acMode[0]=m;
-                  strcat(acMode,pcDefDcb);
+         if (!ISPATHNAME(name) && !ISDDNAME(name)) {
+            if (acMode[0]=='w' || acMode[0]=='a') {
+               pcRecfm=strstr(acMode,"recfm=*");
+               if (pcRecfm!=NULL) {
+                  char r=pcRecfm[0];
+                  char m=acMode[0];
+                  pcRecfm[0]=0x00;
+                  acMode[0]='r';
+                  f=fopen(name, acMode);
+                  if (f!=NULL) {
+                     fclose(f);
+                     acMode[0]=m;
+                     pcRecfm[0]=r;
+                  } else {
+                     acMode[0]=m;
+                     strcat(acMode,pcDefDcb);
+                  }
                }
             }
          }
@@ -210,21 +212,23 @@ static inline int flzsym(const char* pcDat, const int* piSln, char* pcVal, int* 
             strcat(acMode,pcDefDcb);
          }
       } else {
-         if (acMode[0]=='w' || acMode[0]=='a') {
-            pcRecfm=strstr(acMode,"recfm=*");
-            if (pcRecfm!=NULL) {
-               char r=pcRecfm[0];
-               char m=acMode[0];
-               pcRecfm[0]=0x00;
-               acMode[0]='r';
-               f=fopen_nowarn(name, acMode);
-               if (f!=NULL) {
-                  fclose(f);
-                  acMode[0]=m;
-                  pcRecfm[0]=r;
-               } else {
-                  acMode[0]=m;
-                  strcat(acMode,pcDefDcb);
+         if (!ISPATHNAME(name) && !ISDDNAME(name)) {
+            if (acMode[0]=='w' || acMode[0]=='a') {
+               pcRecfm=strstr(acMode,"recfm=*");
+               if (pcRecfm!=NULL) {
+                  char r=pcRecfm[0];
+                  char m=acMode[0];
+                  pcRecfm[0]=0x00;
+                  acMode[0]='r';
+                  f=fopen_nowarn(name, acMode);
+                  if (f!=NULL) {
+                     fclose(f);
+                     acMode[0]=m;
+                     pcRecfm[0]=r;
+                  } else {
+                     acMode[0]=m;
+                     strcat(acMode,pcDefDcb);
+                  }
                }
             }
          }
