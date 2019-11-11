@@ -73,7 +73,7 @@ static inline int flzsym(const char* pcDat, const int* piSln, char* pcVal, int* 
          if(strcmp(mode,"r")==0 || strcmp(mode,"rt")==0){
             return "r, noseek, samethread, abend=recover";
          }
-         if(strcmp(mode,"r+")==0 || strcmp(mode,"rt+" || strcmp(mode,"r+t")==0){
+         if(strcmp(mode,"r+")==0 || strcmp(mode,"rt+")==0 || strcmp(mode,"r+t")==0){
             return "r+, noseek, samethread, abend=recover";
          }
          if(strcmp(mode,"rb")==0){
@@ -82,10 +82,10 @@ static inline int flzsym(const char* pcDat, const int* piSln, char* pcVal, int* 
          if(strcmp(mode,"rb+")==0 || strcmp(mode,"r+b")==0){
             return "rb+, noseek, samethread, abend=recover";
          }
-         if(strcmp(mode,"rs")==0 || strcmp(mode,"rts"){
+         if(strcmp(mode,"rs")==0 || strcmp(mode,"rts")==0){
             return "r, byteseek, samethread, abend=recover";
          }
-         if(strcmp(mode,"rs+")==0 || strcmp(mode,"r+s" || strcmp(mode,"rts+")==0 || strcmp(mode,"r+ts")==0){
+         if(strcmp(mode,"rs+")==0 || strcmp(mode,"r+s")==0 || strcmp(mode,"rts+")==0 || strcmp(mode,"r+ts")==0){
             return "r+, byteseek, samethread, abend=recover";
          }
          if(strcmp(mode,"rbs")==0){
