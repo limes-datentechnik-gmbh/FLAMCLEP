@@ -70,10 +70,10 @@ static inline int flzsym(const char* pcDat, const int* piSln, char* pcVal, int* 
 #ifdef __ZOS__
    static inline const char* filemode(const char* mode) {
       if(mode!=NULL) {
-         if(strcmp(mode,"r")==0){
+         if(strcmp(mode,"r")==0 || strcmp(mode,"rt")==0){
             return "r, noseek, samethread, abend=recover";
          }
-         if(strcmp(mode,"r+")==0){
+         if(strcmp(mode,"r+")==0 || strcmp(mode,"rt+" || strcmp(mode,"r+t")==0){
             return "r+, noseek, samethread, abend=recover";
          }
          if(strcmp(mode,"rb")==0){
@@ -82,10 +82,10 @@ static inline int flzsym(const char* pcDat, const int* piSln, char* pcVal, int* 
          if(strcmp(mode,"rb+")==0 || strcmp(mode,"r+b")==0){
             return "rb+, noseek, samethread, abend=recover";
          }
-         if(strcmp(mode,"rs")==0){
+         if(strcmp(mode,"rs")==0 || strcmp(mode,"rts"){
             return "r, byteseek, samethread, abend=recover";
          }
-         if(strcmp(mode,"rs+")==0 || strcmp(mode,"r+s")==0){
+         if(strcmp(mode,"rs+")==0 || strcmp(mode,"r+s" || strcmp(mode,"rts+")==0 || strcmp(mode,"r+ts")==0){
             return "r+, byteseek, samethread, abend=recover";
          }
          if(strcmp(mode,"rbs")==0){
@@ -95,10 +95,10 @@ static inline int flzsym(const char* pcDat, const int* piSln, char* pcVal, int* 
             return "rb+, byteseek, samethread, abend=recover";
          }
 
-         if(strcmp(mode,"w")==0){
+         if(strcmp(mode,"w")==0 || strcmp(mode,"wt")==0){
             return "w, noseek, samethread, abend=recover, recfm=*";
          }
-         if(strcmp(mode,"w+")==0){
+         if(strcmp(mode,"w+")==0 || strcmp(mode,"wt+")==0 || strcmp(mode,"w+t")==0){
             return "w+, noseek, samethread, abend=recover, recfm=*";
          }
          if(strcmp(mode,"wb")==0){
@@ -107,10 +107,10 @@ static inline int flzsym(const char* pcDat, const int* piSln, char* pcVal, int* 
          if(strcmp(mode,"wb+")==0 || strcmp(mode,"w+b")==0){
             return "wb+, noseek, samethread, abend=recover, recfm=*";
          }
-         if(strcmp(mode,"ws")==0){
+         if(strcmp(mode,"ws")==0 || strcmp(mode,"wts")==0){
             return "w, byteseek, samethread, abend=recover, recfm=*";
          }
-         if(strcmp(mode,"ws+")==0 || strcmp(mode,"w+s")==0){
+         if(strcmp(mode,"ws+")==0 || strcmp(mode,"w+s")==0 || strcmp(mode,"wts+")==0 || strcmp(mode,"w+ts")==0){
             return "w+, byteseek, samethread, abend=recover, recfm=*";
          }
          if(strcmp(mode,"wbs")==0){
@@ -120,10 +120,10 @@ static inline int flzsym(const char* pcDat, const int* piSln, char* pcVal, int* 
             return "wb+, byteseek, samethread, abend=recover, recfm=*";
          }
 
-         if(strcmp(mode,"a")==0){
+         if(strcmp(mode,"a")==0 || strcmp(mode,"at")==0){
             return "a, noseek, samethread, abend=recover, recfm=*";
          }
-         if(strcmp(mode,"a+")==0){
+         if(strcmp(mode,"a+")==0 || strcmp(mode,"at+")==0 || strcmp(mode,"a+t")==0){
             return "a+, noseek, samethread, abend=recover, recfm=*";
          }
          if(strcmp(mode,"ab")==0){
@@ -132,10 +132,10 @@ static inline int flzsym(const char* pcDat, const int* piSln, char* pcVal, int* 
          if(strcmp(mode,"ab+")==0 || strcmp(mode,"a+b")==0){
             return "ab+, noseek, samethread, abend=recover, recfm=*";
          }
-         if(strcmp(mode,"as")==0){
+         if(strcmp(mode,"as")==0 || strcmp(mode,"ats")==0){
             return "a, byteseek, samethread, abend=recover, recfm=*";
          }
-         if(strcmp(mode,"as+")==0 || strcmp(mode,"a+s")==0){
+         if(strcmp(mode,"as+")==0 || strcmp(mode,"a+s")==0 || strcmp(mode,"ats+")==0  || strcmp(mode,"a+ts")==0){
             return "a+, byteseek, samethread, abend=recover, recfm=*";
          }
          if(strcmp(mode,"abs")==0){
