@@ -2086,7 +2086,7 @@ EVALUATE:
       if (pfErr==NULL) pfErr=pfStd;
       if (argc==3) {
          const char* pcVal;
-         const char* pcEnv;
+         const char* pcEnv="";
          pcVal=strchr(argv[2],'=');
          if (pcVal!=NULL) {
             *((char*)pcVal)=EOS; pcVal++; pcEnv=argv[2];
