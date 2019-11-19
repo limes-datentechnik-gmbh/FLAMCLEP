@@ -1676,15 +1676,9 @@ extern int siClpDocu(
                            default           :strcpy(acArg,"PARAMETER");break;
                            }
                            if (isNbr) {
-                              fprintf(pfDoc,"%s %s '%s'\n",acNum,acArg,psArg->psStd->pcKyw);
-                              l=strlen(acNum)+strlen(acArg)+strlen(psArg->psStd->pcKyw)+4;
-                              for (i=0;i<l;i++) fprintf(pfDoc,"%c",C_CRT);
-                              fprintf(pfDoc,"\n\n");
+                              fprintf(pfDoc,"==== %s %s '%s'\n\n",acNum,acArg,psArg->psStd->pcKyw);
                            } else {
-                              fprintf(pfDoc,"%s '%s'\n",acArg,psArg->psStd->pcKyw);
-                              l=strlen(acArg)+strlen(psArg->psStd->pcKyw)+3;
-                              for (i=0;i<l;i++) fprintf(pfDoc,"%c",C_CRT);
-                              fprintf(pfDoc,"\n\n");
+                              fprintf(pfDoc,"==== %s '%s'\n\n",acArg,psArg->psStd->pcKyw);
                            }
                            fprintf(pfDoc, ".SYNOPSIS\n\n");
                            fprintf(pfDoc, "-----------------------------------------------------------------------\n");
@@ -7656,7 +7650,7 @@ static int siClpPrnDoc(
       const TsSym*                  psHlp;
       const TsSym*                  psSel;
       int                           siErr,isCon;
-      int                           i,k,l,m;
+      int                           k,m;
       char                          acNum[strlen(pcNum)+10];
       char                          acArg[20];
       int                           siMan=0;
@@ -7704,15 +7698,9 @@ static int siClpPrnDoc(
                for (k=m=0;m<siMan;m++) {
                   snprintf(acNum,sizeof(acNum),"%s%d.",pcNum,k+1);
                   if (isNbr) {
-                     fprintf(pfDoc,"%s CONSTANT '%s'\n",acNum,apMan[m]->psStd->pcKyw);
-                     l=strlen(acNum)+strlen(apMan[m]->psStd->pcKyw)+12;
-                     for (i=0;i<l;i++) fprintf(pfDoc,"+");
-                     fprintf(pfDoc,"\n\n");
+                     fprintf(pfDoc,"===== %s CONSTANT '%s'\n\n",acNum,apMan[m]->psStd->pcKyw);
                   } else {
-                     fprintf(pfDoc,"CONSTANT '%s'\n",apMan[m]->psStd->pcKyw);
-                     l=strlen(apMan[m]->psStd->pcKyw)+11;
-                     for (i=0;i<l;i++) fprintf(pfDoc,"+");
-                     fprintf(pfDoc,"\n\n");
+                     fprintf(pfDoc,"===== CONSTANT '%s'\n\n",apMan[m]->psStd->pcKyw);
                   }
                   fprintf(pfDoc, ".SYNOPSIS\n\n");
                   fprintf(pfDoc, "-----------------------------------------------------------------------\n");
@@ -7749,15 +7737,9 @@ static int siClpPrnDoc(
                }
                snprintf(acNum,sizeof(acNum),"%s%d.",pcNum,k+1);
                if (isNbr) {
-                  fprintf(pfDoc,"%s %s '%s'\n",acNum,acArg,apMan[m]->psStd->pcKyw);
-                  l=strlen(acNum)+strlen(acArg)+strlen(apMan[m]->psStd->pcKyw)+4;
-                  for (i=0;i<l;i++) fprintf(pfDoc,"%c",C_CRT);
-                  fprintf(pfDoc,"\n\n");
+                  fprintf(pfDoc,"==== %s %s '%s'\n\n",acNum,acArg,apMan[m]->psStd->pcKyw);
                } else {
-                  fprintf(pfDoc,"%s '%s'\n",acArg,apMan[m]->psStd->pcKyw);
-                  l=strlen(acArg)+strlen(apMan[m]->psStd->pcKyw)+3;
-                  for (i=0;i<l;i++) fprintf(pfDoc,"%c",C_CRT);
-                  fprintf(pfDoc,"\n\n");
+                  fprintf(pfDoc,"==== %s '%s'\n\n",acArg,apMan[m]->psStd->pcKyw);
                }
                fprintf(pfDoc, ".SYNOPSIS\n\n");
                fprintf(pfDoc, "-----------------------------------------------------------------------\n");
