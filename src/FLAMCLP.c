@@ -7690,7 +7690,7 @@ static int siClpPrnDoc(
             if (siLst) {
                fprintf(pfDoc,".SELECTIONS\n\n");
                for (m=0;m<siLst;m++) {
-                  efprintf(pfDoc," * `%s - %s`\n",apLst[m]->psStd->pcKyw,apLst[m]->psFix->pcHlp);
+                  efprintf(pfDoc,"* `%s` - %s\n",apLst[m]->psStd->pcKyw,apLst[m]->psFix->pcHlp);
                }
                fprintf(pfDoc,"\n");
             }
@@ -7720,9 +7720,9 @@ static int siClpPrnDoc(
          if (siLst) {
             fprintf(pfDoc,".ARGUMENTS\n\n");
             for (m=0;m<siLst;m++) {
-               fprintf(pfDoc," * %c%s: ",C_GRV,apClpTyp[apLst[m]->psFix->siTyp]); siClpPrnSyn(pvHdl,pfDoc,FALSE,siLev,apLst[m]); efprintf(pfDoc," - %s`\n",apLst[m]->psFix->pcHlp);
+               fprintf(pfDoc,"* %c%s: ",C_GRV,apClpTyp[apLst[m]->psFix->siTyp]); siClpPrnSyn(pvHdl,pfDoc,FALSE,siLev,apLst[m]); efprintf(pfDoc," - %s`\n",apLst[m]->psFix->pcHlp);
                for (psSel=apLst[m]->psDep;psSel!=NULL;psSel=psSel->psNxt) {
-                  efprintf(pfDoc," ** `%s - %s`\n",psSel->psStd->pcKyw,psSel->psFix->pcHlp);
+                  efprintf(pfDoc,"** `%s` - %s\n",psSel->psStd->pcKyw,psSel->psFix->pcHlp);
                }
             }
             fprintf(pfDoc,"\n");
