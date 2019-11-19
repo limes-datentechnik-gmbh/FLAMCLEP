@@ -41,8 +41,7 @@ information about the program.
 
 This is the ${__BUILD__} build version of the FLAMCLEP.
 
-COMMAND LINE CONSIDERATIONS
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== Command Line Considerations
 
 The command line parser supports abbreviation of key words depending on
 the unique first characters. This is only useful if you work in dialog.
@@ -72,8 +71,7 @@ commands or to simplify the interactive use. But in certain cases,
 the command interpretation could fail, if not the unique variant of
 keywords, strings and arrays are used.
 
-USED ENVIRONMENT VARIABLES
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== Used Environment Variables
 
  * LANG    - to determine the CCSID on EBCDIC systems
  * HOME    - to determine the home directory on UNIX/WIN
@@ -189,8 +187,7 @@ FLCL_ICNV_TO=UTF-8                # "UTF-8" could result in errors
 
 See <<Properties,Properties>> for the current property file content.
 
-ENVIRONMENT VARIABLE MAPPING
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== Environment Variable Mapping
 
 Each value enclosed with angle brackets (`<>`) are replaced with the
 corresponding environment variable (`<LANG>`). This feature is available
@@ -211,8 +208,7 @@ possible:
  ** On ZOS with <SYSUID>
 
 [[CLEP.FNMAPPING]]
-FILENAME MAPPING
-~~~~~~~~~~~~~~~~
+=== Filename Mapping
 
 All filenames used by CLEP are additionally mapped based on the rules
 below:
@@ -241,8 +237,7 @@ This file name mapping is provided by the library CLEPUTL and should
 also be used for file names managed by the commands supported with this
 program.
 
-KEY LABEL NAME MAPPING
-~~~~~~~~~~~~~~~~~~~~~~
+=== Key Label Name Mapping
 
 The key label name mapping works like the file name mapping, but you can
 additional use `^` to replace it with the OWNERID (`^=<ONWERID>`), `!`
@@ -250,8 +245,7 @@ to replace it with the environment identifier (`!=<ENVID>`) and `~` is
 only replaced with login user id. If the environment ID not defined then
 `T` for test is used by default.
 
-SPECIAL EBCDIC CODE PAGE SUPPORT
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=== Special EBCDIC Code Page Support
 
 To interpret commands correctly the punctuation characters below are on
 different code points depending on the EBCDIC CCSID used to enter these

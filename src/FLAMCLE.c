@@ -1402,7 +1402,6 @@ EVALUATE:
    } else if (strxcmp(isCas,argv[1],"GENDOCU",0,0,FALSE)==0) {
       const char*                pcCmd=NULL;
       const char*                pcSgn=NULL;
-      char                       acHdl[1024];
       char                       acNum[16];
       int                        isNbr=TRUE;
       if (pfOut==NULL) pfOut=pfStd;
@@ -1488,32 +1487,24 @@ EVALUATE:
             if (pcCov!=NULL && *pcCov) {
                fprintm(pfDoc,pcOwn,pcPgm,pcCov,2);
             } else {
-               snprintf(acHdl,sizeof(acHdl),"'%s' - User Manual",pcPgm); l=strlen(acHdl); fprintf(pfDoc,"%s\n",acHdl);
-               for (i=0;i<l;i++) fprintf(pfDoc,"=");
-               fprintf(pfDoc,"\n");
                fprintf(pfDoc,":doctype: book\n\n");
+               fprintf(pfDoc,"= %s - User Manual\n\n",pcPgm);
             }
             efprintf(pfDoc,"[[command-line-processor]]\n");
             if (isNbr) {
-               fprintf(pfDoc,"1. COMMAND LINE PROCESSOR\n");
-               fprintf(pfDoc,"-------------------------\n\n");
+               fprintf(pfDoc,"== 1. Command Line Processor\n\n");
             } else {
-               fprintf(pfDoc,"COMMAND LINE PROCESSOR\n");
-               fprintf(pfDoc,"----------------------\n\n");
+               fprintf(pfDoc,"== Command Line Processor\n\n");
             }
             fprintm(pfDoc,pcOwn,pcPgm,MAN_CLE_MAIN,2);
-            efprintf(pfDoc,"indexterm:[Command line processor]\n\n\n");
+            efprintf(pfDoc,"indexterm:[Command Line Processor]\n\n");
 
             vdCleManProgram(pfDoc,psTab,pcOwn,pcPgm,pcHlp,pcMan,pcDep,pcOpt,pcDpa,FALSE,isNbr);
 
             if (isNbr) {
-               snprintf(acHdl,sizeof(acHdl),"3. Available commands"); l=strlen(acHdl); fprintf(pfDoc,"%s\n",acHdl);
-               for (i=0;i<l;i++) fprintf(pfDoc,"-");
-               fprintf(pfDoc,"\n\n");
+               fprintf(pfDoc,"== 3. Available commands\n\n");
             } else {
-               snprintf(acHdl,sizeof(acHdl),"Available commands"); l=strlen(acHdl); fprintf(pfDoc,"%s\n",acHdl);
-               for (i=0;i<l;i++) fprintf(pfDoc,"-");
-               fprintf(pfDoc,"\n\n");
+               fprintf(pfDoc,"== Available commands\n\n");
             }
             fprintm(pfDoc,pcOwn,pcPgm,MAN_CLE_COMMANDS,2);
             efprintf(pfDoc,"indexterm:[Available commands]\n\n\n");
@@ -1541,8 +1532,7 @@ EVALUATE:
             if (psApx!=NULL) {
                efprintf(pfDoc,"[[appendix-clp-strings]]\n");
                efprintf(pfDoc,"[appendix]\n");
-               fprintf(pfDoc,"OTHER CLP STRINGS\n");
-               fprintf(pfDoc,"-----------------\n\n");
+               fprintf(pfDoc,"== Other CLP Strings\n\n");
                if (pcApx!=NULL && *pcApx) fprintm(pfDoc,pcOwn,pcPgm,pcApx,1);
                for (i=0;psApx[i].pcHdl!=NULL;i++) {
                   pvHdl=pvClpOpen(isCas,isPfl,isRpl,siMkl,pcOwn,psApx[i].pcRot,psApx[i].pcKyw,psApx[i].pcMan,psApx[i].pcHlp,psApx[i].isOvl,
@@ -1567,8 +1557,7 @@ EVALUATE:
             if (siErr) ERROR(siErr,NULL);
             efprintf(pfDoc,"[[appendix-lexem]]\n");
             efprintf(pfDoc,"[appendix]\n");
-            fprintf(pfDoc,"LEXEM\n");
-            fprintf(pfDoc,"-----\n\n");
+            fprintf(pfDoc,"== Lexem\n\n");
             fprintm(pfDoc,pcOwn,pcPgm,MAN_CLE_APPENDIX_LEXEM,1);
             fprintf(pfDoc,"------------------------------------------------------------------------\n");
             fprintf(pfDoc,"Lexemes (regular expressions) for argument list or parameter file\n");
@@ -1582,8 +1571,7 @@ EVALUATE:
 
             efprintf(pfDoc,"[[appendix-grammar]]\n");
             efprintf(pfDoc,"[appendix]\n");
-            fprintf(pfDoc,"GRAMMAR\n");
-            fprintf(pfDoc,"-------\n\n");
+            fprintf(pfDoc,"== Grammar\n\n");
             fprintm(pfDoc,pcOwn,pcPgm,MAN_CLE_APPENDIX_GRAMMAR,1);
             fprintf(pfDoc,"------------------------------------------------------------------------\n");
             fprintf(pfDoc,"Grammar for argument list, parameter file or property file\n");
@@ -1597,8 +1585,7 @@ EVALUATE:
             }
             efprintf(pfDoc,"[[appendix-properties]]\n");
             efprintf(pfDoc,"[appendix]\n");
-            fprintf(pfDoc,"PROPERTIES\n");
-            fprintf(pfDoc,"----------\n\n");
+            fprintf(pfDoc,"== Properties\n\n");
             fprintm(pfDoc,pcOwn,pcPgm,MAN_CLE_APPENDIX_PROPERTIES,1);
 
             efprintf(pfDoc,"%s",MAN_CLE_REMAINING);
@@ -1635,8 +1622,7 @@ EVALUATE:
 
             efprintf(pfDoc,"[[appendix-returncodes]]\n");
             efprintf(pfDoc,"[appendix]\n");
-            fprintf(pfDoc,"RETURN CODES\n");
-            fprintf(pfDoc,"------------\n\n");
+            fprintf(pfDoc,"== Return Codes\n\n");
             fprintm(pfDoc,pcOwn,pcPgm,MAN_CLE_APPENDIX_RETURNCODES,1);
             if (pcScc!=NULL && *pcScc) fprintm(pfDoc,pcOwn,pcPgm,pcScc,1);
             efprintf(pfDoc,"indexterm:[Appendix Returncodes]\n\n\n");
@@ -1644,8 +1630,7 @@ EVALUATE:
             if (pfMsg!=NULL) {
                efprintf(pfDoc,"[[appendix-reasoncodes]]\n");
                efprintf(pfDoc,"[appendix]\n");
-               fprintf(pfDoc,"REASON CODES\n");
-               fprintf(pfDoc,"------------\n\n");
+               fprintf(pfDoc,"== Reason Codes\n\n");
                fprintm(pfDoc,pcOwn,pcPgm,MAN_CLE_APPENDIX_REASONCODES,1);
                for (i=1,m=pfMsg(i);m!=NULL;i++,m=pfMsg(i)) {
                   if (*m) fprintf(pfDoc," * %d - %s\n",i,m);
@@ -1668,8 +1653,7 @@ EVALUATE:
             if (pcAbo!=NULL && *pcAbo) {
                efprintf(pfDoc,"[[appendix-about]]\n");
                efprintf(pfDoc,"[appendix]\n");
-               fprintf(pfDoc,"ABOUT\n");
-               fprintf(pfDoc,"-----\n\n");
+               fprintf(pfDoc,"== About\n\n");
                fprintm(pfDoc,pcOwn,pcPgm,MAN_CLE_APPENDIX_ABOUT,1);
                fprintf(pfDoc,"------------------------------------------------------------------------\n");
                fprintf(pfDoc,"%s",pcAbo); s++;
@@ -1679,25 +1663,22 @@ EVALUATE:
 
             if (pcGls!=NULL && *pcGls) {
                efprintf(pfDoc,"[glossary]\n");
-               fprintf(pfDoc,"GLOSSARY\n");
-               fprintf(pfDoc,"--------\n\n");
+               fprintf(pfDoc,"== Glossary\n\n");
                fprintm(pfDoc,pcOwn,pcPgm,MAN_CLE_GLOSSARY,1);
                fprintm(pfDoc,pcOwn,pcPgm,pcGls,2);
                efprintf(pfDoc,"indexterm:[Glossary]\n\n\n");
             }
 
             efprintf(pfDoc,"[index]\n");
-            fprintf(pfDoc,"INDEX\n");
-            fprintf(pfDoc,"-----\n\n");
+            fprintf(pfDoc,"== Index\n\n");
 
             if (pcFin!=NULL && *pcFin) {
                efprintf(pfDoc,"\n\n");
                fprintm(pfDoc,pcOwn,pcPgm,pcFin,2);
             } else {
                efprintf(pfDoc,"\n\n");
-               efprintf(pfDoc,"[colophon]\n");
-               fprintf(pfDoc,"COLOPHON\n");
-               fprintf(pfDoc,"--------\n\n");
+               efprintf(pfDoc,"[imprint]\n");
+               fprintf(pfDoc,"== Imprint\n\n");
                fprintf(pfDoc,"Owner:   %s\n",pcOwn);
                fprintf(pfDoc,"Program: %s\n",pcPgm);
                fprintf(pfDoc,"\n\n");
