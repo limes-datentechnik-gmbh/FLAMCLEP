@@ -37,7 +37,7 @@ The command line is interpreted by CLE the command string by CLP. For example:
     |    |-- conv is part of the command line
     |-- flcl is part of the command line
     
------------------------------------------------------------------------- 
+------------------------------------------------------------------------
  
 A command execution (run) will return 0 or 1 on success, 4 if a warning
 occurs (only some of the files converted), 8 in case of an error or
