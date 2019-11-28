@@ -1575,20 +1575,11 @@ extern int siClpHelp(
 
 static inline void vdPrintHdl(FILE* pfDoc,unsigned int uiLev, const int isNbr, const char* pcNum, const char* pcPat, const char* pcKnd, const char* pcKyw, const char chHdl) {
    unsigned int   l,i;
-   unsigned int   uiKyw=strlen(pcKyw);
-   char           acKyw[uiKyw+1];
-   for (i=0;i<uiKyw;i++) {
-      acKyw[i]=isspace(pcKyw[i])?'.':tolower(pcKyw[i]);
-   }
-   acKyw[i]=0x00;
 
    if (chHdl==C_CRT) {
       uiLev+=1;
    } else if (chHdl=='+') {
       uiLev+=2;
-   }
-   if (pcPat!=NULL && *pcPat) {
-      efprintf(pfDoc,"[[%s.%s]]\n",pcPat,acKyw);
    }
    if (isNbr) {
       if (uiLev) {

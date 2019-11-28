@@ -544,20 +544,11 @@ extern void vdClePrnBuiltInDocu(FILE* pfDoc, const char* pcOwn, char* pcPgm, int
 } while(FALSE)
 
 static inline void vdPrintMan(FILE* pfDoc, const TsCleDoc* psDoc, const char* pcOwn, const char* pcPgm, const char* pcId, const char* pcMan) {
-   unsigned int   i,uiLen=(psDoc->pcHdl!=NULL)?strlen(psDoc->pcHdl):0;
-   char           acRef[uiLen+1];
-   for (i=0;i<uiLen;i++) {
-      acRef[i]=isspace(psDoc->pcHdl[i])?'.':tolower(psDoc->pcHdl[i]);
-   }
-   acRef[i]=0x00;
-   if (i) {
-      efprintf(pfDoc,"[[%s]]\n",acRef);
-   }
    if (pcId!=NULL && *pcId) {
       efprintf(pfDoc,"[%s]\n\n",pcId);
    }
    if (psDoc->pcHdl!=NULL && *psDoc->pcHdl) {
-      for (i=0;i<psDoc->uiLev;i++) {
+      for (unsigned int i=0;i<psDoc->uiLev;i++) {
          efprintf(pfDoc,"=");
       }
       efprintf(pfDoc," %s\n\n",psDoc->pcHdl);
@@ -573,27 +564,17 @@ static inline void vdPrintMan(FILE* pfDoc, const TsCleDoc* psDoc, const char* pc
 }
 
 static inline void vdPrintPgm(FILE* pfDoc, const TsCleDoc* psDoc, const char* pcOwn, const char* pcPgm, const char* pcHlp) {
-   unsigned int   i,a,uiLen=(psDoc->pcHdl!=NULL)?strlen(psDoc->pcHdl):0;
-   char           acRef[uiLen+1];
-   for (i=0;i<uiLen;i++) {
-      acRef[i]=isspace(psDoc->pcHdl[i])?'.':tolower(psDoc->pcHdl[i]);
-   }
-   acRef[i]=0x00;
-   if (i) {
-      efprintf(pfDoc,"[[%s]]\n",acRef);
-   }
+   unsigned int isHdl=FALSE;
 
    if (psDoc->pcHdl!=NULL && *psDoc->pcHdl) {
-      for (i=0;i<psDoc->uiLev;i++) {
+      for (unsigned int i=0;i<psDoc->uiLev;i++) {
          efprintf(pfDoc,"=");
       }
       efprintf(pfDoc," %s\n\n",psDoc->pcHdl);
-      a=1;
-   } else {
-      a=0;
+      isHdl=TRUE;
    }
 
-   for (unsigned int j=0;j<psDoc->uiLev+a;j++) fprintf(pfDoc,"=");
+   for (unsigned int j=0;j<psDoc->uiLev+isHdl;j++) fprintf(pfDoc,"=");
    efprintf(pfDoc," SYNOPSIS\n\n");
    efprintf(pfDoc,"-----------------------------------------------------------------------\n");
    efprintf(pfDoc,"HELP:   %s\n",pcHlp);
@@ -603,7 +584,7 @@ static inline void vdPrintPgm(FILE* pfDoc, const TsCleDoc* psDoc, const char* pc
    efprintf(pfDoc,"-----------------------------------------------------------------------\n\n");
    efprintf(pfDoc,"indexterm:[Synopsis for program %s]\n\n\n",pcPgm);
 
-   for (unsigned int j=0;j<psDoc->uiLev+a;j++) fprintf(pfDoc,"=");
+   for (unsigned int j=0;j<psDoc->uiLev+isHdl;j++) fprintf(pfDoc,"=");
    efprintf(pfDoc," DESCRIPTION\n\n");
    if (psDoc->pcMan!=NULL && psDoc->pcMan) {
       fprintm(pfDoc,pcOwn,pcPgm,psDoc->pcMan,2);
