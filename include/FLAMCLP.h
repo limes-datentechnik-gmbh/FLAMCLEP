@@ -1318,7 +1318,10 @@ extern int siClpHelp(
  * is used. The same is valid for constant definitions, but in this case the headline level 4 '^'
  * and the key word 'CONSTANT' in Headline or 'SELECTIONS' in bullet list is used.
  *
- * Numbering of headlines for doc type book can be enabled or disabled.
+ * Numbering of headlines for doc type book can be enabled or disabled. If a level given (>0) then
+ * the headlines are prefixed with this amount of '=' for arguments and with one '=' more for
+ * constants or selections. A valid minimum level would be 3 and the maximum should not greater
+ * then 5.
  *
  * The manual page for the command is displayed with headline level 2 '-', if no manual page is
  * available the message below is shown:
@@ -1345,6 +1348,7 @@ extern int siClpHelp(
  * @param[in]  isMan If TRUE then doc type MANPAGE will be generated else doc type book will be used.
  *                   (isMan==TRUE results automatically in isDep==FALSE)
  * @param[in]  isNbr Boolean to enable header numbering for generated documentation (only for doc type book)
+ * @param[in]  uiLev If > 0 then headlines are written with this amount of '=' in front instead of underlining (only for doc type book)
  *
  * @return signed integer with CLP_OK(0) or an error code (CLPERR_xxxxxx)
  */
@@ -1357,7 +1361,8 @@ extern int siClpDocu(
    const char*                   pcCmd,
    const int                     isDep,
    const int                     isMan,
-   const int                     isNbr);
+   const int                     isNbr,
+   const unsigned int            uiLev);
 
 /**
  * Generate properties

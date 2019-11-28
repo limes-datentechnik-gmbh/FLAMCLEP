@@ -1,0 +1,113 @@
+ * LANG    - to determine the CCSID on EBCDIC systems
+ * HOME    - to determine the home directory on UNIX/WIN
+ * USER    - to determine the current user id on UNIX/WIN
+ * ENVID   - for the current environment qualifier (D/T/P) if key label template mapping used (default is 'T')
+ * OWNERID - used for current owner if not already defined
+ * CLP_NOW - The current point in time used for predefined constants (0tYYYY/MM/DD.HH:MM:SS)
+ * CLP_STRING_CCSID - CCSID used for interpretation of critical punctuation character on EBCDIC systems (default is taken from LANG)
+ * CLP_DEFAULT_DCB - The default record format and record length in C file mode format (default is 'recfm=VB, lrecl=516' only for z/OS)
+ * &{PGM}_CONFIG_FILE - the configuration filename (default is '$HOME/.&{pgm}.config' on UNIX/WIN or '&SYSUID..&{PGM}.CONFIG' on mainframes)
+ * &{PGM}_DEFAULT_OWNER_ID - the default owner ID (default is '&{oWn}')
+ * owner_&{PGM}_command_PROPERTY_FILENAME - To override default property file names
+ * path_argument - to override the hard coded default property value
+ 
+Environment variables can be set from the system or in the program
+configuration file with the build-in function 'SETENV'. Particularly on
+mainframe systems the configuration file is an easy way to define
+environment variables. Additionally on host systems the DD name STDENV 
+and with lower priority the data set name '&SYSUID..STDENV' is
+supported. On the other architectures the file '.stdenv' in the
+working or with lower priority in the home directory can be used to
+define environment variables for FLAM utility, subsystems and subprogram
+interfaces.
+
+The STDENV files allows to define the &{PGM}_CONFIG_FILE,
+&{PGM}_DEFAULT_OWNER_ID, LANG and other environment variables
+in JCL:
+
+Below a you can find a sample with a z/OS DD name allocation.
+-----------------------------------------------------------------------
+ //STDENV   DD *
+ &{PGM}_CONFIG_FILE=GLOBAL.&{PGM}.CONFIG
+ LANG=de_DE.IBM-1141
+ HOME=/u/hugo
+ USER=hugo
+ ENVID=T
+ /*
+-----------------------------------------------------------------------
+The definition of the LANG variable outside of the program configuration
+file is recommended, so that the system character set is defined in each
+situation. The program configuration file name is used as is, there are
+no replacements (<USER>) possible, because it is used in front of
+establishment of the environment it self.
+
+Often it will be useful to have a dedicated environment per user on
+mainframes. In such a case it makes sense to define the environment in
+a dedicated file for each user.
+
+-----------------------------------------------------------------------
+ //STDENV   DD DSN=USER.ENVIR(&SYSUID.), DSP=SHR
+-----------------------------------------------------------------------
+
+Since z/OSv2r1 you can also used exported JCL symbols like environment
+variables. The exported JCL symbols have lower priority then the same
+environment variable. The service CEEGTJS is called dynamically and the
+language environment must be in the STEPLIB concatenation to use it.
+Additional all z/OS system symbols can be used in the in the string
+replacement (<&LDAY>). The environment variable have the highest
+priority, followed by the exported JCL symbols. The lowest priority have
+system symbols. If the variable name not found, then no replacement are
+done and the angle bracket keep still in place.
+
+------------------------------------------------------------------------
+ //E0       EXPORT SYMLIST=*
+ //S1       SET    BLKSIZE=27886
+ //S3       SET    LRECL=128
+------------------------------------------------------------------------
+
+For z/OS, the default record format and record length for non-existent
+output files is `recfm=VB, lrecl=516`. An attempt is made to open an
+existing file with `recfm=*` for overwriting (DISP=OLD). If this fails,
+another attempt is made with `recfm=VB, lrecl=516` to write a new file
+(DISP=NEW). The environment variable CLP_DEFAULT_DCB can be used to
+change this default file mode string.
+See 'Keyword Parameters for File Mode' for fopen() in
+_z/OS XL C/C++ Runtime Library Reference_ for more information and for
+the correct syntax. Beside 'recfm' with a valid record format (not
+'*' or '+') and 'lrecl', the 'space' parameter can be set.
+All other file mode parameters are managed by CLP.
+
+Beside all the environment variables managed by CLE it is possible to
+set all properties as environment variables to override the hard coded
+default values with CLP. If a property is defined as environment variable
+and in a property file, then the value in the property file overrides the
+setting in the environment. The environment variable name for each
+property is build by the rules below:
+
+ * convert all letters to upper case
+ * replace all dots (`.`) by underline (`_`)
+
+To get a list and help for all properties please use the built-in
+function 'GENPROP' to generate property files. The properties can be
+defined per owner, per program and general. The owner specific
+definition overrides the program specific definition and the program
+specific definition overrides the general definition. Examples:
+
+-----------------------------------------------------------------------
+CONV_READ_TEXT_ENL2LF=OFF #in general the 0x15 to 0x25 conversion is off#
+HUGO_FLCL_CONV_READ_TEXT_ENL2LF=ON # for owner 'hugo' the conversion is on#
+-----------------------------------------------------------------------
+
+The value string behind the sign (including the comment) will be used as
+supplement for the command line processor. Aliases are not supported in
+this case. You can only define properties for the main argument. If a
+string must be enclosed with apostrophe, please don't use double
+quotation marks, because these are used in addition if a new property
+file is build based on the environment settings.
+
+-----------------------------------------------------------------------
+FLCL_ICNV_FROM='IBM-1141'         # this is the best solution 
+FLCL_ICNV_TO=UTF-8                # "UTF-8" could result in errors
+-----------------------------------------------------------------------
+
+See <<Properties,Properties>> for the current property file content.

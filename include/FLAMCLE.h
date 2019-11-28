@@ -157,7 +157,7 @@ Below, you can find the syntax for each built-in function:
  * * SYNTAX [command[.path] [DEPTH1 | ... | DEPTH9 | ALL]]
  * * HELP [command[.path] [DEPTH1 | ... | DEPTH9 | ALL]] [MAN]
  * * MANPAGE [function | command[.path][=filename]] | [filename]
- * * GENDOCU [command[.paht]=]filename [NONBR]
+ * * GENDOCU [command[.paht]=]filename [NONBR] [SHORT]
  * * GENPROP [command=]filename
  * * SETPROP [command=]filename
  * * CHGPROP command [path[=value]]*
@@ -212,10 +212,62 @@ Sample program
           CLETAB_CLS
        };
 
-       return(siCleExecute(NULL,asCmdTab,argc,argv,"limes","flcl",FALSE,0,stderr,stdout,
-                           "--|","/",pcFlclVersion(),pcFlclAbout(),"TEST-LICENSE",
-                           "Frankenstein Limes(R) Command Line for FLUC, FLAM and FLIES",
-                           MAN_FLCL_MAIN,MAN_FLCL_COV,MAN_FLCL_GLS,MAN_FLCL_FIN,"CONV",pcFlmErrors));
+       CLEOTH_OPN(asOthTab) = {
+          CLETAB_OTH("FLCBYT","FORMAT","Read format string"       ,asClpWrtFmtPar,MAN_FLCBYT_READ_FORMAT ,HLP_FLCBYT_READ_FORMAT ,TRUE)
+          CLETAB_OTH("FLCBYT","FORMAT","Write format string"      ,asClpRedFmtPar,MAN_FLCBYT_WRITE_FORMAT,HLP_FLCBYT_WRITE_FORMAT,TRUE)
+          CLETAB_OTH("FLCBYT","READ"  ,"Read conversion string"   ,asClpElmCnvRed,MAN_FLCBYT_CONV_READ   ,HLP_FLCBYT_CONV_READ   ,TRUE)
+          CLETAB_OTH("FLCBYT","WRITE" ,"Write conversion string"  ,asClpElmCnvWrt,MAN_FLCBYT_CONV_WRITE  ,HLP_FLCBYT_CONV_WRITE  ,TRUE)
+          CLETAB_OTH("FLCBYT","CONV"  ,"From-To conversion string",asClpElmCnv   ,MAN_FLCBYT_CONV        ,HLP_FLCBYT_CONV        ,TRUE)
+          CLETAB_OTH("FLCBYT","STATE" ,"State string"             ,asClpExtPar   ,MAN_FLCBYT_STATE       ,HLP_FLCBYT_STATE       ,FALSE)
+          CLETAB_OTH("FLCBYT","LOG"   ,"Log string"               ,asClpMemoryLog,MAN_FLCBYT_LOG         ,HLP_FLCBYT_LOG         ,FALSE)
+          CLEOTH_CLS
+       };
+
+       CLEDOC_OPN(asDocTab) = {
+          CLETAB_DOC(CLE_DOCTYP_COVER               ,1,"FLCL manual"                       ,MAN_FLCL_COVER)
+          CLETAB_DOC(CLE_DOCTYP_CHAPTER             ,2,"Trademarks"                        ,MAN_FLCL_TRADEMARKS)
+          CLETAB_DOC(CLE_DOCTYP_CHAPTER             ,2,"Abstract"                          ,MAN_FLCL_ABSTRACT)
+          CLETAB_DOC(CLE_DOCTYP_CHAPTER             ,2,"Use cases"                         ,MAN_FLCL_USECASES)
+          CLETAB_DOC(CLE_DOCTYP_PREFACE             ,2,"Preface"                           ,MAN_FLCL_PREFACE)
+          CLETAB_DOC(CLE_DOCTYP_CLEPMAIN            ,2,"Command line parser"               ,NULL)
+          CLETAB_DOC(CLE_DOCTYP_CLEPMAIN_CONSID     ,3,"Command line considerations"       ,NULL)
+          CLETAB_DOC(CLE_DOCTYP_CLEPMAIN_USEDENV    ,3,"Used environment variables"        ,NULL)
+          CLETAB_DOC(CLE_DOCTYP_CLEPMAIN_ENVARMAP   ,3,"Environment variable mapping"      ,NULL)
+          CLETAB_DOC(CLE_DOCTYP_CLEPMAIN_FILEMAP    ,3,"Filename mapping"                  ,NULL)
+          CLETAB_DOC(CLE_DOCTYP_CLEPMAIN_KEYLABMAP  ,3,"Key label name mapping"            ,NULL)
+          CLETAB_DOC(CLE_DOCTYP_CLEPMAIN_EBCDIC     ,3,"Special EBCDIC code page support"  ,NULL)
+          CLETAB_DOC(CLE_DOCTYP_BUILTINF            ,3,"Build-in functions"                ,NULL)
+          CLETAB_DOC(CLE_DOCTYP_PROGRAM             ,2,"FLCL Utility"                      ,MAN_FLCL_MAIN)
+          CLETAB_DOC(CLE_DOCTYP_PGMSYNTAX           ,3,"Syntax of FLCL"                    ,NULL)
+          CLETAB_DOC(CLE_DOCTYP_PGMHELP             ,3,"Help for FLCL"                     ,NULL)
+          CLETAB_DOC(CLE_DOCTYP_COMMANDS            ,3,"Available FLCL commands"           ,NULL)
+          CLETAB_DOC(CLE_DOCTYP_APPENDIX            ,0,NULL,NULL)
+          CLETAB_DOC(CLE_DOCTYP_OTHERCLP            ,2,"Other CLP strings"                 ,MAN_FLCL_OTHERCLP)
+          CLETAB_DOC(CLE_DOCTYP_CHAPTER             ,2,"FLUC Filesystem for Linux"         ,MAN_FLCL_APPENDIX_FLUCFS)
+          CLETAB_DOC(CLE_DOCTYP_CHAPTER             ,2,"FLUC Subsystem for z/OS"           ,MAN_FLCL_APPENDIX_FLUCSUB)
+          CLETAB_DOC(CLE_DOCTYP_LEXEM               ,2,"Lexem"                             ,NULL)
+          CLETAB_DOC(CLE_DOCTYP_GRAMMAR             ,2,"Grammar"                           ,NULL)
+          CLETAB_DOC(CLE_DOCTYP_PROPERTIES          ,2,"Properties"                        ,NULL)
+          CLETAB_DOC(CLE_DOCTYP_PROPREMAIN          ,3,"Remaining documentation"           ,NULL)
+          CLETAB_DOC(CLE_DOCTYP_PROPDEFAULTS        ,3,"Predefined defaults"               ,NULL)
+          CLETAB_DOC(CLE_DOCTYP_RETURNCODES         ,2,"Returncodes"                       ,NULL)
+          CLETAB_DOC(CLE_DOCTYP_SPECIALCODES        ,3,"Special condition codes"           ,MAN_FLCL_SPECIALCODES)
+          CLETAB_DOC(CLE_DOCTYP_REASONCODES         ,2,"Reasoncodes"                       ,NULL)
+          CLETAB_DOC(CLE_DOCTYP_ABOUT               ,2,"About"                             ,NULL)
+          CLETAB_DOC(CLE_DOCTYP_VERSION             ,2,"Version"                           ,NULL)
+          CLETAB_DOC(CLE_DOCTYP_GLOSSARY            ,2,"Glossary"                          ,MAN_FLCL_GLS)
+          CLETAB_DOC(CLE_DOCTYP_INDEX               ,2,"Index"                             ,NULL)
+          CLETAB_DOC(CLE_DOCTYP_COLOPHON            ,2,"Imprint"                           ,MAN_FLCL_IMPRINT)
+          CLEDOC_CLS
+       };
+
+       siErr=siCleExecute(NULL,asCmdTab,argc,argv,FLM_CLEP_DEFAULT_OWNER,"flcl",
+               FLM_CLEP_CASE_SENSITIVITY,TRUE,TRUE,FALSE,FLM_CLEP_MINIMAL_KEYWORDLEN,
+               pfErr,pfTrc,FLM_CLEP_DEPTH_STRING_1047,FLM_CLEP_OPTION_STRING,
+               FLM_CLEP_SEPARATION_STRING,psMain->acLicTxt,
+               FLM_VSN_STR"-"__BUILDNRSTR__,psMain->acVersion,psMain->acAbout,
+               "Frankenstein Limes(R) Command Line for FLUC, FLAM and FLIES",
+               pcFlmErrors,asOthTab,NULL,NULL,NULL,NULL,NULL,0,asDocTab);
     }
 @endcode
 
@@ -318,10 +370,10 @@ in this case.
 #include "FLAMCLP.h"
 
 #ifdef __HOSTSHORTING__
-#  define pcCleVersion          FLCLEVSN
-#  define pcCleAbout            FLCLEABO
-#  define siCleExecute          FLCLEEXE
-#  define siCleParseString      FLCLEPRS
+#  define pcCleVersion           FLCLEVSN
+#  define pcCleAbout             FLCLEABO
+#  define siCleExecute           FLCLEEXE
+#  define siCleParseString       FLCLEPRS
 #endif
 
 /**
@@ -361,6 +413,76 @@ extern const char* pcCleVersion(const int l, const int s, char* b);
 * @return pointer to a null-terminated about string (return(b))
 */
 extern const char* pcCleAbout(const int l, const int s, char* b);
+
+/**
+* Documentation types used in table below
+*/
+#define CLE_DOCTYP_COVER               1U    /** Cover page (manpage must be given)*/
+#define CLE_DOCTYP_PREFACE             2U    /** Preface page (manpage must be given)*/
+#define CLE_DOCTYP_CHAPTER             3U    /** A chapter (manpage must be given)*/
+#define CLE_DOCTYP_PROGRAM             4U    /** The program part (manpage must be given)*/
+#define CLE_DOCTYP_PGMSYNTAX           5U    /** The program syntax (manpage can be overwritten)*/
+#define CLE_DOCTYP_PGMHELP             6U    /** The program help (manpage can be overwritten)*/
+#define CLE_DOCTYP_COMMANDS            10U   /** The commands part (manpage can be overwritten)*/
+#define CLE_DOCTYP_OTHERCLP            11U   /** Other CLP strings (manpage should be overwritten)*/
+#define CLE_DOCTYP_CLEPMAIN            20U   /** The CLEP main part (manpage can be overwritten)*/
+#define CLE_DOCTYP_CLEPMAIN_CONSID     21U   /** The command line considerations (manpage can be overwritten)*/
+#define CLE_DOCTYP_CLEPMAIN_USEDENV    22U   /** The used environment variables of CLEP (manpage can be overwritten)*/
+#define CLE_DOCTYP_CLEPMAIN_ENVARMAP   23U   /** The environment variable mapping of CLEP (manpage can be overwritten)*/
+#define CLE_DOCTYP_CLEPMAIN_FILEMAP    24U   /** The file name mapping of CLEP (manpage can be overwritten)*/
+#define CLE_DOCTYP_CLEPMAIN_KEYLABMAP  25U   /** The key lable name mapping of CLEP (manpage can be overwritten)*/
+#define CLE_DOCTYP_CLEPMAIN_EBCDIC     26U   /** The special EBCDIC code page support (manpage can be overwritten)*/
+#define CLE_DOCTYP_BUILTINF            30U   /** The built-in function section (manpage can be overwritten)*/
+#define CLE_DOCTYP_APPENDIX            31U   /** Switch to activate the appendix part (no level, headline and manual page)*/
+#define CLE_DOCTYP_LEXEM               32U   /** The appendix which prints the lexems (manpage can be overwritten)*/
+#define CLE_DOCTYP_GRAMMAR             33U   /** The appendix which prints the grammar (manpage can be overwritten)*/
+#define CLE_DOCTYP_VERSION             34U   /** The appendix which prints the version (manpage can be overwritten, pcVsn must be provided)*/
+#define CLE_DOCTYP_ABOUT               35U   /** The appendix which prints the about (manpage can be overwritten, pcAbo must be provided)*/
+#define CLE_DOCTYP_PROPERTIES          36U   /** The appendix which prints the properties (manpage can be overwritten)*/
+#define CLE_DOCTYP_PROPREMAIN          37U   /** The appendix which prints the remaining parameter documentation (manpage can be overwritten)*/
+#define CLE_DOCTYP_PROPDEFAULTS        38U   /** The appendix which prints the default parameter documentation (manpage can be overwritten)*/
+#define CLE_DOCTYP_RETURNCODES         40U   /** The appendix which prints the return codes (manpage can be overwritten)*/
+#define CLE_DOCTYP_SPECIALCODES        41U   /** The appendix which prints the special condition codes (manpage must be given)*/
+#define CLE_DOCTYP_REASONCODES         42U   /** The appendix which prints the reason codes (manpage can be overwritten, pfMsg must be provided)*/
+#define CLE_DOCTYP_GLOSSARY            50U   /** The glossary (additional manpage can be provided)*/
+#define CLE_DOCTYP_INDEX               51U   /** The index (manpage can be overwritten, often not supported by ASCIIDOC backends)*/
+#define CLE_DOCTYP_COLOPHON            60U   /** The imprint/final page (manpage should be overwritten)*/
+
+/**
+ * \struct TsCleDoc
+ *
+ * This structure is used to define a table used to generate the documentation\n
+ *
+ * Its members are:
+ * \par
+ * \b uiTyp  One of the documentation types above\n
+ * \b uiLev  The level of the chapter in the document (cover page is 1 all other chapter > 1)\n
+ * \b pcHdl  Headline for this chapter\n
+ * \b pcMan  Optional or required manual page with the content of this chapter)\n
+ */
+typedef struct CleDoc {
+   unsigned int      uiTyp;
+   unsigned int      uiLev;
+   const char*       pcHdl;
+   const char*       pcMan;
+}TsCleDoc;
+
+/** Starts the documentation generation table
+ *  *nam* Name of this table\n
+ */
+#define CLEDOC_OPN(nam)               const TsCleDoc nam[]
+
+/** Starts the documentation generation table
+ *  *typ* Documentation type\n
+ *  *lev* The level of the chapter\n
+ *  *hdl* Headline for this chapter\n
+ *  *man* Manual page for this chapter\n
+ */
+#define CLETAB_DOC(typ,lev,hdl,man)   {(typ),(lev),(hdl),(man)},
+
+/** Ends a table with constant definitions
+ */
+#define CLEDOC_CLS                    {  0  ,  0  , NULL, NULL}
 
 /**
  * @brief vdClePrnBuiltInDocu print Docu of Builtin functions
@@ -583,7 +705,7 @@ typedef struct CleCommand {
 } TsCleCommand;
 
 /**
- * \struct TsCleAppendix
+ * \struct TsCleOtherClp
  *
  * This structure is used to define a table of CLP strings add as appendix to the generated documentation\n
  *
@@ -601,7 +723,7 @@ typedef struct CleCommand {
  * \b pcHlp  String for a short context sensitive help for this CLP string (converted on EBCDIC systems)\n
  * \b isOvl  True if provided table must be interpreted as overlay else as object\n
  */
-typedef struct CleAppendix {
+typedef struct CleOtherClp {
    const char*                   pcRot;
    const char*                   pcKyw;
    const char*                   pcHdl;
@@ -609,13 +731,13 @@ typedef struct CleAppendix {
    const char*                   pcMan;
    const char*                   pcHlp;
    const int                     isOvl;
-} TsCleAppendix;
+} TsCleOtherClp;
 
 /** Starts a table with command definitions
  *
  *  *nam* Name of this table\n
  */
-#define CLETAB_OPN(nam)                                           TsCleCommand nam[]
+#define CLETAB_OPN(nam)          TsCleCommand nam[]
 
 /** defines a command with the command line keyword *kyw*
  *
@@ -642,13 +764,13 @@ typedef struct CleAppendix {
  */
 #define CLETAB_CLS                                                    { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0   , NULL, NULL}
 
-/** Starts a table with appendix definitions
+/** Starts a table with other CLP strings
  *
  *  *nam* Name of this table\n
  */
-#define CLEAPX_OPN(nam)               TsCleAppendix nam[]
+#define CLEOTH_OPN(nam)               TsCleOtherClp nam[]
 
-/** defines a appendix for the object or overlay *kyw* of the root *rot* with the headline of *hdl* for a certain CLP string
+/** defines a appendix for the object or overlay *kyw* of the root *rot* with the headline of *hdl* for a certain other CLP string
  *
  *  *tab* Pointer to the main table for this CLP string.\n
  *  *man* Pointer to a null-terminated string for a detailed description for this CLP string.
@@ -656,11 +778,11 @@ typedef struct CleAppendix {
  *        It is recommended to use a header file with a define for this long string)\n
  *  *hlp* String for a short context sensitive help for this CLP string\n
  */
-#define CLETAB_APX(rot,kyw,hdl,tab,man,hlp,ovl)   {(rot),(kyw),(hdl),(tab),(man),(hlp),(ovl)},
+#define CLETAB_OTH(rot,kyw,hdl,tab,man,hlp,ovl)   {(rot),(kyw),(hdl),(tab),(man),(hlp),(ovl)},
 
-/** Ends a table with appendix definitions
+/** Ends a table with other CLP strings
  */
-#define CLEAPX_CLS                    { NULL, NULL, NULL, NULL, NULL, NULL, 0}
+#define CLEOTH_CLS                    { NULL, NULL, NULL, NULL, NULL, NULL, 0}
 
 /**
  * Execute command line
@@ -670,7 +792,7 @@ typedef struct CleAppendix {
  * - SYNTAX [command[.path] [DEPTH1 | ... | DEPTH9 | ALL]]
  * - HELP   [command[.path] [DEPTH1 | ... | DEPTH9 | ALL]] [MAN]
  * - MANPAGE [function | command[.path][=filename]] | [filename]
- * - GENDOCU [command[.path]=]filename [NONBR]
+ * - GENDOCU [command[.path]=]filename [NONBR] [SHORT]
  * - GENPROP [command=]filename
  * - SETPROP [command=]filename
  * - CHGPROP command [path[=value]]*
@@ -721,9 +843,9 @@ typedef struct CleAppendix {
  * @param[in]  pfMsg Pointer to a function which prints a message for an reason code (use to generate the corresponding appendix)\n
  * @param[in]  pcApp Optional free defined appendix page (will simply copied in front of all other generated appendixes - converted on EBCDIC systems),
  *             if NULL or empty then this appendix will not add. The ASCIIDOC conform appendix headlines must be part of this string.
- * @param[in]  pcApx Optional description if appendix A used for other CLP string (in ASCIIDOC format (term:: explanation) - converted on EBCDIC systems),
- *             if NULL or empty then no description is generated, the parameter is only used if psApx below set
- * @param[in]  psApx Pointer to the table with other CLP strings to print as appendix (optional could be NULL)
+ * @param[in]  pcOth Optional description used for other CLP string (in ASCIIDOC format (term:: explanation) - converted on EBCDIC systems),
+ *             if NULL or empty then no description is generated, the parameter is only used if psOth below set
+ * @param[in]  psOth Pointer to the table with other CLP strings to print (optional could be NULL)
  * @param[in]  pvF2S Pointer to a handle which can be used in file 2 string callback function (if not required then NULL)
  * @param[in]  pfF2S Callback function which reads a file into a null-terminated string in memory (if NULL then default implementation is used)
  * @param[in]  pvSaf Pointer to a handle which can be used in authorization callback function (if not required then NULL)
@@ -731,6 +853,7 @@ typedef struct CleAppendix {
  * @param[in]  pcDpa Pointer to a file name for a default parameter file (e.g. "DD:FLAMPAR") or NULL/empty string for nothing,
  *                   The file name is used if only a command without assignment or parameter is provided
  * @param[in]  siNoR Define this reason code to the values the mapping function returns if no run is requested (0 is nothing)
+ * @param[in]  psDoc Table for flexible documentation generation (NULL the old documentation format is generated)
  *
  * @return signed integer with the condition codes below:\n
  * 0  - command line, command syntax, mapping, execution and finish of the command was successful\n
@@ -781,14 +904,15 @@ extern int siCleExecute(
    const char*                   pcDef,
    TfMsg*                        pfMsg,
    const char*                   pcApp,
-   const char*                   pcApx,
-   const TsCleAppendix*          psApx,
+   const char*                   pcOth,
+   const TsCleOtherClp*          psOth,
    void*                         pvF2S,
    TfF2S*                        pfF2S,
    void*                         pvSaf,
    TfSaf*                        pfSaf,
    const char*                   pcDpa,
-   const int                     siNoR);
+   const int                     siNoR,
+   const TsCleDoc*               psDoc);
 
 /**********************************************************************/
 /*! @cond PRIVATE */

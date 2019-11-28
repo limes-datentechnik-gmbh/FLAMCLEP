@@ -1,0 +1,26 @@
+All filenames used by CLEP are additionally mapped based on the rules
+below:
+
+ * The tilde character (`~`) is replaced with the string "<HOME>"
+ * DD names on mainframes must be prefixed with "DD:"
+ * Data set names on mainframes are always full qualified
+ * Path names on mainframes must contain a least one slash (`/`)
+ * Data set names on USS must start with //
+ ** Full qualified names with HLQ must enclose in apostrophes ("//''")
+ ** If apostrophes are not used the SYSUID is prefixed as HLQ
+ * Normal file names on other platforms could be relative
+ 
+*ATTENTION:* If a requested environment variable is not defined, the
+replacement is done with the empty string. This can result in
+unexpected behavior.
+
+To use a "<" or "~" as a part of a filename the character must be
+specified twice.
+
+Beside this rules the replacement technologies of your shell can be used,
+but on some platforms $HOME, $USER or something similar might not
+be available, for such cases the possibilities above are implemented.
+
+This file name mapping is provided by the library CLEPUTL and should
+also be used for file names managed by the commands supported with this
+program.

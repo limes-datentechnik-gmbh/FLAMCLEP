@@ -36,7 +36,7 @@ static const char* SYN_CLE_HELP    ="HELP [command[.path] [DEPTH1 | ... | DEPTH9
 static const char* HLP_CLE_MANPAGE ="Provides manual pages (detailed help)";
 static const char* SYN_CLE_MANPAGE ="MANPAGE [function | command[.path][=filename]] | [filename]";
 static const char* HLP_CLE_GENDOCU ="Generates auxiliary documentation";
-static const char* SYN_CLE_GENDOCU ="GENDOCU [command[.path]=]filename [NONBR]";
+static const char* SYN_CLE_GENDOCU ="GENDOCU [command[.path]=]filename [NONBR] [SHORT]";
 static const char* HLP_CLE_GENPROP ="Generates a property file";
 static const char* SYN_CLE_GENPROP ="GENPROP [command=]filename";
 static const char* HLP_CLE_SETPROP ="Activate a property file";

@@ -1,0 +1,41 @@
+The COMMAND LINE PROCESSOR (CLEP) is a user application programming
+interface for several platforms including Windows, Unix and z/OS that
+simplifies and standardizes parameter string processing.
+
+The CLEP provides two separate functions:
+
+ * COMMAND LINE PARSER (CLP)   - Compiles a parameter string from a command to a data structure
+ * COMMAND LINE EXECUTOR (CLE) - Supporting execution of different commands with parameter strings
+
+The COMMAND LINE EXECUTOR provides a list of commands and some
+built-in functions, please use 'MANPAGE', 'HELP' and 'SYNTAX' to get
+extensive information about these capabilities.
+
+Additionally the build-in function 'GENDOCU' can generate a complete or
+a part of the user manual.
+
+To read the parameter of a command, a compiler (CLP) is applied. To see
+the regular expressions (lexems) and the corresponding grammar, please
+use the built-in functions 'LEXEM' and 'GRAMMAR'.
+
+The return/condition/exit codes of the executable and the reason codes
+of the different commands can be reviewed with the built-in function
+'ERRORS'.
+See <<appendix-Returncodes,'appendix-Returncodes'>> and, if available, 
+<<appendix-Reasoncodes, appendix-Reasoncodes>> 
+for the meaning of the used return and reason codes.
+
+The CLE uses an owner management in order to separate the settings for
+different clients and a property management for each command. If
+problems occur, a trace might be activated.
+
+For each command execution the owner and environment variables can be
+defined in the configuration file.
+
+The default trace file is 'stdout'. If the trace is activated before a
+trace file is defined, the trace will be printed on the screen.
+
+Last but not least it is possible to view the license, version and other
+information about the program.
+
+This is the ${__BUILD__} build version of the FLAMCLEP.

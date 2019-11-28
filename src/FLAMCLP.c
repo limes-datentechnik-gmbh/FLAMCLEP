@@ -169,12 +169,13 @@
  * 1.2.123: Increase maximal amount of parameter per object from 256 to 512 (CLPMAX_TABCNT)
  * 1.2.124: Use type of function and not type of pointer to function (usable for pragma's)
  * 1.2.125: Add vdClpReset function to reset after an application handled error
+ * 1.2.126: Support better docu generation and headings as single line variants (= Hdl1, ==Hdl2, ...)
 **/
 
-#define CLP_VSN_STR       "1.2.125"
+#define CLP_VSN_STR       "1.2.126"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        2
-#define CLP_VSN_REVISION       125
+#define CLP_VSN_REVISION       126
 
 /* Definition der Konstanten ******************************************/
 
@@ -382,6 +383,7 @@ typedef struct Hdl {
    int                           siRow;
    int                           siCol;
    int                           siErr;
+   unsigned int                  uiLev;
    I64                           siNow;
    I64                           siRnd;
    int                           siPtr;
@@ -1463,7 +1465,7 @@ extern int siClpHelp(
                      } else {
                         fprintf(psHdl->pfHlp,"TYPE:   OBJECT\n");
                      }
-                     fprintf(psHdl->pfHlp,   "SYNTAX: :> %s ",psHdl->pcPgm);
+                     fprintf(psHdl->pfHlp,   "SYNTAX: > %s ",psHdl->pcPgm);
                      siErr=siClpPrnCmd(pvHdl,psHdl->pfHlp,0,0,1,NULL,psHdl->psTab,FALSE,FALSE);
                      if (siErr<0) return(siErr);
                      fprintf(psHdl->pfHlp,"\n\n");
@@ -1551,7 +1553,7 @@ extern int siClpHelp(
             } else {
                fprintf(psHdl->pfHlp,"TYPE:   OBJECT\n");
             }
-            fprintf(psHdl->pfHlp,   "SYNTAX: :> %s ",psHdl->pcPgm);
+            fprintf(psHdl->pfHlp,   "SYNTAX: > %s ",psHdl->pcPgm);
             siErr=siClpPrnCmd(pvHdl,psHdl->pfHlp,0,0,1,NULL,psHdl->psTab,FALSE,FALSE);
             fprintf(psHdl->pfHlp,"\n\n");
             if (siErr<0) return(siErr);
@@ -1571,6 +1573,46 @@ extern int siClpHelp(
    return(CLP_OK);
 }
 
+static inline void vdPrintHdl(FILE* pfDoc,unsigned int uiLev, const int isNbr, const char* pcNum, const char* pcPat, const char* pcKnd, const char* pcKyw, const char chHdl) {
+   unsigned int   l,i;
+   unsigned int   uiKyw=strlen(pcKyw);
+   char           acKyw[uiKyw+1];
+   for (i=0;i<uiKyw;i++) {
+      acKyw[i]=isspace(pcKyw[i])?'.':tolower(pcKyw[i]);
+   }
+   acKyw[i]=0x00;
+
+   if (chHdl==C_CRT) {
+      uiLev+=1;
+   } else if (chHdl=='+') {
+      uiLev+=2;
+   }
+   if (pcPat!=NULL && *pcPat) {
+      efprintf(pfDoc,"[[%s.%s]]\n",pcPat,acKyw);
+   }
+   if (isNbr) {
+      if (uiLev) {
+         for (l=0;l<uiLev;l++) fprintf(pfDoc,"=");
+         fprintf(pfDoc,   " %s %s '%s'\n\n",pcNum,pcKnd,pcKyw);
+      } else {
+         fprintf(pfDoc,   "%s %s '%s'\n",pcNum,pcKnd,pcKyw);
+         l=strlen(pcNum)+strlen(pcKnd)+strlen(pcKyw)+4;
+         for (i=0;i<l;i++) fprintf(pfDoc,"%c",chHdl);
+         fprintf(pfDoc,"\n\n");
+      }
+   } else {
+      if (uiLev) {
+         for (l=0;l<uiLev;l++) fprintf(pfDoc,"=");
+         fprintf(pfDoc,   " %s '%s'\n",pcKnd,pcKyw);
+      } else {
+         fprintf(pfDoc,   "%s '%s'\n",pcKnd,pcKyw);
+         l=strlen(pcKnd)+strlen(pcKyw)+3;
+         for (i=0;i<l;i++) fprintf(pfDoc,"%c",chHdl);
+         fprintf(pfDoc,"\n\n");
+      }
+   }
+}
+
 extern int siClpDocu(
    void*                         pvHdl,
    FILE*                         pfDoc,
@@ -1580,7 +1622,8 @@ extern int siClpDocu(
    const char*                   pcCmd,
    const int                     isDep,
    const int                     isMan,
-   const int                     isNbr)
+   const int                     isNbr,
+   const unsigned int            uiLev)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    if (psHdl->pcLst!=NULL) psHdl->pcLst[0]=0x00;
@@ -1591,11 +1634,17 @@ extern int siClpDocu(
    psHdl->pcRow=NULL;
    psHdl->siCol=0;
    psHdl->siRow=0;
+   psHdl->uiLev=uiLev;
    psHdl->pcLex[0]=EOS;
    psHdl->pcMsg[0]=EOS;
    psHdl->pcPat[0]=EOS;
    psHdl->pcPre[0]=EOS;
    srprintf(&psHdl->pcSrc,&psHdl->szSrc,0,":DOCU:");
+   if (psHdl->uiLev) {
+      if (psHdl->uiLev<3 || psHdl->uiLev>4) {
+         return CLPERR(psHdl,CLPERR_INT,"Initial level for docu generation (%u) is not valid (<3 or >4)",psHdl->uiLev);
+      }
+   }
 
    if (pcNum!=NULL && strlen(pcNum)<100 && pcCmd!=NULL) {
       if (pfDoc!=NULL) {
@@ -1675,11 +1724,7 @@ extern int siClpDocu(
                            case CLPTYP_OVRLAY:strcpy(acArg,"OVERLAY");break;
                            default           :strcpy(acArg,"PARAMETER");break;
                            }
-                           if (isNbr) {
-                              fprintf(pfDoc,"==== %s %s '%s'\n\n",acNum,acArg,psArg->psStd->pcKyw);
-                           } else {
-                              fprintf(pfDoc,"==== %s '%s'\n\n",acArg,psArg->psStd->pcKyw);
-                           }
+                           vdPrintHdl(pfDoc,psHdl->uiLev,isNbr,pcNum,fpcPat(pvHdl,siLev-1),acArg,psArg->psStd->pcKyw,C_CRT);
                            fprintf(pfDoc, ".SYNOPSIS\n\n");
                            fprintf(pfDoc, "-----------------------------------------------------------------------\n");
                            efprintf(pfDoc,"HELP:   %s\n",psArg->psFix->pcHlp);
@@ -1741,17 +1786,7 @@ extern int siClpDocu(
                            fprintf(pfDoc, "------\n\n");
                            fprintf(pfDoc, "limes datentechnik(r) gmbh (www.flam.de)\n\n");
                         } else {
-                           if (isNbr) {
-                              fprintf(pfDoc,"%s CONSTANT '%s'\n",acNum,psArg->psStd->pcKyw);
-                              l=strlen(acNum)+strlen(psArg->psStd->pcKyw)+12;
-                              for (i=0;i<l;i++) fprintf(pfDoc,"+");
-                              fprintf(pfDoc,"\n\n");
-                           } else {
-                              fprintf(pfDoc,"CONSTANT '%s'\n",psArg->psStd->pcKyw);
-                              l=strlen(psArg->psStd->pcKyw)+11;
-                              for (i=0;i<l;i++) fprintf(pfDoc,"+");
-                              fprintf(pfDoc,"\n\n");
-                           }
+                           vdPrintHdl(pfDoc,psHdl->uiLev,isNbr,pcNum,fpcPat(pvHdl,siLev-1),"CONSTANT",psArg->psStd->pcKyw,'+');
                            fprintf(pfDoc, ".SYNOPSIS\n\n");
                            fprintf(pfDoc, "-----------------------------------------------------------------------\n");
                            efprintf(pfDoc,"HELP:   %s\n",psArg->psFix->pcHlp);
@@ -1810,7 +1845,7 @@ extern int siClpDocu(
             } else {
                fprintf(pfDoc,"TYPE:   OBJECT\n");
             }
-            fprintf(pfDoc,   "SYNTAX: :> %s ",psHdl->pcPgm); siErr=siClpPrnCmd(pvHdl,pfDoc,0,0,1,NULL,psHdl->psTab,FALSE,FALSE); fprintf(pfDoc,"\n");
+            fprintf(pfDoc,   "SYNTAX: > %s ",psHdl->pcPgm); siErr=siClpPrnCmd(pvHdl,pfDoc,0,0,1,NULL,psHdl->psTab,FALSE,FALSE); fprintf(pfDoc,"\n");
             fprintf(pfDoc,   "-----------------------------------------------------------------------\n\n");
             if (siErr<0) return(siErr);
             fprintf(pfDoc,   "DESCRIPTION\n");
@@ -1824,17 +1859,7 @@ extern int siClpDocu(
             fprintf(pfDoc,"------\n\n");
             fprintf(pfDoc,"limes datentechnik(r) gmbh (www.flam.de)\n\n");
          } else {
-            if (isNbr) {
-               fprintf(pfDoc,   "%s %s '%s'\n",pcNum,pcCmd,pcSta);
-               l=strlen(pcNum)+strlen(pcCmd)+strlen(pcSta)+4;
-               for (i=0;i<l;i++) fprintf(pfDoc,"%c",C_TLD);
-               fprintf(pfDoc,"\n\n");
-            } else {
-               fprintf(pfDoc,   "%s '%s'\n",pcCmd,pcSta);
-               l=strlen(pcCmd)+strlen(pcSta)+3;
-               for (i=0;i<l;i++) fprintf(pfDoc,"%c",C_TLD);
-               fprintf(pfDoc,"\n\n");
-            }
+            vdPrintHdl(pfDoc,psHdl->uiLev,isNbr,pcNum,psHdl->pcPgm,pcCmd,pcSta,C_TLD);
             fprintf(pfDoc,   ".SYNOPSIS\n\n");
             fprintf(pfDoc,   "-----------------------------------------------------------------------\n");
             efprintf(pfDoc,  "HELP:   %s\n",psHdl->pcHlp);
@@ -1844,7 +1869,7 @@ extern int siClpDocu(
             } else {
                fprintf(pfDoc,"TYPE:   OBJECT\n");
             }
-            fprintf(pfDoc,   "SYNTAX: :> %s ",psHdl->pcPgm); siErr=siClpPrnCmd(pvHdl,pfDoc,0,0,1,NULL,psHdl->psTab,FALSE,FALSE); fprintf(pfDoc,"\n");
+            fprintf(pfDoc,   "SYNTAX: > %s ",psHdl->pcPgm); siErr=siClpPrnCmd(pvHdl,pfDoc,0,0,1,NULL,psHdl->psTab,FALSE,FALSE); fprintf(pfDoc,"\n");
             fprintf(pfDoc,   "-----------------------------------------------------------------------\n\n");
             if (siErr<0) return(siErr);
             fprintf(pfDoc,   ".DESCRIPTION\n\n");
@@ -7675,7 +7700,7 @@ static int siClpPrnDoc(
                   apLst[siLst]=psHlp; siLst++;
                }
             }
-         } else if (CLPISF_CON(psHlp->psStd->uiFlg) && psArg->psFix->siTyp == psHlp->psFix->siTyp) {
+         } else if (CLPISF_CON(psHlp->psStd->uiFlg) && psArg!=NULL && psArg->psFix->siTyp == psHlp->psFix->siTyp) {
             if (psHlp->psFix->pcMan!=NULL && *psHlp->psFix->pcMan) {
                apMan[siMan]=psHlp; siMan++;
             } else {
@@ -7690,18 +7715,14 @@ static int siClpPrnDoc(
             if (siLst) {
                fprintf(pfDoc,".SELECTIONS\n\n");
                for (m=0;m<siLst;m++) {
-                  efprintf(pfDoc,"* `%s` - %s\n",apLst[m]->psStd->pcKyw,apLst[m]->psFix->pcHlp);
+                  efprintf(pfDoc,"* `%s - %s`\n",apLst[m]->psStd->pcKyw,apLst[m]->psFix->pcHlp);
                }
                fprintf(pfDoc,"\n");
             }
             if (isDep && siMan) {
                for (k=m=0;m<siMan;m++) {
                   snprintf(acNum,sizeof(acNum),"%s%d.",pcNum,k+1);
-                  if (isNbr) {
-                     fprintf(pfDoc,"===== %s CONSTANT '%s'\n\n",acNum,apMan[m]->psStd->pcKyw);
-                  } else {
-                     fprintf(pfDoc,"===== CONSTANT '%s'\n\n",apMan[m]->psStd->pcKyw);
-                  }
+                  vdPrintHdl(pfDoc,psHdl->uiLev,isNbr,acNum,fpcPat(pvHdl,siLev),"CONSTANT",apMan[m]->psStd->pcKyw,'+');
                   fprintf(pfDoc, ".SYNOPSIS\n\n");
                   fprintf(pfDoc, "-----------------------------------------------------------------------\n");
                   efprintf(pfDoc,"HELP:   %s\n",apMan[m]->psFix->pcHlp);
@@ -7722,7 +7743,7 @@ static int siClpPrnDoc(
             for (m=0;m<siLst;m++) {
                fprintf(pfDoc,"* %c%s: ",C_GRV,apClpTyp[apLst[m]->psFix->siTyp]); siClpPrnSyn(pvHdl,pfDoc,FALSE,siLev,apLst[m]); efprintf(pfDoc," - %s`\n",apLst[m]->psFix->pcHlp);
                for (psSel=apLst[m]->psDep;psSel!=NULL;psSel=psSel->psNxt) {
-                  efprintf(pfDoc,"** `%s` - %s\n",psSel->psStd->pcKyw,psSel->psFix->pcHlp);
+                  efprintf(pfDoc,"** `%s - %s`\n",psSel->psStd->pcKyw,psSel->psFix->pcHlp);
                }
             }
             fprintf(pfDoc,"\n");
@@ -7736,11 +7757,7 @@ static int siClpPrnDoc(
                default           :strcpy(acArg,"PARAMETER");break;
                }
                snprintf(acNum,sizeof(acNum),"%s%d.",pcNum,k+1);
-               if (isNbr) {
-                  fprintf(pfDoc,"==== %s %s '%s'\n\n",acNum,acArg,apMan[m]->psStd->pcKyw);
-               } else {
-                  fprintf(pfDoc,"==== %s '%s'\n\n",acArg,apMan[m]->psStd->pcKyw);
-               }
+               vdPrintHdl(pfDoc,psHdl->uiLev,isNbr,acNum,fpcPat(pvHdl,siLev),acArg,apMan[m]->psStd->pcKyw,C_CRT);
                fprintf(pfDoc, ".SYNOPSIS\n\n");
                fprintf(pfDoc, "-----------------------------------------------------------------------\n");
                efprintf(pfDoc,"HELP:   %s\n",apMan[m]->psFix->pcHlp);
