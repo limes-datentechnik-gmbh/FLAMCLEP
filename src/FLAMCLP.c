@@ -1574,7 +1574,7 @@ extern int siClpHelp(
 }
 
 static inline void vdPrintHdl(FILE* pfDoc,unsigned int uiLev, const int isNbr, const char* pcNum, const char* pcPat, const char* pcKnd, const char* pcKyw, const char chHdl) {
-   unsigned int   l,i;
+   unsigned int   l,i,isLev=uiLev>1;
 
    if (chHdl==C_CRT) {
       uiLev+=1;
@@ -1582,7 +1582,7 @@ static inline void vdPrintHdl(FILE* pfDoc,unsigned int uiLev, const int isNbr, c
       uiLev+=2;
    }
    if (isNbr) {
-      if (uiLev) {
+      if (isLev) {
          for (l=0;l<uiLev;l++) fprintf(pfDoc,"=");
          fprintf(pfDoc,   " %s %s '%s'\n\n",pcNum,pcKnd,pcKyw);
       } else {
@@ -1592,7 +1592,7 @@ static inline void vdPrintHdl(FILE* pfDoc,unsigned int uiLev, const int isNbr, c
          fprintf(pfDoc,"\n\n");
       }
    } else {
-      if (uiLev) {
+      if (isLev) {
          for (l=0;l<uiLev;l++) fprintf(pfDoc,"=");
          fprintf(pfDoc,   " %s '%s'\n",pcKnd,pcKyw);
       } else {
