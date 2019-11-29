@@ -2139,7 +2139,7 @@ EVALUATE:
                   fprintf(pfDoc,"-----\n\n");
                   fprintm(pfDoc,pcOwn,pcPgm,MAN_CLE_APPENDIX_ABOUT,1);
                   fprintf(pfDoc,"------------------------------------------------------------------------\n");
-                  fprintf(pfDoc,"%s",pcAbo); s++;
+                  fprintf(pfDoc,"%s",pcAbo);
                   fprintf(pfDoc,"------------------------------------------------------------------------\n\n");
                   efprintf(pfDoc,"indexterm:[Appendix About]\n\n\n");
                }
