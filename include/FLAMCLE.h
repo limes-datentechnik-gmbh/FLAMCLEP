@@ -850,7 +850,7 @@ typedef struct CleOtherClp {
  * @param[in]  pcDpa Pointer to a file name for a default parameter file (e.g. "DD:FLAMPAR") or NULL/empty string for nothing,
  *                   The file name is used if only a command without assignment or parameter is provided
  * @param[in]  siNoR Define this reason code to the values the mapping function returns if no run is requested (0 is nothing)
- * @param[in]  psDoc Table for flexible documentation generation (NULL the old documentation format is generated)
+ * @param[in]  psDoc Table for flexible documentation generation (NULL then no manual page documentation is possible)
  *
  * @return signed integer with the condition codes below:\n
  * 0  - command line, command syntax, mapping, execution and finish of the command was successful\n

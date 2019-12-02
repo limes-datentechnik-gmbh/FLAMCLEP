@@ -1089,7 +1089,7 @@ EVALUATE:
                      ERROR(CLERTC_OK,NULL);
                   } else {
                      fprintf(pfErr,"No manual page available for program '%s'\n",pcPgm);
-                     fprintf(pfErr,"CLE_DOCTYP_PROGRAM not found\n");
+                     fprintf(pfErr,"CLE_DOCTYP_PROGRAM not found in documentation table\n");
                      ERROR(CLERTC_TAB,NULL);
                   }
                } else {
@@ -1209,7 +1209,7 @@ EVALUATE:
                   ERROR(CLERTC_OK,NULL);
                } else {
                   fprintf(pfErr,"No manual page available for program '%s'\n",pcPgm);
-                  fprintf(pfErr,"CLE_DOCTYP_PROGRAM not found\n");
+                  fprintf(pfErr,"CLE_DOCTYP_PROGRAM not found in documentation table\n");
                   ERROR(CLERTC_TAB,NULL);
                }
             } else {
@@ -1262,7 +1262,7 @@ EVALUATE:
                   if (isMan==TRUE) fprintf(pfOut,"Manual page for program '%s' successfully written to file (%s)\n",pcPgm,pcFil);
                } else {
                   fprintf(pfErr,"No manual page available for program '%s'\n",pcPgm);
-                  fprintf(pfErr,"CLE_DOCTYP_PROGRAM not found\n");
+                  fprintf(pfErr,"CLE_DOCTYP_PROGRAM not found in documentation table\n");
                   ERROR(CLERTC_TAB,NULL);
                }
             } else {
@@ -1481,7 +1481,7 @@ EVALUATE:
                ERROR(CLERTC_OK,NULL);
             } else {
                fprintf(pfErr,"No manual page available for program '%s'\n",pcPgm);
-               fprintf(pfErr,"CLE_DOCTYP_PROGRAM not found\n");
+               fprintf(pfErr,"CLE_DOCTYP_PROGRAM not found in documentation table\n");
                ERROR(CLERTC_TAB,NULL);
             }
          } else {
@@ -1949,6 +1949,9 @@ EVALUATE:
                         break;
                   }
                }
+            } else {
+               fprintf(pfErr,"No table for documentation generation given\n");
+               ERROR(CLERTC_TAB,NULL);
             }
             fprintf(pfOut,"Documentation for program '%s' successfully created\n",pcPgm);
             ERROR(CLERTC_OK,NULL);
