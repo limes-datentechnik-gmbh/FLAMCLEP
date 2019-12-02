@@ -586,15 +586,8 @@ extern int siCleExecute(
    const char*                   pcVsn,
    const char*                   pcAbo,
    const char*                   pcHlp,
-   const char*                   pcMan,
-   const char*                   pcCov,
-   const char*                   pcGls,
-   const char*                   pcFin,
-   const char*                   pcScc,
    const char*                   pcDef,
    TfMsg*                        pfMsg,
-   const char*                   pcApp,
-   const char*                   pcOth,
    const TsCleOtherClp*          psOth,
    void*                         pvF2S,
    TfF2S*                        pfF2S,
@@ -604,7 +597,7 @@ extern int siCleExecute(
    const int                     siNoR,
    const TsCleDoc*               psDoc)
 {
-   int                           i,j,l,s,siErr,siDep,siCnt;
+   int                           i,j,l,siErr,siDep,siCnt;
    TsCnfHdl*                     psCnf=NULL;
    size_t                        szCnf=0;
    char*                         pcCnf=NULL;
@@ -952,14 +945,26 @@ EVALUATE:
       if (pfOut==NULL) pfOut=pfStd;
       if (pfErr==NULL) pfErr=pfStd;
       if (argc==2) {
-         fprintf(pfOut,"\n");
-         fprintf(pfOut,"Return/condition/exit codes of the executable\n");
-         fprintf(pfOut,"---------------------------------------------\n\n");
+         const char* pcScc=NULL;
+         efprintf(pfOut,"\n");
+         efprintf(pfOut,"Return/condition/exit codes of the executable\n");
+         efprintf(pfOut,"---------------------------------------------\n\n");
          fprintm(pfOut,pcOwn,pcPgm,MAN_CLE_APPENDIX_RETURNCODES,1);
-         if (pcScc!=NULL && *pcScc) fprintm(pfOut,pcOwn,pcPgm,pcScc,1);
+         if (psDoc!=NULL) {
+            for (i=0;psDoc[i].uiTyp;i++) {
+               if (psDoc[i].uiTyp==CLE_DOCTYP_SPECIALCODES) {
+                  pcScc=psDoc[i].pcMan;
+               }
+            }
+            if (pcScc!=NULL && *pcScc) {
+               efprintf(pfOut,"Special condition codes\n");
+               efprintf(pfOut,"~~~~~~~~~~~~~~~~~~~~~~~\n\n");
+               fprintm(pfOut,pcOwn,pcPgm,pcScc,1);
+            }
+         }
          if (pfMsg!=NULL) {
-            fprintf(pfOut,"Reason codes of the different commands\n");
-            fprintf(pfOut,"--------------------------------------\n\n");
+            efprintf(pfOut,"Reason codes of the different commands\n");
+            efprintf(pfOut,"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n");
             fprintm(pfOut,pcOwn,pcPgm,MAN_CLE_APPENDIX_REASONCODES,1);
             for (i=1,m=pfMsg(i);m!=NULL;i++,m=pfMsg(i)) {
                if (*m) fprintf(pfOut," * %d - %s\n",i,m);
@@ -1071,9 +1076,27 @@ EVALUATE:
       } else if (argc>=3) {
          if (argc==3) {
             if (strxcmp(isCas,argv[2],"MAN",0,0,FALSE)==0 || strxcmp(isCas,argv[2],"-MAN",0,0,FALSE)==0 || strxcmp(isCas,argv[2],"--MAN",0,0,FALSE)==0) {
-               fprintf(pfOut,"Help for program '%s':\n",pcPgm);
-               fprintm(pfOut,pcOwn,pcPgm,pcMan,1);
-               ERROR(CLERTC_OK,NULL);
+               if (psDoc!=NULL) {
+                  const char* pcMan=NULL;
+                  for (i=0;psDoc[i].uiTyp;i++) {
+                     if (psDoc[i].uiTyp==CLE_DOCTYP_PROGRAM) {
+                        pcMan=psDoc[i].pcMan;
+                     }
+                  }
+                  if (pcMan!=NULL && *pcMan) {
+                     fprintf(pfOut,"Help for program '%s':\n",pcPgm);
+                     fprintm(pfOut,pcOwn,pcPgm,pcMan,1);
+                     ERROR(CLERTC_OK,NULL);
+                  } else {
+                     fprintf(pfErr,"No manual page available for program '%s'\n",pcPgm);
+                     fprintf(pfErr,"CLE_DOCTYP_PROGRAM not found\n");
+                     ERROR(CLERTC_TAB,NULL);
+                  }
+               } else {
+                  fprintf(pfErr,"No manual page available for program '%s'\n",pcPgm);
+                  fprintf(pfErr,"No table for documentation generation given\n");
+                  ERROR(CLERTC_TAB,NULL);
+               }
             } else siDep=1;
          } else if (argc==4) {
             if (argv[3][0]=='-') argv[3]++;
@@ -1173,10 +1196,28 @@ EVALUATE:
       if (pfErr==NULL) pfErr=pfStd;
       if (argc==2) {
          if (pfOut!=NULL) {
-            fprintf(pfOut,"Manual page for program '%s':\n\n",pcPgm);
-            vdCleManProgram(pfOut,psTab,pcOwn,pcPgm,pcHlp,pcMan,pcDep,pcOpt,pcDpa,FALSE,TRUE);
+            if (psDoc!=NULL) {
+               const char* pcMan=NULL;
+               for (i=0;psDoc[i].uiTyp;i++) {
+                  if (psDoc[i].uiTyp==CLE_DOCTYP_PROGRAM) {
+                     pcMan=psDoc[i].pcMan;
+                  }
+               }
+               if (pcMan!=NULL && *pcMan) {
+                  fprintf(pfOut,"Manual page for program '%s':\n\n",pcPgm);
+                  vdCleManProgram(pfOut,psTab,pcOwn,pcPgm,pcHlp,pcMan,pcDep,pcOpt,pcDpa,FALSE,TRUE);
+                  ERROR(CLERTC_OK,NULL);
+               } else {
+                  fprintf(pfErr,"No manual page available for program '%s'\n",pcPgm);
+                  fprintf(pfErr,"CLE_DOCTYP_PROGRAM not found\n");
+                  ERROR(CLERTC_TAB,NULL);
+               }
+            } else {
+               fprintf(pfErr,"No manual page available for program '%s'\n",pcPgm);
+               fprintf(pfErr,"No table for documentation generation given\n");
+               ERROR(CLERTC_TAB,NULL);
+            }
          }
-         ERROR(CLERTC_OK,NULL);
       } else if (argc==3) {
          const char*                pcSgn;
          const char*                pcCmd;
@@ -1207,10 +1248,28 @@ EVALUATE:
             }
          }
          if (strxcmp(isCas,pcCmd,"ALL",0,0,FALSE)==0 || strxcmp(isCas,pcCmd,"-ALL",0,0,FALSE)==0 || strxcmp(isCas,pcCmd,"--ALL",0,0,FALSE)==0) {
-            isAll=TRUE;
-            if (isMan==FALSE) fprintf(pfOut,"Manual page for program '%s':\n\n",pcPgm);
-            vdCleManProgram(pfDoc,psTab,pcOwn,pcPgm,pcHlp,pcMan,pcDep,pcOpt,pcDpa,isMan,TRUE);
-            if (isMan==TRUE) fprintf(pfOut,"Manual page for program '%s' successfully written to file (%s)\n",pcPgm,pcFil);
+            if (psDoc!=NULL) {
+               const char* pcMan=NULL;
+               for (i=0;psDoc[i].uiTyp;i++) {
+                  if (psDoc[i].uiTyp==CLE_DOCTYP_PROGRAM) {
+                     pcMan=psDoc[i].pcMan;
+                  }
+               }
+               if (pcMan!=NULL && *pcMan) {
+                  isAll=TRUE;
+                  if (isMan==FALSE) fprintf(pfOut,"Manual page for program '%s':\n\n",pcPgm);
+                  vdCleManProgram(pfDoc,psTab,pcOwn,pcPgm,pcHlp,pcMan,pcDep,pcOpt,pcDpa,isMan,TRUE);
+                  if (isMan==TRUE) fprintf(pfOut,"Manual page for program '%s' successfully written to file (%s)\n",pcPgm,pcFil);
+               } else {
+                  fprintf(pfErr,"No manual page available for program '%s'\n",pcPgm);
+                  fprintf(pfErr,"CLE_DOCTYP_PROGRAM not found\n");
+                  ERROR(CLERTC_TAB,NULL);
+               }
+            } else {
+               fprintf(pfErr,"No manual page available for program '%s'\n",pcPgm);
+               fprintf(pfErr,"No table for documentation generation given\n");
+               ERROR(CLERTC_TAB,NULL);
+            }
          }
          if (strxcmp(isCas,pcCmd,"SYNTAX",0,0,FALSE)==0 || isAll) {
             if (isMan==FALSE) fprintf(pfOut,"Manual page for built-in function 'SYNTAX':\n\n");
@@ -1409,9 +1468,27 @@ EVALUATE:
             fprintf(pfErr,"Open of manual page file (\"%s\",\"%s\") failed (%d - %s)\n",pcFil,"w",errno,strerror(errno));
             ERROR(CLERTC_SYS,NULL);
          }
-         vdCleManProgram(pfDoc,psTab,pcOwn,pcPgm,pcHlp,pcMan,pcDep,pcOpt,pcDpa,isMan,TRUE);
-         if (pfOut!=NULL) fprintf(pfOut,"Manual page for program '%s' successfully written to file (%s)\n",pcPgm,pcFil);
-         ERROR(CLERTC_OK,NULL);
+         if (psDoc!=NULL) {
+            const char* pcMan=NULL;
+            for (i=0;psDoc[i].uiTyp;i++) {
+               if (psDoc[i].uiTyp==CLE_DOCTYP_PROGRAM) {
+                  pcMan=psDoc[i].pcMan;
+               }
+            }
+            if (pcMan!=NULL && *pcMan) {
+               vdCleManProgram(pfDoc,psTab,pcOwn,pcPgm,pcHlp,pcMan,pcDep,pcOpt,pcDpa,isMan,TRUE);
+               if (pfOut!=NULL) fprintf(pfOut,"Manual page for program '%s' successfully written to file (%s)\n",pcPgm,pcFil);
+               ERROR(CLERTC_OK,NULL);
+            } else {
+               fprintf(pfErr,"No manual page available for program '%s'\n",pcPgm);
+               fprintf(pfErr,"CLE_DOCTYP_PROGRAM not found\n");
+               ERROR(CLERTC_TAB,NULL);
+            }
+         } else {
+            fprintf(pfErr,"No manual page available for program '%s'\n",pcPgm);
+            fprintf(pfErr,"No table for documentation generation given\n");
+            ERROR(CLERTC_TAB,NULL);
+         }
       }
       fprintf(pfErr,"Syntax for built-in function 'MANPAGE' not valid\n");
       for (i=0;psTab[i].pcKyw!=NULL ;i++) {
@@ -1426,7 +1503,6 @@ EVALUATE:
    } else if (strxcmp(isCas,argv[1],"GENDOCU",0,0,FALSE)==0) {
       const char*                pcCmd=NULL;
       const char*                pcSgn=NULL;
-      char                       acHdl[1024];
       char                       acNum[64];
       int                        isNbr=TRUE;
       int                        isLong=TRUE;
@@ -1852,11 +1928,8 @@ EVALUATE:
                            fprintf(pfErr,"Level (%u) for the glossary is not 2\n",psDoc[i].uiLev);
                            ERROR(CLERTC_TAB,NULL);
                         }
+                        //TODO: Merge MAN_CLE_GLOSSARY with psDoc[i].pcMan
                         vdPrintMan(pfDoc,psDoc+i,pcOwn,pcPgm,"glossary",MAN_CLE_GLOSSARY,isNbr);
-                        if (pcGls!=NULL && *pcGls) {
-                           //TODO: Merge glossaries
-                           fprintm(pfDoc,pcOwn,pcPgm,pcGls,2);
-                        }
                         break;
                      case CLE_DOCTYP_INDEX:
                         fprintf(pfOut,"... print CLE_DOCTYP_INDEX(%s)\n",psDoc[i].pcHdl);
@@ -1875,226 +1948,6 @@ EVALUATE:
                         vdPrintMan(pfDoc,psDoc+i,pcOwn,pcPgm,"colophon",MAN_CLE_COLOPHON,isNbr);
                         break;
                   }
-               }
-            } else {
-               if (pcCov!=NULL && *pcCov) {
-                  fprintm(pfDoc,pcOwn,pcPgm,pcCov,2);
-               } else {
-                  snprintf(acHdl,sizeof(acHdl),"'%s' - User Manual",pcPgm); l=strlen(acHdl); fprintf(pfDoc,"%s\n",acHdl);
-                  for (i=0;i<l;i++) fprintf(pfDoc,"=");
-                  fprintf(pfDoc,"\n");
-                  fprintf(pfDoc,":doctype: book\n\n");
-               }
-               efprintf(pfDoc,"[[command-line-processor]]\n");
-               if (isNbr) {
-                  fprintf(pfDoc,"1. COMMAND LINE PROCESSOR\n");
-                  fprintf(pfDoc,"-------------------------\n\n");
-               } else {
-                  fprintf(pfDoc,"COMMAND LINE PROCESSOR\n");
-                  fprintf(pfDoc,"----------------------\n\n");
-               }
-               fprintm(pfDoc,pcOwn,pcPgm,MAN_CLE_OLD_MAIN,2);
-               efprintf(pfDoc,"indexterm:[Command line processor]\n\n\n");
-
-               vdCleManProgram(pfDoc,psTab,pcOwn,pcPgm,pcHlp,pcMan,pcDep,pcOpt,pcDpa,FALSE,isNbr);
-
-               if (isNbr) {
-                  snprintf(acHdl,sizeof(acHdl),"3. Available commands"); l=strlen(acHdl); fprintf(pfDoc,"%s\n",acHdl);
-                  for (i=0;i<l;i++) fprintf(pfDoc,"-");
-                  fprintf(pfDoc,"\n\n");
-               } else {
-                  snprintf(acHdl,sizeof(acHdl),"Available commands"); l=strlen(acHdl); fprintf(pfDoc,"%s\n",acHdl);
-                  for (i=0;i<l;i++) fprintf(pfDoc,"-");
-                  fprintf(pfDoc,"\n\n");
-               }
-               fprintm(pfDoc,pcOwn,pcPgm,MAN_CLE_COMMANDS,2);
-               efprintf(pfDoc,"indexterm:[Available commands]\n\n\n");
-
-               for (i=0;psTab[i].pcKyw!=NULL;i++) {
-                  if (psTab[i].siFlg) {
-                     siErr=siCleCommandInit(pvGbl,psTab[i].pfIni,psTab[i].pvClp,pcOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,
-                                            isCas,isPfl,isRpl,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf);
-                     if (siErr) ERROR(siErr,NULL);
-                     snprintf(acNum,sizeof(acNum),"3.%d.",i+1);
-                     siErr=siClpDocu(pvHdl,pfDoc,psTab[i].pcKyw,NULL,acNum,"COMMAND",TRUE,FALSE,isNbr,0);
-                     if (siErr<0) {
-                        fprintf(pfOut,"Creation of documentation file (%s) failed (%d - %s)\n",pcFil,errno,strerror(errno));
-                        ERROR(CLERTC_SYN,NULL);
-                     }
-                     vdClpClose(pvHdl,CLPCLS_MTD_ALL); pvHdl=NULL;
-                  }
-               }
-
-               vdClePrnBuiltInDocu(pfDoc, pcOwn, pcPgm, isNbr);
-               s=1;
-
-               if (pcApp!=NULL && *pcApp) {
-                  fprintm(pfDoc,pcOwn,pcPgm,pcApp,1);
-               }
-               if (psOth!=NULL) {
-                  efprintf(pfDoc,"[[appendix-clp-strings]]\n");
-                  efprintf(pfDoc,"[appendix]\n");
-                  fprintf(pfDoc,"OTHER CLP STRINGS\n");
-                  fprintf(pfDoc,"-----------------\n\n");
-                  if (pcOth!=NULL && *pcOth) fprintm(pfDoc,pcOwn,pcPgm,pcOth,1);
-                  for (i=0;psOth[i].pcHdl!=NULL;i++) {
-                     pvHdl=pvClpOpen(isCas,isPfl,isRpl,siMkl,pcOwn,psOth[i].pcRot,psOth[i].pcKyw,psOth[i].pcMan,psOth[i].pcHlp,psOth[i].isOvl,
-                                     psOth[i].psTab,NULL,pfOut,pfErr,pfTrc,pfTrc,pfTrc,pfTrc,pcDep,pcOpt,pcEnt,NULL,pvGbl,pvF2S,pfF2S,pvSaf,pfSaf);
-                     if (pvHdl==NULL) {
-                        fprintf(pfErr,"Open of parser for CLP string of appendix '%s' failed\n",psOth[i].pcRot);
-                        return(CLERTC_TAB);
-                     }
-                     snprintf(acNum,sizeof(acNum),"A.%d.",i+1);
-                     siErr=siClpDocu(pvHdl,pfDoc,psOth[i].pcKyw,psOth[i].pcHdl,acNum,"Appendix",TRUE,FALSE,isNbr,0);
-                     if (siErr<0) {
-                        fprintf(pfErr,"Creation of documentation file (%s) failed (%d - %s)\n",pcFil,errno,strerror(errno));
-                        ERROR(CLERTC_SYN,NULL);
-                     }
-                     vdClpClose(pvHdl,CLPCLS_MTD_ALL); pvHdl=NULL;
-                  }
-                  efprintf(pfDoc,"indexterm:[Appendix CLP Strings]\n\n\n");
-                  s++;
-               }
-
-               siErr=siCleSimpleInit(pfOut,pfErr,isPfl,isRpl,pcDep,pcOpt,pcEnt,&pvHdl);
-               if (siErr) ERROR(siErr,NULL);
-
-               efprintf(pfDoc,"[[appendix-lexem]]\n");
-               efprintf(pfDoc,"[appendix]\n");
-               fprintf(pfDoc,"LEXEM\n");
-               fprintf(pfDoc,"-----\n\n");
-               fprintm(pfDoc,pcOwn,pcPgm,MAN_CLE_APPENDIX_LEXEM,1);
-               fprintf(pfDoc,"------------------------------------------------------------------------\n");
-               fprintf(pfDoc,"Lexemes (regular expressions) for argument list or parameter file\n");
-               siErr=siClpLexem(pvHdl,pfDoc); s++;
-               fprintf(pfDoc,"------------------------------------------------------------------------\n\n");
-               efprintf(pfDoc,"indexterm:[Appendix Lexem]\n\n\n");
-               if (siErr<0) {
-                  fprintf(pfErr,"Creation of documentation file (%s) failed (%d - %s)\n",pcFil,errno,strerror(errno));
-                  ERROR(CLERTC_SYN,NULL);
-               }
-
-               efprintf(pfDoc,"[[appendix-grammar]]\n");
-               efprintf(pfDoc,"[appendix]\n");
-               fprintf(pfDoc,"GRAMMAR\n");
-               fprintf(pfDoc,"-------\n\n");
-               fprintm(pfDoc,pcOwn,pcPgm,MAN_CLE_APPENDIX_GRAMMAR,1);
-               fprintf(pfDoc,"------------------------------------------------------------------------\n");
-               fprintf(pfDoc,"Grammar for argument list, parameter file or property file\n");
-               siErr=siClpGrammar(pvHdl,pfDoc); s++;
-               vdClpClose(pvHdl,CLPCLS_MTD_ALL); pvHdl=NULL;
-               fprintf(pfDoc,"------------------------------------------------------------------------\n\n");
-               efprintf(pfDoc,"indexterm:[Appendix Grammar]\n\n\n");
-               if (siErr<0) {
-                  fprintf(pfErr,"Creation of documentation file (%s) failed (%d - %s)\n",pcFil,errno,strerror(errno));
-                  ERROR(CLERTC_SYN,NULL);
-               }
-
-               efprintf(pfDoc,"[[appendix-properties]]\n");
-               efprintf(pfDoc,"[appendix]\n");
-               fprintf(pfDoc,"PROPERTIES\n");
-               fprintf(pfDoc,"----------\n\n");
-               fprintm(pfDoc,pcOwn,pcPgm,MAN_CLE_APPENDIX_PROPERTIES,1);
-               efprintf(pfDoc,"%s",MAN_CLE_OLD_REMAINING);
-               for (siErr=CLP_OK, i=0;psTab[i].pcKyw!=NULL && siErr==CLP_OK;i++) {
-                  siErr=siClePropertyInit(pvGbl,psTab[i].pfIni,psTab[i].pvClp,pcOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,
-                                          psTab[i].piOid,psTab[i].psTab,isCas,isPfl,isRpl,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,
-                                          NULL,NULL,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf);
-                  if (siErr) ERROR(siErr,NULL);
-                  siErr=siClpProperties(pvHdl,CLPPRO_MTD_DOC,10,psTab[i].pcKyw,pfDoc);
-                  vdClpClose(pvHdl,CLPCLS_MTD_ALL); pvHdl=NULL;
-               }
-               if (siErr<0) {
-                  fprintf(pfErr,"Creation of documentation file (%s) failed (%d - %s)\n",pcFil,errno,strerror(errno));
-                  ERROR(CLERTC_SYN,NULL);
-               }
-
-               efprintf(pfDoc,"%s",MAN_CLE_OLD_DEFAULTS);
-               fprintf(pfDoc,"------------------------------------------------------------------------\n");
-               fprintf(pfDoc,"\n%c Property file for: %s.%s %c\n",C_HSH,pcOwn,pcPgm,C_HSH);
-               efprintf(pfDoc,"%s",HLP_CLE_PROPFIL);
-               for (siErr=CLP_OK, i=0;psTab[i].pcKyw!=NULL && siErr==CLP_OK;i++) {
-                  siErr=siClePropertyInit(pvGbl,psTab[i].pfIni,psTab[i].pvClp,pcOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,
-                                          psTab[i].piOid,psTab[i].psTab,isCas,isPfl,isRpl,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,NULL,NULL,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf);
-                  if (siErr) ERROR(siErr,NULL);
-                  siErr=siClpProperties(pvHdl,CLPPRO_MTD_SET,10,psTab[i].pcKyw,pfDoc);
-                  vdClpClose(pvHdl,CLPCLS_MTD_ALL); pvHdl=NULL;
-               }
-               fprintf(pfDoc,"------------------------------------------------------------------------\n\n");
-               if (siErr<0) {
-                  fprintf(pfErr,"Creation of documentation file (%s) failed (%d - %s)\n",pcFil,errno,strerror(errno));
-                  ERROR(CLERTC_SYN,NULL);
-               }
-               efprintf(pfDoc,"indexterm:[Appendix Properties]\n\n\n");
-
-               efprintf(pfDoc,"[[appendix-returncodes]]\n");
-               efprintf(pfDoc,"[appendix]\n");
-               fprintf(pfDoc,"RETURN CODES\n");
-               fprintf(pfDoc,"------------\n\n");
-               fprintm(pfDoc,pcOwn,pcPgm,MAN_CLE_APPENDIX_RETURNCODES,1);
-               if (pcScc!=NULL && *pcScc) fprintm(pfDoc,pcOwn,pcPgm,pcScc,1);
-               efprintf(pfDoc,"indexterm:[Appendix Returncodes]\n\n\n");
-
-               if (pfMsg!=NULL) {
-                  efprintf(pfDoc,"[[appendix-reasoncodes]]\n");
-                  efprintf(pfDoc,"[appendix]\n");
-                  fprintf(pfDoc,"REASON CODES\n");
-                  fprintf(pfDoc,"------------\n\n");
-                  fprintm(pfDoc,pcOwn,pcPgm,MAN_CLE_APPENDIX_REASONCODES,1);
-                  for (i=1,m=pfMsg(i);m!=NULL;i++,m=pfMsg(i)) {
-                     if (*m) fprintf(pfDoc,"* %d - %s\n",i,m);
-                  }
-                  efprintf(pfDoc,"indexterm:[Appendix Reasoncodes]\n\n\n");
-               }
-
-               if (pcVsn!=NULL && *pcVsn) {
-                  efprintf(pfDoc,"[[appendix-version]]\n");
-                  efprintf(pfDoc,"[appendix]\n");
-                  fprintf(pfDoc,"VERSION\n");
-                  fprintf(pfDoc,"-------\n\n");
-                  fprintm(pfDoc,pcOwn,pcPgm,MAN_CLE_APPENDIX_VERSION,1);
-                  fprintf(pfDoc,"------------------------------------------------------------------------\n");
-                  fprintf(pfDoc,"%s",pcVsn); s++;
-                  fprintf(pfDoc,"------------------------------------------------------------------------\n\n");
-                  efprintf(pfDoc,"indexterm:[Appendix Version]\n\n\n");
-               }
-
-               if (pcAbo!=NULL && *pcAbo) {
-                  efprintf(pfDoc,"[[appendix-about]]\n");
-                  efprintf(pfDoc,"[appendix]\n");
-                  fprintf(pfDoc,"ABOUT\n");
-                  fprintf(pfDoc,"-----\n\n");
-                  fprintm(pfDoc,pcOwn,pcPgm,MAN_CLE_APPENDIX_ABOUT,1);
-                  fprintf(pfDoc,"------------------------------------------------------------------------\n");
-                  fprintf(pfDoc,"%s",pcAbo);
-                  fprintf(pfDoc,"------------------------------------------------------------------------\n\n");
-                  efprintf(pfDoc,"indexterm:[Appendix About]\n\n\n");
-               }
-
-               if (pcGls!=NULL && *pcGls) {
-                  efprintf(pfDoc,"[glossary]\n");
-                  fprintf(pfDoc,"GLOSSARY\n");
-                  fprintf(pfDoc,"--------\n\n");
-                  fprintm(pfDoc,pcOwn,pcPgm,MAN_CLE_GLOSSARY,1);
-                  fprintm(pfDoc,pcOwn,pcPgm,pcGls,2);
-                  efprintf(pfDoc,"indexterm:[Glossary]\n\n\n");
-               }
-
-               efprintf(pfDoc,"[index]\n");
-               fprintf(pfDoc,"INDEX\n");
-               fprintf(pfDoc,"-----\n\n");
-
-               if (pcFin!=NULL && *pcFin) {
-                  efprintf(pfDoc,"\n\n");
-                  fprintm(pfDoc,pcOwn,pcPgm,pcFin,2);
-               } else {
-                  efprintf(pfDoc,"\n\n");
-                  efprintf(pfDoc,"[colophon]\n");
-                  fprintf(pfDoc,"COLOPHON\n");
-                  fprintf(pfDoc,"--------\n\n");
-                  fprintf(pfDoc,"Owner:   %s\n",pcOwn);
-                  fprintf(pfDoc,"Program: %s\n",pcPgm);
-                  fprintf(pfDoc,"\n\n");
                }
             }
             fprintf(pfOut,"Documentation for program '%s' successfully created\n",pcPgm);

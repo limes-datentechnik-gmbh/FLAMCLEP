@@ -263,13 +263,15 @@ Sample program
          CLEDOC_CLS
       };
 
-       siErr=siCleExecute(NULL,asCmdTab,argc,argv,FLM_CLEP_DEFAULT_OWNER,"flcl",
+      siErr=siCleExecute(psGbl,asCmdTab,argc,argv,FLM_CLEP_DEFAULT_OWNER,"flcl",
                FLM_CLEP_CASE_SENSITIVITY,TRUE,TRUE,FALSE,FLM_CLEP_MINIMAL_KEYWORDLEN,
                pfErr,pfTrc,FLM_CLEP_DEPTH_STRING_1047,FLM_CLEP_OPTION_STRING,
                FLM_CLEP_SEPARATION_STRING,psMain->acLicTxt,
                FLM_VSN_STR"-"__BUILDNRSTR__,psMain->acVersion,psMain->acAbout,
                "Frankenstein Limes(R) Command Line for FLUC, FLAM and FLIES",
-               pcFlmErrors,asOthTab,NULL,NULL,NULL,NULL,NULL,0,asDocTab);
+               NULL,pcFlmErrors,asOthTab,NULL,siClpFile2String,
+               NULL,(psGbl->isSafClpControl)?siClpSaf:NULL,pcDpa,0,asDocTab);
+
     }
 @endcode
 
@@ -422,9 +424,10 @@ extern const char* pcCleAbout(const int l, const int s, char* b);
 #define CLE_DOCTYP_COVER               1U    /** Cover page (manpage must be given)*/
 #define CLE_DOCTYP_PREFACE             2U    /** Preface page (manpage must be given)*/
 #define CLE_DOCTYP_CHAPTER             3U    /** A chapter (manpage must be given)*/
-#define CLE_DOCTYP_PGMSYNOBSIS         4U    /** The program synobsis (manpage can be overwritten)*/
-#define CLE_DOCTYP_PGMSYNTAX           5U    /** The program syntax (manpage can be overwritten)*/
-#define CLE_DOCTYP_PGMHELP             6U    /** The program help (manpage can be overwritten)*/
+#define CLE_DOCTYP_PROGRAM             4U    /** The main program chapter (manpage must be given)*/
+#define CLE_DOCTYP_PGMSYNOBSIS         5U    /** The program synobsis (manpage can be overwritten)*/
+#define CLE_DOCTYP_PGMSYNTAX           6U    /** The program syntax (manpage can be overwritten)*/
+#define CLE_DOCTYP_PGMHELP             7U    /** The program help (manpage can be overwritten)*/
 #define CLE_DOCTYP_COMMANDS            10U   /** The commands part (manpage can be overwritten)*/
 #define CLE_DOCTYP_OTHERCLP            11U   /** Other CLP strings (manpage should be overwritten)*/
 #define CLE_DOCTYP_CLEPMAIN            20U   /** The CLEP main part (manpage can be overwritten)*/
@@ -837,18 +840,8 @@ typedef struct CleOtherClp {
  * @param[in]  pcVsn String containing the version information for this program (used by built-in function VERSION - not converted on EBCDIC systems (don't use dia-critical characters))
  * @param[in]  pcAbo String containing the about message for this program (used by built-in function ABOUT - not converted on EBCDIC systems (don't use dia-critical characters))
  * @param[in]  pcHlp Short help message for the whole program (converted on EBCDIC systems)
- * @param[in]  pcMan Manual page for the whole program (as == 2.1 DESCRIPTION == in ASCIIDOC format, Level 3-4 can be used for sub chapters - converted on EBCDIC systems)
- * @param[in]  pcCov Cover sheets for documentation generation (Header (Title, Autor, Revision) and Preample in ASCIIDOC format - converted on EBCDIC systems)
- * @param[in]  pcGls Glossary for documentation generation (in ASCIIDOC format (term:: explanation) - converted on EBCDIC systems),
- *             if NULL then no glossary are generated, if "" then only the FLAMCLP glossary is added)
- * @param[in]  pcFin Final pages for documentation generation (colophon, copyright, closing aso. in ASCIIDOC format - converted on EBCDIC systems)
- * @param[in]  pcScc String for explanation of special condition codes if not NULL then used by built-in function ERRORS (converted on EBCDIC systems)
  * @param[in]  pcDef Default command or built-in function, which is executed if the first keyword (argv[1]) don't match (if NULL then no default)
  * @param[in]  pfMsg Pointer to a function which prints a message for an reason code (use to generate the corresponding appendix)\n
- * @param[in]  pcApp Optional free defined appendix page (will simply copied in front of all other generated appendixes - converted on EBCDIC systems),
- *             if NULL or empty then this appendix will not add. The ASCIIDOC conform appendix headlines must be part of this string.
- * @param[in]  pcOth Optional description used for other CLP string (in ASCIIDOC format (term:: explanation) - converted on EBCDIC systems),
- *             if NULL or empty then no description is generated, the parameter is only used if psOth below set
  * @param[in]  psOth Pointer to the table with other CLP strings to print (optional could be NULL)
  * @param[in]  pvF2S Pointer to a handle which can be used in file 2 string callback function (if not required then NULL)
  * @param[in]  pfF2S Callback function which reads a file into a null-terminated string in memory (if NULL then default implementation is used)
@@ -900,15 +893,8 @@ extern int siCleExecute(
    const char*                   pcVsn,
    const char*                   pcAbo,
    const char*                   pcHlp,
-   const char*                   pcMan,
-   const char*                   pcCov,
-   const char*                   pcGls,
-   const char*                   pcFin,
-   const char*                   pcScc,
    const char*                   pcDef,
    TfMsg*                        pfMsg,
-   const char*                   pcApp,
-   const char*                   pcOth,
    const TsCleOtherClp*          psOth,
    void*                         pvF2S,
    TfF2S*                        pfF2S,
