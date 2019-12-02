@@ -500,8 +500,9 @@ typedef struct CleDoc {
  * @param pcOwn owner name to use
  * @param pcPgm program name to use
  * @param isNbr flag to number the output
+ * @param uiLev level for '=' head lines
  */
-extern void vdClePrnBuiltInDocu(FILE* pfDoc, const char* pcOwn, char* pcPgm, int isNbr);
+extern void vdClePrnBuiltInDocu(FILE* pfDoc, const char* pcOwn, char* pcPgm, int isNbr, unsigned int uiLev);
 
 /**
  * Type definition for initialization function

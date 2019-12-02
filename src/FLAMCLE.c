@@ -477,44 +477,49 @@ static inline const char* pcMapCleRtc(int siRtc) {
    }
 }
 
-extern void vdClePrnBuiltInDocu(FILE* pfDoc, const char* pcOwn, char* pcPgm, int isNbr)
+extern void vdClePrnBuiltInDocu(FILE* pfDoc, const char* pcOwn, char* pcPgm, int isNbr, unsigned int uiLev) // TODO: muss weg wenn doctab
 {
    char acHdl[1024];
    int  i,l;
-   if (isNbr) {
-      snprintf(acHdl,sizeof(acHdl),"4. Available built-in functions"); l=strlen(acHdl); fprintf(pfDoc,"%s\n",acHdl);
-      for (i=0;i<l;i++) fprintf(pfDoc,"-");
-      fprintf(pfDoc,"\n\n");
+   if (uiLev) {
+      for (i=0;i<uiLev;i++) fprintf(pfDoc,"=");
+      fprintf(pfDoc," Available built-in functions\n\n");
    } else {
-      snprintf(acHdl,sizeof(acHdl),"Available built-in functions"); l=strlen(acHdl); fprintf(pfDoc,"%s\n",acHdl);
-      for (i=0;i<l;i++) fprintf(pfDoc,"-");
-      fprintf(pfDoc,"\n\n");
+      if (isNbr) {
+         snprintf(acHdl,sizeof(acHdl),"4. Available built-in functions"); l=strlen(acHdl); fprintf(pfDoc,"%s\n",acHdl);
+         for (i=0;i<l;i++) fprintf(pfDoc,"-");
+         fprintf(pfDoc,"\n\n");
+      } else {
+         snprintf(acHdl,sizeof(acHdl),"Available built-in functions"); l=strlen(acHdl); fprintf(pfDoc,"%s\n",acHdl);
+         for (i=0;i<l;i++) fprintf(pfDoc,"-");
+         fprintf(pfDoc,"\n\n");
+      }
    }
    fprintm(pfDoc,pcOwn,pcPgm,MAN_CLE_FUNCTIONS,2);
    efprintf(pfDoc,"indexterm:[Available built-in functions]\n\n\n");
 
-   vdCleManFunction(pfDoc,0,S_TLD,"4.1" ,"SYNTAX"  ,HLP_CLE_BUILTIN_SYNTAX  ,pcOwn,pcPgm,SYN_CLE_BUILTIN_SYNTAX  ,MAN_CLE_BUILTIN_SYNTAX  ,FALSE,isNbr);
-   vdCleManFunction(pfDoc,0,S_TLD,"4.2" ,"HELP"    ,HLP_CLE_BUILTIN_HELP    ,pcOwn,pcPgm,SYN_CLE_BUILTIN_HELP    ,MAN_CLE_BUILTIN_HELP    ,FALSE,isNbr);
-   vdCleManFunction(pfDoc,0,S_TLD,"4.3" ,"MANPAGE" ,HLP_CLE_BUILTIN_MANPAGE ,pcOwn,pcPgm,SYN_CLE_BUILTIN_MANPAGE ,MAN_CLE_BUILTIN_MANPAGE ,FALSE,isNbr);
-   vdCleManFunction(pfDoc,0,S_TLD,"4.4" ,"GENDOCU" ,HLP_CLE_BUILTIN_GENDOCU ,pcOwn,pcPgm,SYN_CLE_BUILTIN_GENDOCU ,MAN_CLE_BUILTIN_GENDOCU ,FALSE,isNbr);
-   vdCleManFunction(pfDoc,0,S_TLD,"4.5" ,"GENPROP" ,HLP_CLE_BUILTIN_GENPROP ,pcOwn,pcPgm,SYN_CLE_BUILTIN_GENPROP ,MAN_CLE_BUILTIN_GENPROP ,FALSE,isNbr);
-   vdCleManFunction(pfDoc,0,S_TLD,"4.6" ,"SETPROP" ,HLP_CLE_BUILTIN_SETPROP ,pcOwn,pcPgm,SYN_CLE_BUILTIN_SETPROP ,MAN_CLE_BUILTIN_SETPROP ,FALSE,isNbr);
-   vdCleManFunction(pfDoc,0,S_TLD,"4.7" ,"CHGPROP" ,HLP_CLE_BUILTIN_CHGPROP ,pcOwn,pcPgm,SYN_CLE_BUILTIN_CHGPROP ,MAN_CLE_BUILTIN_CHGPROP ,FALSE,isNbr);
-   vdCleManFunction(pfDoc,0,S_TLD,"4.8" ,"DELPROP" ,HLP_CLE_BUILTIN_DELPROP ,pcOwn,pcPgm,SYN_CLE_BUILTIN_DELPROP ,MAN_CLE_BUILTIN_DELPROP ,FALSE,isNbr);
-   vdCleManFunction(pfDoc,0,S_TLD,"4.9" ,"GETPROP" ,HLP_CLE_BUILTIN_GETPROP ,pcOwn,pcPgm,SYN_CLE_BUILTIN_GETPROP ,MAN_CLE_BUILTIN_GETPROP ,FALSE,isNbr);
-   vdCleManFunction(pfDoc,0,S_TLD,"4.10","SETOWNER",HLP_CLE_BUILTIN_SETOWNER,pcOwn,pcPgm,SYN_CLE_BUILTIN_SETOWNER,MAN_CLE_BUILTIN_SETOWNER,FALSE,isNbr);
-   vdCleManFunction(pfDoc,0,S_TLD,"4.11","GETOWNER",HLP_CLE_BUILTIN_GETOWNER,pcOwn,pcPgm,SYN_CLE_BUILTIN_GETOWNER,MAN_CLE_BUILTIN_GETOWNER,FALSE,isNbr);
-   vdCleManFunction(pfDoc,0,S_TLD,"4.12","SETENV"  ,HLP_CLE_BUILTIN_SETENV  ,pcOwn,pcPgm,SYN_CLE_BUILTIN_SETENV  ,MAN_CLE_BUILTIN_SETENV  ,FALSE,isNbr);
-   vdCleManFunction(pfDoc,0,S_TLD,"4.13","GETENV"  ,HLP_CLE_BUILTIN_GETENV  ,pcOwn,pcPgm,SYN_CLE_BUILTIN_GETENV  ,MAN_CLE_BUILTIN_GETENV  ,FALSE,isNbr);
-   vdCleManFunction(pfDoc,0,S_TLD,"4.14","DELENV"  ,HLP_CLE_BUILTIN_DELENV  ,pcOwn,pcPgm,SYN_CLE_BUILTIN_DELENV  ,MAN_CLE_BUILTIN_DELENV  ,FALSE,isNbr);
-   vdCleManFunction(pfDoc,0,S_TLD,"4.15","TRACE"   ,HLP_CLE_BUILTIN_TRACE   ,pcOwn,pcPgm,SYN_CLE_BUILTIN_TRACE   ,MAN_CLE_BUILTIN_TRACE   ,FALSE,isNbr);
-   vdCleManFunction(pfDoc,0,S_TLD,"4.16","CONFIG"  ,HLP_CLE_BUILTIN_CONFIG  ,pcOwn,pcPgm,SYN_CLE_BUILTIN_CONFIG  ,MAN_CLE_BUILTIN_CONFIG  ,FALSE,isNbr);
-   vdCleManFunction(pfDoc,0,S_TLD,"4.17","GRAMMAR" ,HLP_CLE_BUILTIN_GRAMMAR ,pcOwn,pcPgm,SYN_CLE_BUILTIN_GRAMMAR ,MAN_CLE_BUILTIN_GRAMMAR ,FALSE,isNbr);
-   vdCleManFunction(pfDoc,0,S_TLD,"4.18","LEXEM"   ,HLP_CLE_BUILTIN_LEXEM   ,pcOwn,pcPgm,SYN_CLE_BUILTIN_LEXEM   ,MAN_CLE_BUILTIN_LEXEM   ,FALSE,isNbr);
-   vdCleManFunction(pfDoc,0,S_TLD,"4.19","LICENSE" ,HLP_CLE_BUILTIN_LICENSE ,pcOwn,pcPgm,SYN_CLE_BUILTIN_LICENSE ,MAN_CLE_BUILTIN_LICENSE ,FALSE,isNbr);
-   vdCleManFunction(pfDoc,0,S_TLD,"4.20","VERSION" ,HLP_CLE_BUILTIN_VERSION ,pcOwn,pcPgm,SYN_CLE_BUILTIN_VERSION ,MAN_CLE_BUILTIN_VERSION ,FALSE,isNbr);
-   vdCleManFunction(pfDoc,0,S_TLD,"4.21","ABOUT"   ,HLP_CLE_BUILTIN_ABOUT   ,pcOwn,pcPgm,SYN_CLE_BUILTIN_ABOUT   ,MAN_CLE_BUILTIN_ABOUT   ,FALSE,isNbr);
-   vdCleManFunction(pfDoc,0,S_TLD,"4.22","ERRORS"  ,HLP_CLE_BUILTIN_ERRORS  ,pcOwn,pcPgm,SYN_CLE_BUILTIN_ERRORS  ,MAN_CLE_BUILTIN_ERRORS  ,FALSE,isNbr);
+   vdCleManFunction(pfDoc,uiLev+1,S_TLD,"4.1" ,"SYNTAX"  ,HLP_CLE_BUILTIN_SYNTAX  ,pcOwn,pcPgm,SYN_CLE_BUILTIN_SYNTAX  ,MAN_CLE_BUILTIN_SYNTAX  ,FALSE,isNbr);
+   vdCleManFunction(pfDoc,uiLev+1,S_TLD,"4.2" ,"HELP"    ,HLP_CLE_BUILTIN_HELP    ,pcOwn,pcPgm,SYN_CLE_BUILTIN_HELP    ,MAN_CLE_BUILTIN_HELP    ,FALSE,isNbr);
+   vdCleManFunction(pfDoc,uiLev+1,S_TLD,"4.3" ,"MANPAGE" ,HLP_CLE_BUILTIN_MANPAGE ,pcOwn,pcPgm,SYN_CLE_BUILTIN_MANPAGE ,MAN_CLE_BUILTIN_MANPAGE ,FALSE,isNbr);
+   vdCleManFunction(pfDoc,uiLev+1,S_TLD,"4.4" ,"GENDOCU" ,HLP_CLE_BUILTIN_GENDOCU ,pcOwn,pcPgm,SYN_CLE_BUILTIN_GENDOCU ,MAN_CLE_BUILTIN_GENDOCU ,FALSE,isNbr);
+   vdCleManFunction(pfDoc,uiLev+1,S_TLD,"4.5" ,"GENPROP" ,HLP_CLE_BUILTIN_GENPROP ,pcOwn,pcPgm,SYN_CLE_BUILTIN_GENPROP ,MAN_CLE_BUILTIN_GENPROP ,FALSE,isNbr);
+   vdCleManFunction(pfDoc,uiLev+1,S_TLD,"4.6" ,"SETPROP" ,HLP_CLE_BUILTIN_SETPROP ,pcOwn,pcPgm,SYN_CLE_BUILTIN_SETPROP ,MAN_CLE_BUILTIN_SETPROP ,FALSE,isNbr);
+   vdCleManFunction(pfDoc,uiLev+1,S_TLD,"4.7" ,"CHGPROP" ,HLP_CLE_BUILTIN_CHGPROP ,pcOwn,pcPgm,SYN_CLE_BUILTIN_CHGPROP ,MAN_CLE_BUILTIN_CHGPROP ,FALSE,isNbr);
+   vdCleManFunction(pfDoc,uiLev+1,S_TLD,"4.8" ,"DELPROP" ,HLP_CLE_BUILTIN_DELPROP ,pcOwn,pcPgm,SYN_CLE_BUILTIN_DELPROP ,MAN_CLE_BUILTIN_DELPROP ,FALSE,isNbr);
+   vdCleManFunction(pfDoc,uiLev+1,S_TLD,"4.9" ,"GETPROP" ,HLP_CLE_BUILTIN_GETPROP ,pcOwn,pcPgm,SYN_CLE_BUILTIN_GETPROP ,MAN_CLE_BUILTIN_GETPROP ,FALSE,isNbr);
+   vdCleManFunction(pfDoc,uiLev+1,S_TLD,"4.10","SETOWNER",HLP_CLE_BUILTIN_SETOWNER,pcOwn,pcPgm,SYN_CLE_BUILTIN_SETOWNER,MAN_CLE_BUILTIN_SETOWNER,FALSE,isNbr);
+   vdCleManFunction(pfDoc,uiLev+1,S_TLD,"4.11","GETOWNER",HLP_CLE_BUILTIN_GETOWNER,pcOwn,pcPgm,SYN_CLE_BUILTIN_GETOWNER,MAN_CLE_BUILTIN_GETOWNER,FALSE,isNbr);
+   vdCleManFunction(pfDoc,uiLev+1,S_TLD,"4.12","SETENV"  ,HLP_CLE_BUILTIN_SETENV  ,pcOwn,pcPgm,SYN_CLE_BUILTIN_SETENV  ,MAN_CLE_BUILTIN_SETENV  ,FALSE,isNbr);
+   vdCleManFunction(pfDoc,uiLev+1,S_TLD,"4.13","GETENV"  ,HLP_CLE_BUILTIN_GETENV  ,pcOwn,pcPgm,SYN_CLE_BUILTIN_GETENV  ,MAN_CLE_BUILTIN_GETENV  ,FALSE,isNbr);
+   vdCleManFunction(pfDoc,uiLev+1,S_TLD,"4.14","DELENV"  ,HLP_CLE_BUILTIN_DELENV  ,pcOwn,pcPgm,SYN_CLE_BUILTIN_DELENV  ,MAN_CLE_BUILTIN_DELENV  ,FALSE,isNbr);
+   vdCleManFunction(pfDoc,uiLev+1,S_TLD,"4.15","TRACE"   ,HLP_CLE_BUILTIN_TRACE   ,pcOwn,pcPgm,SYN_CLE_BUILTIN_TRACE   ,MAN_CLE_BUILTIN_TRACE   ,FALSE,isNbr);
+   vdCleManFunction(pfDoc,uiLev+1,S_TLD,"4.16","CONFIG"  ,HLP_CLE_BUILTIN_CONFIG  ,pcOwn,pcPgm,SYN_CLE_BUILTIN_CONFIG  ,MAN_CLE_BUILTIN_CONFIG  ,FALSE,isNbr);
+   vdCleManFunction(pfDoc,uiLev+1,S_TLD,"4.17","GRAMMAR" ,HLP_CLE_BUILTIN_GRAMMAR ,pcOwn,pcPgm,SYN_CLE_BUILTIN_GRAMMAR ,MAN_CLE_BUILTIN_GRAMMAR ,FALSE,isNbr);
+   vdCleManFunction(pfDoc,uiLev+1,S_TLD,"4.18","LEXEM"   ,HLP_CLE_BUILTIN_LEXEM   ,pcOwn,pcPgm,SYN_CLE_BUILTIN_LEXEM   ,MAN_CLE_BUILTIN_LEXEM   ,FALSE,isNbr);
+   vdCleManFunction(pfDoc,uiLev+1,S_TLD,"4.19","LICENSE" ,HLP_CLE_BUILTIN_LICENSE ,pcOwn,pcPgm,SYN_CLE_BUILTIN_LICENSE ,MAN_CLE_BUILTIN_LICENSE ,FALSE,isNbr);
+   vdCleManFunction(pfDoc,uiLev+1,S_TLD,"4.20","VERSION" ,HLP_CLE_BUILTIN_VERSION ,pcOwn,pcPgm,SYN_CLE_BUILTIN_VERSION ,MAN_CLE_BUILTIN_VERSION ,FALSE,isNbr);
+   vdCleManFunction(pfDoc,uiLev+1,S_TLD,"4.21","ABOUT"   ,HLP_CLE_BUILTIN_ABOUT   ,pcOwn,pcPgm,SYN_CLE_BUILTIN_ABOUT   ,MAN_CLE_BUILTIN_ABOUT   ,FALSE,isNbr);
+   vdCleManFunction(pfDoc,uiLev+1,S_TLD,"4.22","ERRORS"  ,HLP_CLE_BUILTIN_ERRORS  ,pcOwn,pcPgm,SYN_CLE_BUILTIN_ERRORS  ,MAN_CLE_BUILTIN_ERRORS  ,FALSE,isNbr);
 }
 
 #undef  ERROR
