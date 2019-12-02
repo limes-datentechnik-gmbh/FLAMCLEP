@@ -1,4 +1,4 @@
-The file name is set as current global property file when no command is
+The filename is set as current global property file when no command is
 specified. The file name is set as current local property file when a
 command is given. The property file can be generated with GENPROP and
 will be activated for the current owner.
@@ -7,7 +7,7 @@ After generation you can activate the property file, but there will be
 no effect until you change the settings inside the property file,
 because the current default settings are written.
 
-The file name can contain replacement/mapping rules (<HOME>/<USER>). 
+The filename can contain replacement/mapping rules (<HOME>/<USER>).
 
 Do not use space characters between the key, assignment character (=)
 and filename.
@@ -18,7 +18,7 @@ activate a property file for a certain command.
 
 See <<Properties,Properties>> for the current property file content.
 
-.EXAMPLES
+.Examples
 
 -----------------------------------------------------------------------
    :> &{PGM} SETPROP general.properties

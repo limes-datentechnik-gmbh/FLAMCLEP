@@ -3,23 +3,23 @@ The return codes of the program are also called completion codes and
 returned at program termination. This content is printed on the screen
 with the built-in function 'ERRORS'.
 
- * 0  - command line, command syntax, mapping, execution and finish of the command was successful
- * 1  - command line, command syntax, mapping, execution and finish of the command was successful but a warning can be found in the log
- * 2  - command line, command syntax, mapping, execution was successful but cleanup of the command failed (may not happened)
- * 4  - command line, command syntax and mapping was successful but execution of the command returned with a warning
- * 8  - command line, command syntax and mapping was successful but execution of the command returned with an error
- * 12 - command line and command syntax was OK but mapping of the parameter for command execution failed
- * 16 - command line was OK but command syntax was wrong (error from command line parser)
- * 20 - command string was wrong (please use built-in function "SYNTAX" for more information)
- * 24 - initialization of the parameter structure for the command failed (may not happened)
- * 28 - configuration is wrong (determination of configuration data failed, configuration file might be damaged)
- * 32 - table error (something within the predefined tables is wrong (internal error))
- * 36 - system error (e.g. load of environment or open of file failed)
- * 40 - access control or license error
- * 44 - interface error (e.g. parameter pointer equals NULL (only at call of subprogram interface))
- * 48 - memory allocation failed (e.g. dynamic string handling)
- * 64 - fatal error (basic things are damaged)
- * >64 - special condition codes from the command for job control
+* 0  - command line, command syntax, mapping, execution and finish of the command was successful
+* 1  - command line, command syntax, mapping, execution and finish of the command was successful but a warning can be found in the log
+* 2  - command line, command syntax, mapping, execution was successful but cleanup of the command failed (may not happened)
+* 4  - command line, command syntax and mapping was successful but execution of the command returned with a warning
+* 8  - command line, command syntax and mapping was successful but execution of the command returned with an error
+* 12 - command line and command syntax was OK but mapping of the parameter for command execution failed
+* 16 - command line was OK but command syntax was wrong (error from command line parser)
+* 20 - command string was wrong (please use built-in function "SYNTAX" for more information)
+* 24 - initialization of the parameter structure for the command failed (may not happened)
+* 28 - configuration is wrong (determination of configuration data failed, configuration file might be damaged)
+* 32 - table error (something within the predefined tables is wrong (internal error))
+* 36 - system error (e.g. load of environment or open of file failed)
+* 40 - access control or license error
+* 44 - interface error (e.g. parameter pointer equals NULL (only at call of subprogram interface))
+* 48 - memory allocation failed (e.g. dynamic string handling)
+* 64 - fatal error (basic things are damaged)
+* >64 - special condition codes from the command for job control
  
 The command line is interpreted by CLE the command string by CLP. For example:
  

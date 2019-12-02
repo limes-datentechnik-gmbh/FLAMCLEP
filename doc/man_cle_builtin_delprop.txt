@@ -9,7 +9,7 @@ We recommend to work only with command specific property files.
 
 See <<Properties,Properties>> for the current property file content.
 
-.EXAMPLES
+.Examples
 
 -----------------------------------------------------------------------
    :> &{PGM} DELPROP

@@ -4,13 +4,17 @@ the configuration data including the corresponding file will be deleted.
 
 The configuration file name can be defined by the environment variable:
 
+------------------------------------------------------------------------
    &{PGM}_CONFIG_FILE=config.file.name
-   
+------------------------------------------------------------------------
+
 This can be used to work with a global configuration file. If this
 location is not defined, the configuration file is stored in the
 home directory with the name:
 
+------------------------------------------------------------------------
    .&{pgm}.config
+------------------------------------------------------------------------
 
 If no home directory is defined for the current user (this case is very
 improbable), the working directory is used.
@@ -24,7 +28,7 @@ On mainframes the data set name 'SYSUID.&{PGM}.CONFIG' is used as default.
 SYSUID as high level qualifier is a kind of replacement for the
 current home directory in other operating systems in this way.
 
-.EXAMPLES
+.Examples
 
 -----------------------------------------------------------------------
    :> &{PGM} CONFIG

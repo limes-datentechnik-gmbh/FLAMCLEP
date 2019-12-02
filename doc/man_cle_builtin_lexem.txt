@@ -7,7 +7,7 @@ values inside a command.
 See <<Lexem,Lexem>> for an explanation and the output of this
 command.
 
-.EXAMPLES
+.Examples
 
 -----------------------------------------------------------------------
    :> &{PGM} LEXEM

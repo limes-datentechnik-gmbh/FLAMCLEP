@@ -4,7 +4,7 @@ are placed in the environment table of the process.
 
 *Attention:* The environment variables will be temporary overwritten
 
-.EXAMPLES
+.Examples
 
 -----------------------------------------------------------------------
    :> &{PGM} GETENV

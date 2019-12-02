@@ -5,14 +5,14 @@ simplifies and standardizes parameter string processing.
 
 The CLEP provides two separate functions:
 
- * COMMAND LINE PARSER (CLP)   - Compiles a parameter string from a command to a data structure
- * COMMAND LINE EXECUTOR (CLE) - Supporting execution of different commands with parameter strings
+* COMMAND LINE PARSER (CLP)   - Compiles a parameter string from a command to a data structure
+* COMMAND LINE EXECUTOR (CLE) - Supporting execution of different commands with parameter strings
 
 The COMMAND LINE EXECUTOR provides a list of commands and some
 built-in functions, please use 'MANPAGE', 'HELP' and 'SYNTAX' to get
 extensive information about these capabilities.
 
-Additionally the build-in function 'GENDOCU' can generate a complete or
+Additionally the built-in function `GENDOCU` can generate a complete or
 a part of the user manual.
 
 To read the parameter of a command, a compiler (CLP) is applied. To see
@@ -22,8 +22,8 @@ use the built-in functions 'LEXEM' and 'GRAMMAR'.
 The return/condition/exit codes of the executable and the reason codes
 of the different commands can be reviewed with the built-in function
 'ERRORS'.
-See <<appendix-Returncodes,'appendix-Returncodes'>> and, if available, 
-<<appendix-Reasoncodes, appendix-Reasoncodes>> 
+See <<appendix-Returncodes,'appendix-Returncodes'>> and, if available,
+<<appendix-Reasoncodes, appendix-Reasoncodes>>
 for the meaning of the used return and reason codes.
 
 The CLE uses an owner management in order to separate the settings for
@@ -73,19 +73,19 @@ keywords, strings and arrays are used.
 
 === Used Environment Variables
 
- * LANG    - to determine the CCSID on EBCDIC systems
- * HOME    - to determine the home directory on UNIX/WIN
- * USER    - to determine the current user id on UNIX/WIN
- * ENVID   - for the current environment qualifier (D/T/P) if key label template mapping used (default is 'T')
- * OWNERID - used for current owner if not already defined
- * CLP_NOW - The current point in time used for predefined constants (0tYYYY/MM/DD.HH:MM:SS)
- * CLP_STRING_CCSID - CCSID used for interpretation of critical punctuation character on EBCDIC systems (default is taken from LANG)
- * CLP_DEFAULT_DCB - The default record format and record length in C file mode format (default is 'recfm=VB, lrecl=516' only for z/OS)
- * &{PGM}_CONFIG_FILE - the configuration filename (default is '$HOME/.&{pgm}.config' on UNIX/WIN or '&SYSUID..&{PGM}.CONFIG' on mainframes)
- * &{PGM}_DEFAULT_OWNER_ID - the default owner ID (default is '&{oWn}')
- * owner_&{PGM}_command_PROPERTY_FILENAME - To override default property file names
- * path_argument - to override the hard coded default property value
- 
+* LANG    - to determine the CCSID on EBCDIC systems
+* HOME    - to determine the home directory on UNIX/WIN
+* USER    - to determine the current user id on UNIX/WIN
+* ENVID   - for the current environment qualifier (D/T/P) if key label template mapping used (default is 'T')
+* OWNERID - used for current owner if not already defined
+* CLP_NOW - The current point in time used for predefined constants (0tYYYY/MM/DD.HH:MM:SS)
+* CLP_STRING_CCSID - CCSID used for interpretation of critical punctuation character on EBCDIC systems (default is taken from LANG)
+* CLP_DEFAULT_DCB - The default record format and record length in C file mode format (default is 'recfm=VB, lrecl=516' only for z/OS)
+* &{PGM}_CONFIG_FILE - the configuration filename (default is '$HOME/.&{pgm}.config' on UNIX/WIN or '&SYSUID..&{PGM}.CONFIG' on mainframes)
+* &{PGM}_DEFAULT_OWNER_ID - the default owner ID (default is '&{oWn}')
+* owner_&{PGM}_command_PROPERTY_FILENAME - To override default property file names
+* path_argument - to override the hard coded default property value
+
 Environment variables can be set from the system or in the program
 configuration file with the build-in function 'SETENV'. Particularly on
 mainframe systems the configuration file is an easy way to define
@@ -159,8 +159,8 @@ and in a property file, then the value in the property file overrides the
 setting in the environment. The environment variable name for each
 property is build by the rules below:
 
- * convert all letters to upper case
- * replace all dots (`.`) by underline (`_`)
+* convert all letters to upper case
+* replace all dots (`.`) by underline (`_`)
 
 To get a list and help for all properties please use the built-in
 function 'GENPROP' to generate property files. The properties can be
@@ -196,16 +196,16 @@ at each starting point of a lexem and inside of a normal string.
 If the environment variable not defined the replacements below are still
 possible:
 
- * <SYSUID> - Current user id in upper case
- * <USER>   - Current user id (case sensitive)
- * <CUSER>  - Current user id in upper case == <SYSUID>
- * <Cuser>  - Current user id in title case
- * <cuser>  - Current user id in lower case
- * <HOME>   - Replaces with the users data directory, if this not
-               available the replacements below are done:
- ** On UNIX with /home/<USER>
- ** On USS with /u/<USER>
- ** On ZOS with <SYSUID>
+* <SYSUID> - Current user id in upper case
+* <USER>   - Current user id (case sensitive)
+* <CUSER>  - Current user id in upper case == <SYSUID>
+* <Cuser>  - Current user id in title case
+* <cuser>  - Current user id in lower case
+* <HOME>   - Replaces with the users data directory, if this not
+              available the replacements below are done:
+** On UNIX with /home/<USER>
+** On USS with /u/<USER>
+** On ZOS with <SYSUID>
 
 [[CLEP.FNMAPPING]]
 === Filename Mapping
@@ -213,15 +213,15 @@ possible:
 All filenames used by CLEP are additionally mapped based on the rules
 below:
 
- * The tilde character (`~`) is replaced with the string "<HOME>"
- * DD names on mainframes must be prefixed with "DD:"
- * Data set names on mainframes are always full qualified
- * Path names on mainframes must contain a least one slash (`/`)
- * Data set names on USS must start with //
- ** Full qualified names with HLQ must enclose in apostrophes ("//''")
- ** If apostrophes are not used the SYSUID is prefixed as HLQ
- * Normal file names on other platforms could be relative
- 
+* The tilde character (`~`) is replaced with the string "<HOME>"
+* DD names on mainframes must be prefixed with "DD:"
+* Data set names on mainframes are always full qualified
+* Path names on mainframes must contain a least one slash (`/`)
+* Data set names on USS must start with //
+** Full qualified names with HLQ must enclose in apostrophes ("//''")
+** If apostrophes are not used the SYSUID is prefixed as HLQ
+* Normal file names on other platforms could be relative
+
 *ATTENTION:* If a requested environment variable is not defined, the
 replacement is done with the empty string. This can result in
 unexpected behavior.

@@ -18,7 +18,7 @@ or warning.
 See <<Returncodes,Returncodes>> and <<Reasoncodes,Reasoncodes>> for an
 explanation and the output of this command.
 
-.EXAMPLES
+.Examples
 
 -----------------------------------------------------------------------
    :> &{PGM} ERRORS

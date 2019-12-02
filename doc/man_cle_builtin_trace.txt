@@ -10,8 +10,7 @@ tracing is switched on.
 Do not use space characters between the key, assignment character (=)
 and filename.
 
-
-.EXAMPLES
+.Examples
 
 -----------------------------------------------------------------------
    :> &{PGM} TRACE FILE=filename

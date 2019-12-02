@@ -9,21 +9,20 @@ question or exclamation mark before the argument.
 The *path* is a dotted keyword list in accordance with the syntax of
 the corresponding command.
 
+------------------------------------------------------------------------
    command.para1.para2.para3
+------------------------------------------------------------------------
 
-.OPTIONS
+.Options
 
-   DEPTH1 / DEPTH2 / ... / DEPTH9
+* DEPTH1 / DEPTH2 / ... / DEPTH9
+** Specifies the depth of the output. Default is DEPTH1. If the depth is
+   greater than 1 the structured print out is used.
+* ALL
+** Shows complete syntax for the specified path, not just DEPTH1.
+   Structured print out is used.
 
-Specifies the depth of the output. Default is DEPTH1. If the depth is
-greater than 1 the structured print out is used.
-
-   ALL
-
-Shows complete syntax for the specified path, not just DEPTH1.
-Structured print out is used.
-
-.EXAMPLES
+.Examples
 
 -----------------------------------------------------------------------
    :> &{PGM} SYNTAX

@@ -2,28 +2,25 @@ All or certain properties can be shown for a dedicated path. The *path*
 is a dotted keyword list according to the syntax of the corresponding
 command.
 
+------------------------------------------------------------------------
    command.para1.para2.para3
+------------------------------------------------------------------------
 
 A help message for a certain parameter will also show the assigned
 property value.
 
 See <<Properties,Properties>> for the current property file content.
 
-.OPTIONS
+.Options
 
-   DEPTH1 / DEPTH2 / ... / DEPTH9
+* `DEPTH1 / DEPTH2 / ... / DEPTH9`
+** Specifies the depth of the output. Default is DEPTH1.
+* `DEPALL`
+** Shows all properties to the specified path, not just DEPTH1.
+* `DEFALL`
+** Shows all defined properties to the specified path.
 
-Specifies the depth of the output. Default is DEPTH1.
-
-   DEPALL
-
-Shows all properties to the specified path, not just DEPTH1.
-
-   DEFALL
-
-Shows all defined properties to the specified path.
-
-.EXAMPLES
+.Examples
 
 -----------------------------------------------------------------------
    :> &{PGM} GETPROP

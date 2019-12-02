@@ -1,14 +1,16 @@
 [[appendix-Properties]]
 All properties can be written to a global property file with the
 built-in function:
-
+------------------------------------------------------------------------
    'GENPROP filename'.
+------------------------------------------------------------------------
    
 A property file for a certain command can be generated with:
-
+------------------------------------------------------------------------
    'GENPROP command=filename'
+------------------------------------------------------------------------
 
-The first comment shows the valid root path for the property file. A
+The first command shows the valid root path for the property file. A
 property file can contain properties for more than one root path. The
 property file parser will only interpret properties where the root
 matches, i.e. if the property file is assigned to a certain owner and
@@ -20,7 +22,9 @@ The second long comment gives some help for handling a property
 file. Thereafter the generated properties for this root are listed
 for all supported commands. The format is:
 
+------------------------------------------------------------------------
    path = SUPPLEMENT # Type: tttttt Help: hhh...hhh #
+------------------------------------------------------------------------
 
 The path denotes the unique dotted keyword list for one argument. The
 'SUPPLEMENT' is a string normally in double quotation marks containing

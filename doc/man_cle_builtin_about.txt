@@ -5,7 +5,7 @@ should reflect the current about information for this program (&{pGm}).
 
 See <<About,About>> for the output of this command.
 
-.EXAMPLES
+.Examples
 
 -----------------------------------------------------------------------
    :> &{PGM} ABOUT

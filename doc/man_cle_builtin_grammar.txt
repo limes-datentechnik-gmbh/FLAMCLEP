@@ -5,7 +5,7 @@ property files are interpreted by the command line processor.
 See <<Grammar,Grammar>> for an explanation and the output of this
 command.
 
-.EXAMPLES
+.Examples
 
 -----------------------------------------------------------------------
    :> &{PGM} GRAMMAR

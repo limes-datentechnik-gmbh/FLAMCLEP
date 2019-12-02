@@ -11,7 +11,7 @@ and filename.
 The files in ASCIIDOC format can be used to generate manpages with the
 tool http://www.methods.co.nz/asciidoc/[ASCIIDOC].
 
-.EXAMPLES
+.Examples
 
 -----------------------------------------------------------------------
    :> &{PGM} MANPAGE

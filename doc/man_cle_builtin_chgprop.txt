@@ -3,7 +3,7 @@ active (see SETPROP) property file for a dedicated command. If no
 property file is activated, a property file  is generated (see GENPROP),
 updated with the provided property list and activated (see SETPROP).
 
-The first argument of CHGPROP is the command name. All other arguments 
+The first argument of CHGPROP is the command name. All other arguments
 are key-value pairs of properties that should be updated. The key is
 internally prefixed with the root (owner.program.command.). The values
 are enclosed in double quotation marks. Multiple properties of a command
@@ -18,7 +18,7 @@ files for the different commands.
 The built-in function reads and parses the currently active property
 file. Then it parses the provided property list and writes the updated
 property file back to disk. The currently active property file could be
-a global, not command specific property file. In such a case, a new 
+a global, not command specific property file. In such a case, a new
 command specific property file is generated and activated. Properties
 from the global property file are copied into the newly generated one.
 
@@ -26,21 +26,27 @@ If no property file is defined (see SETPROP) that corresponds to the
 owner, program and command, a property file is generated. The filename
 formats below are used to read or write property files from/to the home
 directory:
-   
+
 On non-mainframe systems (WINDOWS, UNIX, MAC):
+------------------------------------------------------------------------
     ".owner.program.command.properties"
+------------------------------------------------------------------------
 
 On mainframe systems (ZOS, VSE, BS200, ...):
+------------------------------------------------------------------------
     "<SYSUID>.OWNER.PROGRAM.COMMAND.PROPS"
+------------------------------------------------------------------------
 
 If the default filenames and/or path are not sufficient, you can change
 the filename of each property file by setting environment variables
 using the following naming convention:
 
+------------------------------------------------------------------------
     OWNER_PROGRAM_COMMAND_PROPERTY_FILENAME
-    
+------------------------------------------------------------------------
+
 If no home directory is defined, then the current working directory is
-used as default directory to save the property files. On mainframes 
+used as default directory to save the property files. On mainframes
 SYSUID is used for the first level qualifier, to represent the
 "home directory".
 
@@ -48,11 +54,11 @@ Property files are managed per owner: This means that updates are only
 done for the current owner.
 
 To delete a property you can simply specify the path without the root
-and with out a sign.   
+and with out a sign.
 
 See <<Properties,Properties>> for the current property file content.
 
-.EXAMPLES
+.Examples
 
 -----------------------------------------------------------------------
    :> &{PGM} CHGPROP command overlay.object.argument=value  

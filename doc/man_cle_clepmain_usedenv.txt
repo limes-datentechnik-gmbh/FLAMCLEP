@@ -1,20 +1,20 @@
- * LANG    - to determine the CCSID on EBCDIC systems
- * HOME    - to determine the home directory on UNIX/WIN
- * USER    - to determine the current user id on UNIX/WIN
- * ENVID   - for the current environment qualifier (D/T/P) if key label template mapping used (default is 'T')
- * OWNERID - used for current owner if not already defined
- * CLP_NOW - The current point in time used for predefined constants (0tYYYY/MM/DD.HH:MM:SS)
- * CLP_STRING_CCSID - CCSID used for interpretation of critical punctuation character on EBCDIC systems (default is taken from LANG)
- * CLP_DEFAULT_DCB - The default record format and record length in C file mode format (default is 'recfm=VB, lrecl=516' only for z/OS)
- * &{PGM}_CONFIG_FILE - the configuration filename (default is '$HOME/.&{pgm}.config' on UNIX/WIN or '&SYSUID..&{PGM}.CONFIG' on mainframes)
- * &{PGM}_DEFAULT_OWNER_ID - the default owner ID (default is '&{oWn}')
- * owner_&{PGM}_command_PROPERTY_FILENAME - To override default property file names
- * path_argument - to override the hard coded default property value
- 
+* LANG    - to determine the CCSID on EBCDIC systems
+* HOME    - to determine the home directory on UNIX/WIN
+* USER    - to determine the current user id on UNIX/WIN
+* ENVID   - for the current environment qualifier (D/T/P) if key label template mapping used (default is 'T')
+* OWNERID - used for current owner if not already defined
+* CLP_NOW - The current point in time used for predefined constants (0tYYYY/MM/DD.HH:MM:SS)
+* CLP_STRING_CCSID - CCSID used for interpretation of critical punctuation character on EBCDIC systems (default is taken from LANG)
+* CLP_DEFAULT_DCB - The default record format and record length in C file mode format (default is 'recfm=VB, lrecl=516' only for z/OS)
+* &{PGM}_CONFIG_FILE - the configuration filename (default is '$HOME/.&{pgm}.config' on UNIX/WIN or '&SYSUID..&{PGM}.CONFIG' on mainframes)
+* &{PGM}_DEFAULT_OWNER_ID - the default owner ID (default is '&{oWn}')
+* owner_&{PGM}_command_PROPERTY_FILENAME - To override default property file names
+* path_argument - to override the hard coded default property value
+
 Environment variables can be set from the system or in the program
 configuration file with the build-in function 'SETENV'. Particularly on
 mainframe systems the configuration file is an easy way to define
-environment variables. Additionally on host systems the DD name STDENV 
+environment variables. Additionally on host systems the DD name STDENV
 and with lower priority the data set name '&SYSUID..STDENV' is
 supported. On the other architectures the file '.stdenv' in the
 working or with lower priority in the home directory can be used to

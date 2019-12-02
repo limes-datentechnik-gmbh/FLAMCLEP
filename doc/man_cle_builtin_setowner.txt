@@ -9,7 +9,7 @@ under the key word OWNERID. This environment variable can for example
 used as replacement in file names (~/<OWNERID>.dat) or to refer a 
 signature key.
 
-.EXAMPLES
+.Examples
 
 -----------------------------------------------------------------------
    :> &{PGM} SETOWNER com.company

@@ -20,7 +20,7 @@ deliver a text file and no dictionary can be used.
 Do not use space characters between the key, assignment character (=)
 and filename.
 
-.EXAMPLES
+.Examples
 
 -----------------------------------------------------------------------
    :> &{PGM} GENDOCU &{pgm}.manual.txt NONBR

@@ -1,5 +1,4 @@
-ASCIIDOC::
-   A text document format to write notes, documentation, articles,
+:ASCIIDOC: A text document format to write notes, documentation, articles,
    books, ebooks, slideshows, web pages, man pages and blogs.
    ASCIIDOC files can be converted into HTML, PDF, EPUB or man
    pages. ASCIIDOC is highly configurable, as the syntax and the
@@ -10,103 +9,80 @@ ASCIIDOC::
    or PDF. The CLP uses the command GENDOCU to generate ASCIIDOC files.
    You just have to specify the file name.
    For ASCIIDOC see: http://www.methods.co.nz/asciidoc/[ASCIIDOC]
-BATCH::
-   Batch processing is execution of a series of programs ("jobs") on a
-   computer without manual intervention.
-BUILT-IN FUNCTIONS::
-   The command line processor CLP provides a number of functions built-
-   in that are available to obtain extensive syntax information, help
-   messages, manual pages and documentation. There are additional built-
-   in functions that can be used for owner, property and trace manage-
-   ment.
-CHG::
-   Change
-CHANGING OF PROPERTIES::
-   With the built-in function CHGPROP, you can update a property value
+:BATCH: Batch processing is execution of a series of programs ("jobs")
+   on a computer without manual intervention.
+:BUILT-IN FUNCTIONS: The command line processor CLP provides a number of
+   functions built-in that are available to obtain extensive syntax
+   information, help messages, manual pages and documentation. There are
+   additional built-in functions that can be used for owner, property
+   and trace management.
+:CHG: Change
+:CHANGING OF PROPERTIES: With the built-in function CHGPROP, you can update a property value
    in the currently active property file (see SETPROP) for a certain
    command. If no command specific property file is activated, a
    property file is generated (see GENPROP), updated and activated (see
-   SETPROP).
-   :> &{PGM} CHGPROP command [path[=value]]*
-CLEP::
-   Command line executor and parser
-CLEP-ABOUT::
-   Built-in command to show information about the software product:
+   SETPROP). +
+   `:> &{PGM} CHGPROP command [path[=value]]*`
+:CLEP: Command line executor and parser
+:CLEP-ABOUT: Built-in command to show information about the software product:
    version number, dependence of external libraries and more.
-CLEP-COMMANDS::
-   The top level arguments of a program using CLEP to implement its
+:CLEP-COMMANDS: The top level arguments of a program using CLEP to implement its
    command line interface.
    With CLEP the commands a program supports are defined within a tree
    of tables whoose values are automatically stored in a preinitialized
    data structure, which is mapped to the parameter structure of the
    subprogram, which provides the actual functionality.
-CLEP-CONFIGURATION::
-   Built-in command to show the current configuration: owner, property
+:CLEP-CONFIGURATION: Built-in command to show the current configuration: owner, property
    file names, trace options and more.
-CLEP-TRACE::
-   Build-in command to set the tracing options of CLEP: switch tracing
+:CLEP-TRACE: Build-in command to set the tracing options of CLEP: switch tracing
    ON or OFF and set a file name where trace output will be written to.
    When no file name is set, the trace is redirected to stdin/stdout.
-COMMAND LINE ARGUMENTS::
-   Format and meaning of the parameters depend upon the command
+:COMMAND LINE ARGUMENTS: Format and meaning of the parameters depend upon the command
    issued. Parameters may be either arguments or options. The program
    is typically invoked by entering its name followed by the
    command-line arguments.
-COMMAND-LINE INTERFACE (CLI)::
-   A command-line interface (CLI), also known as command-line user
+:COMMAND-LINE INTERFACE (CLI): A command-line interface (CLI), also known as command-line user
    interface, console user interface, and character user interface (CUI),
    is a means of interacting with a computer program where the user
    (or client) issues commands to the program in the form of successive
    lines of text (command lines).
-COMMAND LINE INTERPRETER::
-   The program interpreting the commands typed by a user. On Unix this
+:COMMAND LINE INTERPRETER: The program interpreting the commands typed by a user. On Unix this
    is called a shell (bash, csh, ksh, or zsh). On Windows(R)
    PowerShell, cmd.exe or COMMAND.COM.
-COMMAND LINE PARAMETERS::
-   Command line parameters (also called flags) are parameters to a
+:COMMAND LINE PARAMETERS: Command line parameters (also called flags) are parameters to a
    command entered behind the command name. They are separated from the
    command and further parameter by at least one space character.
    Parameters can be distinguished between options and arguments.
-COMMAND LINE PARSER::
-   With a command line parser you easily define strongly typed command
+:COMMAND LINE PARSER: With a command line parser you easily define strongly typed command
    line arguments, allow automatic parsing of command line arguments
    and mapping of the values to the properties of your objects.
-COMMAND LINE PARSER LIBRARY::
-   The Command Line Parser Library can offer to many console applications
+:COMMAND LINE PARSER LIBRARY: The Command Line Parser Library can offer to many console applications
    a clean and concise API for manipulating command line arguments and
    related tasks. You can use a help screen with a high degree of
    customization and report the syntax errors of the command to the
    user.
-COMMAND-LINE REFERENCE::
-   The Command-Line Reference allows you to explore the documentation
+:COMMAND-LINE REFERENCE: The Command-Line Reference allows you to explore the documentation
    resources and other technical information that is necessary to learn
    about the command shell, and to automate command-line tasks by using
    scripts or scripting tools.
-COMMAND PROMPT::
-   A command prompt (or just prompt) is a sequence of (one or more)
+:COMMAND PROMPT: A command prompt (or just prompt) is a sequence of (one or more)
    characters used in a command-line interface to indicate readiness to
    accept commands.
-CONFIGURATION FILE::
-   Configuration files contain the settings for a computer
+:CONFIGURATION FILE: Configuration files contain the settings for a computer
    program. Usually this are plain text files. The structure of the
    files is application specific.
-CONSOLE APPLICATION::
-   A console application is a computer program which is usually executed
+:CONSOLE APPLICATION: A console application is a computer program which is usually executed
    via a text-only computer interface (text terminal), the command
    line interface.
-DEL::
-   Delete
-DELETING OF PROPERTY FILE::
-   If you use DELPROP without further addition, you will be able to
+:DEL: Delete
+:DELETING OF PROPERTY FILE: If you use DELPROP without further addition, you will be able to
    delete the general property file. Using this command with a specific
    command name you can delete the specific property file from the
-   configuration data but only for the current owner.
-   :> &{PGM} DELPROP
-   :> &{PGM} DELPROP command
-GEN::
-   Generate
-GENERATION OF PROPERTY FILE::
-   With the help of command GENPROP you can generate a property file
+   configuration data but only for the current owner. +
+   `:> &{PGM} DELPROP` +
+   `:> &{PGM} DELPROP command`
+:GEN: Generate
+:GENERATION OF PROPERTY FILE: With the help of command GENPROP you can generate a property file
    for the CLEP, which enables you to specify default
    properties of the processed command line. The actual owner is able
    to activate the property file. For each parameter a property entry
@@ -114,31 +90,27 @@ GENERATION OF PROPERTY FILE::
    found directly at the top of the text file. Note that a special
    property file overrides the general property file and that you
    should delete expendable properties.
-HELP::
-   Online Computer help links you in general to a database or similar
+:HELP: Online Computer help links you in general to a database or similar
    organization of hundreds of different pages with technical
    information which shall help the user to run the program. The CLP
    help function makes extensive information about each parameter
    available for the user which is adjustable on the command line.
    By this means that you get a structured list of arguments:
-   * keyword           - the keyword for the argument
-   * (TYPE: ...)       - the type of this argument
-   * help message      - the short help text
-   * (PROPERTY: [...]) - the current property value (optional)
-   The keywords have to be unique for this list, but they can be
+** keyword           - the keyword for the argument
+** (TYPE: ...)       - the type of this argument
+** help message      - the short help text
+** (PROPERTY: [...]) - the current property value (optional)
+** The keywords have to be unique for this list, but they can be
    still used in their short form. The writing can be case sensitive
    if wished requiring an additional line to mark the appropriate
    letter. The *path* is a dotted keyword list as per syntax of the
    command (command.para1.para2.para3). A detailed description of
    the manual pages can be printed with keyword *MAN*.
-LEXEM::
-   Built-in function to show how a number, a string, a keyword and
+:LEXEM: Built-in function to show how a number, a string, a keyword and
    other values are defined in their correct command syntax. It uses
    regular expressions for the tokens of the command.
-MAN::
-   Manual
-MANPAGE::
-   A manual page is the local software documentation usually
+:MAN: Manual
+:MANPAGE: A manual page is the local software documentation usually
    found on Unix operating systems. The CLP-manpage function shows the
    manual pages, all commands and built-in functions and if available
    for each argument up to selections/constant definitions.
@@ -147,32 +119,25 @@ MANPAGE::
    *manpage* of ASCIIDOC is written to the file. Manpages can be
    created with the tool found under
    http://www.methods.co.nz/asciidoc/[ASCIIDOC].
-OBJECT::
-   An object argument has one or more members. Each of them can be an
+:OBJECT: An object argument has one or more members. Each of them can be an
    object or an overlay or a simple value. It is implemented by CLEP as
    a C struct.
-OWNER::
-   The owner of a file in UNIX/LUNIX or WINDOWS controls how
+:OWNER: The owner of a file in UNIX/LUNIX or WINDOWS controls how
    permissions are set on the file and to whom permissions are granted.
    If you generate a property file for the CLEP, you will be able to
    change the owner with the command SETOWNER. Thus you can run your own
    management of automated commands. This is a powerful concept when
    working in different or separated environments.
-OVERLAY::
-   An overlay argument may only have one out of several values at a time.
+:OVERLAY: An overlay argument may only have one out of several values at a time.
    It is implemented by CLEP as a C union.
-PATH::
-   Each argument of a CLEP program has a position in the command tree
+:PATH: Each argument of a CLEP program has a position in the command tree
    structure. This position is specified by the path: a DOT separated
    list of argument names, very similar to a file system path.
-PROP::
-   Property
-PROPERTY FILES::
-   Property files are used to configure applications. The
+:PROP: Property
+:PROPERTY FILES: Property files are used to configure applications. The
    project configuration data or settings are stored in a property
    file which is activated by the owner of the file.
-SETTING OF PROPERTY FILE::
-   The file name is assigned to the actual global property file when
+:SETTING OF PROPERTY FILE: The file name is assigned to the actual global property file when
    you specify a command with no parameters. On the other hand the file
    name is assigned to its local property file when you
    define a command with appropriate options (SETPROP). The property
@@ -180,22 +145,18 @@ SETTING OF PROPERTY FILE::
    owner. If you have successfully created the property file you can
    activate it, but it will be still inactive until you alter the
    default settings.
-SHELL SCRIPT::
-   Commands can be stored in a text file called shell script. The Shell
+:SHELL SCRIPT: Commands can be stored in a text file called shell script. The Shell
    Script is itself a command and can be called like a system command
    also with parameters.
-SYNTAX::
-   Built-in function of CLEP to show the syntax of a program. Each built
+:SYNTAX: Built-in function of CLEP to show the syntax of a program. Each built
    command string must follow special rules and refers to an argument
    list which is interpreted by a shell or command-line interpreter
    when running the program. Commands can be from type object or
    overlay. In dependence from command depth the syntax is printed in
    one line or in a structured form.
-TRACING::
-   If switched ON CLEP tracing shows verbose information while the
+:TRACING: If switched ON CLEP tracing shows verbose information while the
    command line is evaluated.
-UTF8 TO MSDOS COMMAND LINE ENCODING::
-   Windows cmd line by default does not support UTF8 but understands
+:UTF8 TO MSDOS COMMAND LINE ENCODING: Windows cmd line by default does not support UTF8 but understands
    it. If you want to output multibyte characters in your cmd line,
    you will have to open a command prompt window, change the properties
    of the window to the Lucida Console True Type font. Then you must

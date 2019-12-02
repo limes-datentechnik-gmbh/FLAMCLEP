@@ -1,17 +1,17 @@
 The regular expressions used by the command line compiler are shown
 below. This content is printed on the screen with the built-in
-function 'LEXEM'.
+function `LEXEM`.
 
 To describe the regular expression the following character classes are
 used:
 
- * :print:  - all printable characters
- * :space:  - all blanks, tabs and new lines
- * :cntr:   - all control characters
- * :alpha:  - all letters ([[a-z]|[A-Z]])
- * :alnum:  - all letters and digits [0-9]
- * :digit:  - all decimal numbers [0-9]
- * :xdigit: - all hexadecimal numbers [[0-9]|[a-f||[A-F]]
+* :print:  - all printable characters
+* :space:  - all blanks, tabs and new lines
+* :cntr:   - all control characters
+* :alpha:  - all letters ([[a-z]|[A-Z]])
+* :alnum:  - all letters and digits [0-9]
+* :digit:  - all decimal numbers [0-9]
+* :xdigit: - all hexadecimal numbers [[0-9]|[a-f||[A-F]]
 
 All comments and separators are ignored by the scanner and not passed
 with the token to the parser. This means that the separators (SEP)

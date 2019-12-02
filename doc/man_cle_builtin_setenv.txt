@@ -8,7 +8,7 @@ and value.
 
 *Attention:* The environment variables will be temporary overwritten
 
-.EXAMPLES
+.Examples
 
 -----------------------------------------------------------------------
    :> &{PGM} SETENV LANG=DE_DE.IBM-1141
