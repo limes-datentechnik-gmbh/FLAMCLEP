@@ -576,7 +576,8 @@ static inline TsCnfHdl* psOpenConfig(FILE* pfOut, FILE* pfErr, const char* pcHom
    if (m==NULL) {
    #ifdef __ZOS__
       {
-         char acUsr[16];
+         int   i,j;
+         char  acUsr[16];
          srprintf(&pcFil,&szFil,strlen(pcPgu)+8,"'%s.",userid(sizeof(acUsr),acUsr));
          if (pcFil==NULL) {
             if (pfErr!=NULL) fprintf(pfErr,"Memory allocation for default configuration file name failed\n");
