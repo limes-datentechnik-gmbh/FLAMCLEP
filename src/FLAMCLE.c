@@ -495,8 +495,7 @@ extern void vdClePrnBuiltInDocu(FILE* pfDoc, const char* pcOwn, char* pcPgm, int
          fprintf(pfDoc,"\n\n");
       }
    }
-   fprintm(pfDoc,pcOwn,pcPgm,MAN_CLE_FUNCTIONS,2);
-   efprintf(pfDoc,"indexterm:[Available built-in functions]\n\n\n");
+   fprintm(pfDoc,pcOwn,pcPgm,MAN_CLE_BUILTIN_FUNCTIONS,2);
 
    vdCleManFunction(pfDoc,uiLev+1,S_TLD,"4.1" ,"SYNTAX"  ,HLP_CLE_BUILTIN_SYNTAX  ,pcOwn,pcPgm,SYN_CLE_BUILTIN_SYNTAX  ,MAN_CLE_BUILTIN_SYNTAX  ,FALSE,isNbr);
    vdCleManFunction(pfDoc,uiLev+1,S_TLD,"4.2" ,"HELP"    ,HLP_CLE_BUILTIN_HELP    ,pcOwn,pcPgm,SYN_CLE_BUILTIN_HELP    ,MAN_CLE_BUILTIN_HELP    ,FALSE,isNbr);
@@ -548,9 +547,9 @@ extern void vdClePrnBuiltInDocu(FILE* pfDoc, const char* pcOwn, char* pcPgm, int
    return(r); \
 } while(FALSE)
 
-static inline void vdPrintMan(FILE* pfDoc, const TsCleDoc* psDoc, const char* pcOwn, const char* pcPgm, const char* pcId, const char* pcMan, const int isNbr) {
-   if (pcId!=NULL && *pcId) {
-      efprintf(pfDoc,"[%s]\n\n",pcId);
+static inline void vdPrintMan(FILE* pfDoc, const TsCleDoc* psDoc, const char* pcOwn, const char* pcPgm, const int isNbr) {
+   if (psDoc->pcKyw!=NULL && *psDoc->pcKyw) {
+      efprintf(pfDoc,"[%s]\n\n",psDoc->pcKyw);
    }
    if (psDoc->pcHdl!=NULL && *psDoc->pcHdl) {
       for (unsigned int i=0;i<psDoc->uiLev;i++) {
@@ -561,11 +560,6 @@ static inline void vdPrintMan(FILE* pfDoc, const TsCleDoc* psDoc, const char* pc
    }
    if (psDoc->pcMan!=NULL && *psDoc->pcMan) {
       fprintm(pfDoc,pcOwn,pcPgm,psDoc->pcMan,2);
-   } else if (pcMan!=NULL && *pcMan) {
-      fprintm(pfDoc,pcOwn,pcPgm,pcMan,2);
-   }
-   if (psDoc->pcHdl!=NULL && *psDoc->pcHdl && (pcId==NULL || strcmp(pcId,"index"))) {
-      efprintf(pfDoc,"indexterm:[%s]\n\n\n",psDoc->pcHdl);
    }
 }
 
@@ -1610,15 +1604,12 @@ EVALUATE:
             }
          } else {
             if (psDoc!=NULL) {
-               int isApx=FALSE;
                for (i=0; psDoc[i].uiTyp; i++) {
-                  if (psDoc[i].uiTyp!=CLE_DOCTYP_APPENDIX) {
-                     if (psDoc[i].pcHdl==NULL) {
-                        fprintf(pfErr,"No headline defined for %d. chapter\n",i+1);
-                        ERROR(CLERTC_TAB,NULL);
-                     }
+                  if (psDoc[i].pcHdl==NULL) {
+                     fprintf(pfErr,"No headline defined for %d. chapter\n",i+1);
+                     ERROR(CLERTC_TAB,NULL);
                   }
-                  if (psDoc[i].uiTyp!=CLE_DOCTYP_COVER && psDoc[i].uiTyp!=CLE_DOCTYP_APPENDIX) {
+                  if (psDoc[i].uiTyp!=CLE_DOCTYP_COVER) {
                      if (psDoc[i].uiLev<2 || psDoc[i].uiLev>5) {
                         fprintf(pfErr,"Level (%u) for %d. chapter smaller than 2 or greater than 5\n",psDoc[i].uiLev,i+1);
                         ERROR(CLERTC_TAB,NULL);
@@ -1635,53 +1626,13 @@ EVALUATE:
                         efprintf(pfDoc,"= %s\n\n",psDoc[i].pcHdl);
                         fprintm(pfDoc,pcOwn,pcPgm,psDoc[i].pcMan,2);
                         break;
-                     case CLE_DOCTYP_PREFACE:
-                        fprintf(pfOut,"... print CLE_DOCTYP_PREFACE(%s)\n",psDoc[i].pcHdl);
-                        if (psDoc[i].uiLev!=2) {
-                           fprintf(pfErr,"Level (%u) for preface is not 2\n",psDoc[i].uiLev);
-                           ERROR(CLERTC_TAB,NULL);
-                        }
-                        vdPrintMan(pfDoc,psDoc+i,pcOwn,pcPgm,"preface",NULL,isNbr);
-                        break;
                      case CLE_DOCTYP_CHAPTER:
                         fprintf(pfOut,"... print CLE_DOCTYP_CHAPTER(%s)\n",psDoc[i].pcHdl);
-                        vdPrintMan(pfDoc,psDoc+i,pcOwn,pcPgm,(isApx && psDoc[i].uiLev==2)?"appendix":NULL,NULL,isNbr);
+                        vdPrintMan(pfDoc,psDoc+i,pcOwn,pcPgm,isNbr);
                         break;
-                     case CLE_DOCTYP_CLEPMAIN:
-                        fprintf(pfOut,"... print CLE_DOCTYP_CLEPMAIN(%s)\n",psDoc[i].pcHdl);
-                        vdPrintMan(pfDoc,psDoc+i,pcOwn,pcPgm,(isApx && psDoc[i].uiLev==2)?"appendix":NULL,MAN_CLE_CLEPMAIN,isNbr);
-                        break;
-                     case CLE_DOCTYP_CLEPMAIN_CONSID:
-                        fprintf(pfOut,"... print CLE_DOCTYP_CLEPMAIN_CONSID(%s)\n",psDoc[i].pcHdl);
-                        vdPrintMan(pfDoc,psDoc+i,pcOwn,pcPgm,(isApx && psDoc[i].uiLev==2)?"appendix":NULL,MAN_CLE_CLEPMAIN_CONSID,isNbr);
-                        break;
-                     case CLE_DOCTYP_CLEPMAIN_USEDENV:
-                        fprintf(pfOut,"... print CLE_DOCTYP_CLEPMAIN_USEDENV(%s)\n",psDoc[i].pcHdl);
-                        vdPrintMan(pfDoc,psDoc+i,pcOwn,pcPgm,(isApx && psDoc[i].uiLev==2)?"appendix":NULL,MAN_CLE_CLEPMAIN_USEDENV,isNbr);
-                        break;
-                     case CLE_DOCTYP_CLEPMAIN_ENVARMAP:
-                        fprintf(pfOut,"... print CLE_DOCTYP_CLEPMAIN_ENVARMAP(%s)\n",psDoc[i].pcHdl);
-                        vdPrintMan(pfDoc,psDoc+i,pcOwn,pcPgm,(isApx && psDoc[i].uiLev==2)?"appendix":NULL,MAN_CLE_CLEPMAIN_ENVARMAP,isNbr);
-                        break;
-                     case CLE_DOCTYP_CLEPMAIN_FILEMAP:
-                        fprintf(pfOut,"... print CLE_DOCTYP_CLEPMAIN_FILEMAP(%s)\n",psDoc[i].pcHdl);
-                        vdPrintMan(pfDoc,psDoc+i,pcOwn,pcPgm,(isApx && psDoc[i].uiLev==2)?"appendix":NULL,MAN_CLE_CLEPMAIN_FILEMAP,isNbr);
-                        break;
-                     case CLE_DOCTYP_CLEPMAIN_KEYLABMAP:
-                        fprintf(pfOut,"... print CLE_DOCTYP_CLEPMAIN_KEYLABMAP(%s)\n",psDoc[i].pcHdl);
-                        vdPrintMan(pfDoc,psDoc+i,pcOwn,pcPgm,(isApx && psDoc[i].uiLev==2)?"appendix":NULL,MAN_CLE_CLEPMAIN_KEYLABMAP,isNbr);
-                        break;
-                     case CLE_DOCTYP_CLEPMAIN_EBCDIC:
-                        fprintf(pfOut,"... print CLE_DOCTYP_CLEPMAIN_EBCDIC(%s)\n",psDoc[i].pcHdl);
-                        vdPrintMan(pfDoc,psDoc+i,pcOwn,pcPgm,(isApx && psDoc[i].uiLev==2)?"appendix":NULL,MAN_CLE_CLEPMAIN_EBCDIC,isNbr);
-                        break;
-                     case CLE_DOCTYP_BUILTINF:
-                        fprintf(pfOut,"... print CLE_DOCTYP_BUILTINF(%s)\n",psDoc[i].pcHdl);
-                        if (psDoc[i].uiLev<2 || psDoc[i].uiLev>5) {
-                           fprintf(pfErr,"Level (%u) for built in functions is not between 2 and 5\n",psDoc[i].uiLev);
-                           ERROR(CLERTC_TAB,NULL);
-                        }
-                        vdPrintMan(pfDoc,psDoc+i,pcOwn,pcPgm,(isApx && psDoc[i].uiLev==2)?"appendix":NULL,MAN_CLE_FUNCTIONS,isNbr);
+                     case CLE_DOCTYP_BUILTIN:
+                        fprintf(pfOut,"... print CLE_DOCTYP_BUILTIN(%s)\n",psDoc[i].pcHdl);
+                        vdPrintMan(pfDoc,psDoc+i,pcOwn,pcPgm,isNbr);
                         j=1;
                         if (psDoc[i].pcNum!=NULL && *psDoc[i].pcNum) snprintf(acNum,sizeof(acNum),"%s%d.",psDoc[i].pcNum,j); else snprintf(acNum,sizeof(acNum),"%d.",j); j++;
                         vdCleManFunction(pfDoc,psDoc[i].uiLev+1,S_TLD,acNum,"SYNTAX"  ,HLP_CLE_BUILTIN_SYNTAX  ,pcOwn,pcPgm,SYN_CLE_BUILTIN_SYNTAX  ,MAN_CLE_BUILTIN_SYNTAX  ,FALSE,isNbr);
@@ -1730,36 +1681,36 @@ EVALUATE:
                         break;
                      case CLE_DOCTYP_PGMSYNOBSIS:
                         fprintf(pfOut,"... print CLE_DOCTYP_PGMSYNOBSIS(%s)\n",psDoc[i].pcHdl);
-                        vdPrintMan(pfDoc,psDoc+i,pcOwn,pcPgm,NULL,NULL,isNbr);
+                        vdPrintMan(pfDoc,psDoc+i,pcOwn,pcPgm,isNbr);
                         efprintf(pfDoc,"-----------------------------------------------------------------------\n");
                         efprintf(pfDoc,"HELP:   %s\n",pcHlp);
                         efprintf(pfDoc,"PATH:   %s\n",pcOwn);
                         efprintf(pfDoc,"TYPE:   PROGRAM\n");
                         efprintf(pfDoc,"SYNTAX: > %s COMMAND ...\n",pcPgm);
                         efprintf(pfDoc,"-----------------------------------------------------------------------\n\n");
-                        efprintf(pfDoc,"indexterm:[Synopsis for program %s]\n\n\n",pcPgm);
+                        efprintf(pfDoc,"indexterm:[PROGRAM Synopsis]\n\n\n");
                         break;
                      case CLE_DOCTYP_PGMSYNTAX:
                         fprintf(pfOut,"... print CLE_DOCTYP_PGMSYNTAX(%s)\n",psDoc[i].pcHdl);
-                        vdPrintMan(pfDoc,psDoc+i,pcOwn,pcPgm,NULL,MAN_CLE_CLEPMAIN_SYNTAX,isNbr);
+                        vdPrintMan(pfDoc,psDoc+i,pcOwn,pcPgm,isNbr);
                         efprintf(pfDoc,"------------------------------------------------------------------------\n");
                         efprintf(pfDoc,"Syntax for program '%s':\n",pcPgm);
                         vdPrnStaticSyntax(pfDoc,psTab,pcPgm,pcDep,pcOpt,pcDpa);
                         efprintf(pfDoc,"------------------------------------------------------------------------\n\n");
-                        efprintf(pfDoc,"indexterm:[Syntax for program %s]\n\n\n",pcPgm);
+                        efprintf(pfDoc,"indexterm:[PROGRAM Syntax]\n\n\n");
                         break;
                      case CLE_DOCTYP_PGMHELP:
                         fprintf(pfOut,"... print CLE_DOCTYP_PGMHELP(%s)\n",psDoc[i].pcHdl);
-                        vdPrintMan(pfDoc,psDoc+i,pcOwn,pcPgm,NULL,MAN_CLE_CLEPMAIN_HELP,isNbr);
+                        vdPrintMan(pfDoc,psDoc+i,pcOwn,pcPgm,isNbr);
                         efprintf(pfDoc,"------------------------------------------------------------------------\n");
                         efprintf(pfDoc,"Help for program '%s':\n",pcPgm);
                         vdPrnStaticHelp(pfDoc,psTab,pcPgm,pcDep);
                         efprintf(pfDoc,"------------------------------------------------------------------------\n\n");
-                        efprintf(pfDoc,"indexterm:[Help for program %s]\n\n\n",pcPgm);
+                        efprintf(pfDoc,"indexterm:[PROGRAM Help]\n\n\n");
                         break;
                      case CLE_DOCTYP_COMMANDS:
                         fprintf(pfOut,"... print CLE_DOCTYP_COMMANDS(%s)\n",psDoc[i].pcHdl);
-                        vdPrintMan(pfDoc,psDoc+i,pcOwn,pcPgm,(isApx && psDoc[i].uiLev==2)?"appendix":NULL,MAN_CLE_COMMANDS,isNbr);
+                        vdPrintMan(pfDoc,psDoc+i,pcOwn,pcPgm,isNbr);
                         for (j=0;psTab[j].pcKyw!=NULL;j++) {
                            if (psTab[j].siFlg) {
                               siErr=siCleCommandInit(pvGbl,psTab[j].pfIni,psTab[j].pvClp,pcOwn,pcPgm,psTab[j].pcKyw,psTab[j].pcMan,psTab[j].pcHlp,psTab[j].piOid,psTab[j].psTab,
@@ -1785,7 +1736,7 @@ EVALUATE:
                            fprintf(pfErr,"The pointer to the list of other CLP strings is NULL but DOCTYP OTHERCLP requested\n");
                            ERROR(CLERTC_ITF,NULL);
                         }
-                        vdPrintMan(pfDoc,psDoc+i,pcOwn,pcPgm,(isApx && psDoc[i].uiLev==2)?"appendix":NULL,MAN_CLE_APPENDIX_OTHERCLP,isNbr);
+                        vdPrintMan(pfDoc,psDoc+i,pcOwn,pcPgm,isNbr);
                         for (j=0;psOth[j].pcHdl!=NULL;j++) {
                            pvHdl=pvClpOpen(isCas,isPfl,isRpl,siMkl,pcOwn,psOth[j].pcRot,psOth[j].pcKyw,psOth[j].pcMan,psOth[j].pcHlp,psOth[j].isOvl,
                                            psOth[j].psTab,NULL,pfOut,pfErr,pfTrc,pfTrc,pfTrc,pfTrc,pcDep,pcOpt,pcEnt,NULL,pvGbl,pvF2S,pfF2S,pvSaf,pfSaf);
@@ -1806,22 +1757,11 @@ EVALUATE:
                            vdClpClose(pvHdl,CLPCLS_MTD_ALL); pvHdl=NULL;
                         }
                         break;
-                     case CLE_DOCTYP_APPENDIX:
-                        fprintf(pfOut,"... print CLE_DOCTYP_APPENDIX(%s)\n",psDoc[i].pcHdl);
-                        isApx=(isApx)?FALSE:TRUE;
-                        if (psDoc[i].pcHdl) {
-                           if (psDoc[i].uiLev<2 || psDoc[i].uiLev>5) {
-                              fprintf(pfErr,"Level (%u) for %d. chapter smaller than 2 or greater than 5\n",psDoc[i].uiLev,i+1);
-                              ERROR(CLERTC_TAB,NULL);
-                           }
-                           vdPrintMan(pfDoc,psDoc+i,pcOwn,pcPgm,(isApx && psDoc[i].uiLev==2)?"appendix":NULL,NULL,isNbr);
-                        }
-                        break;
                      case CLE_DOCTYP_LEXEM:
                         fprintf(pfOut,"... print CLE_DOCTYP_LEXEM(%s)\n",psDoc[i].pcHdl);
                         siErr=siCleSimpleInit(pfOut,pfErr,isPfl,isRpl,pcDep,pcOpt,pcEnt,&pvHdl);
                         if (siErr) ERROR(siErr,NULL);
-                        vdPrintMan(pfDoc,psDoc+i,pcOwn,pcPgm,(isApx && psDoc[i].uiLev==2)?"appendix":NULL,MAN_CLE_APPENDIX_LEXEM,isNbr);
+                        vdPrintMan(pfDoc,psDoc+i,pcOwn,pcPgm,isNbr);
                         efprintf(pfDoc,"------------------------------------------------------------------------\n");
                         efprintf(pfDoc,"Lexemes (regular expressions) for argument list or parameter file\n");
                         siErr=siClpLexem(pvHdl,pfDoc);
@@ -1836,7 +1776,7 @@ EVALUATE:
                         fprintf(pfOut,"... print CLE_DOCTYP_GRAMMAR(%s)\n",psDoc[i].pcHdl);
                         siErr=siCleSimpleInit(pfOut,pfErr,isPfl,isRpl,pcDep,pcOpt,pcEnt,&pvHdl);
                         if (siErr) ERROR(siErr,NULL);
-                        vdPrintMan(pfDoc,psDoc+i,pcOwn,pcPgm,(isApx && psDoc[i].uiLev==2)?"appendix":NULL,MAN_CLE_APPENDIX_GRAMMAR,isNbr);
+                        vdPrintMan(pfDoc,psDoc+i,pcOwn,pcPgm,isNbr);
                         efprintf(pfDoc,"------------------------------------------------------------------------\n");
                         efprintf(pfDoc,"Grammar for argument list, parameter file or property file\n");
                         siErr=siClpGrammar(pvHdl,pfDoc);
@@ -1849,11 +1789,11 @@ EVALUATE:
                         break;
                      case CLE_DOCTYP_PROPERTIES:
                         fprintf(pfOut,"... print CLE_DOCTYP_PROPERTIES(%s)\n",psDoc[i].pcHdl);
-                        vdPrintMan(pfDoc,psDoc+i,pcOwn,pcPgm,(isApx && psDoc[i].uiLev==2)?"appendix":NULL,MAN_CLE_APPENDIX_PROPERTIES,isNbr);
+                        vdPrintMan(pfDoc,psDoc+i,pcOwn,pcPgm,isNbr);
                         break;
                      case CLE_DOCTYP_PROPREMAIN:
                         fprintf(pfOut,"... print CLE_DOCTYP_PROPREMAIN(%s)\n",psDoc[i].pcHdl);
-                        vdPrintMan(pfDoc,psDoc+i,pcOwn,pcPgm,(isApx && psDoc[i].uiLev==2)?"appendix":NULL,MAN_CLE_APPENDIX_PROP_REMAINING,isNbr);
+                        vdPrintMan(pfDoc,psDoc+i,pcOwn,pcPgm,isNbr);
                         for (siErr=CLP_OK, j=0;psTab[j].pcKyw!=NULL && siErr==CLP_OK;j++) {
                            siErr=siClePropertyInit(pvGbl,psTab[j].pfIni,psTab[j].pvClp,pcOwn,pcPgm,psTab[j].pcKyw,psTab[j].pcMan,psTab[j].pcHlp,
                                                    psTab[j].piOid,psTab[j].psTab,isCas,isPfl,isRpl,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,
@@ -1869,7 +1809,7 @@ EVALUATE:
                         break;
                      case CLE_DOCTYP_PROPDEFAULTS:
                         fprintf(pfOut,"... print CLE_DOCTYP_PROPDEFAULTS(%s)\n",psDoc[i].pcHdl);
-                        vdPrintMan(pfDoc,psDoc+i,pcOwn,pcPgm,(isApx && psDoc[i].uiLev==2)?"appendix":NULL,MAN_CLE_APPENDIX_PROP_DEFAULTS,isNbr);
+                        vdPrintMan(pfDoc,psDoc+i,pcOwn,pcPgm,isNbr);
                         efprintf(pfDoc,"------------------------------------------------------------------------\n");
                         efprintf(pfDoc,"\n%c Property file for: %s.%s %c\n",C_HSH,pcOwn,pcPgm,C_HSH);
                         efprintf(pfDoc,"%s",HLP_CLE_PROPFIL);
@@ -1888,11 +1828,11 @@ EVALUATE:
                         break;
                      case CLE_DOCTYP_RETURNCODES:
                         fprintf(pfOut,"... print CLE_DOCTYP_RETURNCODES(%s)\n",psDoc[i].pcHdl);
-                        vdPrintMan(pfDoc,psDoc+i,pcOwn,pcPgm,(isApx && psDoc[i].uiLev==2)?"appendix":NULL,MAN_CLE_APPENDIX_RETURNCODES,isNbr);
+                        vdPrintMan(pfDoc,psDoc+i,pcOwn,pcPgm,isNbr);
                         break;
                      case CLE_DOCTYP_SPECIALCODES:
                         fprintf(pfOut,"... print CLE_DOCTYP_SPECIALCODES(%s)\n",psDoc[i].pcHdl);
-                        vdPrintMan(pfDoc,psDoc+i,pcOwn,pcPgm,(isApx && psDoc[i].uiLev==2)?"appendix":NULL,NULL,isNbr);
+                        vdPrintMan(pfDoc,psDoc+i,pcOwn,pcPgm,isNbr);
                         break;
                      case CLE_DOCTYP_REASONCODES:
                         fprintf(pfOut,"... print CLE_DOCTYP_REASONCODES(%s)\n",psDoc[i].pcHdl);
@@ -1900,7 +1840,7 @@ EVALUATE:
                            fprintf(pfErr,"The pointer to the message function to map the reason codes is NULL but DOCTYP REASONCODES requested\n");
                            ERROR(CLERTC_ITF,NULL);
                         }
-                        vdPrintMan(pfDoc,psDoc+i,pcOwn,pcPgm,(isApx && psDoc[i].uiLev==2)?"appendix":NULL,MAN_CLE_APPENDIX_REASONCODES,isNbr);
+                        vdPrintMan(pfDoc,psDoc+i,pcOwn,pcPgm,isNbr);
                         for (j=1,m=pfMsg(j);m!=NULL;j++,m=pfMsg(j)) {
                            if (*m) efprintf(pfDoc,"* %d - %s\n",j,m);
                         }
@@ -1911,7 +1851,7 @@ EVALUATE:
                            fprintf(pfErr,"No version string provided but DOCTYP VERSION requested\n");
                            ERROR(CLERTC_ITF,NULL);
                         }
-                        vdPrintMan(pfDoc,psDoc+i,pcOwn,pcPgm,(isApx && psDoc[i].uiLev==2)?"appendix":NULL,MAN_CLE_APPENDIX_VERSION,isNbr);
+                        vdPrintMan(pfDoc,psDoc+i,pcOwn,pcPgm,isNbr);
                         efprintf(pfDoc,"------------------------------------------------------------------------\n");
                         efprintf(pfDoc,"%s",pcVsn);
                         efprintf(pfDoc,"------------------------------------------------------------------------\n\n");
@@ -1922,35 +1862,10 @@ EVALUATE:
                            fprintf(pfErr,"No about string provided but DOCTYP ABOUT requested\n");
                            ERROR(CLERTC_ITF,NULL);
                         }
-                        vdPrintMan(pfDoc,psDoc+i,pcOwn,pcPgm,(isApx && psDoc[i].uiLev==2)?"appendix":NULL,MAN_CLE_APPENDIX_ABOUT,isNbr);
+                        vdPrintMan(pfDoc,psDoc+i,pcOwn,pcPgm,isNbr);
                         efprintf(pfDoc,"------------------------------------------------------------------------\n");
                         efprintf(pfDoc,"%s",pcAbo);
                         efprintf(pfDoc,"------------------------------------------------------------------------\n\n");
-                        break;
-                     case CLE_DOCTYP_GLOSSARY:
-                        fprintf(pfOut,"... print CLE_DOCTYP_GLOSSARY(%s)\n",psDoc[i].pcHdl);
-                        if (psDoc[i].uiLev!=2) {
-                           fprintf(pfErr,"Level (%u) for the glossary is not 2\n",psDoc[i].uiLev);
-                           ERROR(CLERTC_TAB,NULL);
-                        }
-                        //TODO: Merge MAN_CLE_GLOSSARY with psDoc[i].pcMan
-                        vdPrintMan(pfDoc,psDoc+i,pcOwn,pcPgm,"glossary",MAN_CLE_GLOSSARY,isNbr);
-                        break;
-                     case CLE_DOCTYP_INDEX:
-                        fprintf(pfOut,"... print CLE_DOCTYP_INDEX(%s)\n",psDoc[i].pcHdl);
-                        if (psDoc[i].uiLev!=2) {
-                           fprintf(pfErr,"Level (%u) for the index is not 2\n",psDoc[i].uiLev);
-                           ERROR(CLERTC_TAB,NULL);
-                        }
-                        vdPrintMan(pfDoc,psDoc+i,pcOwn,pcPgm,"index",NULL,isNbr);
-                        break;
-                     case CLE_DOCTYP_COLOPHON:
-                        fprintf(pfOut,"... print CLE_DOCTYP_COLOPHON(%s)\n",psDoc[i].pcHdl);
-                        if (psDoc[i].uiLev!=2) {
-                           fprintf(pfErr,"Level (%u) for the colophon is not 2\n",psDoc[i].uiLev);
-                           ERROR(CLERTC_TAB,NULL);
-                        }
-                        vdPrintMan(pfDoc,psDoc+i,pcOwn,pcPgm,"colophon",MAN_CLE_COLOPHON,isNbr);
                         break;
                   }
                }
@@ -3073,7 +2988,7 @@ static void vdCleManProgram(
       fprintf(pfOut, "TYPE:   PROGRAM\n");
       fprintf(pfOut, "SYNTAX: > %s COMMAND/FUNCTION ...\n",pcPgm);
       fprintf(pfOut, "-----------------------------------------------------------------------\n\n");
-      fprintf(pfOut, "indexterm:%cSynopsis for program %s%c\n\n\n",C_SBO,pcPgm,C_SBC);
+      fprintf(pfOut, "indexterm:%cPROGRAM Synopsis%c\n\n\n",C_SBO,C_SBC);
 
       if (isNbr) {
          fprintf(pfOut,"2.2. DESCRIPTION\n");
@@ -3090,7 +3005,7 @@ static void vdCleManProgram(
       } else {
          fprintf(pfOut,"No detailed description available for this program.\n\n");
       }
-      fprintf(pfOut,"indexterm:%cDescription for program %s%c\n\n\n",C_SBO,pcPgm,C_SBC);
+      fprintf(pfOut,"indexterm:%cPROGRAM Description%c\n\n\n",C_SBO,C_SBC);
       if (isNbr) {
          fprintf(pfOut,"2.3. SYNTAX\n");
          for (i=0;i<12;i++) fprintf(pfOut,"%c",C_TLD);
@@ -3100,12 +3015,12 @@ static void vdCleManProgram(
          for (i=0;i<6;i++) fprintf(pfOut,"%c",C_TLD);
          fprintf(pfOut,"\n\n");
       }
-      fprintm(pfOut,pcOwn,pcPgm,MAN_CLE_CLEPMAIN_SYNTAX,1);
+      fprintm(pfOut,pcOwn,pcPgm,MAN_CLE_PROGRAM_SYNTAX,1);
       fprintf(pfOut,"------------------------------------------------------------------------\n");
       fprintf(pfOut,"Syntax for program '%s':\n",pcPgm);
       vdPrnStaticSyntax(pfOut,psTab,pcPgm,pcDep,pcSep,pcDpa);
       fprintf(pfOut,"------------------------------------------------------------------------\n\n");
-      fprintf(pfOut,"indexterm:%cSyntax for program %s%c\n\n\n",C_SBO,pcPgm,C_SBC);
+      fprintf(pfOut,"indexterm:%cPROGRAM Syntax%c\n\n\n",C_SBO,C_SBC);
 
       if (isNbr) {
          fprintf(pfOut,"2.4. HELP\n");
@@ -3116,12 +3031,12 @@ static void vdCleManProgram(
          for (i=0;i<4;i++) fprintf(pfOut,"%c",C_TLD);
          fprintf(pfOut,"\n\n");
       }
-      fprintm(pfOut,pcOwn,pcPgm,MAN_CLE_CLEPMAIN_HELP,1);
+      fprintm(pfOut,pcOwn,pcPgm,MAN_CLE_PROGRAM_HELP,1);
       fprintf(pfOut,"------------------------------------------------------------------------\n");
       fprintf(pfOut,"Help for program '%s':\n",pcPgm);
       vdPrnStaticHelp(pfOut,psTab,pcPgm,pcDep);
       fprintf(pfOut,"------------------------------------------------------------------------\n\n");
-      fprintf(pfOut,"indexterm:%cHelp for program %s%c\n\n\n",C_SBO,pcPgm,C_SBC);
+      fprintf(pfOut,"indexterm:%cPROGRAM Help%c\n\n\n",C_SBO,C_SBC);
    }
 }
 
@@ -3195,7 +3110,7 @@ static void vdCleManFunction(
          efprintf(pfOut,"-----------------------------------------------------------------------\n\n");
          efprintf(pfOut,".DESCRIPTION\n\n");
          fprintm(pfOut,pcOwn,pcPgm,pcMan,2);
-         efprintf(pfOut,"indexterm:[Built-in function %s]\n\n\n",pcFct);
+         efprintf(pfOut,"indexterm:[BUILTINT %s]\n\n\n",pcFct);
       } else {
          if (isNbr) {
             fprintf(pfOut,"%s FUNCTION '%s'\n",pcNum,pcFct);
@@ -3217,7 +3132,7 @@ static void vdCleManFunction(
          fprintf(pfOut, "-----------------------------------------------------------------------\n\n");
          fprintf(pfOut, ".DESCRIPTION\n\n");
          fprintm(pfOut,pcOwn,pcPgm,pcMan,2);
-         fprintf(pfOut,"indexterm:%cBuilt-in function %s%c\n\n\n",C_SBO,pcFct,C_SBC);
+         fprintf(pfOut,"indexterm:%cBUILTIN %s%c\n\n\n",C_SBO,pcFct,C_SBC);
       }
    }
 }
