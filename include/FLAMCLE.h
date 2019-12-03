@@ -262,11 +262,11 @@ Sample program
          CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,2,NULL   ,CLE_DOCKYW_APPENDIX,"FLUC Subsystem for z/OS"           ,MAN_FLCL_APPENDIX_FLUCSUB)
          CLETAB_DOC(CLE_DOCTYP_LEXEM         ,2,NULL   ,CLE_DOCKYW_APPENDIX,"Lexem"                             ,MAN_CLE_APPENDIX_LEXEM)
          CLETAB_DOC(CLE_DOCTYP_GRAMMAR       ,2,NULL   ,CLE_DOCKYW_APPENDIX,"Grammar"                           ,MAN_CLE_APPENDIX_GRAMMAR)
-         CLETAB_DOC(CLE_DOCTYP_PROPERTIES    ,2,NULL   ,CLE_DOCKYW_APPENDIX,"Properties"                        ,MAN_CLE_APPENDIX_PROPERTIES)
+         CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,2,NULL   ,CLE_DOCKYW_APPENDIX,"Properties"                        ,MAN_CLE_APPENDIX_PROPERTIES)
          CLETAB_DOC(CLE_DOCTYP_PROPREMAIN    ,3,NULL   ,NULL               ,"Remaining documentation"           ,MAN_CLE_APPENDIX_PROP_REMAINING)
          CLETAB_DOC(CLE_DOCTYP_PROPDEFAULTS  ,3,NULL   ,NULL               ,"Predefined defaults"               ,MAN_CLE_APPENDIX_PROP_DEFAULTS)
-         CLETAB_DOC(CLE_DOCTYP_RETURNCODES   ,2,NULL   ,CLE_DOCKYW_APPENDIX,"Returncodes"                       ,MAN_CLE_APPENDIX_RETURNCODES)
-         CLETAB_DOC(CLE_DOCTYP_SPECIALCODES  ,3,NULL   ,NULL               ,"Special condition codes"           ,MAN_FLCL_SPECIALCODES)
+         CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,2,NULL   ,CLE_DOCKYW_APPENDIX,"Returncodes"                       ,MAN_CLE_APPENDIX_RETURNCODES)
+         CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,3,NULL   ,NULL               ,"Special condition codes"           ,MAN_FLCL_SPECIALCODES)
          CLETAB_DOC(CLE_DOCTYP_REASONCODES   ,3,NULL   ,NULL               ,"Reasoncodes"                       ,MAN_CLE_APPENDIX_REASONCODES)
          CLETAB_DOC(CLE_DOCTYP_VERSION       ,2,NULL   ,CLE_DOCKYW_APPENDIX,"Version"                           ,MAN_CLE_APPENDIX_VERSION)
          CLETAB_DOC(CLE_DOCTYP_ABOUT         ,2,NULL   ,CLE_DOCKYW_APPENDIX,"About"                             ,MAN_CLE_APPENDIX_ABOUT)
@@ -446,10 +446,8 @@ extern const char* pcCleAbout(const int l, const int s, char* b);
 #define CLE_DOCTYP_GRAMMAR             31U   /** The appendix which prints the grammar*/
 #define CLE_DOCTYP_VERSION             32U   /** The appendix which prints the version (pcVsn must be given)*/
 #define CLE_DOCTYP_ABOUT               33U   /** The appendix which prints the about (pcAbo must be given)*/
-#define CLE_DOCTYP_PROPERTIES          40U   /** The appendix which prints the properties*/
 #define CLE_DOCTYP_PROPREMAIN          41U   /** The appendix which prints the remaining parameter documentation*/
 #define CLE_DOCTYP_PROPDEFAULTS        42U   /** The appendix which prints the default parameter documentation*/
-#define CLE_DOCTYP_RETURNCODES         50U   /** The appendix which prints the return codes*/
 #define CLE_DOCTYP_SPECIALCODES        51U   /** The appendix which prints the special condition codes*/
 #define CLE_DOCTYP_REASONCODES         52U   /** The appendix which prints the reason codes (pfMsg must be provided)*/
 

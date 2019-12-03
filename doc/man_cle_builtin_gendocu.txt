@@ -8,7 +8,7 @@ generates the complete manual and convert it in a second step to a HTML5
 document.
 
 ------------------------------------------------------------------------
-   :> ${pgm} gendocu book.txt
+   :> &{pgm} gendocu book.txt
    :> asciidoc -b html5 -f asciidoc-html5.conf -a toc2 -a toclevels=4 -o book.html book.txt
 ------------------------------------------------------------------------
 

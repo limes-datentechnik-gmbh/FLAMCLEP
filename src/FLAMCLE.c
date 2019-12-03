@@ -1679,6 +1679,10 @@ EVALUATE:
                         if (psDoc[i].pcNum!=NULL && *psDoc[i].pcNum) snprintf(acNum,sizeof(acNum),"%s%d.",psDoc[i].pcNum,j); else snprintf(acNum,sizeof(acNum),"%d.",j); j++;
                         vdCleManFunction(pfDoc,psDoc[i].uiLev+1,S_TLD,acNum,"ERRORS"  ,HLP_CLE_BUILTIN_ERRORS  ,pcOwn,pcPgm,SYN_CLE_BUILTIN_ERRORS  ,MAN_CLE_BUILTIN_ERRORS  ,FALSE,isNbr);
                         break;
+                     case CLE_DOCTYP_PROGRAM:
+                        fprintf(pfOut,"... print CLE_DOCTYP_PROGRAM(%s)\n",psDoc[i].pcHdl);
+                        vdPrintMan(pfDoc,psDoc+i,pcOwn,pcPgm,isNbr);
+                        break;
                      case CLE_DOCTYP_PGMSYNOBSIS:
                         fprintf(pfOut,"... print CLE_DOCTYP_PGMSYNOBSIS(%s)\n",psDoc[i].pcHdl);
                         vdPrintMan(pfDoc,psDoc+i,pcOwn,pcPgm,isNbr);
@@ -1787,10 +1791,6 @@ EVALUATE:
                            ERROR(CLERTC_SYN,NULL);
                         }
                         break;
-                     case CLE_DOCTYP_PROPERTIES:
-                        fprintf(pfOut,"... print CLE_DOCTYP_PROPERTIES(%s)\n",psDoc[i].pcHdl);
-                        vdPrintMan(pfDoc,psDoc+i,pcOwn,pcPgm,isNbr);
-                        break;
                      case CLE_DOCTYP_PROPREMAIN:
                         fprintf(pfOut,"... print CLE_DOCTYP_PROPREMAIN(%s)\n",psDoc[i].pcHdl);
                         vdPrintMan(pfDoc,psDoc+i,pcOwn,pcPgm,isNbr);
@@ -1825,10 +1825,6 @@ EVALUATE:
                            fprintf(pfErr,"Creation of documentation file (%s) failed (%d - %s)\n",pcFil,errno,strerror(errno));
                            ERROR(CLERTC_SYN,NULL);
                         }
-                        break;
-                     case CLE_DOCTYP_RETURNCODES:
-                        fprintf(pfOut,"... print CLE_DOCTYP_RETURNCODES(%s)\n",psDoc[i].pcHdl);
-                        vdPrintMan(pfDoc,psDoc+i,pcOwn,pcPgm,isNbr);
                         break;
                      case CLE_DOCTYP_SPECIALCODES:
                         fprintf(pfOut,"... print CLE_DOCTYP_SPECIALCODES(%s)\n",psDoc[i].pcHdl);
