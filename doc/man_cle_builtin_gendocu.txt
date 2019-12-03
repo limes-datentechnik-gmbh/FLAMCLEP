@@ -3,7 +3,14 @@ If a command, or command path, is specified the corresponding section
 of the user manual is written to a file. The generated files are in
 ASCIIDOC format, to be readable as normal text document on all
 platforms and easily convertible into HTML, PDF or other formats
-with http://www.methods.co.nz/asciidoc/[ASCIIDOC].
+with http://www.methods.co.nz/asciidoc/[ASCIIDOC]. The example below
+generates the complete manual and convert it in a second step to a HTML5
+document.
+
+------------------------------------------------------------------------
+   :> ${pgm} gendocu book.txt
+   :> asciidoc -b html5 -f asciidoc-html5.conf -a toc2 -a toclevels=4 -o book.html book.txt
+------------------------------------------------------------------------
 
 The numbering will vary in places where the complete manual uses a
 bullet list for arguments and constants, when no detailed description
