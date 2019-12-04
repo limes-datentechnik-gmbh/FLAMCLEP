@@ -488,8 +488,8 @@ static int siClpFile2String(void* gbl, void* hdl, const char* filename, char** b
 
 extern void vdClePrnBuiltInDocu(FILE* pfDoc, const char* pcOwn, char* pcPgm, int isNbr, unsigned int uiLev) // TODO: muss weg wenn doctab
 {
-   char acHdl[1024];
-   int  i,l;
+   char           acHdl[1024];
+   unsigned int   i,l;
    if (uiLev) {
       for (i=0;i<uiLev;i++) fprintf(pfDoc,"=");
       fprintf(pfDoc," Available built-in functions\n\n");
@@ -3262,8 +3262,8 @@ static void vdCleManFunction(
       fprintf(pfOut, "limes datentechnik(r) gmbh (www.flam.de)\n\n");
    } else {
       if (uiLev) {
-         for (unsigned int j=0;j<uiLev;j++) fprintf(pfOut,"=");
-         if (isNbr) fprintf(pfOut," %s",pcNum);
+         for (unsigned int j=0;j<uiLev;j++) efprintf(pfOut,"=");
+         if (isNbr) efprintf(pfOut," %s",pcNum);
          efprintf(pfOut," FUNCTION '%s'\n\n",pcFct);
          efprintf(pfOut,".SYNOPSIS\n\n");
          efprintf(pfOut,"-----------------------------------------------------------------------\n");
@@ -3274,7 +3274,7 @@ static void vdCleManFunction(
          efprintf(pfOut,"-----------------------------------------------------------------------\n\n");
          efprintf(pfOut,".DESCRIPTION\n\n");
          fprintm(pfOut,pcOwn,pcPgm,pcMan,2);
-         efprintf(pfOut,"indexterm:[BUILTINT %s]\n\n\n",pcFct);
+         efprintf(pfOut,"indexterm:[BUILTIN %s]\n\n\n",pcFct);
       } else {
          if (isNbr) {
             fprintf(pfOut,"%s FUNCTION '%s'\n",pcNum,pcFct);
