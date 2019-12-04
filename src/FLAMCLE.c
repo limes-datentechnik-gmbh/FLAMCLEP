@@ -2029,6 +2029,9 @@ EVALUATE:
                         siErr=siClePrintPreformatedText(pfErr,pfDoc,psDoc+i,pcOwn,pcPgm,pcAbo,isNbr);
                         if (siErr) ERROR(siErr,NULL);
                         break;
+                     default:
+                        fprintf(pfErr,"Documentation type (%u) not supported\n",psDoc[i].uiTyp);
+                        ERROR(CLERTC_TAB,NULL);
                   }
                }
             } else {
