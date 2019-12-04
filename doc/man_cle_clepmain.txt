@@ -1,3 +1,4 @@
+[[clep.main]]
 The COMMAND LINE PROCESSOR (CLEP) is a user application programming
 interface for several platforms including Windows, Unix and z/OS that
 simplifies and standardizes parameter string processing.
@@ -8,32 +9,36 @@ The CLEP provides two separate functions:
  * COMMAND LINE EXECUTOR (CLE) - Supporting execution of different commands with parameter strings
 
 The COMMAND LINE EXECUTOR provides a list of commands and some
-built-in functions, please use 'MANPAGE', 'HELP' and 'SYNTAX' to get
+built-in functions, please use <<clep.builtin.manpage,MANPAGE>>,
+<<clep.builtin.help,HELP>> and <<clep.builtin.syntax,SYNTAX>> to get
 extensive information about these capabilities.
 
-Additionally the build-in function 'GENDOCU' can generate a complete or
-a part of the user manual.
+Additionally the build-in function <<clep.builtin.gendocu,GENDOCU>> can
+generate a complete or a part of the user manual.
 
 To read the parameter of a command, a compiler (CLP) is applied. To see
 the regular expressions (lexems) and the corresponding grammar, please
-use the built-in functions 'LEXEM' and 'GRAMMAR'.
+use the built-in functions <<clep.builtin.lexem,LEXEM>> and
+<<clep.builtin.grammar,GRAMMAR>>.
 
 The return/condition/exit codes of the executable and the reason codes
 of the different commands can be reviewed with the built-in function
-'ERRORS'.
-See <<appendix-Returncodes,'appendix-Returncodes'>> and, if available,
-<<appendix-Reasoncodes, appendix-Reasoncodes>>
-for the meaning of the used return and reason codes.
+<<clep.builtin.errors,ERRORS>>.
+See <<clep.appendix.returncodes,Appendix Returncodes>> and, if available,
+<<clep.appendix.reasoncodes,Appendix Reasoncode'>> for the meaning of the
+used return and reason codes.
 
 The CLE uses an owner management in order to separate the settings for
-different clients and a property management for each command. If
-problems occur, a trace might be activated.
+different clients and a property management for each command. If problems
+occur, a trace might be activated.
 
 For each command execution the owner and environment variables can be
-defined in the configuration file.
+defined in the configuration file. To see the current configuration use
+the built in function <<clep.builtin.config,CONFIG>>.
 
 The default trace file is 'stdout'. If the trace is activated before a
-trace file is defined, the trace will be printed on the screen.
+trace file is defined, the trace will be printed on the screen. To manage
+the tracing use built in function <<clep.builtin.trace,TRACE>>.
 
 Last but not least it is possible to view the license, version and other
 information about the program.

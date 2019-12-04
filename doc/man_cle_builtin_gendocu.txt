@@ -1,3 +1,4 @@
+[[clep.builtin.gendocu]]
 The complete user manual is generated when only the filename is given.
 If a command, or command path, is specified the corresponding section
 of the user manual is written to a file. The generated files are in

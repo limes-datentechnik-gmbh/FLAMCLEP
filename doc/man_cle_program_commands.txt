@@ -1,3 +1,4 @@
+[[clep.program.commands]]
 Commands are used to run powerful subprograms. The command line
 processor compiles a table defined syntax in a corresponding
 preinitialized data structure. This structure will be mapped to the
@@ -5,7 +6,7 @@ parameter structure of the corresponding subprogram.
 The subprogram can be executed with the defined arguments/parameters.
 
 To support these variable commands several built-in functions are
-available and described in the next section.
+available and described in a separate <<clep.builtin.functions,chapter>>.
 
 Each supported command is explained in a separate section in this
 document. Each section contains a synopsis including the help

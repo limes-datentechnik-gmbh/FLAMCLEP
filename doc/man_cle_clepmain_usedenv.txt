@@ -1,3 +1,6 @@
+[[clep.main.usedenv]]
+Below you can find the list of environment variables used by CLE and CLP. 
+
 * LANG    - to determine the CCSID on EBCDIC systems
 * HOME    - to determine the home directory on UNIX/WIN
 * USER    - to determine the current user id on UNIX/WIN
@@ -12,14 +15,13 @@
 * path_argument - to override the hard coded default property value
 
 Environment variables can be set from the system or in the program
-configuration file with the build-in function 'SETENV'. Particularly on
-mainframe systems the configuration file is an easy way to define
-environment variables. Additionally on host systems the DD name STDENV
-and with lower priority the data set name '&SYSUID..STDENV' is
-supported. On the other architectures the file '.stdenv' in the
+configuration file with the build-in function <<clep.builtin.setenv,SETENV>>.
+Particularly on mainframe systems the configuration file is an easy way
+to define environment variables. Additionally on host systems the DD
+name STDENV and with lower priority the data set name '&SYSUID..STDENV'
+is supported. On the other architectures the file '.stdenv' in the
 working or with lower priority in the home directory can be used to
-define environment variables for FLAM utility, subsystems and subprogram
-interfaces.
+define environment variables.
 
 The STDENV files allows to define the &{PGM}_CONFIG_FILE,
 &{PGM}_DEFAULT_OWNER_ID, LANG and other environment variables
@@ -110,4 +112,5 @@ FLCL_ICNV_FROM='IBM-1141'         # this is the best solution
 FLCL_ICNV_TO=UTF-8                # "UTF-8" could result in errors
 -----------------------------------------------------------------------
 
-See <<Properties,Properties>> for the current property file content.
+See <<clep.appendix.properties,Appendix Properties>> for the current
+property file content.

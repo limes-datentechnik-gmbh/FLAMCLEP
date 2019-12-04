@@ -1,3 +1,4 @@
+[[clep.appendix.version]]
 Here you can see the version of the program and its components.
 This content is printed on the screen if the built-in function
-`VERSION` is used.
+<<clep.builtin.version,VERSION>> is used.

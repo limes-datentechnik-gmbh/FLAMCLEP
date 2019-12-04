@@ -1,3 +1,4 @@
+[[clep.builtin.getenv]]
 This function lists all environment variables which are set within the
 configuration file for a certain owner. All shown environment variables
 are placed in the environment table of the process.

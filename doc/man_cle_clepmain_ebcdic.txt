@@ -1,3 +1,4 @@
+[[clep.main.ebcdic]]
 To interpret commands correctly the punctuation characters below are on
 different code points depending on the EBCDIC CCSID used to enter these
 values.

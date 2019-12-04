@@ -1,3 +1,4 @@
+[[clep.appendix.lexem]]
 The regular expressions used by the command line compiler are shown
 below. This content is printed on the screen with the built-in
 function `LEXEM`.

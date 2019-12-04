@@ -1,9 +1,10 @@
+[[clep.builtin.grammar]]
 The grammar used for interpreting the command line and property files
 is shown. This is helpful for understanding how the commands and
 property files are interpreted by the command line processor.
 
-See <<Grammar,Grammar>> for an explanation and the output of this
-command.
+See <<clep.appendix.grammar,Appendix Grammar>> for an explanation and
+the output of this command.
 
 .Examples
 

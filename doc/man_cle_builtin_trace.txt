@@ -1,3 +1,4 @@
+[[clep.builtin.trace]]
 Tracing for command line parser and commands can be enabled or disabled.
 A trace is only required to diagnose errors. In such a case a trace
 file must be defined first, then the trace can be activated, the

@@ -1,3 +1,4 @@
+[[clep.appendix.prop.defaults]]
 Below you can find a sample property file which contains all predefined
 default values for all supported commands when this documentation was
 created.

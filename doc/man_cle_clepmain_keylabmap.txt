@@ -1,3 +1,4 @@
+[[clep.main.keylabmap]]
 The key label name mapping works like the file name mapping, but you can
 additional use `^` to replace it with the OWNERID (`^=<ONWERID>`), `!`
 to replace it with the environment identifier (`!=<ENVID>`) and `~` is

@@ -1,6 +1,7 @@
+[[clep.appendix.grammar]]
 Below you can see the grammar used by the command line compiler. This
-content is printed on the screen if the built-in function `GRAMMAR`
-is used.
+content is printed on the screen if the built-in function
+<<clep.builtin.grammar,GRAMMAR>> is used.
 
 There are two context free grammars, one is used for the command
 line the other for the parameter file. The parameter file contains

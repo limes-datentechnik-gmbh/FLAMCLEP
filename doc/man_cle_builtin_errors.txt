@@ -1,3 +1,4 @@
+[[clep.builtin.errors]]
 This built-in function prints explanations for the return/condition/exit
 codes of the executable and, if available, the reason codes of executed
 commands.
@@ -15,7 +16,8 @@ means that the return (condition/exit) code can be used to control the
 batch processing. The reason code gives more information about the error
 or warning.
 
-See <<Returncodes,Returncodes>> and <<Reasoncodes,Reasoncodes>> for an
+See <<clep.appendix.returncodes,Appendix Returncodes>> and
+<<clep.appendix.reasoncodes,Appendix Reasoncodes>> for an
 explanation and the output of this command.
 
 .Examples

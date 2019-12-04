@@ -1,3 +1,4 @@
+[[clep.program.help]]
 Here you can see the static main help for this program. This content
-is printed on the screen if the built-in function 'HELP' is used
-without any further arguments.
+is printed on the screen if the built-in function <<clep.builtin.help,HELP>>
+is used without any further arguments.

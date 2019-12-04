@@ -1,4 +1,4 @@
-[[Command_Line_Processor]]
+[[clep.main]]
 The COMMAND LINE PROCESSOR (CLEP) is a user application programming
 interface for several platforms including Windows, Unix and z/OS that
 simplifies and standardizes parameter string processing.
@@ -22,8 +22,8 @@ use the built-in functions 'LEXEM' and 'GRAMMAR'.
 The return/condition/exit codes of the executable and the reason codes
 of the different commands can be reviewed with the built-in function
 'ERRORS'.
-See <<appendix-Returncodes,'appendix-Returncodes'>> and, if available,
-<<appendix-Reasoncodes, appendix-Reasoncodes>>
+See <<clep.appendix.returncodes,Appendix Returncodes>> and, if available,
+<<clep.appendix.reasoncodes,Appendix Reasoncodes>>
 for the meaning of the used return and reason codes.
 
 The CLE uses an owner management in order to separate the settings for
@@ -185,7 +185,8 @@ FLCL_ICNV_FROM='IBM-1141'         # this is the best solution
 FLCL_ICNV_TO=UTF-8                # "UTF-8" could result in errors
 -----------------------------------------------------------------------
 
-See <<Properties,Properties>> for the current property file content.
+See <<clep.appendix.properties,Appendix Properties>> for the current
+property file content.
 
 === Environment Variable Mapping
 

@@ -1,7 +1,7 @@
-[[appendix-Returncodes]]
+[[clep.appendix.returncodes]]
 The return codes of the program are also called completion codes and
 returned at program termination. This content is printed on the screen
-with the built-in function 'ERRORS'.
+with the built-in function <<clep.builtin.errors,ERRORS>>.
 
 * 0  - command line, command syntax, mapping, execution and finish of the command was successful
 * 1  - command line, command syntax, mapping, execution and finish of the command was successful but a warning can be found in the log

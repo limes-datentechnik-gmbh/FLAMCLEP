@@ -1,3 +1,4 @@
+[[clep.builtin.getprop]]
 All or certain properties can be shown for a dedicated path. The *path*
 is a dotted keyword list according to the syntax of the corresponding
 command.
@@ -9,7 +10,8 @@ command.
 A help message for a certain parameter will also show the assigned
 property value.
 
-See <<Properties,Properties>> for the current property file content.
+See <<clep.appendix.properties,Appendix Properties>> for the current
+property file content.
 
 .Options
 

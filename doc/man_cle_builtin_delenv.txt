@@ -1,3 +1,4 @@
+[[clep.builtin.delenv]]
 This function will delete environment variables from the configuration
 file for a certain owner.
 

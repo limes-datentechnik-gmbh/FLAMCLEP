@@ -1,3 +1,4 @@
+[[clep.builtin.config]]
 The actual configuration list with owner id, property file names trace
 setting, environment variables and more is shown. With the option CLEAR
 the configuration data including the corresponding file will be deleted.

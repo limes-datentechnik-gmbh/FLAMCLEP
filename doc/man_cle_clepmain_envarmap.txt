@@ -1,3 +1,4 @@
+[[clep.main.envarmap]]
 Each value enclosed with angle brackets (`<>`) are replaced with the
 corresponding environment variable (`<LANG>`). This feature is available
 at each starting point of a lexem and inside of a normal string.
