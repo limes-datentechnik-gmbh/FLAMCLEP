@@ -687,7 +687,7 @@ extern int siClePrintChapter(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, co
    }
 }
 
-extern int siClePrintPgmSynobsis(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const char* pcOwn, const char* pcPgm, const char* pcHlp, const int isNbr) {
+extern int siClePrintPgmSynopsis(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const char* pcOwn, const char* pcPgm, const char* pcHlp, const int isNbr) {
    int siErr=siClePrintChapter(pfErr,pfDoc,psDoc,pcOwn,pcPgm,isNbr);
    if (siErr) return(siErr);
    efprintf(pfDoc,"-----------------------------------------------------------------------\n");
@@ -1921,9 +1921,9 @@ EVALUATE:
                         siErr=siClePrintChapter(pfErr,pfDoc,psDoc+i,pcOwn,pcPgm,isNbr);
                         if (siErr) ERROR(siErr,NULL);
                         break;
-                     case CLE_DOCTYP_PGMSYNOBSIS:
-                        if (pfOut!=NULL) fprintf(pfOut,"... print CLE_DOCTYP_PGMSYNOBSIS(%s)\n",psDoc[i].pcHdl);
-                        siErr=siClePrintPgmSynobsis(pfErr,pfDoc,psDoc+i,pcOwn,pcPgm,pcHlp,isNbr);
+                     case CLE_DOCTYP_PGMSYNOPSIS:
+                        if (pfOut!=NULL) fprintf(pfOut,"... print CLE_DOCTYP_PGMSYNOPSIS(%s)\n",psDoc[i].pcHdl);
+                        siErr=siClePrintPgmSynopsis(pfErr,pfDoc,psDoc+i,pcOwn,pcPgm,pcHlp,isNbr);
                         if (siErr) ERROR(siErr,NULL);
                         break;
                      case CLE_DOCTYP_PGMSYNTAX:

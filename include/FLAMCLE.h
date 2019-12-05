@@ -239,7 +239,7 @@ Sample program
          CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,3,"1.6." ,NULL               ,"Special EBCDIC code page support"  ,MAN_CLE_CLEPMAIN_EBCDIC)
          CLETAB_DOC(CLE_DOCTYP_BUILTIN       ,3,"1.7." ,NULL               ,"Build-in functions"                ,MAN_CLE_BUILTIN_FUNCTIONS)
          CLETAB_DOC(CLE_DOCTYP_PROGRAM       ,2,"2."   ,NULL               ,"FLCL Utility"                      ,MAN_FLCL_MAIN)
-         CLETAB_DOC(CLE_DOCTYP_PGMSYNOBSIS   ,3,"2.1." ,NULL               ,"Synopsis"                          ,NULL)
+         CLETAB_DOC(CLE_DOCTYP_PGMSYNOPSIS   ,3,"2.1." ,NULL               ,"Synopsis"                          ,NULL)
          CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,3,"2.2." ,NULL               ,"Environment Variables"             ,MAN_FLCL_MAIN_ENVIRONMENT_VARIABLES)
          CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,3,"2.3." ,NULL               ,"Filename Handling"                 ,MAN_FLCL_MAIN_FILENAME_HANDLING)
          CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,3,"2.4." ,NULL               ,"Directory Support"                 ,MAN_FLCL_MAIN_DIRECTORY_SUPPORT)
@@ -436,7 +436,7 @@ extern const char* pcCleAbout(const int l, const int s, char* b);
 #define CLE_DOCTYP_COVER               1U    /** Cover page (level must be 1)*/
 #define CLE_DOCTYP_CHAPTER             2U    /** A chapter (level must > 1 and < 6)*/
 #define CLE_DOCTYP_PROGRAM             10U    /** The main program chapter (like chapter but level must < 5)*/
-#define CLE_DOCTYP_PGMSYNOBSIS         11U    /** The program synobsis*/
+#define CLE_DOCTYP_PGMSYNOPSIS         11U    /** The program synopsis*/
 #define CLE_DOCTYP_PGMSYNTAX           12U    /** The program syntax*/
 #define CLE_DOCTYP_PGMHELP             13U    /** The program help*/
 #define CLE_DOCTYP_COMMANDS            20U   /** The commands part*/
@@ -956,7 +956,7 @@ extern void vdClePrnDocProgram(
 
 extern int siClePrintCover(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const char* pcOwn, const char* pcPgm, const int isNbr);
 extern int siClePrintChapter(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const char* pcOwn, const char* pcPgm, const int isNbr);
-extern int siClePrintPgmSynobsis(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const char* pcOwn, const char* pcPgm, const char* pcHlp, const int isNbr);
+extern int siClePrintPgmSynopsis(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const char* pcOwn, const char* pcPgm, const char* pcHlp, const int isNbr);
 extern int siClePrintPgmSyntax(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const TsCleCommand* psTab, const char* pcOwn, const char* pcPgm, const char* pcDep, const char* pcOpt, const char* pcDpa, const int isNbr);
 extern int siClePrintPgmHelp(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const TsCleCommand* psTab, const char* pcOwn, const char* pcPgm, const char* pcDep, const int isNbr);
 extern int siClePrintBuiltIn(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const char* pcOwn, const char* pcPgm, const int isNbr);
