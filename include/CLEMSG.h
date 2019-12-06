@@ -73,6 +73,8 @@ static const char* HLP_CLE_BUILTIN_ABOUT   ="Show information about the program"
 static const char* SYN_CLE_BUILTIN_ABOUT   ="ABOUT";
 static const char* HLP_CLE_BUILTIN_ERRORS  ="Show information about return and reason codes of the program";
 static const char* SYN_CLE_BUILTIN_ERRORS  ="ERRORS";
+static const char* HLP_CLE_BUILTIN_HTMLDOC ="Generates the complete HTML documentation into a folder";
+static const char* SYN_CLE_BUILTIN_HTMLDOC ="HTMLDOC [path]";
 
 static const char* HLP_CLE_PROPFIL =""
 "#------------------------------------------------------------------- #\n"

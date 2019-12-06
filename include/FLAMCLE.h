@@ -57,10 +57,10 @@ Beside the specified user-defined commands, the FLAMCLE provides several
 powerful built-in functions (listed below). All built-in functions have
 a manual page, implemented to display more information at runtime.
 
-Based on the keyword, the short help message and the detailed
-description, the built-in function GENDOCU can be used to generate a
-complete user manual. Based on this capability the FLAMCLE completely
-describes itself.
+With the built-in function help a the short help message or the detailed
+description can determined for each parameter and command using a dotted path.
+The built-in function GENDOCU can be used to generate a part or the complete
+user manual. Based on this capability the FLAMCLE completely describes itself.
 
 The self-documenting style of the whole program was one of the main
 targets of this general command line interface. To understand the
@@ -450,6 +450,37 @@ extern const char* pcCleAbout(const int l, const int s, char* b);
 #define CLE_DOCTYP_PROPDEFAULTS        42U   /** The appendix which prints the default parameter documentation*/
 #define CLE_DOCTYP_SPECIALCODES        51U   /** The appendix which prints the special condition codes*/
 #define CLE_DOCTYP_REASONCODES         52U   /** The appendix which prints the reason codes (pfMsg must be provided)*/
+
+/**
+ * @brief Map documentation type
+ *
+ * The function can be used to map the documentation type into a string constant.
+ *
+ * @param uiTyp Documentation type
+ * @return      String with the nam of the documentation type
+ */
+static inline const char* pcMapDocTyp(const unsigned int uiTyp) {
+   switch(uiTyp) {
+      case CLE_DOCTYP_COVER:        return("CLE_DOCTYP_COVER");
+      case CLE_DOCTYP_CHAPTER:      return("CLE_DOCTYP_CHAPTER");
+      case CLE_DOCTYP_BUILTIN:      return("CLE_DOCTYP_BUILTIN");
+      case CLE_DOCTYP_PROGRAM:      return("CLE_DOCTYP_PROGRAM");
+      case CLE_DOCTYP_PGMSYNOBSIS:  return("CLE_DOCTYP_PGMSYNOBSIS");
+      case CLE_DOCTYP_PGMSYNTAX:    return("CLE_DOCTYP_PGMSYNTAX");
+      case CLE_DOCTYP_PGMHELP:      return("CLE_DOCTYP_PGMHELP");
+      case CLE_DOCTYP_COMMANDS:     return("CLE_DOCTYP_COMMANDS");
+      case CLE_DOCTYP_OTHERCLP:     return("CLE_DOCTYP_OTHERCLP");
+      case CLE_DOCTYP_LEXEM:        return("CLE_DOCTYP_LEXEM");
+      case CLE_DOCTYP_GRAMMAR:      return("CLE_DOCTYP_GRAMMAR");
+      case CLE_DOCTYP_PROPREMAIN:   return("CLE_DOCTYP_PROPREMAIN");
+      case CLE_DOCTYP_PROPDEFAULTS: return("CLE_DOCTYP_PROPDEFAULTS");
+      case CLE_DOCTYP_SPECIALCODES: return("CLE_DOCTYP_SPECIALCODES");
+      case CLE_DOCTYP_REASONCODES:  return("CLE_DOCTYP_REASONCODES");
+      case CLE_DOCTYP_VERSION:      return("CLE_DOCTYP_VERSION");
+      case CLE_DOCTYP_ABOUT:        return("CLE_DOCTYP_ABOUT");
+      default:                      return("UNKOWN");
+   }
+}
 
 /**
 * ASCIIDOC key words used in table below
@@ -967,7 +998,28 @@ extern int siClePrintPropRemain(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc,
       const int isCas, const int isPfl, const int isRpl, const int siMkl, const char* pcDep, const char* pcOpt, const char* pcEnt, const int isNbr);
 extern int siClePrintPropDefaults(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const TsCleCommand* psTab, void* pvCnf, const char* pcOwn, const char* pcPgm,
       const int isCas, const int isPfl, const int isRpl, const int siMkl, const char* pcDep, const char* pcOpt, const char* pcEnt, const int isNbr);
-extern int siClePrintReasonCodes(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const char* pcOwn, const char* pcPgm, const int isNbr, TfMsg* pfMsg);
+extern int siClePrintReasonCodes(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const char* pcOwn, const char* pcPgm, TfMsg* pfMsg, const int isNbr);
+
+typedef struct CleDocPar {
+   const char*       pcOwn;
+   const char*       pcPgm;
+   const char*       pcHlp;
+   const char*       pcDep;
+   const char*       pcOpt;
+   const char*       pcEnt;
+   const char*       pcDpa;
+   void*             pvCnf;
+   int               isPfl;
+   int               isRpl;
+   int               isCas;
+   int               siMkl;
+   TfMsg*            pfMsg;
+   const char*       pcVsn;
+   const char*       pcAbo;
+}TsCleDocPar;
+
+typedef int (TfClePrintPage)(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const TsCleDocPar* psPar, const TsCleCommand* psCmd);
+typedef int (TfCleHtmlDoc)(FILE* pfOut, FILE* pfErr, const char* pcPat, const TsCleDoc* psDoc, const TsCleCommand* psCmd, const TsCleOtherClp* psOth , const TsCleDocPar* psPar,TfClePrintPage* pfDoc);
 
 /*! @endcond */
 

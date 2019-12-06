@@ -1,14 +1,14 @@
 [[clep.main.consid]]
-The command line parser supports abbreviation of key words depending on
+The command line parser supports abbreviation of keywords depending on
 the unique first characters. This is only useful if you work in dialog.
 If the command is specified in a persistent way (e.g. in a script) writing
 the complete keyword is recommended, to ensure that the script must not be
 changed to work with a later version of the program. For example:
 
-Version X, supports only one keyword starting with V (VERSION). Version
+Version X supports only one keyword starting with V (VERSION). Version
 X+1, supports the keywords VERSION and VERIFY. If you use version X with
 VER=4711 anything is fine but with with version X+1 it will fail, because
-a letter more is required (VERS=4711) to be unique. 
+one more character is required (VERS=4711) for the keyword to be unique.
 
 The same is valid for the required string support. The CLP supports
 strings without enclosing. These strings depend on the keywords used
