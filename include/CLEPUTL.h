@@ -717,6 +717,7 @@ extern void          init_diachr(TsDiaChr* psDiaChr,const unsigned int uiCcsId);
 
 extern TsDiaChr      gsDiaChr;
 
+extern int           ebcdic_srprintc(char** buffer, size_t* size, const size_t expansion, const char* format, ...);
 extern int           ebcdic_snprintf(char* string, size_t size, const char* format, ...);
 extern int           ebcdic_sprintf(char* string, const char* format, ...);
 extern int           ebcdic_fprintf(FILE* file, const char* format, ...);
@@ -757,6 +758,7 @@ extern char*         init_string(char* p);
 #  define S_SBS      ((gsDiaChr.sbs[0])?gsDiaChr.sbs:init_string(gsDiaChr.sbs))
 #  define S_IDT      ((gsDiaChr.idt[0])?gsDiaChr.idt:init_string(gsDiaChr.idt))
 
+#  define esrprintc  ebcdic_srprintc
 #  define esnprintf  ebcdic_snprintf
 #  define esprintf   ebcdic_sprintf
 #  define efprintf   ebcdic_fprintf
@@ -796,6 +798,7 @@ extern char*         init_string(char* p);
 #  define S_SBS      "/\\" /*nodiac*/
 #  define S_IDT      "--|" /*nodiac*/
 
+#  define esrprintc  srprintc
 #  define esnprintf  snprintf
 #  define esprintf   sprintf
 #  define efprintf   fprintf

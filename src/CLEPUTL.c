@@ -779,6 +779,27 @@ extern char* init_string(char* p) {
    }                                              \
 }
 
+extern int ebcdic_srprintc(char** buffer, size_t* size, const size_t expansion, const char* format, ...) {
+
+   va_list  argv;
+   int      r;
+   size_t   h=(*buffer!=NULL)?strlen(*buffer):0;
+   size_t   s=h+strlen(format)+expansion+1;
+   if ((*size)<s || *buffer==NULL) {
+      s=(*size>s)?*size:2*s;
+      char* b=(char*)realloc_nowarn(*buffer,s);
+      if (b==NULL) return(0);
+      (*buffer)=b;
+      (*size)=s;
+   }
+   va_start(argv, format);
+   r = vsnprintf((*buffer)+h, (*size)-h, format, argv);
+   va_end(argv);
+   (*buffer)[(*size)-1]=0;
+   RPLDIAC(*buffer);
+   return(h+r);
+}
+
 extern int ebcdic_snprintf(char* string, size_t size, const char* format, ...) {
    va_list  argv;
    int      r;

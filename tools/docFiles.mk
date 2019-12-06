@@ -9,7 +9,6 @@ CLE_DOCF += builtin_help builtin_manpage builtin_trace builtin_gendocu builtin_c
 CLE_DOCF += appendix_lexem appendix_grammar appendix_properties appendix_prop_defaults appendix_prop_remaining
 CLE_DOCF += appendix_otherclp appendix_version appendix_about appendix_returncodes appendix_reasoncodes
 CLE_DOCF += glossary colophon
-CLE_DOCF += old_main old_defaults old_remaining
 
 CLE_DOCFILES = $(addsuffix .txt, $(CLE_DOCF))
 

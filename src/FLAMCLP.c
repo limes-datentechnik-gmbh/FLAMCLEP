@@ -1645,7 +1645,7 @@ extern int siClpDocu(
          const char*                   pcKyw=NULL;
          char                          acKyw[CLPMAX_KYWSIZ];
          int                           siErr=0,siLev,siPos;
-         const char*                   pcSta=(pcHdl!=NULL&&*pcHdl)?pcHdl:psHdl->pcCmd;
+         const char*                   pcSta=(pcHdl!=NULL && *pcHdl)?pcHdl:psHdl->pcCmd;
          unsigned int                  i,l=strlen(psHdl->pcCmd);
          char                          acNum[strlen(pcNum)+10];
          char                          acArg[20];
@@ -1730,7 +1730,7 @@ extern int siClpDocu(
                            } else {
                               fprintf(pfDoc,"No detailed description available for this argument.\n\n");
                            }
-                           fprintf(pfDoc,"indexterm:%cARGUMENT %s%c\n\n\n",C_SBO,psArg->psStd->pcKyw,C_SBC);
+                           fprintf(pfDoc,"indexterm:%c%s %s%c\n\n\n",C_SBO,acArg,psArg->psStd->pcKyw,C_SBC);
                            siErr=siClpPrnDoc(pvHdl,pfDoc,siLev,isNbr,acNum,psArg,psTab,isDep);
                            if (siErr<0) return(siErr);
                         }
@@ -7671,8 +7671,8 @@ static int siClpPrnDoc(
       char                          acArg[20];
       int                           siMan=0;
       int                           siLst=0;
-      const TsSym*                  apMan[CLPMAX_HDEPTH];
-      const TsSym*                  apLst[CLPMAX_HDEPTH];
+      const TsSym*                  apMan[CLPMAX_TABCNT];
+      const TsSym*                  apLst[CLPMAX_TABCNT];
       if (psTab->psBak!=NULL) {
          return CLPERR(psHdl,CLPERR_INT,"Entry '%s.%s' not at beginning of a table",fpcPat(pvHdl,siLev),psTab->psStd->pcKyw);
       }
@@ -7765,7 +7765,7 @@ static int siClpPrnDoc(
                } else {
                   fprintf(pfDoc,"No detailed description available for this argument.\n\n");
                }
-               fprintf(pfDoc,"indexterm:%cARGUMENT %s%c\n\n\n",C_SBO,apMan[m]->psStd->pcKyw,C_SBC);
+               fprintf(pfDoc,"indexterm:%c%s %s%c\n\n\n",C_SBO,acArg,apMan[m]->psStd->pcKyw,C_SBC);
                if (apMan[m]->psDep!=NULL) {
                   siErr=siClpPrnDoc(pvHdl,pfDoc,siLev+1,isNbr,acNum,apMan[m],apMan[m]->psDep,isDep);
                   if (siErr<0) return(siErr);

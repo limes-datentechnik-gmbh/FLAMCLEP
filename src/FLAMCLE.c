@@ -1943,7 +1943,7 @@ EVALUATE:
                for (i=0; psDoc[i].uiTyp; i++) {
                   if (pfOut!=NULL) {
                      fprintf(pfOut,"... print %24s ",pcMapDocTyp(psDoc[i].uiTyp));
-                     for (j=0;j<psDoc[i].uiLev;j++) fprintf(pfOut,"=");
+                     for (j=0;j<(int)psDoc[i].uiLev;j++) fprintf(pfOut,"=");
                      fprintf(pfOut," %s\n",(psDoc[i].pcHdl!=NULL)?psDoc[i].pcHdl:"(NULL)");
                   }
                   switch (psDoc[i].uiTyp) {

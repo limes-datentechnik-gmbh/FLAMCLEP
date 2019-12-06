@@ -5,7 +5,7 @@ path given, then a relative path with the program name is used as
 default.
 
 The built-in function can only be used if a call back function for HTML
-documentation generation provided. If not a error will be printed auf
+documentation generation provided. If not a error will be printed if
 HTMLDOC executed. 
 
 .Examples
