@@ -483,9 +483,9 @@ typedef struct CleDoc {
 }TsCleDoc;
 
 /** Starts the documentation generation table
- *  *nam* Name of this table\n
+ *  *name* Name of this table\n
  */
-#define CLEDOC_OPN(nam)               const TsCleDoc nam[]
+#define CLEDOC_OPN(name)               TsCleDoc name[]
 
 /** Starts the documentation generation table
  *  *typ* Documentation type\n
