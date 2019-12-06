@@ -465,7 +465,7 @@ static inline const char* pcMapDocTyp(const unsigned int uiTyp) {
       case CLE_DOCTYP_CHAPTER:      return("CLE_DOCTYP_CHAPTER");
       case CLE_DOCTYP_BUILTIN:      return("CLE_DOCTYP_BUILTIN");
       case CLE_DOCTYP_PROGRAM:      return("CLE_DOCTYP_PROGRAM");
-      case CLE_DOCTYP_PGMSYNOBSIS:  return("CLE_DOCTYP_PGMSYNOBSIS");
+      case CLE_DOCTYP_PGMSYNOPSIS:  return("CLE_DOCTYP_PGMSYNOPSIS");
       case CLE_DOCTYP_PGMSYNTAX:    return("CLE_DOCTYP_PGMSYNTAX");
       case CLE_DOCTYP_PGMHELP:      return("CLE_DOCTYP_PGMHELP");
       case CLE_DOCTYP_COMMANDS:     return("CLE_DOCTYP_COMMANDS");
