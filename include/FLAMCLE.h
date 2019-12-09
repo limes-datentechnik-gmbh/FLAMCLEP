@@ -389,7 +389,6 @@ in this case.
 #  define pcCleVersion           FLCLEVSN
 #  define pcCleAbout             FLCLEABO
 #  define siCleExecute           FLCLEEXE
-#  define siCleParseString       FLCLEPRS
 #endif
 
 /**
@@ -531,19 +530,6 @@ typedef struct CleDoc {
 /** Ends a table with constant definitions
  */
 #define CLEDOC_CLS                    {  0  ,  0  , NULL, NULL, NULL, NULL}
-
-/**
- * @brief vdClePrnBuiltInDocu print Docu of Builtin functions
- *
- * The Documentation of the builtin functions is printed to the specified file.
- *
- * @param pfDoc file pointer to write to
- * @param pcOwn owner name to use
- * @param pcPgm program name to use
- * @param isNbr flag to number the output
- * @param uiLev level for '=' head lines
- */
-extern void vdClePrnBuiltInDocu(FILE* pfDoc, const char* pcOwn, char* pcPgm, int isNbr, unsigned int uiLev);
 
 /**
  * Type definition for initialization function
@@ -948,7 +934,8 @@ extern int siCleExecute(
 
 /**********************************************************************/
 /*! @cond PRIVATE */
- extern int siCleParseString(
+
+extern int siCleParseString(
     const int                     uiErr,
     char*                         pcErr,
     const int                     isCas,
@@ -974,16 +961,6 @@ extern int siCleExecute(
     void*                         pvSaf,
     TfSaf*                        pfSaf,
     void**                        ppClp);
-
-extern void vdClePrnDocProgram(
-   FILE*                         pfOut,
-   const TsCleCommand*           psTab,
-   const char*                   pcOwn,
-   const char*                   pcPgm,
-   const char*                   pcHlp,
-   const char*                   pcMan,
-   const char*                   pcDep,
-   const char*                   pcSep);
 
 extern int siClePrintCover(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const char* pcOwn, const char* pcPgm, const int isNbr);
 extern int siClePrintChapter(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const char* pcOwn, const char* pcPgm, const int isNbr);
