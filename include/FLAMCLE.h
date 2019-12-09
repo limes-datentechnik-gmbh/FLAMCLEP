@@ -993,6 +993,7 @@ typedef struct CleDocPar {
    TfMsg*            pfMsg;
    const char*       pcVsn;
    const char*       pcAbo;
+   int               isNbr;
 }TsCleDocPar;
 
 typedef int (TfClePrintPage)(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const TsCleDocPar* psPar, const TsCleCommand* psCmd);

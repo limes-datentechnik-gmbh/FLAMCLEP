@@ -42,7 +42,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <errno.h>
-
+#ifdef __UNIX__
+#  include <dlfcn.h>
+#endif
 /* Include eigener Bibliotheken  **************************************/
 
 #include "CLEPUTL.h"
@@ -727,8 +729,8 @@ extern int siClePrintBuiltIn(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, co
    vdCleManFunction(pfDoc,psDoc->uiLev+1,S_TLD,acNum,"ABOUT"   ,HLP_CLE_BUILTIN_ABOUT   ,pcOwn,pcPgm,SYN_CLE_BUILTIN_ABOUT   ,MAN_CLE_BUILTIN_ABOUT   ,FALSE,isNbr);
    if (psDoc->pcNum!=NULL && *psDoc->pcNum) snprintf(acNum,sizeof(acNum),"%s%d.",psDoc->pcNum,j); else snprintf(acNum,sizeof(acNum),"%d.",j); j++;
    vdCleManFunction(pfDoc,psDoc->uiLev+1,S_TLD,acNum,"ERRORS"  ,HLP_CLE_BUILTIN_ERRORS  ,pcOwn,pcPgm,SYN_CLE_BUILTIN_ERRORS  ,MAN_CLE_BUILTIN_ERRORS  ,FALSE,isNbr);
-   if (psDoc->pcNum!=NULL && *psDoc->pcNum) snprintf(acNum,sizeof(acNum),"%s%d.",psDoc->pcNum,j); else snprintf(acNum,sizeof(acNum),"%d.",j); j++;
-   vdCleManFunction(pfDoc,psDoc->uiLev+1,S_TLD,acNum,"HTMLDOC" ,HLP_CLE_BUILTIN_HTMLDOC ,pcOwn,pcPgm,SYN_CLE_BUILTIN_HTMLDOC ,MAN_CLE_BUILTIN_HTMLDOC ,FALSE,isNbr);
+// if (psDoc->pcNum!=NULL && *psDoc->pcNum) snprintf(acNum,sizeof(acNum),"%s%d.",psDoc->pcNum,j); else snprintf(acNum,sizeof(acNum),"%d.",j); j++;
+// vdCleManFunction(pfDoc,psDoc->uiLev+1,S_TLD,acNum,"HTMLDOC" ,HLP_CLE_BUILTIN_HTMLDOC ,pcOwn,pcPgm,SYN_CLE_BUILTIN_HTMLDOC ,MAN_CLE_BUILTIN_HTMLDOC ,FALSE,isNbr);
    return(CLERTC_OK);
 }
 
@@ -876,29 +878,56 @@ extern int siClePrintReasonCodes(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc
 
 static int siClePrintPage(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const TsCleDocPar* psPar, const TsCleCommand* psCmd) {
    switch (psDoc->uiTyp) {
-      case CLE_DOCTYP_COVER:        return(siClePrintCover(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,FALSE));
-      case CLE_DOCTYP_CHAPTER:      return(siClePrintChapter(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,FALSE));
-      case CLE_DOCTYP_BUILTIN:      return(siClePrintBuiltIn(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,FALSE));
-      case CLE_DOCTYP_PROGRAM:      return(siClePrintChapter(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,FALSE));
-      case CLE_DOCTYP_PGMSYNOPSIS:  return(siClePrintPgmSynopsis(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->pcHlp,FALSE));
-      case CLE_DOCTYP_PGMSYNTAX:    return(siClePrintPgmSyntax(pfErr,pfDoc,psDoc,psCmd,psPar->pcOwn,psPar->pcPgm,psPar->pcDep,psPar->pcOpt,psPar->pcDpa,FALSE));
-      case CLE_DOCTYP_PGMHELP:      return(siClePrintPgmHelp(pfErr,pfDoc,psDoc,psCmd,psPar->pcOwn,psPar->pcPgm,psPar->pcDep,FALSE));
-      case CLE_DOCTYP_COMMANDS:     return(siClePrintChapter(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,FALSE));
-      case CLE_DOCTYP_OTHERCLP:     return(siClePrintChapter(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,FALSE));
-      case CLE_DOCTYP_LEXEM:        return(siClePrintLexem(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->isPfl,psPar->isRpl,psPar->pcDep,psPar->pcOpt,psPar->pcEnt,FALSE));
-      case CLE_DOCTYP_GRAMMAR:      return(siClePrintGrammar(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->isPfl,psPar->isRpl,psPar->pcDep,psPar->pcOpt,psPar->pcEnt,FALSE));
+      case CLE_DOCTYP_COVER:        return(siClePrintCover(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->isNbr));
+      case CLE_DOCTYP_CHAPTER:      return(siClePrintChapter(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->isNbr));
+      case CLE_DOCTYP_BUILTIN:      return(siClePrintBuiltIn(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->isNbr));
+      case CLE_DOCTYP_PROGRAM:      return(siClePrintChapter(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->isNbr));
+      case CLE_DOCTYP_PGMSYNOPSIS:  return(siClePrintPgmSynopsis(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->pcHlp,psPar->isNbr));
+      case CLE_DOCTYP_PGMSYNTAX:    return(siClePrintPgmSyntax(pfErr,pfDoc,psDoc,psCmd,psPar->pcOwn,psPar->pcPgm,psPar->pcDep,psPar->pcOpt,psPar->pcDpa,psPar->isNbr));
+      case CLE_DOCTYP_PGMHELP:      return(siClePrintPgmHelp(pfErr,pfDoc,psDoc,psCmd,psPar->pcOwn,psPar->pcPgm,psPar->pcDep,psPar->isNbr));
+      case CLE_DOCTYP_COMMANDS:     return(siClePrintChapter(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->isNbr));
+      case CLE_DOCTYP_OTHERCLP:     return(siClePrintChapter(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->isNbr));
+      case CLE_DOCTYP_LEXEM:        return(siClePrintLexem(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->isPfl,psPar->isRpl,psPar->pcDep,psPar->pcOpt,psPar->pcEnt,psPar->isNbr));
+      case CLE_DOCTYP_GRAMMAR:      return(siClePrintGrammar(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->isPfl,psPar->isRpl,psPar->pcDep,psPar->pcOpt,psPar->pcEnt,psPar->isNbr));
       case CLE_DOCTYP_PROPREMAIN:   return(siClePrintPropRemain(pfErr,pfDoc,psDoc,psCmd,psPar->pvCnf,psPar->pcOwn,psPar->pcPgm,
-            psPar->isCas,psPar->isPfl,psPar->isRpl,psPar->siMkl,psPar->pcDep,psPar->pcOpt,psPar->pcEnt,FALSE));
+            psPar->isCas,psPar->isPfl,psPar->isRpl,psPar->siMkl,psPar->pcDep,psPar->pcOpt,psPar->pcEnt,psPar->isNbr));
       case CLE_DOCTYP_PROPDEFAULTS: return(siClePrintPropDefaults(pfErr,pfDoc,psDoc,psCmd,NULL,psPar->pcOwn,psPar->pcPgm,
-            psPar->isCas,psPar->isPfl,psPar->isRpl,psPar->siMkl,psPar->pcDep,psPar->pcOpt,psPar->pcEnt,FALSE));
-      case CLE_DOCTYP_SPECIALCODES: return(siClePrintChapter(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,FALSE));
-      case CLE_DOCTYP_REASONCODES:  return(siClePrintReasonCodes(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->pfMsg,FALSE));
-      case CLE_DOCTYP_VERSION:      return(siClePrintPreformatedText(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->pcVsn,FALSE));
-      case CLE_DOCTYP_ABOUT:        return(siClePrintPreformatedText(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->pcAbo,FALSE));
+            psPar->isCas,psPar->isPfl,psPar->isRpl,psPar->siMkl,psPar->pcDep,psPar->pcOpt,psPar->pcEnt,psPar->isNbr));
+      case CLE_DOCTYP_SPECIALCODES: return(siClePrintChapter(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->isNbr));
+      case CLE_DOCTYP_REASONCODES:  return(siClePrintReasonCodes(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->pfMsg,psPar->isNbr));
+      case CLE_DOCTYP_VERSION:      return(siClePrintPreformatedText(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->pcVsn,psPar->isNbr));
+      case CLE_DOCTYP_ABOUT:        return(siClePrintPreformatedText(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->pcAbo,psPar->isNbr));
       default:
          if (pfErr!=NULL) fprintf(pfErr,"Documentation type (%u) not supported\n",psDoc->uiTyp);
          return(CLERTC_TAB);
    }
+}
+
+/***********************************************************************/
+
+static void* pfLoadHtmlDoc(TfCleHtmlDoc** ppHtmlDoc) {
+#ifdef __UNIX__
+      void* pvHtmlDoc=dlopen("libhtmldoc",RTLD_LAZY);
+      if (pvHtmlDoc==NULL) {
+         return(NULL);
+      }
+      *ppHtmlDoc=dlsym(pvHtmlDoc, "genHtmlDoc");
+      if (*ppHtmlDoc==NULL) {
+         dlclose(pvHtmlDoc);
+         return(NULL);
+      }
+      return(pvHtmlDoc);
+#else
+      return(NULL);
+#endif
+}
+
+static void vdFreeHtmlDoc(void* pvLib) {
+#ifdef __UNIX__
+   if (pvLib!=NULL) {
+      dlclose(pvLib);
+   }
+#endif
 }
 
 /***********************************************************************/
@@ -960,8 +989,6 @@ extern int siCleExecute(
    int                           siScc=0;
    int                           isEnvOwn;
    const char*                   m;
-   TfCleHtmlDoc*                 pfHtmlDoc=NULL;
-
 
    if (argc>0) {
       if (strxcmp(isCas,argv[argc-1],"SILENT",0,0,FALSE)==0) {
@@ -1815,6 +1842,10 @@ EVALUATE:
                ERROR(CLERTC_CMD,NULL);
             }
          } else if (argc==5) {
+            if (argv[3][0]=='-') argv[3]++;
+            if (argv[3][0]=='-') argv[3]++;
+            if (argv[4][0]=='-') argv[4]++;
+            if (argv[4][0]=='-') argv[4]++;
             if (strxcmp(isCas,argv[3],"NONBR",0,0,FALSE)==0 && strxcmp(isCas,argv[4],"SHORT",0,0,FALSE)==0) {
                isNbr=FALSE;
                isLong=FALSE;
@@ -2036,35 +2067,75 @@ EVALUATE:
       efprintf(pfErr,"%s %s GENDOCU filename [NONBR][SHORT]\n",pcDep,argv[0]);
       ERROR(CLERTC_CMD,NULL);
    } else if (strxcmp(isCas,argv[1],"HTMLDOC",0,0,FALSE)==0) {
-      const char*                pcPat=NULL;
+      const char*       pcSgn=NULL;
+      int               isNbr=FALSE;
+      TfCleHtmlDoc*     pfHtmlDoc=NULL;
       if (pfOut==NULL) pfOut=pfStd;
       if (pfErr==NULL) pfErr=pfStd;
-      if (argc==3) {
-         pcPat=argv[2];
+      if (argc==4) {
+         if (argv[2][0]=='-') argv[2]++;
+         if (argv[2][0]=='-') argv[2]++;
+         if (argv[3][0]=='-') argv[3]++;
+         if (argv[3][0]=='-') argv[3]++;
+         if (strxcmp(isCas,argv[3],"NUMBERS",0,0,FALSE)==0) {
+            isNbr=TRUE;
+            pcSgn=strchr(argv[2],'=');
+         } else if (strxcmp(isCas,argv[2],"NUMBERS",0,0,FALSE)==0) {
+            isNbr=TRUE;
+            pcSgn=strchr(argv[3],'=');
+         } else {
+            fprintf(pfErr,"Syntax for built-in function 'HTMLDOC' not valid\n");
+            efprintf(pfErr,"%s %s %s\n",pcDep,argv[0],SYN_CLE_BUILTIN_HTMLDOC);
+            ERROR(CLERTC_CMD,NULL);
+         }
+      } else if (argc==3) {
+         if (argv[2][0]=='-') argv[2]++;
+         if (argv[2][0]=='-') argv[2]++;
+         if (strxcmp(isCas,argv[2],"NUMBERS",0,0,FALSE)==0) {
+            isNbr=TRUE;
+            pcSgn="=.";
+         } else {
+            pcSgn=strchr(argv[2],'=');
+         }
       } else if (argc==2) {
-         pcPat=pcPgm;
+         pcSgn="=.";
       } else {
          fprintf(pfErr,"Syntax for built-in function 'HTMLDOC' not valid\n");
-         efprintf(pfErr,"%s %s HTMLDOC [path]\n",pcDep,argv[0]);
+         efprintf(pfErr,"%s %s %s\n",pcDep,argv[0],SYN_CLE_BUILTIN_HTMLDOC);
          ERROR(CLERTC_CMD,NULL);
       }
-      if (pfHtmlDoc==NULL) {
-         fprintf(pfErr,"There is no service provider DLL/SO available for HTML generation\n");
-         ERROR(CLERTC_FAT,NULL);
+      if (pcSgn==NULL) {
+         fprintf(pfErr,"Syntax for built-in function 'HTMLDOC' not valid\n");
+         efprintf(pfErr,"%s %s %s\n",pcDep,argv[0],SYN_CLE_BUILTIN_HTMLDOC);
+         ERROR(CLERTC_CMD,NULL);
       } else {
+         char* pcPat=dcpmapfil(pcSgn+1);
+         if (pcPat==NULL) {
+            fprintf(pfErr,"Allocation of memory for file name (%s) failed\n",pcSgn);
+            ERROR(CLERTC_MEM,NULL);
+         }
+
+         void* pvLib=pfLoadHtmlDoc(&pfHtmlDoc);
+         if (pvLib==NULL || pfHtmlDoc==NULL) {
+            fprintf(pfErr,"There is no service provider DLL/SO (libhtmldoc/genHtmlDoc) available for HTML generation\n");
+            ERROR(CLERTC_FAT,pcPat);
+         }
+
          TsCleDocPar stDocPar;
+         stDocPar.isNbr=isNbr;
          stDocPar.isCas=isCas; stDocPar.isPfl=isPfl; stDocPar.isRpl=isRpl;
          stDocPar.pcAbo=pcAbo; stDocPar.pcDep=pcDep; stDocPar.pcDpa=pcDpa;
          stDocPar.pcEnt=pcEnt; stDocPar.pcHlp=pcHlp; stDocPar.pcOpt=pcOpt;
          stDocPar.pcOwn=pcOwn; stDocPar.pcPgm=pcPgm; stDocPar.pcVsn=pcVsn;
          stDocPar.pfMsg=pfMsg; stDocPar.pvCnf=psCnf; stDocPar.siMkl=siMkl;
          siErr=pfHtmlDoc(pfOut,pfErr,pcPat,psDoc,psTab,psOth,&stDocPar,siClePrintPage);
+         vdFreeHtmlDoc(pvLib);
          if (siErr) {
             fprintf(pfErr,"Generation of HTML documentation to folder '%s' failed\n",pcPat);
-            ERROR(CLERTC_SYS,NULL);
+            ERROR(CLERTC_SYS,pcPat);
          } else {
             fprintf(pfErr,"Generation of HTML documentation to folder '%s' was successful\n",pcPat);
-            ERROR(CLERTC_OK,NULL);
+            ERROR(CLERTC_OK,pcPat);
          }
       }
    } else if (strxcmp(isCas,argv[1],"GENPROP",0,0,FALSE)==0) {
@@ -3357,7 +3428,7 @@ if (pcDpa!=NULL) {
    fprintf(pfOut,"%s%s %s ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",SYN_CLE_BUILTIN_VERSION );
    fprintf(pfOut,"%s%s %s ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",SYN_CLE_BUILTIN_ABOUT   );
    fprintf(pfOut,"%s%s %s ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",SYN_CLE_BUILTIN_ERRORS  );
-   fprintf(pfOut,"%s%s %s ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",SYN_CLE_BUILTIN_HTMLDOC );
+// fprintf(pfOut,"%s%s %s ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",SYN_CLE_BUILTIN_HTMLDOC );
 }
 
 static void vdPrnStaticHelp(
@@ -3396,7 +3467,7 @@ static void vdPrnStaticHelp(
    fprintf(pfOut,"%s%s %s VERSION  - ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",HLP_CLE_BUILTIN_VERSION);
    fprintf(pfOut,"%s%s %s ABOUT    - ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",HLP_CLE_BUILTIN_ABOUT);
    fprintf(pfOut,"%s%s %s ERRORS   - ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",HLP_CLE_BUILTIN_ERRORS);
-   fprintf(pfOut,"%s%s %s HTMLDOC  - ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",HLP_CLE_BUILTIN_HTMLDOC);
+// fprintf(pfOut,"%s%s %s HTMLDOC  - ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",HLP_CLE_BUILTIN_HTMLDOC);
    fprintf(pfOut,"For more information please use the built-in function 'MANPAGE'\n");
 }
 

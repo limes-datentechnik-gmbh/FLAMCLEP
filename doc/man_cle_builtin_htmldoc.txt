@@ -1,16 +1,20 @@
 [[clep.builtin.htmldoc]]
 This build-in function generates the complete user manual in HTML format
 into a folder. The folder can be defined as optional parameter. If no
-path given, then a relative path with the program name is used as
-default.
+path given, then the current directory is used as default.
+
+With the optional keyword `NUMBERS` the numbering of headlines can be
+activated.
 
 The built-in function can only be used if a call back function for HTML
 documentation generation provided. If not a error will be printed if
-HTMLDOC executed. 
+HTMLDOC is executed.
 
 .Examples
 
 -----------------------------------------------------------------------
    :> &{PGM} HTMLDOC
-   :> &{PGM} HTMLDOC /user/home/docu/flclbook
+   :> &{PGM} HTMLDOC PATH=/user/home/docu/flclbook
+   :> &{PGM} HTMLDOC NUMBERS
+   :> &{PGM} HTMLDOC PATH=/user/home/docu/flclbook NUMBERS
 -----------------------------------------------------------------------
