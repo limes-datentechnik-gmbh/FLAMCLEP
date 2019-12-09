@@ -653,7 +653,7 @@ extern int siClePrintPgmSynopsis(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc
    efprintf(pfDoc,"HELP:   %s\n",pcHlp);
    efprintf(pfDoc,"PATH:   %s\n",pcOwn);
    efprintf(pfDoc,"TYPE:   PROGRAM\n");
-   efprintf(pfDoc,"SYNTAX: > %s COMMAND ...\n",pcPgm);
+   efprintf(pfDoc,"SYNTAX: > %s COMMAND/FUNCTION ...\n",pcPgm);
    efprintf(pfDoc,"-----------------------------------------------------------------------\n\n");
    efprintf(pfDoc,"indexterm:[PROGRAM Synopsis]\n\n\n");
    return(CLERTC_OK);

@@ -239,7 +239,7 @@ Sample program
          CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,3,"1.6." ,NULL               ,"Special EBCDIC code page support"  ,MAN_CLE_CLEPMAIN_EBCDIC)
          CLETAB_DOC(CLE_DOCTYP_BUILTIN       ,3,"1.7." ,NULL               ,"Build-in functions"                ,MAN_CLE_BUILTIN_FUNCTIONS)
          CLETAB_DOC(CLE_DOCTYP_PROGRAM       ,2,"2."   ,NULL               ,"FLCL Utility"                      ,MAN_FLCL_MAIN)
-         CLETAB_DOC(CLE_DOCTYP_PGMSYNOPSIS   ,3,"2.1." ,NULL               ,"Synopsis"                          ,NULL)
+         CLETAB_DOC(CLE_DOCTYP_PGMSYNOPSIS   ,3,"2.1." ,NULL               ,"Synopsis"                          ,MAN_CLE_PROGRAM_SYNOPSIS)
          CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,3,"2.2." ,NULL               ,"Environment Variables"             ,MAN_FLCL_MAIN_ENVIRONMENT_VARIABLES)
          CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,3,"2.3." ,NULL               ,"Filename Handling"                 ,MAN_FLCL_MAIN_FILENAME_HANDLING)
          CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,3,"2.4." ,NULL               ,"Directory Support"                 ,MAN_FLCL_MAIN_DIRECTORY_SUPPORT)
