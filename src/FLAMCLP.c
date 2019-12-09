@@ -753,6 +753,7 @@ static int siClpPrnDoc(
    const char*                   pcNum,
    const TsSym*                  psArg,
    const TsSym*                  psTab,
+   const int                     isPat,
    const int                     isDep);
 
 static int siClpPrnPro(
@@ -1614,6 +1615,7 @@ extern int siClpDocu(
    const int                     isDep,
    const int                     isMan,
    const int                     isNbr,
+   const int                     isPat,
    const unsigned int            uiLev)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
@@ -1719,6 +1721,7 @@ extern int siClpDocu(
                            fprintf(pfDoc, ".SYNOPSIS\n\n");
                            fprintf(pfDoc, "-----------------------------------------------------------------------\n");
                            efprintf(pfDoc,"HELP:   %s\n",psArg->psFix->pcHlp);
+                           if(isPat)
                            fprintf(pfDoc, "PATH:   %s\n",fpcPat(pvHdl,siLev-1));
                            fprintf(pfDoc, "TYPE:   %s\n",apClpTyp[psArg->psFix->siTyp]);
                            fprintf(pfDoc, "SYNTAX: "); siErr=siClpPrnSyn(pvHdl,pfDoc,FALSE,siLev-1,psArg); fprintf(pfDoc,"\n");
@@ -1731,7 +1734,7 @@ extern int siClpDocu(
                               fprintf(pfDoc,"No detailed description available for this argument.\n\n");
                            }
                            fprintf(pfDoc,"indexterm:%c%s %s%c\n\n\n",C_SBO,acArg,psArg->psStd->pcKyw,C_SBC);
-                           siErr=siClpPrnDoc(pvHdl,pfDoc,siLev,isNbr,acNum,psArg,psTab,isDep);
+                           siErr=siClpPrnDoc(pvHdl,pfDoc,siLev,isNbr,acNum,psArg,psTab,isPat,isDep);
                            if (siErr<0) return(siErr);
                         }
                      } else if (CLPISF_CON(psArg->psStd->uiFlg)) {
@@ -1781,6 +1784,7 @@ extern int siClpDocu(
                            fprintf(pfDoc, ".SYNOPSIS\n\n");
                            fprintf(pfDoc, "-----------------------------------------------------------------------\n");
                            efprintf(pfDoc,"HELP:   %s\n",psArg->psFix->pcHlp);
+                           if(isPat)
                            fprintf(pfDoc, "PATH:   %s\n",fpcPat(pvHdl,siLev-1));
                            fprintf(pfDoc, "TYPE:   %s\n",apClpTyp[psArg->psFix->siTyp]);
                            fprintf(pfDoc, "SYNTAX: %s\n",psArg->psStd->pcKyw);
@@ -1854,7 +1858,9 @@ extern int siClpDocu(
             fprintf(pfDoc,   ".SYNOPSIS\n\n");
             fprintf(pfDoc,   "-----------------------------------------------------------------------\n");
             efprintf(pfDoc,  "HELP:   %s\n",psHdl->pcHlp);
-            fprintf(pfDoc,   "PATH:   %s.%s\n",psHdl->pcOwn,psHdl->pcPgm);
+            if(isPat) {
+               fprintf(pfDoc,"PATH:   %s.%s\n",psHdl->pcOwn,psHdl->pcPgm);
+            }
             if (psHdl->isOvl) {
                fprintf(pfDoc,"TYPE:   OVERLAY\n");
             } else {
@@ -1870,7 +1876,7 @@ extern int siClpDocu(
                fprintf(pfDoc,"No detailed description available for this command.\n\n");
             }
             fprintf(pfDoc,   "indexterm:%c%s %s%c\n\n\n",C_SBO,pcCmd,pcSta,C_SBC);
-            siPos=siClpPrnDoc(pvHdl,pfDoc,0,isNbr,pcNum,NULL,psTab,isDep);
+            siPos=siClpPrnDoc(pvHdl,pfDoc,0,isNbr,pcNum,NULL,psTab,isPat,isDep);
             if (siPos<0) return(siPos);
          }
       }
@@ -7658,6 +7664,7 @@ static int siClpPrnDoc(
    const char*                   pcNum,
    const TsSym*                  psArg,
    const TsSym*                  psTab,
+   const int                     isPat,
    const int                     isDep)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
@@ -7717,6 +7724,7 @@ static int siClpPrnDoc(
                   fprintf(pfDoc, ".SYNOPSIS\n\n");
                   fprintf(pfDoc, "-----------------------------------------------------------------------\n");
                   efprintf(pfDoc,"HELP:   %s\n",apMan[m]->psFix->pcHlp);
+                  if (isPat)
                   fprintf(pfDoc, "PATH:   %s\n",fpcPat(pvHdl,siLev));
                   fprintf(pfDoc, "TYPE:   %s\n",apClpTyp[apMan[m]->psFix->siTyp]);
                   fprintf(pfDoc, "SYNTAX: %s\n",apMan[m]->psStd->pcKyw);
@@ -7752,6 +7760,7 @@ static int siClpPrnDoc(
                fprintf(pfDoc, ".SYNOPSIS\n\n");
                fprintf(pfDoc, "-----------------------------------------------------------------------\n");
                efprintf(pfDoc,"HELP:   %s\n",apMan[m]->psFix->pcHlp);
+               if (isPat)
                fprintf(pfDoc, "PATH:   %s\n",fpcPat(pvHdl,siLev));
                fprintf(pfDoc, "TYPE:   %s\n",apClpTyp[apMan[m]->psFix->siTyp]);
                fprintf(pfDoc, "SYNTAX: ");
@@ -7767,7 +7776,7 @@ static int siClpPrnDoc(
                }
                fprintf(pfDoc,"indexterm:%c%s %s%c\n\n\n",C_SBO,acArg,apMan[m]->psStd->pcKyw,C_SBC);
                if (apMan[m]->psDep!=NULL) {
-                  siErr=siClpPrnDoc(pvHdl,pfDoc,siLev+1,isNbr,acNum,apMan[m],apMan[m]->psDep,isDep);
+                  siErr=siClpPrnDoc(pvHdl,pfDoc,siLev+1,isNbr,acNum,apMan[m],apMan[m]->psDep,isPat,isDep);
                   if (siErr<0) return(siErr);
                }
                k++;

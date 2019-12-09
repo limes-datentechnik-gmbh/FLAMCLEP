@@ -1348,6 +1348,7 @@ extern int siClpHelp(
  * @param[in]  isMan If TRUE then doc type MANPAGE will be generated else doc type book will be used.
  *                   (isMan==TRUE results automatically in isDep==FALSE)
  * @param[in]  isNbr Boolean to enable header numbering for generated documentation (only for doc type book)
+ * @param[in]  isPat Boolean to enable printing of path as part of the synopsis (only for doc type book)
  * @param[in]  uiLev If > 0 then headlines are written with this amount of '=' in front instead of underlining (only for doc type book)
  *
  * @return signed integer with CLP_OK(0) or an error code (CLPERR_xxxxxx)
@@ -1362,6 +1363,7 @@ extern int siClpDocu(
    const int                     isDep,
    const int                     isMan,
    const int                     isNbr,
+   const int                     isPat,
    const unsigned int            uiLev);
 
 /**
