@@ -16,8 +16,8 @@ DEPO = -MT
 
 VPATH = src:include
 
-DEB_LDF = -g
-REL_LDF =
+DEB_LDF = -g -ldl
+REL_LDF = -ldl
 
 STRIP = strip
 ifeq ($(COMPILER),gnu)
