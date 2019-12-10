@@ -213,8 +213,8 @@ Sample program
        };
 
        CLEOTH_OPN(asOthTab) = {
-          CLETAB_OTH("FLCBYT","FORMAT","Read format string"       ,asClpWrtFmtPar,MAN_FLCBYT_READ_FORMAT ,HLP_FLCBYT_READ_FORMAT ,TRUE)
-          CLETAB_OTH("FLCBYT","FORMAT","Write format string"      ,asClpRedFmtPar,MAN_FLCBYT_WRITE_FORMAT,HLP_FLCBYT_WRITE_FORMAT,TRUE)
+          CLETAB_OTH("FLCBYT","RFMT"  ,"Read format string"       ,asClpWrtFmtPar,MAN_FLCBYT_READ_FORMAT ,HLP_FLCBYT_READ_FORMAT ,TRUE)
+          CLETAB_OTH("FLCBYT","WFMT"  ,"Write format string"      ,asClpRedFmtPar,MAN_FLCBYT_WRITE_FORMAT,HLP_FLCBYT_WRITE_FORMAT,TRUE)
           CLETAB_OTH("FLCBYT","READ"  ,"Read conversion string"   ,asClpElmCnvRed,MAN_FLCBYT_CONV_READ   ,HLP_FLCBYT_CONV_READ   ,TRUE)
           CLETAB_OTH("FLCBYT","WRITE" ,"Write conversion string"  ,asClpElmCnvWrt,MAN_FLCBYT_CONV_WRITE  ,HLP_FLCBYT_CONV_WRITE  ,TRUE)
           CLETAB_OTH("FLCBYT","CONV"  ,"From-To conversion string",asClpElmCnv   ,MAN_FLCBYT_CONV        ,HLP_FLCBYT_CONV        ,TRUE)
