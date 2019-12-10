@@ -3277,7 +3277,6 @@ static void vdCleManProgram(
       fprintf(pfOut, "TYPE:   PROGRAM\n");
       fprintf(pfOut, "SYNTAX: > %s COMMAND/FUNCTION ...\n",pcPgm);
       fprintf(pfOut, "-----------------------------------------------------------------------\n\n");
-      fprintf(pfOut, "indexterm:%cPROGRAM,Synopsis%c\n\n\n",C_SBO,C_SBC);
 
       if (isNbr) {
          fprintf(pfOut,"2.2. DESCRIPTION\n");
@@ -3294,7 +3293,6 @@ static void vdCleManProgram(
       } else {
          fprintf(pfOut,"No detailed description available for this program.\n\n");
       }
-      fprintf(pfOut,"indexterm:%cPROGRAM,Description%c\n\n\n",C_SBO,C_SBC);
       if (isNbr) {
          fprintf(pfOut,"2.3. SYNTAX\n");
          for (i=0;i<12;i++) fprintf(pfOut,"%c",C_TLD);
@@ -3309,7 +3307,6 @@ static void vdCleManProgram(
       fprintf(pfOut,"Syntax for program '%s':\n",pcPgm);
       vdPrnStaticSyntax(pfOut,psTab,pcPgm,pcDep,pcSep,pcDpa);
       fprintf(pfOut,"------------------------------------------------------------------------\n\n");
-      fprintf(pfOut,"indexterm:%cPROGRAM,Syntax%c\n\n\n",C_SBO,C_SBC);
 
       if (isNbr) {
          fprintf(pfOut,"2.4. HELP\n");
@@ -3325,7 +3322,6 @@ static void vdCleManProgram(
       fprintf(pfOut,"Help for program '%s':\n",pcPgm);
       vdPrnStaticHelp(pfOut,psTab,pcPgm,pcDep);
       fprintf(pfOut,"------------------------------------------------------------------------\n\n");
-      fprintf(pfOut,"indexterm:%cPROGRAM,Help%c\n\n\n",C_SBO,C_SBC);
    }
 }
 
@@ -3388,7 +3384,7 @@ static void vdCleManFunction(
          efprintf(pfOut,"-----------------------------------------------------------------------\n\n");
          efprintf(pfOut,".DESCRIPTION\n\n");
          fprintm(pfOut,pcOwn,pcPgm,pcMan,2);
-         efprintf(pfOut,"indexterm:[BUILTIN,%s]\n\n\n",pcFct);
+         efprintf(pfOut,"indexterm:[BUILTIN, %s]\n\n\n",pcFct);
       } else {
          efprintf(pfOut,"[[CLEP.BUILTIN.%s]]\n",pcFct);
          if (isNbr) {
@@ -3412,7 +3408,7 @@ static void vdCleManFunction(
          fprintf(pfOut, "-----------------------------------------------------------------------\n\n");
          fprintf(pfOut, ".DESCRIPTION\n\n");
          fprintm(pfOut,pcOwn,pcPgm,pcMan,2);
-         fprintf(pfOut,"indexterm:%cBUILTIN,%s%c\n\n\n",C_SBO,pcFct,C_SBC);
+         fprintf(pfOut,"indexterm:%cBUILTIN, %s%c\n\n\n",C_SBO,pcFct,C_SBC);
       }
    }
 }

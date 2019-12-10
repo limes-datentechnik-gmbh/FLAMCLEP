@@ -1733,7 +1733,7 @@ extern int siClpDocu(
                            } else {
                               fprintf(pfDoc,"No detailed description available for this argument.\n\n");
                            }
-                           fprintf(pfDoc,"indexterm:%c%s %s%c\n\n\n",C_SBO,acArg,psArg->psStd->pcKyw,C_SBC);
+                           fprintf(pfDoc,"indexterm:%cARGUMENT, %s, %s%c\n\n\n",C_SBO,acArg,psArg->psStd->pcKyw,C_SBC);
                            siErr=siClpPrnDoc(pvHdl,pfDoc,siLev,isNbr,acNum,psArg,psTab,isPat,isDep);
                            if (siErr<0) return(siErr);
                         }
@@ -1796,7 +1796,7 @@ extern int siClpDocu(
                            } else {
                               fprintf(pfDoc,"No detailed description available for this constant.\n\n");
                            }
-                           fprintf(pfDoc,"indexterm:%cCONSTANT %s%c\n\n\n",C_SBO,psArg->psStd->pcKyw,C_SBC);
+                           fprintf(pfDoc,"indexterm:%cARGUMENT, CONSTANT, %s%c\n\n\n",C_SBO,psArg->psStd->pcKyw,C_SBC);
                         }
                      } else {
                         return CLPERR(psHdl,CLPERR_SEM,"Path (%s) contains too many or invalid qualifiers",pcPat);
@@ -1876,7 +1876,7 @@ extern int siClpDocu(
             } else {
                fprintf(pfDoc,"No detailed description available for this command.\n\n");
             }
-            fprintf(pfDoc,   "indexterm:%c%s %s%c\n\n\n",C_SBO,pcCmd,pcSta,C_SBC);
+            fprintf(pfDoc,   "indexterm:%c%s, %s%c\n\n\n",C_SBO,pcCmd,pcSta,C_SBC);
             siPos=siClpPrnDoc(pvHdl,pfDoc,0,isNbr,pcNum,NULL,psTab,isPat,isDep);
             if (siPos<0) return(siPos);
          }
@@ -7732,7 +7732,7 @@ static int siClpPrnDoc(
                   fprintf(pfDoc, "-----------------------------------------------------------------------\n\n");
                   fprintf(pfDoc, ".DESCRIPTION\n\n");
                   fprintm(pfDoc,psHdl->pcOwn,psHdl->pcPgm,apMan[m]->psFix->pcMan,2);
-                  fprintf(pfDoc,"indexterm:%cCONSTANT %s%c\n\n\n",C_SBO,apMan[m]->psStd->pcKyw,C_SBC);
+                  fprintf(pfDoc,"indexterm:%cARGUMENT, CONSTANT, %s%c\n\n\n",C_SBO,apMan[m]->psStd->pcKyw,C_SBC);
                   k++;
                }
             }
@@ -7775,7 +7775,7 @@ static int siClpPrnDoc(
                } else {
                   fprintf(pfDoc,"No detailed description available for this argument.\n\n");
                }
-               fprintf(pfDoc,"indexterm:%c%s %s%c\n\n\n",C_SBO,acArg,apMan[m]->psStd->pcKyw,C_SBC);
+               fprintf(pfDoc,"indexterm:%cARGUMENT, %s, %s%c\n\n\n",C_SBO,acArg,apMan[m]->psStd->pcKyw,C_SBC);
                if (apMan[m]->psDep!=NULL) {
                   siErr=siClpPrnDoc(pvHdl,pfDoc,siLev+1,isNbr,acNum,apMan[m],apMan[m]->psDep,isPat,isDep);
                   if (siErr<0) return(siErr);
