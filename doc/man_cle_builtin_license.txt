@@ -1,4 +1,3 @@
-[[clep.builtin.license]]
 The license string of the software product is shown. This string is
 provided to the command line executer (CLE) by the calling program and
 should reflect the current license text for this program.

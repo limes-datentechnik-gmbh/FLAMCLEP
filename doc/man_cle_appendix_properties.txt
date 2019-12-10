@@ -1,6 +1,5 @@
-[[clep.appendix.properties]]
 All properties can be written to a global property file with the
-built-in function <<clep.builtin.genprop,GENPROP>>:
+built-in function <<CLEP.BUILTIN.GENPROP,GENPROP>>:
 ------------------------------------------------------------------------
    'GENPROP filename'.
 ------------------------------------------------------------------------

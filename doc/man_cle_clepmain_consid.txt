@@ -1,4 +1,3 @@
-[[clep.main.consid]]
 The command line parser supports abbreviation of keywords depending on
 the unique first characters. This is only useful if you work in dialog.
 If the command is specified in a persistent way (e.g. in a script) writing

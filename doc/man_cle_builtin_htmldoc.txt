@@ -1,4 +1,3 @@
-[[clep.builtin.htmldoc]]
 This build-in function generates the complete user manual in HTML format
 into a folder. The folder can be defined as optional parameter. If no
 path given, then the current directory is used as default.

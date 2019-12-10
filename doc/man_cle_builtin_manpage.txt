@@ -1,4 +1,3 @@
-[[clep.builtin.manpage]]
 Shows the manpages of the program, all commands and built-in functions
 and if available for each argument up to selections/constant definitions.
 

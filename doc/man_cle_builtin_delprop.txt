@@ -1,4 +1,3 @@
-[[clep.builtin.delprop]]
 Without a command the current global property file is deleted from the
 configuration data. A command specific property file can be deleted
 from the configuration data when the command name is given.
@@ -8,7 +7,7 @@ done for the current owner.
 
 We recommend to work only with command specific property files.
 
-See <<clep.appendix.properties,Appendix Properties>> for the current
+See <<CLEP.APPENDIX.PROPERTIES,Appendix Properties>> for the current
 property file content.
 
 .Examples

@@ -1,4 +1,3 @@
-[[clep.builtin.help]]
 The help function can provide extensive information about each parameter
 which is adjustable on the command line. With the help functionality
 you get a structured list of arguments:

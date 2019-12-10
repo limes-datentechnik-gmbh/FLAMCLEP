@@ -1854,6 +1854,7 @@ extern int siClpDocu(
             fprintf(pfDoc,"------\n\n");
             fprintf(pfDoc,"limes datentechnik(r) gmbh (www.flam.de)\n\n");
          } else {
+            efprintf(pfDoc,  "[[CLEP.%s.%s]]\n",pcCmd,psHdl->pcCmd);
             vdPrintHdl(pfDoc,psHdl->uiLev,isNbr,pcNum,psHdl->pcPgm,pcCmd,pcSta,C_TLD);
             fprintf(pfDoc,   ".SYNOPSIS\n\n");
             fprintf(pfDoc,   "-----------------------------------------------------------------------\n");

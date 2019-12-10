@@ -1,4 +1,3 @@
-[[clep.builtin.functions]]
 Numerous built-in functions are available to obtain extensive help
 about syntax, errors, commands and functions of a program with help
 messages, manual pages and documentation.

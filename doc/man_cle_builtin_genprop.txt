@@ -1,4 +1,3 @@
-[[clep.builtin.genprop]]
 A property file is generated for all commands if only a filename
 is provided. If a command is specified, a property file for this
 specific command is created. Property files can be used to define
@@ -23,7 +22,7 @@ and filename.
 To optimize the program performance, one can remove all unnecessary
 properties.
 
-See <<clep.appendix.properties,Appendix Properties>> for the current
+See <<CLEP.APPENDIX.PROPERTIES,Appendix Properties>> for the current
 property file content.
 
 .Examples

@@ -1,4 +1,3 @@
-[[clep.builtin.setprop]]
 The filename is set as current global property file when no command is
 specified. The file name is set as current local property file when a
 command is given. The property file can be generated with GENPROP and
@@ -17,7 +16,7 @@ We recommend to work only with command specific property files, because
 the built-in function CHGPROP can be used to generate, update and 
 activate a property file for a certain command.
 
-See <<clep.appendix.properties,Appendix Properties>> for the current
+See <<CLEP.APPENDIX.PROPERTIES,Appendix Properties>> for the current
 property file content.
 
 .Examples

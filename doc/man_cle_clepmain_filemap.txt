@@ -1,4 +1,3 @@
-[[clep.main.filemap]]
 All filenames used by CLEP are additionally mapped based on the rules
 below:
 

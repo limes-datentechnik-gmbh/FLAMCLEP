@@ -1,4 +1,3 @@
-[[clep.program.synopsis]]
 The synopsis collects the help, syntax and other important information
 for a program, function or parameter. It is a kind of quick reference
 and will used over the complete hierarchies in this document. Below you

@@ -1,4 +1,3 @@
-[[clep.appendix.about]]
 This is the about information for the program (&{pgm}). Its content
-is printed on the screen if the built-in function <<clep.builtin.about,ABOUT>>
+is printed on the screen if the built-in function <<CLEP.BUILTIN.ABOUT,ABOUT>>
 is used.

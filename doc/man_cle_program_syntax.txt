@@ -1,6 +1,5 @@
-[[clep.program.syntax]]
 Below you can see the main syntax for this program. This content is
-printed on the screen if the built-in function <<clep.builtin.syntax,SYNTAX>>
+printed on the screen if the built-in function <<CLEP.BUILTIN.SYNTAX,SYNTAX>>
 is used.
 
 Each command can be entered as an argument list on the command line or
