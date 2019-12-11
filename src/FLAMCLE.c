@@ -919,7 +919,7 @@ static int siClePrintPage(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const
 
 static void* pfLoadHtmlDoc(TfCleHtmlDoc** ppHtmlDoc) {
 #ifdef __UNIX__
-      void* pvHtmlDoc=dlopen("libhtmldoc",RTLD_LAZY);
+      void* pvHtmlDoc=dlopen("libhtmldoc.so.1",RTLD_LAZY);
       if (pvHtmlDoc==NULL) {
          *ppHtmlDoc=NULL;
          return(NULL);
