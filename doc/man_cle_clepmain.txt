@@ -12,7 +12,7 @@ built-in functions, please use <<CLEP.BUILTIN.MANPAGE,MANPAGE>>,
 <<CLEP.BUILTIN.HELP,HELP>> and <<CLEP.BUILTIN.SYNTAX,SYNTAX>> to get
 extensive information about these capabilities.
 
-Additionally the build-in function <<CLEP.BUILTIN.GENDOCU,GENDOCU>> can
+Additionally the built-in function <<CLEP.BUILTIN.GENDOCU,GENDOCU>> can
 generate a complete or a part of the user manual.
 
 To read the parameter of a command, a compiler (CLP) is applied. To see
@@ -33,11 +33,11 @@ occur, a trace might be activated.
 
 For each command execution the owner and environment variables can be
 defined in the configuration file. To see the current configuration use
-the built in function <<CLEP.BUILTIN.CONFIG,CONFIG>>.
+the built-in function <<CLEP.BUILTIN.CONFIG,CONFIG>>.
 
 The default trace file is 'stdout'. If the trace is activated before a
 trace file is defined, the trace will be printed on the screen. To manage
-the tracing use built in function <<CLEP.BUILTIN.TRACE,TRACE>>.
+the tracing use built-in function <<CLEP.BUILTIN.TRACE,TRACE>>.
 
 Last but not least it is possible to view the license, version and other
 information about the program.

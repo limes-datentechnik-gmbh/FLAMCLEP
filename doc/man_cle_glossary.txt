@@ -34,7 +34,7 @@
    subprogram, which provides the actual functionality.
 :CLEP-CONFIGURATION: Built-in command to show the current configuration: owner, property
    file names, trace options and more.
-:CLEP-TRACE: Build-in command to set the tracing options of CLEP: switch tracing
+:CLEP-TRACE: Built-in command to set the tracing options of CLEP: switch tracing
    ON or OFF and set a file name where trace output will be written to.
    When no file name is set, the trace is redirected to stdin/stdout.
 :COMMAND LINE ARGUMENTS: Format and meaning of the parameters depend upon the command

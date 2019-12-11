@@ -106,7 +106,7 @@
  * 1.1.40: fix potential memory leaks
  * 1.1.41: Change to new condition codes (separation of warnings and error in RUN function)
  *         Add support of reason codes including generation of an appendix in GENDOCU for it
- *         Add new built in function to print out error code messages
+ *         Add new built-in function to print out error code messages
  * 1.1.42: Code page specific interpretation of punctuation characters on EBCDIC systems
  * 1.1.43: Replace unnecessary strlen()
  * 1.1.44: Define command qualifier for ClpDocu("COMMAND")

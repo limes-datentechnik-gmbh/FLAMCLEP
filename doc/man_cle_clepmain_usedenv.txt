@@ -14,7 +14,7 @@ Below you can find the list of environment variables used by CLE and CLP.
 * path_argument - to override the hard coded default property value
 
 Environment variables can be set from the system or in the program
-configuration file with the build-in function <<CLEP.BUILTIN.SETENV,SETENV>>.
+configuration file with the built-in function <<CLEP.BUILTIN.SETENV,SETENV>>.
 Particularly on mainframe systems the configuration file is an easy way
 to define environment variables. Additionally on host systems the DD
 name STDENV and with lower priority the data set name '&SYSUID..STDENV'

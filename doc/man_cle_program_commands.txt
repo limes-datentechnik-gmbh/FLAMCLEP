@@ -43,7 +43,7 @@ front of the command.
 To suppress the outputs of the command line executer you can set QUIET
 or SILENT as the last parameter. Additional to QUIET, SILENT suppressed
 also the error messages. These options has no effect of the outputs of
-the commands and build-in functions.
+the commands and built-in functions.
 
 For job control, the maximum (and minimum) condition code
 (MAXCC=[max][-min]) of the command execution can optionally be set as

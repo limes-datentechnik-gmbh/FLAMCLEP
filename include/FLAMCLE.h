@@ -237,7 +237,7 @@ Sample program
       CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,3,"1.4."   ,NULL               ,"clep.main.filemap"              ,"Filename mapping"                  ,MAN_CLE_CLEPMAIN_FILEMAP                  ,NULL)
       CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,3,"1.5."   ,NULL               ,NULL                             ,"Key label name mapping"            ,MAN_CLE_CLEPMAIN_KEYLABMAP                ,NULL)
       CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,3,"1.6."   ,NULL               ,"clep.main.ebcdic"               ,"Special EBCDIC code page support"  ,MAN_CLE_CLEPMAIN_EBCDIC                   ,NULL)
-      CLETAB_DOC(CLE_DOCTYP_BUILTIN       ,3,"1.7."   ,NULL               ,CLE_ANCHOR_BUILTIN_FUNCTIONS     ,"Build-in functions"                ,MAN_CLE_BUILTIN_FUNCTIONS                 ,NULL)
+      CLETAB_DOC(CLE_DOCTYP_BUILTIN       ,3,"1.7."   ,NULL               ,CLE_ANCHOR_BUILTIN_FUNCTIONS     ,"Built-in functions"                ,MAN_CLE_BUILTIN_FUNCTIONS                 ,NULL)
       CLETAB_DOC(CLE_DOCTYP_PROGRAM       ,2,"2."     ,NULL               ,NULL                             ,"FLCL Utility"                      ,MAN_FLCL_MAIN                             ,NULL)
       CLETAB_DOC(CLE_DOCTYP_PGMSYNOPSIS   ,3,"2.1."   ,NULL               ,NULL                             ,"Synopsis"                          ,MAN_CLE_PROGRAM_SYNOPSIS                  ,NULL)
       CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,3,"2.2."   ,NULL               ,NULL                             ,"Environment Variables"             ,MAN_FLCL_MAIN_ENVIRONMENT_VARIABLES       ,NULL)
