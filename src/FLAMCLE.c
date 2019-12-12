@@ -901,6 +901,12 @@ static void vdFreeHtmlDoc(void** ppLib) {
 #endif
 }
 
+static int siPrintPage(void* pvHdl, const int siLev, const char* pcPat, const char* pcOrg, const char* pcPge) {
+   printd("--->%d(%s,%p,%p)\n",siLev,pcPat!=NULL?pcPat:"(NULL)",pcOrg,pcPge);
+   fwrite(pcPge,1,strlen(pcPge),(FILE*)pvHdl);
+   return(0);
+}
+
 /***********************************************************************/
 
 extern int siCleExecute(
@@ -1935,6 +1941,27 @@ EVALUATE:
                      case CLE_DOCTYP_COMMANDS:
                         siErr=siClePrintChapter(pfErr,pfDoc,psDoc+i,pcOwn,pcPgm,isNbr,FALSE);
                         if (siErr) ERROR(siErr,NULL);
+
+//                        for (j=0;psTab[j].pcKyw!=NULL;j++) {
+//                           if (psTab[j].siFlg) {
+//                              char acNum[64];
+//                              siErr=siCleCommandInit(pvGbl,psTab[j].pfIni,psTab[j].pvClp,pcOwn,pcPgm,psTab[j].pcKyw,psTab[j].pcMan,psTab[j].pcHlp,psTab[j].piOid,psTab[j].psTab,
+//                                                     isCas,isPfl,isRpl,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf);
+//                              if (siErr) ERROR(siErr,NULL);
+//                              if (psDoc[i].pcNum!=NULL && *psDoc[i].pcNum) {
+//                                 snprintf(acNum,sizeof(acNum),"%s%d.",psDoc[i].pcNum,j+1);
+//                              } else {
+//                                 snprintf(acNum,sizeof(acNum),"%d.",j+1);
+//                              }
+//                              siErr=siClpPrintDocu(pvHdl,NULL,acNum,"COMMAND",isNbr,FALSE,TRUE,psDoc[i].uiLev+1,pfDoc,siPrintPage);
+//                              if (siErr<0) {
+//                                 fprintf(pfOut,"Creation of documentation file (%s) failed (%d - %s)\n",pcFil,errno,strerror(errno));
+//                                 ERROR(CLERTC_SYN,NULL);
+//                              }
+//                              vdClpClose(pvHdl,CLPCLS_MTD_ALL); pvHdl=NULL;
+//                           }
+//                        }
+
                         for (j=0;psTab[j].pcKyw!=NULL;j++) {
                            if (psTab[j].siFlg) {
                               char acNum[64];

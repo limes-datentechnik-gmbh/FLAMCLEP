@@ -1470,6 +1470,22 @@ extern char* pcClpError(
 
 /**********************************************************************/
 
+typedef int (TfClpPrintPage)(void* pvHdl, const int siLev, const char* pcPat, const char* pcOrg, const char* pcPge);
+
+extern int siClpPrintDocu(
+   void*                         pvHdl,
+   const char*                   pcHdl,
+   const char*                   pcNum,
+   const char*                   pcCmd,
+   const int                     isNbr,
+   const int                     isIdt,
+   const int                     isPat,
+   const unsigned int            uiLev,
+   void*                         pvPrn,
+   TfClpPrintPage*               pfPrn);
+
+/**********************************************************************/
+
 #endif // INC_CLP_H
 
 #ifdef __cplusplus
