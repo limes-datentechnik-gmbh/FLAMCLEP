@@ -1004,7 +1004,7 @@ typedef struct CleDocPar {
    const char*       pcAbo;
    int               isNbr;
    int               isPat;
-   int               isIdx;
+   int               isIdt;
 }TsCleDocPar;
 
 typedef int (TfClePrintPage)(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const TsCleDocPar* psPar, const TsCleCommand* psCmd);
