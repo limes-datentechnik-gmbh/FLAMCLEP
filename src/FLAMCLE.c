@@ -839,7 +839,7 @@ static int siClePrintReasonCodes(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc
 
 /***********************************************************************/
 
-static int siClePrintPage(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const TsCleDocPar* psPar, const TsCleCommand* psCmd) {
+static int siCleWritePage(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const TsCleDocPar* psPar, const TsCleCommand* psCmd) {
    switch (psDoc->uiTyp) {
       case CLE_DOCTYP_COVER:        return(siClePrintCover(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->isNbr,psPar->isIdt));
       case CLE_DOCTYP_CHAPTER:      return(siClePrintChapter(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->isNbr,psPar->isIdt));
@@ -866,9 +866,54 @@ static int siClePrintPage(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const
    }
 }
 
+static int siClePrintPage(FILE* pfOut, FILE* pfErr, const TsCleDoc* psDoc, const TsCleDocPar* psPar, const TsCleCommand* psCmd, void* pvPrn, TfClpPrintPage* pfPrn) {
+   if (psDoc->pcHdl==NULL) {
+      if (pfErr!=NULL) fprintf(pfErr,"Headline is NULL\n");
+      return(CLERTC_TAB);
+   }
+   if (pfOut!=NULL) {
+      fprintf(pfOut,"... print %24s ",pcMapDocTyp(psDoc->uiTyp));
+      for (unsigned int i=0;i<psDoc->uiLev;i++) fprintf(pfOut,"=");
+      fprintf(pfOut," %s\n",psDoc->pcHdl);
+   }
+   FILE* pfDoc=fopen_tmp();
+   if (pfDoc==NULL) {
+      if (pfErr!=NULL) fprintf(pfErr,"Open of temporary file to print manual page '%s' failed (%d - %s)\n",psDoc->pcHdl,errno,strerror(errno));
+      return(CLERTC_SYS);
+   }
+   int siErr=siCleWritePage(pfErr,pfDoc,psDoc,psPar,psCmd);
+   if (siErr) {
+      fclose_tmp(pfDoc);
+      return(siErr);
+   }
+   long int s=ftell(pfDoc);
+   rewind(pfDoc);
+   char* pcPge=malloc(s+1);
+   if (pcPge==NULL) {
+      if (pfErr!=NULL) fprintf(pfErr,"Allocation of memory for temporary file to print manual '%s' page failed\n",psDoc->pcHdl);
+      fclose_tmp(pfDoc);
+      return(CLERTC_MEM);
+   }
+   long int r=fread(pcPge,1,s,pfDoc);
+   fclose_tmp(pfDoc);
+   if (r!=s) {
+      free(pcPge);
+      if (pfErr!=NULL) fprintf(pfErr,"Read of temporary file to print manual page '%s' failed (%d - %s)\n",psDoc->pcHdl,errno,strerror(errno));
+      return(CLERTC_SYS);
+   }
+   pcPge[r]=0x00;
+   siErr=pfPrn(pvPrn,psDoc->uiLev,NULL,psDoc->pcMan,pcPge);
+   free(pcPge);
+   if (siErr) {
+      if (pfErr!=NULL) fprintf(pfErr,"Print page over call back function for command '%s' failed with %d\n",psDoc->pcHdl,siErr);
+      return(CLERTC_MEM);
+   }
+   return(CLERTC_OK);
+}
+
 /***********************************************************************/
 
-static void* pfLoadHtmlDoc(TfCleHtmlDoc** ppHtmlDoc) {
+static void* pfLoadHtmlDoc(TfCleHtmlDoc** ppHtmlDoc, TfCleOpenPrint** ppHtmlOpn, TfClpPrintPage** ppHtmlPrn, TfCleClosePrint** ppHtmlCls) {
 #ifdef __UNIX__
       void* pvHtmlDoc=dlopen("libhtmldoc.so",RTLD_LAZY);
       if (pvHtmlDoc==NULL) {
@@ -876,10 +921,9 @@ static void* pfLoadHtmlDoc(TfCleHtmlDoc** ppHtmlDoc) {
          return(NULL);
       }
       *ppHtmlDoc=dlsym(pvHtmlDoc, "genHtmlDoc");
-      if (*ppHtmlDoc==NULL) {
-         dlclose(pvHtmlDoc);
-         return(NULL);
-      }
+      *ppHtmlOpn=dlsym(pvHtmlDoc, "opnHtmlDoc");
+      *ppHtmlPrn=dlsym(pvHtmlDoc, "prnHtmlDoc");
+      *ppHtmlCls=dlsym(pvHtmlDoc, "clsHtmlDoc");
       // cppcheck-suppress resourceLeak
       return(pvHtmlDoc);
 #else
@@ -902,9 +946,86 @@ static void vdFreeHtmlDoc(void** ppLib) {
 }
 
 static int siPrintPage(void* pvHdl, const int siLev, const char* pcPat, const char* pcOrg, const char* pcPge) {
-   printd("--->%d(%s,%p,%p)\n",siLev,pcPat!=NULL?pcPat:"(NULL)",pcOrg,pcPge);
-   fwrite(pcPge,1,strlen(pcPge),(FILE*)pvHdl);
-   return(0);
+   int l=strlen(pcPge);
+   int r=fwrite(pcPge,1,l,(FILE*)pvHdl);
+   return(r-l);
+}
+
+static int siPrintDocu(
+   void*                         pvGbl,
+   FILE*                         pfOut,
+   FILE*                         pfErr,
+   const TsCleDoc*               psDoc,
+   TsCleDocPar*                  psPar,
+   const TsCleCommand*           psCmd,
+   const TsCleOtherClp*          psOth,
+   void*                         pvF2S,
+   TfF2S*                        pfF2S,
+   void*                         pvSaf,
+   TfSaf*                        pfSaf,
+   void*                         pvPrn,
+   TfClpPrintPage*               pfPrn)
+{
+   if (psDoc!=NULL) {
+      for (int i=0; psDoc[i].uiTyp; i++) {
+         int siErr=siClePrintPage(pfOut,pfErr,psDoc+i,psPar,psCmd,pvPrn,pfPrn);
+         if (siErr) return(siErr);
+         if (psDoc[i].uiTyp==CLE_DOCTYP_COMMANDS) {
+            for (int j=0;psCmd[j].pcKyw!=NULL;j++) {
+               if (psCmd[j].siFlg) {
+                  void* pvClp=NULL;
+                  char  acNum[64];
+                  siErr=siCleCommandInit(pvGbl,psCmd[j].pfIni,psCmd[j].pvClp,psPar->pcOwn,psPar->pcPgm,psCmd[j].pcKyw,psCmd[j].pcMan,psCmd[j].pcHlp,psCmd[j].piOid,psCmd[j].psTab,
+                        psPar->isCas,psPar->isPfl,psPar->isRpl,psPar->siMkl,pfOut,pfErr,NULL,psPar->pcDep,psPar->pcOpt,psPar->pcEnt,psPar->pvCnf,&pvClp,psPar->pfMsg,pvF2S,pfF2S,pvSaf,pfSaf);
+                  if (siErr) return(siErr);
+                  if (psDoc[i].pcNum!=NULL && *psDoc[i].pcNum) {
+                     snprintf(acNum,sizeof(acNum),"%s%d.",psDoc[i].pcNum,j+1);
+                  } else {
+                     snprintf(acNum,sizeof(acNum),"%d.",j+1);
+                  }
+                  siErr=siClpPrintDocu(pvClp,NULL,acNum,"COMMAND",psPar->isDep,psPar->isNbr,psPar->isIdt,psPar->isPat,psDoc[i].uiLev+1,pvPrn,pfPrn);
+                  if (siErr<0) {
+                     if (pfErr!=NULL) fprintf(pfErr,"Creation of documentation for COMMAND '%s' failed\n",psCmd[j].pcKyw);
+                     return(CLERTC_SYN);
+                  }
+                  vdClpClose(pvClp,CLPCLS_MTD_ALL);
+                  pvClp=NULL;
+               }
+            }
+         } else if (psDoc[i].uiTyp==CLE_DOCTYP_OTHERCLP) {
+            if (psOth==NULL) {
+               if (pfErr!=NULL) fprintf(pfErr,"The pointer to the list of other CLP strings is NULL but DOCTYP OTHERCLP requested\n");
+               return(CLERTC_ITF);
+            }
+            for (int j=0;psOth[j].pcHdl!=NULL;j++) {
+               void* pvClp=NULL;
+               char acNum[64];
+               pvClp=pvClpOpen(psPar->isCas,psPar->isPfl,psPar->isRpl,psPar->siMkl,psPar->pcOwn,psOth[j].pcRot,psOth[j].pcKyw,psOth[j].pcMan,psOth[j].pcHlp,psOth[j].isOvl,
+                               psOth[j].psTab,NULL,pfOut,pfErr,NULL,NULL,NULL,NULL,psPar->pcDep,psPar->pcOpt,psPar->pcEnt,NULL,pvGbl,pvF2S,pfF2S,pvSaf,pfSaf);
+               if (pvClp==NULL) {
+                  if (pfErr!=NULL) fprintf(pfErr,"Open of parser for CLP string of appendix '%s' failed\n",psOth[j].pcRot);
+                  return(CLERTC_TAB);
+               }
+               if (psDoc[i].pcNum!=NULL && *psDoc[i].pcNum) {
+                  snprintf(acNum,sizeof(acNum),"%s%d.",psDoc[i].pcNum,j+1);
+               } else {
+                  snprintf(acNum,sizeof(acNum),"%d.",j+1);
+               }
+               siErr=siClpPrintDocu(pvClp,psOth[j].pcHdl,acNum,"OTHERCLP",psPar->isDep,psPar->isNbr,psPar->isIdt,psPar->isPat,psDoc[i].uiLev+1,pvPrn,pfPrn);
+               if (siErr<0) {
+                  if (pfErr!=NULL) fprintf(pfErr,"Creation of documentation for OTHERCLP '%s' failed\n",psOth[j].pcHdl);
+                  return(CLERTC_SYN);
+               }
+               vdClpClose(pvClp,CLPCLS_MTD_ALL);
+               pvClp=NULL;
+            }
+         }
+      }
+   } else {
+      if (pfErr!=NULL) fprintf(pfErr,"No table for documentation generation given\n");
+      return(CLERTC_TAB);
+   }
+   return(CLERTC_OK);
 }
 
 /***********************************************************************/
@@ -1902,154 +2023,16 @@ EVALUATE:
                }
             }
          } else {
-            if (psDoc!=NULL) {
-               for (i=0; psDoc[i].uiTyp; i++) {
-                  if (pfOut!=NULL) {
-                     fprintf(pfOut,"... print %24s ",pcMapDocTyp(psDoc[i].uiTyp));
-                     for (j=0;j<(int)psDoc[i].uiLev;j++) fprintf(pfOut,"=");
-                     fprintf(pfOut," %s\n",(psDoc[i].pcHdl!=NULL)?psDoc[i].pcHdl:"(NULL)");
-                  }
-                  switch (psDoc[i].uiTyp) {
-                     case CLE_DOCTYP_COVER:
-                        siErr=siClePrintCover(pfErr,pfDoc,psDoc+i,pcOwn,pcPgm,isNbr,FALSE);
-                        if (siErr) ERROR(siErr,NULL);
-                        break;
-                     case CLE_DOCTYP_CHAPTER:
-                        siErr=siClePrintChapter(pfErr,pfDoc,psDoc+i,pcOwn,pcPgm,isNbr,FALSE);
-                        if (siErr) ERROR(siErr,NULL);
-                        break;
-                     case CLE_DOCTYP_BUILTIN:
-                        siErr=siClePrintBuiltIn(pfErr,pfDoc,psDoc+i,pcOwn,pcPgm,TRUE,isNbr,FALSE);
-                        if (siErr) ERROR(siErr,NULL);
-                        break;
-                     case CLE_DOCTYP_PROGRAM:
-                        siErr=siClePrintChapter(pfErr,pfDoc,psDoc+i,pcOwn,pcPgm,isNbr,FALSE);
-                        if (siErr) ERROR(siErr,NULL);
-                        break;
-                     case CLE_DOCTYP_PGMSYNOPSIS:
-                        siErr=siClePrintPgmSynopsis(pfErr,pfDoc,psDoc+i,pcOwn,pcPgm,pcHlp,TRUE,isNbr,FALSE);
-                        if (siErr) ERROR(siErr,NULL);
-                        break;
-                     case CLE_DOCTYP_PGMSYNTAX:
-                        siErr=siClePrintPgmSyntax(pfErr,pfDoc,psDoc+i,psTab,pcOwn,pcPgm,pcDep,pcOpt,pcDpa,isNbr,FALSE);
-                        if (siErr) ERROR(siErr,NULL);
-                        break;
-                     case CLE_DOCTYP_PGMHELP:
-                        siErr=siClePrintPgmHelp(pfErr,pfDoc,psDoc+i,psTab,pcOwn,pcPgm,pcDep,isNbr,FALSE);
-                        if (siErr) ERROR(siErr,NULL);
-                        break;
-                     case CLE_DOCTYP_COMMANDS:
-                        siErr=siClePrintChapter(pfErr,pfDoc,psDoc+i,pcOwn,pcPgm,isNbr,FALSE);
-                        if (siErr) ERROR(siErr,NULL);
-
-//                        for (j=0;psTab[j].pcKyw!=NULL;j++) {
-//                           if (psTab[j].siFlg) {
-//                              char acNum[64];
-//                              siErr=siCleCommandInit(pvGbl,psTab[j].pfIni,psTab[j].pvClp,pcOwn,pcPgm,psTab[j].pcKyw,psTab[j].pcMan,psTab[j].pcHlp,psTab[j].piOid,psTab[j].psTab,
-//                                                     isCas,isPfl,isRpl,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf);
-//                              if (siErr) ERROR(siErr,NULL);
-//                              if (psDoc[i].pcNum!=NULL && *psDoc[i].pcNum) {
-//                                 snprintf(acNum,sizeof(acNum),"%s%d.",psDoc[i].pcNum,j+1);
-//                              } else {
-//                                 snprintf(acNum,sizeof(acNum),"%d.",j+1);
-//                              }
-//                              siErr=siClpPrintDocu(pvHdl,NULL,acNum,"COMMAND",isNbr,FALSE,TRUE,psDoc[i].uiLev+1,pfDoc,siPrintPage);
-//                              if (siErr<0) {
-//                                 fprintf(pfOut,"Creation of documentation file (%s) failed (%d - %s)\n",pcFil,errno,strerror(errno));
-//                                 ERROR(CLERTC_SYN,NULL);
-//                              }
-//                              vdClpClose(pvHdl,CLPCLS_MTD_ALL); pvHdl=NULL;
-//                           }
-//                        }
-
-                        for (j=0;psTab[j].pcKyw!=NULL;j++) {
-                           if (psTab[j].siFlg) {
-                              char acNum[64];
-                              siErr=siCleCommandInit(pvGbl,psTab[j].pfIni,psTab[j].pvClp,pcOwn,pcPgm,psTab[j].pcKyw,psTab[j].pcMan,psTab[j].pcHlp,psTab[j].piOid,psTab[j].psTab,
-                                                     isCas,isPfl,isRpl,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf);
-                              if (siErr) ERROR(siErr,NULL);
-                              if (psDoc[i].pcNum!=NULL && *psDoc[i].pcNum) {
-                                 snprintf(acNum,sizeof(acNum),"%s%d.",psDoc[i].pcNum,j+1);
-                              } else {
-                                 snprintf(acNum,sizeof(acNum),"%d.",j+1);
-                              }
-                              siErr=siClpDocu(pvHdl,pfDoc,psTab[j].pcKyw,NULL,acNum,"COMMAND",isLong,FALSE,isNbr,FALSE,TRUE,psDoc[i].uiLev+1);
-                              if (siErr<0) {
-                                 fprintf(pfOut,"Creation of documentation file (%s) failed (%d - %s)\n",pcFil,errno,strerror(errno));
-                                 ERROR(CLERTC_SYN,NULL);
-                              }
-                              vdClpClose(pvHdl,CLPCLS_MTD_ALL); pvHdl=NULL;
-                           }
-                        }
-                        break;
-                     case CLE_DOCTYP_OTHERCLP:
-                        if (psOth==NULL) {
-                           fprintf(pfErr,"The pointer to the list of other CLP strings is NULL but DOCTYP OTHERCLP requested\n");
-                           ERROR(CLERTC_ITF,NULL);
-                        }
-                        siErr=siClePrintChapter(pfErr,pfDoc,psDoc+i,pcOwn,pcPgm,isNbr,FALSE);
-                        if (siErr) ERROR(siErr,NULL);
-                        for (j=0;psOth[j].pcHdl!=NULL;j++) {
-                           char acNum[64];
-                           pvHdl=pvClpOpen(isCas,isPfl,isRpl,siMkl,pcOwn,psOth[j].pcRot,psOth[j].pcKyw,psOth[j].pcMan,psOth[j].pcHlp,psOth[j].isOvl,
-                                           psOth[j].psTab,NULL,pfOut,pfErr,pfTrc,pfTrc,pfTrc,pfTrc,pcDep,pcOpt,pcEnt,NULL,pvGbl,pvF2S,pfF2S,pvSaf,pfSaf);
-                           if (pvHdl==NULL) {
-                              fprintf(pfErr,"Open of parser for CLP string of appendix '%s' failed\n",psOth[j].pcRot);
-                              return(CLERTC_TAB);
-                           }
-                           if (psDoc[i].pcNum!=NULL && *psDoc[i].pcNum) {
-                              snprintf(acNum,sizeof(acNum),"%s%d.",psDoc[i].pcNum,j+1);
-                           } else {
-                              snprintf(acNum,sizeof(acNum),"%d.",j+1);
-                           }
-                           siErr=siClpDocu(pvHdl,pfDoc,psOth[j].pcKyw,psOth[j].pcHdl,acNum,"OTHERCLP",isLong,FALSE,isNbr,FALSE,TRUE,psDoc[i].uiLev+1);
-                           if (siErr<0) {
-                              fprintf(pfErr,"Creation of documentation file (%s) failed (%d - %s)\n",pcFil,errno,strerror(errno));
-                              ERROR(CLERTC_SYN,NULL);
-                           }
-                           vdClpClose(pvHdl,CLPCLS_MTD_ALL); pvHdl=NULL;
-                        }
-                        break;
-                     case CLE_DOCTYP_LEXEM:
-                        siErr=siClePrintLexem(pfErr,pfDoc,psDoc+i,pcOwn,pcPgm,isPfl,isRpl,pcDep,pcOpt,pcEnt,isNbr,FALSE);
-                        if (siErr) ERROR(siErr,NULL);
-                        break;
-                     case CLE_DOCTYP_GRAMMAR:
-                        siErr=siClePrintGrammar(pfErr,pfDoc,psDoc+i,pcOwn,pcPgm,isPfl,isRpl,pcDep,pcOpt,pcEnt,isNbr,FALSE);
-                        if (siErr) ERROR(siErr,NULL);
-                        break;
-                     case CLE_DOCTYP_PROPREMAIN:
-                        siErr=siClePrintPropRemain(pfErr,pfDoc,psDoc+i,psTab,psCnf,pcOwn,pcPgm,isCas,isPfl,isRpl,siMkl,pcDep,pcOpt,pcEnt,isNbr,FALSE);
-                        if (siErr) ERROR(siErr,NULL);
-                        break;
-                     case CLE_DOCTYP_PROPDEFAULTS:
-                        siErr=siClePrintPropDefaults(pfErr,pfDoc,psDoc+i,psTab,psCnf,pcOwn,pcPgm,isCas,isPfl,isRpl,siMkl,pcDep,pcOpt,pcEnt,isNbr,FALSE);
-                        if (siErr) ERROR(siErr,NULL);
-                        break;
-                     case CLE_DOCTYP_SPECIALCODES:
-                        siErr=siClePrintChapter(pfErr,pfDoc,psDoc+i,pcOwn,pcPgm,isNbr,FALSE);
-                        if (siErr) ERROR(siErr,NULL);
-                        break;
-                     case CLE_DOCTYP_REASONCODES:
-                        siErr=siClePrintReasonCodes(pfErr,pfDoc,psDoc+i,pcOwn,pcPgm,pfMsg,isNbr,FALSE);
-                        if (siErr) ERROR(siErr,NULL);
-                        break;
-                     case CLE_DOCTYP_VERSION:
-                        siErr=siClePrintPreformatedText(pfErr,pfDoc,psDoc+i,pcOwn,pcPgm,pcVsn,isNbr,FALSE);
-                        if (siErr) ERROR(siErr,NULL);
-                        break;
-                     case CLE_DOCTYP_ABOUT:
-                        siErr=siClePrintPreformatedText(pfErr,pfDoc,psDoc+i,pcOwn,pcPgm,pcAbo,isNbr,FALSE);
-                        if (siErr) ERROR(siErr,NULL);
-                        break;
-                     default:
-                        fprintf(pfErr,"Documentation type (%u) not supported\n",psDoc[i].uiTyp);
-                        ERROR(CLERTC_TAB,NULL);
-                  }
-               }
-            } else {
-               fprintf(pfErr,"No table for documentation generation given\n");
-               ERROR(CLERTC_TAB,NULL);
+            TsCleDocPar stDocPar;
+            stDocPar.isNbr=isNbr; stDocPar.isPat=TRUE;  stDocPar.isIdt=FALSE; stDocPar.isDep=isLong;
+            stDocPar.isCas=isCas; stDocPar.isPfl=isPfl; stDocPar.isRpl=isRpl;
+            stDocPar.pcAbo=pcAbo; stDocPar.pcDep=pcDep; stDocPar.pcDpa=pcDpa;
+            stDocPar.pcEnt=pcEnt; stDocPar.pcHlp=pcHlp; stDocPar.pcOpt=pcOpt;
+            stDocPar.pcOwn=pcOwn; stDocPar.pcPgm=pcPgm; stDocPar.pcVsn=pcVsn;
+            stDocPar.pfMsg=pfMsg; stDocPar.pvCnf=psCnf; stDocPar.siMkl=siMkl;
+            siErr=siPrintDocu(pvGbl,pfOut,pfErr,psDoc,&stDocPar,psTab,psOth,pvF2S,pfF2S,pvSaf,pfSaf,pfDoc,siPrintPage);
+            if (siErr) {
+               ERROR(siErr,NULL);
             }
             fprintf(pfOut,"Documentation for program '%s' successfully created\n",pcPgm);
             ERROR(CLERTC_OK,NULL);
@@ -2067,7 +2050,6 @@ EVALUATE:
    } else if (strxcmp(isCas,argv[1],"HTMLDOC",0,0,FALSE)==0) {
       const char*       pcSgn=NULL;
       int               isNbr=FALSE;
-      TfCleHtmlDoc*     pfHtmlDoc=NULL;
       if (pfOut==NULL) pfOut=pfStd;
       if (pfErr==NULL) pfErr=pfStd;
       if (argc==4) {
@@ -2107,33 +2089,56 @@ EVALUATE:
          efprintf(pfErr,"%s %s %s\n",pcDep,argv[0],SYN_CLE_BUILTIN_HTMLDOC);
          ERROR(CLERTC_CMD,NULL);
       } else {
+         TfCleHtmlDoc*     pfHtmlDoc=NULL;
+         TfCleOpenPrint*   pfHtmlOpn=NULL;
+         TfClpPrintPage*   pfHtmlPrn=NULL;
+         TfCleClosePrint*  pfHtmlCls=NULL;
          char* pcPat=dcpmapfil(pcSgn+1);
          if (pcPat==NULL) {
             fprintf(pfErr,"Allocation of memory for file name (%s) failed\n",pcSgn);
             ERROR(CLERTC_MEM,NULL);
          }
-
-         void* pvLib=pfLoadHtmlDoc(&pfHtmlDoc);
-         if (pvLib==NULL || pfHtmlDoc==NULL) {
-            fprintf(pfErr,"There is no service provider DLL/SO (libhtmldoc/genHtmlDoc) available for HTML generation\n");
+         void* pvLib=pfLoadHtmlDoc(&pfHtmlDoc,&pfHtmlOpn,&pfHtmlPrn,&pfHtmlCls);
+         if (pvLib==NULL) {
+            fprintf(pfErr,"There is no service provider DLL/SO (libhtmldoc) available for HTML generation\n");
             ERROR(CLERTC_FAT,pcPat);
          }
 
          TsCleDocPar stDocPar;
-         stDocPar.isNbr=isNbr; stDocPar.isPat=FALSE; stDocPar.isIdt=TRUE;
+         stDocPar.isNbr=isNbr; stDocPar.isPat=FALSE; stDocPar.isIdt=TRUE; stDocPar.isDep=TRUE;
          stDocPar.isCas=isCas; stDocPar.isPfl=isPfl; stDocPar.isRpl=isRpl;
          stDocPar.pcAbo=pcAbo; stDocPar.pcDep=pcDep; stDocPar.pcDpa=pcDpa;
          stDocPar.pcEnt=pcEnt; stDocPar.pcHlp=pcHlp; stDocPar.pcOpt=pcOpt;
          stDocPar.pcOwn=pcOwn; stDocPar.pcPgm=pcPgm; stDocPar.pcVsn=pcVsn;
          stDocPar.pfMsg=pfMsg; stDocPar.pvCnf=psCnf; stDocPar.siMkl=siMkl;
-         siErr=pfHtmlDoc(pfOut,pfErr,pcPat,psDoc,psTab,psOth,&stDocPar,siClePrintPage);
-         vdFreeHtmlDoc(&pvLib);
-         if (siErr) {
-            fprintf(pfErr,"Generation of HTML documentation to folder '%s' failed\n",pcPat);
-            ERROR(CLERTC_SYS,pcPat);
+         if (pfHtmlOpn!=NULL && pfHtmlPrn!=NULL && pfHtmlCls!=NULL) {
+            void* pvDocHdl=pfHtmlOpn(pfOut,pfErr,pcPat,pcOwn,pcPgm);
+            if (pvDocHdl==NULL) {
+               fprintf(pfErr,"Open for HTML generation failed\n");
+               ERROR(CLERTC_FAT,pcPat);
+            }
+            siErr=siPrintDocu(pvGbl,pfOut,pfErr,psDoc,&stDocPar,psTab,psOth,pvF2S,pfF2S,pvSaf,pfSaf,pvDocHdl,pfHtmlPrn);
+            pfHtmlCls(pvDocHdl);
+            if (siErr) {
+               ERROR(siErr,pcPat);
+            } else {
+               fprintf(pfErr,"Generation of HTML documentation to folder '%s' was successful\n",pcPat);
+               ERROR(CLERTC_OK,pcPat);
+            }
+         } else if (pfHtmlDoc!=NULL) {
+            siErr=pfHtmlDoc(pfOut,pfErr,pcPat,psDoc,psTab,psOth,&stDocPar,siCleWritePage);
+            vdFreeHtmlDoc(&pvLib);
+            if (siErr) {
+               fprintf(pfErr,"Generation of HTML documentation to folder '%s' failed\n",pcPat);
+               ERROR(CLERTC_SYS,pcPat);
+            } else {
+               fprintf(pfErr,"Generation of HTML documentation to folder '%s' was successful\n",pcPat);
+               ERROR(CLERTC_OK,pcPat);
+            }
          } else {
-            fprintf(pfErr,"Generation of HTML documentation to folder '%s' was successful\n",pcPat);
-            ERROR(CLERTC_OK,pcPat);
+            vdFreeHtmlDoc(&pvLib);
+            fprintf(pfErr,"There is no service provider function (genHtmlDoc,opnHtmlDoc,prnHtmlDoc or clsHtmlDoc) available for HTML generation\n");
+            ERROR(CLERTC_FAT,pcPat);
          }
       }
    } else if (strxcmp(isCas,argv[1],"GENPROP",0,0,FALSE)==0) {

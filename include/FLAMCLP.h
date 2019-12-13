@@ -1469,6 +1469,7 @@ extern char* pcClpError(
    int               siErr);
 
 /**********************************************************************/
+/*! @cond PRIVATE */
 
 typedef int (TfClpPrintPage)(void* pvHdl, const int siLev, const char* pcPat, const char* pcOrg, const char* pcPge);
 
@@ -1477,6 +1478,7 @@ extern int siClpPrintDocu(
    const char*                   pcHdl,
    const char*                   pcNum,
    const char*                   pcCmd,
+   const int                     isDep,
    const int                     isNbr,
    const int                     isIdt,
    const int                     isPat,
@@ -1484,6 +1486,7 @@ extern int siClpPrintDocu(
    void*                         pvPrn,
    TfClpPrintPage*               pfPrn);
 
+/*! @endcond */
 /**********************************************************************/
 
 #endif // INC_CLP_H

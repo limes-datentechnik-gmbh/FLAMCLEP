@@ -1002,6 +1002,7 @@ typedef struct CleDocPar {
    TfMsg*            pfMsg;
    const char*       pcVsn;
    const char*       pcAbo;
+   int               isDep;
    int               isNbr;
    int               isPat;
    int               isIdt;
@@ -1010,10 +1011,11 @@ typedef struct CleDocPar {
 typedef int (TfClePrintPage)(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const TsCleDocPar* psPar, const TsCleCommand* psCmd);
 typedef int (TfCleHtmlDoc)(FILE* pfOut, FILE* pfErr, const char* pcPat, const TsCleDoc* psDoc, const TsCleCommand* psCmd, const TsCleOtherClp* psOth , const TsCleDocPar* psPar,TfClePrintPage* pfDoc);
 
-typedef void* (TfCleOpenPrint)(const char* pcOwn, const char* pcPgm);
+typedef void* (TfCleOpenPrint)(FILE* pfOut, FILE* pfErr, const char* pcPat, const char* pcOwn, const char* pcPgm);
 typedef void (TfCleClosePrint)(void* pvHdl);
 
 /*! @endcond */
+/**********************************************************************/
 
 #endif /*INC_CLE_H*/
 

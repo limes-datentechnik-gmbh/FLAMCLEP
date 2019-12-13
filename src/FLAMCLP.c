@@ -1904,11 +1904,74 @@ static int siClpPrintTable(
    const char*                   pcPat,
    const TsSym*                  psTab);
 
+static int siClpWriteRemaining(
+   void*                         pvHdl,
+   FILE*                         pfDoc,
+   const int                     siLev,
+   const char*                   pcPat,
+   const TsSym*                  psTab)
+{
+   TsHdl*                        psHdl=(TsHdl*)pvHdl;
+   int                           i=0;
+   for (const TsSym* psHlp=psTab;psHlp!=NULL;psHlp=psHlp->psNxt) {
+      if (psHlp->psFix->pcMan==NULL) {
+         if (CLPISF_ARG(psHlp->psStd->uiFlg) && CLPISF_CMD(psHlp->psStd->uiFlg)) {
+            if (psHlp->psFix->siTyp==CLPTYP_OBJECT || psHlp->psFix->siTyp==CLPTYP_OVRLAY) {
+               return CLPERR(psHdl,CLPERR_TAB,"Manual page for %s '%s.%s' missing",apClpTyp[psHlp->psFix->siTyp],pcPat,psHlp->psStd->pcKyw);
+            }
+            if (i==0) fprintf(pfDoc,".ARGUMENTS\n\n");
+            efprintf(pfDoc,"* `%s: ",apClpTyp[psHlp->psFix->siTyp]); siClpPrnSyn(pvHdl,pfDoc,FALSE,siLev,psHlp); efprintf(pfDoc," - %s`\n",psHlp->psFix->pcHlp);
+            for (const TsSym* psSel=psHlp->psDep;psSel!=NULL;psSel=psSel->psNxt) {
+               if (psSel->psFix->siTyp==psHlp->psFix->siTyp) {
+                  if (psSel->psFix->pcMan!=NULL) {
+                     return CLPERR(psHdl,CLPERR_TAB,"Manual page for SELECTION '%s.%s.%s' useless",pcPat,psHlp->psStd->pcKyw,psSel->psStd->pcKyw);
+                  }
+                  efprintf(pfDoc,"** `%s - %s`\n",psSel->psStd->pcKyw,psSel->psFix->pcHlp);
+               }
+            }
+            i++;
+         } else if (CLPISF_CON(psHlp->psStd->uiFlg)) {
+            if (i==0) fprintf(pfDoc,".SELECTIONS\n\n");
+            efprintf(pfDoc,"* `%s - %s`\n",psHlp->psStd->pcKyw,psHlp->psFix->pcHlp);
+            i++;
+         }
+      }
+   }
+   if (i) fprintf(pfDoc,"\n");
+   return(CLP_OK);
+}
+
+extern int siClpPrintWritten(
+   void*                         pvHdl,
+   FILE*                         pfDoc)
+{
+   TsHdl*                        psHdl=(TsHdl*)pvHdl;
+   long int s=ftell(pfDoc);
+   rewind(pfDoc);
+   char* pcPge=malloc(s+1);
+   if (pcPge==NULL) {
+      return CLPERR(psHdl,CLPERR_SYS,"Allocation of memory for temporary file to print page for argument '%s' failed",psHdl->pcCmd);
+   }
+   long int r=fread(pcPge,1,s,pfDoc);
+   if (r!=s) {
+      free(pcPge);
+      return CLPERR(psHdl,CLPERR_SYS,"Read of temporary file to print page for command '%s' failed",psHdl->pcCmd);
+   }
+   pcPge[r]=0x00;
+   int siErr=psHdl->pfPrn(psHdl->pvPrn,psHdl->uiLev,psHdl->pcCmd,psHdl->pcMan,pcPge);
+   free(pcPge);
+   if (siErr) {
+      return CLPERR(psHdl,CLPERR_SYS,"Print page over call back function for command '%s' failed with %d",psHdl->pcCmd,siErr);
+   }
+   return(CLP_OK);
+}
+
 extern int siClpPrintDocu(
    void*                         pvHdl,
    const char*                   pcHdl,
    const char*                   pcNum,
    const char*                   pcCmd,
+   const int                     isDep,
    const int                     isNbr,
    const int                     isIdt,
    const int                     isPat,
@@ -1947,12 +2010,10 @@ extern int siClpPrintDocu(
       return CLPERR(psHdl,CLPERR_INT,"No print callback function provided");
    }
 
-   if (pcNum!=NULL && strlen(pcNum)<100 && pcCmd!=NULL) {
+   if (pcNum!=NULL && pcCmd!=NULL) {
       int                           siErr;
       const char*                   pcSta=(pcHdl!=NULL && *pcHdl)?pcHdl:psHdl->pcCmd;
-      long int                      s,r;
       FILE*                         pfDoc;
-      char*                         pcPge;
 
       pfDoc=fopen_tmp();
       if (pfDoc==NULL) {
@@ -1978,38 +2039,31 @@ extern int siClpPrintDocu(
       fprintf(pfDoc,    "\n");
       efprintf(pfDoc,   "-----------------------------------------------------------------------\n\n");
       if (siErr<0) {
-         fclose(pfDoc);
+         fclose_tmp(pfDoc);
          return(siErr);
       }
       efprintf(pfDoc,   ".DESCRIPTION\n\n");
       if (psHdl->pcMan!=NULL && *psHdl->pcMan) {
          fprintm(pfDoc,psHdl->pcOwn,psHdl->pcPgm,psHdl->pcMan,2);
       } else {
-         efprintf(pfDoc,"No detailed description available for this command.\n\n");
+         return CLPERR(psHdl,CLPERR_TAB,"Manual page for COMMAND '%s' missing",psHdl->pcCmd);
       }
 
-      s=ftell(pfDoc);
-      rewind(pfDoc);
-      pcPge=malloc(s+1);
-      if (pcPge==NULL) {
-         fclose_tmp(pfDoc);
-         return CLPERR(psHdl,CLPERR_SYS,"Allocation of memory for temporary file to print page for argument '%s' failed",psHdl->pcCmd);
-      }
-      r=fread(pcPge,1,s,pfDoc);
-      fclose_tmp(pfDoc);
-      if (r!=s) {
-         free(pcPge);
-         return CLPERR(psHdl,CLPERR_SYS,"Read of temporary file to print page for command '%s' failed",psHdl->pcCmd);
-      }
-      pcPge[r]=0x00;
-      siErr=psHdl->pfPrn(psHdl->pvPrn,psHdl->uiLev,psHdl->pcCmd,psHdl->pcMan,pcPge);
-      free(pcPge);
+      siErr=siClpWriteRemaining(pvHdl,pfDoc,0,psHdl->pcCmd,psHdl->psTab);
       if (siErr) {
-         return CLPERR(psHdl,CLPERR_SYS,"Print page over call back function for command '%s' failed",psHdl->pcCmd);
+         fclose_tmp(pfDoc);
+         return(siErr);
       }
 
-      siErr=siClpPrintTable(pvHdl,0,pcNum,psHdl->pcCmd,psHdl->psTab);
-      if (siErr) return(siErr);
+      siErr=siClpPrintWritten(pvHdl,pfDoc);
+      fclose_tmp(pfDoc);
+      if (siErr) {
+         return(siErr);
+      }
+      if (isDep) {
+         siErr=siClpPrintTable(pvHdl,0,pcNum,psHdl->pcCmd,psHdl->psTab);
+         if (siErr) return(siErr);
+      }
    } else {
       return CLPERR(psHdl,CLPERR_INT,"No valid initial number or command string for head lines (%s)",psHdl->pcCmd);
    }
@@ -7941,11 +7995,10 @@ static int siClpWriteArgument(
       fprintf(pfDoc, "SYNTAX: %s\n",psArg->psStd->pcKyw);
       fprintf(pfDoc, "-----------------------------------------------------------------------\n\n");
       fprintf(pfDoc, ".DESCRIPTION\n\n");
-      fprintm(pfDoc,psHdl->pcOwn,psHdl->pcPgm,psArg->psFix->pcMan,2);
       if (psArg->psFix->pcMan!=NULL && *psArg->psFix->pcMan) {
          fprintm(pfDoc,psHdl->pcOwn,psHdl->pcPgm,psArg->psFix->pcMan,2);
       } else {
-         fprintf(pfDoc,"No detailed description available for this constant.\n\n");
+         return CLPERR(psHdl,CLPERR_TAB,"Manual page for CONSTANT '%s.%s' missing",pcPat,psArg->psStd->pcKyw);
       }
       i=0;
       for (const TsSym* psHlp=psArg->psDep;psHlp!=NULL;psHlp=psHlp->psNxt) {
@@ -7956,7 +8009,7 @@ static int siClpWriteArgument(
          }
       }
       if (i) fprintf(pfDoc,"\n");
-   } else {
+   } else if (CLPISF_ARG(psArg->psStd->uiFlg)){
       char                       acArg[16];
       switch (psArg->psFix->siTyp){
       case CLPTYP_OBJECT:strcpy(acArg,"OBJECT");break;
@@ -7977,24 +8030,13 @@ static int siClpWriteArgument(
       if (siErr<0) return(siErr);
       fprintf(pfDoc, "-----------------------------------------------------------------------\n\n");
       fprintf(pfDoc, ".DESCRIPTION\n\n");
-      fprintm(pfDoc,psHdl->pcOwn,psHdl->pcPgm,psArg->psFix->pcMan,2);
       if (psArg->psFix->pcMan!=NULL && *psArg->psFix->pcMan) {
          fprintm(pfDoc,psHdl->pcOwn,psHdl->pcPgm,psArg->psFix->pcMan,2);
       } else {
-         fprintf(pfDoc,"No detailed description available for this argument.\n\n");
+         return CLPERR(psHdl,CLPERR_TAB,"Manual page for %s '%s.%s' missing",acArg,pcPat,psArg->psStd->pcKyw);
       }
-      i=0;
-      for (const TsSym* psHlp=psArg->psDep;psHlp!=NULL;psHlp=psHlp->psNxt) {
-         if (psArg->psFix->siTyp==psHlp->psFix->siTyp && psHlp->psFix->pcMan==NULL) {
-            if (i==0) fprintf(pfDoc,".ARGUMENTS\n\n");
-            efprintf(pfDoc,"* `%s: ",apClpTyp[psHlp->psFix->siTyp]); siClpPrnSyn(pvHdl,pfDoc,FALSE,siLev,psHlp); efprintf(pfDoc," - %s`\n",psHlp->psFix->pcHlp);
-            for (const TsSym* psSel=psHlp->psDep;psSel!=NULL;psSel=psSel->psNxt) {
-               efprintf(pfDoc,"** `%s - %s`\n",psSel->psStd->pcKyw,psSel->psFix->pcHlp);
-            }
-            i++;
-         }
-      }
-      if (i) fprintf(pfDoc,"\n");
+      siErr=siClpWriteRemaining(pvHdl,pfDoc,siLev,pcPat,psArg->psDep);
+      if (siErr) return(siErr);
    }
    return (CLP_OK);
 }
@@ -8009,38 +8051,24 @@ static int siClpPrintArgument(
    int                           siErr;
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    FILE*                         pfTmp;
-   char*                         pcPge;
-   long int                      s,r;
 
    pfTmp=fopen_tmp();
    if (pfTmp==NULL) {
       return CLPERR(psHdl,CLPERR_SYS,"Open of temporary file to print page for argument '%s.%s' failed",pcPat,psArg->psStd->pcKyw);
    }
+
    siErr=siClpWriteArgument(pvHdl,pfTmp,siLev,pcNum,pcPat,psArg);
    if (siErr) {
       fclose_tmp(pfTmp);
       return(siErr);
    }
 
-   s=ftell(pfTmp);
-   rewind(pfTmp);
-   pcPge=malloc(s+1);
-   if (pcPge==NULL) {
-      fclose_tmp(pfTmp);
-      return CLPERR(psHdl,CLPERR_SYS,"Allocation of memory for temporary file to print page for argument '%s.%s' failed",pcPat,psArg->psStd->pcKyw);
-   }
-   r=fread(pcPge,1,s,pfTmp);
+   siErr=siClpPrintWritten(pvHdl,pfTmp);
    fclose_tmp(pfTmp);
-   if (r!=s) {
-      free(pcPge);
-      return CLPERR(psHdl,CLPERR_SYS,"Read of temporary file to print page for argument '%s.%s' failed",pcPat,psArg->psStd->pcKyw);
-   }
-   pcPge[r]=0x00;
-   siErr=psHdl->pfPrn(psHdl->pvPrn,psHdl->uiLev+siLev,pcPat,psArg->psFix->pcMan,pcPge);
-   free(pcPge);
    if (siErr) {
-      return CLPERR(psHdl,CLPERR_SYS,"Print page over call back function for argument '%s.%s' failed",pcPat,psArg->psStd->pcKyw);
+      return(siErr);
    }
+
    return(CLP_OK);
 }
 
@@ -8051,21 +8079,23 @@ static int siClpPrintTable(
    const char*                   pcPat,
    const TsSym*                  psTab)
 {
-   int                           siErr,i;
+   int                           siErr,i=1;
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    const TsSym*                  psHlp;
 
    if (psTab->psBak!=NULL) {
       return CLPERR(psHdl,CLPERR_INT,"Entry '%s.%s' not at beginning of a table",pcPat,psTab->psStd->pcKyw);
    }
-   for (i=0,psHlp=psTab;psHlp!=NULL;psHlp=psHlp->psNxt,i++) {
-      if (CLPISF_CMD(psHlp->psStd->uiFlg) && (psHlp->psFix->siTyp==CLPTYP_OBJECT || psHlp->psFix->siTyp==CLPTYP_OVRLAY || (psHlp->psFix->pcMan!=NULL && *psHlp->psFix->pcMan))) {
-         siErr=siClpPrintArgument(pvHdl,siLev,pcNum,pcPat,psHlp);
+   for (psHlp=psTab;psHlp!=NULL;psHlp=psHlp->psNxt) {
+      if (CLPISF_CMD(psHlp->psStd->uiFlg) && (CLPISF_ARG(psHlp->psStd->uiFlg) || CLPISF_CON(psHlp->psStd->uiFlg)) &&
+         (psHlp->psFix->siTyp==CLPTYP_OBJECT || psHlp->psFix->siTyp==CLPTYP_OVRLAY || (psHlp->psFix->pcMan!=NULL && *psHlp->psFix->pcMan))) {
+         char  acNum[strlen(pcNum)+16];
+         snprintf(acNum,sizeof(acNum),"%s%d.",pcNum,i); i++;
+         psHdl->apPat[siLev]=psHlp;
+         siErr=siClpPrintArgument(pvHdl,siLev,acNum,pcPat,psHlp);
          if (siErr) return(siErr);
          if (psHlp->psDep!=NULL) {
-            char  acNum[strlen(pcNum)+16];
             char  acPat[strlen(pcPat)+strlen(psHlp->psStd->pcKyw)+2];
-            snprintf(acNum,sizeof(acNum),"%s%d.",pcNum,i+1);
             snprintf(acPat,sizeof(acPat),"%s.%s",pcPat,psHlp->psStd->pcKyw);
             siErr=siClpPrintTable(pvHdl,siLev+1,acNum,acPat,psHlp->psDep);
             if (siErr) return(siErr);
