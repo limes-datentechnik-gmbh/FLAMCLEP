@@ -42,7 +42,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <errno.h>
-#ifdef __UNIX__
+#ifdef __WIN__
+#  include <windows.h>
+#else
 #  include <dlfcn.h>
 #endif
 /* Include eigener Bibliotheken  **************************************/
@@ -914,35 +916,40 @@ static int siClePrintPage(FILE* pfOut, FILE* pfErr, const TsCleDoc* psDoc, const
 /***********************************************************************/
 
 static void* pfLoadHtmlDoc(TfCleHtmlDoc** ppHtmlDoc, TfCleOpenPrint** ppHtmlOpn, TfClpPrintPage** ppHtmlPrn, TfCleClosePrint** ppHtmlCls) {
-#ifdef __UNIX__
-      void* pvHtmlDoc=dlopen("libhtmldoc.so",RTLD_LAZY);
-      if (pvHtmlDoc==NULL) {
-         *ppHtmlDoc=NULL;
-         return(NULL);
-      }
-      *ppHtmlDoc=dlsym(pvHtmlDoc, "genHtmlDoc");
-      *ppHtmlOpn=dlsym(pvHtmlDoc, "opnHtmlDoc");
-      *ppHtmlPrn=dlsym(pvHtmlDoc, "prnHtmlDoc");
-      *ppHtmlCls=dlsym(pvHtmlDoc, "clsHtmlDoc");
-      // cppcheck-suppress resourceLeak
-      return(pvHtmlDoc);
-#else
+#ifdef __WIN__
+   void* pvHtmlDoc=LoadLibrary(TEXT("libhtmldoc.dll"));
+   if (pvHtmlDoc==NULL) {
       *ppHtmlDoc=NULL;
       return(NULL);
+   }
+   *ppHtmlDoc=(TfCleHtmlDoc*)GetProcAddress(pvHtmlDoc,    "genHtmlDoc");
+   *ppHtmlOpn=(TfCleOpenPrint*)GetProcAddress(pvHtmlDoc,  "opnHtmlDoc");
+   *ppHtmlPrn=(TfClpPrintPage*)GetProcAddress(pvHtmlDoc,  "prnHtmlDoc");
+   *ppHtmlCls=(TfCleClosePrint*)GetProcAddress(pvHtmlDoc, "clsHtmlDoc");
+#else
+   void* pvHtmlDoc=dlopen("libhtmldoc.so",RTLD_LAZY);
+   if (pvHtmlDoc==NULL) {
+      *ppHtmlDoc=NULL;
+      return(NULL);
+   }
+   *ppHtmlDoc=dlsym(pvHtmlDoc, "genHtmlDoc");
+   *ppHtmlOpn=dlsym(pvHtmlDoc, "opnHtmlDoc");
+   *ppHtmlPrn=dlsym(pvHtmlDoc, "prnHtmlDoc");
+   *ppHtmlCls=dlsym(pvHtmlDoc, "clsHtmlDoc");
 #endif
+   // cppcheck-suppress resourceLeak
+   return(pvHtmlDoc);
 }
 
 static void vdFreeHtmlDoc(void** ppLib) {
-#ifdef __UNIX__
    if (ppLib!=NULL && *ppLib!=NULL) {
-      dlclose(*ppLib);
-      *ppLib=NULL;
-   }
+#ifdef __WIN__
+      FreeLibrary(*ppLib);
 #else
-   if (ppLib!=NULL && *ppLib!=NULL) {
+      dlclose(*ppLib);
+#endif
       *ppLib=NULL;
    }
-#endif
 }
 
 static int siPrintPage(void* pvHdl, const int siLev, const char* pcPat, const char* pcOrg, const char* pcPge) {
@@ -2032,10 +2039,12 @@ EVALUATE:
             stDocPar.pfMsg=pfMsg; stDocPar.pvCnf=psCnf; stDocPar.siMkl=siMkl;
             siErr=siPrintDocu(pvGbl,pfOut,pfErr,psDoc,&stDocPar,psTab,psOth,pvF2S,pfF2S,pvSaf,pfSaf,pfDoc,siPrintPage);
             if (siErr) {
+               fprintf(pfErr,"Generation of documentation for program '%s' failed\n",pcPgm);
                ERROR(siErr,NULL);
+            } else {
+               fprintf(pfOut,"Documentation for program '%s' successfully created\n",pcPgm);
+               ERROR(CLERTC_OK,NULL);
             }
-            fprintf(pfOut,"Documentation for program '%s' successfully created\n",pcPgm);
-            ERROR(CLERTC_OK,NULL);
          }
       }
       fprintf(pfErr,"Syntax for built-in function 'GENDOCU' not valid\n");
@@ -2120,6 +2129,7 @@ EVALUATE:
             siErr=siPrintDocu(pvGbl,pfOut,pfErr,psDoc,&stDocPar,psTab,psOth,pvF2S,pfF2S,pvSaf,pfSaf,pvDocHdl,pfHtmlPrn);
             pfHtmlCls(pvDocHdl);
             if (siErr) {
+               fprintf(pfErr,"Generation of HTML documentation to folder '%s' failed\n",pcPat);
                ERROR(siErr,pcPat);
             } else {
                fprintf(pfErr,"Generation of HTML documentation to folder '%s' was successful\n",pcPat);
