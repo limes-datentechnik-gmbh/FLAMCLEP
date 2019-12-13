@@ -85,8 +85,8 @@ and in a property file, then the value in the property file overrides the
 setting in the environment. The environment variable name for each
 property is build by the rules below:
 
- * convert all letters to upper case
- * replace all dots (`.`) by underline (`_`)
+* convert all characters to upper case
+* replace all dots (`.`) by underline (`_`)
 
 To get a list and help for all properties please use the built-in
 function 'GENPROP' to generate property files. The properties can be

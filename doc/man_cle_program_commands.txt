@@ -27,10 +27,10 @@ DOT operator (optional) for defining the overlay.
 To be compatible with certain shells, the features below are
 implemented:
 
- * Strings can be enclosed with single '' or double "" quotation marks
- * Integrated strings (without spaces) can also defined without quotes
- * Keywords can also start with "-" or "--" in front of the qualifier
- * If it unique then parenthesis and the dot can be omit for object and overlays
+* Strings can be enclosed with single '' or double "" quotation marks
+* Integrated strings (without spaces) can also defined without quotes
+* Keywords can also start with "-" or "--" in front of the qualifier
+* If it unique then parenthesis and the dot can be omit for object and overlays
 
 Commands can be declared in deep hierarchical depth. In order to
 simplify their handling the path is a powerful instrument for managing
@@ -54,9 +54,9 @@ value of 'max'. If the condition code would be smaller than 'min', the
 actually returned condition code is reduced to 0. Both, 'max' and 'min',
 values are optional. To only specify the minimum, simply omit the 'max'
 value, i.e. the MAXCC value starts with a hyphen.
-Example: The clause "MAXCC=8-4" will set each condition code
+Example: The clause `MAXCC=8-4` will set each condition code
 greater than 8 to 8 and each condition code smaller than 4 to 0,
-while "MAXCC=-4" only sets condition codes smaller than 4 to 0.
+while `MAXCC=-4` only sets condition codes smaller than 4 to 0.
 
 ------------------------------------------------------------------------
 &{pgm} [OWNER=oid] command "... argument list ..." [MAXCC=[max][-min]] [QUIET]
