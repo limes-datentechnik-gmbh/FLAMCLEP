@@ -9,6 +9,9 @@ The built-in function can only be used if a call back function for HTML
 documentation generation provided. If not a error will be printed if
 HTMLDOC is executed.
 
+To understand the service provider interface for HTML generation see the
+DOXYGEN documentation for FLAMCLE/CLP.h
+
 .Examples
 
 -----------------------------------------------------------------------

@@ -1469,10 +1469,50 @@ extern char* pcClpError(
    int               siErr);
 
 /**********************************************************************/
-/*! @cond PRIVATE */
 
+/**
+ * Function 'prnHtmlDoc' of library 'libhtmldoc' called if built-in function HTMLDOC used
+ *
+ * The built-in function HTMLDOC use a service provider interface to create the documentation
+ * using a callback function for each page/chapter. This is this callback function. This interface
+ * is used with the function siClpPrintDocu() below. The function is called for each page/chapter
+ * and the pointer to the original manual page (pcOrg) can be used to determine if this page the
+ * first time printed or if the same page printed again. The HTML documentation can now use an link
+ * instead to print the same page again to reduce memory and redundancies in the document. The
+ * level can be used to insert Headlines to a dictionary, the path shows the real position. The
+ * prepared page is in ASCIIDOC and must be converted to HTML. In this case the headline must be
+ * provided for the dictionary, the index terms for the index and other information can be used
+ * to build a very powerful HTML documentation.
+ *
+ * @param pvHdl   Handle for the print callback function (e.G. from opnHtmlDoc)
+ * @param siLev   The hierarchical level for this page/chapter
+ * @param pcPat   The path for the corresponding parameter (NULL if the page not inside a command or other CLP string)
+ * @param pcOrg   The pointer to the original manual page (can be used to determine duplicates and produce links)
+ * @param pcPge   The prepared page for printing
+ * @return Return code (0 is OK else error)
+ */
 typedef int (TfClpPrintPage)(void* pvHdl, const int siLev, const char* pcPat, const char* pcOrg, const char* pcPge);
 
+/**
+ * Generate documentation using a callback function
+ *
+ * This function works like siClpDocu, but it gives each page to a
+ * callback function and don't print it to a certain file.
+ *
+ * @param pvHdl   Pointer to the corresponding handle created with \a pvClpOpen
+ * @param pcHdl   Head line (optional, replacement for command in the first level)
+ * @param pcNum   Leading number for table of contents ("1.2." used or not used depend on isNbr, NULL pointer cause an error)
+ * @param pcCmd   Qualifier for command head line (Recommended: "COMMAND" NULL pointer cause an error)
+ * @param isDep   If TRUE then all deeper parts are printed if FALSE then not.
+ * @param isNbr   Boolean to enable header numbering for generated documentation (only for doc type book)
+ * @param isIdt   Boolean to enable printing of generated index terms (only for doc type book)
+ * @param isPat   Boolean to enable printing of path as part of the synopsis (only for doc type book)
+ * @param uiLev   If > 0 then headlines are written with this amount of '=' in front instead of underlining (only for doc type book)
+ * @param pvPrn   Handle for the print callback function (created with TfCleOpenPrint (opnHtmlDoc))
+ * @param pfPrn   Pointer to the callback function TfClpPrintPage (prnHtmlDoc)
+ *
+ * @return        signed integer with CLP_OK(0) or an error code (CLPERR_xxxxxx)
+ */
 extern int siClpPrintDocu(
    void*                         pvHdl,
    const char*                   pcHdl,
@@ -1486,7 +1526,6 @@ extern int siClpPrintDocu(
    void*                         pvPrn,
    TfClpPrintPage*               pfPrn);
 
-/*! @endcond */
 /**********************************************************************/
 
 #endif // INC_CLP_H

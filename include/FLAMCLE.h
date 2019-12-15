@@ -128,6 +128,7 @@ All these built-in functions are available:
  * * HELP     - Provides quick help for arguments
  * * MANPAGE  - Provides manual pages (detailed help)
  * * GENDOCU  - Generates auxiliary documentation
+ * * HTMLDOC  - Generates documentation using a call pack interface for each page
  * * GENPROP  - Generates a property file
  * * SETPROP  - Activates a property file
  * * CHGPROP  - Updates property values in the current property file
@@ -852,6 +853,7 @@ typedef struct CleOtherClp {
  * - HELP   [command[.path] [DEPTH1 | ... | DEPTH9 | ALL]] [MAN]
  * - MANPAGE [function | command[.path][=filename]] | [filename]
  * - GENDOCU [command[.path]=]filename [NONBR] [SHORT]
+ * - HTMLDOC [path] [NUMBERS]
  * - GENPROP [command=]filename
  * - SETPROP [command=]filename
  * - CHGPROP command [path[=value]]*
@@ -956,6 +958,40 @@ extern int siCleExecute(
    const int                     siNoR,
    const TsCleDoc*               psDoc);
 
+/**
+ * Function 'opnHtmlDoc' of library 'libhtmldoc' called if built-in function HTMLDOC used
+ *
+ * The built-in function HTMLDOC use a service provider interface to create the documentation
+ * using a callback function for each page/chapter. This function is called in front of the
+ * generation process to establish a handle for the callback function.
+ *
+ * The resulting handle is given to the callback function TfClpPrintPage defined by CLP. This
+ * callback function is called for each page/chapter written. After the documentation generation
+ * process the handle will be released with the function TfCleClosePrint.
+ *
+ * @param pfOut   File pointer for normal output (NULL for no output)
+ * @param pfErr   File pointer for error messages (NULL for no output)
+ * @param pcPat   Path where the documentation is written to
+ * @param pcOwn   String of the current Owner
+ * @param pcPgm   String with the current program name
+ *
+ * @return        Pointer to an handle or NULL if open failed
+ */
+typedef void* (TfCleOpenPrint)(FILE* pfOut, FILE* pfErr, const char* pcPat, const char* pcOwn, const char* pcPgm);
+
+/**
+ * Function 'clsHtmlDoc' of library 'libhtmldoc' called if built-in function HTMLDOC used
+ *
+ * The built-in function HTMLDOC use a service provider interface to create the documentation
+ * using a callback function for each page/chapter. This function is called after the
+ * generation process to free resources associated with this handle. The handle will be generated
+ * with the function TfCleOpenPrint in front of documentation generation.
+ *
+ * @param pvHdl Pointer the the print handle
+ */
+typedef void (TfCleClosePrint)(void* pvHdl);
+
+
 /**********************************************************************/
 /*! @cond PRIVATE */
 
@@ -1010,9 +1046,6 @@ typedef struct CleDocPar {
 
 typedef int (TfClePrintPage)(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const TsCleDocPar* psPar, const TsCleCommand* psCmd);
 typedef int (TfCleHtmlDoc)(FILE* pfOut, FILE* pfErr, const char* pcPat, const TsCleDoc* psDoc, const TsCleCommand* psCmd, const TsCleOtherClp* psOth , const TsCleDocPar* psPar,TfClePrintPage* pfDoc);
-
-typedef void* (TfCleOpenPrint)(FILE* pfOut, FILE* pfErr, const char* pcPat, const char* pcOwn, const char* pcPgm);
-typedef void (TfCleClosePrint)(void* pvHdl);
 
 /*! @endcond */
 /**********************************************************************/

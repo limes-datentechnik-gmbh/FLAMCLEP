@@ -700,6 +700,8 @@ static int siClePrintBuiltIn(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, co
    if (psDoc->pcNum!=NULL && *psDoc->pcNum) snprintf(acNum,sizeof(acNum),"%s%d.",psDoc->pcNum,j); else snprintf(acNum,sizeof(acNum),"%d.",j); j++;
    vdCleManFunction(pfDoc,psDoc->uiLev+1,S_TLD,acNum,"GENDOCU" ,HLP_CLE_BUILTIN_GENDOCU ,pcOwn,pcPgm,SYN_CLE_BUILTIN_GENDOCU ,MAN_CLE_BUILTIN_GENDOCU ,FALSE,isPat,isNbr,isIdt);
    if (psDoc->pcNum!=NULL && *psDoc->pcNum) snprintf(acNum,sizeof(acNum),"%s%d.",psDoc->pcNum,j); else snprintf(acNum,sizeof(acNum),"%d.",j); j++;
+   vdCleManFunction(pfDoc,psDoc->uiLev+1,S_TLD,acNum,"HTMLDOC" ,HLP_CLE_BUILTIN_HTMLDOC ,pcOwn,pcPgm,SYN_CLE_BUILTIN_HTMLDOC ,MAN_CLE_BUILTIN_HTMLDOC ,FALSE,isPat,isNbr,isIdt);
+   if (psDoc->pcNum!=NULL && *psDoc->pcNum) snprintf(acNum,sizeof(acNum),"%s%d.",psDoc->pcNum,j); else snprintf(acNum,sizeof(acNum),"%d.",j); j++;
    vdCleManFunction(pfDoc,psDoc->uiLev+1,S_TLD,acNum,"GENPROP" ,HLP_CLE_BUILTIN_GENPROP ,pcOwn,pcPgm,SYN_CLE_BUILTIN_GENPROP ,MAN_CLE_BUILTIN_GENPROP ,FALSE,isPat,isNbr,isIdt);
    if (psDoc->pcNum!=NULL && *psDoc->pcNum) snprintf(acNum,sizeof(acNum),"%s%d.",psDoc->pcNum,j); else snprintf(acNum,sizeof(acNum),"%d.",j); j++;
    vdCleManFunction(pfDoc,psDoc->uiLev+1,S_TLD,acNum,"SETPROP" ,HLP_CLE_BUILTIN_SETPROP ,pcOwn,pcPgm,SYN_CLE_BUILTIN_SETPROP ,MAN_CLE_BUILTIN_SETPROP ,FALSE,isPat,isNbr,isIdt);
@@ -735,8 +737,6 @@ static int siClePrintBuiltIn(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, co
    vdCleManFunction(pfDoc,psDoc->uiLev+1,S_TLD,acNum,"ABOUT"   ,HLP_CLE_BUILTIN_ABOUT   ,pcOwn,pcPgm,SYN_CLE_BUILTIN_ABOUT   ,MAN_CLE_BUILTIN_ABOUT   ,FALSE,isPat,isNbr,isIdt);
    if (psDoc->pcNum!=NULL && *psDoc->pcNum) snprintf(acNum,sizeof(acNum),"%s%d.",psDoc->pcNum,j); else snprintf(acNum,sizeof(acNum),"%d.",j); j++;
    vdCleManFunction(pfDoc,psDoc->uiLev+1,S_TLD,acNum,"ERRORS"  ,HLP_CLE_BUILTIN_ERRORS  ,pcOwn,pcPgm,SYN_CLE_BUILTIN_ERRORS  ,MAN_CLE_BUILTIN_ERRORS  ,FALSE,isPat,isNbr,isIdt);
-// if (psDoc->pcNum!=NULL && *psDoc->pcNum) snprintf(acNum,sizeof(acNum),"%s%d.",psDoc->pcNum,j); else snprintf(acNum,sizeof(acNum),"%d.",j); j++;
-// vdCleManFunction(pfDoc,psDoc->uiLev+1,S_TLD,acNum,"HTMLDOC" ,HLP_CLE_BUILTIN_HTMLDOC ,pcOwn,pcPgm,SYN_CLE_BUILTIN_HTMLDOC ,MAN_CLE_BUILTIN_HTMLDOC ,FALSE,isPat,isNbr,isIdt);
    return(CLERTC_OK);
 }
 
@@ -1460,8 +1460,7 @@ EVALUATE:
          if (pcDef!=NULL && *pcDef) {
             for (i=0;psTab[i].pcKyw!=NULL;i++) {
                if (strxcmp(isCas,pcDef,psTab[i].pcKyw,0,0,FALSE)==0) {
-                  // TODO: don't use stack allocation because strings can be larger than stack size (user input)
-                  char acPat[strlen(pcDef)+strlen(argv[2]+2)];
+                  char acPat[strlen(pcDef)+strlen(argv[2])+2];
                   siErr=siCleCommandInit(pvGbl,psTab[i].pfIni,psTab[i].pvClp,pcOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,
                                          isCas,isPfl,isRpl,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf);
                   if (siErr) ERROR(siErr,NULL);
@@ -1580,8 +1579,7 @@ EVALUATE:
          if (pcDef!=NULL && *pcDef) {
             for (i=0;psTab[i].pcKyw!=NULL;i++) {
                if (strxcmp(isCas,pcDef,psTab[i].pcKyw,0,0,FALSE)==0) {
-                  // TODO: don't use stack allocation because strings can be larger than stack size (user input)
-                  char acPat[strlen(psTab[i].pcKyw)+strlen(argv[2]+2)];
+                  char acPat[strlen(psTab[i].pcKyw)+strlen(argv[2])+2];
                   siErr=siCleCommandInit(pvGbl,psTab[i].pfIni,psTab[i].pvClp,pcOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,
                                          isCas,isPfl,isRpl,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf);
                   if (siErr) ERROR(siErr,NULL);
@@ -1710,118 +1708,118 @@ EVALUATE:
             if (isMan==TRUE) fprintf(pfOut,"Manual page for built-in function 'GENDOCU' successfully written to file (%s)\n",pcFil);
             if (isAll==FALSE) ERROR(CLERTC_OK,NULL);
          }
+         if (strxcmp(isCas,pcCmd,"HTMLDOC",0,0,FALSE)==0 || isAll) {
+            if (isMan==FALSE) fprintf(pfOut,"Manual page for built-in function 'HTMLDOC':\n\n");
+            vdCleManFunction(pfDoc,0,S_TLD,"4.5" ,"HTMLDOC" ,HLP_CLE_BUILTIN_HTMLDOC ,pcOwn,pcPgm,SYN_CLE_BUILTIN_HTMLDOC,MAN_CLE_BUILTIN_HTMLDOC,isMan,TRUE,TRUE,FALSE);
+            if (isMan==TRUE) fprintf(pfOut,"Manual page for built-in function 'HTMLDOC' successfully written to file (%s)\n",pcFil);
+            if (isAll==FALSE) ERROR(CLERTC_OK,NULL);
+         }
          if (strxcmp(isCas,pcCmd,"GENPROP",0,0,FALSE)==0 || isAll) {
             if (isMan==FALSE) fprintf(pfOut,"Manual page for built-in function 'GENPROP':\n\n");
-            vdCleManFunction(pfDoc,0,S_TLD,"4.5" ,"GENPROP" ,HLP_CLE_BUILTIN_GENPROP ,pcOwn,pcPgm,SYN_CLE_BUILTIN_GENPROP,MAN_CLE_BUILTIN_GENPROP,isMan,TRUE,TRUE,FALSE);
+            vdCleManFunction(pfDoc,0,S_TLD,"4.6" ,"GENPROP" ,HLP_CLE_BUILTIN_GENPROP ,pcOwn,pcPgm,SYN_CLE_BUILTIN_GENPROP,MAN_CLE_BUILTIN_GENPROP,isMan,TRUE,TRUE,FALSE);
             if (isMan==TRUE) fprintf(pfOut,"Manual page for built-in function 'GENPROP' successfully written to file (%s)\n",pcFil);
             if (isAll==FALSE) ERROR(CLERTC_OK,NULL);
          }
          if (strxcmp(isCas,pcCmd,"SETPROP",0,0,FALSE)==0 || isAll) {
             if (isMan==FALSE) fprintf(pfOut,"Manual page for built-in function 'SETPROP':\n\n");
-            vdCleManFunction(pfDoc,0,S_TLD,"4.6" ,"SETPROP" ,HLP_CLE_BUILTIN_SETPROP ,pcOwn,pcPgm,SYN_CLE_BUILTIN_SETPROP,MAN_CLE_BUILTIN_SETPROP,isMan,TRUE,TRUE,FALSE);
+            vdCleManFunction(pfDoc,0,S_TLD,"4.7" ,"SETPROP" ,HLP_CLE_BUILTIN_SETPROP ,pcOwn,pcPgm,SYN_CLE_BUILTIN_SETPROP,MAN_CLE_BUILTIN_SETPROP,isMan,TRUE,TRUE,FALSE);
             if (isMan==TRUE) fprintf(pfOut,"Manual page for built-in function 'SETPROP' successfully written to file (%s)\n",pcFil);
             if (isAll==FALSE) ERROR(CLERTC_OK,NULL);
          }
          if (strxcmp(isCas,pcCmd,"CHGPROP",0,0,FALSE)==0 || isAll) {
             if (isMan==FALSE) fprintf(pfOut,"Manual page for built-in function 'CHGPROP':\n\n");
-            vdCleManFunction(pfDoc,0,S_TLD,"4.7" ,"CHGPROP" ,HLP_CLE_BUILTIN_CHGPROP ,pcOwn,pcPgm,SYN_CLE_BUILTIN_CHGPROP,MAN_CLE_BUILTIN_CHGPROP,isMan,TRUE,TRUE,FALSE);
+            vdCleManFunction(pfDoc,0,S_TLD,"4.8" ,"CHGPROP" ,HLP_CLE_BUILTIN_CHGPROP ,pcOwn,pcPgm,SYN_CLE_BUILTIN_CHGPROP,MAN_CLE_BUILTIN_CHGPROP,isMan,TRUE,TRUE,FALSE);
             if (isMan==TRUE) fprintf(pfOut,"Manual page for built-in function 'CHGPROP' successfully written to file (%s)\n",pcFil);
             if (isAll==FALSE) ERROR(CLERTC_OK,NULL);
          }
          if (strxcmp(isCas,pcCmd,"DELPROP",0,0,FALSE)==0 || isAll) {
             if (isMan==FALSE) fprintf(pfOut,"Manual page for built-in function 'DELPROP':\n\n");
-            vdCleManFunction(pfDoc,0,S_TLD,"4.8" ,"DELPROP" ,HLP_CLE_BUILTIN_DELPROP ,pcOwn,pcPgm,SYN_CLE_BUILTIN_DELPROP,MAN_CLE_BUILTIN_DELPROP,isMan,TRUE,TRUE,FALSE);
+            vdCleManFunction(pfDoc,0,S_TLD,"4.9" ,"DELPROP" ,HLP_CLE_BUILTIN_DELPROP ,pcOwn,pcPgm,SYN_CLE_BUILTIN_DELPROP,MAN_CLE_BUILTIN_DELPROP,isMan,TRUE,TRUE,FALSE);
             if (isMan==TRUE) fprintf(pfOut,"Manual page for built-in function 'DELPROP' successfully written to file (%s)\n",pcFil);
             if (isAll==FALSE) ERROR(CLERTC_OK,NULL);
          }
          if (strxcmp(isCas,pcCmd,"GETPROP",0,0,FALSE)==0 || isAll) {
             if (isMan==FALSE) fprintf(pfOut,"Manual page for built-in function 'GETPROP':\n\n");
-            vdCleManFunction(pfDoc,0,S_TLD,"4.9" ,"GETPROP" ,HLP_CLE_BUILTIN_GETPROP ,pcOwn,pcPgm,SYN_CLE_BUILTIN_GETPROP,MAN_CLE_BUILTIN_GETPROP,isMan,TRUE,TRUE,FALSE);
+            vdCleManFunction(pfDoc,0,S_TLD,"4.10" ,"GETPROP" ,HLP_CLE_BUILTIN_GETPROP ,pcOwn,pcPgm,SYN_CLE_BUILTIN_GETPROP,MAN_CLE_BUILTIN_GETPROP,isMan,TRUE,TRUE,FALSE);
             if (isMan==TRUE) fprintf(pfOut,"Manual page for built-in function 'GETPROP' successfully written to file (%s)\n",pcFil);
             if (isAll==FALSE) ERROR(CLERTC_OK,NULL);
          }
          if (strxcmp(isCas,pcCmd,"SETOWNER",0,0,FALSE)==0 || isAll) {
             if (isMan==FALSE) fprintf(pfOut,"Manual page for built-in function 'SETOWNER':\n\n");
-            vdCleManFunction(pfDoc,0,S_TLD,"4.10" ,"SETOWNER",HLP_CLE_BUILTIN_SETOWNER,pcOwn,pcPgm,SYN_CLE_BUILTIN_SETOWNER,MAN_CLE_BUILTIN_SETOWNER,isMan,TRUE,TRUE,FALSE);
+            vdCleManFunction(pfDoc,0,S_TLD,"4.11" ,"SETOWNER",HLP_CLE_BUILTIN_SETOWNER,pcOwn,pcPgm,SYN_CLE_BUILTIN_SETOWNER,MAN_CLE_BUILTIN_SETOWNER,isMan,TRUE,TRUE,FALSE);
             if (isMan==TRUE) fprintf(pfOut,"Manual page for built-in function 'SETOWNER' successfully written to file (%s)\n",pcFil);
             if (isAll==FALSE) ERROR(CLERTC_OK,NULL);
          }
          if (strxcmp(isCas,pcCmd,"GETOWNER",0,0,FALSE)==0 || isAll) {
             if (isMan==FALSE) fprintf(pfOut,"Manual page for built-in function 'GETOWNER':\n\n");
-            vdCleManFunction(pfDoc,0,S_TLD,"4.11","GETOWNER",HLP_CLE_BUILTIN_GETOWNER,pcOwn,pcPgm,SYN_CLE_BUILTIN_GETOWNER,MAN_CLE_BUILTIN_GETOWNER,isMan,TRUE,TRUE,FALSE);
+            vdCleManFunction(pfDoc,0,S_TLD,"4.12","GETOWNER",HLP_CLE_BUILTIN_GETOWNER,pcOwn,pcPgm,SYN_CLE_BUILTIN_GETOWNER,MAN_CLE_BUILTIN_GETOWNER,isMan,TRUE,TRUE,FALSE);
             if (isMan==TRUE) fprintf(pfOut,"Manual page for built-in function 'GETOWNER' successfully written to file (%s)\n",pcFil);
             if (isAll==FALSE) ERROR(CLERTC_OK,NULL);
          }
          if (strxcmp(isCas,pcCmd,"SETENV",0,0,FALSE)==0 || isAll) {
             if (isMan==FALSE) fprintf(pfOut,"Manual page for built-in function 'SETENV':\n\n");
-            vdCleManFunction(pfDoc,0,S_TLD,"4.12" ,"SETENV",HLP_CLE_BUILTIN_SETENV,pcOwn,pcPgm,SYN_CLE_BUILTIN_SETENV,MAN_CLE_BUILTIN_SETENV,isMan,TRUE,TRUE,FALSE);
+            vdCleManFunction(pfDoc,0,S_TLD,"4.13" ,"SETENV",HLP_CLE_BUILTIN_SETENV,pcOwn,pcPgm,SYN_CLE_BUILTIN_SETENV,MAN_CLE_BUILTIN_SETENV,isMan,TRUE,TRUE,FALSE);
             if (isMan==TRUE) fprintf(pfOut,"Manual page for built-in function 'SETENV' successfully written to file (%s)\n",pcFil);
             if (isAll==FALSE) ERROR(CLERTC_OK,NULL);
          }
          if (strxcmp(isCas,pcCmd,"GETENV",0,0,FALSE)==0 || isAll) {
             if (isMan==FALSE) fprintf(pfOut,"Manual page for built-in function 'GETENV':\n\n");
-            vdCleManFunction(pfDoc,0,S_TLD,"4.13" ,"GETENV",HLP_CLE_BUILTIN_GETENV,pcOwn,pcPgm,SYN_CLE_BUILTIN_GETENV,MAN_CLE_BUILTIN_GETENV,isMan,TRUE,TRUE,FALSE);
+            vdCleManFunction(pfDoc,0,S_TLD,"4.14" ,"GETENV",HLP_CLE_BUILTIN_GETENV,pcOwn,pcPgm,SYN_CLE_BUILTIN_GETENV,MAN_CLE_BUILTIN_GETENV,isMan,TRUE,TRUE,FALSE);
             if (isMan==TRUE) fprintf(pfOut,"Manual page for built-in function 'GETENV' successfully written to file (%s)\n",pcFil);
             if (isAll==FALSE) ERROR(CLERTC_OK,NULL);
          }
          if (strxcmp(isCas,pcCmd,"DELENV",0,0,FALSE)==0 || isAll) {
             if (isMan==FALSE) fprintf(pfOut,"Manual page for built-in function 'DELENV':\n\n");
-            vdCleManFunction(pfDoc,0,S_TLD,"4.14" ,"DELENV",HLP_CLE_BUILTIN_DELENV,pcOwn,pcPgm,SYN_CLE_BUILTIN_DELENV,MAN_CLE_BUILTIN_DELENV,isMan,TRUE,TRUE,FALSE);
+            vdCleManFunction(pfDoc,0,S_TLD,"4.15" ,"DELENV",HLP_CLE_BUILTIN_DELENV,pcOwn,pcPgm,SYN_CLE_BUILTIN_DELENV,MAN_CLE_BUILTIN_DELENV,isMan,TRUE,TRUE,FALSE);
             if (isMan==TRUE) fprintf(pfOut,"Manual page for built-in function 'DELENV' successfully written to file (%s)\n",pcFil);
             if (isAll==FALSE) ERROR(CLERTC_OK,NULL);
          }
          if (strxcmp(isCas,pcCmd,"TRACE",0,0,FALSE)==0 || isAll) {
             if (isMan==FALSE) fprintf(pfOut,"Manual page for built-in function 'TRACE':\n\n");
-            vdCleManFunction(pfDoc,0,S_TLD,"4.15","TRACE"   ,HLP_CLE_BUILTIN_TRACE   ,pcOwn,pcPgm,SYN_CLE_BUILTIN_TRACE,MAN_CLE_BUILTIN_TRACE,isMan,TRUE,TRUE,FALSE);
+            vdCleManFunction(pfDoc,0,S_TLD,"4.16","TRACE"   ,HLP_CLE_BUILTIN_TRACE   ,pcOwn,pcPgm,SYN_CLE_BUILTIN_TRACE,MAN_CLE_BUILTIN_TRACE,isMan,TRUE,TRUE,FALSE);
             if (isMan==TRUE) fprintf(pfOut,"Manual page for built-in function 'TRACE' successfully written to file (%s)\n",pcFil);
             if (isAll==FALSE) ERROR(CLERTC_OK,NULL);
          }
          if (strxcmp(isCas,pcCmd,"CONFIG",0,0,FALSE)==0 || isAll) {
             if (isMan==FALSE) fprintf(pfOut,"Manual page for built-in function 'CONFIG':\n\n");
-            vdCleManFunction(pfDoc,0,S_TLD,"4.16","CONFIG"  ,HLP_CLE_BUILTIN_CONFIG  ,pcOwn,pcPgm,SYN_CLE_BUILTIN_CONFIG,MAN_CLE_BUILTIN_CONFIG,isMan,TRUE,TRUE,FALSE);
+            vdCleManFunction(pfDoc,0,S_TLD,"4.17","CONFIG"  ,HLP_CLE_BUILTIN_CONFIG  ,pcOwn,pcPgm,SYN_CLE_BUILTIN_CONFIG,MAN_CLE_BUILTIN_CONFIG,isMan,TRUE,TRUE,FALSE);
             if (isMan==TRUE) fprintf(pfOut,"Manual page for built-in function 'CONFIG' successfully written to file (%s)\n",pcFil);
             if (isAll==FALSE) ERROR(CLERTC_OK,NULL);
          }
          if (strxcmp(isCas,pcCmd,"GRAMMAR",0,0,FALSE)==0 || isAll) {
             if (isMan==FALSE) fprintf(pfOut,"Manual page for built-in function 'GRAMMAR':\n\n");
-            vdCleManFunction(pfDoc,0,S_TLD,"4.17","GRAMMAR" ,HLP_CLE_BUILTIN_GRAMMAR ,pcOwn,pcPgm,SYN_CLE_BUILTIN_GRAMMAR,MAN_CLE_BUILTIN_GRAMMAR,isMan,TRUE,TRUE,FALSE);
+            vdCleManFunction(pfDoc,0,S_TLD,"4.18","GRAMMAR" ,HLP_CLE_BUILTIN_GRAMMAR ,pcOwn,pcPgm,SYN_CLE_BUILTIN_GRAMMAR,MAN_CLE_BUILTIN_GRAMMAR,isMan,TRUE,TRUE,FALSE);
             if (isMan==TRUE) fprintf(pfOut,"Manual page for built-in function 'GRAMMAR' successfully written to file (%s)\n",pcFil);
             if (isAll==FALSE) ERROR(CLERTC_OK,NULL);
          }
          if (strxcmp(isCas,pcCmd,"LEXEM",0,0,FALSE)==0 || isAll) {
             if (isMan==FALSE) fprintf(pfOut,"Manual page for built-in function 'LEXEM':\n\n");
-            vdCleManFunction(pfDoc,0,S_TLD,"4.18","LEXEM"   ,HLP_CLE_BUILTIN_LEXEM   ,pcOwn,pcPgm,SYN_CLE_BUILTIN_LEXEM,MAN_CLE_BUILTIN_LEXEM,isMan,TRUE,TRUE,FALSE);
+            vdCleManFunction(pfDoc,0,S_TLD,"4.19","LEXEM"   ,HLP_CLE_BUILTIN_LEXEM   ,pcOwn,pcPgm,SYN_CLE_BUILTIN_LEXEM,MAN_CLE_BUILTIN_LEXEM,isMan,TRUE,TRUE,FALSE);
             if (isMan==TRUE) fprintf(pfOut,"Manual page for built-in function 'LEXEM' successfully written to file (%s)\n",pcFil);
             if (isAll==FALSE) ERROR(CLERTC_OK,NULL);
          }
          if (strxcmp(isCas,pcCmd,"LICENSE",0,0,FALSE)==0 || isAll) {
             if (isMan==FALSE) fprintf(pfOut,"Manual page for built-in function 'LICENSE':\n\n");
-            vdCleManFunction(pfDoc,0,S_TLD,"4.19","LICENSE" ,HLP_CLE_BUILTIN_LICENSE ,pcOwn,pcPgm,SYN_CLE_BUILTIN_LICENSE,MAN_CLE_BUILTIN_LICENSE,isMan,TRUE,TRUE,FALSE);
+            vdCleManFunction(pfDoc,0,S_TLD,"4.20","LICENSE" ,HLP_CLE_BUILTIN_LICENSE ,pcOwn,pcPgm,SYN_CLE_BUILTIN_LICENSE,MAN_CLE_BUILTIN_LICENSE,isMan,TRUE,TRUE,FALSE);
             if (isMan==TRUE) fprintf(pfOut,"Manual page for built-in function 'LICENSE' successfully written to file (%s)\n",pcFil);
             if (isAll==FALSE) ERROR(CLERTC_OK,NULL);
          }
          if (strxcmp(isCas,pcCmd,"VERSION",0,0,FALSE)==0 || isAll) {
             if (isMan==FALSE) fprintf(pfOut,"Manual page for built-in function 'VERSION':\n\n");
-            vdCleManFunction(pfDoc,0,S_TLD,"4.20","VERSION" ,HLP_CLE_BUILTIN_VERSION ,pcOwn,pcPgm,SYN_CLE_BUILTIN_VERSION,MAN_CLE_BUILTIN_VERSION,isMan,TRUE,TRUE,FALSE);
+            vdCleManFunction(pfDoc,0,S_TLD,"4.21","VERSION" ,HLP_CLE_BUILTIN_VERSION ,pcOwn,pcPgm,SYN_CLE_BUILTIN_VERSION,MAN_CLE_BUILTIN_VERSION,isMan,TRUE,TRUE,FALSE);
             if (isMan==TRUE) fprintf(pfOut,"Manual page for built-in function 'VERSION' successfully written to file (%s)\n",pcFil);
             if (isAll==FALSE) ERROR(CLERTC_OK,NULL);
          }
          if (strxcmp(isCas,pcCmd,"ABOUT",0,0,FALSE)==0 || isAll) {
             if (isMan==FALSE) fprintf(pfOut,"Manual page for built-in function 'ABOUT':\n\n");
-            vdCleManFunction(pfDoc,0,S_TLD,"4.21","ABOUT"   ,HLP_CLE_BUILTIN_ABOUT   ,pcOwn,pcPgm,SYN_CLE_BUILTIN_ABOUT,MAN_CLE_BUILTIN_ABOUT,isMan,TRUE,TRUE,FALSE);
+            vdCleManFunction(pfDoc,0,S_TLD,"4.22","ABOUT"   ,HLP_CLE_BUILTIN_ABOUT   ,pcOwn,pcPgm,SYN_CLE_BUILTIN_ABOUT,MAN_CLE_BUILTIN_ABOUT,isMan,TRUE,TRUE,FALSE);
             if (isMan==TRUE) fprintf(pfOut,"Manual page for built-in function 'ABOUT' successfully written to file (%s)\n",pcFil);
             if (isAll==FALSE) ERROR(CLERTC_OK,NULL);
          }
          if (strxcmp(isCas,pcCmd,"ERRORS",0,0,FALSE)==0 || isAll) {
             if (isMan==FALSE) fprintf(pfOut,"Manual page for built-in function 'ERRORS':\n\n");
-            vdCleManFunction(pfDoc,0,S_TLD,"4.22","ERRORS"  ,HLP_CLE_BUILTIN_ERRORS  ,pcOwn,pcPgm,SYN_CLE_BUILTIN_ERRORS,MAN_CLE_BUILTIN_ERRORS,isMan,TRUE,TRUE,FALSE);
+            vdCleManFunction(pfDoc,0,S_TLD,"4.23","ERRORS"  ,HLP_CLE_BUILTIN_ERRORS  ,pcOwn,pcPgm,SYN_CLE_BUILTIN_ERRORS,MAN_CLE_BUILTIN_ERRORS,isMan,TRUE,TRUE,FALSE);
             if (isMan==TRUE) fprintf(pfOut,"Manual page for built-in function 'ERRORS' successfully written to file (%s)\n",pcFil);
-            if (isAll==FALSE) ERROR(CLERTC_OK,NULL);
-         }
-         if (strxcmp(isCas,pcCmd,"HTMLDOC",0,0,FALSE)==0 || isAll) {
-            if (isMan==FALSE) fprintf(pfOut,"Manual page for built-in function 'HTMLDOC':\n\n");
-            vdCleManFunction(pfDoc,0,S_TLD,"4.23" ,"HTMLDOC" ,HLP_CLE_BUILTIN_HTMLDOC ,pcOwn,pcPgm,SYN_CLE_BUILTIN_HTMLDOC,MAN_CLE_BUILTIN_HTMLDOC,isMan,TRUE,TRUE,FALSE);
-            if (isMan==TRUE) fprintf(pfOut,"Manual page for built-in function 'HTMLDOC' successfully written to file (%s)\n",pcFil);
             if (isAll==FALSE) ERROR(CLERTC_OK,NULL);
          }
          for (i=0;psTab[i].pcKyw!=NULL;i++) {
@@ -1860,8 +1858,7 @@ EVALUATE:
          if (pcDef!=NULL && *pcDef) {
             for (i=0;psTab[i].pcKyw!=NULL;i++) {
                if (strxcmp(isCas,pcDef,psTab[i].pcKyw,0,0,FALSE)==0) {
-                  // TODO: don't use stack allocation because strings can be larger than stack size (user input)
-                  char acPat[strlen(pcDef)+strlen(pcCmd+2)];
+                  char acPat[strlen(pcDef)+strlen(pcCmd)+2];
                   siErr=siCleCommandInit(pvGbl,psTab[i].pfIni,psTab[i].pvClp,pcOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,
                                          isCas,isPfl,isRpl,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf);
                   if (siErr) ERROR(siErr,NULL);
@@ -2011,8 +2008,7 @@ EVALUATE:
                for (i=0;psTab[i].pcKyw!=NULL;i++) {
                   if (strxcmp(isCas,pcDef,psTab[i].pcKyw,0,0,FALSE)==0) {
                      char acNum[64];
-                     // TODO: don't use stack allocation because strings can be larger than stack size (user input)
-                     char acPat[strlen(pcDef)+strlen(pcCmd+2)];
+                     char acPat[strlen(pcDef)+strlen(pcCmd)+2];
                      siErr=siCleCommandInit(pvGbl,psTab[i].pfIni,psTab[i].pvClp,pcOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,psTab[i].piOid,psTab[i].psTab,
                                             isCas,isPfl,isRpl,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf);
                      if (siErr) ERROR(siErr,NULL);
@@ -2135,7 +2131,7 @@ EVALUATE:
                fprintf(pfErr,"Generation of HTML documentation to folder '%s' was successful\n",pcPat);
                ERROR(CLERTC_OK,pcPat);
             }
-         } else if (pfHtmlDoc!=NULL) {
+         } else if (pfHtmlDoc!=NULL) { // TODO: muss weg
             siErr=pfHtmlDoc(pfOut,pfErr,pcPat,psDoc,psTab,psOth,&stDocPar,siCleWritePage);
             vdFreeHtmlDoc(&pvLib);
             if (siErr) {
@@ -2147,7 +2143,7 @@ EVALUATE:
             }
          } else {
             vdFreeHtmlDoc(&pvLib);
-            fprintf(pfErr,"There is no service provider function (genHtmlDoc,opnHtmlDoc,prnHtmlDoc or clsHtmlDoc) available for HTML generation\n");
+            fprintf(pfErr,"There is no service provider function (opnHtmlDoc,prnHtmlDoc or clsHtmlDoc) available for HTML generation\n");
             ERROR(CLERTC_FAT,pcPat);
          }
       }
@@ -2466,8 +2462,7 @@ EVALUATE:
          if (pcDef!=NULL && *pcDef) {
             for (i=0;psTab[i].pcKyw!=NULL;i++) {
                if (strxcmp(isCas,pcDef,psTab[i].pcKyw,0,0,FALSE)==0) {
-                  // TODO: don't use stack allocation because strings can be larger than stack size (user input)
-                  char acPat[strlen(pcDef)+strlen(argv[2]+2)];
+                  char acPat[strlen(pcDef)+strlen(argv[2])+2];
                   siErr=siClePropertyInit(pvGbl,psTab[i].pfIni,psTab[i].pvClp,pcOwn,pcPgm,psTab[i].pcKyw,psTab[i].pcMan,psTab[i].pcHlp,
                                           psTab[i].piOid,psTab[i].psTab,isCas,isPfl,isRpl,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,
                                           psCnf,&pvHdl,NULL,NULL,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf);
@@ -3425,6 +3420,7 @@ if (pcDpa!=NULL) {
    fprintf(pfOut,"%s%s %s ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",SYN_CLE_BUILTIN_HELP    );
    fprintf(pfOut,"%s%s %s ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",SYN_CLE_BUILTIN_MANPAGE );
    fprintf(pfOut,"%s%s %s ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",SYN_CLE_BUILTIN_GENDOCU );
+   fprintf(pfOut,"%s%s %s ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",SYN_CLE_BUILTIN_HTMLDOC );
    fprintf(pfOut,"%s%s %s ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",SYN_CLE_BUILTIN_GENPROP );
    fprintf(pfOut,"%s%s %s ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",SYN_CLE_BUILTIN_SETPROP );
    fprintf(pfOut,"%s%s %s ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",SYN_CLE_BUILTIN_CHGPROP );
@@ -3443,7 +3439,6 @@ if (pcDpa!=NULL) {
    fprintf(pfOut,"%s%s %s ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",SYN_CLE_BUILTIN_VERSION );
    fprintf(pfOut,"%s%s %s ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",SYN_CLE_BUILTIN_ABOUT   );
    fprintf(pfOut,"%s%s %s ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",SYN_CLE_BUILTIN_ERRORS  );
-// fprintf(pfOut,"%s%s %s ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",SYN_CLE_BUILTIN_HTMLDOC );
 }
 
 static void vdPrnStaticHelp(
@@ -3464,6 +3459,7 @@ static void vdPrnStaticHelp(
    fprintf(pfOut,"%s%s %s HELP     - ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",HLP_CLE_BUILTIN_HELP);
    fprintf(pfOut,"%s%s %s MANPAGE  - ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",HLP_CLE_BUILTIN_MANPAGE);
    fprintf(pfOut,"%s%s %s GENDOCU  - ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",HLP_CLE_BUILTIN_GENDOCU);
+   fprintf(pfOut,"%s%s %s HTMLDOC  - ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",HLP_CLE_BUILTIN_HTMLDOC);
    fprintf(pfOut,"%s%s %s GENPROP  - ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",HLP_CLE_BUILTIN_GENPROP);
    fprintf(pfOut,"%s%s %s SETPROP  - ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",HLP_CLE_BUILTIN_SETPROP);
    fprintf(pfOut,"%s%s %s CHGPROP  - ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",HLP_CLE_BUILTIN_CHGPROP);
@@ -3482,7 +3478,6 @@ static void vdPrnStaticHelp(
    fprintf(pfOut,"%s%s %s VERSION  - ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",HLP_CLE_BUILTIN_VERSION);
    fprintf(pfOut,"%s%s %s ABOUT    - ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",HLP_CLE_BUILTIN_ABOUT);
    fprintf(pfOut,"%s%s %s ERRORS   - ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",HLP_CLE_BUILTIN_ERRORS);
-// fprintf(pfOut,"%s%s %s HTMLDOC  - ",pcDep,pcDep,pcPgm);efprintf(pfOut,"%s\n",HLP_CLE_BUILTIN_HTMLDOC);
    fprintf(pfOut,"For more information please use the built-in function 'MANPAGE'\n");
 }
 

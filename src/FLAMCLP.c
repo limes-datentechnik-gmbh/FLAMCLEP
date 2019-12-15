@@ -170,6 +170,7 @@
  * 1.2.124: Use type of function and not type of pointer to function (usable for pragma's)
  * 1.2.125: Add vdClpReset function to reset after an application handled error
  * 1.2.126: Support better docu generation and headings as single line variants (= Hdl1, ==Hdl2, ...)
+ * 1.2.127: Support documentation generation by callback function (for built-in HTMLDOC)
 **/
 
 #define CLP_VSN_STR       "1.2.126"
