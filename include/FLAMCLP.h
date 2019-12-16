@@ -974,7 +974,7 @@ typedef struct ClpArgument {
  *
  *  *nam* Name of this table\n
  */
-#define CLPCONTAB_OPN(nam) TsClpArgument nam[]
+#define CLPCONTAB_OPN(name)      TsClpArgument name[]
 
 /** defines a number literal with the command line keyword *kyw* and the value *dat*
  *

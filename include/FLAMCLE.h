@@ -797,7 +797,7 @@ typedef struct CleOtherClp {
  *
  *  *nam* Name of this table\n
  */
-#define CLETAB_OPN(nam)          TsCleCommand nam[]
+#define CLETAB_OPN(name)         TsCleCommand name[]
 
 /** defines a command with the command line keyword *kyw*
  *
@@ -828,7 +828,7 @@ typedef struct CleOtherClp {
  *
  *  *nam* Name of this table\n
  */
-#define CLEOTH_OPN(nam)               TsCleOtherClp nam[]
+#define CLEOTH_OPN(name)               TsCleOtherClp name[]
 
 /** defines a appendix for the object or overlay *kyw* of the root *rot* with the headline of *hdl* for a certain other CLP string
  *
@@ -1022,30 +1022,51 @@ extern int siCleParseString(
     TfSaf*                        pfSaf,
     void**                        ppClp);
 
-typedef struct CleDocPar {
-   const char*       pcOwn;
-   const char*       pcPgm;
-   const char*       pcHlp;
-   const char*       pcDep;
-   const char*       pcOpt;
-   const char*       pcEnt;
-   const char*       pcDpa;
-   void*             pvCnf;
-   int               isPfl;
-   int               isRpl;
-   int               isCas;
-   int               siMkl;
-   TfMsg*            pfMsg;
-   const char*       pcVsn;
-   const char*       pcAbo;
-   int               isDep;
-   int               isNbr;
-   int               isPat;
-   int               isIdt;
-}TsCleDocPar;
+//TODO: in CLE.c verlagern
+typedef struct CleBuiltin {
+   const char*                   pcKyw;
+   const char*                   pcHlp;
+   const char*                   pcSyn;
+   const char*                   pcMan;
+   int                           isBif;
+} TsCleBuiltin;
 
-typedef int (TfClePrintPage)(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const TsCleDocPar* psPar, const TsCleCommand* psCmd);
-typedef int (TfCleHtmlDoc)(FILE* pfOut, FILE* pfErr, const char* pcPat, const TsCleDoc* psDoc, const TsCleCommand* psCmd, const TsCleOtherClp* psOth , const TsCleDocPar* psPar,TfClePrintPage* pfDoc);
+#define CLEBIF_OPN(name)              TsCleBuiltin name[]
+#define CLETAB_BIF(kyw,hlp,syn,man)   {(kyw),(hlp),(syn),(man), FALSE},
+#define CLEBIF_CLS                    { NULL, NULL, NULL, NULL, FALSE}
+
+typedef struct CleDocPar {
+   const char*                   pcOwn;
+   const char*                   pcPgm;
+   const char*                   pcHlp;
+   const char*                   pcDep;
+   const char*                   pcOpt;
+   const char*                   pcEnt;
+   const char*                   pcDpa;
+   void*                         pvCnf;
+   int                           isPfl;
+   int                           isRpl;
+   int                           isCas;
+   int                           siMkl;
+   TfMsg*                        pfMsg;
+   const char*                   pcVsn;
+   const char*                   pcAbo;
+   int                           isDep;
+   int                           isNbr;
+   int                           isPat;
+   int                           isIdt;
+   const TsCleBuiltin*           psBif;
+   const TsCleCommand*           psCmd;
+   const TsCleOtherClp*          psOth;
+   void*                         pvF2S;
+   TfF2S*                        pfF2S;
+   void*                         pvSaf;
+   TfSaf*                        pfSaf;
+}TsCleDocPar;
+//end of TODO:
+
+typedef int (TfClePrintPage)(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const TsCleDocPar* psPar);
+typedef int (TfCleHtmlDoc)(FILE* pfOut, FILE* pfErr, const char* pcPat, const TsCleDoc* psDoc, const TsCleDocPar* psPar,TfClePrintPage* pfDoc);
 
 /*! @endcond */
 /**********************************************************************/
