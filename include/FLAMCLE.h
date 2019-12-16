@@ -874,7 +874,7 @@ typedef struct CleOtherClp {
  * - ERRORS
  *
  * @param[in]  pvGbl Pointer to a global handle given to called functions in the command table
- * @param[in]  psTab Pointer to the table which defines the commands
+ * @param[in]  psCmd Pointer to the table which defines the commands
  * @param[in]  argc  Number of command line parameters (argc of main(int argc, char* argv[]))
  * @param[in]  argv  List of pointers to the command line parameters (argv of main(int argc, char* argv[]))
  * @param[in]  pcOwn Default owner id (owner ids are used to identify properties and other things "com.company")
@@ -927,7 +927,7 @@ typedef struct CleOtherClp {
  */
 extern int siCleExecute(
    void*                         pvGbl,
-   const TsCleCommand*           psTab,
+   const TsCleCommand*           psCmd,
    int                           argc,
    char*                         argv[],
    const char*                   pcOwn,
@@ -1009,7 +1009,7 @@ extern int siCleParseString(
     const char*                   pcHlp,
     const int                     isOvl,
     const char*                   pcStr,
-    const TsClpArgument*          psTab,
+    const TsClpArgument*          psCmd,
     const char*                   pcDep,
     const char*                   pcOpt,
     const char*                   pcEnt,
