@@ -29,14 +29,40 @@
  *
 ***********************************************************************/
 
+#define IDX_CLE_BUILTIN_SYNTAX      0
+#define IDX_CLE_BUILTIN_HELP        1
+#define IDX_CLE_BUILTIN_MANPAGE     2
+#define IDX_CLE_BUILTIN_GENDOCU     3
+#define IDX_CLE_BUILTIN_HTMLDOC     4
+#define IDX_CLE_BUILTIN_GENPROP     5
+#define IDX_CLE_BUILTIN_SETPROP     6
+#define IDX_CLE_BUILTIN_CHGPROP     7
+#define IDX_CLE_BUILTIN_DELPROP     8
+#define IDX_CLE_BUILTIN_GETPROP     9
+#define IDX_CLE_BUILTIN_SETOWNER    10
+#define IDX_CLE_BUILTIN_GETOWNER    11
+#define IDX_CLE_BUILTIN_SETENV      12
+#define IDX_CLE_BUILTIN_GETENV      13
+#define IDX_CLE_BUILTIN_DELENV      14
+#define IDX_CLE_BUILTIN_TRACE       15
+#define IDX_CLE_BUILTIN_CONFIG      16
+#define IDX_CLE_BUILTIN_GRAMMAR     17
+#define IDX_CLE_BUILTIN_LEXEM       18
+#define IDX_CLE_BUILTIN_LICENSE     19
+#define IDX_CLE_BUILTIN_VERSION     20
+#define IDX_CLE_BUILTIN_ABOUT       21
+#define IDX_CLE_BUILTIN_ERRORS      22
+
 static const char* HLP_CLE_BUILTIN_SYNTAX  ="Provides the syntax for each command";
 static const char* SYN_CLE_BUILTIN_SYNTAX  ="SYNTAX [command[.path] [DEPTH1 | ... | DEPTH9 | ALL]]";
 static const char* HLP_CLE_BUILTIN_HELP    ="Provides quick help for arguments";
 static const char* SYN_CLE_BUILTIN_HELP    ="HELP [command[.path] [DEPTH1 | ... | DEPTH9 | ALL]] [MAN]";
 static const char* HLP_CLE_BUILTIN_MANPAGE ="Provides manual pages (detailed help)";
 static const char* SYN_CLE_BUILTIN_MANPAGE ="MANPAGE [function | command[.path][=filename]] | [filename]";
-static const char* HLP_CLE_BUILTIN_GENDOCU ="Generates auxiliary documentation";
+static const char* HLP_CLE_BUILTIN_GENDOCU ="Generates auxiliary documentation (ASCIIDOC text format)";
 static const char* SYN_CLE_BUILTIN_GENDOCU ="GENDOCU [command[.path]=]filename [NONBR] [SHORT]";
+static const char* HLP_CLE_BUILTIN_HTMLDOC ="Generates the complete HTML documentation into a folder";
+static const char* SYN_CLE_BUILTIN_HTMLDOC ="HTMLDOC [PATH=path] [NUMBERS]";
 static const char* HLP_CLE_BUILTIN_GENPROP ="Generates a property file";
 static const char* SYN_CLE_BUILTIN_GENPROP ="GENPROP [command=]filename";
 static const char* HLP_CLE_BUILTIN_SETPROP ="Activate a property file";
@@ -73,8 +99,6 @@ static const char* HLP_CLE_BUILTIN_ABOUT   ="Show information about the program"
 static const char* SYN_CLE_BUILTIN_ABOUT   ="ABOUT";
 static const char* HLP_CLE_BUILTIN_ERRORS  ="Show information about return and reason codes of the program";
 static const char* SYN_CLE_BUILTIN_ERRORS  ="ERRORS";
-static const char* HLP_CLE_BUILTIN_HTMLDOC ="Generates the complete HTML documentation into a folder";
-static const char* SYN_CLE_BUILTIN_HTMLDOC ="HTMLDOC [PATH=path] [NUMBERS]";
 
 static const char* HLP_CLE_PROPFIL =""
 "#------------------------------------------------------------------- #\n"

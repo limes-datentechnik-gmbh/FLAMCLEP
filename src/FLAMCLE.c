@@ -146,12 +146,12 @@
  * 1.2.76: Support additional authorization for CLP path
  * 1.2.77: Use type of function and not type of pointer to function (usable for pragma's)
  * 1.2.78: Support free defined appendix
- * 1.2.79: Support new more flexible table based documentation generation
- * 1.2.80: Support optional built-in function HTMLDOC
+ * 1.3.79: Support new more flexible table based documentation generation
+ * 1.3.80: Support optional built-in function HTMLDOC
  */
-#define CLE_VSN_STR       "1.2.80"
+#define CLE_VSN_STR       "1.3.80"
 #define CLE_VSN_MAJOR      1
-#define CLE_VSN_MINOR        2
+#define CLE_VSN_MINOR        3
 #define CLE_VSN_REVISION       80
 
 /* Definition der Konstanten ******************************************/
@@ -315,6 +315,7 @@ static void vdCleManProgram(
    const char*                   pcDep,
    const char*                   pcSep,
    const char*                   pcDpa,
+   const char*                   pcNum,
    const int                     isMan,
    const int                     isNbr);
 
@@ -368,6 +369,7 @@ static void vdPrnCommandHelp(
 static void vdPrnCommandManpage(
    void*                         pvHdl,
    FILE*                         pfOut,
+   const char*                   pcNum,
    const char*                   pcCmd,
    const int                     siInd,
    const int                     isMan,
@@ -1046,32 +1048,37 @@ extern int siCleExecute(
    int                           isWrn=FALSE;
    int                           siScc=0;
    int                           isEnvOwn;
+   const char*                   pcPgmNum="2.";
+   const char*                   pcCmdNum="3.";
+   const char*                   pcBifNum="4.";
+   const char*                   pcSccMan=NULL;
+   const char*                   pcPgmMan=NULL;
    const char*                   m;
 
    CLEBIF_OPN(asBif) = {
-      CLETAB_BIF("SYNTAX"  ,HLP_CLE_BUILTIN_SYNTAX  ,SYN_CLE_BUILTIN_SYNTAX  ,MAN_CLE_BUILTIN_SYNTAX  )
-      CLETAB_BIF("HELP"    ,HLP_CLE_BUILTIN_HELP    ,SYN_CLE_BUILTIN_HELP    ,MAN_CLE_BUILTIN_HELP    )
-      CLETAB_BIF("MANPAGE" ,HLP_CLE_BUILTIN_MANPAGE ,SYN_CLE_BUILTIN_MANPAGE ,MAN_CLE_BUILTIN_MANPAGE )
-      CLETAB_BIF("GENDOCU" ,HLP_CLE_BUILTIN_GENDOCU ,SYN_CLE_BUILTIN_GENDOCU ,MAN_CLE_BUILTIN_GENDOCU )
-      CLETAB_BIF("HTMLDOC" ,HLP_CLE_BUILTIN_HTMLDOC ,SYN_CLE_BUILTIN_HTMLDOC ,MAN_CLE_BUILTIN_HTMLDOC )
-      CLETAB_BIF("GENPROP" ,HLP_CLE_BUILTIN_GENPROP ,SYN_CLE_BUILTIN_GENPROP ,MAN_CLE_BUILTIN_GENPROP )
-      CLETAB_BIF("SETPROP" ,HLP_CLE_BUILTIN_SETPROP ,SYN_CLE_BUILTIN_SETPROP ,MAN_CLE_BUILTIN_SETPROP )
-      CLETAB_BIF("CHGPROP" ,HLP_CLE_BUILTIN_CHGPROP ,SYN_CLE_BUILTIN_CHGPROP ,MAN_CLE_BUILTIN_CHGPROP )
-      CLETAB_BIF("DELPROP" ,HLP_CLE_BUILTIN_DELPROP ,SYN_CLE_BUILTIN_DELPROP ,MAN_CLE_BUILTIN_DELPROP )
-      CLETAB_BIF("GETPROP" ,HLP_CLE_BUILTIN_GETPROP ,SYN_CLE_BUILTIN_GETPROP ,MAN_CLE_BUILTIN_GETPROP )
-      CLETAB_BIF("SETOWNER",HLP_CLE_BUILTIN_SETOWNER,SYN_CLE_BUILTIN_SETOWNER,MAN_CLE_BUILTIN_SETOWNER)
-      CLETAB_BIF("GETOWNER",HLP_CLE_BUILTIN_GETOWNER,SYN_CLE_BUILTIN_GETOWNER,MAN_CLE_BUILTIN_GETOWNER)
-      CLETAB_BIF("SETENV"  ,HLP_CLE_BUILTIN_SETENV  ,SYN_CLE_BUILTIN_SETENV  ,MAN_CLE_BUILTIN_SETENV  )
-      CLETAB_BIF("GETENV"  ,HLP_CLE_BUILTIN_GETENV  ,SYN_CLE_BUILTIN_GETENV  ,MAN_CLE_BUILTIN_GETENV  )
-      CLETAB_BIF("DELENV"  ,HLP_CLE_BUILTIN_DELENV  ,SYN_CLE_BUILTIN_DELENV  ,MAN_CLE_BUILTIN_DELENV  )
-      CLETAB_BIF("TRACE"   ,HLP_CLE_BUILTIN_TRACE   ,SYN_CLE_BUILTIN_TRACE   ,MAN_CLE_BUILTIN_TRACE   )
-      CLETAB_BIF("CONFIG"  ,HLP_CLE_BUILTIN_CONFIG  ,SYN_CLE_BUILTIN_CONFIG  ,MAN_CLE_BUILTIN_CONFIG  )
-      CLETAB_BIF("GRAMMAR" ,HLP_CLE_BUILTIN_GRAMMAR ,SYN_CLE_BUILTIN_GRAMMAR ,MAN_CLE_BUILTIN_GRAMMAR )
-      CLETAB_BIF("LEXEM"   ,HLP_CLE_BUILTIN_LEXEM   ,SYN_CLE_BUILTIN_LEXEM   ,MAN_CLE_BUILTIN_LEXEM   )
-      CLETAB_BIF("LICENSE" ,HLP_CLE_BUILTIN_LICENSE ,SYN_CLE_BUILTIN_LICENSE ,MAN_CLE_BUILTIN_LICENSE )
-      CLETAB_BIF("VERSION" ,HLP_CLE_BUILTIN_VERSION ,SYN_CLE_BUILTIN_VERSION ,MAN_CLE_BUILTIN_VERSION )
-      CLETAB_BIF("ABOUT"   ,HLP_CLE_BUILTIN_ABOUT   ,SYN_CLE_BUILTIN_ABOUT   ,MAN_CLE_BUILTIN_ABOUT   )
-      CLETAB_BIF("ERRORS"  ,HLP_CLE_BUILTIN_ERRORS  ,SYN_CLE_BUILTIN_ERRORS  ,MAN_CLE_BUILTIN_ERRORS  )
+      CLETAB_BIF(IDX_CLE_BUILTIN_SYNTAX  ,"SYNTAX"  ,HLP_CLE_BUILTIN_SYNTAX  ,SYN_CLE_BUILTIN_SYNTAX  ,MAN_CLE_BUILTIN_SYNTAX  ,TRUE)
+      CLETAB_BIF(IDX_CLE_BUILTIN_HELP    ,"HELP"    ,HLP_CLE_BUILTIN_HELP    ,SYN_CLE_BUILTIN_HELP    ,MAN_CLE_BUILTIN_HELP    ,TRUE)
+      CLETAB_BIF(IDX_CLE_BUILTIN_MANPAGE ,"MANPAGE" ,HLP_CLE_BUILTIN_MANPAGE ,SYN_CLE_BUILTIN_MANPAGE ,MAN_CLE_BUILTIN_MANPAGE ,TRUE)
+      CLETAB_BIF(IDX_CLE_BUILTIN_GENDOCU ,"GENDOCU" ,HLP_CLE_BUILTIN_GENDOCU ,SYN_CLE_BUILTIN_GENDOCU ,MAN_CLE_BUILTIN_GENDOCU ,TRUE)
+      CLETAB_BIF(IDX_CLE_BUILTIN_HTMLDOC ,"HTMLDOC" ,HLP_CLE_BUILTIN_HTMLDOC ,SYN_CLE_BUILTIN_HTMLDOC ,MAN_CLE_BUILTIN_HTMLDOC ,TRUE)
+      CLETAB_BIF(IDX_CLE_BUILTIN_GENPROP ,"GENPROP" ,HLP_CLE_BUILTIN_GENPROP ,SYN_CLE_BUILTIN_GENPROP ,MAN_CLE_BUILTIN_GENPROP ,TRUE)
+      CLETAB_BIF(IDX_CLE_BUILTIN_SETPROP ,"SETPROP" ,HLP_CLE_BUILTIN_SETPROP ,SYN_CLE_BUILTIN_SETPROP ,MAN_CLE_BUILTIN_SETPROP ,TRUE)
+      CLETAB_BIF(IDX_CLE_BUILTIN_CHGPROP ,"CHGPROP" ,HLP_CLE_BUILTIN_CHGPROP ,SYN_CLE_BUILTIN_CHGPROP ,MAN_CLE_BUILTIN_CHGPROP ,TRUE)
+      CLETAB_BIF(IDX_CLE_BUILTIN_DELPROP ,"DELPROP" ,HLP_CLE_BUILTIN_DELPROP ,SYN_CLE_BUILTIN_DELPROP ,MAN_CLE_BUILTIN_DELPROP ,TRUE)
+      CLETAB_BIF(IDX_CLE_BUILTIN_GETPROP ,"GETPROP" ,HLP_CLE_BUILTIN_GETPROP ,SYN_CLE_BUILTIN_GETPROP ,MAN_CLE_BUILTIN_GETPROP ,TRUE)
+      CLETAB_BIF(IDX_CLE_BUILTIN_SETOWNER,"SETOWNER",HLP_CLE_BUILTIN_SETOWNER,SYN_CLE_BUILTIN_SETOWNER,MAN_CLE_BUILTIN_SETOWNER,TRUE)
+      CLETAB_BIF(IDX_CLE_BUILTIN_GETOWNER,"GETOWNER",HLP_CLE_BUILTIN_GETOWNER,SYN_CLE_BUILTIN_GETOWNER,MAN_CLE_BUILTIN_GETOWNER,TRUE)
+      CLETAB_BIF(IDX_CLE_BUILTIN_SETENV  ,"SETENV"  ,HLP_CLE_BUILTIN_SETENV  ,SYN_CLE_BUILTIN_SETENV  ,MAN_CLE_BUILTIN_SETENV  ,TRUE)
+      CLETAB_BIF(IDX_CLE_BUILTIN_GETENV  ,"GETENV"  ,HLP_CLE_BUILTIN_GETENV  ,SYN_CLE_BUILTIN_GETENV  ,MAN_CLE_BUILTIN_GETENV  ,TRUE)
+      CLETAB_BIF(IDX_CLE_BUILTIN_DELENV  ,"DELENV"  ,HLP_CLE_BUILTIN_DELENV  ,SYN_CLE_BUILTIN_DELENV  ,MAN_CLE_BUILTIN_DELENV  ,TRUE)
+      CLETAB_BIF(IDX_CLE_BUILTIN_TRACE   ,"TRACE"   ,HLP_CLE_BUILTIN_TRACE   ,SYN_CLE_BUILTIN_TRACE   ,MAN_CLE_BUILTIN_TRACE   ,TRUE)
+      CLETAB_BIF(IDX_CLE_BUILTIN_CONFIG  ,"CONFIG"  ,HLP_CLE_BUILTIN_CONFIG  ,SYN_CLE_BUILTIN_CONFIG  ,MAN_CLE_BUILTIN_CONFIG  ,TRUE)
+      CLETAB_BIF(IDX_CLE_BUILTIN_GRAMMAR ,"GRAMMAR" ,HLP_CLE_BUILTIN_GRAMMAR ,SYN_CLE_BUILTIN_GRAMMAR ,MAN_CLE_BUILTIN_GRAMMAR ,TRUE)
+      CLETAB_BIF(IDX_CLE_BUILTIN_LEXEM   ,"LEXEM"   ,HLP_CLE_BUILTIN_LEXEM   ,SYN_CLE_BUILTIN_LEXEM   ,MAN_CLE_BUILTIN_LEXEM   ,TRUE)
+      CLETAB_BIF(IDX_CLE_BUILTIN_LICENSE ,"LICENSE" ,HLP_CLE_BUILTIN_LICENSE ,SYN_CLE_BUILTIN_LICENSE ,MAN_CLE_BUILTIN_LICENSE ,pcLic!=NULL)
+      CLETAB_BIF(IDX_CLE_BUILTIN_VERSION ,"VERSION" ,HLP_CLE_BUILTIN_VERSION ,SYN_CLE_BUILTIN_VERSION ,MAN_CLE_BUILTIN_VERSION ,pcVsn!=NULL)
+      CLETAB_BIF(IDX_CLE_BUILTIN_ABOUT   ,"ABOUT"   ,HLP_CLE_BUILTIN_ABOUT   ,SYN_CLE_BUILTIN_ABOUT   ,MAN_CLE_BUILTIN_ABOUT   ,pcAbo!=NULL)
+      CLETAB_BIF(IDX_CLE_BUILTIN_ERRORS  ,"ERRORS"  ,HLP_CLE_BUILTIN_ERRORS  ,SYN_CLE_BUILTIN_ERRORS  ,MAN_CLE_BUILTIN_ERRORS  ,TRUE)
       CLEBIF_CLS
    };
 
@@ -1088,9 +1095,34 @@ extern int siCleExecute(
    }
 
    if (psCmd==NULL || argc==0     || argv==NULL  ||  pcOwner==NULL ||  pcProgram==NULL ||  pcHlp==NULL ||
-       pcDep==NULL || pcOpt==NULL || pcEnt==NULL || *pcOwner==0x00 || *pcProgram==0x00 || *pcHlp==0   ) {
+       pcDep==NULL || pcOpt==NULL || pcEnt==NULL || *pcOwner==0x00 || *pcProgram==0x00 || *pcHlp==0    || psDoc==NULL) {
       if (pfErr!=NULL) fprintf(pfErr,"CLE call parameter incorrect (NULL pointer or empty strings)\n");
       ERROR(CLERTC_FAT,NULL);
+   }
+
+   for (i=0;asBif[i].pcKyw!=NULL;i++) {
+      if (asBif[i].siIdx!=i) {
+         if (pfErr!=NULL) fprintf(pfErr,"Index of built-in function '%s' not valid\n",asBif[i].pcKyw);
+         ERROR(CLERTC_TAB,NULL);
+      }
+   }
+
+   for (i=0;psDoc[i].uiTyp;i++) {
+      if (psDoc[i].uiTyp==CLE_DOCTYP_PROGRAM) {
+         pcPgmNum=psDoc[i].pcNum;
+      }
+      if (psDoc[i].uiTyp==CLE_DOCTYP_COMMANDS) {
+         pcCmdNum=psDoc[i].pcNum;
+      }
+      if (psDoc[i].uiTyp==CLE_DOCTYP_BUILTIN) {
+         pcBifNum=psDoc[i].pcNum;
+      }
+      if (psDoc[i].uiTyp==CLE_DOCTYP_PROGRAM) {
+         pcPgmMan=psDoc[i].pcMan;
+      }
+      if (psDoc[i].uiTyp==CLE_DOCTYP_SPECIALCODES) {
+         pcSccMan=psDoc[i].pcMan;
+      }
    }
 
    if (pfF2S==NULL) {
@@ -1265,7 +1297,7 @@ extern int siCleExecute(
    if (argv[1][0]=='-') argv[1]++;
 
 EVALUATE:
-   if (strxcmp(isCas,argv[1],"LICENSE",0,0,FALSE)==0) {
+   if (asBif[IDX_CLE_BUILTIN_LICENSE].isBif && strxcmp(isCas,argv[1],"LICENSE",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
       if (pfErr==NULL) pfErr=pfStd;
       if (argc==2) {
@@ -1280,7 +1312,7 @@ EVALUATE:
       fprintf(pfErr,"Syntax for built-in function 'LICENSE' not valid\n");
       fprintf(pfErr,"%s %s LICENSE\n",pcDep,argv[0]);
       ERROR(CLERTC_CMD,NULL);
-   } else if (strxcmp(isCas,argv[1],"VERSION",0,0,FALSE)==0) {
+   } else if (asBif[IDX_CLE_BUILTIN_VERSION].isBif && strxcmp(isCas,argv[1],"VERSION",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
       if (pfErr==NULL) pfErr=pfStd;
       if (argc==2) {
@@ -1295,7 +1327,7 @@ EVALUATE:
       fprintf(pfErr,"Syntax for built-in function 'VERSION' not valid\n");
       fprintf(pfErr,"%s %s VERSION\n",pcDep,argv[0]);
       ERROR(CLERTC_CMD,NULL);
-   } else if (strxcmp(isCas,argv[1],"ABOUT",0,0,FALSE)==0) {
+   } else if (asBif[IDX_CLE_BUILTIN_ABOUT].isBif && strxcmp(isCas,argv[1],"ABOUT",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
       if (pfErr==NULL) pfErr=pfStd;
       if (argc==2) {
@@ -1310,7 +1342,7 @@ EVALUATE:
       fprintf(pfErr,"Syntax for built-in function 'ABOUT' not valid\n");
       fprintf(pfErr,"%s %s ABOUT\n",pcDep,argv[0]);
       ERROR(CLERTC_CMD,NULL);
-   } else if (strxcmp(isCas,argv[1],"LEXEM",0,0,FALSE)==0) {
+   } else if (asBif[IDX_CLE_BUILTIN_LEXEM].isBif && strxcmp(isCas,argv[1],"LEXEM",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
       if (pfErr==NULL) pfErr=pfStd;
       if (argc==2) {
@@ -1323,7 +1355,7 @@ EVALUATE:
       fprintf(pfErr,"Syntax for built-in function 'LEXEM' not valid\n");
       fprintf(pfErr,"%s %s LEXEM\n",pcDep,argv[0]);
       ERROR(CLERTC_CMD,NULL);
-   } else if (strxcmp(isCas,argv[1],"GRAMMAR",0,0,FALSE)==0) {
+   } else if (asBif[IDX_CLE_BUILTIN_GRAMMAR].isBif && strxcmp(isCas,argv[1],"GRAMMAR",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
       if (pfErr==NULL) pfErr=pfStd;
       if (argc==2) {
@@ -1336,7 +1368,7 @@ EVALUATE:
       fprintf(pfErr,"Syntax for built-in function 'GRAMMAR' not valid\n");
       fprintf(pfErr,"%s %s GRAMMAR\n",pcDep,argv[0]);
       ERROR(CLERTC_CMD,NULL);
-   } else if (strxcmp(isCas,argv[1],"ERRORS",0,0,FALSE)==0) {
+   } else if (asBif[IDX_CLE_BUILTIN_ERRORS].isBif && strxcmp(isCas,argv[1],"ERRORS",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
       if (pfErr==NULL) pfErr=pfStd;
       if (argc==2) {
@@ -1345,17 +1377,10 @@ EVALUATE:
          efprintf(pfOut,"Return/condition/exit codes of the executable\n");
          efprintf(pfOut,"---------------------------------------------\n\n");
          fprintm(pfOut,pcOwn,pcPgm,MAN_CLE_APPENDIX_RETURNCODES,1);
-         if (psDoc!=NULL) {
-            for (i=0;psDoc[i].uiTyp;i++) {
-               if (psDoc[i].uiTyp==CLE_DOCTYP_SPECIALCODES) {
-                  pcScc=psDoc[i].pcMan;
-               }
-            }
-            if (pcScc!=NULL && *pcScc) {
-               efprintf(pfOut,"Special condition codes\n");
-               efprintf(pfOut,"~~~~~~~~~~~~~~~~~~~~~~~\n\n");
-               fprintm(pfOut,pcOwn,pcPgm,pcScc,1);
-            }
+         if (pcSccMan!=NULL && *pcSccMan) {
+            efprintf(pfOut,"Special condition codes\n");
+            efprintf(pfOut,"~~~~~~~~~~~~~~~~~~~~~~~\n\n");
+            fprintm(pfOut,pcOwn,pcPgm,pcScc,1);
          }
          if (pfMsg!=NULL) {
             efprintf(pfOut,"Reason codes of the different commands\n");
@@ -1370,7 +1395,7 @@ EVALUATE:
       fprintf(pfErr,"Syntax for built-in function 'ERRORS' not valid\n");
       fprintf(pfErr,"%s %s ERRORS\n",pcDep,argv[0]);
       ERROR(CLERTC_CMD,NULL);
-   } else if (strxcmp(isCas,argv[1],"SYNTAX",0,0,FALSE)==0) {
+   } else if (asBif[IDX_CLE_BUILTIN_SYNTAX].isBif && strxcmp(isCas,argv[1],"SYNTAX",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
       if (pfErr==NULL) pfErr=pfStd;
       if (argc==2) {
@@ -1460,7 +1485,7 @@ EVALUATE:
          }
       }
       ERROR(CLERTC_CMD,NULL);
-   } else if (strxcmp(isCas,argv[1],"HELP",0,0,FALSE)==0) {
+   } else if (asBif[IDX_CLE_BUILTIN_HELP].isBif && strxcmp(isCas,argv[1],"HELP",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
       if (pfErr==NULL) pfErr=pfStd;
       if (argc==2) {
@@ -1470,25 +1495,13 @@ EVALUATE:
       } else if (argc>=3) {
          if (argc==3) {
             if (strxcmp(isCas,argv[2],"MAN",0,0,FALSE)==0 || strxcmp(isCas,argv[2],"-MAN",0,0,FALSE)==0 || strxcmp(isCas,argv[2],"--MAN",0,0,FALSE)==0) {
-               if (psDoc!=NULL) {
-                  const char* pcMan=NULL;
-                  for (i=0;psDoc[i].uiTyp;i++) {
-                     if (psDoc[i].uiTyp==CLE_DOCTYP_PROGRAM) {
-                        pcMan=psDoc[i].pcMan;
-                     }
-                  }
-                  if (pcMan!=NULL && *pcMan) {
-                     fprintf(pfOut,"Help for program '%s':\n",pcPgm);
-                     fprintm(pfOut,pcOwn,pcPgm,pcMan,1);
-                     ERROR(CLERTC_OK,NULL);
-                  } else {
-                     fprintf(pfErr,"No manual page available for program '%s'\n",pcPgm);
-                     fprintf(pfErr,"CLE_DOCTYP_PROGRAM not found in documentation table\n");
-                     ERROR(CLERTC_TAB,NULL);
-                  }
+               if (pcPgmMan!=NULL && *pcPgmMan) {
+                  fprintf(pfOut,"Help for program '%s':\n",pcPgm);
+                  fprintm(pfOut,pcOwn,pcPgm,pcPgmMan,1);
+                  ERROR(CLERTC_OK,NULL);
                } else {
                   fprintf(pfErr,"No manual page available for program '%s'\n",pcPgm);
-                  fprintf(pfErr,"No table for documentation generation given\n");
+                  fprintf(pfErr,"CLE_DOCTYP_PROGRAM not found in documentation table\n");
                   ERROR(CLERTC_TAB,NULL);
                }
             } else siDep=1;
@@ -1584,30 +1597,18 @@ EVALUATE:
          }
       }
       ERROR(CLERTC_CMD,NULL);
-   } else if (strxcmp(isCas,argv[1],"MANPAGE",0,0,FALSE)==0) {
+   } else if (asBif[IDX_CLE_BUILTIN_MANPAGE].isBif && strxcmp(isCas,argv[1],"MANPAGE",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
       if (pfErr==NULL) pfErr=pfStd;
       if (argc==2) {
          if (pfOut!=NULL) {
-            if (psDoc!=NULL) {
-               const char* pcMan=NULL;
-               for (i=0;psDoc[i].uiTyp;i++) {
-                  if (psDoc[i].uiTyp==CLE_DOCTYP_PROGRAM) {
-                     pcMan=psDoc[i].pcMan;
-                  }
-               }
-               if (pcMan!=NULL && *pcMan) {
-                  fprintf(pfOut,"Manual page for program '%s':\n\n",pcPgm);
-                  vdCleManProgram(pfOut,psCmd,asBif,pcOwn,pcPgm,pcHlp,pcMan,pcDep,pcOpt,pcDpa,FALSE,TRUE);
-                  ERROR(CLERTC_OK,NULL);
-               } else {
-                  fprintf(pfErr,"No manual page available for program '%s'\n",pcPgm);
-                  fprintf(pfErr,"CLE_DOCTYP_PROGRAM not found in documentation table\n");
-                  ERROR(CLERTC_TAB,NULL);
-               }
+            if (pcPgmMan!=NULL && *pcPgmMan) {
+               fprintf(pfOut,"Manual page for program '%s':\n\n",pcPgm);
+               vdCleManProgram(pfOut,psCmd,asBif,pcOwn,pcPgm,pcHlp,pcPgmMan,pcDep,pcOpt,pcDpa,pcPgmNum,FALSE,TRUE);
+               ERROR(CLERTC_OK,NULL);
             } else {
                fprintf(pfErr,"No manual page available for program '%s'\n",pcPgm);
-               fprintf(pfErr,"No table for documentation generation given\n");
+               fprintf(pfErr,"CLE_DOCTYP_PROGRAM not found in documentation table\n");
                ERROR(CLERTC_TAB,NULL);
             }
          }
@@ -1641,37 +1642,27 @@ EVALUATE:
             }
          }
          if (strxcmp(isCas,pcCmd,"ALL",0,0,FALSE)==0 || strxcmp(isCas,pcCmd,"-ALL",0,0,FALSE)==0 || strxcmp(isCas,pcCmd,"--ALL",0,0,FALSE)==0) {
-            if (psDoc!=NULL) {
-               const char* pcMan=NULL;
-               for (i=0;psDoc[i].uiTyp;i++) {
-                  if (psDoc[i].uiTyp==CLE_DOCTYP_PROGRAM) {
-                     pcMan=psDoc[i].pcMan;
-                  }
-               }
-               if (pcMan!=NULL && *pcMan) {
-                  isAll=TRUE;
-                  if (isMan==FALSE) fprintf(pfOut,"Manual page for program '%s':\n\n",pcPgm);
-                  vdCleManProgram(pfDoc,psCmd,asBif,pcOwn,pcPgm,pcHlp,pcMan,pcDep,pcOpt,pcDpa,isMan,TRUE);
-                  if (isMan==TRUE) fprintf(pfOut,"Manual page for program '%s' successfully written to file (%s)\n",pcPgm,pcFil);
-               } else {
-                  fprintf(pfErr,"No manual page available for program '%s'\n",pcPgm);
-                  fprintf(pfErr,"CLE_DOCTYP_PROGRAM not found in documentation table\n");
-                  ERROR(CLERTC_TAB,NULL);
-               }
+            if (pcPgmMan!=NULL && *pcPgmMan) {
+               isAll=TRUE;
+               if (isMan==FALSE) fprintf(pfOut,"Manual page for program '%s':\n\n",pcPgm);
+               vdCleManProgram(pfDoc,psCmd,asBif,pcOwn,pcPgm,pcHlp,pcPgmMan,pcDep,pcOpt,pcDpa,pcPgmNum,isMan,TRUE);
+               if (isMan==TRUE) fprintf(pfOut,"Manual page for program '%s' successfully written to file (%s)\n",pcPgm,pcFil);
             } else {
                fprintf(pfErr,"No manual page available for program '%s'\n",pcPgm);
-               fprintf(pfErr,"No table for documentation generation given\n");
+               fprintf(pfErr,"CLE_DOCTYP_PROGRAM not found in documentation table\n");
                ERROR(CLERTC_TAB,NULL);
             }
          }
          for (i=0;asBif[i].pcKyw!=NULL;i++) {
-            if (strxcmp(isCas,pcCmd,asBif[i].pcKyw,0,0,FALSE)==0 || isAll) {
-               char acNum[16];
-               if (isMan==FALSE) fprintf(pfOut,"Manual page for built-in function '%s':\n\n",asBif[i].pcKyw);
-               snprintf(acNum,sizeof(acNum),"4.%d.",i+1); //TODO: determine right number
-               vdCleManFunction(pfDoc,0,S_TLD,acNum,asBif[i].pcKyw,asBif[i].pcHlp,pcOwn,pcPgm,asBif[i].pcSyn,asBif[i].pcMan,isMan,TRUE,TRUE,FALSE);
-               if (isMan==TRUE) fprintf(pfOut,"Manual page for built-in function '%s' successfully written to file (%s)\n",asBif[i].pcKyw,pcFil);
-               if (isAll==FALSE) ERROR(CLERTC_OK,NULL);
+            if (asBif[i].isBif) {
+               if (strxcmp(isCas,pcCmd,asBif[i].pcKyw,0,0,FALSE)==0 || isAll) {
+                  char acNum[16];
+                  if (isMan==FALSE) fprintf(pfOut,"Manual page for built-in function '%s':\n\n",asBif[i].pcKyw);
+                  snprintf(acNum,sizeof(acNum),"%s%d.",pcBifNum,i+1);
+                  vdCleManFunction(pfDoc,0,S_TLD,acNum,asBif[i].pcKyw,asBif[i].pcHlp,pcOwn,pcPgm,asBif[i].pcSyn,asBif[i].pcMan,isMan,TRUE,TRUE,FALSE);
+                  if (isMan==TRUE) fprintf(pfOut,"Manual page for built-in function '%s' successfully written to file (%s)\n",asBif[i].pcKyw,pcFil);
+                  if (isAll==FALSE) ERROR(CLERTC_OK,NULL);
+               }
             }
          }
          for (i=0;psCmd[i].pcKyw!=NULL;i++) {
@@ -1693,7 +1684,7 @@ EVALUATE:
                      fprintf(pfOut,"Manual page for argument '%s':\n\n",pcCmd);
                   }
                }
-               vdPrnCommandManpage(pvHdl,pfDoc,pcCmd,i,isMan,TRUE);
+               vdPrnCommandManpage(pvHdl,pfDoc,pcCmdNum,pcCmd,i,isMan,TRUE);
                vdClpClose(pvHdl,CLPCLS_MTD_ALL); pvHdl=NULL;
                if (isMan==TRUE) {
                   if (strlen(pcCmd)==strlen(psCmd[i].pcKyw)) {
@@ -1716,7 +1707,7 @@ EVALUATE:
                   if (siErr) ERROR(siErr,NULL);
                   sprintf(acPat,"%s.%s",pcDef,pcCmd);
                   if (pfOut!=NULL)fprintf(pfOut,"Manual page fo'argument '%s':\n\n",acPat);
-                  vdPrnCommandManpage(pvHdl,pfDoc,acPat,i,isMan,TRUE);
+                  vdPrnCommandManpage(pvHdl,pfDoc,pcCmdNum,acPat,i,isMan,TRUE);
                   if (isMan==TRUE) {
                      fprintf(pfOut,"Manual page for argument '%s' successfully written to file (%s)\n",acPat,pcFil);
                   }
@@ -1738,25 +1729,13 @@ EVALUATE:
             fprintf(pfErr,"Open of manual page file (\"%s\",\"%s\") failed (%d - %s)\n",pcFil,"w",errno,strerror(errno));
             ERROR(CLERTC_SYS,NULL);
          }
-         if (psDoc!=NULL) {
-            const char* pcMan=NULL;
-            for (i=0;psDoc[i].uiTyp;i++) {
-               if (psDoc[i].uiTyp==CLE_DOCTYP_PROGRAM) {
-                  pcMan=psDoc[i].pcMan;
-               }
-            }
-            if (pcMan!=NULL && *pcMan) {
-               vdCleManProgram(pfDoc,psCmd,asBif,pcOwn,pcPgm,pcHlp,pcMan,pcDep,pcOpt,pcDpa,isMan,TRUE);
-               if (pfOut!=NULL) fprintf(pfOut,"Manual page for program '%s' successfully written to file (%s)\n",pcPgm,pcFil);
-               ERROR(CLERTC_OK,NULL);
-            } else {
-               fprintf(pfErr,"No manual page available for program '%s'\n",pcPgm);
-               fprintf(pfErr,"CLE_DOCTYP_PROGRAM not found in documentation table\n");
-               ERROR(CLERTC_TAB,NULL);
-            }
+         if (pcPgmMan!=NULL && *pcPgmMan) {
+            vdCleManProgram(pfDoc,psCmd,asBif,pcOwn,pcPgm,pcHlp,pcPgmMan,pcDep,pcOpt,pcDpa,pcPgmNum,isMan,TRUE);
+            if (pfOut!=NULL) fprintf(pfOut,"Manual page for program '%s' successfully written to file (%s)\n",pcPgm,pcFil);
+            ERROR(CLERTC_OK,NULL);
          } else {
             fprintf(pfErr,"No manual page available for program '%s'\n",pcPgm);
-            fprintf(pfErr,"No table for documentation generation given\n");
+            fprintf(pfErr,"CLE_DOCTYP_PROGRAM not found in documentation table\n");
             ERROR(CLERTC_TAB,NULL);
          }
       }
@@ -1770,7 +1749,7 @@ EVALUATE:
       fprintf(pfErr,"%s %s MANPAGE function\n",pcDep,argv[0]);
       fprintf(pfErr,"%s %s MANPAGE\n",pcDep,argv[0]);
       ERROR(CLERTC_CMD,NULL);
-   } else if (strxcmp(isCas,argv[1],"GENDOCU",0,0,FALSE)==0) {
+   } else if (asBif[IDX_CLE_BUILTIN_GENDOCU].isBif && strxcmp(isCas,argv[1],"GENDOCU",0,0,FALSE)==0) {
       const char*                pcCmd=NULL;
       const char*                pcSgn=NULL;
       int                        isNbr=TRUE;
@@ -1841,7 +1820,7 @@ EVALUATE:
                   siErr=siCleCommandInit(pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,pcOwn,pcPgm,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,psCmd[i].piOid,psCmd[i].psTab,
                                          isCas,isPfl,isRpl,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf);
                   if (siErr) ERROR(siErr,NULL);
-                  snprintf(acNum,sizeof(acNum),"2.%d.",i+1);
+                  snprintf(acNum,sizeof(acNum),"%s%d.",pcCmdNum,i+1);
                   siErr=siClpDocu(pvHdl,pfDoc,pcCmd,NULL,acNum,"COMMAND",TRUE,FALSE,isNbr,FALSE,TRUE,0);
                   if (siErr<0) {
                      fprintf(pfErr,"Creation of documentation file (%s) failed (%d - %s)\n",pcFil,errno,strerror(errno));
@@ -1864,7 +1843,7 @@ EVALUATE:
                      siErr=siCleCommandInit(pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,pcOwn,pcPgm,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,psCmd[i].piOid,psCmd[i].psTab,
                                             isCas,isPfl,isRpl,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf);
                      if (siErr) ERROR(siErr,NULL);
-                     snprintf(acNum,sizeof(acNum),"2.%d.",i+1);
+                     snprintf(acNum,sizeof(acNum),"%s%d.",pcCmdNum,i+1);
                      sprintf(acPat,"%s.%s",pcDef,pcCmd);
                      siErr=siClpDocu(pvHdl,pfDoc,acPat,NULL,acNum,"COMMAND",TRUE,FALSE,isNbr,FALSE,TRUE,0);
                      if (siErr<0) {
@@ -1906,7 +1885,7 @@ EVALUATE:
       }
       efprintf(pfErr,"%s %s GENDOCU filename [NONBR][SHORT]\n",pcDep,argv[0]);
       ERROR(CLERTC_CMD,NULL);
-   } else if (strxcmp(isCas,argv[1],"HTMLDOC",0,0,FALSE)==0) {
+   } else if (asBif[IDX_CLE_BUILTIN_HTMLDOC].isBif && strxcmp(isCas,argv[1],"HTMLDOC",0,0,FALSE)==0) {
       const char*       pcSgn=NULL;
       int               isNbr=FALSE;
       if (pfOut==NULL) pfOut=pfStd;
@@ -2003,7 +1982,7 @@ EVALUATE:
             ERROR(CLERTC_FAT,pcPat);
          }
       }
-   } else if (strxcmp(isCas,argv[1],"GENPROP",0,0,FALSE)==0) {
+   } else if (asBif[IDX_CLE_BUILTIN_GENPROP].isBif && strxcmp(isCas,argv[1],"GENPROP",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
       if (pfErr==NULL) pfErr=pfStd;
       if (argc==3) {
@@ -2072,7 +2051,7 @@ EVALUATE:
       }
       fprintf(pfErr,"%s %s GENPROP filename\n",pcDep,argv[0]);
       ERROR(CLERTC_CMD,NULL);
-   } else if (strxcmp(isCas,argv[1],"SETPROP",0,0,FALSE)==0) {
+   } else if (asBif[IDX_CLE_BUILTIN_SETPROP].isBif && strxcmp(isCas,argv[1],"SETPROP",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
       if (pfErr==NULL) pfErr=pfStd;
       if (argc==3) {
@@ -2129,7 +2108,7 @@ EVALUATE:
       }
       fprintf(pfErr,"%s %s SETPROP filename\n",pcDep,argv[0]);
       ERROR(CLERTC_CMD,NULL);
-   } else if (strxcmp(isCas,argv[1],"CHGPROP",0,0,FALSE)==0 || (pcDef!=NULL && strxcmp(isCas,pcDef,"flam",0,0,FALSE)==0 && strxcmp(isCas,argv[1],"DEFAULTS",0,0,FALSE)==0)) {
+   } else if ((asBif[IDX_CLE_BUILTIN_CHGPROP].isBif && strxcmp(isCas,argv[1],"CHGPROP",0,0,FALSE)==0) || (pcDef!=NULL && strxcmp(isCas,pcDef,"flam",0,0,FALSE)==0 && strxcmp(isCas,argv[1],"DEFAULTS",0,0,FALSE)==0)) {
       if (pfOut==NULL) pfOut=pfStd;
       if (pfErr==NULL) pfErr=pfStd;
       if (argc>=3) {
@@ -2198,7 +2177,7 @@ EVALUATE:
          }
       }
       ERROR(CLERTC_CMD,NULL);
-   } else if (strxcmp(isCas,argv[1],"DELPROP",0,0,FALSE)==0) {
+   } else if (asBif[IDX_CLE_BUILTIN_DELPROP].isBif && strxcmp(isCas,argv[1],"DELPROP",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
       if (pfErr==NULL) pfErr=pfStd;
       if (argc==2) {
@@ -2238,7 +2217,7 @@ EVALUATE:
          fprintf(pfOut,"Delete configuration keyword '%s' was successful\n",pcCnf);
          ERROR(CLERTC_OK,NULL);
       }
-   } else if (strxcmp(isCas,argv[1],"GETPROP",0,0,FALSE)==0 || (pcDef!=NULL && strxcmp(isCas,pcDef,"flam",0,0,FALSE)==0 && strxcmp(isCas,argv[1],"LIST",0,0,FALSE)==0)) {
+   } else if ((asBif[IDX_CLE_BUILTIN_GETPROP].isBif && strxcmp(isCas,argv[1],"GETPROP",0,0,FALSE)==0) || (pcDef!=NULL && strxcmp(isCas,pcDef,"flam",0,0,FALSE)==0 && strxcmp(isCas,argv[1],"LIST",0,0,FALSE)==0)) {
       if (pfOut==NULL) pfOut=pfStd;
       if (pfErr==NULL) pfErr=pfStd;
       if (argc==2) {
@@ -2340,7 +2319,7 @@ EVALUATE:
       }
       fprintf(pfErr,"%s %s GETPROP\n",pcDep,argv[0]);
       ERROR(CLERTC_CMD,NULL);
-   } else if (strxcmp(isCas,argv[1],"SETOWNER",0,0,FALSE)==0) {
+   } else if (asBif[IDX_CLE_BUILTIN_SETOWNER].isBif && strxcmp(isCas,argv[1],"SETOWNER",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
       if (pfErr==NULL) pfErr=pfStd;
       if (argc==3) {
@@ -2358,7 +2337,7 @@ EVALUATE:
       fprintf(pfErr,"Syntax for built-in function 'SETOWNER' not valid\n");
       fprintf(pfErr,"%s %s SETOWNER name\n",pcDep,argv[0]);
       ERROR(CLERTC_CMD,NULL);
-   } else if (strxcmp(isCas,argv[1],"GETOWNER",0,0,FALSE)==0) {
+   } else if (asBif[IDX_CLE_BUILTIN_GETOWNER].isBif && strxcmp(isCas,argv[1],"GETOWNER",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
       if (pfErr==NULL) pfErr=pfStd;
       if (argc==2) {
@@ -2368,7 +2347,7 @@ EVALUATE:
       fprintf(pfErr,"Syntax for built-in function 'GETOWNER' not valid\n");
       fprintf(pfErr,"%s %s GETOWNER\n",pcDep,argv[0]);
       ERROR(CLERTC_CMD,NULL);
-   } else if (strxcmp(isCas,argv[1],"SETENV",0,0,FALSE)==0) {
+   } else if (asBif[IDX_CLE_BUILTIN_SETENV].isBif && strxcmp(isCas,argv[1],"SETENV",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
       if (pfErr==NULL) pfErr=pfStd;
       if (argc==3) {
@@ -2396,7 +2375,7 @@ EVALUATE:
       fprintf(pfErr,"Syntax for built-in function 'SETENV' not valid\n");
       fprintf(pfErr,"%s %s SETENV variable=value\n",pcDep,argv[0]);
       ERROR(CLERTC_CMD,NULL);
-   } else if (strxcmp(isCas,argv[1],"GETENV",0,0,FALSE)==0) {
+   } else if (asBif[IDX_CLE_BUILTIN_GETENV].isBif && strxcmp(isCas,argv[1],"GETENV",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
       if (pfErr==NULL) pfErr=pfStd;
       if (argc==2) {
@@ -2412,7 +2391,7 @@ EVALUATE:
       fprintf(pfErr,"Syntax for built-in function 'GETENV' not valid\n");
       fprintf(pfErr,"%s %s GETENV\n",pcDep,argv[0]);
       ERROR(CLERTC_CMD,NULL);
-   } else if (strxcmp(isCas,argv[1],"DELENV",0,0,FALSE)==0) {
+   } else if (asBif[IDX_CLE_BUILTIN_DELENV].isBif && strxcmp(isCas,argv[1],"DELENV",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
       if (pfErr==NULL) pfErr=pfStd;
       if (argc==3) {
@@ -2430,7 +2409,7 @@ EVALUATE:
       fprintf(pfErr,"Syntax for built-in function 'DELENV' not valid\n");
       fprintf(pfErr,"%s %s DELENV variable\n",pcDep,argv[0]);
       ERROR(CLERTC_CMD,NULL);
-   } else if (strxcmp(isCas,argv[1],"TRACE",0,0,FALSE)==0) {
+   } else if (asBif[IDX_CLE_BUILTIN_TRACE].isBif && strxcmp(isCas,argv[1],"TRACE",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
       if (pfErr==NULL) pfErr=pfStd;
       if (argc==3) {
@@ -2485,7 +2464,7 @@ EVALUATE:
       fprintf(pfErr,"%s %s TRACE ON/OFF\n",pcDep,argv[0]);
       fprintf(pfErr,"%s %s TRACE FILE=filenam\n",pcDep,argv[0]);
       ERROR(CLERTC_CMD,NULL);
-   } else if (strxcmp(isCas,argv[1],"CONFIG",0,0,FALSE)==0) {
+   } else if (asBif[IDX_CLE_BUILTIN_CONFIG].isBif && strxcmp(isCas,argv[1],"CONFIG",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
       if (pfErr==NULL) pfErr=pfStd;
       if (argc==2) {
@@ -3038,6 +3017,7 @@ static void vdCleManProgram(
    const char*                   pcDep,
    const char*                   pcSep,
    const char*                   pcDpa,
+   const char*                   pcNum,
    const int                     isMan,
    const int                     isNbr)
 {
@@ -3083,12 +3063,13 @@ static void vdCleManProgram(
       fprintf(pfOut,"\n");
    } else {
       if (isNbr) {
-         fprintf(pfOut,"2. PROGRAM '%s'\n",pcPgm);
-         l=strlen(pcPgm)+13;
+         fprintf(pfOut,"%s PROGRAM '%s'\n",pcNum,pcPgm);
+         l=strlen(pcNum)+strlen(pcPgm)+11;
          for (i=0;i<l;i++) fprintf(pfOut,"%c",'-');
          fprintf(pfOut,"\n\n");
-         fprintf(pfOut,"2.1. SYNOPSIS\n");
-         for (i=0;i<13;i++) fprintf(pfOut,"%c",C_TLD);
+         fprintf(pfOut,"%s1. SYNOPSIS\n",pcNum);
+         l=strlen(pcNum)+11;
+         for (i=0;i<l;i++) fprintf(pfOut,"%c",C_TLD);
          fprintf(pfOut,"\n\n");
       } else {
          fprintf(pfOut,"PROGRAM '%s'\n",pcPgm);
@@ -3107,10 +3088,10 @@ static void vdCleManProgram(
       fprintf(pfOut, "-----------------------------------------------------------------------\n\n");
 
       if (isNbr) {
-         fprintf(pfOut,"2.2. DESCRIPTION\n");
-         for (i=0;i<16;i++) fprintf(pfOut,"%c",C_TLD);
+         fprintf(pfOut,"%s2. DESCRIPTION\n",pcNum);
+         l=strlen(pcNum)+14;
+         for (i=0;i<l;i++) fprintf(pfOut,"%c",C_TLD);
          fprintf(pfOut,"\n\n");
-
       } else {
          fprintf(pfOut,"DESCRIPTION\n");
          for (i=0;i<11;i++) fprintf(pfOut,"%c",C_TLD);
@@ -3122,8 +3103,9 @@ static void vdCleManProgram(
          fprintf(pfOut,"No detailed description available for this program.\n\n");
       }
       if (isNbr) {
-         fprintf(pfOut,"2.3. SYNTAX\n");
-         for (i=0;i<12;i++) fprintf(pfOut,"%c",C_TLD);
+         fprintf(pfOut,"%s3. SYNTAX\n",pcNum);
+         l=strlen(pcNum)+9;
+         for (i=0;i<l;i++) fprintf(pfOut,"%c",C_TLD);
          fprintf(pfOut,"\n\n");
       } else {
          fprintf(pfOut,"SYNTAX\n");
@@ -3137,8 +3119,9 @@ static void vdCleManProgram(
       fprintf(pfOut,"------------------------------------------------------------------------\n\n");
 
       if (isNbr) {
-         fprintf(pfOut,"2.4. HELP\n");
-         for (i=0;i<9;i++) fprintf(pfOut,"%c",C_TLD);
+         fprintf(pfOut,"%s4. HELP\n",pcNum);
+         l=strlen(pcNum)+7;
+         for (i=0;i<l;i++) fprintf(pfOut,"%c",C_TLD);
          fprintf(pfOut,"\n\n");
       } else {
          fprintf(pfOut,"HELP\n");
@@ -3275,7 +3258,9 @@ if (pcDpa!=NULL) {
 }
    fprintf(pfOut,"%s Built-in functions:\n",pcDep);
    for (int i=0;psBif[i].pcKyw!=NULL;i++) {
-      efprintf(pfOut,"%s%s %s %s\n",pcDep,pcDep,pcPgm,psBif[i].pcSyn);
+      if (psBif[i].isBif) {
+         efprintf(pfOut,"%s%s %s %s\n",pcDep,pcDep,pcPgm,psBif[i].pcSyn);
+      }
    }
 }
 
@@ -3294,7 +3279,9 @@ static void vdPrnStaticHelp(
    }
    fprintf(pfOut,"%s Built-in functions - to give interactive support for the commands above\n",pcDep);
    for (int i=0;psBif[i].pcKyw!=NULL;i++) {
-      efprintf(pfOut,"%s%s %s %-8.8s - %s\n",pcDep,pcDep,pcPgm,psBif[i].pcKyw,psBif[i].pcHlp);
+      if (psBif[i].isBif) {
+         efprintf(pfOut,"%s%s %s %-8.8s - %s\n",pcDep,pcDep,pcPgm,psBif[i].pcKyw,psBif[i].pcHlp);
+      }
    }
    fprintf(pfOut,"For more information please use the built-in function 'MANPAGE'\n");
 }
@@ -3330,13 +3317,14 @@ static void vdPrnCommandHelp(
 static void vdPrnCommandManpage(
    void*                   pvHdl,
    FILE*                   pfOut,
+   const char*             pcNum,
    const char*             pcCmd,
    const int               siInd,
    const int               isMan,
    const int               isNbr)
 {
    char                    acNum[16];
-   snprintf(acNum,sizeof(acNum),"3.%d.",siInd+1);
+   snprintf(acNum,sizeof(acNum),"%s%d.",pcNum,siInd+1);
    siClpDocu(pvHdl,pfOut,pcCmd,NULL,acNum,"COMMAND",FALSE,isMan,isNbr,FALSE,TRUE,0);
 }
 

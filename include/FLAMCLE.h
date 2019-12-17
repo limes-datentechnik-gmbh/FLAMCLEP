@@ -904,7 +904,7 @@ typedef struct CleOtherClp {
  * @param[in]  pcDpa Pointer to a file name for a default parameter file (e.g. "DD:FLAMPAR") or NULL/empty string for nothing,
  *                   The file name is used if only a command without assignment or parameter is provided
  * @param[in]  siNoR Define this reason code to the values the mapping function returns if no run is requested (0 is nothing)
- * @param[in]  psDoc Table for flexible documentation generation (NULL then no manual page documentation is possible)
+ * @param[in]  psDoc Table for documentation generation (must be defined)
  *
  * @return signed integer with the condition codes below:\n
  * 0  - command line, command syntax, mapping, execution and finish of the command was successful\n
@@ -1024,6 +1024,7 @@ extern int siCleParseString(
 
 //TODO: in CLE.c verlagern
 typedef struct CleBuiltin {
+   int                           siIdx;
    const char*                   pcKyw;
    const char*                   pcHlp;
    const char*                   pcSyn;
@@ -1031,9 +1032,9 @@ typedef struct CleBuiltin {
    int                           isBif;
 } TsCleBuiltin;
 
-#define CLEBIF_OPN(name)              TsCleBuiltin name[]
-#define CLETAB_BIF(kyw,hlp,syn,man)   {(kyw),(hlp),(syn),(man), FALSE},
-#define CLEBIF_CLS                    { NULL, NULL, NULL, NULL, FALSE}
+#define CLEBIF_OPN(name)                     TsCleBuiltin name[]
+#define CLETAB_BIF(idx,kyw,hlp,syn,man,bif)  {(idx),(kyw),(hlp),(syn),(man), (bif)},
+#define CLEBIF_CLS                           { -1, NULL, NULL, NULL, NULL, FALSE}
 
 typedef struct CleDocPar {
    const char*                   pcOwn;

@@ -169,13 +169,13 @@
  * 1.2.123: Increase maximal amount of parameter per object from 256 to 512 (CLPMAX_TABCNT)
  * 1.2.124: Use type of function and not type of pointer to function (usable for pragma's)
  * 1.2.125: Add vdClpReset function to reset after an application handled error
- * 1.2.126: Support better docu generation and headings as single line variants (= Hdl1, ==Hdl2, ...)
- * 1.2.127: Support documentation generation by callback function (for built-in HTMLDOC)
+ * 1.3.126: Support better docu generation and headings as single line variants (= Hdl1, ==Hdl2, ...)
+ * 1.3.127: Support documentation generation by callback function (for built-in HTMLDOC)
 **/
 
-#define CLP_VSN_STR       "1.2.126"
+#define CLP_VSN_STR       "1.3.126"
 #define CLP_VSN_MAJOR      1
-#define CLP_VSN_MINOR        2
+#define CLP_VSN_MINOR        3
 #define CLP_VSN_REVISION       126
 
 /* Definition der Konstanten ******************************************/
@@ -1660,7 +1660,7 @@ extern int siClpDocu(
          int                           siErr=0,siLev,siPos;
          const char*                   pcSta=(pcHdl!=NULL && *pcHdl)?pcHdl:psHdl->pcCmd;
          unsigned int                  i,l=strlen(psHdl->pcCmd);
-         char                          acNum[strlen(pcNum)+10];
+         char                          acNum[64];
          char                          acArg[20];
          const char*                   p;
          if (pcPat!=NULL && *pcPat) {
@@ -1728,7 +1728,7 @@ extern int siClpDocu(
                            case CLPTYP_OVRLAY:strcpy(acArg,"OVERLAY");break;
                            default           :strcpy(acArg,"PARAMETER");break;
                            }
-                           vdPrintHdl(pfDoc,psHdl->uiLev,isNbr,pcNum,acArg,psArg->psStd->pcKyw,C_CRT);
+                           vdPrintHdl(pfDoc,psHdl->uiLev,isNbr,acNum,acArg,psArg->psStd->pcKyw,C_CRT);
                            if (isIdt) efprintf(pfDoc,"indexterm:[ARGUMENT, %s, %s]\n\n",acArg,psArg->psStd->pcKyw);
                            fprintf(pfDoc, ".SYNOPSIS\n\n");
                            fprintf(pfDoc, "-----------------------------------------------------------------------\n");
@@ -1791,7 +1791,7 @@ extern int siClpDocu(
                            fprintf(pfDoc, "------\n\n");
                            fprintf(pfDoc, "limes datentechnik(r) gmbh (www.flam.de)\n\n");
                         } else {
-                           vdPrintHdl(pfDoc,psHdl->uiLev,isNbr,pcNum,"CONSTANT",psArg->psStd->pcKyw,'+');
+                           vdPrintHdl(pfDoc,psHdl->uiLev,isNbr,acNum,"CONSTANT",psArg->psStd->pcKyw,'+');
                            if (isIdt) efprintf(pfDoc,"indexterm:[ARGUMENT, CONSTANT, %s]\n\n",psArg->psStd->pcKyw);
                            fprintf(pfDoc, ".SYNOPSIS\n\n");
                            fprintf(pfDoc, "-----------------------------------------------------------------------\n");
