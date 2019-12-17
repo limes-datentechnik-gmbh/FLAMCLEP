@@ -890,7 +890,7 @@ typedef struct CleOtherClp {
  * @param[in]  pcOpt String to separate options (recommended: "/" converted on EBCDIC systems)
  * @param[in]  pcEnt String to separate list entries (recommended: "," converted on EBCDIC systems)
  * @param[in]  pcLic String containing the license information for this program (used by built-in function LICENSE - not converted on EBCDIC systems (don't use dia-critical characters))
- * @param[in]  pcBld String containing the build number / raw version for this program (optional, can be NULL) used in final message about completion - converted on EBCDIC systems
+ * @param[in]  pcBld String containing the build number / raw version for this program (optional, can be NULL) used in final message and replacements - converted on EBCDIC systems
  * @param[in]  pcVsn String containing the version information for this program (used by built-in function VERSION - not converted on EBCDIC systems (don't use dia-critical characters))
  * @param[in]  pcAbo String containing the about message for this program (used by built-in function ABOUT - not converted on EBCDIC systems (don't use dia-critical characters))
  * @param[in]  pcHlp Short help message for the whole program (converted on EBCDIC systems)
@@ -930,31 +930,31 @@ extern int siCleExecute(
    const TsCleCommand*           psCmd,
    int                           argc,
    char*                         argv[],
-   const char*                   pcOwn,
-   const char*                   pcPgm,
-   const int                     isCas,
-   const int                     isPfl,
-   const int                     isRpl,
+   const char*                   pcOwn,//
+   const char*                   pcPgm,//
+   const int                     isCas,//
+   const int                     isPfl,//
+   const int                     isRpl,//
    const int                     isEnv,
-   const int                     siMkl,
+   const int                     siMkl,//
    FILE*                         pfOut,
    FILE*                         pfTrc,
-   const char*                   pcDep,
-   const char*                   pcOpt,
-   const char*                   pcEnt,
+   const char*                   pcDep,//
+   const char*                   pcOpt,//
+   const char*                   pcEnt,//
    const char*                   pcLic,
-   const char*                   pcBld,
-   const char*                   pcVsn,
-   const char*                   pcAbo,
-   const char*                   pcHlp,
+   const char*                   pcBld,//
+   const char*                   pcVsn,//
+   const char*                   pcAbo,//
+   const char*                   pcHlp,//
    const char*                   pcDef,
-   TfMsg*                        pfMsg,
-   const TsCleOtherClp*          psOth,
-   void*                         pvF2S,
-   TfF2S*                        pfF2S,
-   void*                         pvSaf,
-   TfSaf*                        pfSaf,
-   const char*                   pcDpa,
+   TfMsg*                        pfMsg,//
+   const TsCleOtherClp*          psOth,//
+   void*                         pvF2S,//
+   TfF2S*                        pfF2S,//
+   void*                         pvSaf,//
+   TfSaf*                        pfSaf,//
+   const char*                   pcDpa,//
    const int                     siNoR,
    const TsCleDoc*               psDoc);
 
@@ -1004,6 +1004,7 @@ extern int siCleParseString(
     const int                     siMkl,
     const char*                   pcOwn,
     const char*                   pcPgm,
+    const char*                   pcBld,
     const char*                   pcCmd,
     const char*                   pcMan,
     const char*                   pcHlp,
@@ -1039,6 +1040,7 @@ typedef struct CleBuiltin {
 typedef struct CleDocPar {
    const char*                   pcOwn;
    const char*                   pcPgm;
+   const char*                   pcBld;
    const char*                   pcHlp;
    const char*                   pcDep;
    const char*                   pcOpt;

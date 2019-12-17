@@ -273,10 +273,11 @@ extern int srprintf(char** buffer,size_t* size,const size_t expansion,const char
  * @param file    pointer to the file
  * @param own     owner name for replacement (&{OWN})
  * @param pgm     program name for replacement (&{PGM})
- * @param man     manpage to print, which can contain &{PGM} and &{OWN}
+ * @param bld     build/version string for replacement (&{BLD})
+ * @param man     manpage to print, which can contain &{PGM}, &{OWN} and &{BLD}
  * @param cnt     amount of '\n' added to man page (0,1,2 (>2=2))
  */
-extern void fprintm(FILE* file,const char* own, const char* pgm, const char* man, const int cnt);
+extern void fprintm(FILE* file,const char* own, const char* pgm, const char* bld, const char* man, const int cnt);
 
 /**
  * This function parses a zero terminated string array of a certain length or terminated with 0xFF.

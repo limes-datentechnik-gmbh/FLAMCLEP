@@ -42,4 +42,4 @@ the tracing use built-in function <<CLEP.BUILTIN.TRACE,TRACE>>.
 Last but not least it is possible to view the license, version and other
 information about the program.
 
-This is the ${__BUILD__} build version of the FLAMCLEP.
+This is the build &{BLD} of the FLAMCLEP.

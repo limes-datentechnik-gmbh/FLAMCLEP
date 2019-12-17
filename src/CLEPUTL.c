@@ -1291,7 +1291,7 @@ extern char* dynUnEscape(const char* input) {
    return(unEscape(input,output));
 }
 
-extern void fprintm(FILE* file,const char* own, const char* pgm, const char* man, const int cnt) {
+extern void fprintm(FILE* file,const char* own, const char* pgm, const char* bld, const char* man, const int cnt) {
    char*       hlp;
    char*       ptr;
    char        tmp[strlen(man)+4];
@@ -1306,31 +1306,72 @@ extern void fprintm(FILE* file,const char* own, const char* pgm, const char* man
       *hlp='\0';
       efprintf(file,"%s",ptr);
       if (strncmp(hlp+2,"OWN}",4)==0) { /*nodiac*/
-         for (const char* p=own;*p;p++) fprintf(file,"%c",toupper(*p));
+         if (own!=NULL) {
+            for (const char* p=own;*p;p++) fprintf(file,"%c",toupper(*p));
+         }
          ptr=hlp+6;
       } else if (strncmp(hlp+2,"own}",4)==0) { /*nodiac*/
-         for (const char* p=pgm;*p;p++) fprintf(file,"%c",tolower(*p));
+         if (own!=NULL) {
+            for (const char* p=own;*p;p++) fprintf(file,"%c",tolower(*p));
+         }
          ptr=hlp+6;
       } else if (strncmp(hlp+2,"Own}",4)==0) { /*nodiac*/
-         fprintf(file,"%c",toupper(*own));
-         for (const char* p=pgm+1;*p;p++) fprintf(file,"%c",tolower(*p));
+         if (own!=NULL) {
+            fprintf(file,"%c",toupper(*own));
+            for (const char* p=own+1;*p;p++) fprintf(file,"%c",tolower(*p));
+         }
          ptr=hlp+6;
       } else if (strncmp(hlp+2,"oWn}",4)==0) { /*nodiac*/
-         fprintf(file,"%s",own);
+         if (own!=NULL) {
+            fprintf(file,"%s",own);
+         }
          ptr=hlp+6;
       } else if (strncmp(hlp+2,"PGM}",4)==0) { /*nodiac*/
-         for (const char* p=pgm;*p;p++) fprintf(file,"%c",toupper(*p));
+         if (pgm!=NULL) {
+            for (const char* p=pgm;*p;p++) fprintf(file,"%c",toupper(*p));
+         }
          ptr=hlp+6;
       } else if (strncmp(hlp+2,"pgm}",4)==0) { /*nodiac*/
-         for (const char* p=pgm;*p;p++) fprintf(file,"%c",tolower(*p));
+         if (pgm!=NULL) {
+            for (const char* p=pgm;*p;p++) fprintf(file,"%c",tolower(*p));
+         }
          ptr=hlp+6;
       } else if (strncmp(hlp+2,"Pgm}",4)==0) { /*nodiac*/
-         fprintf(file,"%c",toupper(*pgm));
-         for (const char* p=pgm+1;*p;p++) fprintf(file,"%c",tolower(*p));
+         if (pgm!=NULL) {
+            fprintf(file,"%c",toupper(*pgm));
+            for (const char* p=pgm+1;*p;p++) fprintf(file,"%c",tolower(*p));
+         }
          ptr=hlp+6;
       } else if (strncmp(hlp+2,"pGm}",4)==0) { /*nodiac*/
-         fprintf(file,"%s",pgm);
+         if (pgm!=NULL) {
+            fprintf(file,"%s",pgm);
+         }
          ptr=hlp+6;
+      } else if (strncmp(hlp+2,"BLD}",4)==0) { /*nodiac*/
+         if (bld!=NULL) {
+            for (const char* p=bld;*p;p++) fprintf(file,"%c",toupper(*p));
+         }
+         ptr=hlp+6;
+      } else if (strncmp(hlp+2,"bld}",4)==0) { /*nodiac*/
+         if (bld!=NULL) {
+            for (const char* p=bld;*p;p++) fprintf(file,"%c",tolower(*p));
+         }
+         ptr=hlp+6;
+      } else if (strncmp(hlp+2,"Bld}",4)==0) { /*nodiac*/
+         if (bld!=NULL) {
+            fprintf(file,"%c",toupper(*bld));
+            for (const char* p=bld+1;*p;p++) fprintf(file,"%c",tolower(*p));
+         }
+         ptr=hlp+6;
+      } else if (strncmp(hlp+2,"bLd}",4)==0) { /*nodiac*/
+         if (bld!=NULL) {
+            fprintf(file,"%s",bld);
+         }
+         ptr=hlp+6;
+      } else if (strncmp(hlp+2,"DATE}",5)==0) { /*nodiac*/
+         char acTimBuf[CSTIME_BUFSIZ];
+         fprintf(file,"%s",cstime(0,acTimBuf));
+         ptr=hlp+7;
       } else {
          char* nxt=strchr(hlp,'}'); /*nodiac*/
          if (nxt!=NULL) {

@@ -187,6 +187,7 @@ static int siClePropertyInit(
    void*                         pvClp,
    const char*                   pcOwn,
    const char*                   pcPgm,
+   const char*                   pcBld,
    const char*                   pcCmd,
    const char*                   pcMan,
    const char*                   pcHlp,
@@ -232,6 +233,7 @@ static int siCleChangeProperties(
    const char*                   pcHom,
    const char*                   pcOwn,
    const char*                   pcPgm,
+   const char*                   pcBld,
    const char*                   pcCmd,
    const char*                   pcMan,
    const char*                   pcHlp,
@@ -261,6 +263,7 @@ static int siCleCommandInit(
    void*                         pvClp,
    const char*                   pcOwn,
    const char*                   pcPgm,
+   const char*                   pcBld,
    const char*                   pcCmd,
    const char*                   pcMan,
    const char*                   pcHlp,
@@ -310,6 +313,7 @@ static void vdCleManProgram(
    const TsCleBuiltin*           psBif,
    const char*                   pcOwn,
    const char*                   pcPgm,
+   const char*                   pcBld,
    const char*                   pcHlp,
    const char*                   pcMan,
    const char*                   pcDep,
@@ -328,6 +332,7 @@ static void vdCleManFunction(
    const char*                   pcHlp,
    const char*                   pcOwn,
    const char*                   pcPgm,
+   const char*                   pcBld,
    const char*                   pcSyn,
    const char*                   pcMan,
    const int                     isMan,
@@ -609,7 +614,7 @@ static inline TsCnfHdl* psOpenConfig(FILE* pfOut, FILE* pfErr, const char* pcHom
 
 /**********************************************************************/
 
-static int siPrintChapter(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const char* pcOwn, const char* pcPgm, const int isNbr, const int isIdt) {
+static int siPrintChapter(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const char* pcOwn, const char* pcPgm, const char* pcBld, const int isNbr, const int isIdt) {
    if (psDoc->pcHdl!=NULL && *psDoc->pcHdl) {
       if (psDoc->pcKyw!=NULL && *psDoc->pcKyw) {
          efprintf(pfDoc,"[%s]\n",psDoc->pcKyw);
@@ -632,7 +637,7 @@ static int siPrintChapter(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const
          efprintf(pfDoc,"indexterm:[%s]\n\n",pcInd);
       }
       if (psDoc->pcMan!=NULL && *psDoc->pcMan) {
-         fprintm(pfDoc,pcOwn,pcPgm,psDoc->pcMan,2);
+         fprintm(pfDoc,pcOwn,pcPgm,pcBld,psDoc->pcMan,2);
       }
       return(CLERTC_OK);
    } else {
@@ -641,25 +646,25 @@ static int siPrintChapter(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const
    }
 }
 
-static int siClePrintCover(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const char* pcOwn, const char* pcPgm, const int isNbr, const int isIdt) {
+static int siClePrintCover(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const char* pcOwn, const char* pcPgm, const char* pcBld, const int isNbr, const int isIdt) {
    if (psDoc->uiLev!=1) {
       if (pfErr!=NULL) fprintf(pfErr,"The level (%u) for the cover page must be 1\n",psDoc->uiLev);
       return(CLERTC_ITF);
    }
    efprintf(pfDoc,":doctype: book\n\n");
-   return(siPrintChapter(pfErr,pfDoc,psDoc,pcOwn,pcPgm,isNbr,isIdt));
+   return(siPrintChapter(pfErr,pfDoc,psDoc,pcOwn,pcPgm,pcBld,isNbr,isIdt));
 }
 
-static int siClePrintChapter(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const char* pcOwn, const char* pcPgm, const int isNbr, const int isIdt) {
+static int siClePrintChapter(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const char* pcOwn, const char* pcPgm, const char* pcBld, const int isNbr, const int isIdt) {
    if (psDoc->uiLev<2 || psDoc->uiLev>5) {
       if (pfErr!=NULL) fprintf(pfErr,"The level (%u) for a chapter must be between 2 and 6\n",psDoc->uiLev);
       return(CLERTC_ITF);
    }
-   return(siPrintChapter(pfErr,pfDoc,psDoc,pcOwn,pcPgm,isNbr,isIdt));
+   return(siPrintChapter(pfErr,pfDoc,psDoc,pcOwn,pcPgm,pcBld,isNbr,isIdt));
 }
 
-static int siClePrintPgmSynopsis(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const char* pcOwn, const char* pcPgm, const char* pcHlp, const int isPat, const int isNbr, const int isIdt) {
-   int siErr=siClePrintChapter(pfErr,pfDoc,psDoc,pcOwn,pcPgm,isNbr,isIdt);
+static int siClePrintPgmSynopsis(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const char* pcOwn, const char* pcPgm, const char* pcBld, const char* pcHlp, const int isPat, const int isNbr, const int isIdt) {
+   int siErr=siClePrintChapter(pfErr,pfDoc,psDoc,pcOwn,pcPgm,pcBld,isNbr,isIdt);
    if (siErr) return(siErr);
    efprintf(pfDoc,"-----------------------------------------------------------------------\n");
    efprintf(pfDoc,"HELP:   %s\n",pcHlp);
@@ -672,8 +677,8 @@ static int siClePrintPgmSynopsis(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc
 }
 
 static int siClePrintPgmSyntax(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const TsCleCommand* psCmd, const TsCleBuiltin* psBif,
-      const char* pcOwn, const char* pcPgm, const char* pcDep, const char* pcOpt, const char* pcDpa, const int isNbr, const int isIdt) {
-   int siErr=siClePrintChapter(pfErr,pfDoc,psDoc,pcOwn,pcPgm,isNbr,isIdt);
+      const char* pcOwn, const char* pcPgm, const char* pcBld, const char* pcDep, const char* pcOpt, const char* pcDpa, const int isNbr, const int isIdt) {
+   int siErr=siClePrintChapter(pfErr,pfDoc,psDoc,pcOwn,pcPgm,pcBld,isNbr,isIdt);
    if (siErr) return(siErr);
    efprintf(pfDoc,"------------------------------------------------------------------------\n");
    efprintf(pfDoc,"Syntax for program '%s':\n",pcPgm);
@@ -682,8 +687,9 @@ static int siClePrintPgmSyntax(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, 
    return(CLERTC_OK);
 }
 
-static int siClePrintPgmHelp(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const TsCleCommand* psCmd, const TsCleBuiltin* psBif, const char* pcOwn, const char* pcPgm, const char* pcDep, const int isNbr, const int isIdt) {
-   int siErr=siClePrintChapter(pfErr,pfDoc,psDoc,pcOwn,pcPgm,isNbr,isIdt);
+static int siClePrintPgmHelp(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const TsCleCommand* psCmd, const TsCleBuiltin* psBif,
+      const char* pcOwn, const char* pcPgm, const char* pcBld, const char* pcDep, const int isNbr, const int isIdt) {
+   int siErr=siClePrintChapter(pfErr,pfDoc,psDoc,pcOwn,pcPgm,pcBld,isNbr,isIdt);
    if (siErr) return(siErr);
    efprintf(pfDoc,"------------------------------------------------------------------------\n");
    efprintf(pfDoc,"Help for program '%s':\n",pcPgm);
@@ -692,20 +698,21 @@ static int siClePrintPgmHelp(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, co
    return(CLERTC_OK);
 }
 
-static int siClePrintBuiltIn(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const char* pcOwn, const char* pcPgm, const int isPat, const int isNbr, const int isIdt,const TsCleBuiltin* psBif) {
-   int   siErr=siClePrintChapter(pfErr,pfDoc,psDoc,pcOwn,pcPgm,isNbr,isIdt);
+static int siClePrintBuiltIn(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const char* pcOwn, const char* pcPgm, const char* pcBld, const int isPat, const int isNbr, const int isIdt,const TsCleBuiltin* psBif) {
+   int   siErr=siClePrintChapter(pfErr,pfDoc,psDoc,pcOwn,pcPgm,pcBld,isNbr,isIdt);
    if (siErr) return(siErr);
    for (int i=0;psBif[i].pcKyw!=NULL;i++) {
       char  acNum[strlen(psDoc->pcNum)+16];
       if (psDoc->pcNum!=NULL && *psDoc->pcNum) snprintf(acNum,sizeof(acNum),"%s%d.",psDoc->pcNum,i+1); else snprintf(acNum,sizeof(acNum),"%d.",i+1);
-      vdCleManFunction(pfDoc,psDoc->uiLev+1,S_TLD,acNum,psBif[i].pcKyw,psBif[i].pcHlp,pcOwn,pcPgm,psBif[i].pcSyn,psBif[i].pcMan,FALSE,isPat,isNbr,isIdt);
+      vdCleManFunction(pfDoc,psDoc->uiLev+1,S_TLD,acNum,psBif[i].pcKyw,psBif[i].pcHlp,pcOwn,pcPgm,pcBld,psBif[i].pcSyn,psBif[i].pcMan,FALSE,isPat,isNbr,isIdt);
    }
    return(CLERTC_OK);
 }
 
-static int siClePrintLexem(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const char* pcOwn, const char* pcPgm, const int isPfl, const int isRpl, const char* pcDep, const char* pcOpt, const char* pcEnt, const int isNbr, const int isIdt) {
+static int siClePrintLexem(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const char* pcOwn, const char* pcPgm, const char* pcBld,
+      const int isPfl, const int isRpl, const char* pcDep, const char* pcOpt, const char* pcEnt, const int isNbr, const int isIdt) {
    void* pvHdl=NULL;
-   int siErr=siClePrintChapter(pfErr,pfDoc,psDoc,pcOwn,pcPgm,isNbr,isIdt);
+   int siErr=siClePrintChapter(pfErr,pfDoc,psDoc,pcOwn,pcPgm,pcBld,isNbr,isIdt);
    if (siErr) return(siErr);
    siErr=siCleSimpleInit(NULL,pfErr,isPfl,isRpl,pcDep,pcOpt,pcEnt,&pvHdl);
    if (siErr) return(siErr);
@@ -717,9 +724,10 @@ static int siClePrintLexem(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, cons
    return((siRtc)?CLERTC_SYN:CLERTC_OK);
 }
 
-static int siClePrintGrammar(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const char* pcOwn, const char* pcPgm, const int isPfl, const int isRpl, const char* pcDep, const char* pcOpt, const char* pcEnt, const int isNbr, const int isIdt) {
+static int siClePrintGrammar(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const char* pcOwn, const char* pcPgm, const char* pcBld,
+      const int isPfl, const int isRpl, const char* pcDep, const char* pcOpt, const char* pcEnt, const int isNbr, const int isIdt) {
    void* pvHdl=NULL;
-   int siErr=siClePrintChapter(pfErr,pfDoc,psDoc,pcOwn,pcPgm,isNbr,isIdt);
+   int siErr=siClePrintChapter(pfErr,pfDoc,psDoc,pcOwn,pcPgm,pcBld,isNbr,isIdt);
    if (siErr) return(siErr);
    siErr=siCleSimpleInit(NULL,pfErr,isPfl,isRpl,pcDep,pcOpt,pcEnt,&pvHdl);
    if (siErr) return(siErr);
@@ -731,9 +739,9 @@ static int siClePrintGrammar(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, co
    return((siRtc)?CLERTC_SYN:CLERTC_OK);
 }
 
-static int siClePrintPreformatedText(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const char* pcOwn, const char* pcPgm, const char* pcTxt, const int isNbr, const int isIdt) {
+static int siClePrintPreformatedText(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const char* pcOwn, const char* pcPgm, const char* pcBld, const char* pcTxt, const int isNbr, const int isIdt) {
    if (pcTxt!=NULL && *pcTxt) {
-      int siErr=siClePrintChapter(pfErr,pfDoc,psDoc,pcOwn,pcPgm,isNbr,isIdt);
+      int siErr=siClePrintChapter(pfErr,pfDoc,psDoc,pcOwn,pcPgm,pcBld,isNbr,isIdt);
       if (siErr) return(siErr);
       efprintf(pfDoc,"------------------------------------------------------------------------\n");
       efprintf(pfDoc,"%s",pcTxt);
@@ -745,13 +753,13 @@ static int siClePrintPreformatedText(FILE* pfErr, FILE* pfDoc, const TsCleDoc* p
    }
 }
 
-static int siClePrintPropRemain(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const TsCleCommand* psCmd, void* pvCnf, const char* pcOwn, const char* pcPgm,
+static int siClePrintPropRemain(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const TsCleCommand* psCmd, void* pvCnf, const char* pcOwn, const char* pcPgm, const char* pcBld,
       const int isCas, const int isPfl, const int isRpl, const int siMkl, const char* pcDep, const char* pcOpt, const char* pcEnt, const int isNbr, const int isIdt) {
-   int         siErr=siClePrintChapter(pfErr,pfDoc,psDoc,pcOwn,pcPgm,isNbr,isIdt);
+   int         siErr=siClePrintChapter(pfErr,pfDoc,psDoc,pcOwn,pcPgm,pcBld,isNbr,isIdt);
    if (siErr) return(siErr);
    for (int j=0;siErr==0 && psCmd[j].pcKyw!=NULL;j++) {
       void* pvHdl=NULL;
-      siErr=siClePropertyInit(NULL,psCmd[j].pfIni,psCmd[j].pvClp,pcOwn,pcPgm,psCmd[j].pcKyw,psCmd[j].pcMan,psCmd[j].pcHlp,
+      siErr=siClePropertyInit(NULL,psCmd[j].pfIni,psCmd[j].pvClp,pcOwn,pcPgm,pcBld,psCmd[j].pcKyw,psCmd[j].pcMan,psCmd[j].pcHlp,
                               psCmd[j].piOid,psCmd[j].psTab,isCas,isPfl,isRpl,siMkl,NULL,pfErr,NULL,
                               pcDep,pcOpt,pcEnt,(TsCnfHdl*)pvCnf,&pvHdl,NULL,NULL,NULL,NULL,siClpFile2String,NULL,NULL);
       if (siErr) {
@@ -763,16 +771,16 @@ static int siClePrintPropRemain(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc,
    return((siErr)?CLERTC_SYN:CLERTC_OK);
 }
 
-static int siClePrintPropDefaults(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const TsCleCommand* psCmd, void* pvCnf, const char* pcOwn, const char* pcPgm,
+static int siClePrintPropDefaults(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const TsCleCommand* psCmd, void* pvCnf, const char* pcOwn, const char* pcPgm, const char* pcBld,
       const int isCas, const int isPfl, const int isRpl, const int siMkl, const char* pcDep, const char* pcOpt, const char* pcEnt, const int isNbr, const int isIdt) {
-   int         siErr=siClePrintChapter(pfErr,pfDoc,psDoc,pcOwn,pcPgm,isNbr,isIdt);
+   int         siErr=siClePrintChapter(pfErr,pfDoc,psDoc,pcOwn,pcPgm,pcBld,isNbr,isIdt);
    if (siErr) return(siErr);
    efprintf(pfDoc,"------------------------------------------------------------------------\n");
    efprintf(pfDoc,"\n# Property file for: %s.%s #\n",pcOwn,pcPgm);
    efprintf(pfDoc,"%s",HLP_CLE_PROPFIL);
    for (int j=0;siErr==0 && psCmd[j].pcKyw!=NULL;j++) {
       void* pvHdl=NULL;
-      siErr=siClePropertyInit(NULL,psCmd[j].pfIni,psCmd[j].pvClp,pcOwn,pcPgm,psCmd[j].pcKyw,psCmd[j].pcMan,psCmd[j].pcHlp,
+      siErr=siClePropertyInit(NULL,psCmd[j].pfIni,psCmd[j].pvClp,pcOwn,pcPgm,pcBld,psCmd[j].pcKyw,psCmd[j].pcMan,psCmd[j].pcHlp,
             psCmd[j].piOid,psCmd[j].psTab,isCas,isPfl,isRpl,siMkl,NULL,pfErr,NULL,
             pcDep,pcOpt,pcEnt,(TsCnfHdl*)pvCnf,&pvHdl,NULL,NULL,NULL,NULL,siClpFile2String,NULL,NULL);
       if (siErr) {
@@ -785,11 +793,11 @@ static int siClePrintPropDefaults(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDo
    return((siErr)?CLERTC_SYN:CLERTC_OK);
 }
 
-static int siClePrintReasonCodes(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const char* pcOwn, const char* pcPgm, TfMsg* pfMsg, const int isNbr, const int isIdt) {
+static int siClePrintReasonCodes(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const char* pcOwn, const char* pcPgm, const char* pcBld, TfMsg* pfMsg, const int isNbr, const int isIdt) {
    if (pfMsg!=NULL) {
       int         r;
       const char* m;
-      int         siErr=siClePrintChapter(pfErr,pfDoc,psDoc,pcOwn,pcPgm,isNbr,isIdt);
+      int         siErr=siClePrintChapter(pfErr,pfDoc,psDoc,pcOwn,pcPgm,pcBld,isNbr,isIdt);
       if (siErr) return(siErr);
       for (r=1,m=pfMsg(r);m!=NULL;r++,m=pfMsg(r)) {
          if (*m) efprintf(pfDoc,"* %d - %s\n",r,m);
@@ -806,25 +814,25 @@ static int siClePrintReasonCodes(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc
 
 static int siCleWritePage(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const TsCleDocPar* psPar) {
    switch (psDoc->uiTyp) {
-      case CLE_DOCTYP_COVER:        return(siClePrintCover(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->isNbr,psPar->isIdt));
-      case CLE_DOCTYP_CHAPTER:      return(siClePrintChapter(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->isNbr,psPar->isIdt));
-      case CLE_DOCTYP_BUILTIN:      return(siClePrintBuiltIn(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->isPat,psPar->isNbr,psPar->isIdt,psPar->psBif));
-      case CLE_DOCTYP_PROGRAM:      return(siClePrintChapter(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->isNbr,psPar->isIdt));
-      case CLE_DOCTYP_PGMSYNOPSIS:  return(siClePrintPgmSynopsis(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->pcHlp,psPar->isPat,psPar->isNbr,psPar->isIdt));
-      case CLE_DOCTYP_PGMSYNTAX:    return(siClePrintPgmSyntax(pfErr,pfDoc,psDoc,psPar->psCmd,psPar->psBif,psPar->pcOwn,psPar->pcPgm,psPar->pcDep,psPar->pcOpt,psPar->pcDpa,psPar->isNbr,psPar->isIdt));
-      case CLE_DOCTYP_PGMHELP:      return(siClePrintPgmHelp(pfErr,pfDoc,psDoc,psPar->psCmd,psPar->psBif,psPar->pcOwn,psPar->pcPgm,psPar->pcDep,psPar->isNbr,psPar->isIdt));
-      case CLE_DOCTYP_COMMANDS:     return(siClePrintChapter(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->isNbr,psPar->isIdt));
-      case CLE_DOCTYP_OTHERCLP:     return(siClePrintChapter(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->isNbr,psPar->isIdt));
-      case CLE_DOCTYP_LEXEM:        return(siClePrintLexem(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->isPfl,psPar->isRpl,psPar->pcDep,psPar->pcOpt,psPar->pcEnt,psPar->isNbr,psPar->isIdt));
-      case CLE_DOCTYP_GRAMMAR:      return(siClePrintGrammar(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->isPfl,psPar->isRpl,psPar->pcDep,psPar->pcOpt,psPar->pcEnt,psPar->isNbr,psPar->isIdt));
-      case CLE_DOCTYP_PROPREMAIN:   return(siClePrintPropRemain(pfErr,pfDoc,psDoc,psPar->psCmd,psPar->pvCnf,psPar->pcOwn,psPar->pcPgm,
+      case CLE_DOCTYP_COVER:        return(siClePrintCover(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->pcBld,psPar->isNbr,psPar->isIdt));
+      case CLE_DOCTYP_CHAPTER:      return(siClePrintChapter(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->pcBld,psPar->isNbr,psPar->isIdt));
+      case CLE_DOCTYP_BUILTIN:      return(siClePrintBuiltIn(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->pcBld,psPar->isPat,psPar->isNbr,psPar->isIdt,psPar->psBif));
+      case CLE_DOCTYP_PROGRAM:      return(siClePrintChapter(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->pcBld,psPar->isNbr,psPar->isIdt));
+      case CLE_DOCTYP_PGMSYNOPSIS:  return(siClePrintPgmSynopsis(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->pcBld,psPar->pcHlp,psPar->isPat,psPar->isNbr,psPar->isIdt));
+      case CLE_DOCTYP_PGMSYNTAX:    return(siClePrintPgmSyntax(pfErr,pfDoc,psDoc,psPar->psCmd,psPar->psBif,psPar->pcOwn,psPar->pcPgm,psPar->pcBld,psPar->pcDep,psPar->pcOpt,psPar->pcDpa,psPar->isNbr,psPar->isIdt));
+      case CLE_DOCTYP_PGMHELP:      return(siClePrintPgmHelp(pfErr,pfDoc,psDoc,psPar->psCmd,psPar->psBif,psPar->pcOwn,psPar->pcPgm,psPar->pcBld,psPar->pcDep,psPar->isNbr,psPar->isIdt));
+      case CLE_DOCTYP_COMMANDS:     return(siClePrintChapter(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->pcBld,psPar->isNbr,psPar->isIdt));
+      case CLE_DOCTYP_OTHERCLP:     return(siClePrintChapter(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->pcBld,psPar->isNbr,psPar->isIdt));
+      case CLE_DOCTYP_LEXEM:        return(siClePrintLexem(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->pcBld,psPar->isPfl,psPar->isRpl,psPar->pcDep,psPar->pcOpt,psPar->pcEnt,psPar->isNbr,psPar->isIdt));
+      case CLE_DOCTYP_GRAMMAR:      return(siClePrintGrammar(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->pcBld,psPar->isPfl,psPar->isRpl,psPar->pcDep,psPar->pcOpt,psPar->pcEnt,psPar->isNbr,psPar->isIdt));
+      case CLE_DOCTYP_PROPREMAIN:   return(siClePrintPropRemain(pfErr,pfDoc,psDoc,psPar->psCmd,psPar->pvCnf,psPar->pcOwn,psPar->pcPgm,psPar->pcBld,
             psPar->isCas,psPar->isPfl,psPar->isRpl,psPar->siMkl,psPar->pcDep,psPar->pcOpt,psPar->pcEnt,psPar->isNbr,psPar->isIdt));
-      case CLE_DOCTYP_PROPDEFAULTS: return(siClePrintPropDefaults(pfErr,pfDoc,psDoc,psPar->psCmd,psPar->pvCnf,psPar->pcOwn,psPar->pcPgm,
+      case CLE_DOCTYP_PROPDEFAULTS: return(siClePrintPropDefaults(pfErr,pfDoc,psDoc,psPar->psCmd,psPar->pvCnf,psPar->pcOwn,psPar->pcPgm,psPar->pcBld,
             psPar->isCas,psPar->isPfl,psPar->isRpl,psPar->siMkl,psPar->pcDep,psPar->pcOpt,psPar->pcEnt,psPar->isNbr,psPar->isIdt));
-      case CLE_DOCTYP_SPECIALCODES: return(siClePrintChapter(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->isNbr,psPar->isIdt));
-      case CLE_DOCTYP_REASONCODES:  return(siClePrintReasonCodes(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->pfMsg,psPar->isNbr,psPar->isIdt));
-      case CLE_DOCTYP_VERSION:      return(siClePrintPreformatedText(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->pcVsn,psPar->isNbr,psPar->isIdt));
-      case CLE_DOCTYP_ABOUT:        return(siClePrintPreformatedText(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->pcAbo,psPar->isNbr,psPar->isIdt));
+      case CLE_DOCTYP_SPECIALCODES: return(siClePrintChapter(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->pcBld,psPar->isNbr,psPar->isIdt));
+      case CLE_DOCTYP_REASONCODES:  return(siClePrintReasonCodes(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->pcBld,psPar->pfMsg,psPar->isNbr,psPar->isIdt));
+      case CLE_DOCTYP_VERSION:      return(siClePrintPreformatedText(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->pcBld,psPar->pcVsn,psPar->isNbr,psPar->isIdt));
+      case CLE_DOCTYP_ABOUT:        return(siClePrintPreformatedText(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->pcBld,psPar->pcAbo,psPar->isNbr,psPar->isIdt));
       default:
          if (pfErr!=NULL) fprintf(pfErr,"Documentation type (%u) not supported\n",psDoc->uiTyp);
          return(CLERTC_TAB);
@@ -939,7 +947,7 @@ static int siPrintDocu(
                if (psPar->psCmd[j].siFlg) {
                   void* pvClp=NULL;
                   char  acNum[64];
-                  siErr=siCleCommandInit(pvGbl,psPar->psCmd[j].pfIni,psPar->psCmd[j].pvClp,psPar->pcOwn,psPar->pcPgm,psPar->psCmd[j].pcKyw,psPar->psCmd[j].pcMan,psPar->psCmd[j].pcHlp,psPar->psCmd[j].piOid,psPar->psCmd[j].psTab,
+                  siErr=siCleCommandInit(pvGbl,psPar->psCmd[j].pfIni,psPar->psCmd[j].pvClp,psPar->pcOwn,psPar->pcPgm,psPar->pcBld,psPar->psCmd[j].pcKyw,psPar->psCmd[j].pcMan,psPar->psCmd[j].pcHlp,psPar->psCmd[j].piOid,psPar->psCmd[j].psTab,
                         psPar->isCas,psPar->isPfl,psPar->isRpl,psPar->siMkl,pfOut,pfErr,NULL,psPar->pcDep,psPar->pcOpt,psPar->pcEnt,psPar->pvCnf,&pvClp,psPar->pfMsg,psPar->pvF2S,psPar->pfF2S,psPar->pvSaf,psPar->pfSaf);
                   if (siErr) return(siErr);
                   if (psDoc[i].pcNum!=NULL && *psDoc[i].pcNum) {
@@ -963,7 +971,7 @@ static int siPrintDocu(
             for (int j=0;psPar->psOth[j].pcHdl!=NULL;j++) {
                void* pvClp=NULL;
                char acNum[64];
-               pvClp=pvClpOpen(psPar->isCas,psPar->isPfl,psPar->isRpl,psPar->siMkl,psPar->pcOwn,psPar->psOth[j].pcRot,psPar->psOth[j].pcKyw,psPar->psOth[j].pcMan,psPar->psOth[j].pcHlp,psPar->psOth[j].isOvl,
+               pvClp=pvClpOpen(psPar->isCas,psPar->isPfl,psPar->isRpl,psPar->siMkl,psPar->pcOwn,psPar->psOth[j].pcRot,psPar->pcBld,psPar->psOth[j].pcKyw,psPar->psOth[j].pcMan,psPar->psOth[j].pcHlp,psPar->psOth[j].isOvl,
                                psPar->psOth[j].psTab,NULL,pfOut,pfErr,NULL,NULL,NULL,NULL,psPar->pcDep,psPar->pcOpt,psPar->pcEnt,NULL,pvGbl,psPar->pvF2S,psPar->pfF2S,psPar->pvSaf,psPar->pfSaf);
                if (pvClp==NULL) {
                   if (pfErr!=NULL) fprintf(pfErr,"Open of parser for CLP string of appendix '%s' failed\n",psPar->psOth[j].pcRot);
@@ -1376,16 +1384,16 @@ EVALUATE:
          efprintf(pfOut,"\n");
          efprintf(pfOut,"Return/condition/exit codes of the executable\n");
          efprintf(pfOut,"---------------------------------------------\n\n");
-         fprintm(pfOut,pcOwn,pcPgm,MAN_CLE_APPENDIX_RETURNCODES,1);
+         fprintm(pfOut,pcOwn,pcPgm,pcBld,MAN_CLE_APPENDIX_RETURNCODES,1);
          if (pcSccMan!=NULL && *pcSccMan) {
             efprintf(pfOut,"Special condition codes\n");
             efprintf(pfOut,"~~~~~~~~~~~~~~~~~~~~~~~\n\n");
-            fprintm(pfOut,pcOwn,pcPgm,pcScc,1);
+            fprintm(pfOut,pcOwn,pcPgm,pcBld,pcScc,1);
          }
          if (pfMsg!=NULL) {
             efprintf(pfOut,"Reason codes of the different commands\n");
             efprintf(pfOut,"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n");
-            fprintm(pfOut,pcOwn,pcPgm,MAN_CLE_APPENDIX_REASONCODES,1);
+            fprintm(pfOut,pcOwn,pcPgm,pcBld,MAN_CLE_APPENDIX_REASONCODES,1);
             for (i=1,m=pfMsg(i);m!=NULL;i++,m=pfMsg(i)) {
                if (*m) fprintf(pfOut," * %d - %s\n",i,m);
             }
@@ -1450,7 +1458,7 @@ EVALUATE:
          }
          for (i=0;psCmd[i].pcKyw!=NULL;i++) {
             if (strxcmp(isCas,argv[2],psCmd[i].pcKyw,strlen(psCmd[i].pcKyw),'.',TRUE)==0) {
-               siErr=siCleCommandInit(pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,pcOwn,pcPgm,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,psCmd[i].piOid,psCmd[i].psTab,
+               siErr=siCleCommandInit(pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,pcOwn,pcPgm,pcBld,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,psCmd[i].piOid,psCmd[i].psTab,
                                       isCas,isPfl,isRpl,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf);
                if (siErr) ERROR(siErr,NULL);
                if (strlen(argv[2])==strlen(psCmd[i].pcKyw)) {
@@ -1466,7 +1474,7 @@ EVALUATE:
             for (i=0;psCmd[i].pcKyw!=NULL;i++) {
                if (strxcmp(isCas,pcDef,psCmd[i].pcKyw,0,0,FALSE)==0) {
                   char acPat[strlen(pcDef)+strlen(argv[2])+2];
-                  siErr=siCleCommandInit(pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,pcOwn,pcPgm,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,psCmd[i].piOid,psCmd[i].psTab,
+                  siErr=siCleCommandInit(pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,pcOwn,pcPgm,pcBld,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,psCmd[i].piOid,psCmd[i].psTab,
                                          isCas,isPfl,isRpl,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf);
                   if (siErr) ERROR(siErr,NULL);
                   sprintf(acPat,"%s.%s",pcDef,argv[2]);
@@ -1497,7 +1505,7 @@ EVALUATE:
             if (strxcmp(isCas,argv[2],"MAN",0,0,FALSE)==0 || strxcmp(isCas,argv[2],"-MAN",0,0,FALSE)==0 || strxcmp(isCas,argv[2],"--MAN",0,0,FALSE)==0) {
                if (pcPgmMan!=NULL && *pcPgmMan) {
                   fprintf(pfOut,"Help for program '%s':\n",pcPgm);
-                  fprintm(pfOut,pcOwn,pcPgm,pcPgmMan,1);
+                  fprintm(pfOut,pcOwn,pcPgm,pcBld,pcPgmMan,1);
                   ERROR(CLERTC_OK,NULL);
                } else {
                   fprintf(pfErr,"No manual page available for program '%s'\n",pcPgm);
@@ -1552,7 +1560,7 @@ EVALUATE:
          }
          for (i=0;psCmd[i].pcKyw!=NULL;i++) {
             if (strxcmp(isCas,argv[2],psCmd[i].pcKyw,strlen(psCmd[i].pcKyw),'.',TRUE)==0) {
-               siErr=siCleCommandInit(pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,pcOwn,pcPgm,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,psCmd[i].piOid,psCmd[i].psTab,
+               siErr=siCleCommandInit(pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,pcOwn,pcPgm,pcBld,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,psCmd[i].piOid,psCmd[i].psTab,
                                       isCas,isPfl,isRpl,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf);
                if (siErr) ERROR(siErr,NULL);
                if (strlen(argv[2])==strlen(psCmd[i].pcKyw)) {
@@ -1573,7 +1581,7 @@ EVALUATE:
             for (i=0;psCmd[i].pcKyw!=NULL;i++) {
                if (strxcmp(isCas,pcDef,psCmd[i].pcKyw,0,0,FALSE)==0) {
                   char acPat[strlen(psCmd[i].pcKyw)+strlen(argv[2])+2];
-                  siErr=siCleCommandInit(pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,pcOwn,pcPgm,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,psCmd[i].piOid,psCmd[i].psTab,
+                  siErr=siCleCommandInit(pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,pcOwn,pcPgm,pcBld,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,psCmd[i].piOid,psCmd[i].psTab,
                                          isCas,isPfl,isRpl,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf);
                   if (siErr) ERROR(siErr,NULL);
                   sprintf(acPat,"%s.%s",psCmd[i].pcKyw,argv[2]);
@@ -1604,7 +1612,7 @@ EVALUATE:
          if (pfOut!=NULL) {
             if (pcPgmMan!=NULL && *pcPgmMan) {
                fprintf(pfOut,"Manual page for program '%s':\n\n",pcPgm);
-               vdCleManProgram(pfOut,psCmd,asBif,pcOwn,pcPgm,pcHlp,pcPgmMan,pcDep,pcOpt,pcDpa,pcPgmNum,FALSE,TRUE);
+               vdCleManProgram(pfOut,psCmd,asBif,pcOwn,pcPgm,pcBld,pcHlp,pcPgmMan,pcDep,pcOpt,pcDpa,pcPgmNum,FALSE,TRUE);
                ERROR(CLERTC_OK,NULL);
             } else {
                fprintf(pfErr,"No manual page available for program '%s'\n",pcPgm);
@@ -1645,7 +1653,7 @@ EVALUATE:
             if (pcPgmMan!=NULL && *pcPgmMan) {
                isAll=TRUE;
                if (isMan==FALSE) fprintf(pfOut,"Manual page for program '%s':\n\n",pcPgm);
-               vdCleManProgram(pfDoc,psCmd,asBif,pcOwn,pcPgm,pcHlp,pcPgmMan,pcDep,pcOpt,pcDpa,pcPgmNum,isMan,TRUE);
+               vdCleManProgram(pfDoc,psCmd,asBif,pcOwn,pcPgm,pcBld,pcHlp,pcPgmMan,pcDep,pcOpt,pcDpa,pcPgmNum,isMan,TRUE);
                if (isMan==TRUE) fprintf(pfOut,"Manual page for program '%s' successfully written to file (%s)\n",pcPgm,pcFil);
             } else {
                fprintf(pfErr,"No manual page available for program '%s'\n",pcPgm);
@@ -1659,7 +1667,7 @@ EVALUATE:
                   char acNum[16];
                   if (isMan==FALSE) fprintf(pfOut,"Manual page for built-in function '%s':\n\n",asBif[i].pcKyw);
                   snprintf(acNum,sizeof(acNum),"%s%d.",pcBifNum,i+1);
-                  vdCleManFunction(pfDoc,0,S_TLD,acNum,asBif[i].pcKyw,asBif[i].pcHlp,pcOwn,pcPgm,asBif[i].pcSyn,asBif[i].pcMan,isMan,TRUE,TRUE,FALSE);
+                  vdCleManFunction(pfDoc,0,S_TLD,acNum,asBif[i].pcKyw,asBif[i].pcHlp,pcOwn,pcPgm,pcBld,asBif[i].pcSyn,asBif[i].pcMan,isMan,TRUE,TRUE,FALSE);
                   if (isMan==TRUE) fprintf(pfOut,"Manual page for built-in function '%s' successfully written to file (%s)\n",asBif[i].pcKyw,pcFil);
                   if (isAll==FALSE) ERROR(CLERTC_OK,NULL);
                }
@@ -1674,7 +1682,7 @@ EVALUATE:
                }
             }
             if (strxcmp(isCas,pcCmd,psCmd[i].pcKyw,strlen(psCmd[i].pcKyw),'.',TRUE)==0) {
-               siErr=siCleCommandInit(pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,pcOwn,pcPgm,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,psCmd[i].piOid,psCmd[i].psTab,
+               siErr=siCleCommandInit(pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,pcOwn,pcPgm,pcBld,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,psCmd[i].piOid,psCmd[i].psTab,
                                       isCas,isPfl,isRpl,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf);
                if (siErr) ERROR(siErr,NULL);
                if (isMan==FALSE) {
@@ -1702,7 +1710,7 @@ EVALUATE:
             for (i=0;psCmd[i].pcKyw!=NULL;i++) {
                if (strxcmp(isCas,pcDef,psCmd[i].pcKyw,0,0,FALSE)==0) {
                   char acPat[strlen(pcDef)+strlen(pcCmd)+2];
-                  siErr=siCleCommandInit(pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,pcOwn,pcPgm,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,psCmd[i].piOid,psCmd[i].psTab,
+                  siErr=siCleCommandInit(pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,pcOwn,pcPgm,pcBld,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,psCmd[i].piOid,psCmd[i].psTab,
                                          isCas,isPfl,isRpl,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf);
                   if (siErr) ERROR(siErr,NULL);
                   sprintf(acPat,"%s.%s",pcDef,pcCmd);
@@ -1730,7 +1738,7 @@ EVALUATE:
             ERROR(CLERTC_SYS,NULL);
          }
          if (pcPgmMan!=NULL && *pcPgmMan) {
-            vdCleManProgram(pfDoc,psCmd,asBif,pcOwn,pcPgm,pcHlp,pcPgmMan,pcDep,pcOpt,pcDpa,pcPgmNum,isMan,TRUE);
+            vdCleManProgram(pfDoc,psCmd,asBif,pcOwn,pcPgm,pcBld,pcHlp,pcPgmMan,pcDep,pcOpt,pcDpa,pcPgmNum,isMan,TRUE);
             if (pfOut!=NULL) fprintf(pfOut,"Manual page for program '%s' successfully written to file (%s)\n",pcPgm,pcFil);
             ERROR(CLERTC_OK,NULL);
          } else {
@@ -1817,7 +1825,7 @@ EVALUATE:
             for (i=0;psCmd[i].pcKyw!=NULL;i++) {
                if (strxcmp(isCas,pcCmd,psCmd[i].pcKyw,strlen(psCmd[i].pcKyw),'.',TRUE)==0) {
                   char acNum[64];
-                  siErr=siCleCommandInit(pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,pcOwn,pcPgm,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,psCmd[i].piOid,psCmd[i].psTab,
+                  siErr=siCleCommandInit(pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,pcOwn,pcPgm,pcBld,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,psCmd[i].piOid,psCmd[i].psTab,
                                          isCas,isPfl,isRpl,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf);
                   if (siErr) ERROR(siErr,NULL);
                   snprintf(acNum,sizeof(acNum),"%s%d.",pcCmdNum,i+1);
@@ -1840,7 +1848,7 @@ EVALUATE:
                   if (strxcmp(isCas,pcDef,psCmd[i].pcKyw,0,0,FALSE)==0) {
                      char acNum[64];
                      char acPat[strlen(pcDef)+strlen(pcCmd)+2];
-                     siErr=siCleCommandInit(pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,pcOwn,pcPgm,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,psCmd[i].piOid,psCmd[i].psTab,
+                     siErr=siCleCommandInit(pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,pcOwn,pcPgm,pcBld,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,psCmd[i].piOid,psCmd[i].psTab,
                                             isCas,isPfl,isRpl,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf);
                      if (siErr) ERROR(siErr,NULL);
                      snprintf(acNum,sizeof(acNum),"%s%d.",pcCmdNum,i+1);
@@ -1862,7 +1870,7 @@ EVALUATE:
             stDocPar.isCas=isCas; stDocPar.isPfl=isPfl; stDocPar.isRpl=isRpl;
             stDocPar.pcAbo=pcAbo; stDocPar.pcDep=pcDep; stDocPar.pcDpa=pcDpa;
             stDocPar.pcEnt=pcEnt; stDocPar.pcHlp=pcHlp; stDocPar.pcOpt=pcOpt;
-            stDocPar.pcOwn=pcOwn; stDocPar.pcPgm=pcPgm; stDocPar.pcVsn=pcVsn;
+            stDocPar.pcOwn=pcOwn; stDocPar.pcPgm=pcPgm; stDocPar.pcBld=pcBld; stDocPar.pcVsn=pcVsn;
             stDocPar.pfMsg=pfMsg; stDocPar.pvCnf=psCnf; stDocPar.siMkl=siMkl;
             stDocPar.psBif=asBif; stDocPar.psCmd=psCmd; stDocPar.psOth=psOth;
             stDocPar.pvF2S=pvF2S; stDocPar.pfF2S=pfF2S; stDocPar.pvSaf=pvSaf; stDocPar.pfSaf=pfSaf;
@@ -1947,7 +1955,7 @@ EVALUATE:
          stDocPar.isCas=isCas; stDocPar.isPfl=isPfl; stDocPar.isRpl=isRpl;
          stDocPar.pcAbo=pcAbo; stDocPar.pcDep=pcDep; stDocPar.pcDpa=pcDpa;
          stDocPar.pcEnt=pcEnt; stDocPar.pcHlp=pcHlp; stDocPar.pcOpt=pcOpt;
-         stDocPar.pcOwn=pcOwn; stDocPar.pcPgm=pcPgm; stDocPar.pcVsn=pcVsn;
+         stDocPar.pcOwn=pcOwn; stDocPar.pcPgm=pcPgm; stDocPar.pcBld=pcBld; stDocPar.pcVsn=pcVsn;
          stDocPar.pfMsg=pfMsg; stDocPar.pvCnf=psCnf; stDocPar.siMkl=siMkl;
          stDocPar.psBif=asBif; stDocPar.psCmd=psCmd; stDocPar.psOth=psOth;
          stDocPar.pvF2S=pvF2S; stDocPar.pfF2S=pfF2S; stDocPar.pvSaf=pvSaf; stDocPar.pfSaf=pfSaf;
@@ -2011,7 +2019,7 @@ EVALUATE:
 
          if (pcCmd==NULL) {
             for (siErr=CLP_OK, i=0;psCmd[i].pcKyw!=NULL && siErr==CLP_OK;i++) {
-               siErr=siClePropertyInit(pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,pcOwn,pcPgm,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,
+               siErr=siClePropertyInit(pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,pcOwn,pcPgm,pcBld,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,
                                        psCmd[i].piOid,psCmd[i].psTab,isCas,isPfl,isRpl,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,NULL,NULL,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf);
                if (siErr) ERROR(siErr,NULL);
                siErr=siClpProperties(pvHdl,CLPPRO_MTD_CMT,10,psCmd[i].pcKyw,pfPro);
@@ -2027,7 +2035,7 @@ EVALUATE:
          } else {
             for (i=0;psCmd[i].pcKyw!=NULL;i++) {
                if (strxcmp(isCas,pcCmd,psCmd[i].pcKyw,0,0,FALSE)==0) {
-                  siErr=siClePropertyInit(pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,pcOwn,pcPgm,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,
+                  siErr=siClePropertyInit(pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,pcOwn,pcPgm,pcBld,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,
                                           psCmd[i].piOid,psCmd[i].psTab,isCas,isPfl,isRpl,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,NULL,NULL,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf);
                   if (siErr) ERROR(siErr,NULL);
                   siErr=siClpProperties(pvHdl,CLPPRO_MTD_CMT,10,psCmd[i].pcKyw,pfPro);
@@ -2134,7 +2142,7 @@ EVALUATE:
                      srprintc(&pcPro,&szPro,strlen(argv[j]),"%s=\"\"",argv[j]);
                   }
                }
-               siErr=siCleChangeProperties(pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,pcHom,pcOwn,pcPgm,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,pcPro,
+               siErr=siCleChangeProperties(pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,pcHom,pcOwn,pcPgm,pcBld,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,pcPro,
                      psCmd[i].piOid,psCmd[i].psTab,isCas,isPfl,isRpl,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf);
                ERROR(siErr,pcPro);
             }
@@ -2163,7 +2171,7 @@ EVALUATE:
                      srprintc(&pcPro,&szPro,strlen(argv[j]),"%s=\"\"",argv[j]);
                   }
                }
-               siErr=siCleChangeProperties(pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,pcHom,pcOwn,pcPgm,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,pcPro,
+               siErr=siCleChangeProperties(pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,pcHom,pcOwn,pcPgm,pcBld,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,pcPro,
                      psCmd[i].piOid,psCmd[i].psTab,isCas,isPfl,isRpl,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf);
                ERROR(siErr,pcPro);
             }
@@ -2223,7 +2231,7 @@ EVALUATE:
       if (argc==2) {
          fprintf(pfOut,"Properties for program '%s':\n",pcPgm);
          for (i=0;psCmd[i].pcKyw!=NULL;i++) {
-            siErr=siClePropertyInit(pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,pcOwn,pcPgm,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,
+            siErr=siClePropertyInit(pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,pcOwn,pcPgm,pcBld,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,
                                     psCmd[i].piOid,psCmd[i].psTab,isCas,isPfl,isRpl,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,
                                     &pvHdl,NULL,NULL,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf);
             if (siErr) ERROR(siErr,NULL);
@@ -2281,7 +2289,7 @@ EVALUATE:
          }
          for (i=0;psCmd[i].pcKyw!=NULL;i++) {
             if (strxcmp(isCas,argv[2],psCmd[i].pcKyw,strlen(psCmd[i].pcKyw),'.',TRUE)==0) {
-               siErr=siClePropertyInit(pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,pcOwn,pcPgm,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,
+               siErr=siClePropertyInit(pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,pcOwn,pcPgm,pcBld,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,
                                        psCmd[i].piOid,psCmd[i].psTab,isCas,isPfl,isRpl,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,
                                        psCnf,&pvHdl,NULL,NULL,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf);
                if (siErr) ERROR(siErr,NULL);
@@ -2298,7 +2306,7 @@ EVALUATE:
             for (i=0;psCmd[i].pcKyw!=NULL;i++) {
                if (strxcmp(isCas,pcDef,psCmd[i].pcKyw,0,0,FALSE)==0) {
                   char acPat[strlen(pcDef)+strlen(argv[2])+2];
-                  siErr=siClePropertyInit(pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,pcOwn,pcPgm,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,
+                  siErr=siClePropertyInit(pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,pcOwn,pcPgm,pcBld,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,
                                           psCmd[i].piOid,psCmd[i].psTab,isCas,isPfl,isRpl,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,
                                           psCnf,&pvHdl,NULL,NULL,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf);
                   if (siErr) ERROR(siErr,NULL);
@@ -2531,7 +2539,7 @@ EVALUATE:
                char*                         pcCmd=NULL;
                char*                         pcTls=NULL;
                char*                         pcLst=NULL;
-               siErr=siCleCommandInit(pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,pcOwn,pcPgm,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,psCmd[i].piOid,psCmd[i].psTab,
+               siErr=siCleCommandInit(pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,pcOwn,pcPgm,pcBld,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,psCmd[i].piOid,psCmd[i].psTab,
                                       isCas,isPfl,isRpl,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf);
                if (siErr) ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
                siErr=siCleGetCommand(pfOut,pcDep,psCmd[i].pcKyw,argc,argv,&pcFil,&pcCmd,pvGbl,pvF2S,pfF2S,pcDpa);
@@ -2639,6 +2647,7 @@ static int siClePropertyInit(
    void*                         pvClp,
    const char*                   pcOwn,
    const char*                   pcPgm,
+   const char*                   pcBld,
    const char*                   pcCmd,
    const char*                   pcMan,
    const char*                   pcHlp,
@@ -2672,7 +2681,7 @@ static int siClePropertyInit(
 
    if (piFil!=NULL) *piFil=0;
    if (ppFil!=NULL) *ppFil=NULL;
-   *ppHdl=pvClpOpen(isCas,isPfl,isRpl,siMkl,pcOwn,pcPgm,pcCmd,pcMan,pcHlp,isOvl,psTab,pvClp,pfOut,pfErr,pfTrc,pfTrc,pfTrc,pfTrc,pcDep,pcOpt,pcEnt,NULL,pvGbl,pvF2S,pfF2S,pvSaf,pfSaf);
+   *ppHdl=pvClpOpen(isCas,isPfl,isRpl,siMkl,pcOwn,pcPgm,pcBld,pcCmd,pcMan,pcHlp,isOvl,psTab,pvClp,pfOut,pfErr,pfTrc,pfTrc,pfTrc,pfTrc,pcDep,pcOpt,pcEnt,NULL,pvGbl,pvF2S,pfF2S,pvSaf,pfSaf);
    if (*ppHdl==NULL) {
       if (pfErr!=NULL) fprintf(pfErr,"Open of property parser for command '%s' failed\n",pcCmd);
       return(CLERTC_TAB);
@@ -2831,6 +2840,7 @@ static int siCleCommandInit(
    void*                         pvClp,
    const char*                   pcOwn,
    const char*                   pcPgm,
+   const char*                   pcBld,
    const char*                   pcCmd,
    const char*                   pcMan,
    const char*                   pcHlp,
@@ -2859,7 +2869,7 @@ static int siCleCommandInit(
    char*                         pcFil=NULL;
    char*                         pcPro=NULL;
 
-   *ppHdl=pvClpOpen(isCas,isPfl,isRpl,siMkl,pcOwn,pcPgm,pcCmd,pcMan,pcHlp,isOvl,psTab,pvClp,pfOut,pfErr,pfTrc,pfTrc,pfTrc,pfTrc,pcDep,pcOpt,pcEnt,NULL,pvGbl,pvF2S,pfF2S,pvSaf,pfSaf);
+   *ppHdl=pvClpOpen(isCas,isPfl,isRpl,siMkl,pcOwn,pcPgm,pcBld,pcCmd,pcMan,pcHlp,isOvl,psTab,pvClp,pfOut,pfErr,pfTrc,pfTrc,pfTrc,pfTrc,pcDep,pcOpt,pcEnt,NULL,pvGbl,pvF2S,pfF2S,pvSaf,pfSaf);
    if (*ppHdl==NULL) {
       if (pfErr!=NULL) fprintf(pfErr,"Open of parser for command '%s' failed\n",pcCmd);
       return(CLERTC_TAB);
@@ -2909,7 +2919,7 @@ static int siCleSimpleInit(
          {CLPTYP_NUMBER,"XX",NULL,0,1,1,0,0,CLPFLG_NON,NULL,NULL,NULL,"XX",0,0.0,NULL,"NUMBER"},
          {CLPTYP_NON   ,NULL,NULL,0,0,0,0,0,CLPFLG_NON,NULL,NULL,NULL,NULL,0,0.0,NULL,NULL}
    };
-   *ppHdl=pvClpOpen(FALSE,isPfl,isRpl,0,"","","","","",FALSE,asTab,"",pfOut,pfErr,NULL,NULL,NULL,NULL,pcDep,pcOpt,pcEnt,NULL,NULL,NULL,NULL,NULL,NULL);
+   *ppHdl=pvClpOpen(FALSE,isPfl,isRpl,0,"","","","","","",FALSE,asTab,"",pfOut,pfErr,NULL,NULL,NULL,NULL,pcDep,pcOpt,pcEnt,NULL,NULL,NULL,NULL,NULL,NULL);
    if (*ppHdl==NULL) {
       if (pfErr!=NULL) fprintf(pfErr,"Open of command line parser for grammar and lexem print out failed\n");
       return(CLERTC_TAB);
@@ -2924,6 +2934,7 @@ static int siCleChangeProperties(
    const char*                   pcHom,
    const char*                   pcOwn,
    const char*                   pcPgm,
+   const char*                   pcBld,
    const char*                   pcCmd,
    const char*                   pcMan,
    const char*                   pcHlp,
@@ -2952,7 +2963,7 @@ static int siCleChangeProperties(
    char*                         pcFil=NULL;
    int                           siFil=0;
 
-   siErr=siClePropertyInit(pvGbl,pfIni,pvClp,pcOwn,pcPgm,pcCmd,pcMan,pcHlp,
+   siErr=siClePropertyInit(pvGbl,pfIni,pvClp,pcOwn,pcPgm,pcBld,pcCmd,pcMan,pcHlp,
                            piOid,psTab,isCas,isPfl,isRpl,siMkl,pfOut,pfErr,pfTrc,
                            pcDep,pcOpt,pcEnt,psCnf,&pvHdl,&pcFil,&siFil,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf);
    if (siErr) {
@@ -3012,6 +3023,7 @@ static void vdCleManProgram(
    const TsCleBuiltin*           psBif,
    const char*                   pcOwn,
    const char*                   pcPgm,
+   const char*                   pcBld,
    const char*                   pcHlp,
    const char*                   pcMan,
    const char*                   pcDep,
@@ -3043,7 +3055,7 @@ static void vdCleManProgram(
       fprintf(pfOut, "DESCRIPTION\n");
       fprintf(pfOut, "-----------\n\n");
       if (pcMan!=NULL && *pcMan) {
-         fprintm(pfOut,pcOwn,pcPgm,pcMan,2);
+         fprintm(pfOut,pcOwn,pcPgm,pcBld,pcMan,2);
       } else {
          fprintf(pfOut,"No detailed description available for this program.\n\n");
       }
@@ -3098,7 +3110,7 @@ static void vdCleManProgram(
          fprintf(pfOut,"\n\n");
       }
       if (pcMan!=NULL && *pcMan) {
-         fprintm(pfOut,pcOwn,pcPgm,pcMan,2);
+         fprintm(pfOut,pcOwn,pcPgm,pcBld,pcMan,2);
       } else {
          fprintf(pfOut,"No detailed description available for this program.\n\n");
       }
@@ -3112,7 +3124,7 @@ static void vdCleManProgram(
          for (i=0;i<6;i++) fprintf(pfOut,"%c",C_TLD);
          fprintf(pfOut,"\n\n");
       }
-      fprintm(pfOut,pcOwn,pcPgm,MAN_CLE_PROGRAM_SYNTAX,1);
+      fprintm(pfOut,pcOwn,pcPgm,pcBld,MAN_CLE_PROGRAM_SYNTAX,1);
       fprintf(pfOut,"------------------------------------------------------------------------\n");
       fprintf(pfOut,"Syntax for program '%s':\n",pcPgm);
       vdPrnStaticSyntax(pfOut,psCmd,psBif,pcPgm,pcDep,pcSep,pcDpa);
@@ -3128,7 +3140,7 @@ static void vdCleManProgram(
          for (i=0;i<4;i++) fprintf(pfOut,"%c",C_TLD);
          fprintf(pfOut,"\n\n");
       }
-      fprintm(pfOut,pcOwn,pcPgm,MAN_CLE_PROGRAM_HELP,1);
+      fprintm(pfOut,pcOwn,pcPgm,pcBld,MAN_CLE_PROGRAM_HELP,1);
       fprintf(pfOut,"------------------------------------------------------------------------\n");
       fprintf(pfOut,"Help for program '%s':\n",pcPgm);
       vdPrnStaticHelp(pfOut,psCmd,psBif,pcPgm,pcDep);
@@ -3145,6 +3157,7 @@ static void vdCleManFunction(
    const char*                   pcHlp,
    const char*                   pcOwn,
    const char*                   pcPgm,
+   const char*                   pcBld,
    const char*                   pcSyn,
    const char*                   pcMan,
    const int                     isMan,
@@ -3177,7 +3190,7 @@ static void vdCleManFunction(
       fprintf(pfOut, "-----------------------------------------------------------------------\n\n");
       fprintf(pfOut, "DESCRIPTION\n");
       fprintf(pfOut, "-----------\n\n");
-      fprintm(pfOut,pcOwn,pcPgm,pcMan,2);
+      fprintm(pfOut,pcOwn,pcPgm,pcBld,pcMan,2);
       fprintf(pfOut, "AUTHOR\n------\n\n");
       fprintf(pfOut, "limes datentechnik(r) gmbh (www.flam.de)\n\n");
    } else {
@@ -3196,7 +3209,7 @@ static void vdCleManFunction(
          efprintf(pfOut,"SYNTAX: > %s %s\n",pcPgm,pcSyn);
          efprintf(pfOut,"-----------------------------------------------------------------------\n\n");
          efprintf(pfOut,".DESCRIPTION\n\n");
-         fprintm(pfOut,pcOwn,pcPgm,pcMan,2);
+         fprintm(pfOut,pcOwn,pcPgm,pcBld,pcMan,2);
       } else {
          efprintf(pfOut,"[[CLEP.BUILTIN.%s]]\n",pcFct);
          if (isNbr) {
@@ -3220,7 +3233,7 @@ static void vdCleManFunction(
          fprintf(pfOut, "SYNTAX: > %s %s\n",pcPgm,pcSyn);
          fprintf(pfOut, "-----------------------------------------------------------------------\n\n");
          fprintf(pfOut, ".DESCRIPTION\n\n");
-         fprintm(pfOut,pcOwn,pcPgm,pcMan,2);
+         fprintm(pfOut,pcOwn,pcPgm,pcBld,pcMan,2);
       }
    }
 }
@@ -3808,6 +3821,7 @@ extern int siCleParseString(
    const int                     siMkl,
    const char*                   pcOwn,
    const char*                   pcPgm,
+   const char*                   pcBld,
    const char*                   pcCmd,
    const char*                   pcMan,
    const char*                   pcHlp,
@@ -3833,7 +3847,7 @@ extern int siCleParseString(
 
    pfTmp=fopen_tmp();
 
-   pvHdl=pvClpOpen(isCas,isPfl,isRpl,siMkl,pcOwn,pcPgm,pcCmd,pcMan,pcHlp,isOvl,
+   pvHdl=pvClpOpen(isCas,isPfl,isRpl,siMkl,pcOwn,pcPgm,pcBld,pcCmd,pcMan,pcHlp,isOvl,
                    psTab,pvDat,pfTmp,pfTmp,NULL,NULL,NULL,NULL,
                    pcDep,pcOpt,pcEnt,&stErr,pvGbl,pvF2S,pfF2S,pvSaf,pfSaf);
    if (pvHdl==NULL) {

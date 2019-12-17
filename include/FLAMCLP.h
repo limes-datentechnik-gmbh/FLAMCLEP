@@ -1135,6 +1135,7 @@ typedef int (TfSaf) (
  * @param[in]  siMkl Integer defining the minimal key word length (siMkl<=0 --> full length, no auto abbreviation)
  * @param[in]  pcOwn String constant containing the owner name for the root in the path ("limes")
  * @param[in]  pcPgm String constant containing the program name for the root in the path ("flcl")
+ * @param[in]  pcBld String constant containing the build/version string for replacement
  * @param[in]  pcCmd String constant containing the command name for the root in the path ("CONV")
  * @param[in]  pcMan String constant containing the manual page for this command (converted on EBCDIC systems)
  * @param[in]  pcHlp String constant containing the help message for this command (converted on EBCDIC systems)
@@ -1169,6 +1170,7 @@ extern void* pvClpOpen(
    const int                     siMkl,
    const char*                   pcOwn,
    const char*                   pcPgm,
+   const char*                   pcBld,
    const char*                   pcCmd,
    const char*                   pcMan,
    const char*                   pcHlp,
