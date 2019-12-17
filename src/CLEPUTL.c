@@ -1372,6 +1372,27 @@ extern void fprintm(FILE* file,const char* own, const char* pgm, const char* bld
          char acTimBuf[CSTIME_BUFSIZ];
          fprintf(file,"%s",cstime(0,acTimBuf));
          ptr=hlp+7;
+      } else if (strncmp(hlp+2,"STATE}",6)==0) { /*nodiac*/
+#ifdef __DEBUG__
+         fprintf(file,"DEBUG");
+#else
+         fprintf(file,"RELEASE");
+#endif
+         ptr=hlp+8;
+      } else if (strncmp(hlp+2,"state}",6)==0) { /*nodiac*/
+#ifdef __DEBUG__
+         fprintf(file,"debug");
+#else
+         fprintf(file,"release");
+#endif
+         ptr=hlp+8;
+      } else if (strncmp(hlp+2,"State}",6)==0) { /*nodiac*/
+#ifdef __DEBUG__
+         fprintf(file,"Debug");
+#else
+         fprintf(file,"Release");
+#endif
+         ptr=hlp+8;
       } else {
          char* nxt=strchr(hlp,'}'); /*nodiac*/
          if (nxt!=NULL) {
