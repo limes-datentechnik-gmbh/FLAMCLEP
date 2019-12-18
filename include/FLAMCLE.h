@@ -988,9 +988,11 @@ typedef void* (TfCleOpenPrint)(FILE* pfOut, FILE* pfErr, const char* pcPat, cons
  * generation process to free resources associated with this handle. The handle will be generated
  * with the function TfCleOpenPrint in front of documentation generation.
  *
- * @param pvHdl Pointer the the print handle
+ * @param pvHdl   Pointer the the print handle
+ *
+ * @return        Return code (0 is OK else error)
  */
-typedef void (TfCleClosePrint)(void* pvHdl);
+typedef int (TfCleClosePrint)(void* pvHdl);
 
 
 /**********************************************************************/

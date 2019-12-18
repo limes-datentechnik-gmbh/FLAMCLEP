@@ -1963,13 +1963,18 @@ EVALUATE:
                ERROR(CLERTC_FAT,pcPat);
             }
             siErr=siPrintDocu(pvGbl,pfOut,pfErr,psDoc,&stDocPar,pvDocHdl,pfHtmlPrn);
-            pfHtmlCls(pvDocHdl);
             if (siErr) {
                fprintf(pfErr,"Generation of HTML documentation to folder '%s' failed\n",pcPat);
+               pfHtmlCls(pvDocHdl);
                ERROR(siErr,pcPat);
+            }
+            siErr=pfHtmlCls(pvDocHdl);
+            if (siErr) {
+                fprintf(pfErr,"Finalise generation of HTML documentation to folder '%s' failed (%d)\n",pcPat,siErr);
+                ERROR(CLERTC_SYS,pcPat);
             } else {
-               fprintf(pfErr,"Generation of HTML documentation to folder '%s' was successful\n",pcPat);
-               ERROR(CLERTC_OK,pcPat);
+                fprintf(pfErr,"Generation of HTML documentation to folder '%s' was successful\n",pcPat);
+                ERROR(CLERTC_OK,pcPat);
             }
          } else if (pfHtmlDoc!=NULL) { // TODO: muss weg
             siErr=pfHtmlDoc(pfOut,pfErr,pcPat,psDoc,&stDocPar,siCleWritePage);
