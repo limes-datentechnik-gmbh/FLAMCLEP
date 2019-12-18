@@ -1380,7 +1380,6 @@ EVALUATE:
       if (pfOut==NULL) pfOut=pfStd;
       if (pfErr==NULL) pfErr=pfStd;
       if (argc==2) {
-         const char* pcScc=NULL;
          efprintf(pfOut,"\n");
          efprintf(pfOut,"Return/condition/exit codes of the executable\n");
          efprintf(pfOut,"---------------------------------------------\n\n");
@@ -1388,7 +1387,7 @@ EVALUATE:
          if (pcSccMan!=NULL && *pcSccMan) {
             efprintf(pfOut,"Special condition codes\n");
             efprintf(pfOut,"~~~~~~~~~~~~~~~~~~~~~~~\n\n");
-            fprintm(pfOut,pcOwn,pcPgm,pcBld,pcScc,1);
+            fprintm(pfOut,pcOwn,pcPgm,pcBld,pcSccMan,1);
          }
          if (pfMsg!=NULL) {
             efprintf(pfOut,"Reason codes of the different commands\n");
