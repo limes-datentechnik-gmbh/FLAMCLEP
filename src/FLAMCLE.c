@@ -875,7 +875,7 @@ static int siClePrintPage(FILE* pfOut, FILE* pfErr, const TsCleDoc* psDoc, const
       return(CLERTC_SYS);
    }
    pcPge[r]=0x00;
-   siErr=pfPrn(pvPrn,psDoc->uiLev,NULL,psDoc->pcMan,pcPge);
+   siErr=pfPrn(pvPrn,psDoc->uiLev,psDoc->pcHdl,NULL,psDoc->pcMan,pcPge);
    free(pcPge);
    if (siErr) {
       if (pfErr!=NULL) fprintf(pfErr,"Print page over call back function for command '%s' failed with %d\n",psDoc->pcHdl,siErr);
@@ -923,7 +923,7 @@ static void vdFreeHtmlDoc(void** ppLib) {
    }
 }
 
-static int siPrintPage(void* pvHdl, const int siLev, const char* pcPat, const char* pcOrg, const char* pcPge) {
+static int siPrintPage(void* pvHdl, const int siLev, const char* pcHdl, const char* pcPat, const char* pcOrg, const char* pcPge) {
    int l=strlen(pcPge);
    int r=fwrite(pcPge,1,l,(FILE*)pvHdl);
    return(r-l);

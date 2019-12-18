@@ -1488,12 +1488,13 @@ extern char* pcClpError(
  *
  * @param pvHdl   Handle for the print callback function (e.G. from opnHtmlDoc)
  * @param siLev   The hierarchical level for this page/chapter
+ * @param pcHdl   The headline of the current chapter
  * @param pcPat   The path for the corresponding parameter (NULL if the page not inside a command or other CLP string)
  * @param pcOrg   The pointer to the original manual page (can be used to determine duplicates and produce links)
  * @param pcPge   The prepared page for printing
  * @return Return code (0 is OK else error)
  */
-typedef int (TfClpPrintPage)(void* pvHdl, const int siLev, const char* pcPat, const char* pcOrg, const char* pcPge);
+typedef int (TfClpPrintPage)(void* pvHdl, const int siLev, const char* pcHdl, const char* pcPat, const char* pcOrg, const char* pcPge);
 
 /**
  * Generate documentation using a callback function

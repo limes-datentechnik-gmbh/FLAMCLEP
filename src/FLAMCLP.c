@@ -347,6 +347,7 @@ typedef struct Hdl {
    const char*                   pcOpt;
    const char*                   pcEnt;
    const char*                   pcRow;
+   const char*                   pcHdl;
    int                           siMkl;
    int                           isOvl;
    int                           isChk;
@@ -1945,9 +1946,10 @@ static int siClpWriteRemaining(
    return(CLP_OK);
 }
 
-extern int siClpPrintWritten(
+static int siClpPrintWritten(
    void*                         pvHdl,
-   FILE*                         pfDoc)
+   FILE*                         pfDoc,
+   const char*                   pcPat)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    long int s=ftell(pfDoc);
@@ -1962,7 +1964,7 @@ extern int siClpPrintWritten(
       return CLPERR(psHdl,CLPERR_SYS,"Read of temporary file to print page for command '%s' failed",psHdl->pcCmd);
    }
    pcPge[r]=0x00;
-   int siErr=psHdl->pfPrn(psHdl->pvPrn,psHdl->uiLev,psHdl->pcCmd,psHdl->pcMan,pcPge);
+   int siErr=psHdl->pfPrn(psHdl->pvPrn,psHdl->uiLev,psHdl->pcHdl,pcPat,psHdl->pcMan,pcPge);
    free(pcPge);
    if (siErr) {
       return CLPERR(psHdl,CLPERR_SYS,"Print page over call back function for command '%s' failed with %d",psHdl->pcCmd,siErr);
@@ -1990,6 +1992,7 @@ extern int siClpPrintDocu(
    psHdl->pcCur=NULL;
    psHdl->pcOld=NULL;
    psHdl->pcRow=NULL;
+   psHdl->pcHdl=pcHdl;
    psHdl->siCol=0;
    psHdl->siRow=0;
    psHdl->uiLev=uiLev;
@@ -2059,7 +2062,7 @@ extern int siClpPrintDocu(
          return(siErr);
       }
 
-      siErr=siClpPrintWritten(pvHdl,pfDoc);
+      siErr=siClpPrintWritten(pvHdl,pfDoc,psHdl->pcCmd);
       fclose_tmp(pfDoc);
       if (siErr) {
          return(siErr);
@@ -8067,7 +8070,7 @@ static int siClpPrintArgument(
       return(siErr);
    }
 
-   siErr=siClpPrintWritten(pvHdl,pfTmp);
+   siErr=siClpPrintWritten(pvHdl,pfTmp,pcPat);
    fclose_tmp(pfTmp);
    if (siErr) {
       return(siErr);
