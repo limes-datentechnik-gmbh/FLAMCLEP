@@ -931,7 +931,7 @@ static int siPrintPage(void* pvHdl, const int siLev, const char* pcHdl, const ch
    if (pcHlp!=NULL) {
       uiPge=pcHlp-pcPge;
    }
-   printd("%08d %s(%s(%.*s)) %p\n",siLev,pcHdl!=NULL?pcHdl:"-NULL-",pcPat!=NULL?pcPat:"-NULL-",uiPge,pcPge,pcOrg);
+   printd("... print %04d %s(%s(%.*s)) %p\n",siLev,pcHdl!=NULL?pcHdl:"-NULL-",pcPat!=NULL?pcPat:"-NULL-",uiPge,pcPge,pcOrg);
    return(r-l);
 }
 
