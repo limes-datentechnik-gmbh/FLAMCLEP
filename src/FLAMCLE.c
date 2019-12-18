@@ -1866,11 +1866,10 @@ EVALUATE:
          } else {
             TsCleDocPar stDocPar;
             stDocPar.isNbr=isNbr; stDocPar.isPat=TRUE;  stDocPar.isIdt=FALSE; stDocPar.isDep=isLong;
-            stDocPar.isCas=isCas; stDocPar.isPfl=isPfl; stDocPar.isRpl=isRpl;
-            stDocPar.pcAbo=pcAbo; stDocPar.pcDep=pcDep; stDocPar.pcDpa=pcDpa;
-            stDocPar.pcEnt=pcEnt; stDocPar.pcHlp=pcHlp; stDocPar.pcOpt=pcOpt;
-            stDocPar.pcOwn=pcOwn; stDocPar.pcPgm=pcPgm; stDocPar.pcBld=pcBld; stDocPar.pcVsn=pcVsn;
-            stDocPar.pfMsg=pfMsg; stDocPar.pvCnf=psCnf; stDocPar.siMkl=siMkl;
+            stDocPar.isCas=isCas; stDocPar.isPfl=isPfl; stDocPar.isRpl=isRpl; stDocPar.pcAbo=pcAbo;
+            stDocPar.pcDep=pcDep; stDocPar.pcDpa=pcDpa; stDocPar.pcEnt=pcEnt; stDocPar.pcHlp=pcHlp;
+            stDocPar.pcOpt=pcOpt; stDocPar.pcOwn=pcOwn; stDocPar.pcPgm=pcPgm; stDocPar.pcBld=pcBld;
+            stDocPar.pcVsn=pcVsn; stDocPar.pfMsg=pfMsg; stDocPar.pvCnf=psCnf; stDocPar.siMkl=siMkl;
             stDocPar.psBif=asBif; stDocPar.psCmd=psCmd; stDocPar.psOth=psOth;
             stDocPar.pvF2S=pvF2S; stDocPar.pfF2S=pfF2S; stDocPar.pvSaf=pvSaf; stDocPar.pfSaf=pfSaf;
             siErr=siPrintDocu(pvGbl,pfOut,pfErr,psDoc,&stDocPar,pfDoc,siPrintPage);
@@ -1950,16 +1949,15 @@ EVALUATE:
          }
 
          TsCleDocPar stDocPar;
-         stDocPar.isNbr=isNbr; stDocPar.isPat=FALSE; stDocPar.isIdt=TRUE; stDocPar.isDep=TRUE;
-         stDocPar.isCas=isCas; stDocPar.isPfl=isPfl; stDocPar.isRpl=isRpl;
-         stDocPar.pcAbo=pcAbo; stDocPar.pcDep=pcDep; stDocPar.pcDpa=pcDpa;
-         stDocPar.pcEnt=pcEnt; stDocPar.pcHlp=pcHlp; stDocPar.pcOpt=pcOpt;
-         stDocPar.pcOwn=pcOwn; stDocPar.pcPgm=pcPgm; stDocPar.pcBld=pcBld; stDocPar.pcVsn=pcVsn;
-         stDocPar.pfMsg=pfMsg; stDocPar.pvCnf=psCnf; stDocPar.siMkl=siMkl;
+         stDocPar.isNbr=isNbr; stDocPar.isPat=FALSE; stDocPar.isIdt=TRUE;  stDocPar.isDep=TRUE;
+         stDocPar.isCas=isCas; stDocPar.isPfl=isPfl; stDocPar.isRpl=isRpl; stDocPar.pcAbo=pcAbo;
+         stDocPar.pcDep=pcDep; stDocPar.pcDpa=pcDpa; stDocPar.pcEnt=pcEnt; stDocPar.pcHlp=pcHlp;
+         stDocPar.pcOpt=pcOpt; stDocPar.pcOwn=pcOwn; stDocPar.pcPgm=pcPgm; stDocPar.pcBld=pcBld;
+         stDocPar.pcVsn=pcVsn; stDocPar.pfMsg=pfMsg; stDocPar.pvCnf=psCnf; stDocPar.siMkl=siMkl;
          stDocPar.psBif=asBif; stDocPar.psCmd=psCmd; stDocPar.psOth=psOth;
          stDocPar.pvF2S=pvF2S; stDocPar.pfF2S=pfF2S; stDocPar.pvSaf=pvSaf; stDocPar.pfSaf=pfSaf;
          if (pfHtmlOpn!=NULL && pfHtmlPrn!=NULL && pfHtmlCls!=NULL) {
-            void* pvDocHdl=pfHtmlOpn(pfOut,pfErr,pcPat,pcOwn,pcPgm);
+            void* pvDocHdl=pfHtmlOpn(pfOut,pfErr,pcPat,pcOwn,pcPgm,pcBld);
             if (pvDocHdl==NULL) {
                fprintf(pfErr,"Open for HTML generation failed\n");
                ERROR(CLERTC_FAT,pcPat);

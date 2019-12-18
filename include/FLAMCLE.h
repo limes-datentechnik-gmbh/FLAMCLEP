@@ -974,10 +974,11 @@ extern int siCleExecute(
  * @param pcPat   Path where the documentation is written to
  * @param pcOwn   String of the current Owner
  * @param pcPgm   String with the current program name
+ * @param pcBld   Optional build/version number (could be NULL)
  *
  * @return        Pointer to an handle or NULL if open failed
  */
-typedef void* (TfCleOpenPrint)(FILE* pfOut, FILE* pfErr, const char* pcPat, const char* pcOwn, const char* pcPgm);
+typedef void* (TfCleOpenPrint)(FILE* pfOut, FILE* pfErr, const char* pcPat, const char* pcOwn, const char* pcPgm, const char* pcBld);
 
 /**
  * Function 'clsHtmlDoc' of library 'libhtmldoc' called if built-in function HTMLDOC used
