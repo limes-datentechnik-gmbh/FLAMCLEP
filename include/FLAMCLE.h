@@ -764,35 +764,6 @@ typedef struct CleCommand {
    const char*                   pcHlp;
 } TsCleCommand;
 
-/**
- * \struct TsCleOtherClp
- *
- * This structure is used to define a table of CLP strings add as appendix to the generated documentation\n
- *
- * Its members are:
- * \par
- * \b pcRot  Pointer to the root key word for this string (:alpha:[:alnum:|'_']*)\n
- * \b pcKyw  Pointer to the key word for this string (:alpha:[:alnum:|'_']*)\n
- * \b pcHdl  Pointer to the headline for the sub chapter for this CLP string (:alpha:[:alnum:|'_']*)\n
- * \b psTab  Pointer to the main argument table for this CLP string\n
- * \b pcMan  Pointer to a null-terminated string for a detailed description for this CLP string
- *           (in ASCIDOC format, content behind .DESCRIPTION, mainly simply some paragraphs plus .OPTIONS and/or.EXAMPLES)
- *           It is recommended to use a header file with a define for this long string.
- *           "&{OWN}" and "&{PGM}" are replaced with the current owner and program name.
- *           The resulting text is converted on EBCDIC systems)\n
- * \b pcHlp  String for a short context sensitive help for this CLP string (converted on EBCDIC systems)\n
- * \b isOvl  True if provided table must be interpreted as overlay else as object\n
- */
-typedef struct CleOtherClp {
-   const char*                   pcRot;
-   const char*                   pcKyw;
-   const char*                   pcHdl;
-   const TsClpArgument*          psTab;
-   const char*                   pcMan;
-   const char*                   pcHlp;
-   const int                     isOvl;
-} TsCleOtherClp;
-
 /** Starts a table with command definitions
  *
  *  *nam* Name of this table\n
@@ -824,25 +795,59 @@ typedef struct CleOtherClp {
  */
 #define CLETAB_CLS                                                    { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0   , NULL, NULL}
 
+
+/**
+ * \struct TsCleOtherClp
+ *
+ * This structure is used to define a table of CLP strings add as appendix to the generated documentation\n
+ *
+ * Its members are:
+ * \par
+ * \b pcRot  Pointer to the program/root key word for this string (:alpha:[:alnum:|'_']*)\n
+ * \b pcKyw  Pointer to the key word for this string (:alpha:[:alnum:|'_']*)\n
+ * \b psTab  Pointer to the main argument table for this CLP string\n
+ * \b pcMan  Pointer to a null-terminated string for a detailed description for this CLP string
+ *           (in ASCIDOC format, content behind .DESCRIPTION, mainly simply some paragraphs plus .OPTIONS and/or.EXAMPLES)
+ *           It is recommended to use a header file with a define for this long string.
+ *           "&{OWN}" and "&{PGM}" are replaced with the current owner and program name.
+ *           The resulting text is converted on EBCDIC systems)\n
+ * \b pcHlp  String for a short context sensitive help for this CLP string (converted on EBCDIC systems)\n
+ * \b isOvl  True if provided table must be interpreted as overlay else as object\n
+ */
+typedef struct CleOtherClp {
+   const char*                   pcRot;
+   const char*                   pcKyw;
+   const TsClpArgument*          psTab;
+   const char*                   pcMan;
+   const char*                   pcHlp;
+   const int                     isOvl;
+} TsCleOtherClp;
+
 /** Starts a table with other CLP strings
  *
  *  *nam* Name of this table\n
  */
 #define CLEOTH_OPN(name)               TsCleOtherClp name[]
 
-/** defines a appendix for the object or overlay *kyw* of the root *rot* with the headline of *hdl* for a certain other CLP string
+/** defines a appendix for the object or overlay *cmd* of the root *rot* with the headline of *hdl* for a certain other CLP string
  *
- *  *tab* Pointer to the main table for this CLP string.\n
- *  *man* Pointer to a null-terminated string for a detailed description for this CLP string.
- *        (in ASCIDOC format, content behind .DESCRIPTION, mainly simply some paragraphs plus .OPTIONS and/or .EXAMPLES)
- *        It is recommended to use a header file with a define for this long string)\n
- *  *hlp* String for a short context sensitive help for this CLP string\n
+ * *rot*  Pointer to the program/root key word for this string (:alpha:[:alnum:|'_']*)\n
+ * *kyw*  Pointer to the key word for this string (:alpha:[:alnum:|'_']*)\n
+ * *hdl*  Pointer to the headline for the sub chapter for this CLP string (:alpha:[:alnum:|'_']*)\n
+ * *tab*  Pointer to the main argument table for this CLP string\n
+ * *man*  Pointer to a null-terminated string for a detailed description for this CLP string
+ *           (in ASCIDOC format, content behind .DESCRIPTION, mainly simply some paragraphs plus .OPTIONS and/or.EXAMPLES)
+ *           It is recommended to use a header file with a define for this long string.
+ *           "&{OWN}" and "&{PGM}" are replaced with the current owner and program name.
+ *           The resulting text is converted on EBCDIC systems)\n
+ * *hlp*  String for a short context sensitive help for this CLP string (converted on EBCDIC systems)\n
+ * *ovl*  True if provided table must be interpreted as overlay else as object\n
  */
-#define CLETAB_OTH(rot,kyw,hdl,tab,man,hlp,ovl)   {(rot),(kyw),(hdl),(tab),(man),(hlp),(ovl)},
+#define CLETAB_OTH(rot,kyw,tab,man,hlp,ovl)  {(rot),(kyw),(tab),(man),(hlp),(ovl)},
 
 /** Ends a table with other CLP strings
  */
-#define CLEOTH_CLS                    { NULL, NULL, NULL, NULL, NULL, NULL, 0}
+#define CLEOTH_CLS                           { NULL, NULL, NULL, NULL, NULL, 0}
 
 /**
  * Execute command line

@@ -1662,7 +1662,6 @@ extern int siClpDocu(
          const char*                   pcKyw=NULL;
          char                          acKyw[CLPMAX_KYWSIZ];
          int                           siErr=0,siLev,siPos;
-         const char*                   pcSta=(pcHdl!=NULL && *pcHdl)?pcHdl:psHdl->pcCmd;
          unsigned int                  i,l=strlen(psHdl->pcCmd);
          char                          acNum[64];
          char                          acArg[20];
@@ -1829,11 +1828,11 @@ extern int siClpDocu(
             if (psHdl->pcPgm!=NULL && *psHdl->pcPgm) {
                 for (p=psHdl->pcPgm;*p;p++) fprintf(pfDoc,"%c",tolower(*p));
                 fprintf(pfDoc,".");
-                l=strlen(psHdl->pcPgm)+strlen(pcSta)+4;
+                l=strlen(psHdl->pcPgm)+strlen(psHdl->pcCmd)+4;
             } else {
-                l=strlen(pcSta)+3;
+                l=strlen(psHdl->pcCmd)+3;
             }
-            for (p=pcSta;*p;p++) fprintf(pfDoc,"%c",tolower(*p));
+            for (p=psHdl->pcCmd;*p;p++) fprintf(pfDoc,"%c",tolower(*p));
             fprintf(pfDoc,   "(1)\n");
             for (i=0;i<l;i++) fprintf(pfDoc,"=");
             fprintf(pfDoc,"\n");
@@ -1844,7 +1843,7 @@ extern int siClpDocu(
                 for (p=psHdl->pcPgm;*p;p++) fprintf(pfDoc,"%c",tolower(*p));
                 fprintf(pfDoc,".");
             }
-            for (p=pcSta;*p;p++) fprintf(pfDoc,"%c",tolower(*p));
+            for (p=psHdl->pcCmd;*p;p++) fprintf(pfDoc,"%c",tolower(*p));
             efprintf(pfDoc,  " - `%s`\n\n",psHdl->pcHlp);
             fprintf(pfDoc,   "SYNOPSIS\n");
             fprintf(pfDoc,   "--------\n\n");
@@ -1870,8 +1869,8 @@ extern int siClpDocu(
             fprintf(pfDoc,"limes datentechnik(r) gmbh (www.flam.de)\n\n");
          } else {
             efprintf(pfDoc,  "[[CLEP.%s.%s]]\n",pcKnd,psHdl->pcCmd);
-            vdPrintHdl(pfDoc,psHdl->uiLev,isNbr,pcNum,pcKnd,pcSta,C_TLD);
-            if (isIdt) efprintf(pfDoc,"indexterm:[%s, %s]\n\n",pcKnd,pcSta);
+            vdPrintHdl(pfDoc,psHdl->uiLev,isNbr,pcNum,pcKnd,psHdl->pcCmd,C_TLD);
+            if (isIdt) efprintf(pfDoc,"indexterm:[%s, %s]\n\n",pcKnd,psHdl->pcCmd);
             fprintf(pfDoc,   ".SYNOPSIS\n\n");
             fprintf(pfDoc,   "-----------------------------------------------------------------------\n");
             efprintf(pfDoc,  "HELP:   %s\n",psHdl->pcHlp);
@@ -2021,7 +2020,6 @@ extern int siClpPrintDocu(
 
    if (pcNum!=NULL && pcKnd!=NULL) {
       int                           siErr;
-      const char*                   pcSta=/*(pcHdl!=NULL && *pcHdl)?pcHdl:*/psHdl->pcCmd;
       FILE*                         pfDoc;
 
       pfDoc=fopen_tmp();
@@ -2030,8 +2028,8 @@ extern int siClpPrintDocu(
       }
 
       efprintf(pfDoc,   "[[CLEP.%s.%s]]\n",pcKnd,psHdl->pcCmd);
-      vdPrintHdl(pfDoc,psHdl->uiLev,psHdl->isNbr,pcNum,pcKnd,pcSta,C_TLD);
-      if (isIdt) efprintf(pfDoc,"indexterm:[%s, %s]\n\n",pcKnd,pcSta);
+      vdPrintHdl(pfDoc,psHdl->uiLev,psHdl->isNbr,pcNum,pcKnd,psHdl->pcCmd,C_TLD);
+      if (isIdt) efprintf(pfDoc,"indexterm:[%s, %s]\n\n",pcKnd,psHdl->pcCmd);
       efprintf(pfDoc,   ".SYNOPSIS\n\n");
       efprintf(pfDoc,   "-----------------------------------------------------------------------\n");
       efprintf(pfDoc,   "HELP:   %s\n",psHdl->pcHlp);

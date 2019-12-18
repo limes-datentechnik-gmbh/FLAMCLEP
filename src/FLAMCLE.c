@@ -974,13 +974,13 @@ static int siPrintDocu(
                if (pfErr!=NULL) fprintf(pfErr,"The pointer to the list of other CLP strings is NULL but DOCTYP OTHERCLP requested\n");
                return(CLERTC_ITF);
             }
-            for (int j=0;psPar->psOth[j].pcHdl!=NULL;j++) {
+            for (int j=0;psPar->psOth[j].pcKyw!=NULL;j++) {
                void* pvClp=NULL;
                char acNum[64];
                pvClp=pvClpOpen(psPar->isCas,psPar->isPfl,psPar->isRpl,psPar->siMkl,psPar->pcOwn,psPar->psOth[j].pcRot,psPar->pcBld,psPar->psOth[j].pcKyw,psPar->psOth[j].pcMan,psPar->psOth[j].pcHlp,psPar->psOth[j].isOvl,
                                psPar->psOth[j].psTab,NULL,pfOut,pfErr,NULL,NULL,NULL,NULL,psPar->pcDep,psPar->pcOpt,psPar->pcEnt,NULL,pvGbl,psPar->pvF2S,psPar->pfF2S,psPar->pvSaf,psPar->pfSaf);
                if (pvClp==NULL) {
-                  if (pfErr!=NULL) fprintf(pfErr,"Open of parser for CLP string of appendix '%s' failed\n",psPar->psOth[j].pcRot);
+                  if (pfErr!=NULL) fprintf(pfErr,"Open of parser for CLP string of appendix '%s' failed\n",psPar->psOth[j].pcKyw);
                   return(CLERTC_TAB);
                }
                if (psDoc[i].pcNum!=NULL && *psDoc[i].pcNum) {
@@ -988,10 +988,10 @@ static int siPrintDocu(
                } else {
                   snprintf(acNum,sizeof(acNum),"%d.",j+1);
                }
-               siErr=siClpPrintDocu(pvClp,psPar->psOth[j].pcHdl,acNum,"OTHERCLP",psPar->isDep,psPar->isNbr,psPar->isIdt,psPar->isPat,psDoc[i].uiLev+1,pvPrn,pfPrn);
+               siErr=siClpPrintDocu(pvClp,psDoc[i].pcHdl,acNum,"OTHERCLP",psPar->isDep,psPar->isNbr,psPar->isIdt,psPar->isPat,psDoc[i].uiLev+1,pvPrn,pfPrn);
                vdClpClose(pvClp,CLPCLS_MTD_ALL); pvClp=NULL;
                if (siErr<0) {
-                  if (pfErr!=NULL) fprintf(pfErr,"Creation of documentation for OTHERCLP '%s' failed\n",psPar->psOth[j].pcHdl);
+                  if (pfErr!=NULL) fprintf(pfErr,"Creation of documentation for OTHERCLP '%s' failed\n",psPar->psOth[j].pcKyw);
                   return(CLERTC_SYN);
                }
             }
