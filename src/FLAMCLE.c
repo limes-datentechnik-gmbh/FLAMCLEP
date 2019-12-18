@@ -924,8 +924,14 @@ static void vdFreeHtmlDoc(void** ppLib) {
 }
 
 static int siPrintPage(void* pvHdl, const int siLev, const char* pcHdl, const char* pcPat, const char* pcOrg, const char* pcPge) {
-   int l=strlen(pcPge);
-   int r=fwrite(pcPge,1,l,(FILE*)pvHdl);
+   int         l=strlen(pcPge);
+   int         r=fwrite(pcPge,1,l,(FILE*)pvHdl);
+   int         uiPge=strlen(pcPge);
+   const char* pcHlp=strchr(pcPge,'\n');
+   if (pcHlp!=NULL) {
+      uiPge=pcHlp-pcPge;
+   }
+   printd("%08d %s(%s(%.*s)) %p\n",siLev,pcHdl!=NULL?pcHdl:"-NULL-",pcPat!=NULL?pcPat:"-NULL-",uiPge,pcPge,pcOrg);
    return(r-l);
 }
 
@@ -955,7 +961,7 @@ static int siPrintDocu(
                   } else {
                      snprintf(acNum,sizeof(acNum),"%d.",j+1);
                   }
-                  siErr=siClpPrintDocu(pvClp,NULL,acNum,"COMMAND",psPar->isDep,psPar->isNbr,psPar->isIdt,psPar->isPat,psDoc[i].uiLev+1,pvPrn,pfPrn);
+                  siErr=siClpPrintDocu(pvClp,psDoc[i].pcHdl,acNum,"COMMAND",psPar->isDep,psPar->isNbr,psPar->isIdt,psPar->isPat,psDoc[i].uiLev+1,pvPrn,pfPrn);
                   vdClpClose(pvClp,CLPCLS_MTD_ALL); pvClp=NULL;
                   if (siErr<0) {
                      if (pfErr!=NULL) fprintf(pfErr,"Creation of documentation for COMMAND '%s' failed\n",psPar->psCmd[j].pcKyw);
