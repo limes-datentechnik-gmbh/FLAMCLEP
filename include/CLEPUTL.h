@@ -269,15 +269,29 @@ extern int srprintc(char** buffer,size_t* size,const size_t expansion,const char
 extern int srprintf(char** buffer,size_t* size,const size_t expansion,const char* format,...) __PRINTF_CHECK__(4, 5);
 
 /**
- * Prints man pages to a file, inserting owner and program name into placeholders
+ * Prints man pages to a file, inserting owner, program name, build number, state and date into placeholders
  * @param file    pointer to the file
  * @param own     owner name for replacement (&{OWN})
  * @param pgm     program name for replacement (&{PGM})
  * @param bld     build/version string for replacement (&{BLD})
- * @param man     manpage to print, which can contain &{PGM}, &{OWN} and &{BLD}
+ * @param man     manpage to print, which can contain &{PGM}, &{OWN}, &{BLD}, &{DATE} and &{STATE}
  * @param cnt     amount of '\n' added to man page (0,1,2 (>2=2))
  */
 extern void fprintm(FILE* file,const char* own, const char* pgm, const char* bld, const char* man, const int cnt);
+
+/**
+ * Prints man pages to a buffer, inserting owner, program name, build number, state and date into placeholders
+ * @param buffer  pointer to the buffer
+ * @param size    size of the buffer
+ * @param own     owner name for replacement (&{OWN})
+ * @param pgm     program name for replacement (&{PGM})
+ * @param bld     build/version string for replacement (&{BLD})
+ * @param man     manpage to print, which can contain &{PGM}, &{OWN}, &{BLD}, &{DATE} and &{STATE}
+ * @param cnt     amount of '\n' added to man page (0,1,2 (>2=2))
+ * @return        same as snprintf
+ */
+extern int snprintm(char* buffer, size_t size, const char* own, const char* pgm, const char* bld, const char* man, const int cnt);
+
 
 /**
  * This function parses a zero terminated string array of a certain length or terminated with 0xFF.

@@ -617,24 +617,33 @@ static inline TsCnfHdl* psOpenConfig(FILE* pfOut, FILE* pfErr, const char* pcHom
 static int siPrintChapter(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const char* pcOwn, const char* pcPgm, const char* pcBld, const int isNbr, const int isIdt) {
    if (psDoc->pcHdl!=NULL && *psDoc->pcHdl) {
       if (psDoc->pcKyw!=NULL && *psDoc->pcKyw) {
-         efprintf(pfDoc,"[%s]\n",psDoc->pcKyw);
+         char acKyw[strlen(psDoc->pcKyw)+4];
+         snprintf(acKyw,sizeof(acKyw),"[%s]",psDoc->pcKyw);/*nodiac*/
+         fprintm(pfDoc,pcOwn,pcPgm,pcBld,acKyw,1);
       }
       if (psDoc->pcAnc!=NULL && *psDoc->pcAnc) {
-         efprintf(pfDoc,"[[%s]]\n",psDoc->pcAnc);
+         char acAnc[strlen(psDoc->pcAnc)+8];
+         snprintf(acAnc,sizeof(acAnc),"[[%s]]",psDoc->pcAnc);/*nodiac*/
+         fprintm(pfDoc,pcOwn,pcPgm,pcBld,acAnc,1);
       }
       for (unsigned int i=0;i<psDoc->uiLev;i++) {
          efprintf(pfDoc,"=");
       }
       if (isNbr && psDoc->pcNum!=NULL && *psDoc->pcNum) efprintf(pfDoc," %s",psDoc->pcNum);
-      efprintf(pfDoc," %s\n\n",psDoc->pcHdl);
-      if (isIdt && psDoc->pcInd!=NULL && *psDoc->pcInd) {
+      efprintf(pfDoc," ");
+      fprintm(pfDoc,pcOwn,pcPgm,pcBld,psDoc->pcHdl,2);
+      if (isIdt && psDoc->pcIdt!=NULL && *psDoc->pcIdt) {
          const char* pcHlp;
-         const char* pcInd=psDoc->pcInd;
-         for (pcHlp=strchr(pcInd,'\n');pcHlp!=NULL;pcHlp=strchr(pcInd,'\n')) {
-            efprintf(pfDoc,"indexterm:[%.*s]\n",(int)(pcHlp-pcInd),pcInd);
-            pcInd=pcHlp+1;
+         const char* pcIdt=psDoc->pcIdt;
+         for (pcHlp=strchr(pcIdt,'\n');pcHlp!=NULL;pcHlp=strchr(pcIdt,'\n')) {
+            char acIdt[strlen(pcIdt)+16];
+            snprintf(acIdt,sizeof(acIdt),"indexterm:[%.*s]",(int)(pcHlp-pcIdt),pcIdt);/*nodiac*/
+            fprintm(pfDoc,pcOwn,pcPgm,pcBld,acIdt,1);
+            pcIdt=pcHlp+1;
          }
-         efprintf(pfDoc,"indexterm:[%s]\n\n",pcInd);
+         char acIdt[strlen(pcIdt)+16];
+         snprintf(acIdt,sizeof(acIdt),"indexterm:[%s]",pcIdt);/*nodiac*/
+         fprintm(pfDoc,pcOwn,pcPgm,pcBld,acIdt,2);
       }
       if (psDoc->pcMan!=NULL && *psDoc->pcMan) {
          fprintm(pfDoc,pcOwn,pcPgm,pcBld,psDoc->pcMan,2);

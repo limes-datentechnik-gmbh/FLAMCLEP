@@ -522,7 +522,7 @@ static inline const char* pcMapDocTyp(const unsigned int uiTyp) {
  * \b pcAnc  Optional anchor for this chapter (printed in front of headline in double square brackets)\n
  * \b pcHdl  Headline for this chapter\n
  * \b pcMan  Optional or required manual page with the content of this chapter)\n
- * \b pcInd  Optional new line separated list of index term for this chapter (printed at the end (indexterm:[]))\n
+ * \b pcIdt  Optional new line separated list of index term for this chapter (printed at the end (indexterm:[]))\n
  */
 typedef struct CleDoc {
    unsigned int      uiTyp;
@@ -532,7 +532,7 @@ typedef struct CleDoc {
    const char*       pcAnc;
    const char*       pcHdl;
    const char*       pcMan;
-   const char*       pcInd;
+   const char*       pcIdt;
 }TsCleDoc;
 
 /** Starts the documentation generation table
@@ -550,7 +550,7 @@ typedef struct CleDoc {
  *  *man* Optional manual page for this chapter\n
  *  *ind* Optional new line separated list of index terms for this chapter\n
  */
-#define CLETAB_DOC(typ,lev,num,kyw,anc,hdl,man,ind)   {(typ),(lev),(num),(kyw),(anc),(hdl),(man),(ind)},
+#define CLETAB_DOC(typ,lev,num,kyw,anc,hdl,man,idt)   {(typ),(lev),(num),(kyw),(anc),(hdl),(man),(idt)},
 
 /** Ends a table with constant definitions
  */

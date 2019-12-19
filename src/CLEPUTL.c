@@ -1406,6 +1406,31 @@ extern void fprintm(FILE* file,const char* own, const char* pgm, const char* bld
    efprintf(file,"%s",ptr);
 }
 
+extern int snprintm(char* buffer, size_t size, const char* own, const char* pgm, const char* bld, const char* man, const int cnt) {
+   FILE*       f=fopen_tmp();
+   if (f!=NULL) {
+      fprintm(f,own,pgm,bld,man,cnt);
+      unsigned long s=ftell(f);
+      rewind(f);
+      char* p=malloc(s+1);
+      if (p!=NULL) {
+         unsigned long r=fread(p,1,s,f);
+         fclose_tmp(f);
+         if (r==s) {
+            p[r]=0x00;
+            int i=snprintf(buffer,size,"%s",p);
+            free(p);
+            return(i);
+         } else {
+            free(p);
+         }
+      } else {
+         fclose_tmp(f);
+      }
+   }
+   return(snprintf(buffer,size,"Convert of manual page failed"));
+}
+
 extern unsigned int localccsid(void) {
    unsigned int ccsid = 0;
    const char* charset;
