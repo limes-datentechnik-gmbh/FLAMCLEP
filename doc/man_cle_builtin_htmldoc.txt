@@ -5,14 +5,22 @@ path given, then the current directory is used as default.
 With the optional keyword `NUMBERS` the numbering of headlines can be
 activated. The keyword `SHORT` will result in a short version of the
 document, not containing the parameter of the commands and other CLP
-strings. 
+strings.
+
+In opposite to the built-in function <<CLEP.BUILTIN.GENDOCU,GENDOCU>> at
+HTML generation no path is written to the synopsis but index terms are
+generated.
 
 The built-in function can only be used if a call back function for HTML
-documentation provided. If not a error will be printed if HTMLDOC is
-executed.
+documentation provided. If not a error will be issued if HTMLDOC is
+executed. The callback function is called for each prepared page and the
+unique pointer to the original manual string can be used to determine if
+this page already created and if so then only a link to this existing
+page is required. This interface allows to generated more flexible (with
+dictionary, index, search) and redundancy free HTML documentation.
 
 To understand the service provider interface (open, close and callback
-function) for HTML generation see the DOXYGEN documentation for
+function) for HTML generation see the DOXYGEN documentation of
 FLAMCLE/CLP.h
 
 .Examples
