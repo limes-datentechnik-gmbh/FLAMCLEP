@@ -1775,7 +1775,7 @@ EVALUATE:
       const char*                pcCmd=NULL;
       const char*                pcSgn=NULL;
       int                        isNbr=TRUE;
-      int                        isLong=TRUE;
+      int                        isDep=TRUE;
       if (pfOut==NULL) pfOut=pfStd;
       if (pfErr==NULL) pfErr=pfStd;
       if (argc==3 || argc==4 || argc==5) {
@@ -1785,7 +1785,7 @@ EVALUATE:
             if (strxcmp(isCas,argv[3],"NONBR",0,0,FALSE)==0) {
                isNbr=FALSE;
             } else if(strxcmp(isCas,argv[3],"SHORT",0,0,FALSE)==0) {
-               isLong=FALSE;
+               isDep=FALSE;
             } else {
                fprintf(pfErr,"Syntax for built-in function 'GENDOCU' not valid\n");
                for (i=0;psCmd[i].pcKyw!=NULL ;i++) {
@@ -1803,10 +1803,10 @@ EVALUATE:
             if (argv[4][0]=='-') argv[4]++;
             if (strxcmp(isCas,argv[3],"NONBR",0,0,FALSE)==0 && strxcmp(isCas,argv[4],"SHORT",0,0,FALSE)==0) {
                isNbr=FALSE;
-               isLong=FALSE;
+               isDep=FALSE;
             } else if(strxcmp(isCas,argv[3],"SHORT",0,0,FALSE)==0 && strxcmp(isCas,argv[4],"NONBR",0,0,FALSE)==0) {
                isNbr=FALSE;
-               isLong=FALSE;
+               isDep=FALSE;
             } else {
                fprintf(pfErr,"Syntax for built-in function 'GENDOCU' not valid\n");
                for (i=0;psCmd[i].pcKyw!=NULL ;i++) {
@@ -1880,7 +1880,7 @@ EVALUATE:
             }
          } else {
             TsCleDocPar stDocPar;
-            stDocPar.isNbr=isNbr; stDocPar.isPat=TRUE;  stDocPar.isIdt=FALSE; stDocPar.isDep=isLong;
+            stDocPar.isNbr=isNbr; stDocPar.isPat=TRUE;  stDocPar.isIdt=FALSE; stDocPar.isDep=isDep;
             stDocPar.isCas=isCas; stDocPar.isPfl=isPfl; stDocPar.isRpl=isRpl; stDocPar.pcAbo=pcAbo;
             stDocPar.pcDep=pcDep; stDocPar.pcDpa=pcDpa; stDocPar.pcEnt=pcEnt; stDocPar.pcHlp=pcHlp;
             stDocPar.pcOpt=pcOpt; stDocPar.pcOwn=pcOwn; stDocPar.pcPgm=pcPgm; stDocPar.pcBld=pcBld;
@@ -1907,105 +1907,83 @@ EVALUATE:
       efprintf(pfErr,"%s %s GENDOCU filename [NONBR][SHORT]\n",pcDep,argv[0]);
       ERROR(CLERTC_CMD,NULL);
    } else if (asBif[IDX_CLE_BUILTIN_HTMLDOC].isBif && strxcmp(isCas,argv[1],"HTMLDOC",0,0,FALSE)==0) {
-      const char*       pcSgn=NULL;
-      int               isNbr=FALSE;
+      const char*      pcHlp=".";
+      int              isNbr=FALSE;
+      int              isDep=TRUE;
       if (pfOut==NULL) pfOut=pfStd;
       if (pfErr==NULL) pfErr=pfStd;
-      if (argc==4) {
-         if (argv[2][0]=='-') argv[2]++;
-         if (argv[2][0]=='-') argv[2]++;
-         if (argv[3][0]=='-') argv[3]++;
-         if (argv[3][0]=='-') argv[3]++;
-         if (strxcmp(isCas,argv[3],"NUMBERS",0,0,FALSE)==0) {
-            isNbr=TRUE;
-            pcSgn=strchr(argv[2],'=');
-         } else if (strxcmp(isCas,argv[2],"NUMBERS",0,0,FALSE)==0) {
-            isNbr=TRUE;
-            pcSgn=strchr(argv[3],'=');
-         } else {
-            fprintf(pfErr,"Syntax for built-in function 'HTMLDOC' not valid\n");
-            efprintf(pfErr,"%s %s %s\n",pcDep,argv[0],SYN_CLE_BUILTIN_HTMLDOC);
-            ERROR(CLERTC_CMD,NULL);
-         }
-      } else if (argc==3) {
-         if (argv[2][0]=='-') argv[2]++;
-         if (argv[2][0]=='-') argv[2]++;
-         if (strxcmp(isCas,argv[2],"NUMBERS",0,0,FALSE)==0) {
-            isNbr=TRUE;
-            pcSgn="=.";
-         } else {
-            pcSgn=strchr(argv[2],'=');
-         }
-      } else if (argc==2) {
-         pcSgn="=.";
-      } else {
+      if (argc>5) {
          fprintf(pfErr,"Syntax for built-in function 'HTMLDOC' not valid\n");
          efprintf(pfErr,"%s %s %s\n",pcDep,argv[0],SYN_CLE_BUILTIN_HTMLDOC);
          ERROR(CLERTC_CMD,NULL);
       }
-      if (pcSgn==NULL) {
-         fprintf(pfErr,"Syntax for built-in function 'HTMLDOC' not valid\n");
-         efprintf(pfErr,"%s %s %s\n",pcDep,argv[0],SYN_CLE_BUILTIN_HTMLDOC);
-         ERROR(CLERTC_CMD,NULL);
-      } else {
-         TfCleHtmlDoc*     pfHtmlDoc=NULL;
-         TfCleOpenPrint*   pfHtmlOpn=NULL;
-         TfClpPrintPage*   pfHtmlPrn=NULL;
-         TfCleClosePrint*  pfHtmlCls=NULL;
-         char* pcPat=dcpmapfil(pcSgn+1);
-         if (pcPat==NULL) {
-            fprintf(pfErr,"Allocation of memory for file name (%s) failed\n",pcSgn);
-            ERROR(CLERTC_MEM,NULL);
-         }
-         void* pvLib=pfLoadHtmlDoc(&pfHtmlDoc,&pfHtmlOpn,&pfHtmlPrn,&pfHtmlCls);
-         if (pvLib==NULL) {
-            fprintf(pfErr,"There is no service provider DLL/SO (libhtmldoc) available for HTML generation\n");
-            ERROR(CLERTC_FAT,pcPat);
-         }
-
-         TsCleDocPar stDocPar;
-         stDocPar.isNbr=isNbr; stDocPar.isPat=FALSE; stDocPar.isIdt=TRUE;  stDocPar.isDep=TRUE;
-         stDocPar.isCas=isCas; stDocPar.isPfl=isPfl; stDocPar.isRpl=isRpl; stDocPar.pcAbo=pcAbo;
-         stDocPar.pcDep=pcDep; stDocPar.pcDpa=pcDpa; stDocPar.pcEnt=pcEnt; stDocPar.pcHlp=pcHlp;
-         stDocPar.pcOpt=pcOpt; stDocPar.pcOwn=pcOwn; stDocPar.pcPgm=pcPgm; stDocPar.pcBld=pcBld;
-         stDocPar.pcVsn=pcVsn; stDocPar.pfMsg=pfMsg; stDocPar.pvCnf=psCnf; stDocPar.siMkl=siMkl;
-         stDocPar.psBif=asBif; stDocPar.psCmd=psCmd; stDocPar.psOth=psOth;
-         stDocPar.pvF2S=pvF2S; stDocPar.pfF2S=pfF2S; stDocPar.pvSaf=pvSaf; stDocPar.pfSaf=pfSaf;
-         if (pfHtmlOpn!=NULL && pfHtmlPrn!=NULL && pfHtmlCls!=NULL) {
-            void* pvDocHdl=pfHtmlOpn(pfOut,pfErr,pcPat,pcOwn,pcPgm,pcBld);
-            if (pvDocHdl==NULL) {
-               fprintf(pfErr,"Open for HTML generation failed\n");
-               ERROR(CLERTC_FAT,pcPat);
-            }
-            siErr=siPrintDocu(pvGbl,pfOut,pfErr,psDoc,&stDocPar,pvDocHdl,pfHtmlPrn);
-            if (siErr) {
-               fprintf(pfErr,"Generation of HTML documentation to folder '%s' failed\n",pcPat);
-               pfHtmlCls(pvDocHdl);
-               ERROR(siErr,pcPat);
-            }
-            siErr=pfHtmlCls(pvDocHdl);
-            if (siErr) {
-                fprintf(pfErr,"Finalise generation of HTML documentation to folder '%s' failed (%d)\n",pcPat,siErr);
-                ERROR(CLERTC_SYS,pcPat);
-            } else {
-                fprintf(pfErr,"Generation of HTML documentation to folder '%s' was successful\n",pcPat);
-                ERROR(CLERTC_OK,pcPat);
-            }
-         } else if (pfHtmlDoc!=NULL) { // TODO: muss weg
-            siErr=pfHtmlDoc(pfOut,pfErr,pcPat,psDoc,&stDocPar,siCleWritePage);
-            vdFreeHtmlDoc(&pvLib);
-            if (siErr) {
-               fprintf(pfErr,"Generation of HTML documentation to folder '%s' failed\n",pcPat);
-               ERROR(CLERTC_SYS,pcPat);
-            } else {
-               fprintf(pfErr,"Generation of HTML documentation to folder '%s' was successful\n",pcPat);
-               ERROR(CLERTC_OK,pcPat);
-            }
+      for (i=2;i<argc;i++) {
+         if (argv[i][0]=='-') argv[i]++;
+         if (argv[i][0]=='-') argv[i]++;
+         if (strxcmp(isCas,argv[i],"NUMBERS",0,0,FALSE)==0) {
+            isNbr=TRUE;
+         } else if (strxcmp(isCas,argv[i],"SHORT",0,0,FALSE)==0) {
+            isDep=FALSE;
          } else {
-            vdFreeHtmlDoc(&pvLib);
-            fprintf(pfErr,"There is no service provider function (opnHtmlDoc,prnHtmlDoc or clsHtmlDoc) available for HTML generation\n");
+            pcHlp=argv[i];
+         }
+      }
+      TfCleHtmlDoc*     pfHtmlDoc=NULL;
+      TfCleOpenPrint*   pfHtmlOpn=NULL;
+      TfClpPrintPage*   pfHtmlPrn=NULL;
+      TfCleClosePrint*  pfHtmlCls=NULL;
+      char* pcPat=dcpmapfil(pcHlp);
+      if (pcPat==NULL) {
+         fprintf(pfErr,"Allocation of memory for path name (%s) failed\n",pcHlp);
+         ERROR(CLERTC_MEM,NULL);
+      }
+      void* pvLib=pfLoadHtmlDoc(&pfHtmlDoc,&pfHtmlOpn,&pfHtmlPrn,&pfHtmlCls);
+      if (pvLib==NULL) {
+         fprintf(pfErr,"There is no service provider DLL/SO (libhtmldoc) available for HTML generation\n");
+         ERROR(CLERTC_FAT,pcPat);
+      }
+      TsCleDocPar stDocPar;
+      stDocPar.isNbr=isNbr; stDocPar.isPat=FALSE; stDocPar.isIdt=TRUE;  stDocPar.isDep=isDep;
+      stDocPar.isCas=isCas; stDocPar.isPfl=isPfl; stDocPar.isRpl=isRpl; stDocPar.pcAbo=pcAbo;
+      stDocPar.pcDep=pcDep; stDocPar.pcDpa=pcDpa; stDocPar.pcEnt=pcEnt; stDocPar.pcHlp=pcHlp;
+      stDocPar.pcOpt=pcOpt; stDocPar.pcOwn=pcOwn; stDocPar.pcPgm=pcPgm; stDocPar.pcBld=pcBld;
+      stDocPar.pcVsn=pcVsn; stDocPar.pfMsg=pfMsg; stDocPar.pvCnf=psCnf; stDocPar.siMkl=siMkl;
+      stDocPar.psBif=asBif; stDocPar.psCmd=psCmd; stDocPar.psOth=psOth;
+      stDocPar.pvF2S=pvF2S; stDocPar.pfF2S=pfF2S; stDocPar.pvSaf=pvSaf; stDocPar.pfSaf=pfSaf;
+      if (pfHtmlOpn!=NULL && pfHtmlPrn!=NULL && pfHtmlCls!=NULL) {
+         void* pvDocHdl=pfHtmlOpn(pfOut,pfErr,pcPat,pcOwn,pcPgm,pcBld);
+         if (pvDocHdl==NULL) {
+            fprintf(pfErr,"Open service provider for HTML generation failed\n");
             ERROR(CLERTC_FAT,pcPat);
          }
+         siErr=siPrintDocu(pvGbl,pfOut,pfErr,psDoc,&stDocPar,pvDocHdl,pfHtmlPrn);
+         if (siErr) {
+            fprintf(pfErr,"Generation of %s HTML documentation to folder '%s' failed\n",isDep?"long":"short",pcPat);
+            pfHtmlCls(pvDocHdl);
+            ERROR(siErr,pcPat);
+         }
+         siErr=pfHtmlCls(pvDocHdl);
+         if (siErr) {
+             fprintf(pfErr,"Finalise generation of HTML documentation to folder '%s' failed (%d)\n",pcPat,siErr);
+             ERROR(CLERTC_SYS,pcPat);
+         } else {
+             fprintf(pfErr,"Generation of %s HTML documentation to folder '%s' was successful\n",isDep?"long":"short",pcPat);
+             ERROR(CLERTC_OK,pcPat);
+         }
+      } else if (pfHtmlDoc!=NULL) { // TODO: muss weg
+         siErr=pfHtmlDoc(pfOut,pfErr,pcPat,psDoc,&stDocPar,siCleWritePage);
+         vdFreeHtmlDoc(&pvLib);
+         if (siErr) {
+            fprintf(pfErr,"Generation of old HTML documentation to folder '%s' failed\n",pcPat);
+            ERROR(CLERTC_SYS,pcPat);
+         } else {
+            fprintf(pfErr,"Generation of old HTML documentation to folder '%s' was successful\n",pcPat);
+            ERROR(CLERTC_OK,pcPat);
+         }
+      } else {
+         vdFreeHtmlDoc(&pvLib);
+         fprintf(pfErr,"There is no service provider function (opnHtmlDoc,prnHtmlDoc or clsHtmlDoc) available for HTML generation\n");
+         ERROR(CLERTC_FAT,pcPat);
       }
    } else if (asBif[IDX_CLE_BUILTIN_GENPROP].isBif && strxcmp(isCas,argv[1],"GENPROP",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;

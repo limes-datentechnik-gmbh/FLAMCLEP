@@ -3,20 +3,24 @@ into a folder. The folder can be defined as optional parameter. If no
 path given, then the current directory is used as default.
 
 With the optional keyword `NUMBERS` the numbering of headlines can be
-activated.
+activated. The keyword `SHORT` will result in a short version of the
+document, not containing the parameter of the commands and other CLP
+strings. 
 
 The built-in function can only be used if a call back function for HTML
-documentation generation provided. If not a error will be printed if
-HTMLDOC is executed.
+documentation provided. If not a error will be printed if HTMLDOC is
+executed.
 
-To understand the service provider interface for HTML generation see the
-DOXYGEN documentation for FLAMCLE/CLP.h
+To understand the service provider interface (open, close and callback
+function) for HTML generation see the DOXYGEN documentation for
+FLAMCLE/CLP.h
 
 .Examples
 
 -----------------------------------------------------------------------
    :> &{PGM} HTMLDOC
-   :> &{PGM} HTMLDOC PATH=/user/home/docu/flclbook
-   :> &{PGM} HTMLDOC NUMBERS
-   :> &{PGM} HTMLDOC PATH=/user/home/docu/flclbook NUMBERS
+   :> &{PGM} HTMLDOC . SHORT
+   :> &{PGM} HTMLDOC /user/home/docu/flclbook
+   :> &{PGM} HTMLDOC NUMBERS SHORT
+   :> &{PGM} HTMLDOC /user/home/docu/flclbook SHORT
 -----------------------------------------------------------------------

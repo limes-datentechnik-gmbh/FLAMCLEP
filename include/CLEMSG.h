@@ -62,7 +62,7 @@ static const char* SYN_CLE_BUILTIN_MANPAGE ="MANPAGE [function | command[.path][
 static const char* HLP_CLE_BUILTIN_GENDOCU ="Generates auxiliary documentation (ASCIIDOC text format)";
 static const char* SYN_CLE_BUILTIN_GENDOCU ="GENDOCU [command[.path]=]filename [NONBR] [SHORT]";
 static const char* HLP_CLE_BUILTIN_HTMLDOC ="Generates the complete HTML documentation into a folder";
-static const char* SYN_CLE_BUILTIN_HTMLDOC ="HTMLDOC [PATH=path] [NUMBERS]";
+static const char* SYN_CLE_BUILTIN_HTMLDOC ="HTMLDOC [path] [NUMBERS] [SHORT]";
 static const char* HLP_CLE_BUILTIN_GENPROP ="Generates a property file";
 static const char* SYN_CLE_BUILTIN_GENPROP ="GENPROP [command=]filename";
 static const char* HLP_CLE_BUILTIN_SETPROP ="Activate a property file";
