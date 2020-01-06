@@ -347,7 +347,6 @@ typedef struct Hdl {
    const char*                   pcOpt;
    const char*                   pcEnt;
    const char*                   pcRow;
-   const char*                   pcHdl;
    int                           siMkl;
    int                           isOvl;
    int                           isChk;
@@ -403,9 +402,14 @@ typedef struct Hdl {
    TfClpPrintPage*               pfPrn;
    int                           isMan;
    int                           isDep;
+   int                           isAnc;
    int                           isNbr;
+   int                           isShl;
    int                           isIdt;
    int                           isPat;
+   int                           siPs1;
+   int                           siPs2;
+   int                           siPr3;
 } TsHdl;
 
 /* Deklaration der internen Funktionen ********************************/
@@ -759,6 +763,7 @@ static int siClpPrnDoc(
    void*                         pvHdl,
    FILE*                         pfDoc,
    const int                     siLev,
+   const char*                   pcAnc,
    const char*                   pcNum,
    const TsSym*                  psArg,
    const TsSym*                  psTab);
@@ -1583,34 +1588,63 @@ extern int siClpHelp(
    return(CLP_OK);
 }
 
-static inline void vdPrintHdl(FILE* pfDoc,unsigned int uiLev, const int isNbr, const char* pcNum, const char* pcKnd, const char* pcKyw, const char chHdl) {
-   unsigned int   l,i,isLev=uiLev>1;
+static inline void vdPrintHdl(FILE* pfDoc,TsHdl* psHdl, const char* pcAnc, const char* pcNum, const char* pcKnd, const char* pcKyw, const char chHdl) {
+   unsigned int   l,i,isLev=psHdl->uiLev>1;
+   unsigned int   uiLev=psHdl->uiLev;
 
    if (chHdl==C_CRT) {
       uiLev+=1;
    } else if (chHdl=='+') {
       uiLev+=2;
    }
-   if (isNbr) {
+   if (psHdl->isAnc) {
+      efprintf(pfDoc,        "[[%s]]\n",pcAnc);
+   }
+   if (psHdl->isNbr) {
       if (isLev) {
          for (l=0;l<uiLev;l++) fprintf(pfDoc,"=");
-         fprintf(pfDoc,   " %s %s '%s'\n\n",pcNum,pcKnd,pcKyw);
+         if (psHdl->isShl) {
+            fprintf(pfDoc,   " %s %s\n\n",pcNum,pcKyw);
+         } else {
+            fprintf(pfDoc,   " %s %s '%s'\n\n",pcNum,pcKnd,pcKyw);
+         }
       } else {
-         fprintf(pfDoc,   "%s %s '%s'\n",pcNum,pcKnd,pcKyw);
-         l=strlen(pcNum)+strlen(pcKnd)+strlen(pcKyw)+4;
-         for (i=0;i<l;i++) fprintf(pfDoc,"%c",chHdl);
-         fprintf(pfDoc,"\n\n");
+         if (psHdl->isShl) {
+            fprintf(pfDoc,   "%s %s\n",pcNum,pcKyw);
+            l=strlen(pcNum)+strlen(pcKyw)+1;
+            for (i=0;i<l;i++) fprintf(pfDoc,"%c",chHdl);
+            fprintf(pfDoc,"\n\n");
+         } else {
+            fprintf(pfDoc,   "%s %s '%s'\n",pcNum,pcKnd,pcKyw);
+            l=strlen(pcNum)+strlen(pcKnd)+strlen(pcKyw)+4;
+            for (i=0;i<l;i++) fprintf(pfDoc,"%c",chHdl);
+            fprintf(pfDoc,"\n\n");
+         }
       }
    } else {
       if (isLev) {
          for (l=0;l<uiLev;l++) fprintf(pfDoc,"=");
-         fprintf(pfDoc,   " %s '%s'\n",pcKnd,pcKyw);
+         if (psHdl->isShl) {
+            fprintf(pfDoc,   " %s\n",pcKyw);
+         } else {
+            fprintf(pfDoc,   " %s '%s'\n",pcKnd,pcKyw);
+         }
       } else {
-         fprintf(pfDoc,   "%s '%s'\n",pcKnd,pcKyw);
-         l=strlen(pcKnd)+strlen(pcKyw)+3;
-         for (i=0;i<l;i++) fprintf(pfDoc,"%c",chHdl);
-         fprintf(pfDoc,"\n\n");
+         if (psHdl->isShl) {
+            fprintf(pfDoc,   "%s\n",pcKyw);
+            l=strlen(pcKyw);
+            for (i=0;i<l;i++) fprintf(pfDoc,"%c",chHdl);
+            fprintf(pfDoc,"\n\n");
+         } else {
+            fprintf(pfDoc,   "%s '%s'\n",pcKnd,pcKyw);
+            l=strlen(pcKnd)+strlen(pcKyw)+3;
+            for (i=0;i<l;i++) fprintf(pfDoc,"%c",chHdl);
+            fprintf(pfDoc,"\n\n");
+         }
       }
+   }
+   if (psHdl->isIdt) {
+      efprintf(pfDoc,"indexterm:[ARGUMENT, %s, %s]\n\n",pcKnd,pcKyw);
    }
 }
 
@@ -1618,11 +1652,12 @@ extern int siClpDocu(
    void*                         pvHdl,
    FILE*                         pfDoc,
    const char*                   pcPat,
-   const char*                   pcHdl,
    const char*                   pcNum,
    const char*                   pcKnd,
+   const int                     isCmd,
    const int                     isDep,
    const int                     isMan,
+   const int                     isAnc,
    const int                     isNbr,
    const int                     isIdt,
    const int                     isPat,
@@ -1640,7 +1675,9 @@ extern int siClpDocu(
    psHdl->uiLev=uiLev;
    psHdl->isMan=isMan;
    psHdl->isDep=isDep;
+   psHdl->isAnc=isAnc;
    psHdl->isNbr=isNbr;
+   psHdl->isShl=FALSE;
    psHdl->isIdt=isIdt;
    psHdl->isPat=isPat;
    psHdl->pcLex[0]=EOS;
@@ -1683,6 +1720,8 @@ extern int siClpDocu(
                      snprintc(acNum,sizeof(acNum),"%d.",siPos+1);
                   }
                   if (psArg!=NULL) {
+                     psHdl->isAnc=FALSE;
+                     psHdl->isIdt=FALSE;
                      if (CLPISF_ARG(psArg->psStd->uiFlg)) {
                         if (isMan) {
                            if (psHdl->pcPgm!=NULL && *psHdl->pcPgm) {
@@ -1727,13 +1766,12 @@ extern int siClpDocu(
                            fprintf(pfDoc, "limes datentechnik(r) gmbh (www.flam.de)\n\n");
                         } else {
                            switch (psArg->psFix->siTyp){
-                           case CLPTYP_OBJECT:strcpy(acArg,"OBJECT");break;
-                           case CLPTYP_OVRLAY:strcpy(acArg,"OVERLAY");break;
-                           default           :strcpy(acArg,"PARAMETER");break;
+                           case CLPTYP_OBJECT:strcpy(acArg,"Object");break;
+                           case CLPTYP_OVRLAY:strcpy(acArg,"Overlay");break;
+                           default           :strcpy(acArg,"Parameter");break;
                            }
-                           vdPrintHdl(pfDoc,psHdl->uiLev,isNbr,acNum,acArg,psArg->psStd->pcKyw,C_CRT);
-                           if (isIdt) efprintf(pfDoc,"indexterm:[ARGUMENT, %s, %s]\n\n",acArg,psArg->psStd->pcKyw);
-                           fprintf(pfDoc, ".SYNOPSIS\n\n");
+                           vdPrintHdl(pfDoc,psHdl,"",acNum,acArg,psArg->psStd->pcKyw,C_CRT);
+                           fprintf(pfDoc, ".Synopsis\n\n");
                            fprintf(pfDoc, "-----------------------------------------------------------------------\n");
                            efprintf(pfDoc,"HELP:   %s\n",psArg->psFix->pcHlp);
                            if(isPat)
@@ -1742,13 +1780,13 @@ extern int siClpDocu(
                            fprintf(pfDoc, "SYNTAX: "); siErr=siClpPrnSyn(pvHdl,pfDoc,FALSE,siLev-1,psArg); fprintf(pfDoc,"\n");
                            fprintf(pfDoc, "-----------------------------------------------------------------------\n\n");
                            if (siErr<0) return(siErr);
-                           fprintf(pfDoc,".DESCRIPTION\n\n");
+                           fprintf(pfDoc,".Description\n\n");
                            if (psArg->psFix->pcMan!=NULL && *psArg->psFix->pcMan) {
                               fprintm(pfDoc,psHdl->pcOwn,psHdl->pcPgm,psHdl->pcBld,psArg->psFix->pcMan,2);
                            } else {
                               fprintf(pfDoc,"No detailed description available for this argument.\n\n");
                            }
-                           siErr=siClpPrnDoc(pvHdl,pfDoc,siLev,acNum,psArg,psTab);
+                           siErr=siClpPrnDoc(pvHdl,pfDoc,siLev,"",acNum,psArg,psTab);
                            if (siErr<0) return(siErr);
                         }
                      } else if (CLPISF_CON(psArg->psStd->uiFlg)) {
@@ -1794,9 +1832,8 @@ extern int siClpDocu(
                            fprintf(pfDoc, "------\n\n");
                            fprintf(pfDoc, "limes datentechnik(r) gmbh (www.flam.de)\n\n");
                         } else {
-                           vdPrintHdl(pfDoc,psHdl->uiLev,isNbr,acNum,"CONSTANT",psArg->psStd->pcKyw,'+');
-                           if (isIdt) efprintf(pfDoc,"indexterm:[ARGUMENT, CONSTANT, %s]\n\n",psArg->psStd->pcKyw);
-                           fprintf(pfDoc, ".SYNOPSIS\n\n");
+                           vdPrintHdl(pfDoc,psHdl,"",acNum,"Constant",psArg->psStd->pcKyw,'+');
+                           fprintf(pfDoc, ".Synopsis\n\n");
                            fprintf(pfDoc, "-----------------------------------------------------------------------\n");
                            efprintf(pfDoc,"HELP:   %s\n",psArg->psFix->pcHlp);
                            if(isPat)
@@ -1805,7 +1842,7 @@ extern int siClpDocu(
                            fprintf(pfDoc, "SYNTAX: %s\n",psArg->psStd->pcKyw);
                            fprintf(pfDoc, "-----------------------------------------------------------------------\n\n");
                            if (siErr<0) return(siErr);
-                           fprintf(pfDoc,".DESCRIPTION\n\n");
+                           fprintf(pfDoc,".Description\n\n");
                            if (psArg->psFix->pcMan!=NULL && *psArg->psFix->pcMan) {
                               fprintm(pfDoc,psHdl->pcOwn,psHdl->pcPgm,psHdl->pcBld,psArg->psFix->pcMan,2);
                            } else {
@@ -1868,10 +1905,14 @@ extern int siClpDocu(
             fprintf(pfDoc,"------\n\n");
             fprintf(pfDoc,"limes datentechnik(r) gmbh (www.flam.de)\n\n");
          } else {
-            efprintf(pfDoc,  "[[CLEP.%s.%s]]\n",pcKnd,psHdl->pcCmd);
-            vdPrintHdl(pfDoc,psHdl->uiLev,isNbr,pcNum,pcKnd,psHdl->pcCmd,C_TLD);
-            if (isIdt) efprintf(pfDoc,"indexterm:[%s, %s]\n\n",pcKnd,psHdl->pcCmd);
-            fprintf(pfDoc,   ".SYNOPSIS\n\n");
+            char  acAnc[strlen(psHdl->pcCmd)+16];
+            if (isCmd) {
+               snprintf(acAnc,sizeof(acAnc),"CLEP.COMMAND.%s",psHdl->pcCmd);
+            } else {
+               snprintf(acAnc,sizeof(acAnc),"CLEP.OTHERCLP.%s",psHdl->pcCmd);
+            }
+            vdPrintHdl(pfDoc,psHdl,acAnc,pcNum,pcKnd,psHdl->pcCmd,C_TLD);
+            fprintf(pfDoc,   ".Synopsis\n\n");
             fprintf(pfDoc,   "-----------------------------------------------------------------------\n");
             efprintf(pfDoc,  "HELP:   %s\n",psHdl->pcHlp);
             if(isPat) {
@@ -1885,13 +1926,13 @@ extern int siClpDocu(
             fprintf(pfDoc,   "SYNTAX: > %s ",psHdl->pcPgm); siErr=siClpPrnCmd(pvHdl,pfDoc,0,0,1,NULL,psHdl->psTab,FALSE,FALSE); fprintf(pfDoc,"\n");
             fprintf(pfDoc,   "-----------------------------------------------------------------------\n\n");
             if (siErr<0) return(siErr);
-            fprintf(pfDoc,   ".DESCRIPTION\n\n");
+            fprintf(pfDoc,   ".Description\n\n");
             if (psHdl->pcMan!=NULL && *psHdl->pcMan) {
                fprintm(pfDoc,psHdl->pcOwn,psHdl->pcPgm,psHdl->pcBld,psHdl->pcMan,2);
             } else {
                fprintf(pfDoc,"No detailed description available for this command.\n\n");
             }
-            siPos=siClpPrnDoc(pvHdl,pfDoc,0,pcNum,NULL,psTab);
+            siPos=siClpPrnDoc(pvHdl,pfDoc,0,acAnc,pcNum,NULL,psTab);
             if (siPos<0) return(siPos);
          }
       }
@@ -1904,8 +1945,10 @@ extern int siClpDocu(
 static int siClpPrintTable(
    void*                         pvHdl,
    const int                     siLev,
+   const char*                   pcAnc,
    const char*                   pcNum,
    const char*                   pcPat,
+   const char*                   pcFil,
    const TsSym*                  psTab);
 
 static int siClpWriteRemaining(
@@ -1923,7 +1966,7 @@ static int siClpWriteRemaining(
             if (psHlp->psFix->siTyp==CLPTYP_OBJECT || psHlp->psFix->siTyp==CLPTYP_OVRLAY) {
                return CLPERR(psHdl,CLPERR_TAB,"Manual page for %s '%s.%s' missing",apClpTyp[psHlp->psFix->siTyp],pcPat,psHlp->psStd->pcKyw);
             }
-            if (i==0) fprintf(pfDoc,".ARGUMENTS\n\n");
+            if (i==0) fprintf(pfDoc,".Arguments\n\n");
             efprintf(pfDoc,"* `%s: ",apClpTyp[psHlp->psFix->siTyp]); siClpPrnSyn(pvHdl,pfDoc,FALSE,siLev,psHlp); efprintf(pfDoc," - %s`\n",psHlp->psFix->pcHlp);
             for (const TsSym* psSel=psHlp->psDep;psSel!=NULL;psSel=psSel->psNxt) {
                if (psSel->psFix->siTyp==psHlp->psFix->siTyp) {
@@ -1935,7 +1978,7 @@ static int siClpWriteRemaining(
             }
             i++;
          } else if (CLPISF_CON(psHlp->psStd->uiFlg)) {
-            if (i==0) fprintf(pfDoc,".SELECTIONS\n\n");
+            if (i==0) fprintf(pfDoc,".Selections\n\n");
             efprintf(pfDoc,"* `%s - %s`\n",psHlp->psStd->pcKyw,psHlp->psFix->pcHlp);
             i++;
          }
@@ -1950,6 +1993,7 @@ static int siClpPrintWritten(
    FILE*                         pfDoc,
    const int                     siLev,
    const char*                   pcPat,
+   const char*                   pcFil,
    const char*                   pcMan)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
@@ -1965,7 +2009,25 @@ static int siClpPrintWritten(
       return CLPERR(psHdl,CLPERR_SYS,"Read of temporary file to print page for command '%s' failed",psHdl->pcCmd);
    }
    pcPge[r]=0x00;
-   int siErr=psHdl->pfPrn(psHdl->pvPrn,psHdl->uiLev+siLev,psHdl->pcHdl,pcPat,pcMan,pcPge);
+
+   const char* p=strchr(pcPge,'=');
+   if (p==NULL) {
+      free(pcPge);
+      return CLPERR(psHdl,CLPERR_INT,"No headline found in manual page for command '%s'",psHdl->pcCmd);
+   }
+   while (p!=NULL && (*p=='=' || *p==' ')) p++;
+   const char* e=strchr(p,'\n');
+   if (e==NULL) {
+      free(pcPge);
+      return CLPERR(psHdl,CLPERR_INT,"No end of headline found in manual page for command '%s'",psHdl->pcCmd);
+   }
+   int l=e-p;
+   char acHdl[l+1];
+   memcpy(acHdl,p,l);
+   acHdl[l]=0x00;
+   char acFil[strlen(pcFil)+16];
+   snprintf(acFil,sizeof(acFil),"%s%c%04x",pcFil,psHdl->siPr3,(unsigned)rand()&0xFFFF);
+   int siErr=psHdl->pfPrn(psHdl->pvPrn,psHdl->uiLev+siLev,acHdl,pcPat,acFil,pcMan,pcPge);
    free(pcPge);
    if (siErr) {
       return CLPERR(psHdl,CLPERR_SYS,"Print page over call back function for command '%s' failed with %d",psHdl->pcCmd,siErr);
@@ -1973,16 +2035,22 @@ static int siClpPrintWritten(
    return(CLP_OK);
 }
 
-extern int siClpPrintDocu(
+extern int siClpPrint(
    void*                         pvHdl,
-   const char*                   pcHdl,
+   const char*                   pcFil,
    const char*                   pcNum,
    const char*                   pcKnd,
+   const int                     isCmd,
    const int                     isDep,
+   const int                     isAnc,
    const int                     isNbr,
+   const int                     isShl,
    const int                     isIdt,
    const int                     isPat,
    const unsigned int            uiLev,
+   const int                     siPs1,
+   const int                     siPs2,
+   const int                     siPr3,
    void*                         pvPrn,
    TfClpPrintPage*               pfPrn)
 {
@@ -1993,15 +2061,19 @@ extern int siClpPrintDocu(
    psHdl->pcCur=NULL;
    psHdl->pcOld=NULL;
    psHdl->pcRow=NULL;
-   psHdl->pcHdl=pcHdl;
    psHdl->siCol=0;
    psHdl->siRow=0;
    psHdl->uiLev=uiLev;
    psHdl->isMan=FALSE;
    psHdl->isDep=TRUE;
+   psHdl->isAnc=isAnc;
    psHdl->isNbr=isNbr;
+   psHdl->isShl=isShl;
    psHdl->isIdt=isIdt;
    psHdl->isPat=isPat;
+   psHdl->siPs1=siPs1;
+   psHdl->siPs2=siPs2;
+   psHdl->siPr3=siPr3;
    psHdl->pvPrn=pvPrn;
    psHdl->pfPrn=pfPrn;
    psHdl->pcLex[0]=EOS;
@@ -2019,18 +2091,32 @@ extern int siClpPrintDocu(
    }
 
    if (pcNum!=NULL && pcKnd!=NULL) {
-      int                           siErr;
-      FILE*                         pfDoc;
-
+      int   siErr;
+      FILE* pfDoc;
+      int   i;
+      char  acCmd[strlen(psHdl->pcCmd)+1];
+      for (i=0;psHdl->pcCmd[i];i++) {
+         if (isalnum(psHdl->pcCmd[i])) {
+            acCmd[i]=tolower(psHdl->pcCmd[i]);
+         } else {
+            acCmd[i]=psHdl->siPr3;
+         }
+      }
+      acCmd[i]=0x00;
+      char  acFil[strlen(pcFil)+strlen(acCmd)+2];
+      snprintf(acFil,sizeof(acFil),"%s%c%s",pcFil,psHdl->siPs1,acCmd);
       pfDoc=fopen_tmp();
       if (pfDoc==NULL) {
          return CLPERR(psHdl,CLPERR_SYS,"Open of temporary file to print main page for command '%s' failed",psHdl->pcCmd);
       }
-
-      efprintf(pfDoc,   "[[CLEP.%s.%s]]\n",pcKnd,psHdl->pcCmd);
-      vdPrintHdl(pfDoc,psHdl->uiLev,psHdl->isNbr,pcNum,pcKnd,psHdl->pcCmd,C_TLD);
-      if (isIdt) efprintf(pfDoc,"indexterm:[%s, %s]\n\n",pcKnd,psHdl->pcCmd);
-      efprintf(pfDoc,   ".SYNOPSIS\n\n");
+      char  acAnc[strlen(psHdl->pcCmd)+16];
+      if (isCmd) {
+         snprintf(acAnc,sizeof(acAnc),"CLEP.COMMAND.%s",psHdl->pcCmd);
+      } else {
+         snprintf(acAnc,sizeof(acAnc),"CLEP.OTHERCLP.%s",psHdl->pcCmd);
+      }
+      vdPrintHdl(pfDoc,psHdl,acAnc,pcNum,pcKnd,psHdl->pcCmd,C_TLD);
+      efprintf(pfDoc,   ".Synopsis\n\n");
       efprintf(pfDoc,   "-----------------------------------------------------------------------\n");
       efprintf(pfDoc,   "HELP:   %s\n",psHdl->pcHlp);
       if(psHdl->isPat) {
@@ -2049,11 +2135,11 @@ extern int siClpPrintDocu(
          fclose_tmp(pfDoc);
          return(siErr);
       }
-      efprintf(pfDoc,   ".DESCRIPTION\n\n");
+      efprintf(pfDoc,   ".Description\n\n");
       if (psHdl->pcMan!=NULL && *psHdl->pcMan) {
          fprintm(pfDoc,psHdl->pcOwn,psHdl->pcPgm,psHdl->pcBld,psHdl->pcMan,2);
       } else {
-         return CLPERR(psHdl,CLPERR_TAB,"Manual page for COMMAND '%s' missing",psHdl->pcCmd);
+         return CLPERR(psHdl,CLPERR_TAB,"Manual page for COMMAND/OTHERCLP '%s' missing",psHdl->pcCmd);
       }
 
       siErr=siClpWriteRemaining(pvHdl,pfDoc,0,psHdl->pcCmd,psHdl->psTab);
@@ -2062,13 +2148,13 @@ extern int siClpPrintDocu(
          return(siErr);
       }
 
-      siErr=siClpPrintWritten(pvHdl,pfDoc,0,psHdl->pcCmd,psHdl->pcMan);
+      siErr=siClpPrintWritten(pvHdl,pfDoc,0,psHdl->pcCmd,acFil,psHdl->pcMan);
       fclose_tmp(pfDoc);
       if (siErr) {
          return(siErr);
       }
       if (isDep) {
-         siErr=siClpPrintTable(pvHdl,0,pcNum,psHdl->pcCmd,psHdl->psTab);
+         siErr=siClpPrintTable(pvHdl,0,acAnc,pcNum,psHdl->pcCmd,acFil,psHdl->psTab);
          if (siErr) return(siErr);
       }
    } else {
@@ -7856,6 +7942,7 @@ static int siClpPrnDoc(
    void*                         pvHdl,
    FILE*                         pfDoc,
    const int                     siLev,
+   const char*                   pcAnc,
    const char*                   pcNum,
    const TsSym*                  psArg,
    const TsSym*                  psTab)
@@ -7867,7 +7954,6 @@ static int siClpPrnDoc(
       const TsSym*                  psSel;
       int                           siErr,isCon;
       int                           k,m;
-      char                          acNum[strlen(pcNum)+10];
       char                          acArg[20];
       int                           siMan=0;
       int                           siLst=0;
@@ -7904,7 +7990,7 @@ static int siClpPrnDoc(
       if (isCon) {
          if (psArg!=NULL) {
             if (siLst) {
-               fprintf(pfDoc,".SELECTIONS\n\n");
+               fprintf(pfDoc,".Selections\n\n");
                for (m=0;m<siLst;m++) {
                   efprintf(pfDoc,"* `%s - %s`\n",apLst[m]->psStd->pcKyw,apLst[m]->psFix->pcHlp);
                }
@@ -7912,10 +7998,12 @@ static int siClpPrnDoc(
             }
             if (psHdl->isDep && siMan) {
                for (k=m=0;m<siMan;m++) {
+                  char acAnc[strlen(pcAnc)+strlen(apMan[m]->psStd->pcKyw)+2];
+                  char acNum[strlen(pcNum)+10];
+                  snprintf(acAnc,sizeof(acAnc),"%s.%s",pcAnc,apMan[m]->psStd->pcKyw);
                   snprintf(acNum,sizeof(acNum),"%s%d.",pcNum,k+1);
-                  vdPrintHdl(pfDoc,psHdl->uiLev,psHdl->isNbr,acNum,"CONSTANT",apMan[m]->psStd->pcKyw,'+');
-                  if (psHdl->isIdt) efprintf(pfDoc,"indexterm:[ARGUMENT, CONSTANT, %s]\n\n",apMan[m]->psStd->pcKyw);
-                  fprintf(pfDoc, ".SYNOPSIS\n\n");
+                  vdPrintHdl(pfDoc,psHdl,acAnc,acNum,"Constant",apMan[m]->psStd->pcKyw,'+');
+                  fprintf(pfDoc, ".Synopsis\n\n");
                   fprintf(pfDoc, "-----------------------------------------------------------------------\n");
                   efprintf(pfDoc,"HELP:   %s\n",apMan[m]->psFix->pcHlp);
                   if (psHdl->isPat)
@@ -7923,7 +8011,7 @@ static int siClpPrnDoc(
                   fprintf(pfDoc, "TYPE:   %s\n",apClpTyp[apMan[m]->psFix->siTyp]);
                   fprintf(pfDoc, "SYNTAX: %s\n",apMan[m]->psStd->pcKyw);
                   fprintf(pfDoc, "-----------------------------------------------------------------------\n\n");
-                  fprintf(pfDoc, ".DESCRIPTION\n\n");
+                  fprintf(pfDoc, ".Descritpion\n\n");
                   fprintm(pfDoc,psHdl->pcOwn,psHdl->pcPgm,psHdl->pcBld,apMan[m]->psFix->pcMan,2);
                   k++;
                }
@@ -7931,7 +8019,7 @@ static int siClpPrnDoc(
          }
       } else {
          if (siLst) {
-            fprintf(pfDoc,".ARGUMENTS\n\n");
+            fprintf(pfDoc,".Arguments\n\n");
             for (m=0;m<siLst;m++) {
                fprintf(pfDoc,"* %c%s: ",C_GRV,apClpTyp[apLst[m]->psFix->siTyp]); siClpPrnSyn(pvHdl,pfDoc,FALSE,siLev,apLst[m]); efprintf(pfDoc," - %s`\n",apLst[m]->psFix->pcHlp);
                for (psSel=apLst[m]->psDep;psSel!=NULL;psSel=psSel->psNxt) {
@@ -7944,14 +8032,16 @@ static int siClpPrnDoc(
             for (k=m=0;m<siMan;m++) {
                psHdl->apPat[siLev]=apMan[m];
                switch (apMan[m]->psFix->siTyp){
-               case CLPTYP_OBJECT:strcpy(acArg,"OBJECT");break;
-               case CLPTYP_OVRLAY:strcpy(acArg,"OVERLAY");break;
-               default           :strcpy(acArg,"PARAMETER");break;
+               case CLPTYP_OBJECT:strcpy(acArg,"Object");break;
+               case CLPTYP_OVRLAY:strcpy(acArg,"Overlay");break;
+               default           :strcpy(acArg,"Parameter");break;
                }
+               char acAnc[strlen(pcAnc)+strlen(apMan[m]->psStd->pcKyw)+2];
+               char acNum[strlen(pcNum)+10];
+               snprintf(acAnc,sizeof(acAnc),"%s.%s",pcAnc,apMan[m]->psStd->pcKyw);
                snprintf(acNum,sizeof(acNum),"%s%d.",pcNum,k+1);
-               vdPrintHdl(pfDoc,psHdl->uiLev,psHdl->isNbr,acNum,acArg,apMan[m]->psStd->pcKyw,C_CRT);
-               if (psHdl->isIdt) efprintf(pfDoc,"indexterm:[ARGUMENT, %s, %s]\n\n",acArg,apMan[m]->psStd->pcKyw);
-               fprintf(pfDoc, ".SYNOPSIS\n\n");
+               vdPrintHdl(pfDoc,psHdl,acAnc,acNum,acArg,apMan[m]->psStd->pcKyw,C_CRT);
+               fprintf(pfDoc, ".Synopsis\n\n");
                fprintf(pfDoc, "-----------------------------------------------------------------------\n");
                efprintf(pfDoc,"HELP:   %s\n",apMan[m]->psFix->pcHlp);
                if (psHdl->isPat)
@@ -7962,14 +8052,14 @@ static int siClpPrnDoc(
                fprintf(pfDoc,"\n");
                if (siErr<0) return(siErr);
                fprintf(pfDoc, "-----------------------------------------------------------------------\n\n");
-               fprintf(pfDoc, ".DESCRIPTION\n\n");
+               fprintf(pfDoc, ".Description\n\n");
                if (apMan[m]->psFix->pcMan!=NULL && *apMan[m]->psFix->pcMan) {
                   fprintm(pfDoc,psHdl->pcOwn,psHdl->pcPgm,psHdl->pcBld,apMan[m]->psFix->pcMan,2);
                } else {
                   fprintf(pfDoc,"No detailed description available for this argument.\n\n");
                }
                if (apMan[m]->psDep!=NULL) {
-                  siErr=siClpPrnDoc(pvHdl,pfDoc,siLev+1,acNum,apMan[m],apMan[m]->psDep);
+                  siErr=siClpPrnDoc(pvHdl,pfDoc,siLev+1,acAnc,acNum,apMan[m],apMan[m]->psDep);
                   if (siErr<0) return(siErr);
                }
                k++;
@@ -7984,6 +8074,7 @@ static int siClpWriteArgument(
    void*                         pvHdl,
    FILE*                         pfDoc,
    const int                     siLev,
+   const char*                   pcAnc,
    const char*                   pcNum,
    const char*                   pcPat,
    const TsSym*                  psArg)
@@ -7991,9 +8082,8 @@ static int siClpWriteArgument(
    int                           siErr,i;
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    if (CLPISF_CON(psArg->psStd->uiFlg)) {
-      vdPrintHdl(pfDoc,psHdl->uiLev,psHdl->isNbr,pcNum,"CONSTANT",psArg->psStd->pcKyw,'+');
-      if (psHdl->isIdt) efprintf(pfDoc,"indexterm:[ARGUMENT, CONSTANT, %s]\n\n",psArg->psStd->pcKyw);
-      fprintf(pfDoc, ".SYNOPSIS\n\n");
+      vdPrintHdl(pfDoc,psHdl,pcAnc,pcNum,"Constant",psArg->psStd->pcKyw,'+');
+      fprintf(pfDoc, ".Synopsis\n\n");
       fprintf(pfDoc, "-----------------------------------------------------------------------\n");
       efprintf(pfDoc,"HELP:   %s\n",psArg->psFix->pcHlp);
       if (psHdl->isPat)
@@ -8001,16 +8091,16 @@ static int siClpWriteArgument(
       fprintf(pfDoc, "TYPE:   %s\n",apClpTyp[psArg->psFix->siTyp]);
       fprintf(pfDoc, "SYNTAX: %s\n",psArg->psStd->pcKyw);
       fprintf(pfDoc, "-----------------------------------------------------------------------\n\n");
-      fprintf(pfDoc, ".DESCRIPTION\n\n");
+      fprintf(pfDoc, ".Description\n\n");
       if (psArg->psFix->pcMan!=NULL && *psArg->psFix->pcMan) {
          fprintm(pfDoc,psHdl->pcOwn,psHdl->pcPgm,psHdl->pcBld,psArg->psFix->pcMan,2);
       } else {
-         return CLPERR(psHdl,CLPERR_TAB,"Manual page for CONSTANT '%s.%s' missing",pcPat,psArg->psStd->pcKyw);
+         return CLPERR(psHdl,CLPERR_TAB,"Manual page for constant '%s.%s' missing",pcPat,psArg->psStd->pcKyw);
       }
       i=0;
       for (const TsSym* psHlp=psArg->psDep;psHlp!=NULL;psHlp=psHlp->psNxt) {
          if (psArg->psFix->siTyp==psHlp->psFix->siTyp && psHlp->psFix->pcMan==NULL) {
-            if (i==0) fprintf(pfDoc,".SELECTIONS\n\n");
+            if (i==0) fprintf(pfDoc,".Selections\n\n");
             efprintf(pfDoc,"* `%s - %s`\n",psHlp->psStd->pcKyw,psHlp->psFix->pcHlp);
             i++;
          }
@@ -8019,13 +8109,12 @@ static int siClpWriteArgument(
    } else if (CLPISF_ARG(psArg->psStd->uiFlg)){
       char                       acArg[16];
       switch (psArg->psFix->siTyp){
-      case CLPTYP_OBJECT:strcpy(acArg,"OBJECT");break;
-      case CLPTYP_OVRLAY:strcpy(acArg,"OVERLAY");break;
-      default           :strcpy(acArg,"PARAMETER");break;
+      case CLPTYP_OBJECT:strcpy(acArg,"Object");break;
+      case CLPTYP_OVRLAY:strcpy(acArg,"Overlay");break;
+      default           :strcpy(acArg,"Parameter");break;
       }
-      vdPrintHdl(pfDoc,psHdl->uiLev,psHdl->isNbr,pcNum,acArg,psArg->psStd->pcKyw,C_CRT);
-      if (psHdl->isIdt) efprintf(pfDoc,"indexterm:[ARGUMENT, %s, %s]\n\n",acArg,psArg->psStd->pcKyw);
-      fprintf(pfDoc, ".SYNOPSIS\n\n");
+      vdPrintHdl(pfDoc,psHdl,pcAnc,pcNum,acArg,psArg->psStd->pcKyw,C_CRT);
+      fprintf(pfDoc, ".Synopsis\n\n");
       fprintf(pfDoc, "-----------------------------------------------------------------------\n");
       efprintf(pfDoc,"HELP:   %s\n",psArg->psFix->pcHlp);
       if (psHdl->isPat)
@@ -8036,7 +8125,7 @@ static int siClpWriteArgument(
       fprintf(pfDoc,"\n");
       if (siErr<0) return(siErr);
       fprintf(pfDoc, "-----------------------------------------------------------------------\n\n");
-      fprintf(pfDoc, ".DESCRIPTION\n\n");
+      fprintf(pfDoc, ".Descritpion\n\n");
       if (psArg->psFix->pcMan!=NULL && *psArg->psFix->pcMan) {
          fprintm(pfDoc,psHdl->pcOwn,psHdl->pcPgm,psHdl->pcBld,psArg->psFix->pcMan,2);
       } else {
@@ -8051,8 +8140,10 @@ static int siClpWriteArgument(
 static int siClpPrintArgument(
    void*                         pvHdl,
    const int                     siLev,
+   const char*                   pcAnc,
    const char*                   pcNum,
    const char*                   pcPat,
+   const char*                   pcFil,
    const TsSym*                  psArg)
 {
    int                           siErr;
@@ -8064,15 +8155,27 @@ static int siClpPrintArgument(
       return CLPERR(psHdl,CLPERR_SYS,"Open of temporary file to print page for argument '%s.%s' failed",pcPat,psArg->psStd->pcKyw);
    }
 
-   siErr=siClpWriteArgument(pvHdl,pfTmp,siLev,pcNum,pcPat,psArg);
+   siErr=siClpWriteArgument(pvHdl,pfTmp,siLev,pcAnc,pcNum,pcPat,psArg);
    if (siErr) {
       fclose_tmp(pfTmp);
       return(siErr);
    }
 
-   char acPat[strlen(pcPat)+strlen(psArg->psStd->pcKyw)+2];
+   int   i;
+   char  acKyw[strlen(psArg->psStd->pcKyw)+1];
+   char  acPat[strlen(pcPat)+strlen(psArg->psStd->pcKyw)+2];
+   char  acFil[strlen(pcFil)+strlen(psArg->psStd->pcKyw)+2];
+   for (i=0;psArg->psStd->pcKyw[i];i++) {
+      if (isalnum(psArg->psStd->pcKyw[i])) {
+         acKyw[i]=tolower(psArg->psStd->pcKyw[i]);
+      } else {
+         acKyw[i]=psHdl->siPr3;
+      }
+   }
+   acKyw[i]=0x00;
    snprintf(acPat,sizeof(acPat),"%s.%s",pcPat,psArg->psStd->pcKyw);
-   siErr=siClpPrintWritten(pvHdl,pfTmp,siLev+1,acPat,psArg->psFix->pcMan);
+   snprintf(acFil,sizeof(acFil),"%s%c%s",pcFil,psHdl->siPs2,acKyw);
+   siErr=siClpPrintWritten(pvHdl,pfTmp,siLev+1,acPat,acFil,psArg->psFix->pcMan);
    fclose_tmp(pfTmp);
    if (siErr) {
       return(siErr);
@@ -8084,8 +8187,10 @@ static int siClpPrintArgument(
 static int siClpPrintTable(
    void*                         pvHdl,
    const int                     siLev,
+   const char*                   pcAnc,
    const char*                   pcNum,
    const char*                   pcPat,
+   const char*                   pcFil,
    const TsSym*                  psTab)
 {
    int                           siErr,i=1;
@@ -8099,14 +8204,28 @@ static int siClpPrintTable(
       if (CLPISF_CMD(psHlp->psStd->uiFlg) && (CLPISF_ARG(psHlp->psStd->uiFlg) || CLPISF_CON(psHlp->psStd->uiFlg)) &&
          (psHlp->psFix->siTyp==CLPTYP_OBJECT || psHlp->psFix->siTyp==CLPTYP_OVRLAY || (psHlp->psFix->pcMan!=NULL && *psHlp->psFix->pcMan))) {
          char  acNum[strlen(pcNum)+16];
+         char  acAnc[strlen(pcAnc)+strlen(psHlp->psStd->pcKyw)+2];
+         snprintf(acAnc,sizeof(acAnc),"%s.%s",pcAnc,psHlp->psStd->pcKyw);
          snprintf(acNum,sizeof(acNum),"%s%d.",pcNum,i); i++;
          psHdl->apPat[siLev]=psHlp;
-         siErr=siClpPrintArgument(pvHdl,siLev,acNum,pcPat,psHlp);
+         siErr=siClpPrintArgument(pvHdl,siLev,acAnc,acNum,pcPat,pcFil,psHlp);
          if (siErr) return(siErr);
          if (psHlp->psDep!=NULL) {
+            int   i;
+            char  acKyw[strlen(psHlp->psStd->pcKyw)+1];
             char  acPat[strlen(pcPat)+strlen(psHlp->psStd->pcKyw)+2];
+            char  acFil[strlen(pcFil)+strlen(psHlp->psStd->pcKyw)+2];
+            for (i=0;psHlp->psStd->pcKyw[i];i++) {
+               if (isalnum(psHlp->psStd->pcKyw[i])) {
+                  acKyw[i]=tolower(psHlp->psStd->pcKyw[i]);
+               } else {
+                  acKyw[i]=psHdl->siPr3;
+               }
+            }
+            acKyw[i]=0x00;
             snprintf(acPat,sizeof(acPat),"%s.%s",pcPat,psHlp->psStd->pcKyw);
-            siErr=siClpPrintTable(pvHdl,siLev+1,acNum,acPat,psHlp->psDep);
+            snprintf(acFil,sizeof(acFil),"%s%c%s",pcFil,psHdl->siPs2,acKyw);
+            siErr=siClpPrintTable(pvHdl,siLev+1,acAnc,acNum,acPat,acFil,psHlp->psDep);
             if (siErr) return(siErr);
          }
       }
