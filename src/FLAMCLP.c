@@ -8011,7 +8011,7 @@ static int siClpPrnDoc(
                   fprintf(pfDoc, "TYPE:   %s\n",apClpTyp[apMan[m]->psFix->siTyp]);
                   fprintf(pfDoc, "SYNTAX: %s\n",apMan[m]->psStd->pcKyw);
                   fprintf(pfDoc, "-----------------------------------------------------------------------\n\n");
-                  fprintf(pfDoc, ".Descritpion\n\n");
+                  fprintf(pfDoc, ".Description\n\n");
                   fprintm(pfDoc,psHdl->pcOwn,psHdl->pcPgm,psHdl->pcBld,apMan[m]->psFix->pcMan,2);
                   k++;
                }
@@ -8125,7 +8125,7 @@ static int siClpWriteArgument(
       fprintf(pfDoc,"\n");
       if (siErr<0) return(siErr);
       fprintf(pfDoc, "-----------------------------------------------------------------------\n\n");
-      fprintf(pfDoc, ".Descritpion\n\n");
+      fprintf(pfDoc, ".Description\n\n");
       if (psArg->psFix->pcMan!=NULL && *psArg->psFix->pcMan) {
          fprintm(pfDoc,psHdl->pcOwn,psHdl->pcPgm,psHdl->pcBld,psArg->psFix->pcMan,2);
       } else {

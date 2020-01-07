@@ -3,8 +3,8 @@ command line. Depending on depth the syntax is printed in one line or
 in structured form. A structured print out means that you have a
 question or exclamation mark before the argument.
 
- * question mark    - optional parameter
- * exclamation mark - required parameter
+* question mark    - optional parameter
+* exclamation mark - required parameter
 
 The *path* is a dotted keyword list in accordance with the syntax of
 the corresponding command.
