@@ -921,13 +921,14 @@ static int siCleWritePage(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const
 }
 
 static int siClePrintPage(FILE* pfOut, FILE* pfErr, const TsCleDoc* psDoc, const char* pcFil, const TsCleDocPar* psPar, void* pvPrn, TfClpPrintPage* pfPrn) {
+   unsigned int i;
    if (psDoc->pcHdl==NULL) {
       if (pfErr!=NULL) fprintf(pfErr,"Headline is NULL\n");
       return(CLERTC_TAB);
    }
    if (pfOut!=NULL) {
       fprintf(pfOut,"... print %24s ",pcMapDocTyp(psDoc->uiTyp));
-      for (unsigned int i=0;i<psDoc->uiLev;i++) fprintf(pfOut,"=");
+      for (i=0;i<psDoc->uiLev;i++) fprintf(pfOut,"=");
       fprintf(pfOut," %s\n",psDoc->pcHdl);
    }
    FILE* pfDoc=fopen_tmp();
@@ -960,10 +961,16 @@ static int siClePrintPage(FILE* pfOut, FILE* pfErr, const TsCleDoc* psDoc, const
    const char* p=strchr(pcPge,'=');
    if (p==NULL) {
       free(pcPge);
-      if (pfErr!=NULL) fprintf(pfErr,"No headline found in manual page '%s'\n",psDoc->pcHdl);
+      if (pfErr!=NULL) fprintf(pfErr,"No headline found in manual page '%s' (no sign)\n",psDoc->pcHdl);
       return(CLERTC_FAT);
    }
-   while (p!=NULL && (*p=='=' || *p==' ')) p++;
+   while (*p=='=') p++;
+   if (*p!=' ') {
+      free(pcPge);
+      if (pfErr!=NULL) fprintf(pfErr,"No headline found in manual page '%s' (no blank after sign)\n",psDoc->pcHdl);
+      return(CLERTC_FAT);
+   }
+   p++;
    const char* e=strchr(p,'\n');
    if (e==NULL) {
       free(pcPge);
@@ -974,8 +981,22 @@ static int siClePrintPage(FILE* pfOut, FILE* pfErr, const TsCleDoc* psDoc, const
    char acHdl[l+1];
    memcpy(acHdl,p,l);
    acHdl[l]=0x00;
-   char acFil[strlen(pcFil)+16];
-   snprintf(acFil,sizeof(acFil),"%s%c%04x",pcFil,psPar->siPr3,(unsigned)rand()&0xFFFF);
+   l=strlen(pcFil);
+   char acFil[l+16];
+   unsigned int uiHsh=fnvHash(l,(const unsigned char*)pcFil);
+   for (i=0;i<l;i++) {
+      if (pcFil[i]=='\t') {
+         acFil[i]=psPar->siPs1;
+      } else if (pcFil[i]=='\v') {
+         acFil[i]=psPar->siPs2;
+      } else if (isalnum(pcFil[i])) {
+         acFil[i]=tolower(pcFil[i]);
+      } else {
+         acFil[i]=psPar->siPr3;
+      }
+   }
+   acFil[i]=0x00;
+   snprintc(acFil,sizeof(acFil),"%c%04x",psPar->siPr3,uiHsh&0xFFFF);
    siErr=pfPrn(pvPrn,psDoc->uiLev,acHdl,NULL,acFil,psDoc->pcMan,pcPge);
    free(pcPge);
    if (siErr) {
@@ -1039,21 +1060,14 @@ static int siPrintDocu(
          for (int j=1;j<=psDoc[i].uiLev;j++) {
             if (j>1) {
                if (x<sizeof(acFil)-1) {
-                  acFil[x]=psPar->siPs1;
+                  acFil[x]='\t';
                   x++;
                }
             }
             for (int k=0;apPat[j][k];k++) {
-               if (isalnum(apPat[j][k])) {
-                  if (x<sizeof(acFil)-1) {
-                     acFil[x]=tolower(apPat[j][k]);
-                     x++;
-                  }
-               } else {
-                  if (x<sizeof(acFil)-1) {
-                     acFil[x]=psPar->siPr3;
-                     x++;
-                  }
+               if (x<sizeof(acFil)-1) {
+                  acFil[x]=apPat[j][k];
+                  x++;
                }
             }
          }

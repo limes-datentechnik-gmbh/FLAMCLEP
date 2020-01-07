@@ -177,6 +177,16 @@ extern FILE* freopen_hfq(const char* name, const char* mode, FILE* stream);
 
 /**********************************************************************/
 
+static inline unsigned int fnvHash(const unsigned int uiLen, const unsigned char* pcDat) {
+   unsigned int         uiHsh=0x811C9DC5U;
+   const unsigned char* pcEnd=pcDat+uiLen;
+   while(pcDat<pcEnd) {
+      uiHsh=(((*pcDat) ^ (uiHsh)) * 0x01000193U);
+      pcDat++;
+   }
+   return(uiHsh);
+}
+
 /**
  * Returns the current user id.
  * @param size    size of the buffer
@@ -239,6 +249,7 @@ extern char* dynUnEscape(const char* input);
  * @return        amount of characters printed (0 are mainly a error)
  */
 extern int printd(const char* format,...) __PRINTF_CHECK__(1, 2);
+
 /**
  * Works like snprintf but concatenates the format string to the buffer.
  * @param buffer  pointer to the string buffer

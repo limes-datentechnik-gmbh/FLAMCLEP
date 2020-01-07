@@ -1996,6 +1996,7 @@ static int siClpPrintWritten(
    const char*                   pcFil,
    const char*                   pcMan)
 {
+   int                           i;
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    long int s=ftell(pfDoc);
    rewind(pfDoc);
@@ -2013,9 +2014,14 @@ static int siClpPrintWritten(
    const char* p=strchr(pcPge,'=');
    if (p==NULL) {
       free(pcPge);
-      return CLPERR(psHdl,CLPERR_INT,"No headline found in manual page for command '%s'",psHdl->pcCmd);
+      return CLPERR(psHdl,CLPERR_INT,"No headline found in manual page for command '%s' (no sign)",psHdl->pcCmd);
    }
-   while (p!=NULL && (*p=='=' || *p==' ')) p++;
+   while (*p=='=') p++;
+   if (*p!=' ') {
+      free(pcPge);
+      return CLPERR(psHdl,CLPERR_INT,"No headline found in manual page for command '%s' (no blank after sign)",psHdl->pcCmd);
+   }
+   p++;
    const char* e=strchr(p,'\n');
    if (e==NULL) {
       free(pcPge);
@@ -2025,8 +2031,22 @@ static int siClpPrintWritten(
    char acHdl[l+1];
    memcpy(acHdl,p,l);
    acHdl[l]=0x00;
-   char acFil[strlen(pcFil)+16];
-   snprintf(acFil,sizeof(acFil),"%s%c%04x",pcFil,psHdl->siPr3,(unsigned)rand()&0xFFFF);
+   l=strlen(pcFil);
+   char acFil[l+16];
+   unsigned int uiHsh=fnvHash(l,(const unsigned char*)pcFil);
+   for (i=0;i<l;i++) {
+      if (pcFil[i]=='\t') {
+         acFil[i]=psHdl->siPs1;
+      } else if (pcFil[i]=='\v') {
+         acFil[i]=psHdl->siPs2;
+      } else if (isalnum(pcFil[i])) {
+         acFil[i]=tolower(pcFil[i]);
+      } else {
+         acFil[i]=psHdl->siPr3;
+      }
+   }
+   acFil[i]=0x00;
+   snprintc(acFil,sizeof(acFil),"%c%04x",psHdl->siPr3,uiHsh&0xFFFF);
    int siErr=psHdl->pfPrn(psHdl->pvPrn,psHdl->uiLev+siLev,acHdl,pcPat,acFil,pcMan,pcPge);
    free(pcPge);
    if (siErr) {
@@ -2093,18 +2113,8 @@ extern int siClpPrint(
    if (pcNum!=NULL && pcKnd!=NULL) {
       int   siErr;
       FILE* pfDoc;
-      int   i;
-      char  acCmd[strlen(psHdl->pcCmd)+1];
-      for (i=0;psHdl->pcCmd[i];i++) {
-         if (isalnum(psHdl->pcCmd[i])) {
-            acCmd[i]=tolower(psHdl->pcCmd[i]);
-         } else {
-            acCmd[i]=psHdl->siPr3;
-         }
-      }
-      acCmd[i]=0x00;
-      char  acFil[strlen(pcFil)+strlen(acCmd)+2];
-      snprintf(acFil,sizeof(acFil),"%s%c%s",pcFil,psHdl->siPs1,acCmd);
+      char  acFil[strlen(pcFil)+strlen(psHdl->pcCmd)+2];
+      snprintf(acFil,sizeof(acFil),"%s\t%s",pcFil,psHdl->pcCmd);
       pfDoc=fopen_tmp();
       if (pfDoc==NULL) {
          return CLPERR(psHdl,CLPERR_SYS,"Open of temporary file to print main page for command '%s' failed",psHdl->pcCmd);
@@ -8161,20 +8171,10 @@ static int siClpPrintArgument(
       return(siErr);
    }
 
-   int   i;
-   char  acKyw[strlen(psArg->psStd->pcKyw)+1];
    char  acPat[strlen(pcPat)+strlen(psArg->psStd->pcKyw)+2];
    char  acFil[strlen(pcFil)+strlen(psArg->psStd->pcKyw)+2];
-   for (i=0;psArg->psStd->pcKyw[i];i++) {
-      if (isalnum(psArg->psStd->pcKyw[i])) {
-         acKyw[i]=tolower(psArg->psStd->pcKyw[i]);
-      } else {
-         acKyw[i]=psHdl->siPr3;
-      }
-   }
-   acKyw[i]=0x00;
    snprintf(acPat,sizeof(acPat),"%s.%s",pcPat,psArg->psStd->pcKyw);
-   snprintf(acFil,sizeof(acFil),"%s%c%s",pcFil,psHdl->siPs2,acKyw);
+   snprintf(acFil,sizeof(acFil),"%s\v%s",pcFil,psArg->psStd->pcKyw);
    siErr=siClpPrintWritten(pvHdl,pfTmp,siLev+1,acPat,acFil,psArg->psFix->pcMan);
    fclose_tmp(pfTmp);
    if (siErr) {
@@ -8211,20 +8211,10 @@ static int siClpPrintTable(
          siErr=siClpPrintArgument(pvHdl,siLev,acAnc,acNum,pcPat,pcFil,psHlp);
          if (siErr) return(siErr);
          if (psHlp->psDep!=NULL) {
-            int   i;
-            char  acKyw[strlen(psHlp->psStd->pcKyw)+1];
             char  acPat[strlen(pcPat)+strlen(psHlp->psStd->pcKyw)+2];
             char  acFil[strlen(pcFil)+strlen(psHlp->psStd->pcKyw)+2];
-            for (i=0;psHlp->psStd->pcKyw[i];i++) {
-               if (isalnum(psHlp->psStd->pcKyw[i])) {
-                  acKyw[i]=tolower(psHlp->psStd->pcKyw[i]);
-               } else {
-                  acKyw[i]=psHdl->siPr3;
-               }
-            }
-            acKyw[i]=0x00;
             snprintf(acPat,sizeof(acPat),"%s.%s",pcPat,psHlp->psStd->pcKyw);
-            snprintf(acFil,sizeof(acFil),"%s%c%s",pcFil,psHdl->siPs2,acKyw);
+            snprintf(acFil,sizeof(acFil),"%s\v%s",pcFil,psHlp->psStd->pcKyw);
             siErr=siClpPrintTable(pvHdl,siLev+1,acAnc,acNum,acPat,acFil,psHlp->psDep);
             if (siErr) return(siErr);
          }
