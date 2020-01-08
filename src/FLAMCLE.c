@@ -1010,7 +1010,7 @@ static int siClePrintPage(FILE* pfOut, FILE* pfErr, const TsCleDoc* psDoc, const
 
 static void* pfLoadHtmlDoc(TfCleOpenPrint** ppHtmlOpn, TfClpPrintPage** ppHtmlPrn, TfCleClosePrint** ppHtmlCls) {
 #ifdef __WIN__
-   void* pvHtmlDoc=LoadLibrary(TEXT("libhtmldoc.dll"));
+   void* pvHtmlDoc=LoadLibrary(TEXT("htmldoc.dll"));
    if (pvHtmlDoc==NULL) return(NULL);
    *ppHtmlOpn=(TfCleOpenPrint*)GetProcAddress(pvHtmlDoc,  "opnHtmlDoc");
    *ppHtmlPrn=(TfClpPrintPage*)GetProcAddress(pvHtmlDoc,  "prnHtmlDoc");
