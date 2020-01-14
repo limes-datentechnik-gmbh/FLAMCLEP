@@ -686,7 +686,7 @@ static inline TsCnfHdl* psOpenConfig(FILE* pfOut, FILE* pfErr, const char* pcHom
 
 /**********************************************************************/
 
-static int siPrintChapter(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const char* pcOwn, const char* pcPgm, const char* pcBld, const int isNbr, const int isIdt) {
+static int siPrintChapter(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const char* pcOwn, const char* pcPgm, const char* pcBld, const int isNbr, const int isIdt, const int siCnt) {
    if (psDoc->pcHdl!=NULL && *psDoc->pcHdl) {
       if (psDoc->pcKyw!=NULL && *psDoc->pcKyw) {
          char acKyw[strlen(psDoc->pcKyw)+4];
@@ -703,7 +703,7 @@ static int siPrintChapter(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const
       }
       if (isNbr && psDoc->pcNum!=NULL && *psDoc->pcNum) efprintf(pfDoc," %s",psDoc->pcNum);
       efprintf(pfDoc," ");
-      fprintm(pfDoc,pcOwn,pcPgm,pcBld,psDoc->pcHdl,2);
+      fprintm(pfDoc,pcOwn,pcPgm,pcBld,psDoc->pcHdl,siCnt);
       if (isIdt && psDoc->pcIdt!=NULL && *psDoc->pcIdt) {
          const char* pcHlp;
          const char* pcIdt=psDoc->pcIdt;
@@ -719,11 +719,15 @@ static int siPrintChapter(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const
       }
       if (psDoc->pcMan!=NULL && *psDoc->pcMan) {
          fprintm(pfDoc,pcOwn,pcPgm,pcBld,psDoc->pcMan,2);
+      } else {
+         if (pfErr!=NULL) fprintf(pfErr,"No manual page for chapter '%s' provided\n",psDoc->pcHdl);
+         return(CLERTC_TAB);
+
       }
       return(CLERTC_OK);
    } else {
       if (pfErr!=NULL) fprintf(pfErr,"No head line for chapter defined\n");
-      return(CLERTC_ITF);
+      return(CLERTC_TAB);
    }
 }
 
@@ -733,7 +737,7 @@ static int siClePrintCover(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, cons
       return(CLERTC_ITF);
    }
    efprintf(pfDoc,":doctype: book\n\n");
-   return(siPrintChapter(pfErr,pfDoc,psDoc,pcOwn,pcPgm,pcBld,isNbr,isIdt));
+   return(siPrintChapter(pfErr,pfDoc,psDoc,pcOwn,pcPgm,pcBld,isNbr,isIdt,1));
 }
 
 static int siClePrintChapter(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const char* pcOwn, const char* pcPgm, const char* pcBld, const int isNbr, const int isIdt) {
@@ -741,7 +745,7 @@ static int siClePrintChapter(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, co
       if (pfErr!=NULL) fprintf(pfErr,"The level (%u) for a chapter must be between 2 and 6\n",psDoc->uiLev);
       return(CLERTC_ITF);
    }
-   return(siPrintChapter(pfErr,pfDoc,psDoc,pcOwn,pcPgm,pcBld,isNbr,isIdt));
+   return(siPrintChapter(pfErr,pfDoc,psDoc,pcOwn,pcPgm,pcBld,isNbr,isIdt,2));
 }
 
 static int siClePrintPgmSynopsis(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const char* pcOwn, const char* pcPgm, const char* pcBld, const char* pcHlp, const int isPat, const int isNbr, const int isIdt) {

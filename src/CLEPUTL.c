@@ -1369,8 +1369,22 @@ extern void fprintm(FILE* file,const char* own, const char* pgm, const char* bld
          }
          ptr=hlp+6;
       } else if (strncmp(hlp+2,"DATE}",5)==0) { /*nodiac*/
-         char acTimBuf[CSTIME_BUFSIZ];
-         fprintf(file,"%s",cstime(0,acTimBuf));
+
+
+         char        acBuf[20];
+         time_t      h=time(NULL);
+         struct tm   st;
+         struct tm*  x=localtime_r(&h,&st);
+         strftime(acBuf,sizeof(acBuf),"%Y-%m-%d",x);
+         fprintf(file,"%s",acBuf);
+         ptr=hlp+7;
+      } else if (strncmp(hlp+2,"TIME}",5)==0) { /*nodiac*/
+         char        acBuf[20];
+         time_t      h=time(NULL);
+         struct tm   st;
+         struct tm*  x=localtime_r(&h,&st);
+         strftime(acBuf,sizeof(acBuf),"%H:%M:%S",x);
+         fprintf(file,"%s",acBuf);
          ptr=hlp+7;
       } else if (strncmp(hlp+2,"STATE}",6)==0) { /*nodiac*/
 #ifdef __DEBUG__
