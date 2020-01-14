@@ -580,15 +580,15 @@ static int siClpFile2String(void* gbl, void* hdl, const char* filename, char** b
    int r = siCleEndExecution((x),psCnf,pfTrh,pfDoc,pfPro,ppArg,pvHdl,(b));\
    if (r) {\
       if (pcBld!=NULL && *pcBld) {\
-         if (pfErr!=NULL) efprintf(pfErr,"Program '%s' (Build: %s (%s %s)) ends with completion code %d (%s)\n",pcProgram,pcBld,__DATE__,__TIME__,r,pcMapCleRtc(r));\
+         if (pfErr!=NULL) efprintf(pfErr,"Program '%s' (Build: %s (%s %s)) ends with completion code %d (%s)\n",(pcProgram!=NULL)?pcProgram:"-NULL-",pcBld,__DATE__,__TIME__,r,pcMapCleRtc(r));\
       } else {\
-         if (pfErr!=NULL) efprintf(pfErr,"Program '%s' (Build: %s %s) ends with completion code %d (%s)\n",pcProgram,__DATE__,__TIME__,r,pcMapCleRtc(r));\
+         if (pfErr!=NULL) efprintf(pfErr,"Program '%s' (Build: %s %s) ends with completion code %d (%s)\n",(pcProgram!=NULL)?pcProgram:"-NULL-",__DATE__,__TIME__,r,pcMapCleRtc(r));\
       }\
    } else {\
       if (pcBld!=NULL && *pcBld) {\
-         if (pfOut!=NULL) efprintf(pfOut,"Program '%s' (Build: %s (%s %s)) run successfully\n",pcProgram,pcBld,__DATE__,__TIME__);\
+         if (pfOut!=NULL) efprintf(pfOut,"Program '%s' (Build: %s (%s %s)) run successfully\n",(pcProgram!=NULL)?pcProgram:"-NULL-",pcBld,__DATE__,__TIME__);\
       } else {\
-         if (pfOut!=NULL) efprintf(pfOut,"Program '%s' (Build: %s %s) run successfully\n",pcProgram,__DATE__,__TIME__);\
+         if (pfOut!=NULL) efprintf(pfOut,"Program '%s' (Build: %s %s) run successfully\n",(pcProgram!=NULL)?pcProgram:"-NULL-",__DATE__,__TIME__);\
       }\
    }\
    SAFE_FREE(pcHom); \
