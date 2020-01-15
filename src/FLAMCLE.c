@@ -195,6 +195,8 @@ typedef struct CleBuiltin {
 typedef struct CleDocPar {
    const char*                   pcOwn;
    const char*                   pcPgm;
+   const char*                   pcAut;
+   const char*                   pcAdr;
    const char*                   pcBld;
    const char*                   pcHlp;
    const char*                   pcDep;
@@ -210,6 +212,7 @@ typedef struct CleDocPar {
    const char*                   pcVsn;
    const char*                   pcAbo;
    int                           isDep;
+   int                           isHdr;
    int                           isAnc;
    int                           isNbr;
    int                           isShl;
@@ -686,7 +689,7 @@ static inline TsCnfHdl* psOpenConfig(FILE* pfOut, FILE* pfErr, const char* pcHom
 
 /**********************************************************************/
 
-static int siPrintChapter(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const char* pcOwn, const char* pcPgm, const char* pcBld, const int isNbr, const int isIdt, const int siCnt) {
+static int siPrintChapter(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const char* pcOwn, const char* pcPgm, const char* pcAut, const char* pcAdr, const char* pcBld, const int isHdr, const int isNbr, const int isIdt) {
    if (psDoc->pcHdl!=NULL && *psDoc->pcHdl) {
       if (psDoc->pcKyw!=NULL && *psDoc->pcKyw) {
          char acKyw[strlen(psDoc->pcKyw)+4];
@@ -703,7 +706,18 @@ static int siPrintChapter(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const
       }
       if (isNbr && psDoc->pcNum!=NULL && *psDoc->pcNum) efprintf(pfDoc," %s",psDoc->pcNum);
       efprintf(pfDoc," ");
-      fprintm(pfDoc,pcOwn,pcPgm,pcBld,psDoc->pcHdl,siCnt);
+      if (isHdr && pcAut!=NULL && *pcAut) {
+         char acHdr[1024];
+         fprintm(pfDoc,pcOwn,pcPgm,pcBld,psDoc->pcHdl,1);
+         if (pcAdr!=NULL && *pcAdr) {
+            snprintf(acHdr,sizeof(acHdr),"%s <%s>\nv&{BLD}, &{DATE}: &{state}.",pcAut,pcAdr); /*nodiac*/
+         } else {
+            snprintf(acHdr,sizeof(acHdr),"%s\nv&{BLD}, &{DATE}: &{state}.",pcAut); /*nodiac*/
+         }
+         fprintm(pfDoc,pcOwn,pcPgm,pcBld,acHdr,2);
+      } else {
+         fprintm(pfDoc,pcOwn,pcPgm,pcBld,psDoc->pcHdl,2);
+      }
       if (isIdt && psDoc->pcIdt!=NULL && *psDoc->pcIdt) {
          const char* pcHlp;
          const char* pcIdt=psDoc->pcIdt;
@@ -731,13 +745,15 @@ static int siPrintChapter(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const
    }
 }
 
-static int siClePrintCover(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const char* pcOwn, const char* pcPgm, const char* pcBld, const int isNbr, const int isIdt) {
+static int siClePrintCover(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const char* pcOwn, const char* pcPgm, const char* pcAut, const char* pcAdr, const char* pcBld, const int isHdr, const int isNbr, const int isIdt) {
    if (psDoc->uiLev!=1) {
       if (pfErr!=NULL) fprintf(pfErr,"The level (%u) for the cover page must be 1\n",psDoc->uiLev);
       return(CLERTC_ITF);
    }
-   efprintf(pfDoc,":doctype: book\n\n");
-   return(siPrintChapter(pfErr,pfDoc,psDoc,pcOwn,pcPgm,pcBld,isNbr,isIdt,1));
+   if (isHdr) {
+      efprintf(pfDoc,":doctype: book\n\n");
+   }
+   return(siPrintChapter(pfErr,pfDoc,psDoc,pcOwn,pcPgm,pcAut,pcAdr,pcBld,isHdr,isNbr,isIdt));
 }
 
 static int siClePrintChapter(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const char* pcOwn, const char* pcPgm, const char* pcBld, const int isNbr, const int isIdt) {
@@ -745,7 +761,7 @@ static int siClePrintChapter(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, co
       if (pfErr!=NULL) fprintf(pfErr,"The level (%u) for a chapter must be between 2 and 6\n",psDoc->uiLev);
       return(CLERTC_ITF);
    }
-   return(siPrintChapter(pfErr,pfDoc,psDoc,pcOwn,pcPgm,pcBld,isNbr,isIdt,2));
+   return(siPrintChapter(pfErr,pfDoc,psDoc,pcOwn,pcPgm,NULL,NULL,pcBld,FALSE,isNbr,isIdt));
 }
 
 static int siClePrintPgmSynopsis(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const char* pcOwn, const char* pcPgm, const char* pcBld, const char* pcHlp, const int isPat, const int isNbr, const int isIdt) {
@@ -899,7 +915,7 @@ static int siClePrintReasonCodes(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc
 
 static int siCleWritePage(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const TsCleDocPar* psPar) {
    switch (psDoc->uiTyp) {
-      case CLE_DOCTYP_COVER:        return(siClePrintCover(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->pcBld,psPar->isNbr,psPar->isIdt));
+      case CLE_DOCTYP_COVER:        return(siClePrintCover(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->pcAut,psPar->pcAdr,psPar->pcBld,psPar->isHdr,psPar->isNbr,psPar->isIdt));
       case CLE_DOCTYP_CHAPTER:      return(siClePrintChapter(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->pcBld,psPar->isNbr,psPar->isIdt));
       case CLE_DOCTYP_BUILTIN:      return(siClePrintBuiltIn(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->pcBld,psPar->isPat,psPar->isNbr,psPar->isShl,psPar->isIdt,psPar->psBif));
       case CLE_DOCTYP_PROGRAM:      return(siClePrintChapter(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->pcBld,psPar->isNbr,psPar->isIdt));
@@ -1145,6 +1161,8 @@ extern int siCleExecute(
    char*                         argv[],
    const char*                   pcOwner,
    const char*                   pcProgram,
+   const char*                   pcAut,
+   const char*                   pcAdr,
    const int                     isCas,
    const int                     isPfl,
    const int                     isRpl,
@@ -2003,6 +2021,7 @@ EVALUATE:
             }
          } else {
             TsCleDocPar stDocPar;
+            stDocPar.isHdr=TRUE;  stDocPar.pcAut=pcAut; stDocPar.pcAdr=pcAdr;
             stDocPar.isAnc=TRUE;  stDocPar.isNbr=isNbr; stDocPar.isIdt=FALSE; stDocPar.isPat=TRUE;
             stDocPar.isDep=isDep; stDocPar.isCas=isCas; stDocPar.isPfl=isPfl; stDocPar.isRpl=isRpl;
             stDocPar.pcAbo=pcAbo; stDocPar.pcDep=pcDep; stDocPar.pcDpa=pcDpa; stDocPar.pcEnt=pcEnt;
@@ -2076,6 +2095,7 @@ EVALUATE:
          ERROR(CLERTC_FAT,pcPat);
       }
       TsCleDocPar stDocPar;
+      stDocPar.isHdr=TRUE;  stDocPar.pcAut=pcAut; stDocPar.pcAdr=pcAdr;
       stDocPar.isAnc=TRUE;  stDocPar.isNbr=isNbr; stDocPar.isIdt=TRUE;  stDocPar.isPat=FALSE;
       stDocPar.isDep=isDep; stDocPar.isCas=isCas; stDocPar.isPfl=isPfl; stDocPar.isRpl=isRpl;
       stDocPar.pcAbo=pcAbo; stDocPar.pcDep=pcDep; stDocPar.pcDpa=pcDpa; stDocPar.pcEnt=pcEnt;
@@ -2085,7 +2105,7 @@ EVALUATE:
       stDocPar.pvF2S=pvF2S; stDocPar.pfF2S=pfF2S; stDocPar.pvSaf=pvSaf; stDocPar.pfSaf=pfSaf;
       stDocPar.siPs1='-';   stDocPar.siPs2='-';   stDocPar.siPr3='_';   stDocPar.isShl=isShl;
       if (pfHtmlOpn!=NULL && pfHtmlPrn!=NULL && pfHtmlCls!=NULL) {
-         void* pvDocHdl=pfHtmlOpn(pfOut,pfErr,pcPat,pcOwn,pcPgm,pcBld,&stDocPar.isAnc,&stDocPar.isIdt,&stDocPar.isPat,&stDocPar.siPs1,&stDocPar.siPs2,&stDocPar.siPr3);
+         void* pvDocHdl=pfHtmlOpn(pfOut,pfErr,pcPat,pcOwn,pcPgm,pcBld,&stDocPar.isHdr,&stDocPar.isAnc,&stDocPar.isIdt,&stDocPar.isPat,&stDocPar.siPs1,&stDocPar.siPs2,&stDocPar.siPr3);
          if (pvDocHdl==NULL) {
             fprintf(pfErr,"Open service provider for HTML generation failed\n");
             ERROR(CLERTC_FAT,pcPat);

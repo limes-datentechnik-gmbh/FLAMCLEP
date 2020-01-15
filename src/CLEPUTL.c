@@ -1369,8 +1369,6 @@ extern void fprintm(FILE* file,const char* own, const char* pgm, const char* bld
          }
          ptr=hlp+6;
       } else if (strncmp(hlp+2,"DATE}",5)==0) { /*nodiac*/
-
-
          char        acBuf[20];
          time_t      h=time(NULL);
          struct tm   st;
