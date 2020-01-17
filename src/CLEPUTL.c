@@ -1286,9 +1286,11 @@ extern char* unEscape(const char* input, char* output)
 }
 
 extern char* dynUnEscape(const char* input) {
-   char* output=malloc(strlen(input)+1);
-   if (output==NULL) return(NULL);
-   return(unEscape(input,output));
+   if (input!=NULL) {
+      char* output=malloc(strlen(input)+1);
+      if (output==NULL) return(NULL);
+      return(unEscape(input,output));
+   } else return NULL;
 }
 
 extern void fprintm(FILE* file,const char* own, const char* pgm, const char* bld, const char* man, const int cnt) {
