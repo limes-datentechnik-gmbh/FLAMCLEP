@@ -618,7 +618,7 @@ typedef int (TfF2S)(
 /**
  * Type definition for resource access check
  *
- * The function is called with the complete path and the standard lexem as value
+ * The function is called with the complete path and the standard lexeme as value
  * in front of each wrte of data to the CLP structure.
  *
  * @param[in]     pvGbl Pointer to to the global handle as black box given with CleExecute

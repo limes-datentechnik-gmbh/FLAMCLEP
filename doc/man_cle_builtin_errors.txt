@@ -15,9 +15,9 @@ means that the return (condition/exit) code can be used to control the
 batch processing. The reason code gives more information about the error
 or warning.
 
-See <<CLEP.APPENDIX.RETURNCODES,Appendix Returncodes>> and
-<<CLEP.APPENDIX.REASONCODES,Appendix Reasoncodes>> for an
-explanation and the output of this command.
+See sections <<CLEP.APPENDIX.RETURNCODES,return codes>> and
+<<CLEP.APPENDIX.REASONCODES,reason codes>> for an explanation
+and the output of this command.
 
 .Examples
 

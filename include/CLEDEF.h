@@ -80,8 +80,8 @@
 #define CLE_ANCHOR_APPENDIX_VERSION       "CLEP.APPENDIX.VERSION"       /** Appendix Version*/
 #define CLE_ANCHOR_APPENDIX_LEXEM         "CLEP.APPENDIX.LEXEM"         /** Appendix Lexem*/
 #define CLE_ANCHOR_APPENDIX_GRAMMAR       "CLEP.APPENDIX.GRAMMAR"       /** Appendix Grammar*/
-#define CLE_ANCHOR_APPENDIX_RETURNCODES   "CLEP.APPENDIX.RETURNCODES"   /** Appendix Returncodes*/
-#define CLE_ANCHOR_APPENDIX_REASONCODES   "CLEP.APPENDIX.REASONCODES"   /** Appendix Reasoncodes*/
+#define CLE_ANCHOR_APPENDIX_RETURNCODES   "CLEP.APPENDIX.RETURNCODES"   /** Appendix Return codes*/
+#define CLE_ANCHOR_APPENDIX_REASONCODES   "CLEP.APPENDIX.REASONCODES"   /** Appendix Reason codes*/
 #define CLE_ANCHOR_APPENDIX_PROPERTIES    "CLEP.APPENDIX.PROPERTIES"    /** Appendix Properties*/
 
 /**

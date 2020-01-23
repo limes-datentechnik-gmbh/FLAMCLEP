@@ -32,7 +32,7 @@ Description
 -----------
 
 The command line parser (FLAMCLP) is a complier which reads a command
-string using the lexems and grammar below to fill a structure with the
+string using the lexemes and grammar below to fill a structure with the
 corresponding values given in this line. The FLAMCLP works only in memory
 (except parameter files are used for objects, overlays, arrays, arguments or
 string files) and the syntax and semantic will be defined by a tree of
@@ -83,7 +83,7 @@ environment variable LANG or just for CLP strings with the environment
 variable CLP_STRING_CCSID or inside the CLP string ("&nnnn;"). Last but
 not least single character escaping ("&xxx;") is supported as well.
 
-In the command string (everywhere, where the scanner start to read a lexem)
+In the command string (everywhere, where the scanner start to read a lexeme)
 each value in angle brackets will be transparently replaced by the corresponding
 environment variable, except in strings.
 
@@ -137,7 +137,7 @@ selections. A feature is useful in order to define keywords for values
 (numbers, floats and strings). With help of the selection flag you can
 enforce the pure acceptance of predefined keywords.
 
-Additional hard coded key words (see lexems) can be used in constant
+Additional hard coded key words (see lexemes) can be used in constant
 expressions to build values and strings (value=64KiB).
 
 For each argument or constant you must define a keyword and a short
@@ -243,7 +243,7 @@ Beside property and command line parsing the FLAMCLP offers an interactive
 syntax and help function. Additionally, you can use a very powerful
 function to generate single manual pages or complete user manuals,
 You can make use of the supported grammar and regular expressions
-(lexems). Provided manual pages must be in ASCIIDOC and will be converted
+(lexemes). Provided manual pages must be in ASCIIDOC and will be converted
 on EBCDIC systems from the compile code page in the local code page.
 
 Only ClpParseCmd() uses the pvDat pointer. All other functions only work
@@ -262,10 +262,10 @@ Additional there is an interface to browse the symbol table. These interface
 can for example used to build several graphical user interfaces or other
 things based on the tables.
 
-Supported regular expressions (lexems) and grammar
+Supported regular expressions (lexemes) and grammar
 --------------------------------------------------
 
-Call siClpLexem() or siClpGrammar() to get the current supported lexems
+Call siClpLexem() or siClpGrammar() to get the current supported lexemes
 and grammar. The list below could be a older state of the implementation.
 
 Lexeme
@@ -406,7 +406,7 @@ Grammar for argument list or parameter file
 --| selection      -> KEYWORD # value from a selection table        #
 --| variable       -> KEYWORD # value from a previous assignment    #
 --|                |  KEYWORD '{' NUMBER '}' # with index for arrays #
---| constant       -> KEYWORD # see predefined constants at lexem   #
+--| constant       -> KEYWORD # see predefined constants at lexeme   #
 --| For strings only the operator '+' is implemented as concatenation
 --| Strings without an operator in between are also concatenated
 --| A number followed by a constant is a multiplication (4KiB=4*1024)
@@ -815,7 +815,7 @@ extern int siClpProperties(
    FILE*                         pfOut);
 
 /**
- * Print the lexems of the command line compiler
+ * Print the lexemes of the command line compiler
  *
  * The function prints the regular expressions of the command line compiler
  *

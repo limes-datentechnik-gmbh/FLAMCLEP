@@ -92,7 +92,7 @@
  * 1.1.45: Replace unnecessary strlen()
  * 1.1.46: Change "###SECRET###" in "***SECRET***" to eliminate dia-critical characters
  * 1.1.47: Make qualifier for commands variable in ClpDocu
- * 1.1.48: Support dia-critical characters in string lexems (add new macro isStr())
+ * 1.1.48: Support dia-critical characters in string lexemes (add new macro isStr())
  * 1.1.49: Fix issue 684: correct length in error messages (longer then n)
  * 1.1.50: Support replacement of &{OWN} and &{PGM} in man pages
  * 1.1.51: Fix cut & paste error at syntax  error print out
@@ -119,7 +119,7 @@
  * 1.2.73: Make acLst dynamic (pcLst, introduce srprintc)
  * 1.2.74: Separate CLPMAX_KYW/SRCSIZ from CLPMAX_LEXSIZ (introduce srprintf, limit key word length to a maximum of 63)
  * 1.2.75: Rename pcSrc in pcInp and make source qualifier dynamic
- * 1.2.76: Make lexem dynamic in length
+ * 1.2.76: Make lexeme dynamic in length
  * 1.2.77: Make prefix and path dynamic in length
  * 1.2.78: Make message dynamic in length
  * 1.2.79: Add parameter file support for arrays
@@ -157,7 +157,7 @@
  * 1.2.111: Support escaping of CLP string (&xxx; or &nnnn<...>)
  * 1.2.112: Fix replacement of environment variables and increase amount from 32 to 256
  * 1.2.113: Support critical character escape sequences for strings, file names and key labels
- * 1.2.114: Fix reallocation with pointer change for lexem if key word at scanning detected
+ * 1.2.114: Fix reallocation with pointer change for lexeme if key word at scanning detected
  * 1.2.115: Support empty strings behind assignments (comment= ...)
  * 1.2.116: Don't parse but accept parameter files if isPfl==2
  * 1.2.117: Required strings are only terminated with separation characters (space or comma), comment or close bracket on level 0
@@ -1644,7 +1644,7 @@ static inline void vdPrintHdl(FILE* pfDoc,TsHdl* psHdl, const char* pcAnc, const
       }
    }
    if (psHdl->isIdt) {
-      efprintf(pfDoc,"indexterm:[ARGUMENT, %s, %s]\n\n",pcKnd,pcKyw);
+      efprintf(pfDoc,"indexterm:[%s, %s, %s]\n\n",pcKnd,pcKyw,pcAnc);
    }
 }
 
@@ -3385,7 +3385,7 @@ extern int siClpLexem(
       size_t h=pcHlp-(*ppLex);\
       size_t s=(*pzLex)?(*pzLex)*2:CLPINI_LEXSIZ;\
       char*  b=(char*)realloc_nowarn(*ppLex,s);\
-      if (b==NULL) return CLPERR(psHdl,CLPERR_MEM,"Re-allocation to store the lexem failed");\
+      if (b==NULL) return CLPERR(psHdl,CLPERR_MEM,"Re-allocation to store the lexeme failed");\
       (*pzLex)=s;\
       if (b!=(*ppLex)) {\
          (*ppLex)=b;\
@@ -4550,7 +4550,7 @@ extern int siClpGrammar(
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," selection      -> KEYWORD # value from a selection table        #\n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," variable       -> KEYWORD # value from a previous assignment    #\n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  KEYWORD '{' NUMBER '}' # with index for arrays#\n");
-      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," constant       -> KEYWORD # see predefined constants at lexem   #\n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," constant       -> KEYWORD # see predefined constants at lexeme  #\n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," For strings only the operator '+' is implemented as concatenation\n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," Strings without an operator in between are also concatenated     \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," A number followed by a constant is a multiplication (4KiB=4*1024)\n");
@@ -6512,7 +6512,7 @@ static int siClpBldLit(
          char*                         pcLex=(char*)calloc(1,szLex);
          char                          acMsg[1024]="";
          if (pcLex==NULL) {
-            return(CLPERR(psHdl,CLPERR_MEM,"Allocation of memory to store the lexem or file name failed"));
+            return(CLPERR(psHdl,CLPERR_MEM,"Allocation of memory to store the lexeme or file name failed"));
          }
          siErr=psHdl->pfF2s(psHdl->pvGbl,psHdl->pvF2s,pcVal+2,&pcDat,&siSiz,acMsg,sizeof(acMsg));
          if (siErr<0) {

@@ -3060,7 +3060,7 @@ static int siCleSimpleInit(
    };
    *ppHdl=pvClpOpen(FALSE,isPfl,isRpl,0,"","","","","","",FALSE,asTab,"",pfOut,pfErr,NULL,NULL,NULL,NULL,pcDep,pcOpt,pcEnt,NULL,NULL,NULL,NULL,NULL,NULL);
    if (*ppHdl==NULL) {
-      if (pfErr!=NULL) fprintf(pfErr,"Open of command line parser for grammar and lexem print out failed\n");
+      if (pfErr!=NULL) fprintf(pfErr,"Open of command line parser for grammar and lexeme print out failed\n");
       return(CLERTC_TAB);
    }
    return(CLERTC_OK);
@@ -3343,7 +3343,7 @@ static void vdCleManFunction(
          } else {
             efprintf(pfOut," Function '%s'\n\n",pcFct);
          }
-         if (isIdt) efprintf(pfOut,"indexterm:[BUILTIN, %s]\n\n",pcFct);
+         if (isIdt) efprintf(pfOut,"indexterm:[Built-in Function, %s]\n\n",pcFct);
          efprintf(pfOut,".Synopsis\n\n");
          efprintf(pfOut,"-----------------------------------------------------------------------\n");
          efprintf(pfOut,"HELP:   %s\n",pcHlp);
@@ -3381,7 +3381,7 @@ static void vdCleManFunction(
                fprintf(pfOut,"\n\n");
             }
          }
-         if (isIdt) efprintf(pfOut,"indexterm:[BUILTIN, %s]\n\n",pcFct);
+         if (isIdt) efprintf(pfOut,"indexterm:[Built-in Function, %s]\n\n",pcFct);
          fprintf(pfOut, ".Synopsis\n\n");
          fprintf(pfOut, "-----------------------------------------------------------------------\n");
          efprintf(pfOut,"HELP:   %s\n",pcHlp);

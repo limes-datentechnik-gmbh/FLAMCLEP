@@ -16,15 +16,15 @@ Additionally the built-in function <<CLEP.BUILTIN.GENDOCU,GENDOCU>> can
 generate a complete or a part of the user manual.
 
 To read the parameter of a command, a compiler (CLP) is applied. To see
-the regular expressions (lexems) and the corresponding grammar, please
+the regular expressions (lexemes) and the corresponding grammar, please
 use the built-in functions <<CLEP.BUILTIN.LEXEM,LEXEM>> and
 <<CLEP.BUILTIN.GRAMMAR,GRAMMAR>>.
 
 The return/condition/exit codes of the executable and the reason codes
 of the different commands can be reviewed with the built-in function
 <<CLEP.BUILTIN.ERRORS,ERRORS>>.
-See <<CLEP.APPENDIX.RETURNCODES,Appendix Returncodes>> and, if available,
-<<CLEP.APPENDIX.REASONCODES,Appendix Reasoncodes>> for the meaning of the
+See sections <<CLEP.APPENDIX.RETURNCODES,return codes>> and, if available,
+<<CLEP.APPENDIX.REASONCODES,reason codes>> for the meaning of the
 used return and reason codes.
 
 The CLE uses an owner management in order to separate the settings for

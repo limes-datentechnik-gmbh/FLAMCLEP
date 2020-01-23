@@ -1,12 +1,12 @@
 All filenames used by CLEP are additionally mapped based on the rules
 below:
 
-* The tilde character (`~`) is replaced with the string "<HOME>"
+* The tilde character (`~`) is replaced with the string `<HOME>`
 * DD names on mainframes must be prefixed with "DD:"
-* Data set names on mainframes are always full qualified
-* Path names on mainframes must contain a least one slash (`/`)
-* Data set names on USS must start with //
-** Full qualified names with HLQ must enclose in apostrophes ("//''")
+* Data set names on mainframes are always fully qualified
+* Path names on mainframes must contain at least one slash (`/`)
+* Data set names on USS must start with `//`
+** Fully qualified names with HLQ must be enclosed in apostrophes (`//''`)
 ** If apostrophes are not used the SYSUID is prefixed as HLQ
 * Normal file names on other platforms could be relative
 

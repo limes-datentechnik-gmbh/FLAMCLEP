@@ -1,6 +1,6 @@
 Each value enclosed with angle brackets (`<>`) are replaced with the
 corresponding environment variable (`<LANG>`). This feature is available
-at each starting point of a lexem and inside of a normal string.
+at each starting point of a lexeme and inside of a normal string.
 
 If the environment variable not defined the replacements below are still
 possible:
