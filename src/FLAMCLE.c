@@ -961,7 +961,7 @@ static int siClePrintPage(FILE* pfOut, FILE* pfErr, const TsCleDoc* psDoc, const
       fclose_tmp(pfDoc);
       return(siErr);
    }
-   long int s=ftell(pfDoc);
+   size_t s=ftell(pfDoc);
    rewind(pfDoc);
    char* pcPge=malloc(s+1);
    if (pcPge==NULL) {
@@ -969,7 +969,7 @@ static int siClePrintPage(FILE* pfOut, FILE* pfErr, const TsCleDoc* psDoc, const
       fclose_tmp(pfDoc);
       return(CLERTC_MEM);
    }
-   long int r=fread(pcPge,1,s,pfDoc);
+   size_t r=fread(pcPge,1,s,pfDoc);
    fclose_tmp(pfDoc);
    if (r!=s) {
       free(pcPge);
@@ -1038,9 +1038,9 @@ static void* pfLoadHtmlDoc(TfCleOpenPrint** ppHtmlOpn, TfClpPrintPage** ppHtmlPr
 #else
    void* pvHtmlDoc=dlopen("libhtmldoc.so",RTLD_LAZY);
    if (pvHtmlDoc==NULL) return(NULL);
-   *ppHtmlOpn=dlsym(pvHtmlDoc, "opnHtmlDoc");
-   *ppHtmlPrn=dlsym(pvHtmlDoc, "prnHtmlDoc");
-   *ppHtmlCls=dlsym(pvHtmlDoc, "clsHtmlDoc");
+   *ppHtmlOpn=(TfCleOpenPrint* )dlsym(pvHtmlDoc, "opnHtmlDoc");
+   *ppHtmlPrn=(TfClpPrintPage* )dlsym(pvHtmlDoc, "prnHtmlDoc");
+   *ppHtmlCls=(TfCleClosePrint*)dlsym(pvHtmlDoc, "clsHtmlDoc");
 #endif
    return(pvHtmlDoc);
 }

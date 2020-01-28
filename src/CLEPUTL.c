@@ -1424,11 +1424,11 @@ extern int snprintm(char* buffer, size_t size, const char* own, const char* pgm,
    FILE*       f=fopen_tmp();
    if (f!=NULL) {
       fprintm(f,own,pgm,bld,man,cnt);
-      unsigned long s=ftell(f);
+      size_t s=ftell(f);
       rewind(f);
       char* p=malloc(s+1);
       if (p!=NULL) {
-         unsigned long r=fread(p,1,s,f);
+         size_t r=fread(p,1,s,f);
          fclose_tmp(f);
          if (r==s) {
             p[r]=0x00;
