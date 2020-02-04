@@ -1,4 +1,39 @@
-@import url(//fonts.googleapis.com/css?family=Open+Sans:300,400,600);
+@font-face {
+  font-family: 'Crete Round';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Crete Round'), local('CreteRound-Regular'), url(CreteRound.woff) format('woff');
+}
+@font-face {
+  font-family: 'Crete Round';
+  font-style: italic;
+  font-weight: 400;
+  src: local('Crete Round Italic'), local('CreteRound-Italic'), url(CreteRoundItalic.woff) format('woff');
+}
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 300;
+  src: local('Open Sans Light'), local('OpenSans-Light'), url(OpenSans300.woff) format('woff');
+}
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Open Sans'), local('OpenSans'), url(OpenSans400.woff) format('woff');
+}
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 600;
+  src: local('Open Sans Semibold'), local('OpenSans-Semibold'), url(OpenSans600.woff) format('woff');
+}
+@font-face {
+  font-family: 'Andika';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Andika'), url(Andika.woff) format('woff');
+}
 
 #titlearea, #headinfo, #bgimage {
    height: 120px;
@@ -9,7 +44,6 @@
   white-space:nowrap;
   overflow:hidden;
 }
-
 
 #bgimage {
   background-image: url(header-bg_wide.png);
@@ -27,12 +61,42 @@
    position: relative;
 }
 
-#side-nav {
-   top: 157px;
+body, table, div, p, dl {
+   font-family: "Open Sans",sans-serif;
+   font-size: 16px;
 }
 
-body, table, div, p, dl, .tabs, .tabs2, .tabs3, .title, .navpath li.navelem a, div.toc li, div.toc h3, #projectname, #projectbrief, #nav-tree .label {
+.title, h1, h2, h3, h4, h5, h6 {
+   font-family: "Crete Round",sans-serif;
+}
+
+.tabs, .tabs2, .tabs3, .navpath li.navelem a, div.toc li, div.toc h3, #projectname, #projectbrief, #nav-tree .label, table.directory {
    font-family: "Open Sans",sans-serif;
+}
+
+pre, code {
+   font-family: "Lucida Console",'Monaco',monospace;
+}
+
+pre {
+    padding: 1ex 2em;
+    overflow: auto;
+    border-top: 4px solid #6389D6;
+    border-bottom: 4px solid #6389D6;
+    background: none repeat scroll 0% 0% #f5f7fa;
+    color: #303030;
+    margin: 1.6em 0px;
+}
+
+code {
+    border-top: 1px solid #6389D6;
+    border-bottom: 1px solid #6389D6;
+    background: none repeat scroll 0% 0% #f5f7fa;
+    color: #303030;
+    margin: 1.6em 0px;
+}
+table code {
+    margin: 0;
 }
 
 .tabs3 {

@@ -17,7 +17,7 @@ $(ZIPDIR)/%.zip: %.doxy
 	zip -r $@ $(<:.doxy=)/html
 
 
-.PHONY: all doc clean
+.PHONY: all clean
 
 all: $(ALLZIPS)
 
@@ -31,3 +31,5 @@ $(PDFDIR):
 
 clean:
 	rm -rf $(SUBDIRS)
+
+$(ZIPDIR)/CLEPAPI.zip: ../include/FLAMCLE.h ../include/FLAMCLP.h ../include/CLEDEF.h ../include/CLPDEF.h ../include/CLEMSG.h ../include/CLPMAC.h ../include/CLEPUTL.h
