@@ -597,7 +597,7 @@
  * Call siClpLexem() or siClpGrammar() to get the current supported lexems
  * and grammar. The list below could be a older state of the implementation.
  *
- * @subsection CLPLEXEME FLAMCLP-Lexeme
+ * @subsubsection CLPLEXEME FLAMCLP-Lexeme
  *
  * <pre>
  * Lexemes (regular expressions) for argument list or parameter file:
