@@ -1428,7 +1428,7 @@ extern int snprintm(char* buffer, size_t size, const char* own, const char* pgm,
    FILE*       f=fopen_tmp();
    if (f!=NULL) {
       fprintm(f,own,pgm,bld,man,cnt);
-      size_t s=ftell(f);
+      size_t s=(size_t)ftell(f);
       rewind(f);
       char* p=malloc(s+1);
       if (p!=NULL) {

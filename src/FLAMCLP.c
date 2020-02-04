@@ -2014,7 +2014,7 @@ static int siClpPrintWritten(
 {
    int                           i;
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
-   size_t s=ftell(pfDoc);
+   size_t s=(size_t)ftell(pfDoc);
    rewind(pfDoc);
    char* pcPge=malloc(s+1);
    if (pcPge==NULL) {

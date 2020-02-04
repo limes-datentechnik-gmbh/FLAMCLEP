@@ -988,7 +988,7 @@ static int siClePrintPage(FILE* pfOut, FILE* pfErr, const TsCleDoc* psDoc, const
       fclose_tmp(pfDoc);
       return(siErr);
    }
-   size_t s=ftell(pfDoc);
+   size_t s=(size_t)ftell(pfDoc);
    rewind(pfDoc);
    char* pcPge=malloc(s+1);
    if (pcPge==NULL) {
