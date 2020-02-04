@@ -57,6 +57,10 @@ static inline int flzsym(const char* pcDat, const int* piSln, char* pcVal, int* 
 #if !defined(__USS__) && !defined(__ZOS__) && defined(__FL5__)
 #  include "mfinit.h"
 #endif
+
+#if defined(__DEBUG__) && defined(__FL5__)
+#  include "CHKMEM.h"
+#endif
 #include "CLEPUTL.h"
 
 #ifndef realloc_nowarn

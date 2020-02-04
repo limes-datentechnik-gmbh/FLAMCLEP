@@ -106,7 +106,7 @@
    letter. The *path* is a dotted keyword list as per syntax of the
    command (command.para1.para2.para3). A detailed description of
    the manual pages can be printed with keyword *MAN*.
-:LEXEM: Built-in function to show how a number, a string, a keyword and
+:LEXEMES: Built-in function to show how a number, a string, a keyword and
    other values are defined in their correct command syntax. It uses
    regular expressions for the tokens of the command.
 :MAN: Manual

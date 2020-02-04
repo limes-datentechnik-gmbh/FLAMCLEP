@@ -52,7 +52,7 @@
 #define CLE_DOCTYP_COMMANDS               20U   /**< @brief The commands part. */
 #define CLE_DOCTYP_OTHERCLP               21U   /**< @brief Other CLP strings. */
 #define CLE_DOCTYP_BUILTIN                22U   /**< @brief The built-in function section. */
-#define CLE_DOCTYP_LEXEM                  30U   /**< @brief The appendix which prints the lexems. */
+#define CLE_DOCTYP_LEXEMES                30U   /**< @brief The appendix which prints the lexemes. */
 #define CLE_DOCTYP_GRAMMAR                31U   /**< @brief The appendix which prints the grammar. */
 #define CLE_DOCTYP_VERSION                32U   /**< @brief The appendix which prints the version (pcVsn must be given). */
 #define CLE_DOCTYP_ABOUT                  33U   /**< @brief The appendix which prints the about (pcAbo must be given). */
@@ -84,7 +84,7 @@
 #define CLE_ANCHOR_BUILTIN_FUNCTIONS      "CLEP.BUILTIN.FUNCTIONS"      /**< @brief Chapter built-in functions. */
 #define CLE_ANCHOR_APPENDIX_ABOUT         "CLEP.APPENDIX.ABOUT"         /**< @brief Appendix About. */
 #define CLE_ANCHOR_APPENDIX_VERSION       "CLEP.APPENDIX.VERSION"       /**< @brief Appendix Version. */
-#define CLE_ANCHOR_APPENDIX_LEXEM         "CLEP.APPENDIX.LEXEM"         /**< @brief Appendix Lexem. */
+#define CLE_ANCHOR_APPENDIX_LEXEMES       "CLEP.APPENDIX.LEXEMES"       /**< @brief Appendix Lexemes. */
 #define CLE_ANCHOR_APPENDIX_GRAMMAR       "CLEP.APPENDIX.GRAMMAR"       /**< @brief Appendix Grammar. */
 #define CLE_ANCHOR_APPENDIX_RETURNCODES   "CLEP.APPENDIX.RETURNCODES"   /**< @brief Appendix Return codes. */
 #define CLE_ANCHOR_APPENDIX_REASONCODES   "CLEP.APPENDIX.REASONCODES"   /**< @brief Appendix Reason codes. */

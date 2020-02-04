@@ -51,7 +51,7 @@
    #define siClpHelp             FLCLPHLP
    #define siClpDocu             FLCLPDOC
    #define siClpPrint            FLCLPPRN
-   #define siClpLexem            FLCLPLEX
+   #define siClpLexemes          FLCLPLEX
    #define siClpGrammar          FLCLPGRM
    #define vdClpClose            FLCLPCLS
    #define pcClpError            FLCLPERR
@@ -405,7 +405,7 @@ extern int siClpProperties(
  *
  * @return signed integer with CLP_OK(0) or an error code (CLPERR_xxxxxx)
  */
-extern int siClpLexem(
+extern int siClpLexemes(
    void*                         pvHdl,
    FILE*                         pfOut);
 

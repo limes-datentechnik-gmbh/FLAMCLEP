@@ -17,7 +17,7 @@ generate a complete or a part of the user manual.
 
 To read the parameter of a command, a compiler (CLP) is applied. To see
 the regular expressions (lexemes) and the corresponding grammar, please
-use the built-in functions <<CLEP.BUILTIN.LEXEM,LEXEM>> and
+use the built-in functions <<CLEP.BUILTIN.LEXEMES,LEXEMES>> and
 <<CLEP.BUILTIN.GRAMMAR,GRAMMAR>>.
 
 The return/condition/exit codes of the executable and the reason codes

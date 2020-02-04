@@ -114,8 +114,8 @@ extern const char* pcCleAbout(const int l, const int s, char* b);
  * - TRACE ON | OFF | FILE=filename
  * - CONFIG [CLEAR]
  * - GRAMMAR
+ * - LEXEMES
  * - LICENSE
- * - LEXEM
  * - VERSION
  * - ABOUT
  * - ERRORS

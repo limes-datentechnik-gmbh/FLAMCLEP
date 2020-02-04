@@ -49,6 +49,9 @@
 #endif
 /* Include eigener Bibliotheken  **************************************/
 
+#if defined(__DEBUG__) && defined(__FL5__)
+#  include "CHKMEM.h"
+#endif
 #include "CLEPUTL.h"
 #include "FLAMCLP.h"
 
@@ -535,7 +538,7 @@ static inline const char* pcMapDocTyp(const unsigned int uiTyp) {
       case CLE_DOCTYP_PGMHELP:      return("CLE_DOCTYP_PGMHELP");
       case CLE_DOCTYP_COMMANDS:     return("CLE_DOCTYP_COMMANDS");
       case CLE_DOCTYP_OTHERCLP:     return("CLE_DOCTYP_OTHERCLP");
-      case CLE_DOCTYP_LEXEM:        return("CLE_DOCTYP_LEXEM");
+      case CLE_DOCTYP_LEXEMES:      return("CLE_DOCTYP_LEXEMES");
       case CLE_DOCTYP_GRAMMAR:      return("CLE_DOCTYP_GRAMMAR");
       case CLE_DOCTYP_PROPREMAIN:   return("CLE_DOCTYP_PROPREMAIN");
       case CLE_DOCTYP_PROPDEFAULTS: return("CLE_DOCTYP_PROPDEFAULTS");
@@ -810,7 +813,7 @@ static int siClePrintBuiltIn(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, co
    return(CLERTC_OK);
 }
 
-static int siClePrintLexem(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const char* pcOwn, const char* pcPgm, const char* pcBld,
+static int siClePrintLexemes(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const char* pcOwn, const char* pcPgm, const char* pcBld,
       const int isPfl, const int isRpl, const char* pcDep, const char* pcOpt, const char* pcEnt, const int isNbr, const int isIdt) {
    void* pvHdl=NULL;
    int siErr=siClePrintChapter(pfErr,pfDoc,psDoc,pcOwn,pcPgm,pcBld,isNbr,isIdt);
@@ -819,7 +822,7 @@ static int siClePrintLexem(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, cons
    if (siErr) return(siErr);
    efprintf(pfDoc,"------------------------------------------------------------------------\n");
    efprintf(pfDoc,"Lexemes (regular expressions) for argument list or parameter file\n");
-   int siRtc=siClpLexem(pvHdl,pfDoc);
+   int siRtc=siClpLexemes(pvHdl,pfDoc);
    vdClpClose(pvHdl,CLPCLS_MTD_ALL);
    efprintf(pfDoc,"------------------------------------------------------------------------\n\n");
    return((siRtc)?CLERTC_SYN:CLERTC_OK);
@@ -924,7 +927,7 @@ static int siCleWritePage(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const
       case CLE_DOCTYP_PGMHELP:      return(siClePrintPgmHelp(pfErr,pfDoc,psDoc,psPar->psCmd,psPar->psBif,psPar->pcOwn,psPar->pcPgm,psPar->pcBld,psPar->pcDep,psPar->isNbr,psPar->isIdt));
       case CLE_DOCTYP_COMMANDS:     return(siClePrintChapter(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->pcBld,psPar->isNbr,psPar->isIdt));
       case CLE_DOCTYP_OTHERCLP:     return(siClePrintChapter(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->pcBld,psPar->isNbr,psPar->isIdt));
-      case CLE_DOCTYP_LEXEM:        return(siClePrintLexem(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->pcBld,psPar->isPfl,psPar->isRpl,psPar->pcDep,psPar->pcOpt,psPar->pcEnt,psPar->isNbr,psPar->isIdt));
+      case CLE_DOCTYP_LEXEMES:      return(siClePrintLexemes(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->pcBld,psPar->isPfl,psPar->isRpl,psPar->pcDep,psPar->pcOpt,psPar->pcEnt,psPar->isNbr,psPar->isIdt));
       case CLE_DOCTYP_GRAMMAR:      return(siClePrintGrammar(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->pcBld,psPar->isPfl,psPar->isRpl,psPar->pcDep,psPar->pcOpt,psPar->pcEnt,psPar->isNbr,psPar->isIdt));
       case CLE_DOCTYP_PROPREMAIN:   return(siClePrintPropRemain(pfErr,pfDoc,psDoc,psPar->psCmd,psPar->pvCnf,psPar->pcOwn,psPar->pcPgm,psPar->pcBld,
             psPar->isCas,psPar->isPfl,psPar->isRpl,psPar->siMkl,psPar->pcDep,psPar->pcOpt,psPar->pcEnt,psPar->isNbr,psPar->isIdt));
@@ -1238,7 +1241,7 @@ extern int siCleExecute(
       CLETAB_BIF(IDX_CLE_BUILTIN_TRACE   ,"TRACE"   ,HLP_CLE_BUILTIN_TRACE   ,SYN_CLE_BUILTIN_TRACE   ,MAN_CLE_BUILTIN_TRACE   ,TRUE)
       CLETAB_BIF(IDX_CLE_BUILTIN_CONFIG  ,"CONFIG"  ,HLP_CLE_BUILTIN_CONFIG  ,SYN_CLE_BUILTIN_CONFIG  ,MAN_CLE_BUILTIN_CONFIG  ,TRUE)
       CLETAB_BIF(IDX_CLE_BUILTIN_GRAMMAR ,"GRAMMAR" ,HLP_CLE_BUILTIN_GRAMMAR ,SYN_CLE_BUILTIN_GRAMMAR ,MAN_CLE_BUILTIN_GRAMMAR ,TRUE)
-      CLETAB_BIF(IDX_CLE_BUILTIN_LEXEM   ,"LEXEM"   ,HLP_CLE_BUILTIN_LEXEM   ,SYN_CLE_BUILTIN_LEXEM   ,MAN_CLE_BUILTIN_LEXEM   ,TRUE)
+      CLETAB_BIF(IDX_CLE_BUILTIN_LEXEMES ,"LEXEMES" ,HLP_CLE_BUILTIN_LEXEMES ,SYN_CLE_BUILTIN_LEXEMES ,MAN_CLE_BUILTIN_LEXEMES ,TRUE)
       CLETAB_BIF(IDX_CLE_BUILTIN_LICENSE ,"LICENSE" ,HLP_CLE_BUILTIN_LICENSE ,SYN_CLE_BUILTIN_LICENSE ,MAN_CLE_BUILTIN_LICENSE ,pcLic!=NULL)
       CLETAB_BIF(IDX_CLE_BUILTIN_VERSION ,"VERSION" ,HLP_CLE_BUILTIN_VERSION ,SYN_CLE_BUILTIN_VERSION ,MAN_CLE_BUILTIN_VERSION ,pcVsn!=NULL)
       CLETAB_BIF(IDX_CLE_BUILTIN_ABOUT   ,"ABOUT"   ,HLP_CLE_BUILTIN_ABOUT   ,SYN_CLE_BUILTIN_ABOUT   ,MAN_CLE_BUILTIN_ABOUT   ,pcAbo!=NULL)
@@ -1506,18 +1509,18 @@ EVALUATE:
       fprintf(pfErr,"Syntax for built-in function 'ABOUT' not valid\n");
       fprintf(pfErr,"%s %s ABOUT\n",pcDep,argv[0]);
       ERROR(CLERTC_CMD,NULL);
-   } else if (asBif[IDX_CLE_BUILTIN_LEXEM].isBif && strxcmp(isCas,argv[1],"LEXEM",0,0,FALSE)==0) {
+   } else if (asBif[IDX_CLE_BUILTIN_LEXEMES].isBif && (strxcmp(isCas,argv[1],"LEXEMES",0,0,FALSE)==0 || strxcmp(isCas,argv[1],"LEXEM",0,0,FALSE)==0)) {
       if (pfOut==NULL) pfOut=pfStd;
       if (pfErr==NULL) pfErr=pfStd;
       if (argc==2) {
          siErr=siCleSimpleInit(pfOut,pfErr,isPfl,isRpl,pcDep,pcOpt,pcEnt,&pvHdl);
          if (siErr) ERROR(siErr,NULL);
          fprintf(pfOut,"Lexemes (regular expressions) for argument list or parameter file:\n");
-         siErr=siClpLexem(pvHdl,pfOut);
+         siErr=siClpLexemes(pvHdl,pfOut);
          if (siErr<0) ERROR(CLERTC_SYN,NULL); else ERROR(CLERTC_OK,NULL);
       }
-      fprintf(pfErr,"Syntax for built-in function 'LEXEM' not valid\n");
-      fprintf(pfErr,"%s %s LEXEM\n",pcDep,argv[0]);
+      fprintf(pfErr,"Syntax for built-in function 'LEXEMES' not valid\n");
+      fprintf(pfErr,"%s %s LEXEMES\n",pcDep,argv[0]);
       ERROR(CLERTC_CMD,NULL);
    } else if (asBif[IDX_CLE_BUILTIN_GRAMMAR].isBif && strxcmp(isCas,argv[1],"GRAMMAR",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;

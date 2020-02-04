@@ -54,7 +54,7 @@
 #define IDX_CLE_BUILTIN_TRACE       15
 #define IDX_CLE_BUILTIN_CONFIG      16
 #define IDX_CLE_BUILTIN_GRAMMAR     17
-#define IDX_CLE_BUILTIN_LEXEM       18
+#define IDX_CLE_BUILTIN_LEXEMES     18
 #define IDX_CLE_BUILTIN_LICENSE     19
 #define IDX_CLE_BUILTIN_VERSION     20
 #define IDX_CLE_BUILTIN_ABOUT       21
@@ -96,8 +96,8 @@ static const char* HLP_CLE_BUILTIN_CONFIG  ="Shows or clear all the current conf
 static const char* SYN_CLE_BUILTIN_CONFIG  ="CONFIG [CLEAR]";
 static const char* HLP_CLE_BUILTIN_GRAMMAR ="Shows the grammar for commands and properties";
 static const char* SYN_CLE_BUILTIN_GRAMMAR ="GRAMMAR";
-static const char* HLP_CLE_BUILTIN_LEXEM   ="Shows the regular expressions accepted in a command";
-static const char* SYN_CLE_BUILTIN_LEXEM   ="LEXEM";
+static const char* HLP_CLE_BUILTIN_LEXEMES ="Shows the regular expressions accepted in a command";
+static const char* SYN_CLE_BUILTIN_LEXEMES ="LEXEMES";
 static const char* HLP_CLE_BUILTIN_LICENSE ="List license information for the program";
 static const char* SYN_CLE_BUILTIN_LICENSE ="LICENSE";
 static const char* HLP_CLE_BUILTIN_VERSION ="List version information for the program";
