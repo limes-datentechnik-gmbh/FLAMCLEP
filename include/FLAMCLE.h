@@ -48,7 +48,7 @@
 /*! @endcond */
 
 /**
- * @defgroup CLE_CLEFUC CLE Functions
+ * @defgroup CLE_FUNC CLE Functions
  * @brief The function provided by CLE.
  * @{
  */

@@ -161,6 +161,30 @@
 
 #define CLEINI_PROSIZ            1024
 
+#define CLE_BUILTIN_IDX_SYNTAX      0
+#define CLE_BUILTIN_IDX_HELP        1
+#define CLE_BUILTIN_IDX_MANPAGE     2
+#define CLE_BUILTIN_IDX_GENDOCU     3
+#define CLE_BUILTIN_IDX_HTMLDOC     4
+#define CLE_BUILTIN_IDX_GENPROP     5
+#define CLE_BUILTIN_IDX_SETPROP     6
+#define CLE_BUILTIN_IDX_CHGPROP     7
+#define CLE_BUILTIN_IDX_DELPROP     8
+#define CLE_BUILTIN_IDX_GETPROP     9
+#define CLE_BUILTIN_IDX_SETOWNER    10
+#define CLE_BUILTIN_IDX_GETOWNER    11
+#define CLE_BUILTIN_IDX_SETENV      12
+#define CLE_BUILTIN_IDX_GETENV      13
+#define CLE_BUILTIN_IDX_DELENV      14
+#define CLE_BUILTIN_IDX_TRACE       15
+#define CLE_BUILTIN_IDX_CONFIG      16
+#define CLE_BUILTIN_IDX_GRAMMAR     17
+#define CLE_BUILTIN_IDX_LEXEMES     18
+#define CLE_BUILTIN_IDX_LICENSE     19
+#define CLE_BUILTIN_IDX_VERSION     20
+#define CLE_BUILTIN_IDX_ABOUT       21
+#define CLE_BUILTIN_IDX_ERRORS      22
+
 /* Definition der Strukturen ******************************************/
 
 typedef struct CnfEnt {
@@ -1223,29 +1247,29 @@ extern int siCleExecute(
    const char*                   m;
 
    CLEBIF_OPN(asBif) = {
-      CLETAB_BIF(IDX_CLE_BUILTIN_SYNTAX  ,"SYNTAX"  ,HLP_CLE_BUILTIN_SYNTAX  ,SYN_CLE_BUILTIN_SYNTAX  ,MAN_CLE_BUILTIN_SYNTAX  ,TRUE)
-      CLETAB_BIF(IDX_CLE_BUILTIN_HELP    ,"HELP"    ,HLP_CLE_BUILTIN_HELP    ,SYN_CLE_BUILTIN_HELP    ,MAN_CLE_BUILTIN_HELP    ,TRUE)
-      CLETAB_BIF(IDX_CLE_BUILTIN_MANPAGE ,"MANPAGE" ,HLP_CLE_BUILTIN_MANPAGE ,SYN_CLE_BUILTIN_MANPAGE ,MAN_CLE_BUILTIN_MANPAGE ,TRUE)
-      CLETAB_BIF(IDX_CLE_BUILTIN_GENDOCU ,"GENDOCU" ,HLP_CLE_BUILTIN_GENDOCU ,SYN_CLE_BUILTIN_GENDOCU ,MAN_CLE_BUILTIN_GENDOCU ,TRUE)
-      CLETAB_BIF(IDX_CLE_BUILTIN_HTMLDOC ,"HTMLDOC" ,HLP_CLE_BUILTIN_HTMLDOC ,SYN_CLE_BUILTIN_HTMLDOC ,MAN_CLE_BUILTIN_HTMLDOC ,TRUE)
-      CLETAB_BIF(IDX_CLE_BUILTIN_GENPROP ,"GENPROP" ,HLP_CLE_BUILTIN_GENPROP ,SYN_CLE_BUILTIN_GENPROP ,MAN_CLE_BUILTIN_GENPROP ,TRUE)
-      CLETAB_BIF(IDX_CLE_BUILTIN_SETPROP ,"SETPROP" ,HLP_CLE_BUILTIN_SETPROP ,SYN_CLE_BUILTIN_SETPROP ,MAN_CLE_BUILTIN_SETPROP ,TRUE)
-      CLETAB_BIF(IDX_CLE_BUILTIN_CHGPROP ,"CHGPROP" ,HLP_CLE_BUILTIN_CHGPROP ,SYN_CLE_BUILTIN_CHGPROP ,MAN_CLE_BUILTIN_CHGPROP ,TRUE)
-      CLETAB_BIF(IDX_CLE_BUILTIN_DELPROP ,"DELPROP" ,HLP_CLE_BUILTIN_DELPROP ,SYN_CLE_BUILTIN_DELPROP ,MAN_CLE_BUILTIN_DELPROP ,TRUE)
-      CLETAB_BIF(IDX_CLE_BUILTIN_GETPROP ,"GETPROP" ,HLP_CLE_BUILTIN_GETPROP ,SYN_CLE_BUILTIN_GETPROP ,MAN_CLE_BUILTIN_GETPROP ,TRUE)
-      CLETAB_BIF(IDX_CLE_BUILTIN_SETOWNER,"SETOWNER",HLP_CLE_BUILTIN_SETOWNER,SYN_CLE_BUILTIN_SETOWNER,MAN_CLE_BUILTIN_SETOWNER,TRUE)
-      CLETAB_BIF(IDX_CLE_BUILTIN_GETOWNER,"GETOWNER",HLP_CLE_BUILTIN_GETOWNER,SYN_CLE_BUILTIN_GETOWNER,MAN_CLE_BUILTIN_GETOWNER,TRUE)
-      CLETAB_BIF(IDX_CLE_BUILTIN_SETENV  ,"SETENV"  ,HLP_CLE_BUILTIN_SETENV  ,SYN_CLE_BUILTIN_SETENV  ,MAN_CLE_BUILTIN_SETENV  ,TRUE)
-      CLETAB_BIF(IDX_CLE_BUILTIN_GETENV  ,"GETENV"  ,HLP_CLE_BUILTIN_GETENV  ,SYN_CLE_BUILTIN_GETENV  ,MAN_CLE_BUILTIN_GETENV  ,TRUE)
-      CLETAB_BIF(IDX_CLE_BUILTIN_DELENV  ,"DELENV"  ,HLP_CLE_BUILTIN_DELENV  ,SYN_CLE_BUILTIN_DELENV  ,MAN_CLE_BUILTIN_DELENV  ,TRUE)
-      CLETAB_BIF(IDX_CLE_BUILTIN_TRACE   ,"TRACE"   ,HLP_CLE_BUILTIN_TRACE   ,SYN_CLE_BUILTIN_TRACE   ,MAN_CLE_BUILTIN_TRACE   ,TRUE)
-      CLETAB_BIF(IDX_CLE_BUILTIN_CONFIG  ,"CONFIG"  ,HLP_CLE_BUILTIN_CONFIG  ,SYN_CLE_BUILTIN_CONFIG  ,MAN_CLE_BUILTIN_CONFIG  ,TRUE)
-      CLETAB_BIF(IDX_CLE_BUILTIN_GRAMMAR ,"GRAMMAR" ,HLP_CLE_BUILTIN_GRAMMAR ,SYN_CLE_BUILTIN_GRAMMAR ,MAN_CLE_BUILTIN_GRAMMAR ,TRUE)
-      CLETAB_BIF(IDX_CLE_BUILTIN_LEXEMES ,"LEXEMES" ,HLP_CLE_BUILTIN_LEXEMES ,SYN_CLE_BUILTIN_LEXEMES ,MAN_CLE_BUILTIN_LEXEMES ,TRUE)
-      CLETAB_BIF(IDX_CLE_BUILTIN_LICENSE ,"LICENSE" ,HLP_CLE_BUILTIN_LICENSE ,SYN_CLE_BUILTIN_LICENSE ,MAN_CLE_BUILTIN_LICENSE ,pcLic!=NULL)
-      CLETAB_BIF(IDX_CLE_BUILTIN_VERSION ,"VERSION" ,HLP_CLE_BUILTIN_VERSION ,SYN_CLE_BUILTIN_VERSION ,MAN_CLE_BUILTIN_VERSION ,pcVsn!=NULL)
-      CLETAB_BIF(IDX_CLE_BUILTIN_ABOUT   ,"ABOUT"   ,HLP_CLE_BUILTIN_ABOUT   ,SYN_CLE_BUILTIN_ABOUT   ,MAN_CLE_BUILTIN_ABOUT   ,pcAbo!=NULL)
-      CLETAB_BIF(IDX_CLE_BUILTIN_ERRORS  ,"ERRORS"  ,HLP_CLE_BUILTIN_ERRORS  ,SYN_CLE_BUILTIN_ERRORS  ,MAN_CLE_BUILTIN_ERRORS  ,TRUE)
+      CLETAB_BIF(CLE_BUILTIN_IDX_SYNTAX  ,"SYNTAX"  ,HLP_CLE_BUILTIN_SYNTAX  ,SYN_CLE_BUILTIN_SYNTAX  ,MAN_CLE_BUILTIN_SYNTAX  ,TRUE)
+      CLETAB_BIF(CLE_BUILTIN_IDX_HELP    ,"HELP"    ,HLP_CLE_BUILTIN_HELP    ,SYN_CLE_BUILTIN_HELP    ,MAN_CLE_BUILTIN_HELP    ,TRUE)
+      CLETAB_BIF(CLE_BUILTIN_IDX_MANPAGE ,"MANPAGE" ,HLP_CLE_BUILTIN_MANPAGE ,SYN_CLE_BUILTIN_MANPAGE ,MAN_CLE_BUILTIN_MANPAGE ,TRUE)
+      CLETAB_BIF(CLE_BUILTIN_IDX_GENDOCU ,"GENDOCU" ,HLP_CLE_BUILTIN_GENDOCU ,SYN_CLE_BUILTIN_GENDOCU ,MAN_CLE_BUILTIN_GENDOCU ,TRUE)
+      CLETAB_BIF(CLE_BUILTIN_IDX_HTMLDOC ,"HTMLDOC" ,HLP_CLE_BUILTIN_HTMLDOC ,SYN_CLE_BUILTIN_HTMLDOC ,MAN_CLE_BUILTIN_HTMLDOC ,TRUE)
+      CLETAB_BIF(CLE_BUILTIN_IDX_GENPROP ,"GENPROP" ,HLP_CLE_BUILTIN_GENPROP ,SYN_CLE_BUILTIN_GENPROP ,MAN_CLE_BUILTIN_GENPROP ,TRUE)
+      CLETAB_BIF(CLE_BUILTIN_IDX_SETPROP ,"SETPROP" ,HLP_CLE_BUILTIN_SETPROP ,SYN_CLE_BUILTIN_SETPROP ,MAN_CLE_BUILTIN_SETPROP ,TRUE)
+      CLETAB_BIF(CLE_BUILTIN_IDX_CHGPROP ,"CHGPROP" ,HLP_CLE_BUILTIN_CHGPROP ,SYN_CLE_BUILTIN_CHGPROP ,MAN_CLE_BUILTIN_CHGPROP ,TRUE)
+      CLETAB_BIF(CLE_BUILTIN_IDX_DELPROP ,"DELPROP" ,HLP_CLE_BUILTIN_DELPROP ,SYN_CLE_BUILTIN_DELPROP ,MAN_CLE_BUILTIN_DELPROP ,TRUE)
+      CLETAB_BIF(CLE_BUILTIN_IDX_GETPROP ,"GETPROP" ,HLP_CLE_BUILTIN_GETPROP ,SYN_CLE_BUILTIN_GETPROP ,MAN_CLE_BUILTIN_GETPROP ,TRUE)
+      CLETAB_BIF(CLE_BUILTIN_IDX_SETOWNER,"SETOWNER",HLP_CLE_BUILTIN_SETOWNER,SYN_CLE_BUILTIN_SETOWNER,MAN_CLE_BUILTIN_SETOWNER,TRUE)
+      CLETAB_BIF(CLE_BUILTIN_IDX_GETOWNER,"GETOWNER",HLP_CLE_BUILTIN_GETOWNER,SYN_CLE_BUILTIN_GETOWNER,MAN_CLE_BUILTIN_GETOWNER,TRUE)
+      CLETAB_BIF(CLE_BUILTIN_IDX_SETENV  ,"SETENV"  ,HLP_CLE_BUILTIN_SETENV  ,SYN_CLE_BUILTIN_SETENV  ,MAN_CLE_BUILTIN_SETENV  ,TRUE)
+      CLETAB_BIF(CLE_BUILTIN_IDX_GETENV  ,"GETENV"  ,HLP_CLE_BUILTIN_GETENV  ,SYN_CLE_BUILTIN_GETENV  ,MAN_CLE_BUILTIN_GETENV  ,TRUE)
+      CLETAB_BIF(CLE_BUILTIN_IDX_DELENV  ,"DELENV"  ,HLP_CLE_BUILTIN_DELENV  ,SYN_CLE_BUILTIN_DELENV  ,MAN_CLE_BUILTIN_DELENV  ,TRUE)
+      CLETAB_BIF(CLE_BUILTIN_IDX_TRACE   ,"TRACE"   ,HLP_CLE_BUILTIN_TRACE   ,SYN_CLE_BUILTIN_TRACE   ,MAN_CLE_BUILTIN_TRACE   ,TRUE)
+      CLETAB_BIF(CLE_BUILTIN_IDX_CONFIG  ,"CONFIG"  ,HLP_CLE_BUILTIN_CONFIG  ,SYN_CLE_BUILTIN_CONFIG  ,MAN_CLE_BUILTIN_CONFIG  ,TRUE)
+      CLETAB_BIF(CLE_BUILTIN_IDX_GRAMMAR ,"GRAMMAR" ,HLP_CLE_BUILTIN_GRAMMAR ,SYN_CLE_BUILTIN_GRAMMAR ,MAN_CLE_BUILTIN_GRAMMAR ,TRUE)
+      CLETAB_BIF(CLE_BUILTIN_IDX_LEXEMES ,"LEXEMES" ,HLP_CLE_BUILTIN_LEXEMES ,SYN_CLE_BUILTIN_LEXEMES ,MAN_CLE_BUILTIN_LEXEMES ,TRUE)
+      CLETAB_BIF(CLE_BUILTIN_IDX_LICENSE ,"LICENSE" ,HLP_CLE_BUILTIN_LICENSE ,SYN_CLE_BUILTIN_LICENSE ,MAN_CLE_BUILTIN_LICENSE ,pcLic!=NULL)
+      CLETAB_BIF(CLE_BUILTIN_IDX_VERSION ,"VERSION" ,HLP_CLE_BUILTIN_VERSION ,SYN_CLE_BUILTIN_VERSION ,MAN_CLE_BUILTIN_VERSION ,pcVsn!=NULL)
+      CLETAB_BIF(CLE_BUILTIN_IDX_ABOUT   ,"ABOUT"   ,HLP_CLE_BUILTIN_ABOUT   ,SYN_CLE_BUILTIN_ABOUT   ,MAN_CLE_BUILTIN_ABOUT   ,pcAbo!=NULL)
+      CLETAB_BIF(CLE_BUILTIN_IDX_ERRORS  ,"ERRORS"  ,HLP_CLE_BUILTIN_ERRORS  ,SYN_CLE_BUILTIN_ERRORS  ,MAN_CLE_BUILTIN_ERRORS  ,TRUE)
       CLEBIF_CLS
    };
 
@@ -1464,7 +1488,7 @@ extern int siCleExecute(
    if (argv[1][0]=='-') argv[1]++;
 
 EVALUATE:
-   if (asBif[IDX_CLE_BUILTIN_LICENSE].isBif && strxcmp(isCas,argv[1],"LICENSE",0,0,FALSE)==0) {
+   if (asBif[CLE_BUILTIN_IDX_LICENSE].isBif && strxcmp(isCas,argv[1],"LICENSE",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
       if (pfErr==NULL) pfErr=pfStd;
       if (argc==2) {
@@ -1479,7 +1503,7 @@ EVALUATE:
       fprintf(pfErr,"Syntax for built-in function 'LICENSE' not valid\n");
       fprintf(pfErr,"%s %s LICENSE\n",pcDep,argv[0]);
       ERROR(CLERTC_CMD,NULL);
-   } else if (asBif[IDX_CLE_BUILTIN_VERSION].isBif && strxcmp(isCas,argv[1],"VERSION",0,0,FALSE)==0) {
+   } else if (asBif[CLE_BUILTIN_IDX_VERSION].isBif && strxcmp(isCas,argv[1],"VERSION",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
       if (pfErr==NULL) pfErr=pfStd;
       if (argc==2) {
@@ -1494,7 +1518,7 @@ EVALUATE:
       fprintf(pfErr,"Syntax for built-in function 'VERSION' not valid\n");
       fprintf(pfErr,"%s %s VERSION\n",pcDep,argv[0]);
       ERROR(CLERTC_CMD,NULL);
-   } else if (asBif[IDX_CLE_BUILTIN_ABOUT].isBif && strxcmp(isCas,argv[1],"ABOUT",0,0,FALSE)==0) {
+   } else if (asBif[CLE_BUILTIN_IDX_ABOUT].isBif && strxcmp(isCas,argv[1],"ABOUT",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
       if (pfErr==NULL) pfErr=pfStd;
       if (argc==2) {
@@ -1509,7 +1533,7 @@ EVALUATE:
       fprintf(pfErr,"Syntax for built-in function 'ABOUT' not valid\n");
       fprintf(pfErr,"%s %s ABOUT\n",pcDep,argv[0]);
       ERROR(CLERTC_CMD,NULL);
-   } else if (asBif[IDX_CLE_BUILTIN_LEXEMES].isBif && (strxcmp(isCas,argv[1],"LEXEMES",0,0,FALSE)==0 || strxcmp(isCas,argv[1],"LEXEM",0,0,FALSE)==0)) {
+   } else if (asBif[CLE_BUILTIN_IDX_LEXEMES].isBif && (strxcmp(isCas,argv[1],"LEXEMES",0,0,FALSE)==0 || strxcmp(isCas,argv[1],"LEXEM",0,0,FALSE)==0)) {
       if (pfOut==NULL) pfOut=pfStd;
       if (pfErr==NULL) pfErr=pfStd;
       if (argc==2) {
@@ -1522,7 +1546,7 @@ EVALUATE:
       fprintf(pfErr,"Syntax for built-in function 'LEXEMES' not valid\n");
       fprintf(pfErr,"%s %s LEXEMES\n",pcDep,argv[0]);
       ERROR(CLERTC_CMD,NULL);
-   } else if (asBif[IDX_CLE_BUILTIN_GRAMMAR].isBif && strxcmp(isCas,argv[1],"GRAMMAR",0,0,FALSE)==0) {
+   } else if (asBif[CLE_BUILTIN_IDX_GRAMMAR].isBif && strxcmp(isCas,argv[1],"GRAMMAR",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
       if (pfErr==NULL) pfErr=pfStd;
       if (argc==2) {
@@ -1535,7 +1559,7 @@ EVALUATE:
       fprintf(pfErr,"Syntax for built-in function 'GRAMMAR' not valid\n");
       fprintf(pfErr,"%s %s GRAMMAR\n",pcDep,argv[0]);
       ERROR(CLERTC_CMD,NULL);
-   } else if (asBif[IDX_CLE_BUILTIN_ERRORS].isBif && strxcmp(isCas,argv[1],"ERRORS",0,0,FALSE)==0) {
+   } else if (asBif[CLE_BUILTIN_IDX_ERRORS].isBif && strxcmp(isCas,argv[1],"ERRORS",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
       if (pfErr==NULL) pfErr=pfStd;
       if (argc==2) {
@@ -1561,7 +1585,7 @@ EVALUATE:
       fprintf(pfErr,"Syntax for built-in function 'ERRORS' not valid\n");
       fprintf(pfErr,"%s %s ERRORS\n",pcDep,argv[0]);
       ERROR(CLERTC_CMD,NULL);
-   } else if (asBif[IDX_CLE_BUILTIN_SYNTAX].isBif && strxcmp(isCas,argv[1],"SYNTAX",0,0,FALSE)==0) {
+   } else if (asBif[CLE_BUILTIN_IDX_SYNTAX].isBif && strxcmp(isCas,argv[1],"SYNTAX",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
       if (pfErr==NULL) pfErr=pfStd;
       if (argc==2) {
@@ -1651,7 +1675,7 @@ EVALUATE:
          }
       }
       ERROR(CLERTC_CMD,NULL);
-   } else if (asBif[IDX_CLE_BUILTIN_HELP].isBif && strxcmp(isCas,argv[1],"HELP",0,0,FALSE)==0) {
+   } else if (asBif[CLE_BUILTIN_IDX_HELP].isBif && strxcmp(isCas,argv[1],"HELP",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
       if (pfErr==NULL) pfErr=pfStd;
       if (argc==2) {
@@ -1763,7 +1787,7 @@ EVALUATE:
          }
       }
       ERROR(CLERTC_CMD,NULL);
-   } else if (asBif[IDX_CLE_BUILTIN_MANPAGE].isBif && strxcmp(isCas,argv[1],"MANPAGE",0,0,FALSE)==0) {
+   } else if (asBif[CLE_BUILTIN_IDX_MANPAGE].isBif && strxcmp(isCas,argv[1],"MANPAGE",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
       if (pfErr==NULL) pfErr=pfStd;
       if (argc==2) {
@@ -1915,7 +1939,7 @@ EVALUATE:
       fprintf(pfErr,"%s %s MANPAGE function\n",pcDep,argv[0]);
       fprintf(pfErr,"%s %s MANPAGE\n",pcDep,argv[0]);
       ERROR(CLERTC_CMD,NULL);
-   } else if (asBif[IDX_CLE_BUILTIN_GENDOCU].isBif && strxcmp(isCas,argv[1],"GENDOCU",0,0,FALSE)==0) {
+   } else if (asBif[CLE_BUILTIN_IDX_GENDOCU].isBif && strxcmp(isCas,argv[1],"GENDOCU",0,0,FALSE)==0) {
       const char*                pcCmd=NULL;
       const char*                pcSgn=NULL;
       int                        isNbr=TRUE;
@@ -2052,7 +2076,7 @@ EVALUATE:
       }
       efprintf(pfErr,"%s %s GENDOCU filename [NONBR][SHORT]\n",pcDep,argv[0]);
       ERROR(CLERTC_CMD,NULL);
-   } else if (asBif[IDX_CLE_BUILTIN_HTMLDOC].isBif && strxcmp(isCas,argv[1],"HTMLDOC",0,0,FALSE)==0) {
+   } else if (asBif[CLE_BUILTIN_IDX_HTMLDOC].isBif && strxcmp(isCas,argv[1],"HTMLDOC",0,0,FALSE)==0) {
       int              isPat=FALSE;
       const char*      pcPar=".";
       int              isNbr=FALSE;
@@ -2132,7 +2156,7 @@ EVALUATE:
          fprintf(pfErr,"There is no service provider function (opnHtmlDoc, prnHtmlDoc or clsHtmlDoc) available for HTML generation\n");
          ERROR(CLERTC_FAT,pcPat);
       }
-   } else if (asBif[IDX_CLE_BUILTIN_GENPROP].isBif && strxcmp(isCas,argv[1],"GENPROP",0,0,FALSE)==0) {
+   } else if (asBif[CLE_BUILTIN_IDX_GENPROP].isBif && strxcmp(isCas,argv[1],"GENPROP",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
       if (pfErr==NULL) pfErr=pfStd;
       if (argc==3) {
@@ -2201,7 +2225,7 @@ EVALUATE:
       }
       fprintf(pfErr,"%s %s GENPROP filename\n",pcDep,argv[0]);
       ERROR(CLERTC_CMD,NULL);
-   } else if (asBif[IDX_CLE_BUILTIN_SETPROP].isBif && strxcmp(isCas,argv[1],"SETPROP",0,0,FALSE)==0) {
+   } else if (asBif[CLE_BUILTIN_IDX_SETPROP].isBif && strxcmp(isCas,argv[1],"SETPROP",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
       if (pfErr==NULL) pfErr=pfStd;
       if (argc==3) {
@@ -2258,7 +2282,7 @@ EVALUATE:
       }
       fprintf(pfErr,"%s %s SETPROP filename\n",pcDep,argv[0]);
       ERROR(CLERTC_CMD,NULL);
-   } else if ((asBif[IDX_CLE_BUILTIN_CHGPROP].isBif && strxcmp(isCas,argv[1],"CHGPROP",0,0,FALSE)==0) || (pcDef!=NULL && strxcmp(isCas,pcDef,"flam",0,0,FALSE)==0 && strxcmp(isCas,argv[1],"DEFAULTS",0,0,FALSE)==0)) {
+   } else if ((asBif[CLE_BUILTIN_IDX_CHGPROP].isBif && strxcmp(isCas,argv[1],"CHGPROP",0,0,FALSE)==0) || (pcDef!=NULL && strxcmp(isCas,pcDef,"flam",0,0,FALSE)==0 && strxcmp(isCas,argv[1],"DEFAULTS",0,0,FALSE)==0)) {
       if (pfOut==NULL) pfOut=pfStd;
       if (pfErr==NULL) pfErr=pfStd;
       if (argc>=3) {
@@ -2327,7 +2351,7 @@ EVALUATE:
          }
       }
       ERROR(CLERTC_CMD,NULL);
-   } else if (asBif[IDX_CLE_BUILTIN_DELPROP].isBif && strxcmp(isCas,argv[1],"DELPROP",0,0,FALSE)==0) {
+   } else if (asBif[CLE_BUILTIN_IDX_DELPROP].isBif && strxcmp(isCas,argv[1],"DELPROP",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
       if (pfErr==NULL) pfErr=pfStd;
       if (argc==2) {
@@ -2367,7 +2391,7 @@ EVALUATE:
          fprintf(pfOut,"Delete configuration keyword '%s' was successful\n",pcCnf);
          ERROR(CLERTC_OK,NULL);
       }
-   } else if ((asBif[IDX_CLE_BUILTIN_GETPROP].isBif && strxcmp(isCas,argv[1],"GETPROP",0,0,FALSE)==0) || (pcDef!=NULL && strxcmp(isCas,pcDef,"flam",0,0,FALSE)==0 && strxcmp(isCas,argv[1],"LIST",0,0,FALSE)==0)) {
+   } else if ((asBif[CLE_BUILTIN_IDX_GETPROP].isBif && strxcmp(isCas,argv[1],"GETPROP",0,0,FALSE)==0) || (pcDef!=NULL && strxcmp(isCas,pcDef,"flam",0,0,FALSE)==0 && strxcmp(isCas,argv[1],"LIST",0,0,FALSE)==0)) {
       if (pfOut==NULL) pfOut=pfStd;
       if (pfErr==NULL) pfErr=pfStd;
       if (argc==2) {
@@ -2469,7 +2493,7 @@ EVALUATE:
       }
       fprintf(pfErr,"%s %s GETPROP\n",pcDep,argv[0]);
       ERROR(CLERTC_CMD,NULL);
-   } else if (asBif[IDX_CLE_BUILTIN_SETOWNER].isBif && strxcmp(isCas,argv[1],"SETOWNER",0,0,FALSE)==0) {
+   } else if (asBif[CLE_BUILTIN_IDX_SETOWNER].isBif && strxcmp(isCas,argv[1],"SETOWNER",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
       if (pfErr==NULL) pfErr=pfStd;
       if (argc==3) {
@@ -2487,7 +2511,7 @@ EVALUATE:
       fprintf(pfErr,"Syntax for built-in function 'SETOWNER' not valid\n");
       fprintf(pfErr,"%s %s SETOWNER name\n",pcDep,argv[0]);
       ERROR(CLERTC_CMD,NULL);
-   } else if (asBif[IDX_CLE_BUILTIN_GETOWNER].isBif && strxcmp(isCas,argv[1],"GETOWNER",0,0,FALSE)==0) {
+   } else if (asBif[CLE_BUILTIN_IDX_GETOWNER].isBif && strxcmp(isCas,argv[1],"GETOWNER",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
       if (pfErr==NULL) pfErr=pfStd;
       if (argc==2) {
@@ -2497,7 +2521,7 @@ EVALUATE:
       fprintf(pfErr,"Syntax for built-in function 'GETOWNER' not valid\n");
       fprintf(pfErr,"%s %s GETOWNER\n",pcDep,argv[0]);
       ERROR(CLERTC_CMD,NULL);
-   } else if (asBif[IDX_CLE_BUILTIN_SETENV].isBif && strxcmp(isCas,argv[1],"SETENV",0,0,FALSE)==0) {
+   } else if (asBif[CLE_BUILTIN_IDX_SETENV].isBif && strxcmp(isCas,argv[1],"SETENV",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
       if (pfErr==NULL) pfErr=pfStd;
       if (argc==3) {
@@ -2525,7 +2549,7 @@ EVALUATE:
       fprintf(pfErr,"Syntax for built-in function 'SETENV' not valid\n");
       fprintf(pfErr,"%s %s SETENV variable=value\n",pcDep,argv[0]);
       ERROR(CLERTC_CMD,NULL);
-   } else if (asBif[IDX_CLE_BUILTIN_GETENV].isBif && strxcmp(isCas,argv[1],"GETENV",0,0,FALSE)==0) {
+   } else if (asBif[CLE_BUILTIN_IDX_GETENV].isBif && strxcmp(isCas,argv[1],"GETENV",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
       if (pfErr==NULL) pfErr=pfStd;
       if (argc==2) {
@@ -2541,7 +2565,7 @@ EVALUATE:
       fprintf(pfErr,"Syntax for built-in function 'GETENV' not valid\n");
       fprintf(pfErr,"%s %s GETENV\n",pcDep,argv[0]);
       ERROR(CLERTC_CMD,NULL);
-   } else if (asBif[IDX_CLE_BUILTIN_DELENV].isBif && strxcmp(isCas,argv[1],"DELENV",0,0,FALSE)==0) {
+   } else if (asBif[CLE_BUILTIN_IDX_DELENV].isBif && strxcmp(isCas,argv[1],"DELENV",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
       if (pfErr==NULL) pfErr=pfStd;
       if (argc==3) {
@@ -2559,7 +2583,7 @@ EVALUATE:
       fprintf(pfErr,"Syntax for built-in function 'DELENV' not valid\n");
       fprintf(pfErr,"%s %s DELENV variable\n",pcDep,argv[0]);
       ERROR(CLERTC_CMD,NULL);
-   } else if (asBif[IDX_CLE_BUILTIN_TRACE].isBif && strxcmp(isCas,argv[1],"TRACE",0,0,FALSE)==0) {
+   } else if (asBif[CLE_BUILTIN_IDX_TRACE].isBif && strxcmp(isCas,argv[1],"TRACE",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
       if (pfErr==NULL) pfErr=pfStd;
       if (argc==3) {
@@ -2614,7 +2638,7 @@ EVALUATE:
       fprintf(pfErr,"%s %s TRACE ON/OFF\n",pcDep,argv[0]);
       fprintf(pfErr,"%s %s TRACE FILE=filenam\n",pcDep,argv[0]);
       ERROR(CLERTC_CMD,NULL);
-   } else if (asBif[IDX_CLE_BUILTIN_CONFIG].isBif && strxcmp(isCas,argv[1],"CONFIG",0,0,FALSE)==0) {
+   } else if (asBif[CLE_BUILTIN_IDX_CONFIG].isBif && strxcmp(isCas,argv[1],"CONFIG",0,0,FALSE)==0) {
       if (pfOut==NULL) pfOut=pfStd;
       if (pfErr==NULL) pfErr=pfStd;
       if (argc==2) {
