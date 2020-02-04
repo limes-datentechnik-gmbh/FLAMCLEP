@@ -576,7 +576,9 @@ typedef struct ClpArgument {
  *  The pointers are set by CLP and valid until CLP is closed.
  */
 typedef struct ClpError {
-   /** Points to the pointer of a zero-terminated string containing the current error message */
+/**
+ * @brief Points to the pointer of a zero-terminated string containing the current error message\n
+ */
    const char**                  ppMsg;
    /** Points to the pointer of a zero-terminated string containing the current source.
     * The initial source can be defined for command line or property file parsing.

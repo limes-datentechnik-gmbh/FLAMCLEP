@@ -1,5 +1,5 @@
 /**
- * @file
+ * @file CLEPUTL.h
  * @brief  Declaration of utility functions for CLP/CLE in ANSI C
  * @author limes datentechnik gmbh
  * @date   06.03.2015
@@ -269,12 +269,12 @@
  *        #include "FL5CON.h"
  *        #include "FL5ARG.h"
  *
- *        CLETAB_OPN(asCmdTab) = {
+ *        CLECMD_OPN(asCmdTab) = {
  *           CLETAB_CMD("CONV",asClpConvPar,&stClpConvPar,&stFlcConvPar,NULL,siIniConv,siMapConv2Conv,siFluc,siFinConv,1,MAN_FLCL_CONV,"Simple data conversion")
  *           CLETAB_CMD("XCBV",asClpXcnvPar,&stClpXcnvPar,&stFlcConvPar,NULL,siIniXcnv,siMapXcnv2Conv,siFluc,siFinConv,0,MAN_FLCL_XCNV,"Complex data conversion")
  *           CLETAB_CMD("ICNV",asClpIcnvPar,&stClpIcnvPar,&stFlcConvPar,NULL,siIniIcnv,siMapIcnv2Conv,siFluc,siFinConv,1,MAN_FLCL_ICNV,"Character conversion with libiconv")
  *           CLETAB_CMD("INFO",asClpInfoPar,&stClpInfoPar,&stFlcInfoPar,NULL,siIniInfo,siMapInfo2Info,siInfo,siFinInfo,1,MAN_FLCL_INFO,"Provide information")
- *           CLETAB_CLS
+ *           CLECMD_CLS
  *        };
  *
  *        CLEOTH_OPN(asOthTab) = {
@@ -816,6 +816,9 @@
 #define SAFE_FREE(x) do { if ((x) != NULL) {free((void*)(x)); (x)=NULL;} } while(0)
 
 typedef struct EnVarList {
+/**
+ * @brief Environment variable list\n
+ */
    char*                pcName;
    char*                pcValue;
    struct EnVarList*    psNext;
@@ -1471,6 +1474,9 @@ extern int resetEnvars(TsEnVarList** ppList);
 /**********************************************************************/
 
 typedef struct DiaChr {
+/**
+ * @brief Reset list structure of environment variables\n
+ */
    char              exc[4];
    char              hsh[4];
    char              dlr[4];

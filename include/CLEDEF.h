@@ -97,7 +97,7 @@
  * @{
  */
 /**
- * @brief CLE Docu table structure
+ * @brief CLE Structure for documentation table
  *
  * This structure is used to build a table with the macros #CLEDOC_OPN, #CLETAB_DOC and #CLEDOC_CLS.
  * This table must be provided to the function #siCleExecute for documentation generation using the
@@ -373,13 +373,11 @@ typedef const char* (TfMsg)(const int siRsn);
  * @{
  */
 /**
- * \struct TsCleCommand
+ * @brief CLE structure for command table
  *
- * @brief This structure is used to define a table of commands\n
- *
- * To simplify the definition of command tables it is recommended to use the CLPTAB macros.
- *
- * Members of this structure are:
+ * The command table defines all the commands which could be executed by CLE.
+ * To simplify the definition of command tables it is recommended to use the
+ * CLPTAB macros.
  */
 typedef struct CleCommand {
    const char*                   pcKyw;/**< @brief Pointer to the key word for this command (:alpha:[:alnum:|'_']*). */
@@ -400,14 +398,12 @@ typedef struct CleCommand {
 } TsCleCommand;
 /**********************************************************************/
 
-//TODO: rename CLECMD_OPN/CLS
-
 /**
  * @brief Starts a table with command definitions
  *
  * @param[in] name Name of this table.\n
  */
-#define CLETAB_OPN(name)         TsCleCommand name[]
+#define CLECMD_OPN(name)         TsCleCommand name[]
 
 /**
  * @brief Defines a command with the command line keyword *kyw*.
@@ -435,7 +431,7 @@ typedef struct CleCommand {
 /**
  * @brief Ends a table with constant definitions
  */
-#define CLETAB_CLS                                                    { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0   , NULL, NULL}
+#define CLECMD_CLS                                                    { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0   , NULL, NULL}
 /** @}*/
 
 /**
@@ -445,10 +441,9 @@ typedef struct CleCommand {
  */
 
 /**
- * \struct TsCleOtherClp
- * @brief This structure is used to define a table of CLP strings add as appendix to the generated documentation\n
+ * @brief CLE table structure for other CLP strings
  *
- * Its members are:
+ * This structure is used to define a table of CLP strings add as appendix to the generated documentation.
  */
 typedef struct CleOtherClp {
    const char*                   pcRot;/**< @brief Pointer to the program/root key word for this string (:alpha:[:alnum:|'_']*). */
