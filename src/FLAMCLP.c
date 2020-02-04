@@ -1,12 +1,13 @@
 /**
  * @file   FLAMCLP.c
  * @brief  LIMES Command Line Parser in ANSI-C
- *
- * LIMES Command Line Executor (CLE) in ANSI-C
  * @author limes datentechnik gmbh
  * @date  06.03.2015
  * @copyright (c) 2015 limes datentechnik gmbh
  * www.flam.de
+ *
+ * LIMES Command Line Executor (CLE) in ANSI-C
+ *
  * This software is provided 'as-is', without any express or implied
  * warranty. In no event will the authors be held liable for any damages
  * arising from the use of this software.
@@ -179,6 +180,7 @@
 #define CLP_VSN_REVISION       126
 
 /* Definition der Konstanten ******************************************/
+
 
 #define CLPMAX_TABCNT            512
 #define CLPMAX_HDEPTH            128

@@ -2,8 +2,6 @@
 /**
  * @file CLPDEF.h
  * @brief Definitions for <b>C</b>ommand <b>L</b>ine <b>P</b>arsing
- *
- * LIMES Command Line Parser (FLAMCLP) in ANSI-C
  * @author limes datentechnik gmbh
  * @date 27.12.2019
  * @copyright (c) 2019 limes datentechnik gmbh
@@ -29,6 +27,7 @@
  *
  **********************************************************************/
 
+/*! @cond PRIVATE */
 #ifdef __cplusplus
    extern "C" {
 #endif
@@ -58,10 +57,6 @@
 #  define  __BUILD__          "UNKNOWN"
 #endif
 
-/**
- * Please use this defines for the data types in the tables to be ensure
- * the correct size for the parser.
- */
 #ifndef INC_TYPDEF_H
 #  include <inttypes.h>
 #  ifndef I08
@@ -99,16 +94,17 @@
 #  endif
 #endif
 
+/*! @endcond */
 /**********************************************************************/
 
 /**
- * Return code for a successful parsing
+ * @brief Return code for a successful parsing
  */
 #define CLP_OK                   0
 
 /**
-* Error codes for command line parsing
-*/
+ * Error codes for command line parsing
+ */
 /** CLPERR_LEX Lexical error (determined by scanner) */
 #define CLPERR_LEX               -1
 /** CLPERR_SYN Syntax error (determined by parser) */
@@ -133,8 +129,8 @@
 #define CLPERR_AUT               -11
 
 /**
-* Data types of parameter in the argument table
-*/
+ * @brief Data types of parameter in the argument table
+ */
 /** CLPTYP_NON    No type - Mark the end of an argument table */
 #define CLPTYP_NON               0
 /** CLPTYP_SWITCH Switch (single keyword representing a number (OID)) */
@@ -153,7 +149,7 @@
 #define CLPTYP_XALIAS           -1
 
 /**
- * Method used to close
+ * @brief Method used to close
  */
 /** CLPCLS_MTD_ALL Complete close, free anything including the dynamic allocated buffers in the CLP structure*/
 #define CLPCLS_MTD_ALL           1
@@ -163,7 +159,7 @@
 #define CLPCLS_MTD_EXC           2
 
 /**
- * Method for property printing
+ * @brief Method for property printing
  */
 /** CLPPRO_MTD_ALL All properties are printed (manual pages added as comment) */
 #define CLPPRO_MTD_ALL           0
@@ -175,8 +171,8 @@
 #define CLPPRO_MTD_DOC           3
 
 /**
-* Flags for command line parsing
-*/
+ * @brief Flags for command line parsing
+ */
 /** CLPFLG_NON To define no special flags */
 #define CLPFLG_NON               0x00000000U
 
@@ -274,7 +270,7 @@
 #define CLPFLG_LOW               0x80000000U
 
 /**
- *  Definition of CLPFLG macros
+ * @brief Definition of CLPFLG macros
  */
 #define CLPISF_ALI(flg)          ((flg)&CLPFLG_ALI)
 #define CLPISF_CON(flg)          ((flg)&CLPFLG_CON)
@@ -323,9 +319,13 @@
 #define CLPSRC_PAF               ":parameter file:"
 #define CLPSRC_SRF               ":string file:"
 
+
+// group SYMTABWLK Symbol table work
+
+
 /**
-* Symbol table walk operations
-*/
+ * @brief Symbol table walk operations
+ */
 /** CLPSYM_NON No operation done */
 #define CLPSYM_NON               0x00000000U
 /** CLPSYM_ROOT Go to symbol table root */
@@ -356,7 +356,7 @@
 #define CLPSYM_TLN               0x00020000U
 
 /**
- *  Definition of CLPSYM macros
+ * @brief Definition of CLPSYM macros
  */
 #define CLPISS_ROOT(flg)         ((flg)&CLPSYM_ROOT)
 #define CLPISS_OLD(flg)          ((flg)&CLPSYM_OLD)
@@ -414,6 +414,8 @@ typedef struct ClpSymUpd {
    const char*                   pcPro;
 }TsClpSymUpd;
 
+//end SYMTABWLK
+
 /**
  * @brief Defines a table of arguments
  *
@@ -460,7 +462,7 @@ typedef struct ClpArgument {
     *  This value can be overrided by corresponding environment variable or property definition*/
    const char*                   pcDft;
    /** Pointer to a zero-terminated string for a detailed description of this argument (in ASCIIDOC format, content
-    *  behind .DESCRIPTION, mainly simply some paragraphs). Can be a NULL pointer or empty string for constant definition
+    *  behind. DESCRIPTION, mainly simply some paragraphs). Can be a NULL pointer or empty string for constant definition
     *  or simple arguments. It is recommended to use a header file with a define for this long string (required for objects
     *  and overlays). All occurrences of "&{OWN}" or "&{PGM}" (that all their case variations) are replaced with the current
     *  owner or program name, respectively. All other content between "&{" and "}" is ignored (comment).
@@ -590,21 +592,29 @@ typedef struct ClpError {
    const int*                    piCol;
 }TsClpError;
 
+
+/**********************************************************************/
 /**
- * Type definition for string to file call back function
+ * @defgroup CLP_FUNCPTR CLP Function Pointer (call backs)
+ * @brief Function prototype definitions for call backs used by CLP
+ * @{
+ */
+
+/**
+ * @brief Type definition for string to file call back function
  *
  * Read a file using the specified filename and reads the whole content
  * into the supplied buffer. The buffer is reallocated and buffer size
  * updated, if necessary.
  *
- * @param[in]     pvGbl Pointer to to the global handle as black box given with CleExecute
- * @param[in]     pvHdl Pointer to a handle given for this callback
- * @param[in]     pcFil File name to read
- * @param[inout]  ppBuf Pointer to a buffer pointer for reallocation
- * @param[inout]  piBuf Pointer to the buffer size (updated after reallocation)
- * @param[out]    pcMsg Pointer to a buffer for the error message
- * @param[in]     siMsg Size of the message buffer (should be 1024)
- * @return              bytes read or negative value if error
+ * @param  [in]     pvGbl Pointer to to the global handle as black box given with CleExecute
+ * @param  [in]     pvHdl Pointer to a handle given for this callback
+ * @param  [in]     pcFil File name to read
+ * @param  [inout]  ppBuf Pointer to a buffer pointer for reallocation
+ * @param  [inout]  piBuf Pointer to the buffer size (updated after reallocation)
+ * @param  [out]    pcMsg Pointer to a buffer for the error message
+ * @param  [in]     siMsg Size of the message buffer (should be 1024)
+ * @return bytes read or negative value if error
  */
 typedef int (TfF2S)(
    void*                         pvGbl,
@@ -616,15 +626,15 @@ typedef int (TfF2S)(
    const int                     siMsg);
 
 /**
- * Type definition for resource access check
+ * @brief Type definition for resource access check
  *
  * The function is called with the complete path and the standard lexeme as value
  * in front of each wrte of data to the CLP structure.
  *
- * @param[in]     pvGbl Pointer to to the global handle as black box given with CleExecute
- * @param[in]     pvHdl Pointer to a handle given for this callback
- * @param[in]     pcVal Path=Value as resource
- * @return        0 if write allowed else a authorization error
+ * @param  [in]     pvGbl Pointer to to the global handle as black box given with CleExecute
+ * @param  [in]     pvHdl Pointer to a handle given for this callback
+ * @param  [in]     pcVal Path=Value as resource
+ * @return 0 if write allowed else a authorization error
  */
 typedef int (TfSaf) (
    void*                         pvGbl,
@@ -632,7 +642,7 @@ typedef int (TfSaf) (
    const char*                   pcVal);
 
 /**
- * Function 'prnHtmlDoc' of library 'libhtmldoc' called if built-in function HTMLDOC used
+ * @brief Function 'prnHtmlDoc' of library 'libhtmldoc' called if built-in function HTMLDOC used
  *
  * The built-in function HTMLDOC use a service provider interface to create the documentation
  * using a callback function for each page/chapter. This is this callback function. This interface
@@ -647,21 +657,31 @@ typedef int (TfSaf) (
  * provided for the dictionary, the index terms for the index and other information can be used
  * to build a very powerful HTML documentation.
  *
- * @param pvHdl   Handle for the print callback function (e.G. from opnHtmlDoc)
- * @param siLev   The hierarchical level for this page/chapter
- * @param pcHdl   The headline of the current chapter
- * @param pcPat   The path for the corresponding parameter (NULL if the page not inside a command or other CLP string)
- * @param pcFil   Unique hierarchical string (can be used as file name (no extension))
- * @param pcOrg   The pointer to the original manual page (can be used to determine duplicates and produce links)
- * @param pcPge   The prepared ASCIIDOC page for printing (must be converted to HTML)
- * @return Return code (0 is OK else error)
+ * @param  [inout] pvHdl   Handle for the print callback function (e.G. from opnHtmlDoc)
+ * @param  [in]    siLev   The hierarchical level for this page/chapter
+ * @param  [in]    pcHdl   The headline of the current chapter
+ * @param  [in]    pcPat   The path for the corresponding parameter (NULL if the page not inside a command or other CLP string)
+ * @param  [in]    pcFil   Unique hierarchical string (can be used as file name (no extension))
+ * @param  [in]    pcOrg   The pointer to the original manual page (can be used to determine duplicates and produce links)
+ * @param  [in]    pcPge   The prepared ASCIIDOC page for printing (must be converted to HTML)
+ * @return  Return code (0 is OK else error)
  */
-typedef int (TfClpPrintPage)(void* pvHdl, const int siLev, const char* pcHdl, const char* pcPat, const char* pcFil, const char* pcOrg, const char* pcPge);
+typedef int (TfClpPrintPage)(
+   void*                         pvHdl,
+   const int                     siLev,
+   const char*                   pcHdl,
+   const char*                   pcPat,
+   const char*                   pcFil,
+   const char*                   pcOrg,
+   const char*                   pcPge);
 
+/** @}*/
 /**********************************************************************/
 
+/*! @cond PRIVATE */
 #endif // INC_CLPDEF_H
 
 #ifdef __cplusplus
 }
 #endif
+/*! @endcond */

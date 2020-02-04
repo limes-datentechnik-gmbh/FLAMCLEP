@@ -2,8 +2,6 @@
 /**
  * @file CLEMSG.h
  * @brief messages for <b>C</b>ommand <b>L</b>ine <b>E</b>xecution
- *
- * LIMES Command Line Executor (CLE) in ANSI-C
  * @author limes datentechnik gmbh
  * @date 05.09.2013\n
  * @copyright (c) 2013 limes datentechnik gmbh
@@ -27,7 +25,16 @@
  * If you need professional services or support for this library please
  * contact support@flam.de.
  *
-***********************************************************************/
+ ***********************************************************************/
+
+/*! @cond PRIVATE */
+#ifdef __cplusplus
+   extern "C" {
+#endif
+
+#ifndef INC_CLEMSG_H
+#define INC_CLEMSG_H
+/*! @endcond */
 
 #define IDX_CLE_BUILTIN_SYNTAX      0
 #define IDX_CLE_BUILTIN_HELP        1
@@ -136,3 +143,10 @@ static const char* HLP_CLE_PROPFIL =""
 "#                                                                    #\n"
 "#------------------------------------------------------------------- #\n\n";
 
+/*! @cond PRIVATE */
+#endif /*INC_CLEMSG_H*/
+
+#ifdef __cplusplus
+}
+#endif
+/*! @endcond */

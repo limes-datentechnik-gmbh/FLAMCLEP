@@ -1,12 +1,9 @@
-/**********************************************************************/
-/**
+/**********************************************************************
  * @file FLAMCLP.h
  * @brief Definitions for <b>C</b>ommand <b>L</b>ine <b>P</b>arsing
  * @author limes datentechnik gmbh
  * @date 26.01.2017
  * @copyright (c) 2017 limes datentechnik gmbh
- *
- *@mainpage LIMES Command Line Parser (FLAMCLP) in ANSI-C
  *
  * This software is provided 'as-is', without any express or implied
  * warranty. In no event will the authors be held liable for any damages
@@ -27,436 +24,22 @@
  * If you need professional services or support for this library please
  * contact support@flam.de.
  *
- * @section DESC CLP-Description
- * The command line parser (FLAMCLP) is a complier which reads a command
- * string using the lexems and grammar below to fill a structure with the
- * corresponding values given in this line. The FLAMCLP works only in memory
- * (except parameter files are used for objects, overlays, arrays, arguments or
- * string files) and the syntax and semantic will be defined by a tree of
- * tables. Such a table can represent an object (struct) or an overlay (union).
- * Each argument in such a table can be a object or overlay again in using
- * another table for this type. Basic types are switches, numbers, floats or
- * strings (time and date are implemented as number in seconds from 1970).
- * With each argument you can define the required minimum and possible maximum
- * amount of occurrences. This means that each argument can be an array and
- * arrays are implemented as simplified notations. Arrays and strings can be
- * a fixed length part of the data structure or dynamic allocated by CLP. In
- * the last case, the fix part of the data structure is a pointer to the dynamic
- * allocated data area (use '->' instead of '.'). All dynamic allocated data
- * blocks are managed by CLP. If you close the CLP you can define if anything
- * including the dynamic parts of the CLP structure is closed. Or anything is
- * freed except the dynamic blocks allocated for the CLP structure. In this case
- * you can keep the CLP handle open, to free the remaining buffers later or
- * you can close the CLP handle and the dynamic allocated memory of the CLP
- * structure must be free by the application.
- *
- * For object, overlays and arrays you can provide parameter files (OBJECT='filename')
- * containing the parameter string in the corresponding syntax for these object,
- * overlay or array (KYW[='filename']). With '=>' you can also use parameter files
- * for normal arguments. The operator '=>' is also permitted for objects, overlays
- * and arrays.
- *
- * To read such a parameter file as string into the memory a handle and a
- * callback function can be provided. If the parameter NULL a default
- * implementation is used. If you provide your own function you can include
- * for example URL support, remote access, character conversion aso. The
- * handle is given to the callback function. The default implementation don't
- * need any handle, but you can use it for example for the character conversion
- * module, a remote session or something else.
- *
- * To handle passwords and passphrase more secure, you can provide a filename
- * as string (PASSWD=f'filename'), which contains the corresponding string
- * value. This prevents for example passwords from logging.
- *
- * An optional callback function with handle for additional authorization
- * checking can be provided. The resource will be each path written to the
- * CLP structure. If the pointer to the callback function is NULL then the
- * function is not called. This feature is mainly for RACF on z/OS.
- *
- * To support critical punctuation characters on EBCDIC systems a complex
- * support was implemented to make the whole source independent of the
- * used EBCDIC code page. The code page to use must be defined in the
- * environment variable LANG or just for CLP strings with the environment
- * variable CLP_STRING_CCSID or inside the CLP string ("&nnnn;"). Last but
- * not least single character escaping ("&xxx;") is supported as well.
- *
- * In the command string (everywhere, where the scanner start to read a lexem)
- * each value in angle brackets will be transparently replaced by the corresponding
- * environment variable, except in strings.
- *
- * The FLAMCLP uses these tables as symbol tables to define the syntax and
- * semantic of a command. The same table provides the offset used to
- * store the parsed values. This offset occurs in a real data structure
- * and with CLPMAC.h you can use the same macro to build the tables and
- * corresponding structures and unions. This is not mandatory, but we
- * recommend to use the macro in order to be in sync.
- *
- * The FLAMCLP provides also all internally calculated values in this data
- * structure. The mechanism is called linking. Thus you have to use the
- * same keyword for linking eventually with a calculated value of that
- * argument. For example, if you define an array of numbers then you can
- * define a link to determine the amount of entered numbers or for an
- * overlay you can link the corresponding object identifier to determine
- * which of the arguments are chosen by the user. If You define overlays of
- * overlays an additional dimension for each level is used. In this case
- * you must define an array for this link and You get the child (lnk[0])
- * before the parent (lnk[1]) written in the CLP structure. If the OID is
- * 0, then it will not be add to the array. This is useful if the OIDs of
- * the children are already unique.
- *
- * You can also get the string length and other features. The kind of link
- * is defined over the flags field. There are a lot of other flags supported
- * beside links, for example the PWD flag, which tells CLP that this value
- * are only clear in the data structure but always obfuscated in logs, traces
- * and other printouts to keep the value secret. Another flag can be used
- * for numbers. With CLPFLG_DEF you can activate a extension of the syntax.
- * If this flag used for a number then the object identifier is assigned as
- * value if no assignment done for this number. This means that with this extended
- * syntax you can define a switch, which you can assign a number. This is
- * useful for example to activate a feature with a default value by using
- * only the key word and the user can change the default value by an optional
- * assignment of another value.
- *
- * The FLAMCLP also supports aliases. An alias points to another argument
- * and is only an additional keyword that can be used. The maximum length
- * of a keyword or alias cannot exceed 63 character.
- *
- * To be compatible with certain shells the features below are implemented.
- *
- * * Strings can be enclosed with '' or "" or ``
- * * Strings can also be defined without quotes
- * * Explicit keywords can start with "-" or "--" in front of the qualifier
- * * If it is unique then parenthesis and the dot can be omitted for objects and overlays
- * * On EBCDIC systems we use a code page specific interpretation of punctuation characters
- *
- * Besides arguments you can also have a constant definition for
- * selections. A feature is useful in order to define keywords for values
- * (numbers, floats and strings). With help of the selection flag you can
- * enforce the pure acceptance of predefined keywords.
- *
- * Additional hard coded key words (see lexems) can be used in constant
- * expressions to build values and strings (value=64KiB).
- *
- * For each argument or constant you must define a keyword and a short
- * help message. If you provide a detailed description, then this argument
- * becomes an own chapter in the generated documentation, a manual page
- * will be available and extensive help is displayed. The description
- * string can contain &{OWN} for the current owner or &{PGM} for the
- * current program name. The letter case of the replacement string depends
- * and the letter case of the keyword: PGM = upper case, pgm = lower case,
- * Pgm = title case, pGm = original string. All other content inside of
- * &{...} is ignored. This can be used, for example, to insert comments
- * into the source of the manual page.
- *
- * For each argument you can define a default value and use the property
- * parser or environment variables to overwrite it again. The default value
- * replaces the entered value. This means that if a default value, environment
- * variable or property is defined, then this will have the same effect as the
- * entry of the value in the command line. With the latter you can still override
- * the hard coded or property default value. The property management can make use
- * of a function that extracts a property list for the argument table tree.
- *
- * For each path you can also define the default value as environment variable.
- * The path are prefixed with the owner ID and the program name first, then
- * only the program name and at the last the path only starting with the
- * command name will be use to determine a environment variable. For this the
- * path is converted to upper case and all '.' are replaced by '_'. The value
- * of the environment variable must contain the same supplement string which
- * are required for the property definition. All possible path values can be
- * determine with the property generation function.
- *
- * With the CLP flags CMD (for command) and PRO (property) you can define if
- * a parameter is only visible in the command line or property file. These
- * flags have no influence of property or command line parsing. It only
- * reflects the online help/syntax and docu/property generation. This means
- * that you can still use such a parameter in the property file or in the
- * command line, but it is not directly visible to the user. If the flags CMD
- * and PRO are not set then the parameter will be visible in both areas. With
- * the flag DMY (for dummy) you can enforce that this parameter is not
- * visible in a generated property file, on the command line help, syntax
- * and documentation. In this case, the parameter is no part of the symbol
- * table. It is only part of the CLP structure.
- *
- * For binary strings the default interpretation can be free defined over a
- * additional set of flags (CLPFLG_HEX/CHR/ASC/EBC). This is useful for hex
- * strings or passwords. If you want use arrays in overlays you cannot use
- * a link to determine the count or length. In this case you can use the DLM
- * flag. In this case for fix size types an additional empty element are used
- * as delimiter. For the static case the max count are reduced by 1 and in the
- * dynamic case one additional element is allocated to determine the end of
- * the array. For variable (CLPFLG_FIX is not defined) strings the end of the
- * list of strings are marked with 0xFF.
- *
- * The FLAMCLP calculates automatically the minimum amount of letters
- * required to make the meaning of a keyword unique. Depending on the case
- * mode the required letters are highlighted in the interactively used help
- * function. The syntax function provides also data when an argument
- * is required or optional, based on the minimum amount of occurrences.
- *
- * If you intend to apply the FLAMCLP first of all an open will be necessary.
- * Then you are able to parse a property list before doing this with the
- * command line. Both property list and command line are provided as zero
- * terminated strings. This means that the FLAMCLP does not know whether the
- * command line results from a file or argc/argv.
- *
- * If the isPfl (is parameter file) flag TRUE: For objects, overlays and arrays
- * you can use the assignment letter '=' or '=>' to define a parameter file containing
- * the command string for this object, overlay or array. For simple arguments
- * you must use '=>' to define a parameter file but all these capabilities are
- * only supported if the flag defined to true. This means that for each object,
- * overlay, array or argument a dedicated parameter file can be used. The
- * parameter file must contain a command string which syntax is valid for the
- * certain object, overlay, array or argument. CLP open the file with format
- * string "r". To use DD names on mainframes the file name must like "DD:name".
- *
- * If the flag CLPFLG_PWD is used, string outputs containing passwords will
- * result in "###SECRECT###" and float or number outputs in a value of 0.
- *
- * For zero terminated strings in local character set (s'...') several special
- * mapping and conversions can be activated over the flags CLPFLG_FIL/LAB/UPP.
- * The replacement of environment variables is done for each string but you can
- * also activate prefix adjustment and tilde replacement for files, and tilde,
- * circumflex and exclamation mark replacement for key labels. Additional you
- * can ensure that each such string are converted to upper case.
- *
- * Parsing of the properties (can be done a lot of times over different
- * sources) only change the default values in the symbol table and has no
- * effect for the CLP structure. First after parsing the command line the
- * corresponding FLAMCLP structure is filled with the properties or entered
- * values and the FLAMCLP can be closed or another command line parsed.
- *
- * Attention: If pointer to values in the CLP handle used (ppLst, psErr) then
- * you cannot close the CLP or you must copy the values before.
- *
- * The normal procedure to use the CLP:
- * <pre>
- *    ClpOpen()
- *    ClpParsePro()
- *    ClpParseCmd()
- *    ClpClose()
- * </pre>
- *
- * Beside property and command line parsing the FLAMCLP offers an interactive
- * syntax and help function. Additionally, you can use a very powerful
- * function to generate single manual pages or complete user manuals,
- * You can make use of the supported grammar and regular expressions
- * (lexems). Provided manual pages must be in ASCIIDOC and will be converted
- * on EBCDIC systems from the compile code page in the local code page.
- *
- * Only ClpParseCmd() uses the pvDat pointer. All other functions only work
- * on the symbol table. This means if you don't use ClpParseCmd() the pointer
- * to the CLP structure (pvDat), it can be NULL. This is useful if only help,
- * syntax, documentation or property management are required. For these
- * functions no corresponding CLP structure must be allocated.
- *
- * The implementation of the FLAMCLP is finished with the Command Line
- * Executor (FLAMCLE) with which you can define your list of commands by
- * using an additional table. You can make use of only one new function
- * that is executed eventually. The FLAMCLE offers an extensive built-in
- * functionality and is the optimal access method to the FLAMCLP capabilities.
- *
- * Additional there is an interface to browse the symbol table. These interface
- * can for example used to build several graphical user interfaces or other
- * things based on the tables.
- *
- * @section SUPREGEXP Supported regular expressions (lexems) and grammar
- *
- * Call siClpLexem() or siClpGrammar() to get the current supported lexems
- * and grammar. The list below could be a older state of the implementation.
- *
- * @section LEXEME CLP-Lexeme
- *
- *
- * <pre>
- * Lexemes (regular expressions) for argument list or parameter file:
- * --| COMMENT   '#' [:print:]* '#'                              (will be ignored)
---| LCOMMENT  ';' [:print:]* 'nl'                             (will be ignored)
---| SEPARATOR [:space: | :cntr: | ',']*                  (abbreviated with SEP)
---| OPERATOR '=' | '.' | '(' | ')' | '[' | ']' | (SGN, DOT, RBO, RBC, SBO, SBC)
---|  '=>'| '+' | '-' | '*' | '/' | '{' | '}' (SAB, ADD, SUB, MUL, DIV, CBO,CBC)
---| KEYWORD   ['-'['-']][:alpha:]+[:alnum: | '_']*          (always predefined)
---| NUMBER    ([+|-]  [ :digit:]+)  |                       (decimal (default))
---| num       ([+|-]0b[ :digit:]+)  |                                  (binary)
---| num       ([+|-]0o[ :digit:]+)  |                                   (octal)
---| num       ([+|-]0d[ :digit:]+)  |                                 (decimal)
---| num       ([+|-]0x[ :xdigit:]+) |                             (hexadecimal)
---| num       ([+|-]0t(yyyy/mm/tt.hh:mm:ss)) |  (relativ (+|-) or absolut time)
---| FLOAT     ([+|-]  [ :digit:]+.[:digit:]+e|E[:digit:]+) | (decimal(default))
---| flt       ([+|-]0d[ :digit:]+.[:digit:]+e|E[:digit:]+)            (decimal)
---| STRING         ''' [:print:]* ''' |          (default (if binary c else s))
---| str       [s|S]''' [:print:]* ''' |                (null-terminated string)
---| str       [c|C]''' [:print:]* ''' |  (binary string in local character set)
---| str       [a|A]''' [:print:]* ''' |                (binary string in ASCII)
---| str       [e|E]''' [:print:]* ''' |               (binary string in EBCDIC)
---| str       [x|X]''' [:print:]* ''' |         (binary string in hex notation)
---| str       [f|F]''' [:print:]* ''' | (read string from file (for passwords))
---|           Strings can contain two '' to represent one '
---|           Strings can also be enclosed in " or ` instead of '
---|           Strings can directly start behind a '=' without enclosing ('`")
---|              In this case the string ends at the next separator or operator
---|              and keywords are preferred. To use keywords, separators or
---|              operators in strings, enclosing quotes are required.
---|
---| The predefined constant keyword below can be used in a value expressions
---| NOW       NUMBER - current time in seconds since 1970 (+0t0000)
---| MINUTE    NUMBER - minute in seconds (60)
---| HOUR      NUMBER - hour in seconds   (60*60)
---| DAY       NUMBER - day in seconds    (24*60*60)
---| YEAR      NUMBER - year in seconds   (365*24*60*60)
---| KiB       NUMBER - kilobyte          (1024)
---| MiB       NUMBER - megabyte          (1024*1024)
---| GiB       NUMBER - gigabyte          (1024*1024*1024)
---| TiB       NUMBER - terrabyte         (1024*1024*1024*1024)
---| RNDn      NUMBER - simple random number with n * 8 bit in length (1,2,4,8)
---| PI        FLOAT  - PI (3.14159265359)
---| LCSTAMP   STRING - current local stamp in format:           YYYYMMDD.HHMMSS
---| LCDATE    STRING - current local date in format:            YYYYMMDD
---| LCYEAR    STRING - current local year in format:            YYYY
---| LCYEAR2   STRING - current local year in format:            YY
---| LCMONTH   STRING - current local month in format:           MM
---| LCDAY     STRING - current local day in format:             DD
---| LCTIME    STRING - current local time in format:            HHMMSS
---| LCHOUR    STRING - current local hour in format:            HH
---| LCMINUTE  STRING - current local minute in format:          MM
---| LCSECOND  STRING - current local second in format:          SS
---| GMSTAMP   STRING - current Greenwich mean stamp in format:  YYYYMMDD.HHMMSS
---| GMDATE    STRING - current Greenwich mean date in format:   YYYYMMDD
---| GMYEAR    STRING - current Greenwich mean year in format:   YYYY
---| GMYEAR2   STRING - current Greenwich mean year in format:   YY
---| GMMONTH   STRING - current Greenwich mean month in format:  MM
---| GMDAY     STRING - current Greenwich mean day in format:    DD
---| GMTIME    STRING - current Greenwich mean time in format:   HHMMSS
---| GMHOUR    STRING - current Greenwich mean hour in format:   HH
---| GMMINUTE  STRING - current Greenwich mean minute in format: MM
---| GMSECOND  STRING - current Greenwich mean second in format: SS
---| GMSECOND  STRING - current Greenwich mean second in format: SS
---| SnRND10   STRING - decimal random number of length n (1 to 8)
---| SnRND16   STRING - hexadecimal random number of length n (1 to 8)
---|
---| SUPPLEMENT     '"' [:print:]* '"' |   (null-terminated string (properties))
---|           Supplements can contain two "" to represent one "
---|           Supplements can also be enclosed in ' or ` instead of "
---|           Supplements can also be enclosed in ' or ` instead of "
---| ENVIRONMENT VARIABLES '\<'varnam'\>' will replaced by the corresponding value
---| Escape sequences for critical punctuation characters on EBCDIC systems
---|    '!' = '\&EXC;'   - Exclamation mark
---|    '$' = '\&DLR;'   - Dollar sign
---|    '#' = '\&HSH;'   - Hashtag (number sign)
---|    '@' = '\&ATS;'   - At sign
---|    '[' = '\&SBO;'   - Square bracket open
---|    '\' = '\&BSL;'   - Backslash
---|    ']' = '\&SBC;'   - Square bracket close
---|    '^' = '\&CRT;'   - Caret (circumflex)
---|    '`' = '\&GRV;'   - Grave accent
---|    '{' = '\&CBO;'   - Curly bracket open
---|    '|' = '\&VBR;'   - Vertical bar
---|    '}' = '\&CBC;'   - Curly bracket close
---|    '~' = '\&TLD;'   - Tilde
---| Define CCSIDs for certain areas in CLP strings on EBCDIC systems (0-reset)
---|    '&' [:digit:]+ ';  (..."&1047;get.file='&0;%s&1047;'",f)
---| Escape sequences for hexadecimal byte values
---|    '&' ['X''x'] :xdigit: :xdigit: ';' ("&xF5;")
-</pre>
-
- * @section LEXEME Grammar for CLP-command line
-------------------------
-
-Grammar for argument list or parameter file
---| Command Line Parser
---| command        -> ['('] parameter_list [')']       (main=object)
---|                |  ['.'] parameter                  (main=overlay)
---| parameter_list -> parameter SEP parameter_list
---|                |  EMPTY
---| parameter      -> switch | assignment | object | overlay | array
---| switch         -> KEYWORD
---| assignment     -> KEYWORD '=' value
---|                |  KEYWORD '=' KEYWORD # SELECTION #
---|                |  KEYWORD '=>' STRING # parameter file #
---| object         -> KEYWORD ['('] parameter_list [')']
---|                |  KEYWORD '=' STRING # parameter file #
---|                |  KEYWORD '=>' STRING # parameter file #
---| overlay        -> KEYWORD ['.'] parameter
---|                |  KEYWORD '=' STRING # parameter file #
---|                |  KEYWORD '=>' STRING # parameter file #
---| array          -> KEYWORD '[' value_list   ']'
---|                |  KEYWORD '[' object_list  ']'
---|                |  KEYWORD '[' overlay_list ']'
---|                |  KEYWORD '=' value_list # with certain limitations #
---|                |  KEYWORD '[=' STRING ']' # parameter file #
---|                |  KEYWORD '[=>' STRING ']' # parameter file #
---| value_list     -> value SEP value_list
---|                |  EMPTY
---| object_list    -> object SEP object_list
---|                |  EMPTY
---| overlay_list   -> overlay SEP overlay_list
---|                |  EMPTY
---| A list of objects requires parenthesis to enclose the arguments
---|
---| value          -> term '+' value
---|                |  term '-' value
---|                |  term
---| term           -> factor '*' term
---|                |  factor '/' term
---|                |  factor
---| factor         -> NUMBER | FLOAT | STRING
---|                |  selection | variable | constant
---|                |  '(' value ')'
---| selection      -> KEYWORD # value from a selection table        #
---| variable       -> KEYWORD # value from a previous assignment    #
---|                |  KEYWORD '{' NUMBER '}' # with index for arrays #
---| constant       -> KEYWORD # see predefined constants at lexem   #
---| For strings only the operator '+' is implemented as concatenation
---| Strings without an operator in between are also concatenated
---| A number followed by a constant is a multiplication (4KiB=4*1024)
-
-A list of objects requires parenthesis to enclose the arguments. Only
-for one object of a certain level you can omit the round brackets. If
-you want define more than one object of a certain level you must use
-parenthesis to separate the objects from each other. In parameter files
-the command string for an overlay can be start with a dot '.' or not.
-The same is valid for the parenthesis '(...)' of an object.
-
- * @section LEXEME Grammar for property file
--------------------------
-
-Grammar for property file
---| Property File Parser
---| properties     -> property_list
---| property_list  -> property SEP property_list
---|                |  EMPTY
---| property       -> keyword_list '=' SUPPLEMENT
---| keyword_list   -> KEYWORD '.' keyword_list
---|                |  KEYWORD
---| SUPPLEMENT is a string in double quotation marks ("property")
-
- * @section LEXEME Compiler switches
------------------
-
-For compilation the defines below must be set:
-
-    __DEBUG__        for a debug build
-    __RELEASE__      for a release build
-    __WIN__          for WINDOWS platforms
-    __ZOS__          for ZOS mainframe platforms
-    __USS__          for unix system services (USS) on ZOS mainframe platforms
-    __BUILDNR__      to define the build number (integer, default is 0)
-    __BUILD__        to define the build string ("debug", "release", "alpha", ...)
-    __HOSTSHORTING__ to short function names to 8 character for mainframes
- *
  **********************************************************************/
 
+/*! @cond PRIVATE */
 #ifdef __cplusplus
    extern "C" {
 #endif
 
 #ifndef INC_CLP_H
 #define INC_CLP_H
+/*! @endcond */
 
 #include <stdio.h>
 #include "CLPDEF.h"
 
 /**********************************************************************/
-
+/*! @cond PRIVATE */
 #ifdef __HOSTSHORTING__
    #define pcClpVersion          FLCLPVSN
    #define pcClpAbout            FLCLPABO
@@ -473,7 +56,7 @@ For compilation the defines below must be set:
    #define vdClpClose            FLCLPCLS
    #define pcClpError            FLCLPERR
 #endif
-
+/*! @endcond */
 /**********************************************************************/
 
 /**
@@ -857,8 +440,8 @@ extern int siClpGrammar(
  * @param[in]  siMtd Define the close method (EXC/KEP/ALL)
  */
 extern void vdClpClose(
-   void*             pvHdl,
-   const int         siMtd);
+   void*                         pvHdl,
+   const int                     siMtd);
 
 /**
  * @brief Allocate memory in CLP structure
@@ -939,8 +522,10 @@ extern int siClpPrint(
 
 /**********************************************************************/
 
+/*! @cond PRIVATE */
 #endif // INC_FLAMCLP_H
 
 #ifdef __cplusplus
 }
 #endif
+/*! @endcond */

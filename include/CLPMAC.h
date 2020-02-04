@@ -1,14 +1,12 @@
-/******************************************************************************/
 /*******************************************************************************/
 /**
  * @file CLPMAC.h
- * @brief macros for single definition of C struct and argument table
- *   for <b>C</b>ommand <b>L</b>ine <b>P</b>arsing
- * LIMES Command Line Parser (CLP) in ANSI-C
+ * @brief Macros for single definition of C struct and argument table for <b>C</b>ommand <b>L</b>ine <b>P</b>arsing
  * @author Falk Reichbott
  * @date 20.10.2012\n
  * @copyright 2012 limes datentechnik gmbh
  *
+ * @section CLPMAC CLP table macros
  * This file is commonly included 2 times in a C file where the command line arguments
  * of a program are defined. The first inclusion is used to define the C struct types
  * where the parsed argument values will be stored. The second inclusion is used to define
