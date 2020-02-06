@@ -81,11 +81,16 @@ pre, code {
 pre {
     padding: 1ex 2em;
     overflow: auto;
-    border-top: 4px solid #6389D6;
-    border-bottom: 4px solid #6389D6;
-    background: none repeat scroll 0% 0% #f5f7fa;
     color: #303030;
     margin: 1.6em 0px;
+}
+
+pre, pre.fragment, div.fragment {
+    border-top: 4px solid #6389D6;
+    border-bottom: 4px solid #6389D6;
+    border-left: 0;
+    border-left: 0;
+    background: none repeat scroll 0% 0% #f5f7fa;
 }
 
 code {
