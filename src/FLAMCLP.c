@@ -184,7 +184,6 @@
 
 /* Definition der Konstanten ******************************************/
 
-
 #define CLPMAX_TABCNT            512
 #define CLPMAX_HDEPTH            128
 #define CLPMAX_KYWLEN            63

@@ -93,361 +93,206 @@
 #     define F64                double
 #  endif
 #endif
-
 /*! @endcond */
+
 /**********************************************************************/
-
 /**
- * @brief Return code for a successful parsing
+ * @defgroup CLP_ERR CLP Error Codes
+ * @brief Error codes for command line parsing
+ * @{
  */
-#define CLP_OK                   0
+#define CLP_OK                    0    /**< @brief Return code for a successful parsing: 0, otherwize > 0. */
+#define CLPERR_LEX               -1    /**< @brief Lexical error (determined by scanner). */
+#define CLPERR_SYN               -2    /**< @brief Syntax error (determined by parser). */
+#define CLPERR_SEM               -3    /**< @brief Semantic error (determined by builder). */
+#define CLPERR_TYP               -4    /**< @brief Type error (internal error with argument types). */
+#define CLPERR_TAB               -5    /**< @brief Table error (internal error with argument tables). */
+#define CLPERR_SIZ               -6    /**< @brief Size error (internal error with argument tables and data structures). */
+#define CLPERR_PAR               -7    /**< @brief Parameter error (internal error with argument tables and data structures). */
+#define CLPERR_MEM               -8    /**< @brief Memory error (internal error with argument tables and data structures). */
+#define CLPERR_INT               -9    /**< @brief Internal error (internal error with argument tables and data structures). */
+#define CLPERR_SYS               -10   /**< @brief System error (internal error with argument tables and data structures). */
+#define CLPERR_AUT               -11   /**< @brief Authorization request failed. */
 
 /**
- * Error codes for command line parsing
+ * @brief Defines a structure with error information
+ *
+ * A pointer to this structure can be provided at siClpOpen() to have access to
+ * the error information managed in the CLP handle.
+ *
+ *  The pointers are set by CLP and valid until CLP is closed.
  */
-/** CLPERR_LEX Lexical error (determined by scanner) */
-#define CLPERR_LEX               -1
-/** CLPERR_SYN Syntax error (determined by parser) */
-#define CLPERR_SYN               -2
-/** CLPERR_SEM Semantic error (determined by builder) */
-#define CLPERR_SEM               -3
-/** CLPERR_TYP Type error (internal error with argument types) */
-#define CLPERR_TYP               -4
-/** CLPERR_TAB Table error (internal error with argument tables) */
-#define CLPERR_TAB               -5
-/** CLPERR_SIZ Size error (internal error with argument tables and data structures) */
-#define CLPERR_SIZ               -6
-/** CLPERR_PAR Parameter error (internal error with argument tables and data structures) */
-#define CLPERR_PAR               -7
-/** CLPERR_MEM Memory error (internal error with argument tables and data structures) */
-#define CLPERR_MEM               -8
-/** CLPERR_INT Internal error (internal error with argument tables and data structures) */
-#define CLPERR_INT               -9
-/** CLPERR_SYS System error (internal error with argument tables and data structures)*/
-#define CLPERR_SYS               -10
-/** CLPERR_AUT Authorization request failed*/
-#define CLPERR_AUT               -11
+typedef struct ClpError {
+   const char**                  ppMsg;   /**< @brief Points to the pointer of a zero-terminated string containing the current error message. */
+ /** Points to the pointer of a zero-terminated string containing the current source.
+ * The initial source can be defined for command line or property file parsing.
+ * If the initial source is not defined the constant definitions below are used:
+ * * for command line parsing    ":command line:"   see CLPSRC_CMD
+ * * for property string parsing ":property list:"  see CLPSRC_PRO
+ */
+   const char**                  ppSrc;   /**< @brief If a parameter file assigned and cause of the error *pcSrc* points to this file name. */
+   const int*                    piRow;   /**< @brief Points to an integer containing the current row for the error in *pcSrc*e. */
+   const int*                    piCol;   /**< @brief Points to an integer containing the current column for the error in *pcSrc*. */
+}TsClpError;
+/** @} */
 
 /**
+ * @defgroup CLP_TYP CLP Data Types
  * @brief Data types of parameter in the argument table
+ * @{
  */
-/** CLPTYP_NON    No type - Mark the end of an argument table */
-#define CLPTYP_NON               0
-/** CLPTYP_SWITCH Switch (single keyword representing a number (OID)) */
-#define CLPTYP_SWITCH            1
-/** CLPTYP_NUMBER Signed or unsigned integer number (8, 16, 32 or 64 bit) */
-#define CLPTYP_NUMBER            2
-/** CLPTYP_FLOATN Floating point number (32 or 64 bit) */
-#define CLPTYP_FLOATN            3
-/** CLPTYP_STRING String literal (binary (HEX, ASCII, EBCDIC, CHARS) or null-terminated (default)) */
-#define CLPTYP_STRING            4
-/** CLPTYP_OBJECT Object (KEYWORD(parameter_list)) can contain arbitrary list of other types */
-#define CLPTYP_OBJECT            5
-/** CLPTYP_OVRLAY Overlay (KEYWORD.KEYWORD...) contains one of its list as in a C union */
-#define CLPTYP_OVRLAY            6
-
-#define CLPTYP_XALIAS           -1
+#define CLPTYP_NON               0   /**< @brief No type - Mark the end of an argument table. */
+#define CLPTYP_SWITCH            1   /**< @brief Switch (single keyword representing a number (OID)). */
+#define CLPTYP_NUMBER            2   /**< @brief Signed or unsigned integer number (8, 16, 32 or 64 bit). */
+#define CLPTYP_FLOATN            3   /**< @brief Floating point number (32 or 64 bit). */
+#define CLPTYP_STRING            4   /**< @brief String literal (binary (HEX, ASCII, EBCDIC, CHARS) or null-terminated (default)). */
+#define CLPTYP_OBJECT            5   /**< @brief Object (KEYWORD(parameter_list)) can contain arbitrary list of other types. */
+#define CLPTYP_OVRLAY            6   /**< @brief Overlay (KEYWORD.KEYWORD...) contains one of its list as in a C union. */
+#define CLPTYP_XALIAS           -1   /**< @brief For alias definition (used in the corresponding table macro)*/
+/** @} */
 
 /**
- * @brief Method used to close
+ * @defgroup CLP_CLS_MTD CLP Close Method
+ * @brief Method used to close the CLP (see #vdClpClose()).
+ * @{
  */
-/** CLPCLS_MTD_ALL Complete close, free anything including the dynamic allocated buffers in the CLP structure*/
-#define CLPCLS_MTD_ALL           1
-/** CLPCLS_MTD_KEP Free anything except the allocated memory in CLP structure and keep the handle open to close it later with method ALL */
-#define CLPCLS_MTD_KEP           0
-/** CLPCLS_MTD_EXC Free anything including the handle except the allocated memory in the CLP structure, the application must free the dynamic allocated buffers in the CLP structure it self */
-#define CLPCLS_MTD_EXC           2
+#define CLPCLS_MTD_ALL           1   /**< @brief Complete close, free anything including the dynamic allocated buffers in the CLP structure. */
+#define CLPCLS_MTD_KEP           0   /**< @brief Free anything except the allocated memory in CLP structure and keep the handle open to close it later with method ALL. */
+#define CLPCLS_MTD_EXC           2   /**< @brief Free anything including the handle except the allocated memory in the CLP structure, the application must free the dynamic allocated buffers in the CLP structure it self. */
+/** @} */
 
 /**
- * @brief Method for property printing
+ * @defgroup CLP_PRO_MTD CLP Property Method
+ * @brief Method for property printing (see #siClpProperties()).
+ * @{
  */
-/** CLPPRO_MTD_ALL All properties are printed (manual pages added as comment) */
-#define CLPPRO_MTD_ALL           0
-/** CLPPRO_MTD_SET Only defined properties are printed (no manual pages used) */
-#define CLPPRO_MTD_SET           1
-/** CLPPRO_MTD_CMT All properties are printed, but not defined properties are line comments */
-#define CLPPRO_MTD_CMT           2
-/** CLPPRO_MTD_DOC All property only parameter are printed as documentation */
-#define CLPPRO_MTD_DOC           3
+#define CLPPRO_MTD_ALL           0   /**< @brief All properties are printed (manual pages added as comment). */
+#define CLPPRO_MTD_SET           1   /**< @brief Only defined properties are printed (no manual pages used). */
+#define CLPPRO_MTD_CMT           2   /**< @brief All properties are printed, but not defined properties are line comments . */
+#define CLPPRO_MTD_DOC           3   /**< @brief All property only parameter are printed as documentation. */
+/** @} */
 
 /**
- * @brief Flags for command line parsing
+ * @defgroup CLP_FLG CLP Flags
+ * @brief Flags for command line parsing.
+ * @{
  */
-/** CLPFLG_NON To define no special flags */
-#define CLPFLG_NON               0x00000000U
-
-/** CLPFLG_ALI This parameter is an alias for another argument (set by macros) */
-#define CLPFLG_ALI               0x00000001U
-
-/** CLPFLG_CON This parameter is a constant definition (no argument, no link, no alias (set by macros)) */
-#define CLPFLG_CON               0x00000002U
-
-/** CLPFLG_CMD If set the parameter is only used within the command line (command line only) */
-#define CLPFLG_CMD               0x00000004U
-
-/** CLPFLG_PRO If set the parameter is only used within the property file (property file only) */
-#define CLPFLG_PRO               0x00000008U
-
-/** CLPFLG_SEL If set only the predefined constants over the corresponding key words can be selected (useful to define selections) */
-#define CLPFLG_SEL               0x00000010U
-
-/** CLPFLG_FIX This argument has a fixed length (only useful for strings if a typedef defines a fixed length per element, else set internally) */
-#define CLPFLG_FIX               0x00000020U
-
-/** CLPFLG_BIN This argument can contain binary data without null termination (length must be known or determined with a link) */
-#define CLPFLG_BIN               0x00000040U
-
-/** CLPFLG_DMY If set the parameter is not put in the symbol table, meaning it is only a peace of memory in the CLP structure */
-#define CLPFLG_DMY               0x00000080U
-
-/** CLPFLG_CNT This link will be filled by the calculated amount of elements (useful for arrays) */
-#define CLPFLG_CNT               0x00000100U
-
-/** CLPFLG_OID This link will be filled by the object identifier (OID) of the chosen argument (useful for overlays) */
-#define CLPFLG_OID               0x00000200U
-
-/** CLPFLG_IND This link will be filled with the index (position) in the CLP string (byte offset of the current key word)*/
-#define CLPFLG_IND               0x00000400U
-
-/** CLPFLG_HID If set the parameter is not visible, meaning it is a hidden parameter */
-#define CLPFLG_HID               0x00000800U
-
-/** CLPFLG_ELN This link will be filled by the calculated length of an element (fixed types == data size, packed types == data length) */
-#define CLPFLG_ELN               0x00001000U
-
-/** CLPFLG_SLN This link will be filled by the calculated string length for an element (only for null-terminated strings) */
-#define CLPFLG_SLN               0x00002000U
-
-/** CLPFLG_TLN This link will be filled by the calculated total length for the argument (sum of all element lengths) */
-#define CLPFLG_TLN               0x00004000U
-
-/** CLPFLG_DEF This flag enables to use the OID as default for numbers if no value is assigned (only the keyword is used (syntax extension))*/
-#define CLPFLG_DEF               0x00010000U
-
-/** CLPFLG_CHR This flag will set the default method of interpretation of a binary string to local character string (DEFAULT)*/
-#define CLPFLG_CHR               0x00020000U
-
-/** CLPFLG_ASC This flag will set the default method of interpretation of a binary string to ASCII*/
-#define CLPFLG_ASC               0x00040000U
-
-/** CLPFLG_EBC This flag will set the default method of interpretation of a binary string to EBCDIC*/
-#define CLPFLG_EBC               0x00080000U
-
-/** CLPFLG_HEX This flag will set the default method of interpretation of a binary string to hexadecimal*/
-#define CLPFLG_HEX               0x00100000U
-
-/** CLPFLG_PDF This flag will be set if a property value was defined from outside, it will be FALSE if the property value was hard coded in the tables */
-#define CLPFLG_PDF               0x00200000U
-
-/** CLPFLG_TIM This flag mark a number as time value (only used to print out the corressponing time stamp) */
-#define CLPFLG_TIM               0x00400000U
-
-/** CLPFLG_DYN This flag mark a string or array as dynamic (only a pointer to allocated memory is used and must be freeed by the user) */
-#define CLPFLG_DYN               0x00800000U
-
-/** CLPFLG_PWD This flag will ensure that the clear value is only put into the data structure but not traced, logged or given away elsewhere */
-#define CLPFLG_PWD               0x01000000U
-/** CLPFLG_DLM This flag ensures that fix size arrays has a empty (initialized) last element (max-1) as delimiter
- *             Additional you enforce 0xFF at the and of a non fix size string array (size-1)*/
-#define CLPFLG_DLM               0x02000000U
-
-/** CLPFLG_UNS Marks a number as unsigned (prevent negative values)*/
-#define CLPFLG_UNS               0x04000000U
-
-/** CLPFLG_XML Marks zero terminated string as XML path where '(' and ')' are used to replace environment variables*/
-#define CLPFLG_XML               0x08000000U
-
-/** CLPFLG_FIL Marks zero terminated string as file and replace additional '~' by HOME and corrects the prefix for different platforms*/
-#define CLPFLG_FIL               0x10000000U
-
-/** CLPFLG_LAB Marks zero terminated string as label and replace additional '~' by USER, '^' by OWNER and '!' by ENVID */
-#define CLPFLG_LAB               0x20000000U
-
-/** CLPFLG_UPP Converts zero terminated strings to upper case */
-#define CLPFLG_UPP               0x40000000U
-
-/** CLPFLG_LOW Converts zero terminated strings to lower case */
-#define CLPFLG_LOW               0x80000000U
+#define CLPFLG_NON               0x00000000U   /**< @brief To define no special flags. */
+#define CLPFLG_ALI               0x00000001U   /**< @brief This parameter is an alias for another argument (set by macros). */
+#define CLPFLG_CON               0x00000002U   /**< @brief This parameter is a constant definition (no argument, no link, no alias (set by macros)). */
+#define CLPFLG_CMD               0x00000004U   /**< @brief If set the parameter is only used within the command line (command line only). */
+#define CLPFLG_PRO               0x00000008U   /**< @brief If set the parameter is only used within the property file (property file only). */
+#define CLPFLG_SEL               0x00000010U   /**< @brief If set only the predefined constants over the corresponding key words can be selected (useful to define selections). */
+#define CLPFLG_FIX               0x00000020U   /**< @brief This argument has a fixed length (only useful for strings if a typedef defines a fixed length per element, else set internally). */
+#define CLPFLG_BIN               0x00000040U   /**< @brief This argument can contain binary data without null termination (length must be known or determined with a link). */
+#define CLPFLG_DMY               0x00000080U   /**< @brief If set the parameter is not put in the symbol table, meaning it is only a peace of memory in the CLP structure. */
+#define CLPFLG_CNT               0x00000100U   /**< @brief This link will be filled by the calculated amount of elements (useful for arrays). */
+#define CLPFLG_OID               0x00000200U   /**< @brief This link will be filled by the object identifier (OID) of the chosen argument (useful for overlays). */
+#define CLPFLG_IND               0x00000400U   /**< @brief This link will be filled with the index (position) in the CLP string (byte offset of the current key word). */
+#define CLPFLG_HID               0x00000800U   /**< @brief If set the parameter is not visible, meaning it is a hidden parameter. */
+#define CLPFLG_ELN               0x00001000U   /**< @brief This link will be filled by the calculated length of an element (fixed types == data size, packed types == data length). */
+#define CLPFLG_SLN               0x00002000U   /**< @brief This link will be filled by the calculated string length for an element (only for null-terminated strings). */
+#define CLPFLG_TLN               0x00004000U   /**< @brief This link will be filled by the calculated total length for the argument (sum of all element lengths). */
+#define CLPFLG_DEF               0x00010000U   /**< @brief This flag enables to use the OID as default for numbers if no value is assigned (only the keyword is used (syntax extension)). */
+#define CLPFLG_CHR               0x00020000U   /**< @brief This flag will set the default method of interpretation of a binary string to local character string (DEFAULT). */
+#define CLPFLG_ASC               0x00040000U   /**< @brief This flag will set the default method of interpretation of a binary string to ASCII. */
+#define CLPFLG_EBC               0x00080000U   /**< @brief This flag will set the default method of interpretation of a binary string to EBCDIC. */
+#define CLPFLG_HEX               0x00100000U   /**< @brief This flag will set the default method of interpretation of a binary string to hexadecimal. */
+#define CLPFLG_PDF               0x00200000U   /**< @brief This flag will be set if a property value was defined from outside, it will be FALSE if the property value was hard coded in the tables. */
+#define CLPFLG_TIM               0x00400000U   /**< @brief This flag mark a number as time value (only used to print out the corressponing time stamp). */
+#define CLPFLG_DYN               0x00800000U   /**< @brief This flag mark a string or array as dynamic (only a pointer to allocated memory is used and must be freeed by the user). */
+#define CLPFLG_PWD               0x01000000U   /**< @brief This flag will ensure that the clear value is only put into the data structure but not traced, logged or given away elsewhere. */
+#define CLPFLG_DLM               0x02000000U   /**< @brief This flag ensures that fix size arrays has a empty (initialized) last element (max-1) as delimiter. Additional you enforce 0xFF at the and of a non fix size string array (size-1). */
+#define CLPFLG_UNS               0x04000000U   /**< @brief Marks a number as unsigned (prevent negative values). */
+#define CLPFLG_XML               0x08000000U   /**< @brief Marks zero terminated string as XML path where '(' and ')' are used to replace environment variables. */
+#define CLPFLG_FIL               0x10000000U   /**< @brief Marks zero terminated string as file and replace additional '~' by HOME and corrects the prefix for different platforms. */
+#define CLPFLG_LAB               0x20000000U   /**< @brief Marks zero terminated string as label and replace additional '~' by USER, '^' by OWNER and '!' by ENVID . */
+#define CLPFLG_UPP               0x40000000U   /**< @brief Converts zero terminated strings to upper case. */
+#define CLPFLG_LOW               0x80000000U   /**< @brief Converts zero terminated strings to lower case. */
+/** @} */
 
 /**
- * @brief Definition of CLPFLG macros
+ * @defgroup CLP_SRC CLP Source String
+ * @brief Definition of default source strings used in error structure.
+ * @{
  */
-#define CLPISF_ALI(flg)          ((flg)&CLPFLG_ALI)
-#define CLPISF_CON(flg)          ((flg)&CLPFLG_CON)
-#define CLPISF_CMD(flg)          ((flg)&CLPFLG_CMD)
-#define CLPISF_PRO(flg)          ((flg)&CLPFLG_PRO)
-#define CLPISF_DMY(flg)          ((flg)&CLPFLG_DMY)
-#define CLPISF_HID(flg)          ((flg)&CLPFLG_HID)
-#define CLPISF_SEL(flg)          ((flg)&CLPFLG_SEL)
-#define CLPISF_FIX(flg)          ((flg)&CLPFLG_FIX)
-#define CLPISF_BIN(flg)          ((flg)&CLPFLG_BIN)
-#define CLPISF_CNT(flg)          ((flg)&CLPFLG_CNT)
-#define CLPISF_OID(flg)          ((flg)&CLPFLG_OID)
-#define CLPISF_IND(flg)          ((flg)&CLPFLG_IND)
-#define CLPISF_ELN(flg)          ((flg)&CLPFLG_ELN)
-#define CLPISF_SLN(flg)          ((flg)&CLPFLG_SLN)
-#define CLPISF_TLN(flg)          ((flg)&CLPFLG_TLN)
-#define CLPISF_DEF(flg)          ((flg)&CLPFLG_DEF)
-#define CLPISF_PWD(flg)          ((flg)&CLPFLG_PWD)
-#define CLPISF_CHR(flg)          ((flg)&CLPFLG_CHR)
-#define CLPISF_ASC(flg)          ((flg)&CLPFLG_ASC)
-#define CLPISF_EBC(flg)          ((flg)&CLPFLG_EBC)
-#define CLPISF_HEX(flg)          ((flg)&CLPFLG_HEX)
-#define CLPISF_PDF(flg)          ((flg)&CLPFLG_PDF)
-#define CLPISF_TIM(flg)          ((flg)&CLPFLG_TIM)
-#define CLPISF_DYN(flg)          ((flg)&CLPFLG_DYN)
-#define CLPISF_DLM(flg)          ((flg)&CLPFLG_DLM)
-#define CLPISF_UNS(flg)          ((flg)&CLPFLG_UNS)
-#define CLPISF_XML(flg)          ((flg)&CLPFLG_XML)
-#define CLPISF_FIL(flg)          ((flg)&CLPFLG_FIL)
-#define CLPISF_LAB(flg)          ((flg)&CLPFLG_LAB)
-#define CLPISF_UPP(flg)          ((flg)&CLPFLG_UPP)
-#define CLPISF_LOW(flg)          ((flg)&CLPFLG_LOW)
-#define CLPISF_LNK(flg)          (CLPISF_CNT(flg) ||  CLPISF_OID(flg) || CLPISF_IND(flg) ||  CLPISF_ELN(flg) || CLPISF_SLN(flg) ||  CLPISF_TLN(flg))
-#define CLPISF_ARG(flg)          ((!CLPISF_LNK(flg)) && (!CLPISF_CON(flg)) && (!CLPISF_ALI(flg)))
-#define CLPISF_ENT(flg)          ((!CLPISF_LNK(flg)) && (!CLPISF_ALI(flg)))
+#define CLPSRC_CMD               ":command line:"           /**< @brief From command line*/
+#define CLPSRC_PRO               ":property list:"          /**< @brief From property list*/
+#define CLPSRC_DEF               ":default value:"          /**< @brief From default value*/
+#define CLPSRC_ENV               ":environment variable:"   /**< @brief From environment variable*/
+#define CLPSRC_PRF               ":property file:"          /**< @brief From property file*/
+#define CLPSRC_CMF               ":command file:"           /**< @brief From command file*/
+#define CLPSRC_PAF               ":parameter file:"         /**< @brief Parameter file*/
+#define CLPSRC_SRF               ":string file:"            /**< @brief String file*/
+/** @} */
 
 /**
-* Default source strings
-*/
-#define CLPSRC_CMD               ":command line:"
-#define CLPSRC_PRO               ":property list:"
-#define CLPSRC_DEF               ":default value:"
-#define CLPSRC_ENV               ":environment variable:"
-#define CLPSRC_PRF               ":property file:"
-#define CLPSRC_CMF               ":command file:"
-#define CLPSRC_PAF               ":parameter file:"
-#define CLPSRC_SRF               ":string file:"
-
-
-// group SYMTABWLK Symbol table work
-
-
-/**
- * @brief Symbol table walk operations
+ * @defgroup CLP_ARGTAB CLP Argument Table
+ * @brief The structure and corresponding macros are used to define a entry for argument table.
+ * @{
  */
-/** CLPSYM_NON No operation done */
-#define CLPSYM_NON               0x00000000U
-/** CLPSYM_ROOT Go to symbol table root */
-#define CLPSYM_ROOT              0x00000001U
-/** CLPSYM_OLD Go to at last used symbol */
-#define CLPSYM_OLD               0x00000002U
-/** CLPSYM_NEXT Go to the next symbol in the list */
-#define CLPSYM_NEXT              0x00000004U
-/** CLPSYM_BACK Go to the previous symbol in the list */
-#define CLPSYM_BACK              0x00000008U
-/** CLPSYM_DEP Go to the deeper level in the tree */
-#define CLPSYM_DEP               0x00000010U
-/** CLPSYM_HIH Go to the higher level in the tree */
-#define CLPSYM_HIH               0x00000020U
-/** CLPSYM_ALIAS Go to the alias symbol */
-#define CLPSYM_ALIAS             0x00000100U
-/** CLPSYM_COUNT Go to the counter symbol */
-#define CLPSYM_COUNT             0x00001000U
-/** CLPSYM_LINK Go to the entry link symbol */
-#define CLPSYM_LINK              0x00004000U
-/** CLPSYM_OID Go to the entry object identifier symbol */
-#define CLPSYM_OID               0x00008000U
-/** CLPSYM_ELN Go to the element length symbol */
-#define CLPSYM_ELN               0x00002000U
-/** CLPSYM_SLN Go to the string length symbol */
-#define CLPSYM_SLN               0x00010000U
-/** CLPSYM_SLN Go to the total length symbol */
-#define CLPSYM_TLN               0x00020000U
-
 /**
- * @brief Definition of CLPSYM macros
- */
-#define CLPISS_ROOT(flg)         ((flg)&CLPSYM_ROOT)
-#define CLPISS_OLD(flg)          ((flg)&CLPSYM_OLD)
-#define CLPISS_NEXT(flg)         ((flg)&CLPSYM_NEXT)
-#define CLPISS_BACK(flg)         ((flg)&CLPSYM_BACK)
-#define CLPISS_DEP(flg)          ((flg)&CLPSYM_DEP)
-#define CLPISS_HIH(flg)          ((flg)&CLPSYM_HIH)
-#define CLPISS_ALIAS(flg)        ((flg)&CLPSYM_ALIAS)
-#define CLPISS_COUNT(flg)        ((flg)&CLPSYM_COUNT)
-#define CLPISS_ELN(flg)          ((flg)&CLPSYM_ELN)
-#define CLPISS_LINK(flg)         ((flg)&CLPSYM_LINK)
-#define CLPISS_OID(flg)          ((flg)&CLPSYM_OID)
-#define CLPISS_SLN(flg)          ((flg)&CLPSYM_SLN)
-#define CLPISS_TLN(flg)          ((flg)&CLPSYM_TLN)
-
-/**
- * @brief Defines a entry for symbol table walk
- */
-typedef struct ClpSymWlk {
-   /** Pointer to the key word */
-   const char*                   pcKyw;
-   /** Pointer to the alias */
-   const char*                   pcAli;
-   /** Flag value */
-   unsigned int                  uiFlg;
-   /** Pointer to the default supplement string */
-   const char*                   pcDft;
-   /** Pointer to the manual page (description) */
-   const char*                   pcMan;
-   /** Pointer to the help message */
-   const char*                   pcHlp;
-   /** Pointer to the path */
-   const char*                   pcPat;
-   /** Type of the symbol */
-   int                           siTyp;
-   /** Minimum number of entries */
-   int                           siMin;
-   /** Maximum number of entries */
-   int                           siMax;
-   /** Minimum length of keyword string to make it unique (maximal abbreviation) */
-   int                           siKwl;
-   /** Size of the symbol */
-   int                           siSiz;
-   /** Object identifier for the symbol */
-   int                           siOid;
-   /** Bitmask for possible operations */
-   unsigned int                  uiOpr;
-}TsClpSymWlk;
-
-/**
- * @brief Defines a entry for symbol table update
- */
-typedef struct ClpSymUpd {
-   /** Pointer to a property supplement string replacing the current default value */
-   const char*                   pcPro;
-}TsClpSymUpd;
-
-//end SYMTABWLK
-
-/**
- * @brief Defines a table of arguments
+ * @brief Table structure for arguments
  *
  * To simplify the definition of the corresponding data structures and argument tables it is recommended to use the
- * CLPARGTAB macros defined in CLPMAC.h or for constant definitions the CLPCONTAB macros below.
+ * CLPARGTAB macros defined in CLPMAC.h or for constant definitions the CLPCONTAB macros below. With the CLPMAC.h you
+ * can generate the tables or the corresponding data structures, depending if DEFINE_STRUCT defined or not.
+ *
+ * Example:
+ *
+ * First you must define the table:
+ *
+ * @code
+ * #define CLPINTFMTRED_TABLE\
+ *  CLPARGTAB_SKALAR("BIN"         , stBin , TsClpIntRedBin , 0, 1, CLPTYP_OBJECT, CLPFLG_NON, INTCNV_FORMAT_BIN , asClpIntRedBin , NULL, MAN_INTRED_BIN, "Integer in binary format (two's complement)")\
+ *  CLPARGTAB_SKALAR("BCD"         , stBcd , TsClpIntRedBcd , 0, 1, CLPTYP_OBJECT, CLPFLG_NON, INTCNV_FORMAT_BCD , asClpIntRedBcd , NULL, MAN_INTRED_BCD, "Binary coded decimal (BCD) number")\
+ *  CLPARGTAB_SKALAR("STR"         , stStr , TsClpIntRedStr , 0, 1, CLPTYP_OBJECT, CLPFLG_NON, INTCNV_FORMAT_STR , asClpIntRedStr , NULL, MAN_INTRED_STR, "String representation of an integer")\
+ *  CLPARGTAB_SKALAR("ENUM"        , stEnum, TsClpIntRedSel , 0, 1, CLPTYP_OBJECT, CLPFLG_NON, INTCNV_FORMAT_ENUM, asClpIntRedEnum, NULL, MAN_INTRED_ENUM,"Maps enumeration to an integer")\
+ *  CLPARGTAB_CLS
+ * @endcode
+ *
+ *  Then you can use this table to define your structure or union, in our case we create a union:
+ *
+ * @code
+ * #define DEFINE_STRUCT
+ * #include "CLPMAC.h"
+ *
+ * typedef union ClpIntFmtRed{
+ *    CLPINTFMTRED_TABLE
+ * }TuClpIntFmtRed;
+ * @endcode
+ *
+ *  And you use the same define to allocate the corresponding CLP table:
+ *
+ * @code
+ * #undef DEFINE_STRUCT
+ * #include "CLPMAC.h"
+ *
+ * #undef  STRUCT_NAME
+ * #define STRUCT_NAME TuClpIntFmtRed
+ * TsClpArgument       asClpIntFmtRed[] = {
+ *    CLPINTFMTRED_TABLE
+ * };
+ * @endcode
  */
 typedef struct ClpArgument {
- /** Type of this parameter (CLPTYP_xxxxxx)\n
- *           The type will be displayed in context sensitive help messages (TYPE: type_name)*/
-   int                           siTyp;
-   /** Pointer to a null-terminated key word for this parameter (:alpha:[:alnum:|'_']*) */
-   const char*                   pcKyw;
-   /** Pointer to another key word to define an alias (:alpha:[:alnum:|'_']*) */
-   const char*                   pcAli;
-   /** Minimum amount of entries for this argument (0-optional n-required) */
-   int                           siMin;
-   /** Maximum amount of entries for this argument (1-scalar n-array (n=0 unlimited array, n>1 limited array)) */
-   int                           siMax;
-   /** If fixed size type (switch, number, float, object, overlay) then size of this type else (string) available size in memory
-    *  String type can be defined as FIX with CLPFLG_FIX but this requires a typedef for this string size
-    *  For dynamic strings an initial size for the first memory allocation can be defined */
-   int                           siSiz;
-   /** Offset of an argument in a structure used for address calculation (please use offset of(t,m) macro) */
-   int                           siOfs;
-   /** Unique integer value representing the argument (object identifier, used in overlays or for switches) */
-   int                           siOid;
-   /** Flag value which can be assigned with CLPFLG_SEL/CON/FIX/CNT/SEN/ELN/TLN/OID/ALI to define different characteristics */
-   unsigned int                  uiFlg;
-   /** Pointer to another parameter table for CLPTYP_OBJECT and CLPTYP_OVRLAY describing these structures
-    *  for CLPTYP_NUMBER, CLPTYP_FLOATN or CLPTYP_STRING to define selections (constant definitions) */
-   struct ClpArgument*           psTab;
-   /** Pointer to a zero-terminated string to define the default values assigned if no argument was defined.
+   int                           siTyp;   /**< @brief Data type    Type of this parameter (CLPTYP_xxxxxx). The type will be displayed in context sensitive help messages (TYPE: type_name). */
+   const char*                   pcKyw;   /**< @brief Keyword (Parameter name)    Pointer to a null-terminated key word for this parameter (:alpha:[:alnum:|'_']*).  */
+   const char*                   pcAli;   /**< @brief Alias (other name for a existing parameter)     Pointer to another key word to define an alias (:alpha:[:alnum:|'_']*). */
+   int                           siMin;   /**< @brief Minimum amount of entries for this argument (0-optional n-required). */
+   int                           siMax;   /**< @brief Maximum amount of entries for this argument (1-scalar n-array (n=0 unlimited array, n>1 limited array)).  */
+   int                           siSiz;   /**< @brief Data size    If fixed size type (switch, number, float, object, overlay) then size of this type else (string) available size in memory.
+                                                      String type can be defined as FIX with CLPFLG_FIX but this requires a typedef for this string size.
+                                                      For dynamic strings an initial size for the first memory allocation can be defined. */
+   int                           siOfs;   /**< @brief Data Offset  Offset of an argument in a structure used for address calculation (the offset of(t,m) instruction is used by the macros for it). */
+   int                           siOid;   /**< @brief Object identifier    Unique integer value representing the argument (object identifier, used in overlays or for switches). */
+   unsigned int                  uiFlg;   /**< @brief Control Flag     Flag value which can be assigned with CLPFLG_SEL/CON/FIX/CNT/SEN/ELN/TLN/OID/ALI to define different characteristics. */
+   struct ClpArgument*           psTab;   /**< @brief Table for next level    Pointer to another parameter table for CLPTYP_OBJECT and CLPTYP_OVRLAY describing these structures, for
+                                                      CLPTYP_NUMBER, CLPTYP_FLOATN or CLPTYP_STRING to define selections (constant definitions)*/
+   /**
+    * @brief Default value
+    *
+    * Pointer to a zero-terminated string to define the default values assigned if no argument was defined.
     *  If this pointer is NULL or empty ("") then no initialization is done.
     *
     *  - for switches a number literal or the special keywords ON/OFF can be defined
@@ -459,141 +304,140 @@ typedef struct ClpArgument {
     *
     *  For arrays of these types a list of the corresponding values (literals or key words) can be defined
     *  The default values are displayed in context sensitive help messages (PROPERTY: [value_list])
-    *  This value can be overrided by corresponding environment variable or property definition*/
+    *  This value can be override by corresponding environment variable or property definition. */
    const char*                   pcDft;
-   /** Pointer to a zero-terminated string for a detailed description of this argument (in ASCIIDOC format, content
-    *  behind. DESCRIPTION, mainly simply some paragraphs). Can be a NULL pointer or empty string for constant definition
-    *  or simple arguments. It is recommended to use a header file with a define for this long string (required for objects
-    *  and overlays). All occurrences of "&{OWN}" or "&{PGM}" (that all their case variations) are replaced with the current
-    *  owner or program name, respectively. All other content between "&{" and "}" is ignored (comment).
-    *  The resulting text is converted on EBCDIC systems)*/
-   const char*                   pcMan;
-   /** Pointer to a zero-terminated string for context sensitive help to this argument. Also used as headline in
+
+   /**
+    * @brief Manual page
+    *
+    * Pointer to a zero-terminated string for a detailed description of this argument (in ASCIIDOC format, content
+    * behind. DESCRIPTION, mainly simply some paragraphs). Can be a NULL pointer or empty string for constant definition
+    * or simple arguments. It is recommended to use a header file with a define for this long string (required for objects
+    * and overlays). All occurrences of "&{OWN}" or "&{PGM}" (that all their case variations) are replaced with the current
+    * owner or program name, respectively. All other content between "&{" and "}" is ignored (comment).
+    * The resulting text is converted on EBCDIC systems). */
+   const char*                   pcMan;   /**< @brief  */
+
+   /**
+    * @brief Help message
+    *
+    * Pointer to a zero-terminated string for context sensitive help to this argument. Also used as headline in
     * documentation generation. For this only alnum, blank, dot, comma, hyphen and parenthesis are used. At every other
     * separator the headline will be cut, meaning it is possible to have more help information than head line.
-    * (converted on EBCDIC systems) */
+    * (converted on EBCDIC systems). */
    const char*                   pcHlp;
-   signed long long int          siVal;
-   double                        flVal;
-   const unsigned char*          pcVal;
-   const char*                   pcTyp;
+
+/*! @cond PRIVATE */
+   signed long long int          siVal;   /**< @brief for internal use only (must be initialized with 0)*/
+   double                        flVal;   /**< @brief for internal use only (must be initialized with 0.0)*/
+   const unsigned char*          pcVal;   /**< @brief for internal use only (must be initialized with NULL)*/
+   const char*                   pcTyp;   /**< @brief for internal use only (must be initialized with the name of the data type (done by the macros))*/
+/*! @endcond */
 }TsClpArgument;
 
 /** Starts a table with constant definitions
  *
- *  *nam* Name of this table\n
+ * @param[in]  name   Name of this table\n
  */
 #define CLPCONTAB_OPN(name)      TsClpArgument name[]
 
 /** defines a number literal with the command line keyword *kyw* and the value *dat*
  *
- *  *man* Pointer to a null-terminated string for a detailed description of this constant
- *        (in ASCIIDOC format, content behind .DESCRIPTION, mainly simply some paragraphs)
- *        Can be a NULL pointer or empty string to produce a bullet list.
- *        It is recommended to use a header file with a define for this long string\n
- *  *hlp* Pointer to a null-terminated string for context sensitive help for this constant
- *        (also used as head line or in bullet list in documentation generation).\n
+ * @param[in]   kyw   Pointer to command line keyword *kyw*.
+ * @param[in]   dat   Pointer to target definition in case of reading.
+ * @param[in]   man   Pointer to a null-terminated string for a detailed description of this constant
+ *                    (in ASCIIDOC format, content behind .DESCRIPTION, mainly simply some paragraphs)
+ *                    Can be a NULL pointer or empty string to produce a bullet list.
+ *                    It is recommended to use a header file with a define for this long string.
+ * @param[in]   hlp   Pointer to a null-terminated string for context sensitive help for this constant
+ *                    (also used as head line or in bullet list in documentation generation).
  */
 #define CLPCONTAB_NUMBER(kyw,dat,man,hlp)       {CLPTYP_NUMBER,(kyw),NULL,0,0,  0  ,0,0,CLPFLG_CON           ,NULL,NULL,(man),(hlp),(dat), 0.0 ,NULL       ,NULL},
 
 /** defines a floating point literal with the command line keyword *kyw* and the value *dat*
  *
- *  *man* Pointer to a null-terminated string for a detailed description of this constant
- *        (in ASCIIDOC format, content behind .DESCRIPTION, mainly simply some paragraphs)
- *        Can be a NULL pointer or empty string to produce a bullet list.
- *        It is recommended to use a header file with a define for this long string\n
- *  *hlp* Pointer to a null-terminated string for context sensitive help for this constant
- *        (also used as head line or in bullet list in documentation generation).\n
+ * @param[in]   kyw   Pointer to command line keyword *kyw*.
+ * @param[in]   dat   Pointer to target definition in case of reading.
+ * @param[in]   man   Pointer to a null-terminated string for a detailed description of this constant
+ *                    (in ASCIIDOC format, content behind .DESCRIPTION, mainly simply some paragraphs)
+ *                    Can be a NULL pointer or empty string to produce a bullet list.
+ *                    It is recommended to use a header file with a define for this long string.
+ * @param[in]   hlp   Pointer to a null-terminated string for context sensitive help for this constant
+ *                    (also used as head line or in bullet list in documentation generation).
  */
 #define CLPCONTAB_FLOATN(kyw,dat,man,hlp)       {CLPTYP_FLOATN,(kyw),NULL,0,0,  0  ,0,0,CLPFLG_CON           ,NULL,NULL,(man),(hlp),  0  ,(dat),NULL       ,NULL},
 
 /** defines a default string literal with the command line keyword *kyw* and the value *dat*
  *
- *  *man* Pointer to a null-terminated string for a detailed description of this constant
- *        (in ASCIIDOC format, content behind .DESCRIPTION, mainly simply some paragraphs)
- *        Can be a NULL pointer or empty string to produce a bullet list.
- *        It is recommended to use a header file with a define for this long string\n
- *  *hlp* Pointer to a null-terminated string for context sensitive help for this constant
- *        (also used as head line or in bullet list in documentation generation).\n
+ * @param[in]   kyw   Pointer to command line keyword *kyw*.
+ * @param[in]   dat   Pointer to target definition in case of reading.
+ * @param[in]   man   Pointer to a null-terminated string for a detailed description of this constant
+ *                    (in ASCIIDOC format, content behind .DESCRIPTION, mainly simply some paragraphs)
+ *                    Can be a NULL pointer or empty string to produce a bullet list.
+ *                    It is recommended to use a header file with a define for this long string.
+ * @param[in]   hlp   Pointer to a null-terminated string for context sensitive help for this constant
+ *                    (also used as head line or in bullet list in documentation generation).
  */
 #define CLPCONTAB_STRING(kyw,dat,man,hlp)       {CLPTYP_STRING,(kyw),NULL,0,0,  0  ,0,0,CLPFLG_CON           ,NULL,NULL,(man),(hlp),  0  , 0.0 ,(U08*)(dat),NULL},
 
 /** defines a hexadecimal string literal with the command line keyword *kyw* and the value *dat*
  *
- *  *man* Pointer to a null-terminated string for a detailed description of this constant
- *        (in ASCIIDOC format, content behind .DESCRIPTION, mainly simply some paragraphs)
- *        Can be a NULL pointer or empty string to produce a bullet list.
- *        It is recommended to use a header file with a define for this long string\n
- *  *hlp* Pointer to a null-terminated string for context sensitive help for this constant
- *        (also used as head line or in bullet list in documentation generation).\n
+ * @param[in]   kyw   Pointer to command line keyword *kyw*.
+ * @param[in]   dat   Pointer to target definition in case of reading.
+ * @param[in]   man   Pointer to a null-terminated string for a detailed description of this constant
+ *                    (in ASCIIDOC format, content behind .DESCRIPTION, mainly simply some paragraphs)
+ *                    Can be a NULL pointer or empty string to produce a bullet list.
+ *                    It is recommended to use a header file with a define for this long string.
+ * @param[in]   hlp   Pointer to a null-terminated string for context sensitive help for this constant
+ *                    (also used as head line or in bullet list in documentation generation).
  */
 #define CLPCONTAB_HEXSTR(kyw,dat,man,hlp)       {CLPTYP_STRING,(kyw),NULL,0,0,  0  ,0,0,CLPFLG_CON|CLPFLG_HEX,NULL,NULL,(man),(hlp),  0  , 0.0 ,(U08*)(dat),NULL},
 
 /** defines a ASCII string literal with the command line keyword *kyw* and the value *dat*
  *
- *  *man* Pointer to a null-terminated string for a detailed description of this constant
- *        (in ASCIIDOC format, content behind .DESCRIPTION, mainly simply some paragraphs)
- *        Can be a NULL pointer or empty string to produce a bullet list.
- *        It is recommended to use a header file with a define for this long string\n
- *  *hlp* Pointer to a null-terminated string for context sensitive help for this constant
- *        (also used as head line or in bullet list in documentation generation).\n
+ *
+ * @param[in]   kyw   Pointer to command line keyword *kyw*.
+ * @param[in]   dat   Pointer to target definition in case of reading.
+ * @param[in]   man   Pointer to a null-terminated string for a detailed description of this constant
+ *                    (in ASCIIDOC format, content behind .DESCRIPTION, mainly simply some paragraphs)
+ *                    Can be a NULL pointer or empty string to produce a bullet list.
+ *                    It is recommended to use a header file with a define for this long string.
+ * @param[in]   hlp   Pointer to a null-terminated string for context sensitive help for this constant
+ *                    (also used as head line or in bullet list in documentation generation).
  */
 #define CLPCONTAB_ASCSTR(kyw,dat,man,hlp)       {CLPTYP_STRING,(kyw),NULL,0,0,  0  ,0,0,CLPFLG_CON|CLPFLG_ASC,NULL,NULL,(man),(hlp),  0  , 0.0 ,(U08*)(dat),NULL},
 
 /** defines a EBCDIC string literal with the command line keyword *kyw* and the value *dat*
  *
- *  *man* Pointer to a null-terminated string for a detailed description of this constant
- *        (in ASCIIDOC format, content behind .DESCRIPTION, mainly simply some paragraphs)
- *        Can be a NULL pointer or empty string to produce a bullet list.
- *        It is recommended to use a header file with a define for this long string\n
- *  *hlp* Pointer to a null-terminated string for context sensitive help for this constant
- *        (also used as head line or in bullet list in documentation generation).\n
+ * @param[in]   kyw   Pointer to command line keyword *kyw*.
+ * @param[in]   dat   Pointer to target definition in case of reading.
+ * @param[in]   man   Pointer to a null-terminated string for a detailed description of this constant
+ *                    (in ASCIIDOC format, content behind .DESCRIPTION, mainly simply some paragraphs)
+ *                    Can be a NULL pointer or empty string to produce a bullet list.
+ *                    It is recommended to use a header file with a define for this long string.
+ * @param[in]   hlp   Pointer to a null-terminated string for context sensitive help for this constant
+ *                    (also used as head line or in bullet list in documentation generation).
  */
 #define CLPCONTAB_EBCSTR(kyw,dat,man,hlp)       {CLPTYP_STRING,(kyw),NULL,0,0,  0  ,0,0,CLPFLG_CON|CLPFLG_EBC,NULL,NULL,(man),(hlp),  0  , 0.0 ,(U08*)(dat),NULL},
 
 /** defines a binary literal with the command line keyword *kyw* and the value *dat*
  *
- *  *siz* Size of the binary value
- *  *man* Pointer to a null-terminated string for a detailed description of this constant
- *        (in ASCIIDOC format, content behind .DESCRIPTION, mainly simply some paragraphs)
- *        Can be a NULL pointer or empty string to produce a bullet list.
- *        It is recommended to use a header file with a define for this long string)\n
- *  *hlp* Pointer to a null-terminated string for context sensitive help for this constant
- *        (also used as head line or in bullet list in documentation generation).\n
+ * @param[in]   kyw   Pointer to command line keyword *kyw*.
+ * @param[in]   dat   Pointer to target definition in case of reading.
+ * @param[in]   siz   Size of the binary value.
+ * @param[in]   man   Pointer to a null-terminated string for a detailed description of this constant
+ *                    (in ASCIIDOC format, content behind .DESCRIPTION, mainly simply some paragraphs)
+ *                    Can be a NULL pointer or empty string to produce a bullet list.
+ *                    It is recommended to use a header file with a define for this long string.
+ * @param[in]   hlp   Pointer to a null-terminated string for context sensitive help for this constant
+ *                    (also used as head line or in bullet list in documentation generation).
  */
 #define CLPCONTAB_BINARY(kyw,dat,siz,man,hlp)   {CLPTYP_STRING,(kyw),NULL,0,0,(siz),0,0,CLPFLG_CON|CLPFLG_BIN,NULL,NULL,(man),(hlp),  0  , 0.0 ,(U08*)(dat),NULL},
 
 /** Ends a table with constant definitions
  */
 #define CLPCONTAB_CLS                           {CLPTYP_NON   , NULL,NULL,0,0,  0  ,0,0,CLPFLG_NON           ,NULL,NULL, NULL, NULL,  0  , 0.0 ,NULL       ,NULL}
-
-
-/** Defines a structure with error information
- *
- * A pointer to this structure can be provided at siClpOpen() to have access to
- * the error information managed in the CLP handle.
- *
- *  The pointers are set by CLP and valid until CLP is closed.
- */
-typedef struct ClpError {
-/**
- * @brief Points to the pointer of a zero-terminated string containing the current error message\n
- */
-   const char**                  ppMsg;
-   /** Points to the pointer of a zero-terminated string containing the current source.
-    * The initial source can be defined for command line or property file parsing.
-    * If the initial source is not defined the constant definitions below are used:
-    * * for command line parsing    ":command line:"   see CLPSRC_CMD
-    * * for property string parsing ":property list:"  see CLPSRC_PRO
-    *
-    * If a parameter file assigned and cause of the error *pcSrc* points to this file name*/
-   const char**                  ppSrc;
-   /** Points to an integer containing the current row for the error in *pcSrc* */
-   const int*                    piRow;
-   /** Points to an integer containing the current column for the error in *pcSrc* */
-   const int*                    piCol;
-}TsClpError;
-
+/** @} */
 
 /**********************************************************************/
 /**
@@ -681,6 +525,91 @@ typedef int (TfClpPrintPage)(
 /**********************************************************************/
 
 /*! @cond PRIVATE */
+#define CLPISF_ALI(flg)          ((flg)&CLPFLG_ALI)
+#define CLPISF_CON(flg)          ((flg)&CLPFLG_CON)
+#define CLPISF_CMD(flg)          ((flg)&CLPFLG_CMD)
+#define CLPISF_PRO(flg)          ((flg)&CLPFLG_PRO)
+#define CLPISF_DMY(flg)          ((flg)&CLPFLG_DMY)
+#define CLPISF_HID(flg)          ((flg)&CLPFLG_HID)
+#define CLPISF_SEL(flg)          ((flg)&CLPFLG_SEL)
+#define CLPISF_FIX(flg)          ((flg)&CLPFLG_FIX)
+#define CLPISF_BIN(flg)          ((flg)&CLPFLG_BIN)
+#define CLPISF_CNT(flg)          ((flg)&CLPFLG_CNT)
+#define CLPISF_OID(flg)          ((flg)&CLPFLG_OID)
+#define CLPISF_IND(flg)          ((flg)&CLPFLG_IND)
+#define CLPISF_ELN(flg)          ((flg)&CLPFLG_ELN)
+#define CLPISF_SLN(flg)          ((flg)&CLPFLG_SLN)
+#define CLPISF_TLN(flg)          ((flg)&CLPFLG_TLN)
+#define CLPISF_DEF(flg)          ((flg)&CLPFLG_DEF)
+#define CLPISF_PWD(flg)          ((flg)&CLPFLG_PWD)
+#define CLPISF_CHR(flg)          ((flg)&CLPFLG_CHR)
+#define CLPISF_ASC(flg)          ((flg)&CLPFLG_ASC)
+#define CLPISF_EBC(flg)          ((flg)&CLPFLG_EBC)
+#define CLPISF_HEX(flg)          ((flg)&CLPFLG_HEX)
+#define CLPISF_PDF(flg)          ((flg)&CLPFLG_PDF)
+#define CLPISF_TIM(flg)          ((flg)&CLPFLG_TIM)
+#define CLPISF_DYN(flg)          ((flg)&CLPFLG_DYN)
+#define CLPISF_DLM(flg)          ((flg)&CLPFLG_DLM)
+#define CLPISF_UNS(flg)          ((flg)&CLPFLG_UNS)
+#define CLPISF_XML(flg)          ((flg)&CLPFLG_XML)
+#define CLPISF_FIL(flg)          ((flg)&CLPFLG_FIL)
+#define CLPISF_LAB(flg)          ((flg)&CLPFLG_LAB)
+#define CLPISF_UPP(flg)          ((flg)&CLPFLG_UPP)
+#define CLPISF_LOW(flg)          ((flg)&CLPFLG_LOW)
+#define CLPISF_LNK(flg)          (CLPISF_CNT(flg) ||  CLPISF_OID(flg) || CLPISF_IND(flg) ||  CLPISF_ELN(flg) || CLPISF_SLN(flg) ||  CLPISF_TLN(flg))
+#define CLPISF_ARG(flg)          ((!CLPISF_LNK(flg)) && (!CLPISF_CON(flg)) && (!CLPISF_ALI(flg)))
+#define CLPISF_ENT(flg)          ((!CLPISF_LNK(flg)) && (!CLPISF_ALI(flg)))
+
+#define CLPSYM_NON               0x00000000U   /**< @brief No operation done*/
+#define CLPSYM_ROOT              0x00000001U   /**< @brief Go to symbol table root */
+#define CLPSYM_OLD               0x00000002U   /**< @brief Go to at last used symbol */
+#define CLPSYM_NEXT              0x00000004U   /**< @brief Go to the next symbol in the list */
+#define CLPSYM_BACK              0x00000008U   /**< @brief Go to the previous symbol in the list */
+#define CLPSYM_DEP               0x00000010U   /**< @brief Go to the deeper level in the tree */
+#define CLPSYM_HIH               0x00000020U   /**< @brief Go to the higher level in the tree */
+#define CLPSYM_ALIAS             0x00000100U   /**< @brief Go to the alias symbol */
+#define CLPSYM_COUNT             0x00001000U   /**< @brief Go to the counter symbol */
+#define CLPSYM_LINK              0x00004000U   /**< @brief Go to the entry link symbol */
+#define CLPSYM_OID               0x00008000U   /**< @brief Go to the entry object identifier symbol */
+#define CLPSYM_ELN               0x00002000U   /**< @brief Go to the element length symbol */
+#define CLPSYM_SLN               0x00010000U   /**< @brief Go to the string length symbol */
+#define CLPSYM_TLN               0x00020000U   /**< @brief Go to the total length symbol */
+
+#define CLPISS_ROOT(flg)         ((flg)&CLPSYM_ROOT)
+#define CLPISS_OLD(flg)          ((flg)&CLPSYM_OLD)
+#define CLPISS_NEXT(flg)         ((flg)&CLPSYM_NEXT)
+#define CLPISS_BACK(flg)         ((flg)&CLPSYM_BACK)
+#define CLPISS_DEP(flg)          ((flg)&CLPSYM_DEP)
+#define CLPISS_HIH(flg)          ((flg)&CLPSYM_HIH)
+#define CLPISS_ALIAS(flg)        ((flg)&CLPSYM_ALIAS)
+#define CLPISS_COUNT(flg)        ((flg)&CLPSYM_COUNT)
+#define CLPISS_ELN(flg)          ((flg)&CLPSYM_ELN)
+#define CLPISS_LINK(flg)         ((flg)&CLPSYM_LINK)
+#define CLPISS_OID(flg)          ((flg)&CLPSYM_OID )
+#define CLPISS_SLN(flg)          ((flg)&CLPSYM_SLN)
+#define CLPISS_TLN(flg)          ((flg)&CLPSYM_TLN)
+
+typedef struct ClpSymWlk {
+  const char*                   pcKyw;      /**< @brief Pointer to the key word */
+  const char*                   pcAli;      /**< @brief Pointer to the alias */
+  unsigned int                  uiFlg;      /**< @brief Flag value */
+  const char*                   pcDft;      /**< @brief Pointer to the default supplement string */
+  const char*                   pcMan;      /**< @brief Pointer to the manual page (description) */
+  const char*                   pcHlp;      /**< @brief Pointer to the help message */
+  const char*                   pcPat;      /**< @brief Pointer to the path */
+  int                           siTyp;      /**< @brief Type of the symbol */
+  int                           siMin;      /**< @brief Minimum number of entries */
+  int                           siMax;      /**< @brief Maximum number of entries */
+  int                           siKwl;      /**< @brief Minimum length of keyword string to make it unique (maximal abbreviation) */
+  int                           siSiz;      /**< @brief Size of the symbol */
+  int                           siOid;      /**< @brief Object identifier for the symbol */
+  unsigned int                  uiOpr;      /**< @brief Bitmask for possible operations */
+}TsClpSymWlk;
+
+typedef struct ClpSymUpd {
+  const char*                   pcPro;      /**< @brief Pointer to a property supplement string replacing the current default value */
+}TsClpSymUpd;
+
 #endif // INC_CLPDEF_H
 
 #ifdef __cplusplus

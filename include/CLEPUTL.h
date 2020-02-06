@@ -592,15 +592,13 @@
  * can for example used to build several graphical user interfaces or other
  * things based on the tables.
  *
- * @subsection CLPLEXGRAM FLAMCLP-Lexeme and grammar
+ * @subsection CLPLEXEMES FLAMCLP-Lexemes
  *
- * Call siClpLexem() or siClpGrammar() to get the current supported lexems
- * and grammar. The list below could be a older state of the implementation.
+ * Call siClpLexemes() to get the current supported lexemes. The list below could be
+ * a older state of the implementation.
  *
- * @subsubsection CLPLEXEME FLAMCLP-Lexeme
- *
- * <pre>
  * Lexemes (regular expressions) for argument list or parameter file:
+ * <pre>
  * --| COMMENT   '#' [:print:]* '#'                              (will be ignored)
  * --| LCOMMENT  ';' [:print:]* 'nl'                             (will be ignored)
  * --| SEPARATOR [:space: | :cntr: | ',']*                  (abbreviated with SEP)
@@ -622,12 +620,12 @@
  * --| str       [e|E]''' [:print:]* ''' |               (binary string in EBCDIC)
  * --| str       [x|X]''' [:print:]* ''' |         (binary string in hex notation)
  * --| str       [f|F]''' [:print:]* ''' | (read string from file (for passwords))
- * --|           Strings can contain two '' to represent one '
- * --|           Strings can also be enclosed in " or ` instead of '
- * --|           Strings can directly start behind a '=' without enclosing ('`")
- * --|              In this case the string ends at the next separator or operator
- * --|              and keywords are preferred. To use keywords, separators or
- * --|              operators in strings, enclosing quotes are required.
+ * --|           Strings can contain two '' to represent one '.
+ * --|           Strings can also be enclosed in " or ` instead of '.
+ * --|           Strings can directly start behind a '=' without enclosing ('`").
+ * --|           In this case the string ends at the next separator or operator
+ * --|           and keywords are preferred. To use keywords, separators or
+ * --|           operators in strings, enclosing quotes are required.
  * --|
  * --| The predefined constant keyword below can be used in a value expressions
  * --| NOW       NUMBER - current time in seconds since 1970 (+0t0000)
@@ -665,10 +663,10 @@
  * --| SnRND10   STRING - decimal random number of length n (1 to 8)
  * --| SnRND16   STRING - hexadecimal random number of length n (1 to 8)
  * --|
- * --| SUPPLEMENT     '"' [:print:]* '"' |   (null-terminated string (properties))
- * --|           Supplements can contain two "" to represent one "
- * --|           Supplements can also be enclosed in ' or ` instead of "
- * --|           Supplements can also be enclosed in ' or ` instead of "
+ * --| SUPPLEMENT     '"' [:print:]* '"' |   (null-terminated string (properties)).
+ * --|           Supplements can contain two "" to represent one ".
+ * --|           Supplements can also be enclosed in ' or ` instead of ".
+ * --|           Supplements can also be enclosed in ' or ` instead of ".
  * --| ENVIRONMENT VARIABLES '\<'varnam'\>' will replaced by the corresponding value
  * --| Escape sequences for critical punctuation characters on EBCDIC systems
  * --|    '!' = '\&EXC;'   - Exclamation mark
@@ -690,11 +688,13 @@
  * --|    '&' ['X''x'] :xdigit: :xdigit: ';' ("&xF5;")
  * </pre>
  *
- * @subsection GRAMMARC FLAMCLP-Grammar for command line
+ * @subsection CLPGRAMMARL FLAMCLP-Grammar for command line
  *
- * Grammar for argument list or parameter file
+ * Call siClpGrammar() to get the current supported grammar for the command lines.
+ * The list below could be a older state of the implementation.
+ *
+ * Grammar for argument list or parameter file:
  * <pre>
- * --| Command Line Parser
  * --| command        -> ['('] parameter_list [')']       (main=object)
  * --|                |  ['.'] parameter                  (main=overlay)
  * --| parameter_list -> parameter SEP parameter_list
@@ -759,9 +759,12 @@
  * the command string for an overlay can be start with a dot '.' or not.
  * The same is valid for the parenthesis '(...)' of an object.
  *
- * @subsection GRAMMARP FLAMCLP-Grammar for property file
+ * @subsection CLPGRAMMARP FLAMCLP-Grammar for property file
  *
- * Grammar for property file
+ * Call siClpGrammar() to get the current supported grammar for property files.
+ * The list below could be a older state of the implementation.
+ *
+ * Grammar for property file:
  * <pre>
  * --| Property File Parser
  * --| properties     -> property_list
@@ -777,8 +780,12 @@
  *
  * @section CLEPUTIL Utility functions for FLAMCLE/CLP
  *
- * This interface provides utility functions for Command Line Executor (CLE) and Processor (CLP)
- * and should be static linked to CLP and/or CLE.
+ * This interface provides additional several utility functions for the
+ * Command Line Executor (CLE) and Processor (CLP). These help functions
+ * makes the CLEP project platform independent and can also be used for
+ * other things. The CLEPUTL object should be static linked to CLP and/or
+ * CLE.
+ *
  **********************************************************************/
 /*! @cond PRIVATE */
 #ifdef __cplusplus

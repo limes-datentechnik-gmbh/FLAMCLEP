@@ -60,19 +60,25 @@
 /**********************************************************************/
 
 /**
+ * @defgroup CLP_FUNC CLP Functions
+ * @brief The function provided by CLP.
+ * @{
+ */
+
+/**
  * @brief Get version information
  *
  * The function returns the version information for this library
  *
- * @param l Level of visible hierarchy in the first 2 numbers of the string
- *          the number can later be used to better visualize the hierarchy
- * @param s Size of the provided string buffer (including space for null termination)
- * @param b Buffer for the version string.
- *          Must contain a null-terminated string.
- *          The version string will be concatenated.
- *          The size including the 0-byte is the limit.
- *          If (strlen(b)==s-1) then more space is required for the complete version string.
- *          A good size for the version string is 128 byte.
+ * @param[in]    l Level of visible hierarchy in the first 2 numbers of the string
+ *                 the number can later be used to better visualize the hierarchy
+ * @param[in]    s Size of the provided string buffer (including space for null termination)
+ * @param[inout] b Buffer for the version string.
+ *                 Must contain a null-terminated string.
+ *                 The version string will be concatenated.
+ *                 The size including the 0-byte is the limit.
+ *                 If (strlen(b)==s-1) then more space is required for the complete version string.
+ *                 A good size for the version string is 128 byte.
  *
  * @return Pointer to a null-terminated version string (return(b))
  */
@@ -83,49 +89,19 @@ extern const char* pcClpVersion(const int l, const int s, char* b);
  *
  * The function returns the about information for this library
  *
- * @param l Level of visible hierarchy in the first 2 numbers of the string
- *          the number can later be used to better visualize the hierarchy
- * @param s Size of the provided string buffer (including space for null termination)
- * @param b Buffer for the about string.
- *          Must contain a null-terminated string.
- *          The about string will be concatenated.
- *          The size including the 0-byte is the limit.
- *          If (strlen(b)==s-1) then more space is required for the complete about string.
- *          A good size for the about string is 512 byte.
+ * @param[in]     l Level of visible hierarchy in the first 2 numbers of the string
+ *                  the number can later be used to better visualize the hierarchy
+ * @param[in]     s Size of the provided string buffer (including space for null termination)
+ * @param[inout]  b Buffer for the about string.
+ *                  Must contain a null-terminated string.
+ *                  The about string will be concatenated.
+ *                  The size including the 0-byte is the limit.
+ *                  If (strlen(b)==s-1) then more space is required for the complete about string.
+ *                  A good size for the about string is 512 byte.
  *
  * @return pointer to a null-terminated about string (return(b))
  */
 extern const char* pcClpAbout(const int l, const int s, char* b);
-
-/**
- * @brief Symbol table walk
- *
- * The function can be use to read the symbol table of CLP
- *
- * @param[in]  pvHdl Pointer to the corresponding handle created with \a pvClpOpen
- * @param[in]  uiOpr Operation on symbol table
- * @param[out] psSym Entry to read values from symbol table
- *
- * @return signed integer with 0 for end of list, > 0 for the type or < 0 an error code (CLPERR_xxxxxx)
- */
-extern int siClpSymbolTableWalk(
-   void*                         pvHdl,
-   const unsigned int            uiOpr,
-   TsClpSymWlk*                  psSym);
-
-/**
- * @brief Symbol table update
- *
- * The function can be use to update values for symbol table entries
- *
- * @param[in]  pvHdl Pointer to the corresponding handle created with \a pvClpOpen
- * @param[out] psSym Entry to read values from symbol table
- *
- * @return signed integer with CLP_OK(0) or an error code (CLPERR_xxxxxx)
- */
-extern int siClpSymbolTableUpdate(
-   void*                         pvHdl,
-   TsClpSymUpd*                  psSym);
 
 /**
  * @brief Open command line parser
@@ -201,7 +177,7 @@ extern void* pvClpOpen(
  *
  * Required after an error which was handled by the calling application to parse properties or commands correctly
  *
- * @param pvHdl Pointer to the corresponding handle created with \a pvClpOpen
+ * @param[inout] pvHdl Pointer to the corresponding handle created with \a pvClpOpen
  */
 extern void vdClpReset(
    void*                         pvHdl);
@@ -376,6 +352,52 @@ extern int siClpDocu(
    const unsigned int            uiLev);
 
 /**
+ * @brief Generate documentation using a callback function
+ *
+ * This function works like siClpDocu, but it gives each page to a
+ * callback function and don't print it to a certain file.
+ *
+ * @param[in]     pvHdl   Pointer to the corresponding handle created with \a pvClpOpen
+ * @param[in]     pcFil   Prefix for file name building
+ * @param[in]     pcNum   Leading number for table of contents ("1.2." used or not used depend on isNbr, NULL pointer cause an error)
+ * @param[in]     pcKnd   Qualifier for command/otherclp head line (Recommended: "COMMAND" or "STRING" NULL pointer cause an error)
+ * @param[in]     isCmd   If TRUE for command and FALSE for other CLP strings (required for anchor generation).
+ * @param[in]     isDep   If TRUE then all deeper parts are printed if FALSE then not.
+ * @param[in]     isAnc   Boolean to enable write of generated anchors for each command (only for doc type book)
+ * @param[in]     isNbr   Boolean to enable header numbering for generated documentation (only for doc type book)
+ * @param[in]     isShl   Boolean to enable short headline without type specification (only for doc type book)
+ * @param[in]     isIdt   Boolean to enable printing of generated index terms (only for doc type book)
+ * @param[in]     isPat   Boolean to enable printing of path as part of the synopsis (only for doc type book)
+ * @param[in]     uiLev   If > 0 then headlines are written with this amount of '=' in front instead of underlining (only for doc type book)
+ * @param[in]     siPs1   Character to separate parts to build filename outside command path (only for doc type book)
+ * @param[in]     siPs2   Character to separate parts to build filename inside command path (only for doc type book)
+ * @param[in]     siPr3   Character to replace non alpha-numerical characters in file names (only for doc type book)
+ * @param[in]     pvPrn   Handle for the print callback function (created with TfCleOpenPrint (opnHtmlDoc))
+ * @param[inout]  pfPrn   Pointer to the callback function TfClpPrintPage (prnHtmlDoc)
+ *
+ * @return        signed integer with CLP_OK(0) or an error code (CLPERR_xxxxxx)
+ */
+extern int siClpPrint(
+   void*                         pvHdl,
+   const char*                   pcFil,
+   const char*                   pcNum,
+   const char*                   pcKnd,
+   const int                     isCmd,
+   const int                     isDep,
+   const int                     isAnc,
+   const int                     isNbr,
+   const int                     isShl,
+   const int                     isIdt,
+   const int                     isPat,
+   const unsigned int            uiLev,
+   const int                     siPs1,
+   const int                     siPs2,
+   const int                     siPr3,
+   void*                         pvPrn,
+   TfClpPrintPage*               pfPrn);
+
+
+/**
  * @brief Generate properties
  *
  * The function produces a property list with the current default values
@@ -475,54 +497,42 @@ extern void* pvClpAlloc(
 extern char* pcClpError(
    int               siErr);
 
-/**
- * @brief Generate documentation using a callback function
- *
- * This function works like siClpDocu, but it gives each page to a
- * callback function and don't print it to a certain file.
- *
- * @param pvHdl   Pointer to the corresponding handle created with \a pvClpOpen
- * @param pcFil   Prefix for file name building
- * @param pcNum   Leading number for table of contents ("1.2." used or not used depend on isNbr, NULL pointer cause an error)
- * @param pcKnd   Qualifier for command/otherclp head line (Recommended: "COMMAND" or "STRING" NULL pointer cause an error)
- * @param isCmd   If TRUE for command and FALSE for other CLP strings (required for anchor generation).
- * @param isDep   If TRUE then all deeper parts are printed if FALSE then not.
- * @param isAnc   Boolean to enable write of generated anchors for each command (only for doc type book)
- * @param isNbr   Boolean to enable header numbering for generated documentation (only for doc type book)
- * @param isShl   Boolean to enable short headline without type specification (only for doc type book)
- * @param isIdt   Boolean to enable printing of generated index terms (only for doc type book)
- * @param isPat   Boolean to enable printing of path as part of the synopsis (only for doc type book)
- * @param uiLev   If > 0 then headlines are written with this amount of '=' in front instead of underlining (only for doc type book)
- * @param siPs1   Character to separate parts to build filename outside command path (only for doc type book)
- * @param siPs2   Character to separate parts to build filename inside command path (only for doc type book)
- * @param siPr3   Character to replace non alpha-numerical characters in file names (only for doc type book)
- * @param pvPrn   Handle for the print callback function (created with TfCleOpenPrint (opnHtmlDoc))
- * @param pfPrn   Pointer to the callback function TfClpPrintPage (prnHtmlDoc)
- *
- * @return        signed integer with CLP_OK(0) or an error code (CLPERR_xxxxxx)
- */
-extern int siClpPrint(
-   void*                         pvHdl,
-   const char*                   pcFil,
-   const char*                   pcNum,
-   const char*                   pcKnd,
-   const int                     isCmd,
-   const int                     isDep,
-   const int                     isAnc,
-   const int                     isNbr,
-   const int                     isShl,
-   const int                     isIdt,
-   const int                     isPat,
-   const unsigned int            uiLev,
-   const int                     siPs1,
-   const int                     siPs2,
-   const int                     siPr3,
-   void*                         pvPrn,
-   TfClpPrintPage*               pfPrn);
-
+/** @}*/
 /**********************************************************************/
 
 /*! @cond PRIVATE */
+/**
+ * @brief Symbol table walk
+ *
+ * The function can be use to read the symbol table of CLP
+ *
+ * @param[in]  pvHdl Pointer to the corresponding handle created with \a pvClpOpen
+ * @param[in]  uiOpr Operation on symbol table
+ * @param[out] psSym Entry to read values from symbol table
+ *
+ * @return signed integer with 0 for end of list, > 0 for the type or < 0 an error code (CLPERR_xxxxxx)
+ */
+extern int siClpSymbolTableWalk(
+   void*                         pvHdl,
+   const unsigned int            uiOpr,
+   TsClpSymWlk*                  psSym);
+
+/**
+ * @brief Symbol table update
+ *
+ * The function can be use to update values for symbol table entries
+ *
+ * @param[in]  pvHdl Pointer to the corresponding handle created with \a pvClpOpen
+ * @param[out] psSym Entry to read values from symbol table
+ *
+ * @return signed integer with CLP_OK(0) or an error code (CLPERR_xxxxxx)
+ */
+extern int siClpSymbolTableUpdate(
+   void*                         pvHdl,
+   TsClpSymUpd*                  psSym);
+
+/**********************************************************************/
+
 #endif // INC_FLAMCLP_H
 
 #ifdef __cplusplus
