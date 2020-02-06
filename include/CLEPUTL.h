@@ -246,115 +246,115 @@
  * principles of CLE usage.
  *
  * @code
- *     #include "CLEPUTL.h"
- *     #include "FLAMCLE.h"
- *     #include "CLEMAN.h"
+ * #include "CLEPUTL.h"
+ * #include "FLAMCLE.h"
+ * #include "CLEMAN.h"
  *
- *     #define DEFINE_STRUCT
- *     #include "CLPMAC.h"
- *     #include "FL5TAB.h"
- *     #include "FL5STC.h"
+ * #define DEFINE_STRUCT
+ * #include "CLPMAC.h"
+ * #include "FL5TAB.h"
+ * #include "FL5STC.h"
  *
- *     int main(const int argc, const char * argv[])
- *     {
- *        static TsFlcConvPar     stFlcConvPar;
- *        static TsClpConvPar     stClpXcnvPar;
- *        static TsClpConvPar     stClpConvPar;
- *        static TsClpIcnvPar     stClpIcnvPar;
- *        static TsFlcInfoPar     stFlcInfoPar;
- *        static TsClpInfoPar     stClpInfoPar;
+ * int main(const int argc, const char * argv[])
+ * {
+ *    static TsFlcConvPar     stFlcConvPar;
+ *    static TsClpConvPar     stClpXcnvPar;
+ *    static TsClpConvPar     stClpConvPar;
+ *    static TsClpIcnvPar     stClpIcnvPar;
+ *    static TsFlcInfoPar     stFlcInfoPar;
+ *    static TsClpInfoPar     stClpInfoPar;
  *
- *        #undef DEFINE_STRUCT
- *        #include "CLPMAC.h"
- *        #include "FL5CON.h"
- *        #include "FL5ARG.h"
+ *    #undef DEFINE_STRUCT
+ *    #include "CLPMAC.h"
+ *    #include "FL5CON.h"
+ *    #include "FL5ARG.h"
  *
- *        CLECMD_OPN(asCmdTab) = {
- *           CLETAB_CMD("CONV",asClpConvPar,&stClpConvPar,&stFlcConvPar,NULL,siIniConv,siMapConv2Conv,siFluc,siFinConv,1,MAN_FLCL_CONV,"Simple data conversion")
- *           CLETAB_CMD("XCBV",asClpXcnvPar,&stClpXcnvPar,&stFlcConvPar,NULL,siIniXcnv,siMapXcnv2Conv,siFluc,siFinConv,0,MAN_FLCL_XCNV,"Complex data conversion")
- *           CLETAB_CMD("ICNV",asClpIcnvPar,&stClpIcnvPar,&stFlcConvPar,NULL,siIniIcnv,siMapIcnv2Conv,siFluc,siFinConv,1,MAN_FLCL_ICNV,"Character conversion with libiconv")
- *           CLETAB_CMD("INFO",asClpInfoPar,&stClpInfoPar,&stFlcInfoPar,NULL,siIniInfo,siMapInfo2Info,siInfo,siFinInfo,1,MAN_FLCL_INFO,"Provide information")
- *           CLECMD_CLS
- *        };
+ *    CLECMD_OPN(asCmdTab) = {
+ *       CLETAB_CMD("CONV",asClpConvPar,&stClpConvPar,&stFlcConvPar,NULL,siIniConv,siMapConv2Conv,siFluc,siFinConv,1,MAN_FLCL_CONV,"Simple data conversion")
+ *       CLETAB_CMD("XCBV",asClpXcnvPar,&stClpXcnvPar,&stFlcConvPar,NULL,siIniXcnv,siMapXcnv2Conv,siFluc,siFinConv,0,MAN_FLCL_XCNV,"Complex data conversion")
+ *       CLETAB_CMD("ICNV",asClpIcnvPar,&stClpIcnvPar,&stFlcConvPar,NULL,siIniIcnv,siMapIcnv2Conv,siFluc,siFinConv,1,MAN_FLCL_ICNV,"Character conversion with libiconv")
+ *       CLETAB_CMD("INFO",asClpInfoPar,&stClpInfoPar,&stFlcInfoPar,NULL,siIniInfo,siMapInfo2Info,siInfo,siFinInfo,1,MAN_FLCL_INFO,"Provide information")
+ *       CLECMD_CLS
+ *    };
  *
- *        CLEOTH_OPN(asOthTab) = {
- *           CLETAB_OTH("flcbyt","READ-FORMAT"  ,asClpWrtFmtPar,MAN_FLCBYT_READ_FORMAT ,HLP_FLCBYT_READ_FORMAT ,TRUE)
- *           CLETAB_OTH("flcbyt","WRITE-FORMAT" ,asClpRedFmtPar,MAN_FLCBYT_WRITE_FORMAT,HLP_FLCBYT_WRITE_FORMAT,TRUE)
- *           CLETAB_OTH("flcbyt","CONV-READ"    ,asClpElmCnvRed,MAN_FLCBYT_CONV_READ   ,HLP_FLCBYT_CONV_READ   ,TRUE)
- *           CLETAB_OTH("flcbyt","CONV-WRITE"   ,asClpElmCnvWrt,MAN_FLCBYT_CONV_WRITE  ,HLP_FLCBYT_CONV_WRITE  ,TRUE)
- *           CLETAB_OTH("flcbyt","FROM-TO-CONV" ,asClpElmCnv   ,MAN_FLCBYT_CONV        ,HLP_FLCBYT_CONV        ,TRUE)
- *           CLETAB_OTH("flcbyt","STATE"        ,asClpExtPar   ,MAN_FLCBYT_STATE       ,HLP_FLCBYT_STATE       ,FALSE)
- *           CLETAB_OTH("flcbyt","LOG"          ,asClpMemoryLog,MAN_FLCBYT_LOG         ,HLP_FLCBYT_LOG         ,FALSE)
- *           CLEOTH_CLS
- *        };
+ *    CLEOTH_OPN(asOthTab) = {
+ *       CLETAB_OTH("flcbyt","READ-FORMAT"  ,asClpWrtFmtPar,MAN_FLCBYT_READ_FORMAT ,HLP_FLCBYT_READ_FORMAT ,TRUE)
+ *       CLETAB_OTH("flcbyt","WRITE-FORMAT" ,asClpRedFmtPar,MAN_FLCBYT_WRITE_FORMAT,HLP_FLCBYT_WRITE_FORMAT,TRUE)
+ *       CLETAB_OTH("flcbyt","CONV-READ"    ,asClpElmCnvRed,MAN_FLCBYT_CONV_READ   ,HLP_FLCBYT_CONV_READ   ,TRUE)
+ *       CLETAB_OTH("flcbyt","CONV-WRITE"   ,asClpElmCnvWrt,MAN_FLCBYT_CONV_WRITE  ,HLP_FLCBYT_CONV_WRITE  ,TRUE)
+ *       CLETAB_OTH("flcbyt","FROM-TO-CONV" ,asClpElmCnv   ,MAN_FLCBYT_CONV        ,HLP_FLCBYT_CONV        ,TRUE)
+ *       CLETAB_OTH("flcbyt","STATE"        ,asClpExtPar   ,MAN_FLCBYT_STATE       ,HLP_FLCBYT_STATE       ,FALSE)
+ *       CLETAB_OTH("flcbyt","LOG"          ,asClpMemoryLog,MAN_FLCBYT_LOG         ,HLP_FLCBYT_LOG         ,FALSE)
+ *       CLEOTH_CLS
+ *    };
  *
- *        CLEDOC_OPN(asDocTab) = {
- *           CLETAB_DOC(CLE_DOCTYP_COVER         ,1,NULL     ,NULL               ,NULL                             ,"FLCL manual"                       ,MAN_FLCL_COVER                            ,NULL)
- *           CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,2,NULL     ,NULL               ,NULL                             ,"Trademarks"                        ,MAN_FLCL_TRADEMARKS                       ,NULL)
- *           CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,2,NULL     ,NULL               ,NULL                             ,"Abstract"                          ,MAN_FLCL_ABSTRACT                         ,NULL)
- *           CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,2,NULL     ,NULL               ,NULL                             ,"Supported systems"                 ,MAN_FLCL_SUPPORTED_SYSTEMS                ,NULL)
- *           CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,2,NULL     ,NULL               ,NULL                             ,"Use cases"                         ,MAN_FLCL_USECASES                         ,NULL)
- *           CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,2,NULL     ,CLE_DOCKYW_PREFACE ,NULL                             ,"Preface"                           ,MAN_FLCL_PREFACE                          ,NULL)
- *           CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,2,"1."     ,NULL               ,"clep.main"                      ,"Command line parser"               ,MAN_CLE_CLEPMAIN                          ,NULL)
- *           CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,3,"1.1."   ,NULL               ,NULL                             ,"Command line considerations"       ,MAN_CLE_CLEPMAIN_CONSID                   ,NULL)
- *           CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,3,"1.2."   ,NULL               ,"clep.main.usedenv"              ,"Used environment variables"        ,MAN_CLE_CLEPMAIN_USEDENV                  ,NULL)
- *           CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,3,"1.3."   ,NULL               ,NULL                             ,"Environment variable mapping"      ,MAN_CLE_CLEPMAIN_ENVARMAP                 ,NULL)
- *           CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,3,"1.4."   ,NULL               ,"clep.main.filemap"              ,"Filename mapping"                  ,MAN_CLE_CLEPMAIN_FILEMAP                  ,NULL)
- *           CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,3,"1.5."   ,NULL               ,NULL                             ,"Key label name mapping"            ,MAN_CLE_CLEPMAIN_KEYLABMAP                ,NULL)
- *           CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,3,"1.6."   ,NULL               ,"clep.main.ebcdic"               ,"Special EBCDIC code page support"  ,MAN_CLE_CLEPMAIN_EBCDIC                   ,NULL)
- *           CLETAB_DOC(CLE_DOCTYP_BUILTIN       ,3,"1.7."   ,NULL               ,CLE_ANCHOR_BUILTIN_FUNCTIONS     ,"Built-in functions"                ,MAN_CLE_BUILTIN_FUNCTIONS                 ,NULL)
- *           CLETAB_DOC(CLE_DOCTYP_PROGRAM       ,2,"2."     ,NULL               ,NULL                             ,"FLCL Utility"                      ,MAN_FLCL_MAIN                             ,NULL)
- *           CLETAB_DOC(CLE_DOCTYP_PGMSYNOPSIS   ,3,"2.1."   ,NULL               ,NULL                             ,"Synopsis"                          ,MAN_CLE_PROGRAM_SYNOPSIS                  ,NULL)
- *           CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,3,"2.2."   ,NULL               ,NULL                             ,"Environment Variables"             ,MAN_FLCL_MAIN_ENVIRONMENT_VARIABLES       ,NULL)
- *           CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,3,"2.3."   ,NULL               ,NULL                             ,"Filename Handling"                 ,MAN_FLCL_MAIN_FILENAME_HANDLING           ,NULL)
- *           CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,3,"2.4."   ,NULL               ,NULL                             ,"Directory Support"                 ,MAN_FLCL_MAIN_DIRECTORY_SUPPORT           ,NULL)
- *           CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,3,"2.5."   ,NULL               ,NULL                             ,"Input to Output Name Mapping"      ,MAN_FLCL_MAIN_INPUT_TO_OUTPUT_NAME_MAPPING,NULL)
- *           CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,3,"2.6."   ,NULL               ,NULL                             ,"Key Label Handling"                ,MAN_FLCL_MAIN_KEY_LABEL_HANDLING          ,NULL)
- *           CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,3,"2.7."   ,NULL               ,NULL                             ,"Password Handling"                 ,MAN_FLCL_MAIN_PASSWORD_HANDLING           ,NULL)
- *           CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,3,"2.8."   ,NULL               ,NULL                             ,"Handling of Empty Records"         ,MAN_FLCL_MAIN_HANDLING_OF_EMPTY_RECORDS   ,NULL)
- *           CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,3,"2.9."   ,NULL               ,NULL                             ,"Table Support"                     ,MAN_FLCL_MAIN_TABLE_SUPPORT               ,NULL)
- *           CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,3,"2.10."  ,NULL               ,NULL                             ,"Pre- and Post-processing"          ,MAN_FLCL_MAIN_PRE_AND_POST_PROCESSING     ,NULL)
- *           CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,3,"2.11."  ,NULL               ,NULL                             ,"Use of Built-in Functions"         ,MAN_FLCL_MAIN_BUILT_IN_FUNCTIONS          ,NULL)
- *           CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,3,"2.12."  ,NULL               ,NULL                             ,"CONV versus XCNV and ICNVs"        ,MAN_FLCL_MAIN_CONV_VERSUS_XCNV_AND_ICNV   ,NULL)
- *           CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,3,"2.13."  ,NULL               ,NULL                             ,"CONV READ/WRITE overview"          ,MAN_FLCL_MAIN_CONV_READ_WRITE_OVERVIEW    ,NULL)
- *           CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,3,"2.14."  ,NULL               ,NULL                             ,"JCL Considerations"                ,MAN_FLCL_MAIN_JCL_CONSIDERATIONS          ,NULL)
- *           CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,3,"2.15."  ,NULL               ,NULL                             ,"SAF Consideration"                 ,MAN_FLCL_MAIN_SAF_CONSIDERATIONS          ,NULL)
- *           CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,3,"2.16."  ,NULL               ,NULL                             ,"Installation"                      ,MAN_FLCL_MAIN_INSTALLATION                ,NULL)
- *           CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,4,"2.16.1.",NULL               ,NULL                             ,"License"                           ,MAN_FLCL_MAIN_INSTALLATION_LICENSE        ,NULL)
- *           CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,4,"2.16.2.",NULL               ,NULL                             ,"Download"                          ,MAN_FLCL_MAIN_INSTALLATION_DOWNLOAD       ,NULL)
- *           CLETAB_DOC(CLE_DOCTYP_PGMSYNTAX     ,3,"2.17."  ,NULL               ,NULL                             ,"Syntax of FLCL"                    ,MAN_CLE_PROGRAM_SYNTAX                    ,NULL)
- *           CLETAB_DOC(CLE_DOCTYP_PGMHELP       ,3,"2.18."  ,NULL               ,NULL                             ,"Help for FLCL"                     ,MAN_CLE_PROGRAM_HELP                      ,NULL)
- *           CLETAB_DOC(CLE_DOCTYP_COMMANDS      ,3,"2.19."  ,NULL               ,NULL                             ,"Available FLCL commands"           ,MAN_CLE_PROGRAM_COMMANDS                  ,NULL)
- *           CLETAB_DOC(CLE_DOCTYP_OTHERCLP      ,2,NULL     ,CLE_DOCKYW_APPENDIX,NULL                             ,"Other CLP strings"                 ,MAN_FLCL_OTHERCLP                         ,NULL)
- *           CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,2,NULL     ,CLE_DOCKYW_APPENDIX,NULL                             ,"FLUC Filesystem for Linux"         ,MAN_FLCL_APPENDIX_FLUCFS                  ,NULL)
- *           CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,2,NULL     ,CLE_DOCKYW_APPENDIX,NULL                             ,"FLUC Subsystem for z/OS"           ,MAN_FLCL_APPENDIX_FLUCSUB                 ,NULL)
- *           CLETAB_DOC(CLE_DOCTYP_LEXEM         ,2,NULL     ,CLE_DOCKYW_APPENDIX,CLE_ANCHOR_APPENDIX_LEXEM        ,"Lexemes"                           ,MAN_CLE_APPENDIX_LEXEM                    ,NULL)
- *           CLETAB_DOC(CLE_DOCTYP_GRAMMAR       ,2,NULL     ,CLE_DOCKYW_APPENDIX,CLE_ANCHOR_APPENDIX_GRAMMAR      ,"Grammar"                           ,MAN_CLE_APPENDIX_GRAMMAR                  ,NULL)
- *           CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,2,NULL     ,CLE_DOCKYW_APPENDIX,CLE_ANCHOR_APPENDIX_PROPERTIES   ,"Properties"                        ,MAN_CLE_APPENDIX_PROPERTIES               ,NULL)
- *           CLETAB_DOC(CLE_DOCTYP_PROPREMAIN    ,3,NULL     ,NULL               ,NULL                             ,"Remaining documentation"           ,MAN_CLE_APPENDIX_PROP_REMAINING           ,NULL)
- *           CLETAB_DOC(CLE_DOCTYP_PROPDEFAULTS  ,3,NULL     ,NULL               ,NULL                             ,"Predefined defaults"               ,MAN_CLE_APPENDIX_PROP_DEFAULTS            ,NULL)
- *           CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,2,NULL     ,CLE_DOCKYW_APPENDIX,CLE_ANCHOR_APPENDIX_RETURNCODES  ,"Return codes"                      ,MAN_CLE_APPENDIX_RETURNCODES              ,NULL)
- *           CLETAB_DOC(CLE_DOCTYP_SPECIALCODES  ,3,NULL     ,NULL               ,NULL                             ,"Special condition codes"           ,MAN_FLCL_SPECIALCODES                     ,NULL)
- *           CLETAB_DOC(CLE_DOCTYP_REASONCODES   ,3,NULL     ,NULL               ,CLE_ANCHOR_APPENDIX_REASONCODES  ,"Reason codes"                      ,MAN_CLE_APPENDIX_REASONCODES              ,NULL)
- *           CLETAB_DOC(CLE_DOCTYP_VERSION       ,2,NULL     ,CLE_DOCKYW_APPENDIX,CLE_ANCHOR_APPENDIX_VERSION      ,"Version"                           ,MAN_CLE_APPENDIX_VERSION                  ,NULL)
- *           CLETAB_DOC(CLE_DOCTYP_ABOUT         ,2,NULL     ,CLE_DOCKYW_APPENDIX,CLE_ANCHOR_APPENDIX_ABOUT        ,"About"                             ,MAN_CLE_APPENDIX_ABOUT                    ,NULL)
- *           CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,2,NULL     ,CLE_DOCKYW_GLOSSARY,NULL                             ,"Glossary"                          ,MAN_FLCL_GLOSSARY                         ,NULL)
- *           CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,2,NULL     ,CLE_DOCKYW_COLOPHON,NULL                             ,"Imprint"                           ,MAN_FLCL_IMPRINT                          ,NULL)
- *           CLEDOC_CLS
- *        };
+ *    CLEDOC_OPN(asDocTab) = {
+ *       CLETAB_DOC(CLE_DOCTYP_COVER         ,1,NULL     ,NULL               ,NULL                             ,"FLCL manual"                       ,MAN_FLCL_COVER                            ,NULL)
+ *       CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,2,NULL     ,NULL               ,NULL                             ,"Trademarks"                        ,MAN_FLCL_TRADEMARKS                       ,NULL)
+ *       CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,2,NULL     ,NULL               ,NULL                             ,"Abstract"                          ,MAN_FLCL_ABSTRACT                         ,NULL)
+ *       CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,2,NULL     ,NULL               ,NULL                             ,"Supported systems"                 ,MAN_FLCL_SUPPORTED_SYSTEMS                ,NULL)
+ *       CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,2,NULL     ,NULL               ,NULL                             ,"Use cases"                         ,MAN_FLCL_USECASES                         ,NULL)
+ *       CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,2,NULL     ,CLE_DOCKYW_PREFACE ,NULL                             ,"Preface"                           ,MAN_FLCL_PREFACE                          ,NULL)
+ *       CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,2,"1."     ,NULL               ,"clep.main"                      ,"Command line parser"               ,MAN_CLE_CLEPMAIN                          ,NULL)
+ *       CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,3,"1.1."   ,NULL               ,NULL                             ,"Command line considerations"       ,MAN_CLE_CLEPMAIN_CONSID                   ,NULL)
+ *       CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,3,"1.2."   ,NULL               ,"clep.main.usedenv"              ,"Used environment variables"        ,MAN_CLE_CLEPMAIN_USEDENV                  ,NULL)
+ *       CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,3,"1.3."   ,NULL               ,NULL                             ,"Environment variable mapping"      ,MAN_CLE_CLEPMAIN_ENVARMAP                 ,NULL)
+ *       CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,3,"1.4."   ,NULL               ,"clep.main.filemap"              ,"Filename mapping"                  ,MAN_CLE_CLEPMAIN_FILEMAP                  ,NULL)
+ *       CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,3,"1.5."   ,NULL               ,NULL                             ,"Key label name mapping"            ,MAN_CLE_CLEPMAIN_KEYLABMAP                ,NULL)
+ *       CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,3,"1.6."   ,NULL               ,"clep.main.ebcdic"               ,"Special EBCDIC code page support"  ,MAN_CLE_CLEPMAIN_EBCDIC                   ,NULL)
+ *       CLETAB_DOC(CLE_DOCTYP_BUILTIN       ,3,"1.7."   ,NULL               ,CLE_ANCHOR_BUILTIN_FUNCTIONS     ,"Built-in functions"                ,MAN_CLE_BUILTIN_FUNCTIONS                 ,NULL)
+ *       CLETAB_DOC(CLE_DOCTYP_PROGRAM       ,2,"2."     ,NULL               ,NULL                             ,"FLCL Utility"                      ,MAN_FLCL_MAIN                             ,NULL)
+ *       CLETAB_DOC(CLE_DOCTYP_PGMSYNOPSIS   ,3,"2.1."   ,NULL               ,NULL                             ,"Synopsis"                          ,MAN_CLE_PROGRAM_SYNOPSIS                  ,NULL)
+ *       CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,3,"2.2."   ,NULL               ,NULL                             ,"Environment Variables"             ,MAN_FLCL_MAIN_ENVIRONMENT_VARIABLES       ,NULL)
+ *       CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,3,"2.3."   ,NULL               ,NULL                             ,"Filename Handling"                 ,MAN_FLCL_MAIN_FILENAME_HANDLING           ,NULL)
+ *       CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,3,"2.4."   ,NULL               ,NULL                             ,"Directory Support"                 ,MAN_FLCL_MAIN_DIRECTORY_SUPPORT           ,NULL)
+ *       CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,3,"2.5."   ,NULL               ,NULL                             ,"Input to Output Name Mapping"      ,MAN_FLCL_MAIN_INPUT_TO_OUTPUT_NAME_MAPPING,NULL)
+ *       CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,3,"2.6."   ,NULL               ,NULL                             ,"Key Label Handling"                ,MAN_FLCL_MAIN_KEY_LABEL_HANDLING          ,NULL)
+ *       CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,3,"2.7."   ,NULL               ,NULL                             ,"Password Handling"                 ,MAN_FLCL_MAIN_PASSWORD_HANDLING           ,NULL)
+ *       CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,3,"2.8."   ,NULL               ,NULL                             ,"Handling of Empty Records"         ,MAN_FLCL_MAIN_HANDLING_OF_EMPTY_RECORDS   ,NULL)
+ *       CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,3,"2.9."   ,NULL               ,NULL                             ,"Table Support"                     ,MAN_FLCL_MAIN_TABLE_SUPPORT               ,NULL)
+ *       CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,3,"2.10."  ,NULL               ,NULL                             ,"Pre- and Post-processing"          ,MAN_FLCL_MAIN_PRE_AND_POST_PROCESSING     ,NULL)
+ *       CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,3,"2.11."  ,NULL               ,NULL                             ,"Use of Built-in Functions"         ,MAN_FLCL_MAIN_BUILT_IN_FUNCTIONS          ,NULL)
+ *       CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,3,"2.12."  ,NULL               ,NULL                             ,"CONV versus XCNV and ICNVs"        ,MAN_FLCL_MAIN_CONV_VERSUS_XCNV_AND_ICNV   ,NULL)
+ *       CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,3,"2.13."  ,NULL               ,NULL                             ,"CONV READ/WRITE overview"          ,MAN_FLCL_MAIN_CONV_READ_WRITE_OVERVIEW    ,NULL)
+ *       CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,3,"2.14."  ,NULL               ,NULL                             ,"JCL Considerations"                ,MAN_FLCL_MAIN_JCL_CONSIDERATIONS          ,NULL)
+ *       CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,3,"2.15."  ,NULL               ,NULL                             ,"SAF Consideration"                 ,MAN_FLCL_MAIN_SAF_CONSIDERATIONS          ,NULL)
+ *       CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,3,"2.16."  ,NULL               ,NULL                             ,"Installation"                      ,MAN_FLCL_MAIN_INSTALLATION                ,NULL)
+ *       CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,4,"2.16.1.",NULL               ,NULL                             ,"License"                           ,MAN_FLCL_MAIN_INSTALLATION_LICENSE        ,NULL)
+ *       CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,4,"2.16.2.",NULL               ,NULL                             ,"Download"                          ,MAN_FLCL_MAIN_INSTALLATION_DOWNLOAD       ,NULL)
+ *       CLETAB_DOC(CLE_DOCTYP_PGMSYNTAX     ,3,"2.17."  ,NULL               ,NULL                             ,"Syntax of FLCL"                    ,MAN_CLE_PROGRAM_SYNTAX                    ,NULL)
+ *       CLETAB_DOC(CLE_DOCTYP_PGMHELP       ,3,"2.18."  ,NULL               ,NULL                             ,"Help for FLCL"                     ,MAN_CLE_PROGRAM_HELP                      ,NULL)
+ *       CLETAB_DOC(CLE_DOCTYP_COMMANDS      ,3,"2.19."  ,NULL               ,NULL                             ,"Available FLCL commands"           ,MAN_CLE_PROGRAM_COMMANDS                  ,NULL)
+ *       CLETAB_DOC(CLE_DOCTYP_OTHERCLP      ,2,NULL     ,CLE_DOCKYW_APPENDIX,NULL                             ,"Other CLP strings"                 ,MAN_FLCL_OTHERCLP                         ,NULL)
+ *       CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,2,NULL     ,CLE_DOCKYW_APPENDIX,NULL                             ,"FLUC Filesystem for Linux"         ,MAN_FLCL_APPENDIX_FLUCFS                  ,NULL)
+ *       CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,2,NULL     ,CLE_DOCKYW_APPENDIX,NULL                             ,"FLUC Subsystem for z/OS"           ,MAN_FLCL_APPENDIX_FLUCSUB                 ,NULL)
+ *       CLETAB_DOC(CLE_DOCTYP_LEXEM         ,2,NULL     ,CLE_DOCKYW_APPENDIX,CLE_ANCHOR_APPENDIX_LEXEM        ,"Lexemes"                           ,MAN_CLE_APPENDIX_LEXEM                    ,NULL)
+ *       CLETAB_DOC(CLE_DOCTYP_GRAMMAR       ,2,NULL     ,CLE_DOCKYW_APPENDIX,CLE_ANCHOR_APPENDIX_GRAMMAR      ,"Grammar"                           ,MAN_CLE_APPENDIX_GRAMMAR                  ,NULL)
+ *       CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,2,NULL     ,CLE_DOCKYW_APPENDIX,CLE_ANCHOR_APPENDIX_PROPERTIES   ,"Properties"                        ,MAN_CLE_APPENDIX_PROPERTIES               ,NULL)
+ *       CLETAB_DOC(CLE_DOCTYP_PROPREMAIN    ,3,NULL     ,NULL               ,NULL                             ,"Remaining documentation"           ,MAN_CLE_APPENDIX_PROP_REMAINING           ,NULL)
+ *       CLETAB_DOC(CLE_DOCTYP_PROPDEFAULTS  ,3,NULL     ,NULL               ,NULL                             ,"Predefined defaults"               ,MAN_CLE_APPENDIX_PROP_DEFAULTS            ,NULL)
+ *       CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,2,NULL     ,CLE_DOCKYW_APPENDIX,CLE_ANCHOR_APPENDIX_RETURNCODES  ,"Return codes"                      ,MAN_CLE_APPENDIX_RETURNCODES              ,NULL)
+ *       CLETAB_DOC(CLE_DOCTYP_SPECIALCODES  ,3,NULL     ,NULL               ,NULL                             ,"Special condition codes"           ,MAN_FLCL_SPECIALCODES                     ,NULL)
+ *       CLETAB_DOC(CLE_DOCTYP_REASONCODES   ,3,NULL     ,NULL               ,CLE_ANCHOR_APPENDIX_REASONCODES  ,"Reason codes"                      ,MAN_CLE_APPENDIX_REASONCODES              ,NULL)
+ *       CLETAB_DOC(CLE_DOCTYP_VERSION       ,2,NULL     ,CLE_DOCKYW_APPENDIX,CLE_ANCHOR_APPENDIX_VERSION      ,"Version"                           ,MAN_CLE_APPENDIX_VERSION                  ,NULL)
+ *       CLETAB_DOC(CLE_DOCTYP_ABOUT         ,2,NULL     ,CLE_DOCKYW_APPENDIX,CLE_ANCHOR_APPENDIX_ABOUT        ,"About"                             ,MAN_CLE_APPENDIX_ABOUT                    ,NULL)
+ *       CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,2,NULL     ,CLE_DOCKYW_GLOSSARY,NULL                             ,"Glossary"                          ,MAN_FLCL_GLOSSARY                         ,NULL)
+ *       CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,2,NULL     ,CLE_DOCKYW_COLOPHON,NULL                             ,"Imprint"                           ,MAN_FLCL_IMPRINT                          ,NULL)
+ *       CLEDOC_CLS
+ *    };
  *
- *        TsFl5Gbl*   psGbl=psFl5GblOpn(sizeof(acMsg),acMsg);
- *        siErr=siCleExecute(psGbl,asCmdTab,argc,argv,FLM_CLEP_DEFAULT_OWNER,"flcl",
- *                 "limes datentechnik(R) gmbh","support@flam.de",
- *                 FLM_CLEP_CASE_SENSITIVITY,TRUE,TRUE,FALSE,FLM_CLEP_MINIMAL_KEYWORDLEN,
- *                 pfErr,pfTrc,FLM_CLEP_DEPTH_STRING_1047,FLM_CLEP_OPTION_STRING,
- *                 FLM_CLEP_SEPARATION_STRING,psMain->acLicTxt,
- *                 FLM_VSN_STR"-"__BUILDNRSTR__,psMain->acVersion,psMain->acAbout,
- *                 "Frankenstein Limes(R) Command Line for FLUC, FLAM and FLIES",
- *                 NULL,pcFlmErrors,asOthTab,NULL,siClpFile2String,
- *                 NULL,(psGbl->isSafClpControl)?siClpSaf:NULL,pcDpa,0,asDocTab);
- *        vdFl5GblCls(psGbl);
- *     }
+ *    TsFl5Gbl*   psGbl=psFl5GblOpn(sizeof(acMsg),acMsg);
+ *    siErr=siCleExecute(psGbl,asCmdTab,argc,argv,FLM_CLEP_DEFAULT_OWNER,"flcl",
+ *             "limes datentechnik(R) gmbh","support@flam.de",
+ *             FLM_CLEP_CASE_SENSITIVITY,TRUE,TRUE,FALSE,FLM_CLEP_MINIMAL_KEYWORDLEN,
+ *             pfErr,pfTrc,FLM_CLEP_DEPTH_STRING_1047,FLM_CLEP_OPTION_STRING,
+ *             FLM_CLEP_SEPARATION_STRING,psMain->acLicTxt,
+ *             FLM_VSN_STR"-"__BUILDNRSTR__,psMain->acVersion,psMain->acAbout,
+ *             "Frankenstein Limes(R) Command Line for FLUC, FLAM and FLIES",
+ *             NULL,pcFlmErrors,asOthTab,NULL,siClpFile2String,
+ *             NULL,(psGbl->isSafClpControl)?siClpSaf:NULL,pcDpa,0,asDocTab);
+ *    vdFl5GblCls(psGbl);
+ * }
  * @endcode
  *
  **********************************************************************
