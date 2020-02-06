@@ -59,8 +59,7 @@ $(BINDIR_REL)/clptst$(BIN_EXT): $(CLPTST_REL_OBJS)
 	@$(STRIP) $@
 
 doc: release
-	+make -C doc
-
+	+make -C doxygen
 
 .PHONY: cleandep
 cleandep:
