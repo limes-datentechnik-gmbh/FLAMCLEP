@@ -75,16 +75,16 @@
  *
  * For compilation the defines below must be set:
  *
- * <pre>
- *     __DEBUG__        for a debug build
- *     __RELEASE__      for a release build
- *     __WIN__          for WINDOWS platforms
- *     __ZOS__          for ZOS mainframe platforms
- *     __USS__          for unix system services (USS) on ZOS mainframe platforms
- *     __BUILDNR__      to define the build number (integer, default is 0)
- *     __BUILD__        to define the build string ("debug", "release", "alpha", ...)
- *     __HOSTSHORTING__ to short function names to 8 character for mainframes
- * </pre>
+ * @verbatim
+   __DEBUG__        for a debug build
+   __RELEASE__      for a release build
+   __WIN__          for WINDOWS platforms
+   __ZOS__          for ZOS mainframe platforms
+   __USS__          for unix system services (USS) on ZOS mainframe platforms
+   __BUILDNR__      to define the build number (integer, default is 0)
+   __BUILD__        to define the build string ("debug", "release", "alpha", ...)
+   __HOSTSHORTING__ to short function names to 8 character for mainframes
+   @endverbatim
  *
  * On z/OS or USS the CELP and the using project must be compiled with the
  * same CONVLIT() parameter (we recommend IBM-1047) for correct conversion
@@ -209,9 +209,9 @@
  * * ERRORS   - Displays information about return and reason codes of the program
  *
  * To read the manual page, please use:
- * <pre>
- * program MANPAGE function
- * </pre>
+ * @verbatim
+   program MANPAGE function
+   @endverbatim
  *
  * Below, you can find the syntax for each built-in function:
  *
@@ -562,12 +562,12 @@
  * you cannot close the CLP or you must copy the values before.
  *
  * The normal procedure to use the CLP:
- * <pre>
- *    ClpOpen()
- *    ClpParsePro()
- *    ClpParseCmd()
- *    ClpClose()
- * </pre>
+ * @code
+ * ClpOpen()
+ * ClpParsePro()
+ * ClpParseCmd()
+ * ClpClose()
+ * @endcode
  *
  * Beside property and command line parsing the FLAMCLP offers an interactive
  * syntax and help function. Additionally, you can use a very powerful
@@ -598,95 +598,95 @@
  * a older state of the implementation.
  *
  * Lexemes (regular expressions) for argument list or parameter file:
- * <pre>
- * --| COMMENT   '#' [:print:]* '#'                              (will be ignored)
- * --| LCOMMENT  ';' [:print:]* 'nl'                             (will be ignored)
- * --| SEPARATOR [:space: | :cntr: | ',']*                  (abbreviated with SEP)
- * --| OPERATOR '=' | '.' | '(' | ')' | '[' | ']' | (SGN, DOT, RBO, RBC, SBO, SBC)
- * --|  '=>'| '+' | '-' | '*' | '/' | '{' | '}' (SAB, ADD, SUB, MUL, DIV, CBO,CBC)
- * --| KEYWORD   ['-'['-']][:alpha:]+[:alnum: | '_']*          (always predefined)
- * --| NUMBER    ([+|-]  [ :digit:]+)  |                       (decimal (default))
- * --| num       ([+|-]0b[ :digit:]+)  |                                  (binary)
- * --| num       ([+|-]0o[ :digit:]+)  |                                   (octal)
- * --| num       ([+|-]0d[ :digit:]+)  |                                 (decimal)
- * --| num       ([+|-]0x[ :xdigit:]+) |                             (hexadecimal)
- * --| num       ([+|-]0t(yyyy/mm/tt.hh:mm:ss)) |  (relativ (+|-) or absolut time)
- * --| FLOAT     ([+|-]  [ :digit:]+.[:digit:]+e|E[:digit:]+) | (decimal(default))
- * --| flt       ([+|-]0d[ :digit:]+.[:digit:]+e|E[:digit:]+)            (decimal)
- * --| STRING         ''' [:print:]* ''' |          (default (if binary c else s))
- * --| str       [s|S]''' [:print:]* ''' |                (null-terminated string)
- * --| str       [c|C]''' [:print:]* ''' |  (binary string in local character set)
- * --| str       [a|A]''' [:print:]* ''' |                (binary string in ASCII)
- * --| str       [e|E]''' [:print:]* ''' |               (binary string in EBCDIC)
- * --| str       [x|X]''' [:print:]* ''' |         (binary string in hex notation)
- * --| str       [f|F]''' [:print:]* ''' | (read string from file (for passwords))
- * --|           Strings can contain two '' to represent one '.
- * --|           Strings can also be enclosed in " or ` instead of '.
- * --|           Strings can directly start behind a '=' without enclosing ('`").
- * --|           In this case the string ends at the next separator or operator
- * --|           and keywords are preferred. To use keywords, separators or
- * --|           operators in strings, enclosing quotes are required.
- * --|
- * --| The predefined constant keyword below can be used in a value expressions
- * --| NOW       NUMBER - current time in seconds since 1970 (+0t0000)
- * --| MINUTE    NUMBER - minute in seconds (60)
- * --| HOUR      NUMBER - hour in seconds   (60*60)
- * --| DAY       NUMBER - day in seconds    (24*60*60)
- * --| YEAR      NUMBER - year in seconds   (365*24*60*60)
- * --| KiB       NUMBER - kilobyte          (1024)
- * --| MiB       NUMBER - megabyte          (1024*1024)
- * --| GiB       NUMBER - gigabyte          (1024*1024*1024)
- * --| TiB       NUMBER - terrabyte         (1024*1024*1024*1024)
- * --| RNDn      NUMBER - simple random number with n * 8 bit in length (1,2,4,8)
- * --| PI        FLOAT  - PI (3.14159265359)
- * --| LCSTAMP   STRING - current local stamp in format:           YYYYMMDD.HHMMSS
- * --| LCDATE    STRING - current local date in format:            YYYYMMDD
- * --| LCYEAR    STRING - current local year in format:            YYYY
- * --| LCYEAR2   STRING - current local year in format:            YY
- * --| LCMONTH   STRING - current local month in format:           MM
- * --| LCDAY     STRING - current local day in format:             DD
- * --| LCTIME    STRING - current local time in format:            HHMMSS
- * --| LCHOUR    STRING - current local hour in format:            HH
- * --| LCMINUTE  STRING - current local minute in format:          MM
- * --| LCSECOND  STRING - current local second in format:          SS
- * --| GMSTAMP   STRING - current Greenwich mean stamp in format:  YYYYMMDD.HHMMSS
- * --| GMDATE    STRING - current Greenwich mean date in format:   YYYYMMDD
- * --| GMYEAR    STRING - current Greenwich mean year in format:   YYYY
- * --| GMYEAR2   STRING - current Greenwich mean year in format:   YY
- * --| GMMONTH   STRING - current Greenwich mean month in format:  MM
- * --| GMDAY     STRING - current Greenwich mean day in format:    DD
- * --| GMTIME    STRING - current Greenwich mean time in format:   HHMMSS
- * --| GMHOUR    STRING - current Greenwich mean hour in format:   HH
- * --| GMMINUTE  STRING - current Greenwich mean minute in format: MM
- * --| GMSECOND  STRING - current Greenwich mean second in format: SS
- * --| GMSECOND  STRING - current Greenwich mean second in format: SS
- * --| SnRND10   STRING - decimal random number of length n (1 to 8)
- * --| SnRND16   STRING - hexadecimal random number of length n (1 to 8)
- * --|
- * --| SUPPLEMENT     '"' [:print:]* '"' |   (null-terminated string (properties)).
- * --|           Supplements can contain two "" to represent one ".
- * --|           Supplements can also be enclosed in ' or ` instead of ".
- * --|           Supplements can also be enclosed in ' or ` instead of ".
- * --| ENVIRONMENT VARIABLES '\<'varnam'\>' will replaced by the corresponding value
- * --| Escape sequences for critical punctuation characters on EBCDIC systems
- * --|    '!' = '\&EXC;'   - Exclamation mark
- * --|    '$' = '\&DLR;'   - Dollar sign
- * --|    '#' = '\&HSH;'   - Hashtag (number sign)
- * --|    '@' = '\&ATS;'   - At sign
- * --|    '[' = '\&SBO;'   - Square bracket open
- * --|    '\' = '\&BSL;'   - Backslash
- * --|    ']' = '\&SBC;'   - Square bracket close
- * --|    '^' = '\&CRT;'   - Caret (circumflex)
- * --|    '`' = '\&GRV;'   - Grave accent
- * --|    '{' = '\&CBO;'   - Curly bracket open
- * --|    '|' = '\&VBR;'   - Vertical bar
- * --|    '}' = '\&CBC;'   - Curly bracket close
- * --|    '~' = '\&TLD;'   - Tilde
- * --| Define CCSIDs for certain areas in CLP strings on EBCDIC systems (0-reset)
- * --|    '&' [:digit:]+ ';  (..."&1047;get.file='&0;%s&1047;'",f)
- * --| Escape sequences for hexadecimal byte values
- * --|    '&' ['X''x'] :xdigit: :xdigit: ';' ("&xF5;")
- * </pre>
+ * @verbatim
+   --| COMMENT   '#' [:print:]* '#'                              (will be ignored)
+   --| LCOMMENT  ';' [:print:]* 'nl'                             (will be ignored)
+   --| SEPARATOR [:space: | :cntr: | ',']*                  (abbreviated with SEP)
+   --| OPERATOR '=' | '.' | '(' | ')' | '[' | ']' | (SGN, DOT, RBO, RBC, SBO, SBC)
+   --|  '=>'| '+' | '-' | '*' | '/' | '{' | '}' (SAB, ADD, SUB, MUL, DIV, CBO,CBC)
+   --| KEYWORD   ['-'['-']][:alpha:]+[:alnum: | '_']*          (always predefined)
+   --| NUMBER    ([+|-]  [ :digit:]+)  |                       (decimal (default))
+   --| num       ([+|-]0b[ :digit:]+)  |                                  (binary)
+   --| num       ([+|-]0o[ :digit:]+)  |                                   (octal)
+   --| num       ([+|-]0d[ :digit:]+)  |                                 (decimal)
+   --| num       ([+|-]0x[ :xdigit:]+) |                             (hexadecimal)
+   --| num       ([+|-]0t(yyyy/mm/tt.hh:mm:ss)) |  (relativ (+|-) or absolut time)
+   --| FLOAT     ([+|-]  [ :digit:]+.[:digit:]+e|E[:digit:]+) | (decimal(default))
+   --| flt       ([+|-]0d[ :digit:]+.[:digit:]+e|E[:digit:]+)            (decimal)
+   --| STRING         ''' [:print:]* ''' |          (default (if binary c else s))
+   --| str       [s|S]''' [:print:]* ''' |                (null-terminated string)
+   --| str       [c|C]''' [:print:]* ''' |  (binary string in local character set)
+   --| str       [a|A]''' [:print:]* ''' |                (binary string in ASCII)
+   --| str       [e|E]''' [:print:]* ''' |               (binary string in EBCDIC)
+   --| str       [x|X]''' [:print:]* ''' |         (binary string in hex notation)
+   --| str       [f|F]''' [:print:]* ''' | (read string from file (for passwords))
+   --|           Strings can contain two '' to represent one '.
+   --|           Strings can also be enclosed in " or ` instead of '.
+   --|           Strings can directly start behind a '=' without enclosing ('`").
+   --|           In this case the string ends at the next separator or operator
+   --|           and keywords are preferred. To use keywords, separators or
+   --|           operators in strings, enclosing quotes are required.
+   --|
+   --| The predefined constant keyword below can be used in a value expressions
+   --| NOW       NUMBER - current time in seconds since 1970 (+0t0000)
+   --| MINUTE    NUMBER - minute in seconds (60)
+   --| HOUR      NUMBER - hour in seconds   (60*60)
+   --| DAY       NUMBER - day in seconds    (24*60*60)
+   --| YEAR      NUMBER - year in seconds   (365*24*60*60)
+   --| KiB       NUMBER - kilobyte          (1024)
+   --| MiB       NUMBER - megabyte          (1024*1024)
+   --| GiB       NUMBER - gigabyte          (1024*1024*1024)
+   --| TiB       NUMBER - terrabyte         (1024*1024*1024*1024)
+   --| RNDn      NUMBER - simple random number with n * 8 bit in length (1,2,4,8)
+   --| PI        FLOAT  - PI (3.14159265359)
+   --| LCSTAMP   STRING - current local stamp in format:           YYYYMMDD.HHMMSS
+   --| LCDATE    STRING - current local date in format:            YYYYMMDD
+   --| LCYEAR    STRING - current local year in format:            YYYY
+   --| LCYEAR2   STRING - current local year in format:            YY
+   --| LCMONTH   STRING - current local month in format:           MM
+   --| LCDAY     STRING - current local day in format:             DD
+   --| LCTIME    STRING - current local time in format:            HHMMSS
+   --| LCHOUR    STRING - current local hour in format:            HH
+   --| LCMINUTE  STRING - current local minute in format:          MM
+   --| LCSECOND  STRING - current local second in format:          SS
+   --| GMSTAMP   STRING - current Greenwich mean stamp in format:  YYYYMMDD.HHMMSS
+   --| GMDATE    STRING - current Greenwich mean date in format:   YYYYMMDD
+   --| GMYEAR    STRING - current Greenwich mean year in format:   YYYY
+   --| GMYEAR2   STRING - current Greenwich mean year in format:   YY
+   --| GMMONTH   STRING - current Greenwich mean month in format:  MM
+   --| GMDAY     STRING - current Greenwich mean day in format:    DD
+   --| GMTIME    STRING - current Greenwich mean time in format:   HHMMSS
+   --| GMHOUR    STRING - current Greenwich mean hour in format:   HH
+   --| GMMINUTE  STRING - current Greenwich mean minute in format: MM
+   --| GMSECOND  STRING - current Greenwich mean second in format: SS
+   --| GMSECOND  STRING - current Greenwich mean second in format: SS
+   --| SnRND10   STRING - decimal random number of length n (1 to 8)
+   --| SnRND16   STRING - hexadecimal random number of length n (1 to 8)
+   --|
+   --| SUPPLEMENT     '"' [:print:]* '"' |   (null-terminated string (properties)).
+   --|           Supplements can contain two "" to represent one ".
+   --|           Supplements can also be enclosed in ' or ` instead of ".
+   --|           Supplements can also be enclosed in ' or ` instead of ".
+   --| ENVIRONMENT VARIABLES '\<'varnam'\>' will replaced by the corresponding value
+   --| Escape sequences for critical punctuation characters on EBCDIC systems
+   --|    '!' = '\&EXC;'   - Exclamation mark
+   --|    '$' = '\&DLR;'   - Dollar sign
+   --|    '#' = '\&HSH;'   - Hashtag (number sign)
+   --|    '@' = '\&ATS;'   - At sign
+   --|    '[' = '\&SBO;'   - Square bracket open
+   --|    '\' = '\&BSL;'   - Backslash
+   --|    ']' = '\&SBC;'   - Square bracket close
+   --|    '^' = '\&CRT;'   - Caret (circumflex)
+   --|    '`' = '\&GRV;'   - Grave accent
+   --|    '{' = '\&CBO;'   - Curly bracket open
+   --|    '|' = '\&VBR;'   - Vertical bar
+   --|    '}' = '\&CBC;'   - Curly bracket close
+   --|    '~' = '\&TLD;'   - Tilde
+   --| Define CCSIDs for certain areas in CLP strings on EBCDIC systems (0-reset)
+   --|    '&' [:digit:]+ ';  (..."&1047;get.file='&0;%s&1047;'",f)
+   --| Escape sequences for hexadecimal byte values
+   --|    '&' ['X''x'] :xdigit: :xdigit: ';' ("&xF5;")
+   @endverbatim
  *
  * @subsection CLPGRAMMARL FLAMCLP-Grammar for command line
  *
@@ -694,63 +694,63 @@
  * The list below could be a older state of the implementation.
  *
  * Grammar for argument list or parameter file:
- * <pre>
- * --| command        -> ['('] parameter_list [')']       (main=object)
- * --|                |  ['.'] parameter                  (main=overlay)
- * --| parameter_list -> parameter SEP parameter_list
- * --|                |  EMPTY
- * --| parameter      -> switch | assignment | object | overlay | array
- * --| switch         -> KEYWORD
- * --| assignment     -> KEYWORD '=' value
- * --|                |  KEYWORD '=' KEYWORD # SELECTION #
- * --|                |  KEYWORD '=>' STRING # parameter file #
- * --| object         -> KEYWORD ['('] parameter_list [')']
- * --|                |  KEYWORD '=' STRING # parameter file #
- * --|                |  KEYWORD '=>' STRING # parameter file #
- * --| overlay        -> KEYWORD ['.'] parameter
- * --|                |  KEYWORD '=' STRING # parameter file #
- * --|                |  KEYWORD '=>' STRING # parameter file #
- * --| array          -> KEYWORD '[' value_list   ']'
- * --|                |  KEYWORD '[' object_list  ']'
- * --|                |  KEYWORD '[' overlay_list ']'
- * --|                |  KEYWORD '=' value_list # with certain limitations #
- * --| It is recommended to use only enclosed array lists to know the end
- * --|                |  KEYWORD '[=' STRING ']' # parameter file #
- * --|                |  KEYWORD '[=>' STRING ']' # parameter file #
- * --| value_list     -> value SEP value_list
- * --|                |  EMPTY
- * --| object_list    -> object SEP object_list
- * --|                |  EMPTY
- * --| overlay_list   -> overlay SEP overlay_list
- * --|                |  EMPTY
- * --| A list of objects requires parenthesis to enclose the arguments
- * --|
- * --| value          -> term '+' value
- * --|                |  term '-' value
- * --|                |  term
- * --| term           -> factor '*' term
- * --|                |  factor '/' term
- * --|                |  factor
- * --| factor         -> NUMBER | FLOAT | STRING
- * --|                |  selection | variable | constant
- * --|                |  '(' value ')'
- * --| selection      -> KEYWORD # value from a selection table        #
- * --| variable       -> KEYWORD # value from a previous assignment    #
- * --|                |  KEYWORD '{' NUMBER '}' # with index for arrays #
- * --| constant       -> KEYWORD # see predefined constants at lexem   #
- * --| For strings only the operator '+' is implemented as concatenation
- * --| Strings without an operator in between are also concatenated
- * --| A number followed by a constant is a multiplication (4KiB=4*1024)
- * --|
- * --| Property File Parser
- * --| properties     -> property_list
- * --| property_list  -> property SEP property_list
- * --|                |  EMPTY
- * --| property       -> keyword_list '=' SUPPLEMENT
- * --| keyword_list   -> KEYWORD '.' keyword_list
- * --|                |  KEYWORD
- * --| SUPPLEMENT is a string in double quotation marks ("property")
- * </pre>
+ * @verbatim
+   --| command        -> ['('] parameter_list [')']       (main=object)
+   --|                |  ['.'] parameter                  (main=overlay)
+   --| parameter_list -> parameter SEP parameter_list
+   --|                |  EMPTY
+   --| parameter      -> switch | assignment | object | overlay | array
+   --| switch         -> KEYWORD
+   --| assignment     -> KEYWORD '=' value
+   --|                |  KEYWORD '=' KEYWORD # SELECTION #
+   --|                |  KEYWORD '=>' STRING # parameter file #
+   --| object         -> KEYWORD ['('] parameter_list [')']
+   --|                |  KEYWORD '=' STRING # parameter file #
+   --|                |  KEYWORD '=>' STRING # parameter file #
+   --| overlay        -> KEYWORD ['.'] parameter
+   --|                |  KEYWORD '=' STRING # parameter file #
+   --|                |  KEYWORD '=>' STRING # parameter file #
+   --| array          -> KEYWORD '[' value_list   ']'
+   --|                |  KEYWORD '[' object_list  ']'
+   --|                |  KEYWORD '[' overlay_list ']'
+   --|                |  KEYWORD '=' value_list # with certain limitations #
+   --| It is recommended to use only enclosed array lists to know the end
+   --|                |  KEYWORD '[=' STRING ']' # parameter file #
+   --|                |  KEYWORD '[=>' STRING ']' # parameter file #
+   --| value_list     -> value SEP value_list
+   --|                |  EMPTY
+   --| object_list    -> object SEP object_list
+   --|                |  EMPTY
+   --| overlay_list   -> overlay SEP overlay_list
+   --|                |  EMPTY
+   --| A list of objects requires parenthesis to enclose the arguments
+   --|
+   --| value          -> term '+' value
+   --|                |  term '-' value
+   --|                |  term
+   --| term           -> factor '*' term
+   --|                |  factor '/' term
+   --|                |  factor
+   --| factor         -> NUMBER | FLOAT | STRING
+   --|                |  selection | variable | constant
+   --|                |  '(' value ')'
+   --| selection      -> KEYWORD # value from a selection table        #
+   --| variable       -> KEYWORD # value from a previous assignment    #
+   --|                |  KEYWORD '{' NUMBER '}' # with index for arrays #
+   --| constant       -> KEYWORD # see predefined constants at lexem   #
+   --| For strings only the operator '+' is implemented as concatenation
+   --| Strings without an operator in between are also concatenated
+   --| A number followed by a constant is a multiplication (4KiB=4*1024)
+   --|
+   --| Property File Parser
+   --| properties     -> property_list
+   --| property_list  -> property SEP property_list
+   --|                |  EMPTY
+   --| property       -> keyword_list '=' SUPPLEMENT
+   --| keyword_list   -> KEYWORD '.' keyword_list
+   --|                |  KEYWORD
+   --| SUPPLEMENT is a string in double quotation marks ("property")
+   @endverbatim
  *
  * A list of objects requires parenthesis to enclose the arguments. Only
  * for one object of a certain level you can omit the round brackets. If
@@ -765,16 +765,16 @@
  * The list below could be a older state of the implementation.
  *
  * Grammar for property file:
- * <pre>
- * --| Property File Parser
- * --| properties     -> property_list
- * --| property_list  -> property SEP property_list
- * --|                |  EMPTY
- * --| property       -> keyword_list '=' SUPPLEMENT
- * --| keyword_list   -> KEYWORD '.' keyword_list
- * --|                |  KEYWORD
- * --| SUPPLEMENT is a string in double quotation marks ("property")
- * </pre>
+ * @verbatim
+   --| Property File Parser
+   --| properties     -> property_list
+   --| property_list  -> property SEP property_list
+   --|                |  EMPTY
+   --| property       -> keyword_list '=' SUPPLEMENT
+   --| keyword_list   -> KEYWORD '.' keyword_list
+   --|                |  KEYWORD
+   --| SUPPLEMENT is a string in double quotation marks ("property")
+   @endverbatim
  *
  **********************************************************************
  *
