@@ -30,6 +30,7 @@ $(PDFDIR):
 	mkdir -p $@
 
 clean:
-	rm -rf $(SUBDIRS)
+	rm -rf $(SUBDIRS) $(ALLZIPS) $(ALLPDFS)
+	-rmdir $(ZIPDIR) $(PDFDIR)
 
 $(ZIPDIR)/CLEPAPI.zip: ../include/FLAMCLE.h ../include/FLAMCLP.h ../include/CLEDEF.h ../include/CLPDEF.h ../include/CLEMSG.h ../include/CLPMAC.h ../include/CLEPUTL.h

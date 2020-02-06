@@ -67,8 +67,9 @@ cleandep:
 
 .PHONY: clean
 clean:
-	$(RM) -f $(DEB_OBJS) $(DEB_TARGETS)
-	$(RM) -f $(REL_OBJS) $(REL_TARGETS)
+	+make -C doxygen clean
+	$(RM) -rf $(BLDDIR_DEB) $(BLDDIR_REL) $(BINDIR_DEB) $(BINDIR_REL)
+	-rmdir bin build
 
 .PHONY: distclean
 distclean:
