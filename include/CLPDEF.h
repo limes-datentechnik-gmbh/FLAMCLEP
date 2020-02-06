@@ -101,18 +101,26 @@
  * @brief Error codes for command line parsing
  * @{
  */
-#define CLP_OK                    0    /**< @brief Return code for a successful parsing: 0, otherwize > 0. */
-#define CLPERR_LEX               -1    /**< @brief Lexical error (determined by scanner). */
-#define CLPERR_SYN               -2    /**< @brief Syntax error (determined by parser). */
-#define CLPERR_SEM               -3    /**< @brief Semantic error (determined by builder). */
-#define CLPERR_TYP               -4    /**< @brief Type error (internal error with argument types). */
-#define CLPERR_TAB               -5    /**< @brief Table error (internal error with argument tables). */
-#define CLPERR_SIZ               -6    /**< @brief Size error (internal error with argument tables and data structures). */
-#define CLPERR_PAR               -7    /**< @brief Parameter error (internal error with argument tables and data structures). */
-#define CLPERR_MEM               -8    /**< @brief Memory error (internal error with argument tables and data structures). */
-#define CLPERR_INT               -9    /**< @brief Internal error (internal error with argument tables and data structures). */
-#define CLPERR_SYS               -10   /**< @brief System error (internal error with argument tables and data structures). */
-#define CLPERR_AUT               -11   /**< @brief Authorization request failed. */
+#define CLP_OK                    0                       /**< @brief Return code for a successful parsing: 0, otherwize > 0. */
+#define CLPERR_LEX               -1                       /**< @brief Lexical error (determined by scanner). */
+#define CLPERR_SYN               -2                       /**< @brief Syntax error (determined by parser). */
+#define CLPERR_SEM               -3                       /**< @brief Semantic error (determined by builder). */
+#define CLPERR_TYP               -4                       /**< @brief Type error (internal error with argument types). */
+#define CLPERR_TAB               -5                       /**< @brief Table error (internal error with argument tables). */
+#define CLPERR_SIZ               -6                       /**< @brief Size error (internal error with argument tables and data structures). */
+#define CLPERR_PAR               -7                       /**< @brief Parameter error (internal error with argument tables and data structures). */
+#define CLPERR_MEM               -8                       /**< @brief Memory error (internal error with argument tables and data structures). */
+#define CLPERR_INT               -9                       /**< @brief Internal error (internal error with argument tables and data structures). */
+#define CLPERR_SYS               -10                      /**< @brief System error (internal error with argument tables and data structures). */
+#define CLPERR_AUT               -11                      /**< @brief Authorization request failed. */
+#define CLPSRC_CMD               ":command line:"         /**< @brief From command line*/
+#define CLPSRC_PRO               ":property list:"        /**< @brief From property list*/
+#define CLPSRC_DEF               ":default value:"        /**< @brief From default value*/
+#define CLPSRC_ENV               ":environment variable:" /**< @brief From environment variable*/
+#define CLPSRC_PRF               ":property file:"        /**< @brief From property file*/
+#define CLPSRC_CMF               ":command file:"         /**< @brief From command file*/
+#define CLPSRC_PAF               ":parameter file:"       /**< @brief Parameter file*/
+#define CLPSRC_SRF               ":string file:"          /**< @brief String file*/
 
 /**
  * @brief Defines a structure with error information
@@ -209,21 +217,6 @@ typedef struct ClpError {
 #define CLPFLG_LAB               0x20000000U   /**< @brief Marks zero terminated string as label and replace additional '~' by USER, '^' by OWNER and '!' by ENVID . */
 #define CLPFLG_UPP               0x40000000U   /**< @brief Converts zero terminated strings to upper case. */
 #define CLPFLG_LOW               0x80000000U   /**< @brief Converts zero terminated strings to lower case. */
-/** @} */
-
-/**
- * @defgroup CLP_SRC CLP Source String
- * @brief Definition of default source strings used in error structure.
- * @{
- */
-#define CLPSRC_CMD               ":command line:"           /**< @brief From command line*/
-#define CLPSRC_PRO               ":property list:"          /**< @brief From property list*/
-#define CLPSRC_DEF               ":default value:"          /**< @brief From default value*/
-#define CLPSRC_ENV               ":environment variable:"   /**< @brief From environment variable*/
-#define CLPSRC_PRF               ":property file:"          /**< @brief From property file*/
-#define CLPSRC_CMF               ":command file:"           /**< @brief From command file*/
-#define CLPSRC_PAF               ":parameter file:"         /**< @brief Parameter file*/
-#define CLPSRC_SRF               ":string file:"            /**< @brief String file*/
 /** @} */
 
 /**
@@ -335,13 +328,16 @@ typedef struct ClpArgument {
 /*! @endcond */
 }TsClpArgument;
 
-/** Starts a table with constant definitions
+/**
+ * @brief Starts a table with constant definitions
  *
  * @param[in]  name   Name of this table\n
  */
 #define CLPCONTAB_OPN(name)      TsClpArgument name[]
 
-/** defines a number literal with the command line keyword *kyw* and the value *dat*
+/**
+ *
+ * @brief Defines a number literal with the command line keyword *kyw* and the value *dat*.
  *
  * @param[in]   kyw   Pointer to command line keyword *kyw*.
  * @param[in]   dat   Pointer to target definition in case of reading.
@@ -354,7 +350,8 @@ typedef struct ClpArgument {
  */
 #define CLPCONTAB_NUMBER(kyw,dat,man,hlp)       {CLPTYP_NUMBER,(kyw),NULL,0,0,  0  ,0,0,CLPFLG_CON           ,NULL,NULL,(man),(hlp),(dat), 0.0 ,NULL       ,NULL},
 
-/** defines a floating point literal with the command line keyword *kyw* and the value *dat*
+/**
+ * @brief Defines a floating point literal with the command line keyword *kyw* and the value *dat*.
  *
  * @param[in]   kyw   Pointer to command line keyword *kyw*.
  * @param[in]   dat   Pointer to target definition in case of reading.
@@ -367,7 +364,8 @@ typedef struct ClpArgument {
  */
 #define CLPCONTAB_FLOATN(kyw,dat,man,hlp)       {CLPTYP_FLOATN,(kyw),NULL,0,0,  0  ,0,0,CLPFLG_CON           ,NULL,NULL,(man),(hlp),  0  ,(dat),NULL       ,NULL},
 
-/** defines a default string literal with the command line keyword *kyw* and the value *dat*
+/**
+ * @brief Defines a default string literal with the command line keyword *kyw* and the value *dat*.
  *
  * @param[in]   kyw   Pointer to command line keyword *kyw*.
  * @param[in]   dat   Pointer to target definition in case of reading.
@@ -380,7 +378,8 @@ typedef struct ClpArgument {
  */
 #define CLPCONTAB_STRING(kyw,dat,man,hlp)       {CLPTYP_STRING,(kyw),NULL,0,0,  0  ,0,0,CLPFLG_CON           ,NULL,NULL,(man),(hlp),  0  , 0.0 ,(U08*)(dat),NULL},
 
-/** defines a hexadecimal string literal with the command line keyword *kyw* and the value *dat*
+/**
+ * @brief Defines a hexadecimal string literal with the command line keyword *kyw* and the value *dat*.
  *
  * @param[in]   kyw   Pointer to command line keyword *kyw*.
  * @param[in]   dat   Pointer to target definition in case of reading.
@@ -393,8 +392,8 @@ typedef struct ClpArgument {
  */
 #define CLPCONTAB_HEXSTR(kyw,dat,man,hlp)       {CLPTYP_STRING,(kyw),NULL,0,0,  0  ,0,0,CLPFLG_CON|CLPFLG_HEX,NULL,NULL,(man),(hlp),  0  , 0.0 ,(U08*)(dat),NULL},
 
-/** defines a ASCII string literal with the command line keyword *kyw* and the value *dat*
- *
+/**
+ * @brief Defines a ASCII string literal with the command line keyword *kyw* and the value *dat*.
  *
  * @param[in]   kyw   Pointer to command line keyword *kyw*.
  * @param[in]   dat   Pointer to target definition in case of reading.
@@ -407,7 +406,8 @@ typedef struct ClpArgument {
  */
 #define CLPCONTAB_ASCSTR(kyw,dat,man,hlp)       {CLPTYP_STRING,(kyw),NULL,0,0,  0  ,0,0,CLPFLG_CON|CLPFLG_ASC,NULL,NULL,(man),(hlp),  0  , 0.0 ,(U08*)(dat),NULL},
 
-/** defines a EBCDIC string literal with the command line keyword *kyw* and the value *dat*
+/**
+ * @brief Defines a EBCDIC string literal with the command line keyword *kyw* and the value *dat*.
  *
  * @param[in]   kyw   Pointer to command line keyword *kyw*.
  * @param[in]   dat   Pointer to target definition in case of reading.
@@ -420,7 +420,8 @@ typedef struct ClpArgument {
  */
 #define CLPCONTAB_EBCSTR(kyw,dat,man,hlp)       {CLPTYP_STRING,(kyw),NULL,0,0,  0  ,0,0,CLPFLG_CON|CLPFLG_EBC,NULL,NULL,(man),(hlp),  0  , 0.0 ,(U08*)(dat),NULL},
 
-/** defines a binary literal with the command line keyword *kyw* and the value *dat*
+/**
+ * @brief Defines a binary literal with the command line keyword *kyw* and the value *dat*.
  *
  * @param[in]   kyw   Pointer to command line keyword *kyw*.
  * @param[in]   dat   Pointer to target definition in case of reading.
