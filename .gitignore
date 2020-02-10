@@ -1,5 +1,7 @@
 DOCPDF
 DOCZIP
+doc/CLEPAPI
+doc/FLAMCLEP
 bin
 build
 clptst.bin
