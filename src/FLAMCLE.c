@@ -479,6 +479,7 @@ static int siCleGetProperties(
    TfF2S*                        pfF2S);
 
 static int siCleGetCommand(
+   FILE*                         pfOut,
    FILE*                         pfErr,
    const char*                   pcDep,
    const char*                   pcFct,
@@ -2720,7 +2721,7 @@ EVALUATE:
                siErr=siCleCommandInit(pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,pcOwn,pcPgm,pcBld,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,psCmd[i].piOid,psCmd[i].psTab,
                                       isCas,isPfl,isRpl,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf);
                if (siErr) ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
-               siErr=siCleGetCommand(pfOut,pcDep,psCmd[i].pcKyw,argc,argv,&pcFil,&pcCmd,pvGbl,pvF2S,pfF2S,pcDpa);
+               siErr=siCleGetCommand(pfOut,pfErr,pcDep,psCmd[i].pcKyw,argc,argv,&pcFil,&pcCmd,pvGbl,pvF2S,pfF2S,pcDpa);
                if (siErr) ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
                siErr=siClpParseCmd(pvHdl,pcFil,pcCmd,TRUE,TRUE,psCmd[i].piOid,&pcTls);
                if (siErr<0) {
@@ -3595,6 +3596,7 @@ static int siCleGetProperties(
 }
 
 static int siCleGetCommand(
+   FILE*                   pfOut,
    FILE*                   pfErr,
    const char*             pcDep,
    const char*             pcFct,
@@ -3625,7 +3627,8 @@ static int siCleGetCommand(
          if (pcDpa!=NULL && *pcDpa) {
             siErr=pfF2S(pvGbl,pvF2S,pcDpa,ppCmd,&siSiz,NULL,0);
             if(siErr>0) {
-               if (pfErr!=NULL) fprintf(pfErr,"Read parameter in length %d from file '%s'\n",siErr,pcDpa);
+               char acTs[24];
+               if (pfOut!=NULL) fprintf(pfOut,"%s Read parameter in length %d from file '%s'\n",cstime(0,acTs),siErr,pcDpa);
             } else {
                char* pcHlp=(char*)realloc(*ppCmd,1);
                if (pcHlp==NULL) {
