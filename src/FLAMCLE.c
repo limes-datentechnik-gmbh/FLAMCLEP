@@ -38,6 +38,7 @@
 #define _XOPEN_SOURCE 600
 #endif
 #include <ctype.h>
+#include <time.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -610,17 +611,22 @@ static int siClpFile2String(void* gbl, void* hdl, const char* filename, char** b
    int r = siCleEndExecution((x),psCnf,pfTrh,pfDoc,pfPro,ppArg,pvHdl,(b));\
    if (r) {\
       if (pcBld!=NULL && *pcBld) {\
-         if (pfErr!=NULL) efprintf(pfErr,"Program '%s' (Build: %s (%s %s)) ends with completion code %d (%s)\n",(pcProgram!=NULL)?pcProgram:"-NULL-",pcBld,__DATE__,__TIME__,r,pcMapCleRtc(r));\
+         char acTs[24];\
+         if (pfErr!=NULL) efprintf(pfErr,"%s Program '%s' (Build: %s (%s %s)) ends with completion code %d (%s)\n",cstime(0,acTs),(pcProgram!=NULL)?pcProgram:"-NULL-",pcBld,__DATE__,__TIME__,r,pcMapCleRtc(r));\
       } else {\
-         if (pfErr!=NULL) efprintf(pfErr,"Program '%s' (Build: %s %s) ends with completion code %d (%s)\n",(pcProgram!=NULL)?pcProgram:"-NULL-",__DATE__,__TIME__,r,pcMapCleRtc(r));\
+         char acTs[24];\
+         if (pfErr!=NULL) efprintf(pfErr,"%s Program '%s' (Build: %s %s) ends with completion code %d (%s)\n",cstime(0,acTs),(pcProgram!=NULL)?pcProgram:"-NULL-",__DATE__,__TIME__,r,pcMapCleRtc(r));\
       }\
    } else {\
       if (pcBld!=NULL && *pcBld) {\
-         if (pfOut!=NULL) efprintf(pfOut,"Program '%s' (Build: %s (%s %s)) run successfully\n",(pcProgram!=NULL)?pcProgram:"-NULL-",pcBld,__DATE__,__TIME__);\
+         char acTs[24];\
+         if (pfOut!=NULL) efprintf(pfOut,"%s Program '%s' (Build: %s (%s %s)) run successfully\n",cstime(0,acTs),(pcProgram!=NULL)?pcProgram:"-NULL-",pcBld,__DATE__,__TIME__);\
       } else {\
-         if (pfOut!=NULL) efprintf(pfOut,"Program '%s' (Build: %s %s) run successfully\n",(pcProgram!=NULL)?pcProgram:"-NULL-",__DATE__,__TIME__);\
+         char acTs[24];\
+         if (pfOut!=NULL) efprintf(pfOut,"%s Program '%s' (Build: %s %s) run successfully\n",cstime(0,acTs),(pcProgram!=NULL)?pcProgram:"-NULL-",__DATE__,__TIME__);\
       }\
    }\
+   if (pfOut!=NULL) efprintf(pfOut,"%s Total runtime %us / Total CPU time %3.3fs\n",cstime(0,acTs),(U32)(time(NULL)-uiTime),((double)(clock()-uiClock))/CLOCKS_PER_SEC);\
    SAFE_FREE(pcHom); \
    SAFE_FREE(pcPgm); \
    SAFE_FREE(pcPgu); \
@@ -638,6 +644,7 @@ static inline TsCnfHdl* psOpenConfig(FILE* pfOut, FILE* pfErr, const char* pcHom
    size_t         szCnf=0;
    char*          pcCnf=NULL;
    char*          pcFil=NULL;
+   char           acTs[24];
    TsCnfHdl*      psCnf;
    const char*    m;
 
@@ -683,10 +690,10 @@ static inline TsCnfHdl* psOpenConfig(FILE* pfOut, FILE* pfErr, const char* pcHom
                free(pcCnf);
                return(NULL);
             }
-            if (pfOut!=NULL) fprintf(pfOut,"Use default configuration file (%s) in home directory\n",pcFil);
+            if (pfOut!=NULL) fprintf(pfOut,"%s Use default configuration file (%s) in home directory\n",cstime(0,acTs),pcFil);
          } else {
             fclose(pfTmp);
-            if (pfOut!=NULL) fprintf(pfOut,"Use existing configuration file (%s) in working directory\n",pcFil);
+            if (pfOut!=NULL) fprintf(pfOut,"%s Use existing configuration file (%s) in working directory\n",cstime(0,acTs),pcFil);
          }
       } else {
          srprintf(&pcFil,&szFil,strlen(pcPgl),".%s.config",pcPgl);
@@ -695,7 +702,7 @@ static inline TsCnfHdl* psOpenConfig(FILE* pfOut, FILE* pfErr, const char* pcHom
             free(pcCnf);
             return(NULL);
          }
-         if (pfOut!=NULL) fprintf(pfOut,"Use default configuration file (%s) in working directory\n",pcFil);
+         if (pfOut!=NULL) fprintf(pfOut,"%s Use default configuration file (%s) in working directory\n",cstime(0,acTs),pcFil);
       }
    #endif
    } else {
@@ -705,7 +712,7 @@ static inline TsCnfHdl* psOpenConfig(FILE* pfOut, FILE* pfErr, const char* pcHom
          free(pcCnf);
          return(NULL);
       }
-      if (pfOut!=NULL) fprintf(pfOut,"Using configuration file (%s) defined by environment variable (%s)\n",pcFil,pcCnf);
+      if (pfOut!=NULL) fprintf(pfOut,"%s Using configuration file (%s) defined by environment variable (%s)\n",cstime(0,acTs),pcFil,pcCnf);
    }
 
    psCnf=psCnfOpn(pfErr,isCas,pcPgm,pcFil);
@@ -1245,6 +1252,9 @@ extern int siCleExecute(
    const char*                   pcSccMan=NULL;
    const char*                   pcPgmMan=NULL;
    const char*                   m;
+   char                          acTs[24];
+   time_t                        uiTime=time(NULL);
+   clock_t                       uiClock=clock();
 
    CLEBIF_OPN(asBif) = {
       CLETAB_BIF(CLE_BUILTIN_IDX_SYNTAX  ,"SYNTAX"  ,HLP_CLE_BUILTIN_SYNTAX  ,SYN_CLE_BUILTIN_SYNTAX  ,MAN_CLE_BUILTIN_SYNTAX  ,TRUE)
@@ -1290,6 +1300,8 @@ extern int siCleExecute(
       if (pfErr!=NULL) fprintf(pfErr,"CLE call parameter incorrect (NULL pointer or empty strings)\n");
       ERROR(CLERTC_FAT,NULL);
    }
+
+   if (pfOut!=NULL) efprintf(pfOut,"%s Start program '%s' (Build: %s (%s %s))\n",cstime(0,acTs),(pcProgram!=NULL)?pcProgram:"-NULL-",pcBld,__DATE__,__TIME__);
 
    for (i=0;asBif[i].pcKyw!=NULL;i++) {
       if (asBif[i].siIdx!=i) {
@@ -1383,9 +1395,9 @@ extern int siCleExecute(
    if (pfOut!=NULL) {
       if (i) {
          if (i==1) {
-            fprintf(pfOut,"Load successfully %d environment variable using the configuration file.\n",i);
+            fprintf(pfOut,"%s Load successfully %d environment variable using the configuration file.\n",cstime(0,acTs),i);
          } else {
-            fprintf(pfOut,"Load successfully %d environment variables using the configuration file.\n",i);
+            fprintf(pfOut,"%s Load successfully %d environment variables using the configuration file.\n",cstime(0,acTs),i);
          }
       }
    }
@@ -1399,24 +1411,24 @@ extern int siCleExecute(
             if (pfErr!=NULL) fprintf(pfErr,"Put variable (%s=%s) to environment failed (strcmp(%s,GETENV(%s)))\n","OWNERID",pcOwn,pcOwn,"OWNERID");
          } else {
 #ifdef __DEBUG__
-            if (pfOut!=NULL) fprintf(pfOut,"Put variable (%s=%s) to environment was successful\n","OWNERID",pcOwn);
+            if (pfOut!=NULL) fprintf(pfOut,"%s Put variable (%s=%s) to environment was successful\n",cstime(0,acTs),"OWNERID",pcOwn);
 #endif
          }
       }
       isEnvOwn=TRUE;
    } else {
 #ifdef __DEBUG__
-      if (pfOut!=NULL) fprintf(pfOut,"Environment variable OWNERID already defined (%s)\n",pcOwn);
+      if (pfOut!=NULL) fprintf(pfOut,"%s Environment variable OWNERID already defined (%s)\n",cstime(0,acTs),pcOwn);
 #endif
       isEnvOwn=FALSE;
    }
 
    if (pfOut!=NULL) {
-      fprintf( pfOut,"Complete load of environment ...\n");
+      fprintf(pfOut,"%s Complete load of environment ...\n",cstime(0,acTs));
 #ifdef __EBCDIC__
       init_char(gsDiaChr.exc);
 #endif
-      efprintf(pfOut,"Initialize dia-critical character (!$#@[\\]^`{|}~) conversion (%s)\n",mapccsid(localccsid()));
+      efprintf(pfOut,"%s Initialize dia-critical character (!$#@[\\]^`{|}~) conversion (%s)\n",cstime(0,acTs),mapccsid(localccsid()));
    }
 
    char  acDep[strlen(pcDep)+1];
