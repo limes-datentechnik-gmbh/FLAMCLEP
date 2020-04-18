@@ -383,6 +383,8 @@ static inline int flzsym(const char* pcDat, const int* piSln, char* pcVal, int* 
                return(stSta.st_size);
             }
             free(pcName);
+         } else {
+            errno=ENOMEM;
          }
       } else {
 #ifdef __FL5__
@@ -404,8 +406,12 @@ static inline int flzsym(const char* pcDat, const int* piSln, char* pcVal, int* 
                   return(stZos.approxSize);
                }
                return(uiFilSiz);
+            } else {
+               errno=EINVAL;
             }
             free(pcName);
+         } else {
+            errno=ENOMEM;
          }
 #endif
       }
@@ -502,6 +508,8 @@ static inline int flzsym(const char* pcDat, const int* piSln, char* pcVal, int* 
             return(stSta.st_size);
          }
          free(pcName);
+      } else {
+         errno=ENOMEM;
       }
       return(-1);
    }
