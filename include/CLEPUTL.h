@@ -874,6 +874,7 @@ extern int win_unsetenv(const char* name);
 extern FILE* fopen_hfq(const char* name, const char* mode);
 extern FILE* fopen_hfq_nowarn(const char* name, const char* mode);
 extern FILE* freopen_hfq(const char* name, const char* mode, FILE* stream);
+extern long long getFileSize(const char* name);
 #ifdef __ZOS__
    extern FILE* fopen_tmp(void);
    extern int   fclose_tmp(FILE* fp);

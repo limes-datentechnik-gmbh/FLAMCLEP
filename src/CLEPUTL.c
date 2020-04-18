@@ -37,6 +37,7 @@
 #include <limits.h>
 #include <locale.h>
 #include <time.h>
+#include <sys/stat.h>
 #ifdef __UNIX__
 #  include <langinfo.h>
 #endif
@@ -44,6 +45,7 @@
 #  include <windows.h>
 #endif
 #if defined(__ZOS__) && defined(__FL5__)
+#  include "FSTATZOS.h"
 #  include "FLZASM31.h"
 #  define flzsym FLZSYM
 #else
@@ -370,6 +372,45 @@ static inline int flzsym(const char* pcDat, const int* piSln, char* pcVal, int* 
          return(remove(help));
       }
    }
+   extern long long getFileSize(const char* name) {
+      if (ISPATHNAME(name)) {
+         C08* pcName=dmapfil(name,0);
+         if (pcName!=NULL) {
+            struct stat stSta;
+            memset(&stSta,0,sizeof(stSta));
+            if (stat(pcName,&stSta)==0) {
+               free(pcName);
+               return(stSta.st_size);
+            }
+            free(pcName);
+         }
+      } else {
+#ifdef __FL5__
+         C08*                 pcName=dmapfil(name,0);
+         if (pcName!=NULL) {
+            TsFileStatZOS        stZos;
+            C08*                 pcHlp=strchr(pcName,'(');
+            if (pcHlp!=NULL) *pcHlp=0x00;
+            memset(&stZos,0,sizeof(stZos));
+            if (FSTATZOS(pcName,&stZos)==0) {
+               free(pcName);
+               U64 uiFilSiz=0;
+               if (stZos.datasetIsNonVSAM) {
+                  for (int i=0;i<stZos._nonVSAMAttr._spaceAllocation.numberOfExtents;i++) {
+                     uiFilSiz+=stZos._nonVSAMAttr._spaceAllocation._extents[i].tracks<<16;
+                  }
+               }
+               if (stZos.approxSize && (uiFilSiz && stZos.approxSize<uiFilSiz)) {
+                  return(stZos.approxSize);
+               }
+               return(uiFilSiz);
+            }
+            free(pcName);
+         }
+#endif
+      }
+      return(-1);
+   }
 #else
    static inline const char* filemode(const char* mode) {
       if(mode!=NULL) {
@@ -450,6 +491,19 @@ static inline int flzsym(const char* pcDat, const int* piSln, char* pcVal, int* 
    }
    extern FILE* freopen_hfq(const char* name, const char* mode, FILE* stream) {
       return(freopen(name, filemode(mode), stream));
+   }
+   extern long long getFileSize(const char* name) {
+      char* pcName=dmapfil(name,0);
+      if (pcName!=NULL) {
+         struct stat stSta;
+         memset(&stSta,0,sizeof(stSta));
+         if (stat(pcName,&stSta)==0) {
+            free(pcName);
+            return(stSta.st_size);
+         }
+         free(pcName);
+      }
+      return(-1);
    }
 #endif
 
