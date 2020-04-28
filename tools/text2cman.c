@@ -349,7 +349,7 @@ int main(int argc, char* argv[])
                 fclose(inFile);
                 strcpy(pageName, "#ifdef __SHOW_TEXT_SOURCE\n");
                 fputs(pageName, outFile);
-                sprintf(pageName, "\"\\000\"\n%s#endif\n", iList.start);/* skip leading ../ */
+                sprintf(pageName, "\"\\000\\037\"\n%s#endif\n", iList.start);/* skip leading ../ */
                 fputs(pageName, outFile);
                 strcpy(linebuf, ";\n\n");
                 fputs(linebuf, outFile);
