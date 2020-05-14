@@ -3103,14 +3103,14 @@ static const TsSym* psClpFndSym(
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    const TsSym*                  psHlp=NULL;
    int                           i,j,k;
-   for (i=0,psHlp=psTab;psHlp!=NULL;psHlp=psHlp->psNxt,i++) {
+   for (i=0,psHlp=psTab;psHlp!=NULL && psHlp->psStd!=NULL;psHlp=psHlp->psNxt,i++) {
       if (!CLPISF_LNK(psHlp->psStd->uiFlg)) {
          if (psHdl->isCas) {
-            for (k=j=0;pcKyw[j]!=EOS;j++) {
+            for (k=j=0;k==0 && pcKyw[j]!=EOS && psHlp->psStd->pcKyw!=NULL;j++) {
                if (pcKyw[j]!=psHlp->psStd->pcKyw[j]) k++;
             }
          } else {
-            for (k=j=0;pcKyw[j]!=EOS;j++) {
+            for (k=j=0;k==0 && pcKyw[j]!=EOS && psHlp->psStd->pcKyw!=NULL;j++) {
                if (toupper(pcKyw[j])!=toupper(psHlp->psStd->pcKyw[j])) k++;
             }
          }
@@ -3131,14 +3131,14 @@ static const TsSym* psClpFndSym2(
    const TsSym*                  psHlp=NULL;
    int                           i,j,k;
    if (psTab) {
-      for (i=0,psHlp=psTab;psHlp!=NULL;psHlp=psHlp->psBak,i++) {
+      for (i=0,psHlp=psTab;psHlp!=NULL && psHlp->psStd!=NULL;psHlp=psHlp->psBak,i++) {
          if (!CLPISF_LNK(psHlp->psStd->uiFlg)) {
             if (psHdl->isCas) {
-               for (k=j=0;pcKyw[j]!=EOS;j++) {
+               for (k=j=0;k==0 && pcKyw[j]!=EOS && psHlp->psStd->pcKyw!=NULL;j++) {
                   if (pcKyw[j]!=psHlp->psStd->pcKyw[j]) k++;
                }
             } else {
-               for (k=j=0;pcKyw[j]!=EOS;j++) {
+               for (k=j=0;k==0 && pcKyw[j]!=EOS && psHlp->psStd->pcKyw!=NULL;j++) {
                   if (toupper(pcKyw[j])!=toupper(psHlp->psStd->pcKyw[j])) k++;
                }
             }
@@ -3147,14 +3147,14 @@ static const TsSym* psClpFndSym2(
             }
          }
       }
-      for (i=0,psHlp=psTab->psNxt;psHlp!=NULL;psHlp=psHlp->psNxt,i++) {
+      for (i=0,psHlp=psTab->psNxt;psHlp!=NULL && psHlp->psStd!=NULL;psHlp=psHlp->psNxt,i++) {
          if (!CLPISF_LNK(psHlp->psStd->uiFlg)) {
             if (psHdl->isCas) {
-               for (k=j=0;pcKyw[j]!=EOS;j++) {
+               for (k=j=0;k==0 && pcKyw[j]!=EOS && psHlp->psStd->pcKyw!=NULL;j++) {
                   if (pcKyw[j]!=psHlp->psStd->pcKyw[j]) k++;
                }
             } else {
-               for (k=j=0;pcKyw[j]!=EOS;j++) {
+               for (k=j=0;k==0 && pcKyw[j]!=EOS && psHlp->psStd->pcKyw!=NULL;j++) {
                   if (toupper(pcKyw[j])!=toupper(psHlp->psStd->pcKyw[j])) k++;
                }
             }
@@ -3189,14 +3189,14 @@ static int siClpSymFnd(
       CLPERRADD(psHdl,      1,"Try to find keyword '%s' in this table",pcKyw);
       return(CLPERR_INT);
    }
-   for (e=i=0,psHlp=psTab;psHlp!=NULL;psHlp=psHlp->psNxt,i++) {
+   for (e=i=0,psHlp=psTab;psHlp!=NULL && psHlp->psStd!=NULL;psHlp=psHlp->psNxt,i++) {
       if (!CLPISF_LNK(psHlp->psStd->uiFlg)) {
          if (psHdl->isCas) {
-            for (k=j=0;pcKyw[j]!=EOS;j++) {
+            for (k=j=0;k==0 && pcKyw[j]!=EOS && psHlp->psStd->pcKyw!=NULL;j++) {
                if (pcKyw[j]!=psHlp->psStd->pcKyw[j]) k++;
             }
          } else {
-            for (k=j=0;pcKyw[j]!=EOS;j++) {
+            for (k=j=0;k==0 && pcKyw[j]!=EOS && psHlp->psStd->pcKyw!=NULL;j++) {
                if (toupper(pcKyw[j])!=toupper(psHlp->psStd->pcKyw[j])) k++;
             }
          }
@@ -7407,7 +7407,7 @@ static void vdClpPrnArgTab(
    const TsSym*                  psTab)
 {
    const TsSym*                  psHlp;
-   if (psTab!=NULL && psTab->psHih!=NULL) {
+   if (psTab!=NULL && psTab->psHih!=NULL && psTab->psStd!=NULL) {
       if (CLPISF_CON(psTab->psStd->uiFlg)) {
          if (siTyp<0) siTyp=psTab->psHih->psFix->siTyp;
          if (CLPISF_SEL(psTab->psHih->psStd->uiFlg)==FALSE) {
@@ -7421,7 +7421,7 @@ static void vdClpPrnArgTab(
          }
       }
    }
-   for (psHlp=psTab;psHlp!=NULL;psHlp=psHlp->psNxt) {
+   for (psHlp=psTab;psHlp!=NULL && psHlp->psStd!=NULL;psHlp=psHlp->psNxt) {
       if ((psHlp->psFix->siTyp==siTyp || siTyp<0) && !CLPISF_LNK(psHlp->psStd->uiFlg) && !CLPISF_HID(psHlp->psStd->uiFlg)) {
          vdClpPrnArg(pvHdl,pfOut,siLev,psHlp->psStd->pcKyw,GETALI(psHlp),psHlp->psStd->siKwl,psHlp->psFix->siTyp,psHlp->psFix->pcHlp,psHlp->psFix->pcDft,
                      CLPISF_SEL(psHlp->psStd->uiFlg),CLPISF_CON(psHlp->psStd->uiFlg));
