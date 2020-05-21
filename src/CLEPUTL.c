@@ -2275,8 +2275,11 @@ typedef void TfCEEGTJS(_INT4* funcode, _VSTRING* symname, _CHAR255 symvalue, _IN
 static TfCEEGTJS* gpfCeeGtjs=NULL;
 
 static void releaseCeeGtjs(void) {
+   fprintf(stderr,"------------>releaseCeeGtjs0\n");
    if (gpfCeeGtjs!=NULL) {
+      fprintf(stderr,"------------>releaseCeeGtjs1\n");
       release(gpfCeeGtjs);
+      fprintf(stderr,"------------>releaseCeeGtjs2\n");
       gpfCeeGtjs=NULL;
    }
 }
