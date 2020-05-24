@@ -1843,13 +1843,13 @@ extern unsigned int mapcdstr(const char* p) {
             } else return(0);
          } else if (toupper(p[0])=='E' && toupper(p[1])=='U' && toupper(p[2])=='C') { /*EUC-xx*/
             p+=3; if (p[0]=='-' || p[0]=='_') p++;
-            if (toupper(p[0]=='J') && toupper(p[1]=='P') && (p[2]==0x00 || isspace(p[2]))) {
+            if (toupper(p[0])=='J' && toupper(p[1])=='P' && (p[2]==0x00 || isspace(p[2]))) {
                return(954);
-            } else if (toupper(p[0]=='T') && toupper(p[1]=='W') && (p[2]==0x00 || isspace(p[2]))) {
+            } else if (toupper(p[0])=='T' && toupper(p[1])=='W' && (p[2]==0x00 || isspace(p[2]))) {
                return(964);
-            } else if (toupper(p[0]=='K') && toupper(p[1]=='R') && (p[2]==0x00 || isspace(p[2]))) {
+            } else if (toupper(p[0])=='K' && toupper(p[1])=='R' && (p[2]==0x00 || isspace(p[2]))) {
                return(949);
-            } else if (toupper(p[0]=='C') && toupper(p[1]=='N') && (p[2]==0x00 || isspace(p[2]))) {
+            } else if (toupper(p[0])=='C' && toupper(p[1])=='N' && (p[2]==0x00 || isspace(p[2]))) {
                return(1383);
             } else return(0);
          } else if (toupper(p[0])=='B' && toupper(p[1])=='I' && toupper(p[2])=='G') { /*BIG-5*/
@@ -4268,6 +4268,7 @@ extern int readEnvars(const char* pcFil, FILE* pfOut, FILE* pfErr, TsEnVarList**
       unsigned int   uiLen;
       unsigned int   uiPos=0;
       unsigned int   uiSiz=4096;
+      // cppcheck-suppress knownArgument
       char*          pcBuf=malloc(uiSiz+1);
       char*          pcHlp;
 // read the file into buffer
