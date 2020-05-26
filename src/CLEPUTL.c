@@ -2277,7 +2277,7 @@ static TfCEEGTJS* gpfCeeGtjs=NULL;
 static void releaseCeeGtjs(void) {
    fprintf(stderr,"----->releaseCeeGtjs0\n");
    if (gpfCeeGtjs!=NULL) {
-      fprintf(stderr,"------->releaseCeeGtjs1\n");
+      fprintf(stderr,"------->releaseCeeGtjs1(%p)\n",gpfCeeGtjs);
       release(gpfCeeGtjs);
       fprintf(stderr,"------->releaseCeeGtjs2\n");
       gpfCeeGtjs=NULL;
@@ -2304,7 +2304,7 @@ static const char* getjclvar(const char* symbol, int size, char* value) {
    if (gpfCeeGtjs==NULL) {
       gpfCeeGtjs=(TfCEEGTJS*)fetch("CEEGTJS");
       if (gpfCeeGtjs!=NULL) {
-         fprintf(stderr,"---> atexit(releaseCeeGtjs);\n");
+         fprintf(stderr,"---> atexit(releaseCeeGtjs(%p));\n",gpfCeeGtjs);
          atexit(releaseCeeGtjs);
       }
    }
