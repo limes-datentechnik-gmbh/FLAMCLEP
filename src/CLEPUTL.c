@@ -2275,14 +2275,14 @@ typedef void TfCEEGTJS(_INT4* funcode, _VSTRING* symname, _CHAR255 symvalue, _IN
 static TfCEEGTJS* gpfCeeGtjs=NULL;
 
 static void releaseCeeGtjs(void) {
-   fprintf(stderr,"----->releaseCeeGtjs0\n");
+   printd("----->releaseCeeGtjs0\n");
    if (gpfCeeGtjs!=NULL) {
-      fprintf(stderr,"------->releaseCeeGtjs1(%p)\n",gpfCeeGtjs);
+      printd("------->releaseCeeGtjs1(%p)\n",gpfCeeGtjs);
       release(gpfCeeGtjs);
-      fprintf(stderr,"------->releaseCeeGtjs2\n");
+      printd("------->releaseCeeGtjs2\n");
       gpfCeeGtjs=NULL;
    }
-   fprintf(stderr,"----->releaseCeeGtjs3\n");
+   printd("----->releaseCeeGtjs3\n");
 }
 
 static const char* getjclvar(const char* symbol, int size, char* value) {
@@ -2304,7 +2304,7 @@ static const char* getjclvar(const char* symbol, int size, char* value) {
    if (gpfCeeGtjs==NULL) {
       gpfCeeGtjs=(TfCEEGTJS*)fetch("CEEGTJS");
       if (gpfCeeGtjs!=NULL) {
-         fprintf(stderr,"---> atexit(releaseCeeGtjs(%p));\n",gpfCeeGtjs);
+         printd("---> atexit(releaseCeeGtjs(%p));\n",gpfCeeGtjs);
          atexit(releaseCeeGtjs);
       }
    }
