@@ -1023,7 +1023,7 @@ extern char* pcClpError(
    }
 }
 
-static int siClpFile2String(void* gbl, void* hdl, const char* filename, char** buf, int* bufsize, char* errmsg, const int msgsiz) {
+static int siOwnFile2String(void* gbl, void* hdl, const char* filename, char** buf, int* bufsize, char* errmsg, const int msgsiz) {
    (void)gbl;
    char* pcFil=dcpmapfil(filename);
    if (pcFil==NULL) return(-1);
@@ -1119,7 +1119,7 @@ extern void* pvClpOpen(
             psHdl->pfF2s=pfF2S;
             psHdl->pvF2s=pvF2S;
          } else {
-            psHdl->pfF2s=siClpFile2String;
+            psHdl->pfF2s=siOwnFile2String;
             psHdl->pvF2s=NULL;
          }
          psHdl->pvSaf=pvSaf;
