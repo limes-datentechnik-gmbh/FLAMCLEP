@@ -4171,7 +4171,8 @@ extern int loadEnvars(const unsigned int uiLen, const char* pcBuf, FILE* pfOut, 
                            siErr=CLERTC_SYS;
                         } else {
                            if (pfOut!=NULL) {
-                              fprintf(pfOut,"Put variable (%s=%s) to environment was successful\n",pcKey,pcVal);
+                              char acTs[24];
+                              fprintf(pfOut,"%s Put variable (%s=%s) to environment was successful\n",cstime(0,acTs),pcKey,pcVal);
                            }
                            c++;
                         }
@@ -4191,7 +4192,8 @@ extern int loadEnvars(const unsigned int uiLen, const char* pcBuf, FILE* pfOut, 
                            siErr=CLERTC_SYS;
                         } else {
                            if (pfOut!=NULL) {
-                              fprintf(pfOut,"Remove variable (%s=%s(EMPTY->UNSET)) from environment was successful\n",pcKey,pcVal);
+                              char acTs[24];
+                              fprintf(pfOut,"%s Remove variable (%s=%s(EMPTY->UNSET)) from environment was successful\n",cstime(0,acTs),pcKey,pcVal);
                            }
                            c++;
                         }

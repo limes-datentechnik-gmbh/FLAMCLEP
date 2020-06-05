@@ -3679,7 +3679,10 @@ static int siCleGetCommand(
 
       char acMsg[1024]="";
       siErr=pfF2S(pvGbl,pvF2S,*ppFil,ppCmd,&siSiz,acMsg,sizeof(acMsg));
-      if (siErr<0) {
+      if(siErr>0) {
+         char acTs[24];
+         if (pfOut!=NULL) fprintf(pfOut,"%s Read parameter in length %d from file '%s'\n",cstime(0,acTs),siErr,*ppFil);
+      } else {
          if (pfErr!=NULL) fprintf(pfErr,"Command file: %s\n",acMsg);
          SAFE_FREE(*ppFil);
          SAFE_FREE(*ppCmd);
