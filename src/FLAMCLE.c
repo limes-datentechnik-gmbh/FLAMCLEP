@@ -2718,11 +2718,17 @@ EVALUATE:
                char*                         pcCmd=NULL;
                char*                         pcTls=NULL;
                char*                         pcLst=NULL;
+               char                          acTs[24];
+               if (pfOut!=NULL) fprintf(pfOut,"%s Initialize command '%s'\n",cstime(0,acTs),psCmd[i].pcKyw);
                siErr=siCleCommandInit(pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,pcOwn,pcPgm,pcBld,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,psCmd[i].piOid,psCmd[i].psTab,
                                       isCas,isPfl,isRpl,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf);
                if (siErr) ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+
+               if (pfOut!=NULL) fprintf(pfOut,"%s Determine parameter string for command '%s'\n",cstime(0,acTs),psCmd[i].pcKyw);
                siErr=siCleGetCommand(pfOut,pfErr,pcDep,psCmd[i].pcKyw,argc,argv,&pcFil,&pcCmd,pvGbl,pvF2S,pfF2S,pcDpa);
                if (siErr) ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+
+               if (pfOut!=NULL) fprintf(pfOut,"%s Parse parameter string for command '%s'\n",cstime(0,acTs),psCmd[i].pcKyw);
                siErr=siClpParseCmd(pvHdl,pcFil,pcCmd,TRUE,TRUE,psCmd[i].piOid,&pcTls);
                if (siErr<0) {
                   if (pfErr!=NULL) fprintf(pfErr,"Command line parser for command '%s' failed\n",psCmd[i].pcKyw);
@@ -2737,6 +2743,8 @@ EVALUATE:
                   }
                }
                vdClpClose(pvHdl,CLPCLS_MTD_KEP);
+
+               if (pfOut!=NULL) fprintf(pfOut,"%s Map parameter structures for command '%s'\n",cstime(0,acTs),psCmd[i].pcKyw);
                siErr=psCmd[i].pfMap(pvHdl,pfErr,pfTrc,pvGbl,psCmd[i].piOid,psCmd[i].pvClp,psCmd[i].pvPar);
                if (siErr) {
                   if (siErr!=siNoR) {
@@ -2753,6 +2761,8 @@ EVALUATE:
                   psCmd[i].pfFin(pfErr,pfTrc,pvGbl,psCmd[i].pvPar);
                   ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
                }
+
+               if (pfOut!=NULL) fprintf(pfOut,"%s Run command '%s'\n",cstime(0,acTs),psCmd[i].pcKyw);
                siErr=psCmd[i].pfRun(pvHdl,pfErr,pfTrc,pvGbl,pcOwn,pcPgm,pcVsn,pcAbo,pcLic,psCmd[i].pcKyw,pcCmd,pcLst,psCmd[i].pvPar,&isWrn,&siScc);
                SAFE_FREE(pcCmd); SAFE_FREE(pcLst);
                if (siErr) {
@@ -2781,6 +2791,8 @@ EVALUATE:
                      }
                   }
                }
+
+               if (pfOut!=NULL) fprintf(pfOut,"%s Finalize command '%s'\n",cstime(0,acTs),psCmd[i].pcKyw);
                siErr=psCmd[i].pfFin(pfErr,pfTrc,pvGbl,psCmd[i].pvPar);
                vdClpClose(pvHdl,CLPCLS_MTD_ALL); pvHdl=NULL;
                if (siErr) {
