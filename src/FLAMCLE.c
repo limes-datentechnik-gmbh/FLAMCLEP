@@ -152,11 +152,12 @@
  * 1.2.78: Support free defined appendix
  * 1.3.79: Support new more flexible table based documentation generation
  * 1.3.80: Support optional built-in function HTMLDOC
+ * 1.3.81: Improve printouts and add time stamps
  */
-#define CLE_VSN_STR       "1.3.80"
+#define CLE_VSN_STR       "1.3.81"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        3
-#define CLE_VSN_REVISION       80
+#define CLE_VSN_REVISION       81
 
 /* Definition der Konstanten ******************************************/
 
@@ -2718,7 +2719,6 @@ EVALUATE:
                char*                         pcCmd=NULL;
                char*                         pcTls=NULL;
                char*                         pcLst=NULL;
-               char                          acTs[24];
                clock_t                       ckCpu1=clock();
                clock_t                       ckCpu2;
                siErr=siCleCommandInit(pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,pcOwn,pcPgm,pcBld,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,psCmd[i].piOid,psCmd[i].psTab,
