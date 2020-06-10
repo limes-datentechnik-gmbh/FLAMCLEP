@@ -176,13 +176,13 @@
  * 1.2.125: Add vdClpReset function to reset after an application handled error
  * 1.3.126: Support better docu generation and headings as single line variants (= Hdl1, ==Hdl2, ...)
  * 1.3.127: Support documentation generation by callback function (for built-in HTMLDOC)
- * 1.3.128: Use trace macro with fflush and time stamp
+ * 1.3.128: Use trace macro with fflush and time stamp, add symbols find to parse trace
 **/
 
-#define CLP_VSN_STR       "1.3.126"
+#define CLP_VSN_STR       "1.3.128"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        3
-#define CLP_VSN_REVISION       126
+#define CLP_VSN_REVISION       128
 
 /* Definition der Konstanten ******************************************/
 
@@ -3124,6 +3124,7 @@ static const TsSym* psClpFndSym(
             }
          }
          if (k==0 && j>=psHlp->psStd->siKwl) {
+            TRACE(psHdl->pfPrs,"FIND-SYMBOL1(KYW=%s(%s))\n",pcKyw,psHlp->psStd->pcKyw);
             return(psHlp);
          }
       }
@@ -3152,6 +3153,7 @@ static const TsSym* psClpFndSym2(
                }
             }
             if (k==0 && j>=psHlp->psStd->siKwl) {
+               TRACE(psHdl->pfPrs,"FIND-SYMBOL2a(KYW=%s(%s))\n",pcKyw,psHlp->psStd->pcKyw);
                return(psHlp);
             }
          }
@@ -3168,6 +3170,7 @@ static const TsSym* psClpFndSym2(
                }
             }
             if (k==0 && j>=psHlp->psStd->siKwl) {
+               TRACE(psHdl->pfPrs,"FIND-SYMBOL2b(KYW=%s(%s))\n",pcKyw,psHlp->psStd->pcKyw);
                return(psHlp);
             }
          }
@@ -3212,6 +3215,7 @@ static int siClpSymFnd(
          if (k==0 && j>=psHlp->psStd->siKwl) {
             if (piElm!=NULL) (*piElm)=e;
             *ppArg=(TsSym*)psHlp;
+            TRACE(psHdl->pfPrs,"%s FIND-SYMBOL3(LEV=%d ELM=%d IND=%d KYW=%s(%s))\n",fpcPre(pvHdl,siLev),siLev,e,i,pcKyw,psHlp->psStd->pcKyw);
             return(i);
          }
          if (piElm!=NULL) {
