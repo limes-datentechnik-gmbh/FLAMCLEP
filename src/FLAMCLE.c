@@ -47,7 +47,9 @@
 #  include <windows.h>
 #else
 #  include <dlfcn.h>
+#  include <sys/utsname.h>
 #endif
+
 /* Include eigener Bibliotheken  **************************************/
 
 #if defined(__DEBUG__) && defined(__FL5__)
@@ -482,6 +484,7 @@ static int siCleGetProperties(
 static int siCleGetCommand(
    FILE*                         pfOut,
    FILE*                         pfErr,
+   FILE*                         pfTrc,
    const char*                   pcDep,
    const char*                   pcFct,
    int                           argc,
@@ -613,18 +616,14 @@ static int siClpFile2String(void* gbl, void* hdl, const char* filename, char** b
    int r = siCleEndExecution((x),psCnf,pfTrh,pfDoc,pfPro,ppArg,pvHdl,(b));\
    if (r) {\
       if (pcBld!=NULL && *pcBld) {\
-         char acTs[24];\
          if (pfErr!=NULL) efprintf(pfErr,"%s Program '%s' (Build: %s (%s %s)) ends with completion code %d (%s)\n",cstime(0,acTs),(pcProgram!=NULL)?pcProgram:"-NULL-",pcBld,__DATE__,__TIME__,r,pcMapCleRtc(r));\
       } else {\
-         char acTs[24];\
          if (pfErr!=NULL) efprintf(pfErr,"%s Program '%s' (Build: %s %s) ends with completion code %d (%s)\n",cstime(0,acTs),(pcProgram!=NULL)?pcProgram:"-NULL-",__DATE__,__TIME__,r,pcMapCleRtc(r));\
       }\
    } else {\
       if (pcBld!=NULL && *pcBld) {\
-         char acTs[24];\
          if (pfOut!=NULL) efprintf(pfOut,"%s Program '%s' (Build: %s (%s %s)) run successfully\n",cstime(0,acTs),(pcProgram!=NULL)?pcProgram:"-NULL-",pcBld,__DATE__,__TIME__);\
       } else {\
-         char acTs[24];\
          if (pfOut!=NULL) efprintf(pfOut,"%s Program '%s' (Build: %s %s) run successfully\n",cstime(0,acTs),(pcProgram!=NULL)?pcProgram:"-NULL-",__DATE__,__TIME__);\
       }\
    }\
@@ -646,13 +645,14 @@ static inline TsCnfHdl* psOpenConfig(FILE* pfOut, FILE* pfErr, const char* pcHom
    size_t         szCnf=0;
    char*          pcCnf=NULL;
    char*          pcFil=NULL;
-   char           acTs[24];
    TsCnfHdl*      psCnf;
    const char*    m;
 
    srprintf(&pcCnf,&szCnf,strlen(pcPgu),"%s_CONFIG_FILE",pcPgu);
    if (pcCnf==NULL) {
-      if (pfErr!=NULL) fprintf(pfErr,"Memory allocation for %s_CONFIG_FILE  failed\n",pcPgu);
+      if (pfErr!=NULL) {
+         fprintf(pfErr,"Memory allocation for %s_CONFIG_FILE  failed\n",pcPgu);
+      }
       return(NULL);
    }
    m=GETENV(pcCnf);
@@ -664,7 +664,9 @@ static inline TsCnfHdl* psOpenConfig(FILE* pfOut, FILE* pfErr, const char* pcHom
          char  acUsr[16];
          srprintf(&pcFil,&szFil,strlen(pcPgu)+8,"'%s.",userid(sizeof(acUsr),acUsr));
          if (pcFil==NULL) {
-            if (pfErr!=NULL) fprintf(pfErr,"Memory allocation for default configuration file name failed\n");
+            if (pfErr!=NULL) {
+               fprintf(pfErr,"Memory allocation for default configuration file name failed\n");
+            }
             free(pcCnf);
             return(NULL);
          }
@@ -680,7 +682,9 @@ static inline TsCnfHdl* psOpenConfig(FILE* pfOut, FILE* pfErr, const char* pcHom
       if (pcHom[0]) {
          srprintf(&pcFil,&szFil,strlen(pcPgl),".%s.config",pcPgl);
          if (pcFil==NULL) {
-            if (pfErr!=NULL) fprintf(pfErr,"Memory allocation for default configuration file name failed\n");
+            if (pfErr!=NULL) {
+               fprintf(pfErr,"Memory allocation for default configuration file name failed\n");
+            }
             free(pcCnf);
             return(NULL);
          }
@@ -688,33 +692,51 @@ static inline TsCnfHdl* psOpenConfig(FILE* pfOut, FILE* pfErr, const char* pcHom
          if (pfTmp==NULL) {
             srprintf(&pcFil,&szFil,strlen(pcHom)+strlen(pcPgl),"%s.%s.config",pcHom,pcPgl);
             if (pcFil==NULL) {
-               if (pfErr!=NULL) fprintf(pfErr,"Memory allocation for default configuration file name failed\n");
+               if (pfErr!=NULL) {
+                  fprintf(pfErr,"Memory allocation for default configuration file name failed\n");
+               }
                free(pcCnf);
                return(NULL);
             }
-            if (pfOut!=NULL) fprintf(pfOut,"%s Use default configuration file (%s) in home directory\n",cstime(0,acTs),pcFil);
+            if (pfOut!=NULL) {
+               char  acTs[24];
+               fprintf(pfOut,"%s Use default configuration file (%s) in home directory\n",cstime(0,acTs),pcFil);
+            }
          } else {
             fclose(pfTmp);
-            if (pfOut!=NULL) fprintf(pfOut,"%s Use existing configuration file (%s) in working directory\n",cstime(0,acTs),pcFil);
+            if (pfOut!=NULL) {
+               char  acTs[24];
+               fprintf(pfOut,"%s Use existing configuration file (%s) in working directory\n",cstime(0,acTs),pcFil);
+            }
          }
       } else {
          srprintf(&pcFil,&szFil,strlen(pcPgl),".%s.config",pcPgl);
          if (pcFil==NULL) {
-            if (pfErr!=NULL) fprintf(pfErr,"Memory allocation for default configuration file name failed\n");
+            if (pfErr!=NULL) {
+               fprintf(pfErr,"Memory allocation for default configuration file name failed\n");
+            }
             free(pcCnf);
             return(NULL);
          }
-         if (pfOut!=NULL) fprintf(pfOut,"%s Use default configuration file (%s) in working directory\n",cstime(0,acTs),pcFil);
+         if (pfOut!=NULL) {
+            char  acTs[24];
+            fprintf(pfOut,"%s Use default configuration file (%s) in working directory\n",cstime(0,acTs),pcFil);
+         }
       }
    #endif
    } else {
       srprintf(&pcFil,&szFil,strlen(m),"%s",m);
       if (pcFil==NULL) {
-         if (pfErr!=NULL) fprintf(pfErr,"Memory allocation for configuration file name (%s) from environment variable failed\n",pcCnf);
+         if (pfErr!=NULL) {
+            fprintf(pfErr,"Memory allocation for configuration file name (%s) from environment variable failed\n",pcCnf);
+         }
          free(pcCnf);
          return(NULL);
       }
-      if (pfOut!=NULL) fprintf(pfOut,"%s Using configuration file (%s) defined by environment variable (%s)\n",cstime(0,acTs),pcFil,pcCnf);
+      if (pfOut!=NULL) {
+         char  acTs[24];
+         fprintf(pfOut,"%s Using configuration file (%s) defined by environment variable (%s)\n",cstime(0,acTs),pcFil,pcCnf);
+      }
    }
 
    psCnf=psCnfOpn(pfErr,isCas,pcPgm,pcFil);
@@ -1302,6 +1324,13 @@ extern int siCleExecute(
       if (pfErr!=NULL) fprintf(pfErr,"CLE call parameter incorrect (NULL pointer or empty strings)\n");
       ERROR(CLERTC_FAT,NULL);
    }
+
+#ifndef __WIN__
+   struct utsname uts;
+   if(uname(&uts)>=0) {
+      if (pfOut!=NULL) efprintf(pfOut,"%s Run on %s(%s)v(%s)r(%s)m(%s)\n",cstime(0,acTs),uts.sysname,uts.nodename,uts.version,uts.release,uts.machine);
+   }
+#endif
 
    if (pfOut!=NULL) efprintf(pfOut,"%s Start program '%s' (Build: %s (%s %s))\n",cstime(0,acTs),(pcProgram!=NULL)?pcProgram:"-NULL-",pcBld,__DATE__,__TIME__);
 
@@ -2730,7 +2759,7 @@ EVALUATE:
                   ckCpu1=ckCpu2;
                }
 
-               siErr=siCleGetCommand(pfOut,pfErr,pcDep,psCmd[i].pcKyw,argc,argv,&pcFil,&pcCmd,pvGbl,pvF2S,pfF2S,pcDpa);
+               siErr=siCleGetCommand(pfOut,pfErr,pfTrc,pcDep,psCmd[i].pcKyw,argc,argv,&pcFil,&pcCmd,pvGbl,pvF2S,pfF2S,pcDpa);
                if (siErr) ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
                if (pfOut!=NULL) {
                   ckCpu2=clock();
@@ -3084,12 +3113,21 @@ static int siCleCommandInit(
    int                           isOvl=(piOid==NULL)?FALSE:TRUE;
    char*                         pcFil=NULL;
    char*                         pcPro=NULL;
+   clock_t                       ckCpu1=clock();
+   clock_t                       ckCpu2;
+   char                          acTs[24];
 
    *ppHdl=pvClpOpen(isCas,isPfl,isRpl,siMkl,pcOwn,pcPgm,pcBld,pcCmd,pcMan,pcHlp,isOvl,psTab,pvClp,pfOut,pfErr,pfTrc,pfTrc,pfTrc,pfTrc,pcDep,pcOpt,pcEnt,NULL,pvGbl,pvF2S,pfF2S,pvSaf,pfSaf);
    if (*ppHdl==NULL) {
       if (pfErr!=NULL) fprintf(pfErr,"Open of parser for command '%s' failed\n",pcCmd);
       return(CLERTC_TAB);
    }
+   if (pfTrc!=NULL) {
+      ckCpu2=clock();
+      fprintf(pfTrc,"%s Open of command line parser (CLP) for command '%s' was successful (CPU time %3.3fs)\n",cstime(0,acTs),pcCmd,((double)(ckCpu2-ckCpu1))/CLOCKS_PER_SEC);
+      ckCpu1=ckCpu2;
+   }
+
    siErr=pfIni(*ppHdl,pfErr,pfTrc,pvGbl,pcOwn,pcPgm,pvClp);
    if (siErr) {
       const char* pcMsg;
@@ -3101,11 +3139,21 @@ static int siCleCommandInit(
       vdClpClose(*ppHdl,CLPCLS_MTD_ALL);*ppHdl=NULL;
       return(CLERTC_INI);
    }
+   if (pfTrc!=NULL) {
+      ckCpu2=clock();
+      fprintf(pfTrc,"%s Initialization of CLP structure for command '%s' was successful (CPU time %3.3fs)\n",cstime(0,acTs),pcCmd,((double)(ckCpu2-ckCpu1))/CLOCKS_PER_SEC);
+      ckCpu1=ckCpu2;
+   }
    siErr=siCleGetProperties(pfErr,psCnf,pcOwn,pcPgm,pcCmd,&pcFil,&pcPro,&siFil,pvGbl,pvF2S,pfF2S);
    if (siErr) {
       vdClpClose(*ppHdl,CLPCLS_MTD_ALL);*ppHdl=NULL;
       SAFE_FREE(pcPro); SAFE_FREE(pcFil);
       return(siErr);
+   }
+   if (pfTrc!=NULL) {
+      ckCpu2=clock();
+      fprintf(pfTrc,"%s Determine properties for command '%s' was successful (CPU time %3.3fs)\n",cstime(0,acTs),pcCmd,((double)(ckCpu2-ckCpu1))/CLOCKS_PER_SEC);
+      ckCpu1=ckCpu2;
    }
    if (pcPro!=NULL) {
       siErr=siClpParsePro(*ppHdl,pcFil,pcPro,FALSE,NULL);
@@ -3116,6 +3164,10 @@ static int siCleCommandInit(
          return(CLERTC_SYN);
       }
       free(pcPro);
+      if (pfTrc!=NULL) {
+         ckCpu2=clock();
+         fprintf(pfTrc,"%s Parsing of properties for command '%s' was successful (CPU time %3.3fs)\n",cstime(0,acTs),pcCmd,((double)(ckCpu2-ckCpu1))/CLOCKS_PER_SEC);
+      }
    }
    SAFE_FREE(pcFil);
    return(CLERTC_OK);
@@ -3635,6 +3687,7 @@ static int siCleGetProperties(
 static int siCleGetCommand(
    FILE*                   pfOut,
    FILE*                   pfErr,
+   FILE*                   pfTrc,
    const char*             pcDep,
    const char*             pcFct,
    int                     argc,
@@ -3660,12 +3713,18 @@ static int siCleGetCommand(
             default: if (pfErr!=NULL) fprintf(pfErr,"An unknown error occurred while reading command line.\n");                         return(CLERTC_FAT);
             }
          }
+         if (pfTrc!=NULL) {
+            char acTs[24];
+            fprintf(pfTrc,"%s Read parameter string in length %d from command line\n",cstime(0,acTs),(int)strlen(*ppCmd));
+         }
       } else {
          if (pcDpa!=NULL && *pcDpa) {
             siErr=pfF2S(pvGbl,pvF2S,pcDpa,ppCmd,&siSiz,NULL,0);
             if(siErr>0) {
-               char acTs[24];
-               if (pfOut!=NULL) fprintf(pfOut,"%s Read parameter in length %d from file '%s'\n",cstime(0,acTs),siErr,pcDpa);
+               if (pfTrc!=NULL) {
+                  char acTs[24];
+                  fprintf(pfTrc,"%s Read parameter string in length %d from default parameter file '%s'\n",cstime(0,acTs),siErr,pcDpa);
+               }
             } else {
                char* pcHlp=(char*)realloc(*ppCmd,1);
                if (pcHlp==NULL) {
@@ -3696,6 +3755,10 @@ static int siCleGetCommand(
          default: if (pfErr!=NULL) fprintf(pfErr,"An unknown error occurred while reading command line.\n");                         return(CLERTC_FAT);
          }
       }
+      if (pfTrc!=NULL) {
+         char acTs[24];
+         fprintf(pfTrc,"%s Read parameter string in length %d from command line\n",cstime(0,acTs),(int)strlen(*ppCmd));
+      }
    } else if (argv[1][l]=='=') {
       int o=(argv[1][l+1]=='>')?l+2:l+1;
       if (argc!=2) {
@@ -3717,8 +3780,10 @@ static int siCleGetCommand(
       char acMsg[1024]="";
       siErr=pfF2S(pvGbl,pvF2S,*ppFil,ppCmd,&siSiz,acMsg,sizeof(acMsg));
       if(siErr>0) {
-         char acTs[24];
-         if (pfOut!=NULL) fprintf(pfOut,"%s Read parameter in length %d from file '%s'\n",cstime(0,acTs),siErr,*ppFil);
+         if (pfTrc!=NULL) {
+            char acTs[24];
+            fprintf(pfTrc,"%s Read parameter string in length %d from file '%s'\n",cstime(0,acTs),siErr,*ppFil);
+         }
       } else {
          if (pfErr!=NULL) fprintf(pfErr,"Command file: %s\n",acMsg);
          SAFE_FREE(*ppFil);
