@@ -392,7 +392,7 @@
  * To read such a parameter file as string into the memory a handle and a
  * callback function can be provided. If the parameter NULL a default
  * implementation is used. If you provide your own function you can include
- * for example URL support, remote access, character conversion aso. The
+ * for example URL support, remote access, character conversion, etc. The
  * handle is given to the callback function. The default implementation don't
  * need any handle, but you can use it for example for the character conversion
  * module, a remote session or something else.
