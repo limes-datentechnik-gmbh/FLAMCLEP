@@ -128,7 +128,7 @@ extern const char* pcCleAbout(const int l, const int s, char* b);
  * @param[in]  pcPgm Logical program name (can be different from argv[0] and will be used in the root "com.company.program")
  * @param[in]  pcAut Name of the author for ASCIIDOC header (required for header generation)
  * @param[in]  pcAdr Mail address of the author for the ASCIIDOC header (optional)
- * @param[in]  isCas Switch to enable case sensitive interpretation of the command line (recommended is FLASE)
+ * @param[in]  isCas Switch to enable case sensitive interpretation of the command line (recommended is FALSE)
  * @param[in]  isPfl Switch to enable parameter file support for object, overlays and arrays (recommended is TRUE)
  * @param[in]  isRpl Switch to enable replacement of environment variables (recommended is TRUE)
  * @param[in]  isEnv Switch to load environment variables from default files (recommended is TRUE if no own load done else FALSE)
