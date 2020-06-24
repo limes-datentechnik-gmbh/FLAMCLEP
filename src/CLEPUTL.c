@@ -940,6 +940,7 @@ extern int ebcdic_fprintf(FILE* file, const char* format, ...) {
 #define _WIN32_IE 0x5000
 #include <windows.h>
 #include <shlobj.h>
+#include <versionhelpers.h>
 extern char* userid(const int size, char* buffer) {
    DWORD tmp=size;
    buffer[0]=0x00;
@@ -993,6 +994,39 @@ extern int win_unsetenv(const char* name){
   char envstr[strlen(name) + 2];
   sprintf(envstr,"%s=",name);
   return _putenv(envstr);
+}
+
+extern char* windowsversionstring(char** vstr, size_t* size)
+{
+    size_t exp = 28;
+    if (IsWindows10OrGreater()) {
+        srprintf(vstr, size, exp, "Windows10 %s or greater", IsWindowsServer() ? "Server": "Client");
+    } else if (IsWindows8Point1OrGreater()) {
+        srprintf(vstr, size, exp, "Windows8.1 %s", IsWindowsServer() ? "Server": "Client");
+    } else if (IsWindows8OrGreater()) {
+        srprintf(vstr, size, exp, "Windows8 %s", IsWindowsServer() ? "Server": "Client");
+    } else if (IsWindows7SP1OrGreater()) {
+        srprintf(vstr, size, exp, "Windows7SP1 %s", IsWindowsServer() ? "Server": "Client");
+    } else if (IsWindows7OrGreater()) {
+        srprintf(vstr, size, exp, "Windows7 %s", IsWindowsServer() ? "Server": "Client");
+    } else if (IsWindowsVistaSP2OrGreater()) {
+        srprintf(vstr, size, exp, "Windows VistaSP2 %s", IsWindowsServer() ? "Server": "Client");
+    } else if (IsWindowsVistaSP1OrGreater()) {
+        srprintf(vstr, size, exp, "Windows VistaSP1 %s", IsWindowsServer() ? "Server": "Client");
+    } else if (IsWindowsVistaOrGreater()) {
+        srprintf(vstr, size, exp, "Windows Vista %s", IsWindowsServer() ? "Server": "Client");
+    } else if (IsWindowsXPSP3OrGreater()) {
+        srprintf(vstr, size, exp, "WindowsXPSP3 %s", IsWindowsServer() ? "Server": "Client");
+    } else if (IsWindowsXPSP2OrGreater()) {
+        srprintf(vstr, size, exp, "WindowsXPSP2 %s", IsWindowsServer() ? "Server": "Client");
+    } else if (IsWindowsXPSP1OrGreater()) {
+        srprintf(vstr, size, exp, "WindowsXPSP1 %s", IsWindowsServer() ? "Server": "Client");
+    } else if (IsWindowsXPOrGreater()) {
+        srprintf(vstr, size, exp, "WindowsXP %s", IsWindowsServer() ? "Server": "Client");
+    } else {
+        srprintf(vstr, size, exp, "Windows OLDER THAN XP");
+    }
+    return *vstr;
 }
 
 #else

@@ -1325,7 +1325,12 @@ extern int siCleExecute(
       ERROR(CLERTC_FAT,NULL);
    }
 
-#ifndef __WIN__
+#ifdef __WIN__
+   char* pcwinvers = NULL;
+   size_t szwv = 0;
+   if (pfOut!=NULL) efprintf(pfOut,"%s Run on %s\n",cstime(0,acTs),windowsversionstring(&pcwinvers, &szwv));
+   if (pcwinvers != NULL) free(pcwinvers);
+#else
    struct utsname uts;
    if(uname(&uts)>=0) {
       if (pfOut!=NULL) efprintf(pfOut,"%s Run on %s(%s)v(%s)r(%s)m(%s)\n",cstime(0,acTs),uts.sysname,uts.nodename,uts.version,uts.release,uts.machine);
