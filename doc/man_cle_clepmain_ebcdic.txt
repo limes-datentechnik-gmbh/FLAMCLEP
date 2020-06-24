@@ -46,7 +46,7 @@ See list below:
    # = &HSH;   - Hashtag (number sign)
    @ = &ATS;   - At sign
    [ = &SBO;   - Square bracket open
-   \\ = &BSL;   - Backslash
+   \ = &BSL;   - Backslash
    ] = &SBC;   - Square bracket close
    ^ = &CRT;   - Caret (circumflex)
    ` = &GRV;   - Grave accent

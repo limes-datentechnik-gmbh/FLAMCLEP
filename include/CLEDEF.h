@@ -81,6 +81,7 @@
  * and must be assigned to the corresponding chapters in the table below.
  * @{
  */
+#define CLE_ANCHOR_MAIN_EBCDIC            "CLEP.MAIN.EBCDIC"            /**< @brief Chapter for special EBCDIC code page support. */
 #define CLE_ANCHOR_BUILTIN_FUNCTIONS      "CLEP.BUILTIN.FUNCTIONS"      /**< @brief Chapter built-in functions. */
 #define CLE_ANCHOR_APPENDIX_ABOUT         "CLEP.APPENDIX.ABOUT"         /**< @brief Appendix About. */
 #define CLE_ANCHOR_APPENDIX_VERSION       "CLEP.APPENDIX.VERSION"       /**< @brief Appendix Version. */

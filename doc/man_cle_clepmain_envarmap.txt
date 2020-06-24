@@ -15,3 +15,15 @@ possible:
 ** On UNIX with /home/<USER>
 ** On USS with /u/<USER>
 ** On ZOS with <SYSUID>
+
+Additional few abbreviation are supported for different kind of strings.
+
+* '~' for <HOME> in file strings
+* '!' for <ENVID> in key labels
+* '~' for <SYSUID> in key labels
+* '^' for <OWNERID> in key labels
+
+All these abbreviation character have different code points in EBCDIC
+code pages and can only be used if the CCSID known be CLP, see chapter
+<<CLEP.MAIN.EBCDIC,special EBCDIC code page support>> how the CCSID can
+be defined for CLP.
