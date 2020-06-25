@@ -941,12 +941,14 @@ extern int ebcdic_fprintf(FILE* file, const char* format, ...) {
 #include <windows.h>
 #include <shlobj.h>
 #include <versionhelpers.h>
+
 extern char* userid(const int size, char* buffer) {
    DWORD tmp=size;
    buffer[0]=0x00;
    GetUserName(buffer,&tmp);
    return(buffer);
 }
+
 extern char* duserid(void) {
    char*    buffer=NULL;
    size_t   size=0;
@@ -956,6 +958,7 @@ extern char* duserid(void) {
    srprintf(&buffer,&size,strlen(user),"%s",user);
    return(buffer);
 }
+
 extern char* homedir(int flag, const int size, char* buffer) {
    char path[MAX_PATH+1]={0};
    buffer[0]=0x00;
@@ -968,6 +971,7 @@ extern char* homedir(int flag, const int size, char* buffer) {
    }
    return(buffer);
 }
+
 extern char* dhomedir(int flag) {
    char*    buffer=NULL;
    size_t   size=0;
