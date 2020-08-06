@@ -155,11 +155,12 @@
  * 1.3.79: Support new more flexible table based documentation generation
  * 1.3.80: Support optional built-in function HTMLDOC
  * 1.3.81: Improve printouts and add time stamps
+ * 1.3.82: Support CLE_QUITE/SILENT environment variables
  */
-#define CLE_VSN_STR       "1.3.81"
+#define CLE_VSN_STR       "1.3.82"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        3
-#define CLE_VSN_REVISION       81
+#define CLE_VSN_REVISION       82
 
 /* Definition der Konstanten ******************************************/
 
@@ -1317,6 +1318,18 @@ extern int siCleExecute(
          pfOut=NULL;
          argc--;
       }
+   }
+
+   m=GETENV("CLE_SILENT");
+   if (m!=NULL && (strcmp(m,"YES")==0 || strcmp(m,"ON")==0)) {
+      pfErr=NULL;
+      pfOut=NULL;
+   }
+
+   m=GETENV("CLE_QUIET");
+   if (m!=NULL && (strcmp(m,"YES")==0 || strcmp(m,"ON")==0)) {
+      pfErr=pfOut;
+      pfOut=NULL;
    }
 
    if (psCmd==NULL || argc==0     || argv==NULL  ||  pcOwner==NULL ||  pcProgram==NULL ||  pcHlp==NULL ||
