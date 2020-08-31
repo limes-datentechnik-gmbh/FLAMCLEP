@@ -5,6 +5,8 @@ Below you can find the list of environment variables used by CLE and CLP.
 * USER    - to determine the current user id on UNIX/WIN
 * ENVID   - for the current environment qualifier (D/T/P) if key label template mapping used (default is 'T')
 * OWNERID - used for current owner if not already defined
+* CLE_QUIET  - Disables the normal log output of the command line executer (must set to YES or ON)
+* CLE_SILENT - Disables log and errors messages of the command line executer (must set to YES or ON)
 * CLP_NOW - The current point in time used for predefined constants (0tYYYY/MM/DD.HH:MM:SS)
 * CLP_STRING_CCSID - CCSID used for interpretation of critical punctuation character on EBCDIC systems (default is taken from LANG)
 * CLP_DEFAULT_DCB - The default record format and record length in C file mode format (default is 'recfm=VB, lrecl=516' only for z/OS)

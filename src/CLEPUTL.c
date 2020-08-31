@@ -48,8 +48,15 @@
 #  include "FSTATZOS.h"
 #  include "FLZASM31.h"
 #  define flzsym FLZSYM
+#  define flzjsy FLZJSY
 #else
 static inline int flzsym(const char* pcDat, const int* piSln, char* pcVal, int* piVln) {
+   (void)pcDat; (void)piSln;
+   memset(pcVal,0,*piVln);
+   *piVln=0;
+   return(8);
+}
+static inline int flzjsy(const char* pcDat, const int* piSln, char* pcVal, int* piVln) {
    (void)pcDat; (void)piSln;
    memset(pcVal,0,*piVln);
    *piVln=0;
@@ -941,12 +948,14 @@ extern int ebcdic_fprintf(FILE* file, const char* format, ...) {
 #include <windows.h>
 #include <shlobj.h>
 #include <versionhelpers.h>
+
 extern char* userid(const int size, char* buffer) {
    DWORD tmp=size;
    buffer[0]=0x00;
    GetUserName(buffer,&tmp);
    return(buffer);
 }
+
 extern char* duserid(void) {
    char*    buffer=NULL;
    size_t   size=0;
@@ -956,6 +965,7 @@ extern char* duserid(void) {
    srprintf(&buffer,&size,strlen(user),"%s",user);
    return(buffer);
 }
+
 extern char* homedir(int flag, const int size, char* buffer) {
    char path[MAX_PATH+1]={0};
    buffer[0]=0x00;
@@ -968,6 +978,7 @@ extern char* homedir(int flag, const int size, char* buffer) {
    }
    return(buffer);
 }
+
 extern char* dhomedir(int flag) {
    char*    buffer=NULL;
    size_t   size=0;
@@ -2297,74 +2308,32 @@ static void rplchar(char* name,const size_t size,const char c, const char* value
    }
 }
 
-#ifdef __ZOS__
-
-#if __BUILDNR__ != 123
-#  include <leawi.h>
-#  include <ceeedcct.h>
-#endif
-
-typedef void TfCEEGTJS(_INT4* funcode, _VSTRING* symname, _CHAR255 symvalue, _INT4* valuelen, _FEEDBACK* fc);
-
-static TfCEEGTJS* gpfCeeGtjs=NULL;
-
-static void releaseCeeGtjs(void) {
-   printd("----->releaseCeeGtjs0\n");
-   if (gpfCeeGtjs!=NULL) {
-      printd("------->releaseCeeGtjs1(%p)\n",gpfCeeGtjs);
-      release(gpfCeeGtjs);
-      printd("------->releaseCeeGtjs2\n");
-      gpfCeeGtjs=NULL;
+static const char* getjclvar(const char* symbol, int size, char* value)
+{
+   int        err=0;
+   int        siSln;
+   int        siVln=size-1;
+   char       acCpy[strlen(symbol)+2];
+   if(symbol[0]!='&'){
+      siSln=snprintf(acCpy,sizeof(acCpy),"&%s",symbol);
+      symbol=acCpy;
+   } else {
+      siSln=strlen(symbol);
    }
-   printd("----->releaseCeeGtjs3\n");
-}
-
-static const char* getjclvar(const char* symbol, int size, char* value) {
-   _FEEDBACK   fc;
-   _INT4       funcode=1;
-   _CHAR255    symvalue="";
-   _VSTRING    symname;
-   _INT4       valuelen=strlen(symbol);
-
-/* Preparing the JCL symbol */
-   if(symbol[0]=='&'){
-      valuelen--;
-      symbol++;
-   }
-   if (valuelen>sizeof(symname.string)) return(NULL);
-   symname.length=valuelen;
-   memcpy(symname.string,symbol,(size_t)valuelen);
-/* dynamic load of CEEGTJS function */
-   if (gpfCeeGtjs==NULL) {
-      gpfCeeGtjs=(TfCEEGTJS*)fetch("CEEGTJS");
-      if (gpfCeeGtjs!=NULL) {
-         printd("---> atexit(releaseCeeGtjs(%p));\n",gpfCeeGtjs);
-         atexit(releaseCeeGtjs);
+   err=flzjsy(symbol,&siSln,value,&siVln);
+   if (err==0) {
+      if (siVln!=siSln || memcmp(symbol,value,siVln)) {                  // check if real replacement
+         while (siVln>0 && isspace(value[siVln-1])) siVln--;            // remove trailing whitespace
+         if (siVln) {
+            value[siVln]=0x00;
+            return(value);
+         }
       }
    }
-   if (gpfCeeGtjs!=NULL) {
-   /* Retrieving the value of the JCL symbol */
-      valuelen=sizeof(symvalue);
-      gpfCeeGtjs(&funcode,&symname,symvalue,&valuelen,&fc);
-      if( _FBCHECK (fc, CEE000) !=0) return(NULL);
-   /* Success do zero termination and return*/
-      if (valuelen>=size) return(NULL);
-      memcpy(value,symvalue,(size_t)valuelen);
-      value[valuelen]='\0';
-      return(value);
-   } else return(NULL);
-}
-
-#else
-
-static const char* getjclvar(const char* symbol, int size, char* value) {
-   (void)symbol; (void)size; (void)value;
    return(NULL);
 }
 
-#endif
-
-static const char* systemsymbol(const char* symbol, int size, char* value)
+static const char* getsysvar(const char* symbol, int size, char* value)
 {
    int        err=0;
    int        siSln;
@@ -2401,7 +2370,7 @@ extern char* getenvar(const char* name,const size_t length,const size_t size,cha
    memset(acVal,0,sizeof(acVal));
    const char* v=GETENV(name);
    if (v==NULL) v=getjclvar(name,sizeof(acVal)-1,acVal);
-   if (v==NULL) v=systemsymbol(name,sizeof(acVal)-1,acVal);
+   if (v==NULL) v=getsysvar(name,sizeof(acVal)-1,acVal);
    if (v!=NULL && *v) {
       size_t lv=strlen(v);
       while(lv>0 && isspace(v[lv-1])) {
