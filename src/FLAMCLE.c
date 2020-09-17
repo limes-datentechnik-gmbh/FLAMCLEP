@@ -156,11 +156,12 @@
  * 1.3.80: Support optional built-in function HTMLDOC
  * 1.3.81: Improve printouts and add time stamps
  * 1.3.82: Support CLE_QUITE/SILENT environment variables
+ * 1.3.83: Initialize dia-critical characters support also if quiet defined
  */
-#define CLE_VSN_STR       "1.3.82"
+#define CLE_VSN_STR       "1.3.83"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        3
-#define CLE_VSN_REVISION       82
+#define CLE_VSN_REVISION       83
 
 /* Definition der Konstanten ******************************************/
 
@@ -1474,9 +1475,11 @@ extern int siCleExecute(
 
    if (pfOut!=NULL) {
       fprintf(pfOut,"%s Complete load of environment ...\n",cstime(0,acTs));
+   }
 #ifdef __EBCDIC__
       init_char(gsDiaChr.exc);
 #endif
+   if (pfOut!=NULL) {
       efprintf(pfOut,"%s Initialize dia-critical character (!$#@[\\]^`{|}~) conversion (%s)\n",cstime(0,acTs),mapccsid(localccsid()));
    }
 
