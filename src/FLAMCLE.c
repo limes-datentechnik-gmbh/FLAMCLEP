@@ -1477,8 +1477,9 @@ extern int siCleExecute(
       fprintf(pfOut,"%s Complete load of environment ...\n",cstime(0,acTs));
    }
 #ifdef __EBCDIC__
-      init_char(gsDiaChr.exc);
+   init_char(gsDiaChr.exc);
 #endif
+   // cppcheck-suppress dublicateCondition
    if (pfOut!=NULL) {
       efprintf(pfOut,"%s Initialize dia-critical character (!$#@[\\]^`{|}~) conversion (%s)\n",cstime(0,acTs),mapccsid(localccsid()));
    }
