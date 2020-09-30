@@ -1754,11 +1754,17 @@ extern unsigned int mapcdstr(const char* p) {
             p++;
          } else if (toupper(p[0])=='U' && toupper(p[1])=='T' && toupper(p[2])=='F') { /*UTF-xxxx*/
             p+=3; if (p[0]=='-' || p[0]=='_') p++;
-            if (p[0]=='8' && (p[1]==0x00 || isspace(p[1]))) {
+            if ((p[0]=='8' || p[0]=='1') && (p[1]==0x00 || isspace(p[1]))) {
+               return(1208);
+            } else if (p[0]=='0' && (p[1]=='8' || p[1]=='1') && (p[2]==0x00 || isspace(p[2]))) {
                return(1208);
             } else if (p[0]=='1' && p[1]=='6') {
                o=0;  p+=2;
             } else if (p[0]=='3' && p[1]=='2') {
+               o=32; p+=2;
+            } else if (p[0]=='0' && p[1]=='2') {
+               o=0; p+=2;
+            } else if (p[0]=='0' && p[1]=='4') {
                o=32; p+=2;
             } else if (p[0]=='2') {
                o=0;  p+=1;
@@ -1775,9 +1781,17 @@ extern unsigned int mapcdstr(const char* p) {
             return(1200+o);
          } else if (toupper(p[0])=='U' && toupper(p[1])=='C' && toupper(p[2])=='S') { /*UCS-xxxx*/
             p+=3; if (p[0]=='-' || p[0]=='_') p++;
-            if (p[0]=='1' && p[1]=='6') {
+            if ((p[0]=='8' || p[0]=='1') && (p[1]==0x00 || isspace(p[1]))) {
+               return(1208);
+            } else if (p[0]=='0' && (p[1]=='8' || p[1]=='1') && (p[2]==0x00 || isspace(p[2]))) {
+               return(1208);
+            } else if (p[0]=='1' && p[1]=='6') {
                o=0;  p+=2;
             } else if (p[0]=='3' && p[1]=='2') {
+               o=32; p+=2;
+            } else if (p[0]=='0' && p[1]=='2') {
+               o=0; p+=2;
+            } else if (p[0]=='0' && p[1]=='4') {
                o=32; p+=2;
             } else if (p[0]=='2') {
                o=0;  p+=1;
