@@ -834,7 +834,7 @@ static inline int CLPERR(TsHdl* psHdl,int siErr, char* pcMsg, ...) {
    } else psHdl->siCol=0;
    if (psHdl->pfErr!=NULL) {
       fprintf(psHdl->pfErr,"%s:\n%s %s\n",pcErr,fpcPre(psHdl,0),acMsg);
-      if (psHdl->pcSrc!=NULL && psHdl->pcInp!=NULL && psHdl->pcRow!=NULL && psHdl->pcOld!=NULL && psHdl->pcCur!=NULL && (psHdl->pcCur>psHdl->pcInp || psHdl->pcLst!=NULL || psHdl->siRow)) {
+      if (psHdl->pcSrc!=NULL && psHdl->pcInp!=NULL && psHdl->pcOld!=NULL && psHdl->pcCur!=NULL && (psHdl->pcCur>psHdl->pcInp || psHdl->pcLst!=NULL || psHdl->siRow)) {
          if (strcmp(psHdl->pcSrc,CLPSRC_CMD)==0) {
             fprintf(psHdl->pfErr,"%s Cause: Row=%d Column=%d from command line\n",                  fpcPre(psHdl,1),psHdl->siRow,psHdl->siCol);
          } else if (strcmp(psHdl->pcSrc,CLPSRC_PRO)==0) {
