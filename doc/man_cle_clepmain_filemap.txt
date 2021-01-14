@@ -10,7 +10,7 @@ below:
 ** If apostrophes are not used the SYSUID is prefixed as HLQ
 * Normal file names on other platforms could be relative
 
-*ATTENTION:* If a requested environment variable is not defined, the
+NOTE: If a requested environment variable is not defined, the
 replacement is done with the empty string. This can result in
 unexpected behavior.
 

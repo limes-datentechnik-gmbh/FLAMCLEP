@@ -73,7 +73,7 @@ variable CLP_STRING_CCSID is defined. The defined CCSID is valid till
 the next CCSID definition. An unsupported CCSID (0) can be used to
 restore the interpretation to the system code page.
 
-*ATTENTION:* This is no character set conversion, only the UNICODE code
+NOTE: This is no character set conversion, only the UNICODE code
 points 0-127 which are on different code points in the different EBCDIC
 code pages are replaced. All other higher code points (e.g. German
 Umlauts ('ä','ü','ö')) are not touched.
