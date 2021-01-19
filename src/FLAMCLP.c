@@ -177,12 +177,13 @@
  * 1.3.126: Support better docu generation and headings as single line variants (= Hdl1, ==Hdl2, ...)
  * 1.3.127: Support documentation generation by callback function (for built-in HTMLDOC)
  * 1.3.128: Use trace macro with fflush and time stamp, add symbols find to parse trace
+ * 1.3.129: Add symbol able and memory allocation statistics
 **/
 
-#define CLP_VSN_STR       "1.3.128"
+#define CLP_VSN_STR       "1.3.129"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        3
-#define CLP_VSN_REVISION       128
+#define CLP_VSN_REVISION       129
 
 /* Definition der Konstanten ******************************************/
 
@@ -474,7 +475,9 @@ static void vdClpSymTrc(
    void*                         pvHdl);
 
 static void vdClpSymDel(
-   TsSym*                        psSym);
+   TsSym*                        psSym,
+   uint64_t*                     piCnt,
+   uint64_t*                     piSiz);
 
 static char* pcClpUnEscape(
    void*                         pvHdl,
@@ -983,12 +986,19 @@ static void vdClpFree(
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    if (psHdl->psPtr!=NULL) {
+      uint64_t uiCnt=0;
+      uint64_t uiSiz=0;
       for (int i=0;i<psHdl->siPtr;i++) {
          if (psHdl->psPtr[i].pvPtr!=NULL) {
+            uiCnt++;
+            uiSiz+=psHdl->psPtr[i].siSiz;
             free(psHdl->psPtr[i].pvPtr);
             psHdl->psPtr[i].pvPtr=NULL;
             psHdl->psPtr[i].siSiz=0;
          }
+      }
+      if (GETENV("CLP_MALLOC_STATISTICS")!=NULL) {
+         fprintf(stderr,"CLP_MALLOC_STATISTICS(Amount(%"PRIu64"),Table(%d(%"PRIu64")),Size(%"PRIu64"))\n",uiCnt,psHdl->szPtr,((uint64_t)sizeof(TsPtr))*((uint64_t)psHdl->szPtr),uiSiz);
       }
    }
 }
@@ -1139,7 +1149,12 @@ extern void* pvClpOpen(
 #endif
          siErr=siClpSymIni(psHdl,0,NULL,psTab,NULL,&psHdl->psTab);
          if (siErr<0) {
-            vdClpSymDel(psHdl->psTab);
+            uint64_t uiCnt=0;
+            uint64_t uiSiz=0;
+            vdClpSymDel(psHdl->psTab,&uiCnt,&uiSiz);
+            if (GETENV("CLP_SYMTAB_STATISTICS")!=NULL) {
+               fprintf(stderr,"CLP_SYMTAB_STATISTICS(Amount(%"PRIu64"),Size(%"PRIu64")) after fail of in siClpSymIni()\n",uiCnt,uiSiz);
+            }
             SAFE_FREE(psHdl->pcLex);
             SAFE_FREE(psHdl->pcSrc);
             SAFE_FREE(psHdl->pcPre);
@@ -1155,7 +1170,12 @@ extern void* pvClpOpen(
 #endif
          siErr=siClpSymCal(psHdl,0,NULL,psHdl->psTab);
          if (siErr<0) {
-            vdClpSymDel(psHdl->psTab);
+            uint64_t uiCnt=0;
+            uint64_t uiSiz=0;
+            vdClpSymDel(psHdl->psTab,&uiCnt,&uiSiz);
+            if (GETENV("CLP_SYMTAB_STATISTICS")!=NULL) {
+               fprintf(stderr,"CLP_SYMTAB_STATISTICS(Amount(%"PRIu64"),Size(%"PRIu64")) after fail of in siClpSymCal()\n",uiCnt,uiSiz);
+            }
             SAFE_FREE(psHdl->pcLex);
             SAFE_FREE(psHdl->pcSrc);
             SAFE_FREE(psHdl->pcPre);
@@ -2402,8 +2422,15 @@ extern void vdClpClose(
             psHdl->pzBuf[i]=0;
          }
       }
-      vdClpSymDel(psHdl->psTab);
-      psHdl->psTab=NULL;
+      if (psHdl->psTab!=NULL) {
+         uint64_t uiCnt=0;
+         uint64_t uiSiz=0;
+         vdClpSymDel(psHdl->psTab,&uiCnt,&uiSiz);
+         if (GETENV("CLP_SYMTAB_STATISTICS")!=NULL) {
+            fprintf(stderr,"CLP_SYMTAB_STATISTICS(Amount(%"PRIu64"),Size(%"PRIu64")) in vdClpClose()\n",uiCnt,uiSiz);
+         }
+         psHdl->psTab=NULL;
+      }
 
       switch (siMtd) {
       case CLPCLS_MTD_KEP:
@@ -3269,33 +3296,46 @@ static void vdClpSymTrc(
 }
 
 static void vdClpSymDel(
-   TsSym*                        psSym)
+   TsSym*                        psSym,
+   uint64_t*                     piCnt,
+   uint64_t*                     piSiz)
 {
    TsSym*                        psHlp=psSym;
    TsSym*                        psOld;
    while (psHlp!=NULL) {
       if (!CLPISF_ALI(psHlp->psStd->uiFlg) && psHlp->psDep!=NULL) {
-         vdClpSymDel(psHlp->psDep);
+         vdClpSymDel(psHlp->psDep,piCnt,piSiz);
       }
       if (!CLPISF_ALI(psHlp->psStd->uiFlg) && psHlp->psVar!=NULL) {
+         (*piSiz)+=sizeof(TsVar);
          memset(psHlp->psVar,0,sizeof(TsVar));
          free(psHlp->psVar);
          psHlp->psVar=NULL;
       }
       if (!CLPISF_ALI(psHlp->psStd->uiFlg) && psHlp->psFix!=NULL) {
-         if (psHlp->psFix->pcPro!=NULL) free(psHlp->psFix->pcPro);
-         if (psHlp->psFix->pcSrc!=NULL) free(psHlp->psFix->pcSrc);
+         if (psHlp->psFix->pcPro!=NULL) {
+            (*piSiz)+=strlen(psHlp->psFix->pcPro)+1;
+            free(psHlp->psFix->pcPro);
+         }
+         if (psHlp->psFix->pcSrc!=NULL) {
+            (*piSiz)+=strlen(psHlp->psFix->pcSrc)+1;
+            free(psHlp->psFix->pcSrc);
+         }
+         (*piSiz)+=sizeof(TsFix);
          memset(psHlp->psFix,0,sizeof(TsFix));
          free(psHlp->psFix);
          psHlp->psFix=NULL;
       }
       if (psHlp->psStd!=NULL) {
+         (*piSiz)+=sizeof(TsStd);
          memset(psHlp->psStd,0,sizeof(TsStd));
          free(psHlp->psStd);
          psHlp->psStd=NULL;
       }
+      (*piCnt)++;
       psOld=psHlp;
       psHlp=psHlp->psNxt;
+      (*piSiz)+=sizeof(TsSym);
       memset(psOld,0,sizeof(TsSym));
       free(psOld);
    }
@@ -5956,7 +5996,7 @@ static int siClpBldLnk(
          void** ppDat=(void**)psArg->psVar->pvDat;
          (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+((((CLPISF_DLM(psArg->psStd->uiFlg))?2:1)*psArg->psFix->siSiz)),&psArg->psVar->siInd);
          if ((*ppDat)==NULL) {
-            return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d) for link '%s.%s' failed",psArg->psVar->siLen+psArg->psFix->siSiz,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
+            return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d+(%d*%d)) for link '%s.%s' failed",psArg->psVar->siLen,(CLPISF_DLM(psArg->psStd->uiFlg))?2:1,psArg->psFix->siSiz,fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
          }
          psArg->psVar->pvPtr=((char*)(*ppDat))+psArg->psVar->siLen;
       } else {
@@ -6044,7 +6084,7 @@ static int siClpBldSwt(
       void** ppDat=(void**)psArg->psVar->pvDat;
       (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+((((CLPISF_DLM(psArg->psStd->uiFlg))?2:1)*psArg->psFix->siSiz)),&psArg->psVar->siInd);
       if ((*ppDat)==NULL) {
-         return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d) for switch '%s.%s' failed",psArg->psVar->siLen+psArg->psFix->siSiz,pcPat,psArg->psStd->pcKyw);
+         return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d+(%d*%d)) for switch '%s.%s' failed",psArg->psVar->siLen,(CLPISF_DLM(psArg->psStd->uiFlg))?2:1,psArg->psFix->siSiz,pcPat,psArg->psStd->pcKyw);
       }
       psArg->psVar->pvPtr=((char*)(*ppDat))+psArg->psVar->siLen;
    } else {
@@ -6144,7 +6184,7 @@ static int siClpBldNum(
       void** ppDat=(void**)psArg->psVar->pvDat;
       (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+((((CLPISF_DLM(psArg->psStd->uiFlg))?2:1)*psArg->psFix->siSiz)),&psArg->psVar->siInd);
       if ((*ppDat)==NULL) {
-         return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d) for argument '%s.%s' failed (1)",psArg->psVar->siLen+psArg->psFix->siSiz,pcPat,psArg->psStd->pcKyw);
+         return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d+(%d*%d)) for argument '%s.%s' failed (1)",psArg->psVar->siLen,(CLPISF_DLM(psArg->psStd->uiFlg))?2:1,psArg->psFix->siSiz,pcPat,psArg->psStd->pcKyw);
       }
       psArg->psVar->pvPtr=((char*)(*ppDat))+psArg->psVar->siLen;
    } else {
@@ -6253,7 +6293,7 @@ static int siClpBldLit(
          void** ppDat=(void**)psArg->psVar->pvDat;
          (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+((((CLPISF_DLM(psArg->psStd->uiFlg))?2:1)*psArg->psFix->siSiz)),&psArg->psVar->siInd);
          if ((*ppDat)==NULL) {
-            return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d) for argument '%s.%s' failed (2)",psArg->psVar->siLen+psArg->psFix->siSiz,pcPat,psArg->psStd->pcKyw);
+            return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d+(%d*%d)) for argument '%s.%s' failed (2)",psArg->psVar->siLen,(CLPISF_DLM(psArg->psStd->uiFlg))?2:1,psArg->psFix->siSiz,pcPat,psArg->psStd->pcKyw);
          }
          psArg->psVar->pvPtr=((char*)(*ppDat))+psArg->psVar->siLen;
       } else {
@@ -6313,7 +6353,7 @@ static int siClpBldLit(
          void** ppDat=(void**)psArg->psVar->pvDat;
          (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+((((CLPISF_DLM(psArg->psStd->uiFlg))?2:1)*psArg->psFix->siSiz)),&psArg->psVar->siInd);
          if ((*ppDat)==NULL) {
-            return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d) for argument '%s.%s' failed (3)",psArg->psVar->siLen+psArg->psFix->siSiz,pcPat,psArg->psStd->pcKyw);
+            return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d+(%d*%d)) for argument '%s.%s' failed (3)",psArg->psVar->siLen,(CLPISF_DLM(psArg->psStd->uiFlg))?2:1,psArg->psFix->siSiz,pcPat,psArg->psStd->pcKyw);
          }
          psArg->psVar->pvPtr=((char*)(*ppDat))+psArg->psVar->siLen;
       } else {
@@ -6355,7 +6395,7 @@ static int siClpBldLit(
             void** ppDat=(void**)psArg->psVar->pvDat;
             (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+((((CLPISF_DLM(psArg->psStd->uiFlg))?2:1)*psArg->psFix->siSiz)),&psArg->psVar->siInd);
             if ((*ppDat)==NULL) {
-               return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d) for argument '%s.%s' failed (4)",psArg->psVar->siLen+psArg->psFix->siSiz,pcPat,psArg->psStd->pcKyw);
+               return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d+(%d*%d)) for argument '%s.%s' failed (4)",psArg->psVar->siLen,(CLPISF_DLM(psArg->psStd->uiFlg))?2:1,psArg->psFix->siSiz,pcPat,psArg->psStd->pcKyw);
             }
             psArg->psVar->pvPtr=((char*)(*ppDat))+psArg->psVar->siLen;
          } else {
@@ -6389,7 +6429,7 @@ static int siClpBldLit(
                   }
                   (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+(l1/2)+4,&psArg->psVar->siInd);
                   if ((*ppDat)==NULL) {
-                     return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d) for argument '%s.%s' failed (5)",psArg->psVar->siLen+(l1/2)+4,pcPat,psArg->psStd->pcKyw);
+                     return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d+(%d/2+4)) for argument '%s.%s' failed (5)",psArg->psVar->siLen,l1,pcPat,psArg->psStd->pcKyw);
                   }
                   psArg->psVar->pvPtr=((char*)(*ppDat))+psArg->psVar->siLen;
                } else {
@@ -6418,7 +6458,7 @@ static int siClpBldLit(
                   }
                   (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+l1+4,&psArg->psVar->siInd);
                   if ((*ppDat)==NULL) {
-                     return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d) for argument '%s.%s' failed (6)",psArg->psVar->siLen+l1+4,pcPat,psArg->psStd->pcKyw);
+                     return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d+%d+4) for argument '%s.%s' failed (6)",psArg->psVar->siLen,l1,pcPat,psArg->psStd->pcKyw);
                   }
                   psArg->psVar->pvPtr=((char*)(*ppDat))+psArg->psVar->siLen;
                } else {
@@ -6447,7 +6487,7 @@ static int siClpBldLit(
                   }
                   (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+l1+4,&psArg->psVar->siInd);
                   if ((*ppDat)==NULL) {
-                     return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d) for argument '%s.%s' failed (7)",psArg->psVar->siLen+l1+4,pcPat,psArg->psStd->pcKyw);
+                     return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d+%d+4) for argument '%s.%s' failed (7)",psArg->psVar->siLen,l1,pcPat,psArg->psStd->pcKyw);
                   }
                   psArg->psVar->pvPtr=((char*)(*ppDat))+psArg->psVar->siLen;
                } else {
@@ -6476,7 +6516,7 @@ static int siClpBldLit(
                   }
                   (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+l1+4,&psArg->psVar->siInd);
                   if ((*ppDat)==NULL) {
-                     return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d) for argument '%s.%s' failed (8)",psArg->psVar->siLen+l1+4,pcPat,psArg->psStd->pcKyw);
+                     return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d+%d+4) for argument '%s.%s' failed (8)",psArg->psVar->siLen,l1,pcPat,psArg->psStd->pcKyw);
                   }
                   psArg->psVar->pvPtr=((char*)(*ppDat))+psArg->psVar->siLen;
                } else {
@@ -6515,7 +6555,7 @@ static int siClpBldLit(
                (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+l1+4,&psArg->psVar->siInd);
                if ((*ppDat)==NULL) {
                   free(pcHlp);
-                  return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d) for argument '%s.%s' failed (9)",psArg->psVar->siLen+l1+4,pcPat,psArg->psStd->pcKyw);
+                  return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d+%d+4) for argument '%s.%s' failed (9)",psArg->psVar->siLen,l1,pcPat,psArg->psStd->pcKyw);
                }
                psArg->psVar->pvPtr=((char*)(*ppDat))+psArg->psVar->siLen;
             } else {
@@ -6608,7 +6648,7 @@ static int siClpBldLit(
                      }
                      (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+(l1/2)+4,&psArg->psVar->siInd);
                      if ((*ppDat)==NULL) {
-                        return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d) for argument '%s.%s' failed (10)",psArg->psVar->siLen+(l1/2)+4,pcPat,psArg->psStd->pcKyw);
+                        return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d+(%d/2+4)) for argument '%s.%s' failed (10)",psArg->psVar->siLen,l1,pcPat,psArg->psStd->pcKyw);
                      }
                      psArg->psVar->pvPtr=((char*)(*ppDat))+psArg->psVar->siLen;
                   } else {
@@ -6632,7 +6672,7 @@ static int siClpBldLit(
                      }
                      (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+l1+4,&psArg->psVar->siInd);
                      if ((*ppDat)==NULL) {
-                        return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d) for argument '%s.%s' failed (11)",psArg->psVar->siLen+l1+4,pcPat,psArg->psStd->pcKyw);
+                        return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d+%d+4) for argument '%s.%s' failed (11)",psArg->psVar->siLen,l1,pcPat,psArg->psStd->pcKyw);
                      }
                      psArg->psVar->pvPtr=((char*)(*ppDat))+psArg->psVar->siLen;
                   } else {
@@ -6656,7 +6696,7 @@ static int siClpBldLit(
                      }
                      (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+l1+4,&psArg->psVar->siInd);
                      if ((*ppDat)==NULL) {
-                        return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d) for argument '%s.%s' failed (12)",psArg->psVar->siLen+l1+4,pcPat,psArg->psStd->pcKyw);
+                        return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d+%d+4) for argument '%s.%s' failed (12)",psArg->psVar->siLen,l1,pcPat,psArg->psStd->pcKyw);
                      }
                      psArg->psVar->pvPtr=((char*)(*ppDat))+psArg->psVar->siLen;
                   } else {
@@ -6680,7 +6720,7 @@ static int siClpBldLit(
                      }
                      (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+l1+4,&psArg->psVar->siInd);
                      if ((*ppDat)==NULL) {
-                        return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d) for argument '%s.%s' failed (13)",psArg->psVar->siLen+l1+4,pcPat,psArg->psStd->pcKyw);
+                        return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d+%d+4) for argument '%s.%s' failed (13)",psArg->psVar->siLen,l1,pcPat,psArg->psStd->pcKyw);
                      }
                      psArg->psVar->pvPtr=((char*)(*ppDat))+psArg->psVar->siLen;
                   } else {
@@ -6716,7 +6756,7 @@ static int siClpBldLit(
                   (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+l1+4,&psArg->psVar->siInd);
                   if ((*ppDat)==NULL) {
                      free(pcHlp);
-                     return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d) for argument '%s.%s' failed (14)",psArg->psVar->siLen+l1+4,pcPat,psArg->psStd->pcKyw);
+                     return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d+%d+4) for argument '%s.%s' failed (14)",psArg->psVar->siLen,l1,pcPat,psArg->psStd->pcKyw);
                   }
                   psArg->psVar->pvPtr=((char*)(*ppDat))+psArg->psVar->siLen;
                } else {
@@ -7029,7 +7069,7 @@ static int siClpIniObj(
       void** ppDat=(void**)psArg->psVar->pvDat;
       (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+((((CLPISF_DLM(psArg->psStd->uiFlg))?2:1)*psArg->psFix->siSiz)),&psArg->psVar->siInd);
       if ((*ppDat)==NULL) {
-         return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d) for argument '%s.%s' failed (15)",psArg->psVar->siLen+psArg->psFix->siSiz,pcPat,psArg->psStd->pcKyw);
+         return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d+%d) for object '%s.%s' failed",psArg->psVar->siLen,psArg->psFix->siSiz,pcPat,psArg->psStd->pcKyw);
       }
       psArg->psVar->pvPtr=((char*)(*ppDat))+psArg->psVar->siLen;
    } else {
@@ -7169,7 +7209,7 @@ static int siClpIniOvl(
       void** ppDat=(void**)psArg->psVar->pvDat;
       (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+((((CLPISF_DLM(psArg->psStd->uiFlg))?2:1)*psArg->psFix->siSiz)),&psArg->psVar->siInd);
       if ((*ppDat)==NULL) {
-         return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d) for argument '%s.%s' failed (16)",psArg->psVar->siLen+psArg->psFix->siSiz,pcPat,psArg->psStd->pcKyw);
+         return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d+%d) for overlay '%s.%s' failed",psArg->psVar->siLen,psArg->psFix->siSiz,pcPat,psArg->psStd->pcKyw);
       }
       psArg->psVar->pvPtr=((char*)(*ppDat))+psArg->psVar->siLen;
    } else {
