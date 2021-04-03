@@ -641,7 +641,7 @@ static int siClpBldLnk(
    void*                         pvHdl,
    const int                     siLev,
    const int                     siPos,
-   const int                     siNum,
+   const I64                     siVal,
    TsSym*                        psArg,
    const int                     isApp);
 
@@ -4664,15 +4664,15 @@ static int siClpPrsPar(
    int*                          piOid)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
-   char                          acKyw[CLPMAX_KYWSIZ];
    TsSym*                        psArg=NULL;
-   int                           siErr;
 
    if (psHdl->siTok==CLPTOK_KYW) {
+      int                        siErr;
+      char                       acKyw[CLPMAX_KYWSIZ];
       strlcpy(acKyw,psHdl->pcLex,sizeof(acKyw));
       siErr=siClpSymFnd(pvHdl,siLev,acKyw,psTab,&psArg,NULL);
       if (siErr<0) return(siErr);
-      siErr=siClpBldLnk(pvHdl,siLev,siPos,psHdl->pcOld-psHdl->pcInp,psArg->psFix->psInd,TRUE);
+      siErr=siClpBldLnk(pvHdl,siLev,siPos,(psHdl->pcOld-psHdl->pcInp),psArg->psFix->psInd,TRUE);
       if (siErr<0) return(siErr);
       if (piOid!=NULL) *piOid=psArg->psFix->siOid;
       psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
@@ -5964,13 +5964,12 @@ static int siClpBldLnk(
    void*                         pvHdl,
    const int                     siLev,
    const int                     siPos,
-   const int                     siNum,
+   const I64                     siVal,
    TsSym*                        psArg,
    const int                     isApp)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    const int                     siTyp=CLPTYP_NUMBER;
-   I64                           siVal=siNum;
    (void)siPos;
 
    if (psArg!=NULL) {
@@ -6058,7 +6057,6 @@ static int siClpBldSwt(
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    const int                     siTyp=CLPTYP_SWITCH;
-   I64                           siVal=psArg->psFix->siOid;
    const char*                   pcPat=fpcPat(pvHdl,siLev);
    int                           siErr;
 
@@ -6098,36 +6096,33 @@ static int siClpBldSwt(
 
    switch (psArg->psFix->siSiz) {
    case 1:
-      if (siVal<(-128) || siVal>65535) {
-         return CLPERR(psHdl,CLPERR_SEM,"Object identifier (%"PRIi64") of '%s.%s' need more than 8 Bit",isPrnInt(psArg,siVal),pcPat,psArg->psStd->pcKyw);
+      if (psArg->psFix->siOid<(-128) || psArg->psFix->siOid>65535) {
+         return CLPERR(psHdl,CLPERR_SEM,"Object identifier (%"PRIi64") of '%s.%s' need more than 8 Bit",isPrnInt(psArg,psArg->psFix->siOid),pcPat,psArg->psStd->pcKyw);
       }
-      *((I08*)psArg->psVar->pvPtr)=(I08)siVal;
+      *((I08*)psArg->psVar->pvPtr)=(I08)psArg->psFix->siOid;
       TRACE(psHdl->pfBld,"%s BUILD-SWITCH-I08(PTR=%p CNT=%d LEN=%d RST=%d)%s=%"PRIi64"\n",
-                              fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnInt(psArg,siVal));
+                              fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnInt(psArg,psArg->psFix->siOid));
       break;
    case 2:
-      if (siVal<(-32768) || siVal>65535) {
-         return CLPERR(psHdl,CLPERR_SEM,"Object identifier (%"PRIi64") of '%s.%s' need more than 16 Bit",isPrnInt(psArg,siVal),pcPat,psArg->psStd->pcKyw);
+      if (psArg->psFix->siOid<(-32768) || psArg->psFix->siOid>65535) {
+         return CLPERR(psHdl,CLPERR_SEM,"Object identifier (%"PRIi64") of '%s.%s' need more than 16 Bit",isPrnInt(psArg,psArg->psFix->siOid),pcPat,psArg->psStd->pcKyw);
       }
-      *((I16*)psArg->psVar->pvPtr)=(I16)siVal;
+      *((I16*)psArg->psVar->pvPtr)=(I16)psArg->psFix->siOid;
       TRACE(psHdl->pfBld,"%s BUILD-SWITCH-I16(PTR=%p CNT=%d LEN=%d RST=%d)%s=%"PRIi64"\n",
-                              fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnInt(psArg,siVal));
+                              fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnInt(psArg,psArg->psFix->siOid));
       break;
    case 4:
-      if (siVal<(-2147483648LL) || siVal>4294967295LL) {
-         return CLPERR(psHdl,CLPERR_SEM,"Object identifier (%"PRIi64") of '%s.%s' need more than 32 Bit",isPrnInt(psArg,siVal),pcPat,psArg->psStd->pcKyw);
-      }
-      *((I32*)psArg->psVar->pvPtr)=(I32)siVal;
+      *((I32*)psArg->psVar->pvPtr)=(I32)psArg->psFix->siOid;
       TRACE(psHdl->pfBld,"%s BUILD-SWITCH-I32(PTR=%p CNT=%d LEN=%d RST=%d)%s=%"PRIi64"\n",
-                              fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnInt(psArg,siVal));
+                              fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnInt(psArg,psArg->psFix->siOid));
       break;
    case 8:
-      *((I64*)psArg->psVar->pvPtr)=(I64)siVal;
+      *((I64*)psArg->psVar->pvPtr)=(I64)psArg->psFix->siOid;
       TRACE(psHdl->pfBld,"%s BUILD-SWITCH-64(PTR=%p CNT=%d LEN=%d RST=%d)%s=%"PRIi64"\n",
-                              fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnInt(psArg,siVal));
+                              fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnInt(psArg,psArg->psFix->siOid));
       break;
    default:
-      return CLPERR(psHdl,CLPERR_SIZ,"Size (%d) for the value (%"PRIi64") of '%s.%s' is not 1, 2, 4 or 8)",psArg->psFix->siSiz,isPrnInt(psArg,siVal),pcPat,psArg->psStd->pcKyw);
+      return CLPERR(psHdl,CLPERR_SIZ,"Size (%d) for the value (%"PRIi64") of '%s.%s' is not 1, 2, 4 or 8)",psArg->psFix->siSiz,isPrnInt(psArg,psArg->psFix->siOid),pcPat,psArg->psStd->pcKyw);
    }
 
    psArg->psVar->pvPtr=((char*)psArg->psVar->pvPtr)+psArg->psFix->siSiz;
@@ -6158,7 +6153,6 @@ static int siClpBldNum(
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    const int                     siTyp=CLPTYP_NUMBER;
-   I64                           siVal=psArg->psFix->siOid;
    const char*                   pcPat=fpcPat(pvHdl,siLev);
    int                           siErr;
 
@@ -6198,36 +6192,33 @@ static int siClpBldNum(
 
    switch (psArg->psFix->siSiz) {
    case 1:
-      if (siVal<(-128) || siVal>65535) {
-         return CLPERR(psHdl,CLPERR_SEM,"Default value (%"PRIi64") of '%s.%s' need more than 8 Bit",isPrnInt(psArg,siVal),pcPat,psArg->psStd->pcKyw);
+      if (psArg->psFix->siOid<(-128) || psArg->psFix->siOid>65535) {
+         return CLPERR(psHdl,CLPERR_SEM,"Default value (%"PRIi64") of '%s.%s' need more than 8 Bit",isPrnInt(psArg,psArg->psFix->siOid),pcPat,psArg->psStd->pcKyw);
       }
-      *((I08*)psArg->psVar->pvPtr)=(I08)siVal;
+      *((I08*)psArg->psVar->pvPtr)=(I08)psArg->psFix->siOid;
       TRACE(psHdl->pfBld,"%s BUILD-NUMBER-I08(PTR=%p CNT=%d LEN=%d RST=%d)%s=%"PRIi64"\n",
-                              fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnInt(psArg,siVal));
+                              fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnInt(psArg,psArg->psFix->siOid));
       break;
    case 2:
-      if (siVal<(-32768) || siVal>65535) {
-         return CLPERR(psHdl,CLPERR_SEM,"Default value (%"PRIi64") of '%s.%s' need more than 16 Bit",isPrnInt(psArg,siVal),pcPat,psArg->psStd->pcKyw);
+      if (psArg->psFix->siOid<(-32768) || psArg->psFix->siOid>65535) {
+         return CLPERR(psHdl,CLPERR_SEM,"Default value (%"PRIi64") of '%s.%s' need more than 16 Bit",isPrnInt(psArg,psArg->psFix->siOid),pcPat,psArg->psStd->pcKyw);
       }
-      *((I16*)psArg->psVar->pvPtr)=(I16)siVal;
+      *((I16*)psArg->psVar->pvPtr)=(I16)psArg->psFix->siOid;
       TRACE(psHdl->pfBld,"%s BUILD-NUMBER-I16(PTR=%p CNT=%d LEN=%d RST=%d)%s=%"PRIi64"\n",
-                              fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnInt(psArg,siVal));
+                              fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnInt(psArg,psArg->psFix->siOid));
       break;
    case 4:
-      if (siVal<(-2147483648LL) || siVal>4294967295LL) {
-         return CLPERR(psHdl,CLPERR_SEM,"Default value (%"PRIi64") of '%s.%s' need more than 32 Bit",isPrnInt(psArg,siVal),pcPat,psArg->psStd->pcKyw);
-      }
-      *((I32*)psArg->psVar->pvPtr)=(I32)siVal;
+      *((I32*)psArg->psVar->pvPtr)=(I32)psArg->psFix->siOid;
       TRACE(psHdl->pfBld,"%s BUILD-NUMBER-I32(PTR=%p CNT=%d LEN=%d RST=%d)%s=%"PRIi64"\n",
-                              fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnInt(psArg,siVal));
+                              fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnInt(psArg,psArg->psFix->siOid));
       break;
    case 8:
-      *((I64*)psArg->psVar->pvPtr)=(I64)siVal;
+      *((I64*)psArg->psVar->pvPtr)=(I64)psArg->psFix->siOid;
       TRACE(psHdl->pfBld,"%s BUILD-NUMBER-64(PTR=%p CNT=%d LEN=%d RST=%d)%s=%"PRIi64"\n",
-                              fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnInt(psArg,siVal));
+                              fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnInt(psArg,psArg->psFix->siOid));
       break;
    default:
-      return CLPERR(psHdl,CLPERR_SIZ,"Size (%d) for the value (%"PRIi64") of '%s.%s' is not 1, 2, 4 or 8)",psArg->psFix->siSiz,isPrnInt(psArg,siVal),pcPat,psArg->psStd->pcKyw);
+      return CLPERR(psHdl,CLPERR_SIZ,"Size (%d) for the value (%"PRIi64") of '%s.%s' is not 1, 2, 4 or 8)",psArg->psFix->siSiz,isPrnInt(psArg,psArg->psFix->siOid),pcPat,psArg->psStd->pcKyw);
    }
 
    psArg->psVar->pvPtr=((char*)psArg->psVar->pvPtr)+psArg->psFix->siSiz;
@@ -6235,7 +6226,7 @@ static int siClpBldNum(
    psArg->psVar->siRst-=CLPISF_DYN(psArg->psStd->uiFlg)?0:psArg->psFix->siSiz;
    psArg->psVar->siCnt++;
 
-   srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcPat)+strlen(GETKYW(psArg))+16,"%s.%s=DEFAULT(%d)\n",pcPat,GETKYW(psArg),(int)siVal);
+   srprintc(&psHdl->pcLst,&psHdl->szLst,strlen(pcPat)+strlen(GETKYW(psArg))+16,"%s.%s=DEFAULT(%d)\n",pcPat,GETKYW(psArg),psArg->psFix->siOid);
 
    siErr=siClpBldLnk(pvHdl,siLev,siPos,psArg->psVar->siCnt,psArg->psFix->psCnt,FALSE);
    if (siErr<0) return(siErr);
