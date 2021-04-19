@@ -6408,7 +6408,7 @@ static int siClpBldLit(
       switch (pcVal[0]) {
       case 'x':
          l1=strlen(pcVal+2);
-         if (CLPISF_BIN(psArg->psStd->uiFlg)) {
+         if (CLPISF_BIN(psArg->psStd->uiFlg) || CLPISF_PWD(psArg->psStd->uiFlg)) {
             if (l1%2) {
                return CLPERR(psHdl,CLPERR_LEX,"Length of hexadecimal string (%c(%s)) for '%s.%s' is not a multiple of 2",pcVal[0],isPrnStr(psArg,pcVal+2),pcPat,psArg->psStd->pcKyw);
             }
@@ -6433,6 +6433,13 @@ static int siClpBldLit(
             }
             siSln=l2;
             ((char*)psArg->psVar->pvPtr)[l2]=EOS;
+            if (!CLPISF_BIN(psArg->psStd->uiFlg) && CLPISF_PWD(psArg->psStd->uiFlg)) {
+               // parameter is flagged as password, but not as binary => check that data does not contain \0
+               U32 uiStrLen = strlen((char*)psArg->psVar->pvPtr);
+               if (uiStrLen != l2) {
+                  return CLPERR(psHdl,CLPERR_SEM,"Password contains NUL-bytes at offset %d which is not allowed for argument '%s.%s'",uiStrLen,pcPat,psArg->psStd->pcKyw);
+               }
+            }
             l2++;
             TRACE(psHdl->pfBld,"%s BUILD-LITERAL-HEX(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
                                     fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),isPrnLen(psArg,l2));
@@ -6442,7 +6449,7 @@ static int siClpBldLit(
          break;
       case 'a':
          l1=strlen(pcVal+2);
-         if (CLPISF_BIN(psArg->psStd->uiFlg)) {
+         if (CLPISF_BIN(psArg->psStd->uiFlg) || CLPISF_PWD(psArg->psStd->uiFlg)) {
             if (l1+1>l0) {
                if (CLPISF_DYN(psArg->psStd->uiFlg)&& !CLPISF_FIX(psArg->psStd->uiFlg)) {
                   void** ppDat=(void**)psArg->psVar->pvDat;
@@ -6464,6 +6471,13 @@ static int siClpBldLit(
             }
             siSln=l1;
             ((char*)psArg->psVar->pvPtr)[l2]=EOS;
+            if (!CLPISF_BIN(psArg->psStd->uiFlg) && CLPISF_PWD(psArg->psStd->uiFlg)) {
+               // parameter is flagged as password, but not as binary => check that data does not contain \0
+               U32 uiStrLen = strlen((char*)psArg->psVar->pvPtr);
+               if (uiStrLen != l2) {
+                  return CLPERR(psHdl,CLPERR_SEM,"Password contains NUL-bytes at offset %d which is not allowed for argument '%s.%s'",uiStrLen,pcPat,psArg->psStd->pcKyw);
+               }
+            }
             l2++;
             TRACE(psHdl->pfBld,"%s BUILD-LITERAL-ASC(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
                                     fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),isPrnLen(psArg,l2));
@@ -6473,7 +6487,7 @@ static int siClpBldLit(
          break;
       case 'e':
          l1=strlen(pcVal+2);
-         if (CLPISF_BIN(psArg->psStd->uiFlg)) {
+         if (CLPISF_BIN(psArg->psStd->uiFlg) || CLPISF_PWD(psArg->psStd->uiFlg)) {
             if (l1+1>l0) {
                if (CLPISF_DYN(psArg->psStd->uiFlg) && !CLPISF_FIX(psArg->psStd->uiFlg)) {
                   void** ppDat=(void**)psArg->psVar->pvDat;
@@ -6495,6 +6509,13 @@ static int siClpBldLit(
             }
             siSln=l1;
             ((char*)psArg->psVar->pvPtr)[l2]=EOS;
+            if (!CLPISF_BIN(psArg->psStd->uiFlg) && CLPISF_PWD(psArg->psStd->uiFlg)) {
+               // parameter is flagged as password, but not as binary => check that data does not contain \0
+               U32 uiStrLen = strlen((char*)psArg->psVar->pvPtr);
+               if (uiStrLen != l2) {
+                  return CLPERR(psHdl,CLPERR_SEM,"Password contains NUL-bytes at offset %d which is not allowed for argument '%s.%s'",uiStrLen,pcPat,psArg->psStd->pcKyw);
+               }
+            }
             l2++;
             TRACE(psHdl->pfBld,"%s BUILD-LITERAL-EBC(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
                                     fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),isPrnLen(psArg,l2));
@@ -6504,7 +6525,7 @@ static int siClpBldLit(
          break;
       case 'c':
          l1=strlen(pcVal+2);
-         if (CLPISF_BIN(psArg->psStd->uiFlg)) {
+         if (CLPISF_BIN(psArg->psStd->uiFlg) || CLPISF_PWD(psArg->psStd->uiFlg)) {
             if (l1+1>l0) {
                if (CLPISF_DYN(psArg->psStd->uiFlg)&& !CLPISF_FIX(psArg->psStd->uiFlg)) {
                   void** ppDat=(void**)psArg->psVar->pvDat;
@@ -6524,6 +6545,13 @@ static int siClpBldLit(
             l2=l1;
             siSln=l1;
             ((char*)psArg->psVar->pvPtr)[l2]=EOS;
+            if (!CLPISF_BIN(psArg->psStd->uiFlg) && CLPISF_PWD(psArg->psStd->uiFlg)) {
+               // parameter is flagged as password, but not as binary => check that data does not contain \0
+               U32 uiStrLen = strlen((char*)psArg->psVar->pvPtr);
+               if (uiStrLen != l2) {
+                  return CLPERR(psHdl,CLPERR_SEM,"Password contains NUL-bytes at offset %d which is not allowed for argument '%s.%s'",uiStrLen,pcPat,psArg->psStd->pcKyw);
+               }
+            }
             l2++;
             TRACE(psHdl->pfBld,"%s BUILD-LITERAL-CHR(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
                                     fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),isPrnLen(psArg,l2));
