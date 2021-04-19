@@ -6412,15 +6412,15 @@ static int siClpBldLit(
             if (l1%2) {
                return CLPERR(psHdl,CLPERR_LEX,"Length of hexadecimal string (%c(%s)) for '%s.%s' is not a multiple of 2",pcVal[0],isPrnStr(psArg,pcVal+2),pcPat,psArg->psStd->pcKyw);
             }
-            if ((l1/2)>l0) {
+            if ((l1/2)+1>l0) {
                if (CLPISF_DYN(psArg->psStd->uiFlg) && !CLPISF_FIX(psArg->psStd->uiFlg)) {
                   void** ppDat=(void**)psArg->psVar->pvDat;
                   if (psArg->psVar->siLen+(l1/2)>psArg->psFix->siSiz) {
                      return CLPERR(psHdl,CLPERR_MEM,"Size limit (%d) reached for argument '%s.%s'",psArg->psFix->siSiz,pcPat,psArg->psStd->pcKyw);
                   }
-                  (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+(l1/2)+4,&psArg->psVar->siInd);
+                  (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+(l1/2)+1+4,&psArg->psVar->siInd);
                   if ((*ppDat)==NULL) {
-                     return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d+(%d/2+4)) for argument '%s.%s' failed (5)",psArg->psVar->siLen,l1,pcPat,psArg->psStd->pcKyw);
+                     return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d+(%d/+2+1+4)) for argument '%s.%s' failed (5)",psArg->psVar->siLen,l1,pcPat,psArg->psStd->pcKyw);
                   }
                   psArg->psVar->pvPtr=((char*)(*ppDat))+psArg->psVar->siLen;
                } else {
@@ -6432,6 +6432,8 @@ static int siClpBldLit(
                return CLPERR(psHdl,CLPERR_SEM,"Hexadecimal string (%c(%s)) of '%s.%s' cannot be converted from hex to bin",pcVal[0],isPrnStr(psArg,pcVal+2),pcPat,psArg->psStd->pcKyw);
             }
             siSln=l2;
+            ((char*)psArg->psVar->pvPtr)[l2]=EOS;
+            l2++;
             TRACE(psHdl->pfBld,"%s BUILD-LITERAL-HEX(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
                                     fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),isPrnLen(psArg,l2));
          } else {
@@ -6441,15 +6443,15 @@ static int siClpBldLit(
       case 'a':
          l1=strlen(pcVal+2);
          if (CLPISF_BIN(psArg->psStd->uiFlg)) {
-            if (l1>l0) {
+            if (l1+1>l0) {
                if (CLPISF_DYN(psArg->psStd->uiFlg)&& !CLPISF_FIX(psArg->psStd->uiFlg)) {
                   void** ppDat=(void**)psArg->psVar->pvDat;
                   if (psArg->psVar->siLen+l1>psArg->psFix->siSiz) {
                      return CLPERR(psHdl,CLPERR_MEM,"Size limit (%d) reached for argument '%s.%s'",psArg->psFix->siSiz,pcPat,psArg->psStd->pcKyw);
                   }
-                  (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+l1+4,&psArg->psVar->siInd);
+                  (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+l1+1+4,&psArg->psVar->siInd);
                   if ((*ppDat)==NULL) {
-                     return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d+%d+4) for argument '%s.%s' failed (6)",psArg->psVar->siLen,l1,pcPat,psArg->psStd->pcKyw);
+                     return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d+%d+1+4) for argument '%s.%s' failed (6)",psArg->psVar->siLen,l1,pcPat,psArg->psStd->pcKyw);
                   }
                   psArg->psVar->pvPtr=((char*)(*ppDat))+psArg->psVar->siLen;
                } else {
@@ -6461,6 +6463,8 @@ static int siClpBldLit(
                return CLPERR(psHdl,CLPERR_SEM,"ASCII string (%c(%s)) of '%s.%s' cannot be converted to ASCII",pcVal[0],isPrnStr(psArg,pcVal+2),pcPat,psArg->psStd->pcKyw);
             }
             siSln=l1;
+            ((char*)psArg->psVar->pvPtr)[l2]=EOS;
+            l2++;
             TRACE(psHdl->pfBld,"%s BUILD-LITERAL-ASC(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
                                     fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),isPrnLen(psArg,l2));
          } else {
@@ -6470,15 +6474,15 @@ static int siClpBldLit(
       case 'e':
          l1=strlen(pcVal+2);
          if (CLPISF_BIN(psArg->psStd->uiFlg)) {
-            if (l1>l0) {
+            if (l1+1>l0) {
                if (CLPISF_DYN(psArg->psStd->uiFlg) && !CLPISF_FIX(psArg->psStd->uiFlg)) {
                   void** ppDat=(void**)psArg->psVar->pvDat;
                   if (psArg->psVar->siLen+l1>psArg->psFix->siSiz) {
                      return CLPERR(psHdl,CLPERR_MEM,"Size limit (%d) reached for argument '%s.%s'",psArg->psFix->siSiz,pcPat,psArg->psStd->pcKyw);
                   }
-                  (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+l1+4,&psArg->psVar->siInd);
+                  (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+l1+1+4,&psArg->psVar->siInd);
                   if ((*ppDat)==NULL) {
-                     return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d+%d+4) for argument '%s.%s' failed (7)",psArg->psVar->siLen,l1,pcPat,psArg->psStd->pcKyw);
+                     return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d+%d+1+4) for argument '%s.%s' failed (7)",psArg->psVar->siLen,l1,pcPat,psArg->psStd->pcKyw);
                   }
                   psArg->psVar->pvPtr=((char*)(*ppDat))+psArg->psVar->siLen;
                } else {
@@ -6490,6 +6494,8 @@ static int siClpBldLit(
                return CLPERR(psHdl,CLPERR_SEM,"EBCDIC string (%c(%s)) of '%s.%s' cannot be converted to EBCDIC",pcVal[0],isPrnStr(psArg,pcVal+2),pcPat,psArg->psStd->pcKyw);
             }
             siSln=l1;
+            ((char*)psArg->psVar->pvPtr)[l2]=EOS;
+            l2++;
             TRACE(psHdl->pfBld,"%s BUILD-LITERAL-EBC(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
                                     fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),isPrnLen(psArg,l2));
          } else {
@@ -6499,23 +6505,26 @@ static int siClpBldLit(
       case 'c':
          l1=strlen(pcVal+2);
          if (CLPISF_BIN(psArg->psStd->uiFlg)) {
-            if (l1>l0) {
+            if (l1+1>l0) {
                if (CLPISF_DYN(psArg->psStd->uiFlg)&& !CLPISF_FIX(psArg->psStd->uiFlg)) {
                   void** ppDat=(void**)psArg->psVar->pvDat;
                   if (psArg->psVar->siLen+l1>psArg->psFix->siSiz) {
                      return CLPERR(psHdl,CLPERR_MEM,"Size limit (%d) reached for argument '%s.%s'",psArg->psFix->siSiz,pcPat,psArg->psStd->pcKyw);
                   }
-                  (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+l1+4,&psArg->psVar->siInd);
+                  (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+l1+1+4,&psArg->psVar->siInd);
                   if ((*ppDat)==NULL) {
-                     return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d+%d+4) for argument '%s.%s' failed (8)",psArg->psVar->siLen,l1,pcPat,psArg->psStd->pcKyw);
+                     return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d+%d+1+4) for argument '%s.%s' failed (8)",psArg->psVar->siLen,l1,pcPat,psArg->psStd->pcKyw);
                   }
                   psArg->psVar->pvPtr=((char*)(*ppDat))+psArg->psVar->siLen;
                } else {
                   return CLPERR(psHdl,CLPERR_LEX,"Character string (%c(%s)) of '%s.%s' is longer than %d",pcVal[0],isPrnStr(psArg,pcVal+2),pcPat,psArg->psStd->pcKyw,l0);
                }
             }
-            memcpy(psArg->psVar->pvPtr,pcVal+2,l1); l2=l1;
+            memcpy(psArg->psVar->pvPtr,pcVal+2,l1);
+            l2=l1;
             siSln=l1;
+            ((char*)psArg->psVar->pvPtr)[l2]=EOS;
+            l2++;
             TRACE(psHdl->pfBld,"%s BUILD-LITERAL-CHR(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
                                     fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),isPrnLen(psArg,l2));
          } else {
