@@ -6405,278 +6405,26 @@ static int siClpBldLit(
             }
          }
       }
-      switch (pcVal[0]) {
-      case 'x':
-         l1=strlen(pcVal+2);
-         if (CLPISF_BIN(psArg->psStd->uiFlg) || CLPISF_PWD(psArg->psStd->uiFlg)) {
-            if (l1%2) {
-               return CLPERR(psHdl,CLPERR_LEX,"Length of hexadecimal string (%c(%s)) for '%s.%s' is not a multiple of 2",pcVal[0],isPrnStr(psArg,pcVal+2),pcPat,psArg->psStd->pcKyw);
-            }
-            if ((l1/2)+1>l0) {
-               if (CLPISF_DYN(psArg->psStd->uiFlg) && !CLPISF_FIX(psArg->psStd->uiFlg)) {
-                  void** ppDat=(void**)psArg->psVar->pvDat;
-                  if (psArg->psVar->siLen+(l1/2)>psArg->psFix->siSiz) {
-                     return CLPERR(psHdl,CLPERR_MEM,"Size limit (%d) reached for argument '%s.%s'",psArg->psFix->siSiz,pcPat,psArg->psStd->pcKyw);
-                  }
-                  (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+(l1/2)+1+4,&psArg->psVar->siInd);
-                  if ((*ppDat)==NULL) {
-                     return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d+(%d/+2+1+4)) for argument '%s.%s' failed (5)",psArg->psVar->siLen,l1,pcPat,psArg->psStd->pcKyw);
-                  }
-                  psArg->psVar->pvPtr=((char*)(*ppDat))+psArg->psVar->siLen;
-               } else {
-                  return CLPERR(psHdl,CLPERR_LEX,"Hexadecimal string (%c(%s)) of '%s.%s' is longer than %d",pcVal[0],isPrnStr(psArg,pcVal+2),pcPat,psArg->psStd->pcKyw,2*l0);
-               }
-            }
-            l2=hex2bin(pcVal+2,(U08*)psArg->psVar->pvPtr,l1);
-            if (l2!=l1/2) {
-               return CLPERR(psHdl,CLPERR_SEM,"Hexadecimal string (%c(%s)) of '%s.%s' cannot be converted from hex to bin",pcVal[0],isPrnStr(psArg,pcVal+2),pcPat,psArg->psStd->pcKyw);
-            }
-            siSln=l2;
-            ((char*)psArg->psVar->pvPtr)[l2]=EOS;
-            if (!CLPISF_BIN(psArg->psStd->uiFlg) && CLPISF_PWD(psArg->psStd->uiFlg)) {
-               // parameter is flagged as password, but not as binary => check that data does not contain \0
-               U32 uiStrLen = strlen((char*)psArg->psVar->pvPtr);
-               if (uiStrLen != l2) {
-                  return CLPERR(psHdl,CLPERR_SEM,"Password contains NUL-bytes at offset %d which is not allowed for argument '%s.%s'",uiStrLen,pcPat,psArg->psStd->pcKyw);
-               }
-            }
-            l2++;
-            TRACE(psHdl->pfBld,"%s BUILD-LITERAL-HEX(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
-                                    fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),isPrnLen(psArg,l2));
-         } else {
-            return CLPERR(psHdl,CLPERR_SEM,"String literal (%c(%s)) for '%s.%s' is binary (only null-terminated character string permitted)",pcVal[0],isPrnStr(psArg,pcVal+2),pcPat,psArg->psStd->pcKyw);
-         }
-         break;
-      case 'a':
-         l1=strlen(pcVal+2);
-         if (CLPISF_BIN(psArg->psStd->uiFlg) || CLPISF_PWD(psArg->psStd->uiFlg)) {
-            if (l1+1>l0) {
-               if (CLPISF_DYN(psArg->psStd->uiFlg)&& !CLPISF_FIX(psArg->psStd->uiFlg)) {
-                  void** ppDat=(void**)psArg->psVar->pvDat;
-                  if (psArg->psVar->siLen+l1>psArg->psFix->siSiz) {
-                     return CLPERR(psHdl,CLPERR_MEM,"Size limit (%d) reached for argument '%s.%s'",psArg->psFix->siSiz,pcPat,psArg->psStd->pcKyw);
-                  }
-                  (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+l1+1+4,&psArg->psVar->siInd);
-                  if ((*ppDat)==NULL) {
-                     return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d+%d+1+4) for argument '%s.%s' failed (6)",psArg->psVar->siLen,l1,pcPat,psArg->psStd->pcKyw);
-                  }
-                  psArg->psVar->pvPtr=((char*)(*ppDat))+psArg->psVar->siLen;
-               } else {
-                  return CLPERR(psHdl,CLPERR_LEX,"ASCII string (%c(%s)) of '%s.%s' is longer than %d",pcVal[0],isPrnStr(psArg,pcVal+2),pcPat,psArg->psStd->pcKyw,l0);
-               }
-            }
-            l2=chr2asc(pcVal+2,(C08*)psArg->psVar->pvPtr,l1);
-            if (l2!=l1) {
-               return CLPERR(psHdl,CLPERR_SEM,"ASCII string (%c(%s)) of '%s.%s' cannot be converted to ASCII",pcVal[0],isPrnStr(psArg,pcVal+2),pcPat,psArg->psStd->pcKyw);
-            }
-            siSln=l1;
-            ((char*)psArg->psVar->pvPtr)[l2]=EOS;
-            if (!CLPISF_BIN(psArg->psStd->uiFlg) && CLPISF_PWD(psArg->psStd->uiFlg)) {
-               // parameter is flagged as password, but not as binary => check that data does not contain \0
-               U32 uiStrLen = strlen((char*)psArg->psVar->pvPtr);
-               if (uiStrLen != l2) {
-                  return CLPERR(psHdl,CLPERR_SEM,"Password contains NUL-bytes at offset %d which is not allowed for argument '%s.%s'",uiStrLen,pcPat,psArg->psStd->pcKyw);
-               }
-            }
-            l2++;
-            TRACE(psHdl->pfBld,"%s BUILD-LITERAL-ASC(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
-                                    fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),isPrnLen(psArg,l2));
-         } else {
-            return CLPERR(psHdl,CLPERR_SEM,"String literal (%c(%s)) for '%s.%s' is binary (only null-terminated character string permitted)",pcVal[0],isPrnStr(psArg,pcVal+2),pcPat,psArg->psStd->pcKyw);
-         }
-         break;
-      case 'e':
-         l1=strlen(pcVal+2);
-         if (CLPISF_BIN(psArg->psStd->uiFlg) || CLPISF_PWD(psArg->psStd->uiFlg)) {
-            if (l1+1>l0) {
-               if (CLPISF_DYN(psArg->psStd->uiFlg) && !CLPISF_FIX(psArg->psStd->uiFlg)) {
-                  void** ppDat=(void**)psArg->psVar->pvDat;
-                  if (psArg->psVar->siLen+l1>psArg->psFix->siSiz) {
-                     return CLPERR(psHdl,CLPERR_MEM,"Size limit (%d) reached for argument '%s.%s'",psArg->psFix->siSiz,pcPat,psArg->psStd->pcKyw);
-                  }
-                  (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+l1+1+4,&psArg->psVar->siInd);
-                  if ((*ppDat)==NULL) {
-                     return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d+%d+1+4) for argument '%s.%s' failed (7)",psArg->psVar->siLen,l1,pcPat,psArg->psStd->pcKyw);
-                  }
-                  psArg->psVar->pvPtr=((char*)(*ppDat))+psArg->psVar->siLen;
-               } else {
-                  return CLPERR(psHdl,CLPERR_LEX,"EBCDIC string (%c(%s)) of '%s.%s' is longer than %d",pcVal[0],isPrnStr(psArg,pcVal+2),pcPat,psArg->psStd->pcKyw,l0);
-               }
-            }
-            l2=chr2ebc(pcVal+2,(C08*)psArg->psVar->pvPtr,l1);
-            if (l2!=l1) {
-               return CLPERR(psHdl,CLPERR_SEM,"EBCDIC string (%c(%s)) of '%s.%s' cannot be converted to EBCDIC",pcVal[0],isPrnStr(psArg,pcVal+2),pcPat,psArg->psStd->pcKyw);
-            }
-            siSln=l1;
-            ((char*)psArg->psVar->pvPtr)[l2]=EOS;
-            if (!CLPISF_BIN(psArg->psStd->uiFlg) && CLPISF_PWD(psArg->psStd->uiFlg)) {
-               // parameter is flagged as password, but not as binary => check that data does not contain \0
-               U32 uiStrLen = strlen((char*)psArg->psVar->pvPtr);
-               if (uiStrLen != l2) {
-                  return CLPERR(psHdl,CLPERR_SEM,"Password contains NUL-bytes at offset %d which is not allowed for argument '%s.%s'",uiStrLen,pcPat,psArg->psStd->pcKyw);
-               }
-            }
-            l2++;
-            TRACE(psHdl->pfBld,"%s BUILD-LITERAL-EBC(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
-                                    fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),isPrnLen(psArg,l2));
-         } else {
-            return CLPERR(psHdl,CLPERR_SEM,"String literal (%c(%s)) for '%s.%s' is binary (only null-terminated character string permitted)",pcVal[0],isPrnStr(psArg,pcVal+2),pcPat,psArg->psStd->pcKyw);
-         }
-         break;
-      case 'c':
-         l1=strlen(pcVal+2);
-         if (CLPISF_BIN(psArg->psStd->uiFlg) || CLPISF_PWD(psArg->psStd->uiFlg)) {
-            if (l1+1>l0) {
-               if (CLPISF_DYN(psArg->psStd->uiFlg)&& !CLPISF_FIX(psArg->psStd->uiFlg)) {
-                  void** ppDat=(void**)psArg->psVar->pvDat;
-                  if (psArg->psVar->siLen+l1>psArg->psFix->siSiz) {
-                     return CLPERR(psHdl,CLPERR_MEM,"Size limit (%d) reached for argument '%s.%s'",psArg->psFix->siSiz,pcPat,psArg->psStd->pcKyw);
-                  }
-                  (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+l1+1+4,&psArg->psVar->siInd);
-                  if ((*ppDat)==NULL) {
-                     return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d+%d+1+4) for argument '%s.%s' failed (8)",psArg->psVar->siLen,l1,pcPat,psArg->psStd->pcKyw);
-                  }
-                  psArg->psVar->pvPtr=((char*)(*ppDat))+psArg->psVar->siLen;
-               } else {
-                  return CLPERR(psHdl,CLPERR_LEX,"Character string (%c(%s)) of '%s.%s' is longer than %d",pcVal[0],isPrnStr(psArg,pcVal+2),pcPat,psArg->psStd->pcKyw,l0);
-               }
-            }
-            memcpy(psArg->psVar->pvPtr,pcVal+2,l1);
-            l2=l1;
-            siSln=l1;
-            ((char*)psArg->psVar->pvPtr)[l2]=EOS;
-            if (!CLPISF_BIN(psArg->psStd->uiFlg) && CLPISF_PWD(psArg->psStd->uiFlg)) {
-               // parameter is flagged as password, but not as binary => check that data does not contain \0
-               U32 uiStrLen = strlen((char*)psArg->psVar->pvPtr);
-               if (uiStrLen != l2) {
-                  return CLPERR(psHdl,CLPERR_SEM,"Password contains NUL-bytes at offset %d which is not allowed for argument '%s.%s'",uiStrLen,pcPat,psArg->psStd->pcKyw);
-               }
-            }
-            l2++;
-            TRACE(psHdl->pfBld,"%s BUILD-LITERAL-CHR(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
-                                    fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),isPrnLen(psArg,l2));
-         } else {
-            return CLPERR(psHdl,CLPERR_SEM,"String literal (%c(%s)) for '%s.%s' is binary (only null-terminated character string permitted)",pcVal[0],isPrnStr(psArg,pcVal+2),pcPat,psArg->psStd->pcKyw);
-         }
-         break;
-      case 's':
-         if (CLPISF_XML(psArg->psStd->uiFlg)) {
-            pcHlp=dmapxml(pcVal+2,CLPISF_UPP(psArg->psStd->uiFlg)?1:CLPISF_LOW(psArg->psStd->uiFlg)?2:0);
-         } else if (CLPISF_FIL(psArg->psStd->uiFlg)) {
-            pcHlp=dmapfil(pcVal+2,CLPISF_UPP(psArg->psStd->uiFlg)?1:CLPISF_LOW(psArg->psStd->uiFlg)?2:0);
-         } else if (CLPISF_LAB(psArg->psStd->uiFlg)) {
-            pcHlp=dmaplab(pcVal+2,CLPISF_UPP(psArg->psStd->uiFlg)?1:CLPISF_LOW(psArg->psStd->uiFlg)?2:0);
-         } else {
-            pcHlp=dmapstr(pcVal+2,CLPISF_UPP(psArg->psStd->uiFlg)?1:CLPISF_LOW(psArg->psStd->uiFlg)?2:0);
-         }
-         if (pcHlp==NULL) {
-            return CLPERR(psHdl,CLPERR_MEM,"String mapping (memory allocation) for argument '%s.%s' failed",pcPat,psArg->psStd->pcKyw);
-         }
-         l1=strlen(pcHlp);
-         if (l1+1>l0) {
-            if (CLPISF_DYN(psArg->psStd->uiFlg) && !CLPISF_FIX(psArg->psStd->uiFlg)) {
-               void** ppDat=(void**)psArg->psVar->pvDat;
-               if (psArg->psVar->siLen+l1+1>psArg->psFix->siSiz) {
-                  free(pcHlp);
-                  return CLPERR(psHdl,CLPERR_MEM,"Size limit (%d) reached for argument '%s.%s'",psArg->psFix->siSiz,pcPat,psArg->psStd->pcKyw);
-               }
-               (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+l1+4,&psArg->psVar->siInd);
-               if ((*ppDat)==NULL) {
-                  free(pcHlp);
-                  return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d+%d+4) for argument '%s.%s' failed (9)",psArg->psVar->siLen,l1,pcPat,psArg->psStd->pcKyw);
-               }
-               psArg->psVar->pvPtr=((char*)(*ppDat))+psArg->psVar->siLen;
-            } else {
-               siErr=CLPERR(psHdl,CLPERR_LEX,"Character string (%c(%s)) of '%s.%s' is longer than %d",pcVal[0],isPrnStr(psArg,pcHlp),pcPat,psArg->psStd->pcKyw,l0-1);
-               free(pcHlp);
-               return(siErr);
-            }
-         }
-         memcpy(psArg->psVar->pvPtr,pcHlp,l1);
-         ((char*)psArg->psVar->pvPtr)[l1]=EOS;
-         free(pcHlp);
-         l2=l1+1; siSln=l1;
-         TRACE(psHdl->pfBld,"%s BUILD-LITERAL-STR(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
-                                 fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),isPrnLen(psArg,l2));
-         break;
-      case 'f':
-      {
-         int                           siTok;
-         int                           siRow;
-         int                           siSiz=0;
-         char*                         pcDat=NULL;
-         const char*                   pcCur;
-         const char*                   pcInp;
-         const char*                   pcOld;
-         const char*                   pcRow;
-         char                          acSrc[strlen(psHdl->pcSrc)+1];
-         size_t                        szLex=CLPINI_LEXSIZ;
-         char*                         pcLex=(char*)calloc(1,szLex);
-         char                          acMsg[1024]="";
-         if (pcLex==NULL) {
-            return(CLPERR(psHdl,CLPERR_MEM,"Allocation of memory to store the lexeme or file name failed"));
-         }
-         siErr=psHdl->pfF2s(psHdl->pvGbl,psHdl->pvF2s,pcVal+2,&pcDat,&siSiz,acMsg,sizeof(acMsg));
-         if (siErr<0) {
-            siErr=CLPERR(psHdl,CLPERR_SYS,"String file: %s",acMsg);
-            SAFE_FREE(pcDat); free(pcLex);
-            return(siErr);
-         }
-         TRACE(psHdl->pfPrs,"STRING-FILE-BEGIN(%s)\n",pcVal+2);
-         strcpy(acSrc,psHdl->pcSrc);
-         srprintf(&psHdl->pcSrc,&psHdl->szSrc,strlen(CLPSRC_SRF)+strlen(pcVal+2),"%s%s",CLPSRC_SRF,pcVal+2);
-
-         pcInp=psHdl->pcInp; psHdl->pcInp=pcClpUnEscape(pvHdl,pcDat);
-         SAFE_FREE(pcDat);
-         if (psHdl->pcInp==NULL) {
-            siErr=CLPERR(psHdl,CLPERR_MEM,"Un-escaping of string file (%s) failed",pcVal+2);
-            free(pcLex);
-            return(siErr);
-         }
-         pcCur=psHdl->pcCur; psHdl->pcCur=psHdl->pcInp;
-         pcOld=psHdl->pcOld; psHdl->pcOld=psHdl->pcInp;
-         pcRow=psHdl->pcRow; psHdl->pcRow=psHdl->pcInp;
-         siRow=psHdl->siRow; psHdl->siRow=1;
-         psHdl->siBuf++;
-         siTok=siClpScnNat(pvHdl,psHdl->pfErr,psHdl->pfScn,&psHdl->pcCur,&szLex,&pcLex,CLPTYP_STRING,psArg,NULL,NULL);
-         if (siTok<0) {
-            free(pcLex);
-            return(siTok);
-         }
-         if (siTok!=CLPTOK_STR) {
-            siErr=CLPERR(psHdl,CLPERR_SYN,"The token (%s(%s)) is not allowed in a string file (%c(%s)) of '%s.%s'",apClpTok[siTok],pcLex,pcVal[0],pcVal+2,pcPat,psArg->psStd->pcKyw);
-            free(pcLex);
-            return(siErr);
-         }
-         if (pcLex[0]=='f') {
-            siErr=CLPERR(psHdl,CLPERR_SYN,"Define a string file (%c(%s)) in a string file (%c(%s)) is not allowed (%s.%s)",pcLex[0],pcLex+2,pcVal[0],pcVal+2,pcPat,psArg->psStd->pcKyw);
-            free(pcLex);
-            return(siErr);
-         }
-         siErr=siClpBldLit(pvHdl,siLev,siPos,psArg,pcLex);
-         psHdl->siBuf--;
-         strcpy(psHdl->pcSrc,acSrc);
-         psHdl->pcInp=pcInp; psHdl->pcCur=pcCur; psHdl->pcOld=pcOld; psHdl->pcRow=pcRow; psHdl->siRow=siRow;
-         TRACE(psHdl->pfPrs,"STRING-FILE-END(%s)\n",pcVal+2);
-         free(pcLex);
-         return(siErr);
-      }
-      case 'd':
-         if (CLPISF_BIN(psArg->psStd->uiFlg)) {
-            if (CLPISF_HEX(psArg->psStd->uiFlg)) {
-               l1=strlen(pcVal+2);
+      char chMode = pcVal[0];
+      U32  isNotDone;
+      do {
+         isNotDone = FALSE;
+         switch (chMode) {
+         case 'x':
+            l1=strlen(pcVal+2);
+            if (CLPISF_BIN(psArg->psStd->uiFlg) || CLPISF_PWD(psArg->psStd->uiFlg)) {
                if (l1%2) {
                   return CLPERR(psHdl,CLPERR_LEX,"Length of hexadecimal string (%c(%s)) for '%s.%s' is not a multiple of 2",pcVal[0],isPrnStr(psArg,pcVal+2),pcPat,psArg->psStd->pcKyw);
                }
-               if ((l1/2)>l0) {
-                  if (CLPISF_DYN(psArg->psStd->uiFlg)&& !CLPISF_FIX(psArg->psStd->uiFlg)) {
+               if ((l1/2)+1>l0) {
+                  if (CLPISF_DYN(psArg->psStd->uiFlg) && !CLPISF_FIX(psArg->psStd->uiFlg)) {
                      void** ppDat=(void**)psArg->psVar->pvDat;
                      if (psArg->psVar->siLen+(l1/2)>psArg->psFix->siSiz) {
                         return CLPERR(psHdl,CLPERR_MEM,"Size limit (%d) reached for argument '%s.%s'",psArg->psFix->siSiz,pcPat,psArg->psStd->pcKyw);
                      }
-                     (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+(l1/2)+4,&psArg->psVar->siInd);
+                     (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+(l1/2)+1+4,&psArg->psVar->siInd);
                      if ((*ppDat)==NULL) {
-                        return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d+(%d/2+4)) for argument '%s.%s' failed (10)",psArg->psVar->siLen,l1,pcPat,psArg->psStd->pcKyw);
+                        return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d+(%d/+2+1+4)) for argument '%s.%s' failed (5)",psArg->psVar->siLen,l1,pcPat,psArg->psStd->pcKyw);
                      }
                      psArg->psVar->pvPtr=((char*)(*ppDat))+psArg->psVar->siLen;
                   } else {
@@ -6688,19 +6436,33 @@ static int siClpBldLit(
                   return CLPERR(psHdl,CLPERR_SEM,"Hexadecimal string (%c(%s)) of '%s.%s' cannot be converted from hex to bin",pcVal[0],isPrnStr(psArg,pcVal+2),pcPat,psArg->psStd->pcKyw);
                }
                siSln=l2;
+               ((char*)psArg->psVar->pvPtr)[l2]=EOS;
+               if (!CLPISF_BIN(psArg->psStd->uiFlg) && CLPISF_PWD(psArg->psStd->uiFlg)) {
+                  // parameter is flagged as password, but not as binary => check that data does not contain \0
+                  U32 uiStrLen = strlen((char*)psArg->psVar->pvPtr);
+                  if (uiStrLen != l2) {
+                     return CLPERR(psHdl,CLPERR_SEM,"Password contains NUL-bytes at offset %d which is not allowed for argument '%s.%s'",uiStrLen,pcPat,psArg->psStd->pcKyw);
+                  }
+               }
+               l2++;
                TRACE(psHdl->pfBld,"%s BUILD-LITERAL-HEX(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
                                        fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),isPrnLen(psArg,l2));
-            } else if (CLPISF_ASC(psArg->psStd->uiFlg)) {
-               l1=strlen(pcVal+2);
-               if (l1>l0) {
+            } else {
+               return CLPERR(psHdl,CLPERR_SEM,"String literal (%c(%s)) for '%s.%s' is binary (only null-terminated character string permitted)",pcVal[0],isPrnStr(psArg,pcVal+2),pcPat,psArg->psStd->pcKyw);
+            }
+            break;
+         case 'a':
+            l1=strlen(pcVal+2);
+            if (CLPISF_BIN(psArg->psStd->uiFlg) || CLPISF_PWD(psArg->psStd->uiFlg)) {
+               if (l1+1>l0) {
                   if (CLPISF_DYN(psArg->psStd->uiFlg)&& !CLPISF_FIX(psArg->psStd->uiFlg)) {
                      void** ppDat=(void**)psArg->psVar->pvDat;
                      if (psArg->psVar->siLen+l1>psArg->psFix->siSiz) {
                         return CLPERR(psHdl,CLPERR_MEM,"Size limit (%d) reached for argument '%s.%s'",psArg->psFix->siSiz,pcPat,psArg->psStd->pcKyw);
                      }
-                     (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+l1+4,&psArg->psVar->siInd);
+                     (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+l1+1+4,&psArg->psVar->siInd);
                      if ((*ppDat)==NULL) {
-                        return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d+%d+4) for argument '%s.%s' failed (11)",psArg->psVar->siLen,l1,pcPat,psArg->psStd->pcKyw);
+                        return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d+%d+1+4) for argument '%s.%s' failed (6)",psArg->psVar->siLen,l1,pcPat,psArg->psStd->pcKyw);
                      }
                      psArg->psVar->pvPtr=((char*)(*ppDat))+psArg->psVar->siLen;
                   } else {
@@ -6712,19 +6474,33 @@ static int siClpBldLit(
                   return CLPERR(psHdl,CLPERR_SEM,"ASCII string (%c(%s)) of '%s.%s' cannot be converted to ASCII",pcVal[0],isPrnStr(psArg,pcVal+2),pcPat,psArg->psStd->pcKyw);
                }
                siSln=l1;
+               ((char*)psArg->psVar->pvPtr)[l2]=EOS;
+               if (!CLPISF_BIN(psArg->psStd->uiFlg) && CLPISF_PWD(psArg->psStd->uiFlg)) {
+                  // parameter is flagged as password, but not as binary => check that data does not contain \0
+                  U32 uiStrLen = strlen((char*)psArg->psVar->pvPtr);
+                  if (uiStrLen != l2) {
+                     return CLPERR(psHdl,CLPERR_SEM,"Password contains NUL-bytes at offset %d which is not allowed for argument '%s.%s'",uiStrLen,pcPat,psArg->psStd->pcKyw);
+                  }
+               }
+               l2++;
                TRACE(psHdl->pfBld,"%s BUILD-LITERAL-ASC(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
                                        fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),isPrnLen(psArg,l2));
-            } else if (CLPISF_EBC(psArg->psStd->uiFlg)) {
-               l1=strlen(pcVal+2);
-               if (l1>l0) {
-                  if (CLPISF_DYN(psArg->psStd->uiFlg)&& !CLPISF_FIX(psArg->psStd->uiFlg)) {
+            } else {
+               return CLPERR(psHdl,CLPERR_SEM,"String literal (%c(%s)) for '%s.%s' is binary (only null-terminated character string permitted)",pcVal[0],isPrnStr(psArg,pcVal+2),pcPat,psArg->psStd->pcKyw);
+            }
+            break;
+         case 'e':
+            l1=strlen(pcVal+2);
+            if (CLPISF_BIN(psArg->psStd->uiFlg) || CLPISF_PWD(psArg->psStd->uiFlg)) {
+               if (l1+1>l0) {
+                  if (CLPISF_DYN(psArg->psStd->uiFlg) && !CLPISF_FIX(psArg->psStd->uiFlg)) {
                      void** ppDat=(void**)psArg->psVar->pvDat;
                      if (psArg->psVar->siLen+l1>psArg->psFix->siSiz) {
                         return CLPERR(psHdl,CLPERR_MEM,"Size limit (%d) reached for argument '%s.%s'",psArg->psFix->siSiz,pcPat,psArg->psStd->pcKyw);
                      }
-                     (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+l1+4,&psArg->psVar->siInd);
+                     (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+l1+1+4,&psArg->psVar->siInd);
                      if ((*ppDat)==NULL) {
-                        return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d+%d+4) for argument '%s.%s' failed (12)",psArg->psVar->siLen,l1,pcPat,psArg->psStd->pcKyw);
+                        return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d+%d+1+4) for argument '%s.%s' failed (7)",psArg->psVar->siLen,l1,pcPat,psArg->psStd->pcKyw);
                      }
                      psArg->psVar->pvPtr=((char*)(*ppDat))+psArg->psVar->siLen;
                   } else {
@@ -6736,31 +6512,58 @@ static int siClpBldLit(
                   return CLPERR(psHdl,CLPERR_SEM,"EBCDIC string (%c(%s)) of '%s.%s' cannot be converted to EBCDIC",pcVal[0],isPrnStr(psArg,pcVal+2),pcPat,psArg->psStd->pcKyw);
                }
                siSln=l1;
+               ((char*)psArg->psVar->pvPtr)[l2]=EOS;
+               if (!CLPISF_BIN(psArg->psStd->uiFlg) && CLPISF_PWD(psArg->psStd->uiFlg)) {
+                  // parameter is flagged as password, but not as binary => check that data does not contain \0
+                  U32 uiStrLen = strlen((char*)psArg->psVar->pvPtr);
+                  if (uiStrLen != l2) {
+                     return CLPERR(psHdl,CLPERR_SEM,"Password contains NUL-bytes at offset %d which is not allowed for argument '%s.%s'",uiStrLen,pcPat,psArg->psStd->pcKyw);
+                  }
+               }
+               l2++;
                TRACE(psHdl->pfBld,"%s BUILD-LITERAL-EBC(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
                                        fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),isPrnLen(psArg,l2));
             } else {
-               l1=strlen(pcVal+2);
-               if (l1>l0) {
+               return CLPERR(psHdl,CLPERR_SEM,"String literal (%c(%s)) for '%s.%s' is binary (only null-terminated character string permitted)",pcVal[0],isPrnStr(psArg,pcVal+2),pcPat,psArg->psStd->pcKyw);
+            }
+            break;
+         case 'c':
+            l1=strlen(pcVal+2);
+            if (CLPISF_BIN(psArg->psStd->uiFlg) || CLPISF_PWD(psArg->psStd->uiFlg)) {
+               if (l1+1>l0) {
                   if (CLPISF_DYN(psArg->psStd->uiFlg)&& !CLPISF_FIX(psArg->psStd->uiFlg)) {
                      void** ppDat=(void**)psArg->psVar->pvDat;
                      if (psArg->psVar->siLen+l1>psArg->psFix->siSiz) {
                         return CLPERR(psHdl,CLPERR_MEM,"Size limit (%d) reached for argument '%s.%s'",psArg->psFix->siSiz,pcPat,psArg->psStd->pcKyw);
                      }
-                     (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+l1+4,&psArg->psVar->siInd);
+                     (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+l1+1+4,&psArg->psVar->siInd);
                      if ((*ppDat)==NULL) {
-                        return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d+%d+4) for argument '%s.%s' failed (13)",psArg->psVar->siLen,l1,pcPat,psArg->psStd->pcKyw);
+                        return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d+%d+1+4) for argument '%s.%s' failed (8)",psArg->psVar->siLen,l1,pcPat,psArg->psStd->pcKyw);
                      }
                      psArg->psVar->pvPtr=((char*)(*ppDat))+psArg->psVar->siLen;
                   } else {
                      return CLPERR(psHdl,CLPERR_LEX,"Character string (%c(%s)) of '%s.%s' is longer than %d",pcVal[0],isPrnStr(psArg,pcVal+2),pcPat,psArg->psStd->pcKyw,l0);
                   }
                }
-               memcpy(psArg->psVar->pvPtr,pcVal+2,l1); l2=l1;
+               memcpy(psArg->psVar->pvPtr,pcVal+2,l1);
+               l2=l1;
                siSln=l1;
+               ((char*)psArg->psVar->pvPtr)[l2]=EOS;
+               if (!CLPISF_BIN(psArg->psStd->uiFlg) && CLPISF_PWD(psArg->psStd->uiFlg)) {
+                  // parameter is flagged as password, but not as binary => check that data does not contain \0
+                  U32 uiStrLen = strlen((char*)psArg->psVar->pvPtr);
+                  if (uiStrLen != l2) {
+                     return CLPERR(psHdl,CLPERR_SEM,"Password contains NUL-bytes at offset %d which is not allowed for argument '%s.%s'",uiStrLen,pcPat,psArg->psStd->pcKyw);
+                  }
+               }
+               l2++;
                TRACE(psHdl->pfBld,"%s BUILD-LITERAL-CHR(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
                                        fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),isPrnLen(psArg,l2));
+            } else {
+               return CLPERR(psHdl,CLPERR_SEM,"String literal (%c(%s)) for '%s.%s' is binary (only null-terminated character string permitted)",pcVal[0],isPrnStr(psArg,pcVal+2),pcPat,psArg->psStd->pcKyw);
             }
-         } else {
+            break;
+         case 's':
             if (CLPISF_XML(psArg->psStd->uiFlg)) {
                pcHlp=dmapxml(pcVal+2,CLPISF_UPP(psArg->psStd->uiFlg)?1:CLPISF_LOW(psArg->psStd->uiFlg)?2:0);
             } else if (CLPISF_FIL(psArg->psStd->uiFlg)) {
@@ -6775,7 +6578,7 @@ static int siClpBldLit(
             }
             l1=strlen(pcHlp);
             if (l1+1>l0) {
-               if (CLPISF_DYN(psArg->psStd->uiFlg)&& !CLPISF_FIX(psArg->psStd->uiFlg)) {
+               if (CLPISF_DYN(psArg->psStd->uiFlg) && !CLPISF_FIX(psArg->psStd->uiFlg)) {
                   void** ppDat=(void**)psArg->psVar->pvDat;
                   if (psArg->psVar->siLen+l1+1>psArg->psFix->siSiz) {
                      free(pcHlp);
@@ -6784,7 +6587,7 @@ static int siClpBldLit(
                   (*ppDat)=pvClpAlloc(pvHdl,(*ppDat),psArg->psVar->siLen+l1+4,&psArg->psVar->siInd);
                   if ((*ppDat)==NULL) {
                      free(pcHlp);
-                     return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d+%d+4) for argument '%s.%s' failed (14)",psArg->psVar->siLen,l1,pcPat,psArg->psStd->pcKyw);
+                     return CLPERR(psHdl,CLPERR_MEM,"Dynamic memory allocation (%d+%d+4) for argument '%s.%s' failed (9)",psArg->psVar->siLen,l1,pcPat,psArg->psStd->pcKyw);
                   }
                   psArg->psVar->pvPtr=((char*)(*ppDat))+psArg->psVar->siLen;
                } else {
@@ -6799,19 +6602,97 @@ static int siClpBldLit(
             l2=l1+1; siSln=l1;
             TRACE(psHdl->pfBld,"%s BUILD-LITERAL-STR(PTR=%p CNT=%d LEN=%d RST=%d)%s=%s(%d)\n",
                                     fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnStr(psArg,pcVal),isPrnLen(psArg,l2));
+            break;
+         case 'f':
+         {
+            int                           siTok;
+            int                           siRow;
+            int                           siSiz=0;
+            char*                         pcDat=NULL;
+            const char*                   pcCur;
+            const char*                   pcInp;
+            const char*                   pcOld;
+            const char*                   pcRow;
+            char                          acSrc[strlen(psHdl->pcSrc)+1];
+            size_t                        szLex=CLPINI_LEXSIZ;
+            char*                         pcLex=(char*)calloc(1,szLex);
+            char                          acMsg[1024]="";
+            if (pcLex==NULL) {
+               return(CLPERR(psHdl,CLPERR_MEM,"Allocation of memory to store the lexeme or file name failed"));
+            }
+            siErr=psHdl->pfF2s(psHdl->pvGbl,psHdl->pvF2s,pcVal+2,&pcDat,&siSiz,acMsg,sizeof(acMsg));
+            if (siErr<0) {
+               siErr=CLPERR(psHdl,CLPERR_SYS,"String file: %s",acMsg);
+               SAFE_FREE(pcDat); free(pcLex);
+               return(siErr);
+            }
+            TRACE(psHdl->pfPrs,"STRING-FILE-BEGIN(%s)\n",pcVal+2);
+            strcpy(acSrc,psHdl->pcSrc);
+            srprintf(&psHdl->pcSrc,&psHdl->szSrc,strlen(CLPSRC_SRF)+strlen(pcVal+2),"%s%s",CLPSRC_SRF,pcVal+2);
+
+            pcInp=psHdl->pcInp; psHdl->pcInp=pcClpUnEscape(pvHdl,pcDat);
+            SAFE_FREE(pcDat);
+            if (psHdl->pcInp==NULL) {
+               siErr=CLPERR(psHdl,CLPERR_MEM,"Un-escaping of string file (%s) failed",pcVal+2);
+               free(pcLex);
+               return(siErr);
+            }
+            pcCur=psHdl->pcCur; psHdl->pcCur=psHdl->pcInp;
+            pcOld=psHdl->pcOld; psHdl->pcOld=psHdl->pcInp;
+            pcRow=psHdl->pcRow; psHdl->pcRow=psHdl->pcInp;
+            siRow=psHdl->siRow; psHdl->siRow=1;
+            psHdl->siBuf++;
+            siTok=siClpScnNat(pvHdl,psHdl->pfErr,psHdl->pfScn,&psHdl->pcCur,&szLex,&pcLex,CLPTYP_STRING,psArg,NULL,NULL);
+            if (siTok<0) {
+               free(pcLex);
+               return(siTok);
+            }
+            if (siTok!=CLPTOK_STR) {
+               siErr=CLPERR(psHdl,CLPERR_SYN,"The token (%s(%s)) is not allowed in a string file (%c(%s)) of '%s.%s'",apClpTok[siTok],pcLex,pcVal[0],pcVal+2,pcPat,psArg->psStd->pcKyw);
+               free(pcLex);
+               return(siErr);
+            }
+            if (pcLex[0]=='f') {
+               siErr=CLPERR(psHdl,CLPERR_SYN,"Define a string file (%c(%s)) in a string file (%c(%s)) is not allowed (%s.%s)",pcLex[0],pcLex+2,pcVal[0],pcVal+2,pcPat,psArg->psStd->pcKyw);
+               free(pcLex);
+               return(siErr);
+            }
+            siErr=siClpBldLit(pvHdl,siLev,siPos,psArg,pcLex);
+            psHdl->siBuf--;
+            strcpy(psHdl->pcSrc,acSrc);
+            psHdl->pcInp=pcInp; psHdl->pcCur=pcCur; psHdl->pcOld=pcOld; psHdl->pcRow=pcRow; psHdl->siRow=siRow;
+            TRACE(psHdl->pfPrs,"STRING-FILE-END(%s)\n",pcVal+2);
+            free(pcLex);
+            return(siErr);
          }
-         break;
-      default:
-         CLPERR(psHdl,CLPERR_LEX,"String prefix (%c) of '%s.%s' is not supported",pcVal[0],pcPat,psArg->psStd->pcKyw);
-         CLPERRADD(psHdl,0,"Please use one of the following values:%s","");
-         CLPERRADD(psHdl,1,"x - for conversion from hex to bin%s","");
-         CLPERRADD(psHdl,1,"a - for conversion in ASCII%s","");
-         CLPERRADD(psHdl,1,"e - for conversion in EBCDIC%s","");
-         CLPERRADD(psHdl,1,"c - for no conversion (normal character string without null termination)%s","");
-         CLPERRADD(psHdl,1,"s - normal character string with null termination%s","");
-         CLPERRADD(psHdl,1,"f - use file content as string%s","");
-         return(CLPERR_LEX);
-      }
+         case 'd':
+            if (CLPISF_BIN(psArg->psStd->uiFlg)) {
+               if (CLPISF_HEX(psArg->psStd->uiFlg)) {
+                  chMode = 'x';
+               } else if (CLPISF_ASC(psArg->psStd->uiFlg)) {
+                  chMode = 'a';
+               } else if (CLPISF_EBC(psArg->psStd->uiFlg)) {
+                  chMode = 'e';
+               } else {
+                  chMode = 'c';
+               }
+            } else {
+               chMode = 's';
+            }
+            isNotDone = TRUE;
+            break;
+         default:
+            CLPERR(psHdl,CLPERR_LEX,"String prefix (%c) of '%s.%s' is not supported",pcVal[0],pcPat,psArg->psStd->pcKyw);
+            CLPERRADD(psHdl,0,"Please use one of the following values:%s","");
+            CLPERRADD(psHdl,1,"x - for conversion from hex to bin%s","");
+            CLPERRADD(psHdl,1,"a - for conversion in ASCII%s","");
+            CLPERRADD(psHdl,1,"e - for conversion in EBCDIC%s","");
+            CLPERRADD(psHdl,1,"c - for no conversion (normal character string without null termination)%s","");
+            CLPERRADD(psHdl,1,"s - normal character string with null termination%s","");
+            CLPERRADD(psHdl,1,"f - use file content as string%s","");
+            return(CLPERR_LEX);
+         }
+      } while (isNotDone);
 
       if (CLPISF_FIX(psArg->psStd->uiFlg)) {
          memset(((U08*)psArg->psVar->pvPtr)+l2,0,psArg->psFix->siSiz-l2);
