@@ -6686,7 +6686,7 @@ static int siClpBldLit(
             CLPERRADD(psHdl,1,"c - for no conversion (normal character string without null termination)%s","");
             CLPERRADD(psHdl,1,"s - normal character string with null termination%s","");
             CLPERRADD(psHdl,1,"f - use file content as string%s","");
-            // TODO: 'd' is missing
+            // 'd' is the default depending on the flags and defined if no character given to qualify the string
             return(CLPERR_LEX);
          }
       } while (isNotDone);
