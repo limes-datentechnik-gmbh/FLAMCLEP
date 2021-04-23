@@ -3243,8 +3243,8 @@ extern unsigned int chr2asc(
                asc[i]=0x7E;
             } else {
                asc[i]=0x00;
+               return(i);
             }
-            return(i);
       }
    }
    return(i);
@@ -3378,8 +3378,8 @@ extern unsigned int chr2ebc(
                ebc[i]=0xA1;
             } else {
                ebc[i]=0x00;
+               return(i);
             }
-            return(i);
       }
    }
    return(i);
