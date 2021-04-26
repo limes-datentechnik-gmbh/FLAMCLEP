@@ -1340,10 +1340,10 @@ extern int siCleExecute(
    }
 
 #ifdef __WIN__
-   char* pcwinvers = NULL;
-   size_t szwv = 0;
-   if (pfOut!=NULL) efprintf(pfOut,"%s Run on %s\n",cstime(0,acTs),windowsversionstring(&pcwinvers, &szwv));
-   if (pcwinvers != NULL) free(pcwinvers);
+   char*    pcWinVer = NULL;
+   size_t   szWinVer = 0;
+   if (pfOut!=NULL) efprintf(pfOut,"%s Run on %s\n",cstime(0,acTs),windowsversionstring(&pcWinVer, &szWinVer));
+   if (pcWinVer != NULL) free(pcWinVer);
 #else
    struct utsname uts;
    if(uname(&uts)>=0) {
