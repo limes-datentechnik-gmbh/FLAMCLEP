@@ -999,7 +999,8 @@ static void vdClpFree(
          }
       }
       if (GETENV("CLP_MALLOC_STATISTICS")!=NULL) {
-         fprintf(stderr,"CLP_MALLOC_STATISTICS(Amount(%"PRIu64"),Table(%d(%"PRIu64")),Size(%"PRIu64"))\n",uiCnt,psHdl->szPtr,((uint64_t)sizeof(TsPtr))*((uint64_t)psHdl->szPtr),uiSiz);
+         char acTs[24];
+         fprintf(stderr,"%s CLP_MALLOC_STATISTICS(Amount(%"PRIu64"),Table(%d(%"PRIu64")),Size(%"PRIu64"))\n",cstime(0,acTs),uiCnt,psHdl->szPtr,((uint64_t)sizeof(TsPtr))*((uint64_t)psHdl->szPtr),uiSiz);
       }
    }
 }
@@ -1154,7 +1155,8 @@ extern void* pvClpOpen(
             uint64_t uiSiz=0;
             vdClpSymDel(psHdl->psTab,&uiCnt,&uiSiz);
             if (GETENV("CLP_SYMTAB_STATISTICS")!=NULL) {
-               fprintf(stderr,"CLP_SYMTAB_STATISTICS(Amount(%"PRIu64"),Size(%"PRIu64")) after fail of in siClpSymIni()\n",uiCnt,uiSiz);
+               char acTs[24];
+               fprintf(stderr,"%s CLP_SYMTAB_STATISTICS(Amount(%"PRIu64"),Size(%"PRIu64")) after fail of in siClpSymIni()\n",cstime(0,acTs),uiCnt,uiSiz);
             }
             SAFE_FREE(psHdl->pcLex);
             SAFE_FREE(psHdl->pcSrc);
@@ -1175,7 +1177,8 @@ extern void* pvClpOpen(
             uint64_t uiSiz=0;
             vdClpSymDel(psHdl->psTab,&uiCnt,&uiSiz);
             if (GETENV("CLP_SYMTAB_STATISTICS")!=NULL) {
-               fprintf(stderr,"CLP_SYMTAB_STATISTICS(Amount(%"PRIu64"),Size(%"PRIu64")) after fail of in siClpSymCal()\n",uiCnt,uiSiz);
+               char acTs[24];
+               fprintf(stderr,"%s CLP_SYMTAB_STATISTICS(Amount(%"PRIu64"),Size(%"PRIu64")) after fail of in siClpSymCal()\n",cstime(0,acTs),uiCnt,uiSiz);
             }
             SAFE_FREE(psHdl->pcLex);
             SAFE_FREE(psHdl->pcSrc);
@@ -2428,7 +2431,8 @@ extern void vdClpClose(
          uint64_t uiSiz=0;
          vdClpSymDel(psHdl->psTab,&uiCnt,&uiSiz);
          if (GETENV("CLP_SYMTAB_STATISTICS")!=NULL) {
-            fprintf(stderr,"CLP_SYMTAB_STATISTICS(Amount(%"PRIu64"),Size(%"PRIu64")) in vdClpClose()\n",uiCnt,uiSiz);
+            char acTs[24];
+            fprintf(stderr,"%s CLP_SYMTAB_STATISTICS(Amount(%"PRIu64"),Size(%"PRIu64")) in vdClpClose()\n",cstime(0,acTs),uiCnt,uiSiz);
          }
          psHdl->psTab=NULL;
       }

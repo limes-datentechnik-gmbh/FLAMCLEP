@@ -2791,7 +2791,7 @@ EVALUATE:
 
                siErr=siClpParseCmd(pvHdl,pcFil,pcCmd,TRUE,TRUE,psCmd[i].piOid,&pcTls);
                if (siErr<0) {
-                  if (pfErr!=NULL) fprintf(pfErr,"Command line parser for command '%s' failed\n",psCmd[i].pcKyw);
+                  if (pfErr!=NULL) fprintf(pfErr,"%s Command line parser for command '%s' failed\n",cstime(0,acTs),psCmd[i].pcKyw);
                   SAFE_FREE(pcCmd);
                   siErr=CLERTC_SYN;
                   ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
@@ -2813,9 +2813,9 @@ EVALUATE:
                if (siErr) {
                   if (siErr!=siNoR) {
                      if (pfMsg!=NULL && (pcMsg=pfMsg(siErr))!=NULL) {
-                        if (pfErr!=NULL) fprintf(pfErr,"Mapping of CLP structure for command '%s' failed (Return code: %d / Reason code: %d (%s))\n",psCmd[i].pcKyw,CLERTC_MAP,siErr,pcMsg);
+                        if (pfErr!=NULL) fprintf(pfErr,"%s Mapping of CLP structure for command '%s' failed (Return code: %d / Reason code: %d (%s))\n",cstime(0,acTs),psCmd[i].pcKyw,CLERTC_MAP,siErr,pcMsg);
                      } else {
-                        if (pfErr!=NULL) fprintf(pfErr,"Mapping of CLP structure for command '%s' failed (Return code: %d / Reason code: %d)\n",psCmd[i].pcKyw,CLERTC_MAP,siErr);
+                        if (pfErr!=NULL) fprintf(pfErr,"%s Mapping of CLP structure for command '%s' failed (Return code: %d / Reason code: %d)\n",cstime(0,acTs),psCmd[i].pcKyw,CLERTC_MAP,siErr);
                      }
                      siErr=CLERTC_MAP;
                   } else {
@@ -2836,18 +2836,18 @@ EVALUATE:
                if (siErr) {
                   if (isWrn&0x00010000) {
                      if (pfMsg!=NULL && (pcMsg=pfMsg(siErr))!=NULL) {
-                        if (pfErr!=NULL) fprintf(pfErr,"Run of command '%s' ends with warning (Return code: %d / Reason code: %d (%s))\n",psCmd[i].pcKyw,CLERTC_WRN,siErr,pcMsg);
+                        if (pfErr!=NULL) fprintf(pfErr,"%s Run of command '%s' ends with warning (Return code: %d / Reason code: %d (%s))\n",cstime(0,acTs),psCmd[i].pcKyw,CLERTC_WRN,siErr,pcMsg);
                      } else {
-                        if (pfErr!=NULL) fprintf(pfErr,"Run of command '%s' ends with warning (Return code: %d / Reason code: %d)\n",psCmd[i].pcKyw,CLERTC_WRN,siErr);
+                        if (pfErr!=NULL) fprintf(pfErr,"%s Run of command '%s' ends with warning (Return code: %d / Reason code: %d)\n",cstime(0,acTs),psCmd[i].pcKyw,CLERTC_WRN,siErr);
                      }
                      psCmd[i].pfFin(pfErr,pfTrc,pvGbl,psCmd[i].pvPar);
                      siErr=CLERTC_WRN;
                      ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
                   } else {
                      if (pfMsg!=NULL && (pcMsg=pfMsg(siErr))!=NULL) {
-                        if (pfErr!=NULL) fprintf(pfErr,"Run of command '%s' failed (Return code: %d / Reason code: %d (%s))\n",psCmd[i].pcKyw,CLERTC_RUN,siErr,pcMsg);
+                        if (pfErr!=NULL) fprintf(pfErr,"%s Run of command '%s' failed (Return code: %d / Reason code: %d (%s))\n",cstime(0,acTs),psCmd[i].pcKyw,CLERTC_RUN,siErr,pcMsg);
                      } else {
-                        if (pfErr!=NULL) fprintf(pfErr,"Run of command '%s' failed (Return code: %d / Reason code: %d)\n",psCmd[i].pcKyw,CLERTC_RUN,siErr);
+                        if (pfErr!=NULL) fprintf(pfErr,"%s Run of command '%s' failed (Return code: %d / Reason code: %d)\n",cstime(0,acTs),psCmd[i].pcKyw,CLERTC_RUN,siErr);
                      }
                      psCmd[i].pfFin(pfErr,pfTrc,pvGbl,psCmd[i].pvPar);
                      if (siScc>CLERTC_MAX) {
@@ -2869,9 +2869,9 @@ EVALUATE:
                vdClpClose(pvHdl,CLPCLS_MTD_ALL); pvHdl=NULL;
                if (siErr) {
                   if (pfMsg!=NULL && (pcMsg=pfMsg(siErr))!=NULL) {
-                     if (pfErr!=NULL) fprintf(pfErr,"Finish/cleanup for command '%s' failed (Return code: %d / Reason code: %d (%s))\n",psCmd[i].pcKyw,CLERTC_FIN,siErr,pcMsg);
+                     if (pfErr!=NULL) fprintf(pfErr,"%s Finish/cleanup for command '%s' failed (Return code: %d / Reason code: %d (%s))\n",cstime(0,acTs),psCmd[i].pcKyw,CLERTC_FIN,siErr,pcMsg);
                   } else {
-                     if (pfErr!=NULL) fprintf(pfErr,"Finish/cleanup for command '%s' failed (Return code: %d / Reason code: %d)\n",psCmd[i].pcKyw,CLERTC_FIN,siErr);
+                     if (pfErr!=NULL) fprintf(pfErr,"%s Finish/cleanup for command '%s' failed (Return code: %d / Reason code: %d)\n",cstime(0,acTs),psCmd[i].pcKyw,CLERTC_FIN,siErr);
                   }
                   siErr=CLERTC_FIN;
                   ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
