@@ -2692,6 +2692,7 @@ static TsSym* psClpSymIns(
          CLPERR(psHdl,CLPERR_TAB,"Keyword of a link (%s.?) is not defined",pcPat);
          ERROR(psSym);
       }
+      // cppcheck-suppress knownConditionTrueFalse
       if (psArg->pcAli!=NULL) {
          CLPERR(psHdl,CLPERR_TAB,"Alias (%s) for link '%s.%s' defined",psArg->pcAli,pcPat,psSym->psStd->pcKyw);
          ERROR(psSym);
@@ -2721,6 +2722,7 @@ static TsSym* psClpSymIns(
          CLPERR(psHdl,CLPERR_TAB,"Key word for a constant (%s.?) is not defined",pcPat);
          ERROR(psSym);
       }
+      // cppcheck-suppress knownConditionTrueFalse
       if (psArg->pcAli!=NULL) {
          CLPERR(psHdl,CLPERR_TAB,"Alias (%s) for constant '%s.%s' defined",psArg->pcAli,pcPat,psSym->psStd->pcKyw);
          ERROR(psSym);
