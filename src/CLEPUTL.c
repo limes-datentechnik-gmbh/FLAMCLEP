@@ -2254,71 +2254,106 @@ extern const char* mapccsid(const unsigned int uiCcsId){
 /**********************************************************************/
 
 
-static char* drplchar(const char* string,const char c, const char* value)
+static char* drplchar(const char* string, const size_t limit, const char c, const char* value)
 {
-   size_t      l=strlen(value);
-   if (l==0) return(NULL);
-   const char* p=string;
-   size_t      s=strlen(p)+1;
-   char*       b=malloc(s);
-   char*       r=b;
-   if (b==NULL) return(NULL);
-   while (p[0]) {
-      if (p[0]==c) {
-         if (p[1]==c) { // escape sequence
-            r[0]=p[0];
-            r++; p+=2;
+   char*       buf;
+   char*       out;
+   const char* end;
+   size_t      size;
+   size_t      valueLen=strlen(value);
+
+   if (valueLen==0)
+      return NULL;
+
+   size=strlen(string)+1;
+   buf=malloc(size);
+   out=buf;
+   if (buf==NULL)
+      return(NULL);
+
+   end = limit > 0 ? string + limit : string + size;
+   while (string[0]) {
+      if (string[0]==c && string < end) {
+         if (string[1]==c) { // escape sequence
+            out[0]=string[0];
+            out++;
+            string+=2;
          } else { // replacement
-            char* h=realloc_nowarn(b,s+(l-1));
+            char* h=realloc_nowarn(buf,size+(valueLen-1));
             if (h==NULL) {
-               free(b);
-               return(NULL);
+               free(buf);
+               return NULL;
             }
-            s+=l-1; r+=h-b; b=h;
-            memcpy(r,value,l);
-            r+=l; p++;
+            size+=valueLen-1;
+            out+=h-buf;
+            buf=h;
+            memcpy(out,value,valueLen);
+            out+=valueLen;
+            string++;
          }
       } else { // copy
-         r[0]=p[0];
-         r++; p++;
+         out[0]=string[0];
+         out++;
+         string++;
       }
    }
-   r[0]=0x00;
-   return(b);
+   out[0]=0x00;
+   return buf;
 }
 
-static void rplchar(char* name,const size_t size,const char c, const char* value)
+static void rplchar(char* string, const size_t size, const size_t limit, const char c, const char* value)
 {
    char        h[size];
-   char*       a=name;
-   const char* v=value;
-   char*       b;
-   char*       p;
-   size_t      catlen, hlen, vlen=strlen(v);
+   char*       in;
+   char*       out;
+   char*       inEnd;
+   char*       match;
+   int         inHelper = 0;
+   size_t      vlen=strlen(value);
 
-   for (b=strchr(a,c); b!=NULL ;b=strchr(a,c)) {
-      if (b[1]==c) {
-         for (p=b;*p;p++) p[0]=p[1];
-         a=b+1;
-      } else {
-         b[0]=0;
-         hlen=strlcpy(h,b+1,size);
-         catlen = size - strlen(name) - 1;
-         if (catlen > 0)
-               strncat(a, v, catlen);
-         else
-               catlen = 0;
-         if (vlen >= catlen)
-               name[size-1] = 0;
-         catlen = size - strlen(name) - 1;
-         if (catlen > 0)
-               strncat(a, h, catlen);
-         else
-               catlen = 0;
-         if (hlen >= catlen)
-               name[size-1] = 0;
-         a=b+vlen;
+   // check whether we even have a match
+   match = strchr(string, c);
+   if (match != NULL) {
+      in = match;
+      out = match;
+      inEnd = limit > 0 ? string + limit : string + size;
+
+      while (*in != '\0' && out + 1 < string + size) {
+         if (*in == c && in < inEnd) {
+            // character match
+            if (in[1] == c) {
+               // handle doubled character (escaping) => remove one character
+               *out = *in;
+               out++;
+               in += 2;
+            } else {
+               if (!inHelper) {
+                  // output is expanding for the first time => since we do in-place replacement,
+                  // save rest of input to temp buffer, keeping the relative offsets,
+                  // and change 'in' pointer from 'name' parameter to temp buffer
+                  size_t offset = in - string;
+                  strlcpy(h + offset, in, size - offset);
+                  inEnd = limit > 0 ? h + limit : h + size;
+                  in = h + offset;
+                  inHelper = 1;
+               }
+               // write replacement string
+               size_t remaining = size - (out - string) - 1;
+               if (remaining < vlen) {
+                  memcpy(out, value, remaining);
+                  out += remaining;
+               } else {
+                  memcpy(out, value, vlen);
+                  out += vlen;
+               }
+               in++;
+            }
+         } else {
+            // no match => copy character
+            *out++ = *in++;
+         }
       }
+      *out = '\0';
    }
 }
 
@@ -2814,7 +2849,7 @@ extern char* dmapxml(const char* string,int method)
 extern char* mapfil(char* file,int size)
 {
    unEscape(file,file);
-   rplchar(file,size,C_TLD,adjpfx(file,size));
+   rplchar(file,size,1,C_TLD,adjpfx(file,size));
    rplenvar(file,size,'<','>');
    return(file);
 }
@@ -2827,7 +2862,7 @@ extern char* dmapfil(const char* file, int method)
       char* h1=dadjpfx(h0,&pfx);
       free(h0);
       if (h1!=NULL) {
-         char* h2=drplchar(h1,C_TLD,pfx);
+         char* h2=drplchar(h1,1,C_TLD,pfx);
          free(h1);
          if (h2!=NULL) {
             char* h3=drplenvar(h2,'<','>');
@@ -2870,9 +2905,9 @@ extern char* cpmapfil(char* dest, int size,const char* source) {
 
 extern char* maplab(char* label,int size, int toUpper) {
    unEscape(label,label);
-   rplchar(label,size,C_EXC,"<ENVID>");
-   rplchar(label,size,C_TLD,"<SYSUID>");
-   rplchar(label,size,C_CRT,"<OWNERID>");
+   rplchar(label,size,0,C_EXC,"<ENVID>");
+   rplchar(label,size,0,C_TLD,"<SYSUID>");
+   rplchar(label,size,0,C_CRT,"<OWNERID>");
    rplenvar(label,size,'<','>');
    if(toUpper){
       for(int i=0,l=strlen(label);i<l;i++){
@@ -2886,13 +2921,13 @@ extern char* dmaplab(const char* label, int method)
 {
    char* h0=dynUnEscape(label);
    if (h0!=NULL) {
-      char* h1=drplchar(h0,C_EXC,"<ENVID>");
+      char* h1=drplchar(h0,0,C_EXC,"<ENVID>");
       free(h0);
       if (h1!=NULL) {
-         char* h2=drplchar(h1,C_TLD,"<SYSUID>");
+         char* h2=drplchar(h1,0,C_TLD,"<SYSUID>");
          free(h1);
          if (h2!=NULL) {
-            char* h3=drplchar(h2,C_CRT,"<OWNERID>");
+            char* h3=drplchar(h2,0,C_CRT,"<OWNERID>");
             free(h2);
             if (h3!=NULL) {
                char* h4=drplenvar(h3,'<','>');
