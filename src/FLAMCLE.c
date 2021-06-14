@@ -2966,7 +2966,8 @@ static int siClePropertyInit(
    }
    siErr=siCleGetProperties(pfErr,psCnf,pcOwn,pcPgm,pcCmd,&pcFil,&pcPro,&siFil,pvGbl,pvF2S,pfF2S);
    if (siErr) {
-      if (pcPro!=NULL) free(pcPro); SAFE_FREE(pcFil);
+      SAFE_FREE(pcPro);
+      SAFE_FREE(pcFil);
       vdClpClose(*ppHdl,CLPCLS_MTD_ALL);*ppHdl=NULL;
       return(siErr);
    }
