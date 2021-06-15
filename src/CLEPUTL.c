@@ -1782,9 +1782,9 @@ extern unsigned int mapcdstr(const char* p) {
          } else if (toupper(p[0])=='U' && toupper(p[1])=='C' && toupper(p[2])=='S') { /*UCS-xxxx*/
             p+=3; if (p[0]=='-' || p[0]=='_') p++;
             if ((p[0]=='8' || p[0]=='1') && (p[1]==0x00 || isspace(p[1]))) {
-               return(1208);
+               return(13496);
             } else if (p[0]=='0' && (p[1]=='8' || p[1]=='1') && (p[2]==0x00 || isspace(p[2]))) {
-               return(1208);
+               return(13496);
             } else if (p[0]=='1' && p[1]=='6') {
                o=0;  p+=2;
             } else if (p[0]=='3' && p[1]=='2') {
@@ -2193,8 +2193,8 @@ extern const char* mapccsid(const unsigned int uiCcsId){
    case 13490: return("UCS-2LE");
    case 13491: return("UCS-2LE");
    case 13492: return("UCS-2");
-   case 13496: return("UTF-8");
-   case 13497: return("UTF-8");
+   case 13496: return("UCS-1");
+   case 13497: return("UCS-1");
    case 13520: return("UCS-4BE");
    case 13521: return("UCS-4BE");
    case 13522: return("UCS-4LE");
