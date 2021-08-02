@@ -945,8 +945,7 @@ static inline unsigned int fnvHash(const unsigned int uiLen, const unsigned char
    unsigned int         uiHsh=0x811C9DC5U;
    const unsigned char* pcEnd=pcDat+uiLen;
    while(pcDat<pcEnd) {
-      uiHsh=(((*pcDat) ^ (uiHsh)) * 0x01000193U);
-      pcDat++;
+      uiHsh=0x01000193U * (uiHsh ^ *pcDat++);
    }
    return(uiHsh);
 }
