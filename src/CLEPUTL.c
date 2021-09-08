@@ -401,7 +401,7 @@ static inline int flzjsy(const char* pcDat, const int* piSln, char* pcVal, int* 
             C08*                 pcHlp=strchr(pcName,'(');
             if (pcHlp!=NULL) *pcHlp=0x00;
             memset(&stZos,0,sizeof(stZos));
-            if (FSTATZOS(pcName,&stZos)==0) {
+            if (fstatZos(pcName,&stZos)==0) {
                free(pcName);
                U64 uiFilSiz=0;
                if (stZos.datasetIsNonVSAM) {
