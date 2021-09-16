@@ -2268,8 +2268,8 @@ static char* drplchar(const char* string, const size_t limit, const char c, cons
    size=strlen(string)+1;
    buf=malloc(size);
    out=buf;
-   if (buf==NULL)
-      return(NULL);
+   // cppcheck-suppress knownConditionTrueFalse
+   if (buf==NULL) return(NULL);
 
    end = limit > 0 ? string + limit : string + size;
    while (string[0]) {
@@ -2526,7 +2526,7 @@ static char* drplenvar(const char* string,const char opn, const char cls)
    size_t      s=strlen(string)+1;
    char*       b=malloc(s);
    char*       r=b;
-
+   // cppcheck-suppress knownConditionTrueFalse
    if (b==NULL) return(NULL);
 
    while(p[0]) {
@@ -2600,6 +2600,7 @@ static char* drpltpl(const char* templ,const char* values) {
    size_t      s=strlen(templ)+1;
    char*       b=malloc(s);
    char*       r=b;
+   // cppcheck-suppress knownConditionTrueFalse
    if (b==NULL) return(NULL);
 
    while(p[0]) {
@@ -4156,6 +4157,7 @@ extern int loadEnvars(const unsigned int uiLen, const char* pcBuf, FILE* pfOut, 
       const char*    pcCnt;
       const char*    pcEnd;
       char*          pcEnv=malloc(uiLen+1);
+      // cppcheck-suppress knownConditionTrueFalse
       if (pcEnv==NULL) return(-1*CLERTC_MEM);
 
    // EBCDIC/ASCII detection and conversion to local character set
@@ -4328,6 +4330,7 @@ extern int readEnvars(const char* pcFil, FILE* pfOut, FILE* pfErr, TsEnVarList**
       char*          pcBuf=malloc(uiSiz+1);
       char*          pcHlp;
 // read the file into buffer
+      // cppcheck-suppress knownConditionTrueFalse
       if (pcBuf==NULL) {
          fclose(pfTmp);
          return(-1*CLERTC_MEM);
