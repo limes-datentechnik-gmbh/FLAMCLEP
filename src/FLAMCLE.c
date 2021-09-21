@@ -1352,7 +1352,7 @@ extern int siCleExecute(
    }
 #endif
 
-   if (pfOut!=NULL) efprintf(pfOut,"%s Start program '%s' (Build: %s (%s %s))\n",cstime(0,acTs),(pcProgram!=NULL)?pcProgram:"-NULL-",pcBld,__DATE__,__TIME__);
+   if (pfOut!=NULL) efprintf(pfOut,"%s Start program '%s' (Build: %s (%s %s))\n",cstime(0,acTs),pcProgram,pcBld,__DATE__,__TIME__);
 
    for (i=0;asBif[i].pcKyw!=NULL;i++) {
       if (asBif[i].siIdx!=i) {
