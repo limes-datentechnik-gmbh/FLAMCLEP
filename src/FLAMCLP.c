@@ -4205,6 +4205,7 @@ static int siClpScnNat(
             (*ppCur)++; pcLex++;
          }
          *pcLex=EOS;
+         // cppcheck-suppress objectIndex
          if(pcCur[0]=='-' && pcCur[1]!='-' && psArg!=NULL && psArg->psFix->siTyp==siTyp && isClpKywTyp(pvHdl,pfErr,pfTrc,pcHlp,psArg)) {
             (*ppCur)=pcCur+1;
             pcLex[0]='-'; pcLex[1]=EOS;
@@ -4299,6 +4300,7 @@ static int siClpScnNat(
          return(CLPTOK_KYW);
       } else if ((((*ppCur)[0]=='+' || (*ppCur)[0]=='-') && isdigit((*ppCur)[1])) || isdigit((*ppCur)[0])) { /*number*/
          if ((*ppCur)[0]=='+' || (*ppCur)[0]=='-') {
+            // cppcheck-suppress objectIndex
             pcLex[1]=(*ppCur)[0];
             (*ppCur)++;
          } else pcLex[1]=' ';
@@ -4493,55 +4495,68 @@ static int siClpScnNat(
          }
       } else if (*(*ppCur)=='=') { /*sign or sign with agle breckets*/
          if ((*ppCur)[1]=='>') {
+            // cppcheck-suppress objectIndex
             pcLex[0]='='; pcLex[1]='>'; pcLex[2]=EOS; (*ppCur)+=2;
             TRACE(pfTrc,"SCANNER-TOKEN(SAB)-LEXEME(%s)\n",pcHlp);
             return(CLPTOK_SAB);
          } else {
+            // cppcheck-suppress objectIndex
             pcLex[0]='='; pcLex[1]=EOS; (*ppCur)++;
             TRACE(pfTrc,"SCANNER-TOKEN(SGN)-LEXEME(%s)\n",pcHlp);
             return(CLPTOK_SGN);
          }
       } else if (*(*ppCur)=='.') { /*dot*/
+         // cppcheck-suppress objectIndex
          pcLex[0]='.'; pcLex[1]=EOS; (*ppCur)++;
          TRACE(pfTrc,"SCANNER-TOKEN(DOT)-LEXEME(%s)\n",pcHlp);
          return(CLPTOK_DOT);
       } else if (*(*ppCur)=='+') { /*add*/
+         // cppcheck-suppress objectIndex
          pcLex[0]='+'; pcLex[1]=EOS; (*ppCur)++;
          TRACE(pfTrc,"SCANNER-TOKEN(ADD)-LEXEME(%s)\n",pcHlp);
          return(CLPTOK_ADD);
       } else if (*(*ppCur)=='-') { /*sub*/
+         // cppcheck-suppress objectIndex
          pcLex[0]='-'; pcLex[1]=EOS; (*ppCur)++;
          TRACE(pfTrc,"SCANNER-TOKEN(SUB)-LEXEME(%s)\n",pcHlp);
          return(CLPTOK_SUB);
       } else if (*(*ppCur)=='*') { /*mul*/
+         // cppcheck-suppress objectIndex
          pcLex[0]='*'; pcLex[1]=EOS; (*ppCur)++;
          TRACE(pfTrc,"SCANNER-TOKEN(MUL)-LEXEME(%s)\n",pcHlp);
          return(CLPTOK_MUL);
       } else if (*(*ppCur)=='/') { /*div*/
+         // cppcheck-suppress objectIndex
          pcLex[0]='/'; pcLex[1]=EOS; (*ppCur)++;
          TRACE(pfTrc,"SCANNER-TOKEN(DIV)-LEXEME(%s)\n",pcHlp);
          return(CLPTOK_DIV);
       } else if (*(*ppCur)=='(') { /*round bracket open*/
+         // cppcheck-suppress objectIndex
          pcLex[0]='('; pcLex[1]=EOS; (*ppCur)++;
          TRACE(pfTrc,"SCANNER-TOKEN(RBO)-LEXEME(%s)\n",pcHlp);
          return(CLPTOK_RBO);
       } else if (*(*ppCur)==')') { /*round bracket close*/
+         // cppcheck-suppress objectIndex
          pcLex[0]=')'; pcLex[1]=EOS; (*ppCur)++;
          TRACE(pfTrc,"SCANNER-TOKEN(RBC)-LEXEME(%s)\n",pcHlp);
          return(CLPTOK_RBC);
       } else if (*(*ppCur)==C_SBO) { /*squared bracket open*/
+         // cppcheck-suppress objectIndex
          pcLex[0]=C_SBO; pcLex[1]=EOS; (*ppCur)++;
          TRACE(pfTrc,"SCANNER-TOKEN(SBO)-LEXEME(%s)\n",pcHlp);
          return(CLPTOK_SBO);
       } else if (*(*ppCur)==C_SBC) { /*squared bracket close*/
+         // cppcheck-suppress objectIndex
          pcLex[0]=C_SBC; pcLex[1]=EOS; (*ppCur)++;
          TRACE(pfTrc,"SCANNER-TOKEN(SBC)-LEXEME(%s)\n",pcHlp);
          return(CLPTOK_SBC);
       } else if (*(*ppCur)==C_CBO) { /*curly bracket open*/
+         // cppcheck-suppress objectIndex
          pcLex[0]=C_CBO; pcLex[1]=EOS; (*ppCur)++;
          TRACE(pfTrc,"SCANNER-TOKEN(CBO)-LEXEME(%s)\n",pcHlp);
          return(CLPTOK_CBO);
       } else if (*(*ppCur)==C_CBC) { /*curly bracket close*/
+         // cppcheck-suppress objectIndex
          pcLex[0]=C_CBC; pcLex[1]=EOS; (*ppCur)++;
          TRACE(pfTrc,"SCANNER-TOKEN(CBC)-LEXEME(%s)\n",pcHlp);
          return(CLPTOK_CBC);
