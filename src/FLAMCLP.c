@@ -4303,6 +4303,7 @@ static int siClpScnNat(
             // cppcheck-suppress objectIndex
             pcLex[1]=(*ppCur)[0];
             (*ppCur)++;
+            // cppcheck-suppress objectIndex
          } else pcLex[1]=' ';
          if (((*ppCur)[0]=='0') &&
              (tolower((*ppCur)[1])=='b' || tolower((*ppCur)[1])=='o' || tolower((*ppCur)[1])=='d' || tolower((*ppCur)[1])=='x' || tolower((*ppCur)[1])=='t') &&
