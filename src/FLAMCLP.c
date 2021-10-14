@@ -262,6 +262,7 @@ static const char*               apClpTok[]={
       "SIGN-ANGEL-BRACKET",
       "CURLY-BRACKET-OPEN",
       "CURLY-BRACKET-CLOSE"};
+#define CLPTOKCNT (sizeof(apClpTok)/sizeof(char*))
 
 static const char*        apClpTyp[]={
       "NO-TYP",
@@ -271,6 +272,7 @@ static const char*        apClpTyp[]={
       "STRING",
       "OBJECT",
       "OVERLAY"};
+#define CLPTYPCNT (sizeof(apClpTyp)/sizeof(char*))
 
 #define CLP_ASSIGNMENT     "="
 
@@ -7369,7 +7371,7 @@ static void vdClpPrnArgTab(
          if (siTyp<0) siTyp=psTab->psHih->psFix->siTyp;
          if (CLPISF_SEL(psTab->psHih->psStd->uiFlg)==FALSE) {
             if (pfOut!=NULL) {
-               if (siTyp>=0) {
+               if (siTyp>=0 && siTyp<CLPTYPCNT) {
                   fprintf(pfOut,"%s Enter a value (TYPE: %s) or use one of the keywords below:\n",fpcPre(pvHdl,siLev),apClpTyp[siTyp]);
                } else {
                   fprintf(pfOut,"%s Enter a value or use one of the keywords below:\n",fpcPre(pvHdl,siLev));
@@ -7719,7 +7721,7 @@ static int siClpPrnHlp(
    if (pfOut!=NULL) {
       if (siLev<siDep || siDep>9) {
          if (isFlg) {
-            if (siTyp>=0) {
+            if (siTyp>=0 && siTyp<CLPTYPCNT) {
                fprintf(pfOut,"%s Enter a value (TYPE: %s) or use one of the keywords below:\n",fpcPre(pvHdl,siLev),apClpTyp[siTyp]);
             } else {
                fprintf(pfOut,"%s Enter a value or use one of the keywords below:\n",fpcPre(pvHdl,siLev));
