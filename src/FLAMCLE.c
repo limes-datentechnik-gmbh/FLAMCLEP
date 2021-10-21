@@ -1627,21 +1627,17 @@ EVALUATE:
       ERROR(CLERTC_CMD,NULL);
    } else if (asBif[CLE_BUILTIN_IDX_ERRORS].isBif && strxcmp(isCas,argv[1],"ERRORS",0,0,FALSE)==0) {
       if (argc==2) {
-         efprintf(pfStd,"\n");
-         efprintf(pfStd,"Return/condition/exit codes of the executable\n");
-         efprintf(pfStd,"---------------------------------------------\n\n");
+         efprintf(pfStd,"\n=Return/condition/exit codes of the executable\n\n");
          fprintm(pfStd,pcOwn,pcPgm,pcBld,MAN_CLE_APPENDIX_RETURNCODES,1);
          if (pcSccMan!=NULL && *pcSccMan) {
-            efprintf(pfStd,"Special condition codes\n");
-            efprintf(pfStd,"~~~~~~~~~~~~~~~~~~~~~~~\n\n");
+            efprintf(pfStd,"\n==Special condition codes\n\n");
             fprintm(pfStd,pcOwn,pcPgm,pcBld,pcSccMan,1);
          }
          if (pfMsg!=NULL) {
-            efprintf(pfStd,"Reason codes of the different commands\n");
-            efprintf(pfStd,"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n");
+            efprintf(pfStd,"\n==Reason codes of the different commands\n\n");
             fprintm(pfStd,pcOwn,pcPgm,pcBld,MAN_CLE_APPENDIX_REASONCODES,1);
             for (i=1,m=pfMsg(i);m!=NULL;i++,m=pfMsg(i)) {
-               if (*m) fprintf(pfStd," * %d - %s\n",i,m);
+               if (*m) fprintf(pfStd,":%d: %s\n",i,m);
             }
          }
          ERROR(CLERTC_OK,NULL);
