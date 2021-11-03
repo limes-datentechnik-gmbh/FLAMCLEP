@@ -10,8 +10,8 @@ Below you can find the list of environment variables used by CLE and CLP.
 * CLP_NOW - The current point in time used for predefined constants (0tYYYY/MM/DD.HH:MM:SS)
 * CLP_STRING_CCSID - CCSID used for interpretation of critical punctuation character on EBCDIC systems (default is taken from LANG)
 * CLP_DEFAULT_DCB - The default record format and record length in C file mode format (default is 'recfm=VB, lrecl=516' only for z/OS)
-* CLP_SYMTAB_STATISTICS - Print symbol table statistics to STDERR stream at close
-* CLP_MALLOC_STATISTICS - Print memory allocation statistics to STDERR stream at close
+* CLP_SYMTAB_STATISTICS - Print symbol table statistics to STDERR stream at close (must set to YES or ON)
+* CLP_MALLOC_STATISTICS - Print memory allocation statistics to STDERR stream at close (must set to YES or ON)
 * &{PGM}_CONFIG_FILE - the configuration filename (default is '$HOME/.&{pgm}.config' on UNIX/WIN or '&SYSUID..&{PGM}.CONFIG' on mainframes)
 * &{PGM}_DEFAULT_OWNER_ID - the default owner ID (default is '&{oWn}')
 * owner_&{PGM}_command_PROPERTY_FILENAME - To override default property file names

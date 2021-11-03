@@ -179,12 +179,14 @@
  * 1.3.128: Use trace macro with fflush and time stamp, add symbols find to parse trace
  * 1.3.129: Add symbol able and memory allocation statistics
  * 1.3.130: Support ASCII, EBCDIC and HEX entry also for non binary flagged strings
+ * 1.3.131: Envar 'CLP_MALLOC_STATISTICS' and 'CLP_SYMTAB_STATISTICS' requires now "YES" or "ON"
+ *
 **/
 
-#define CLP_VSN_STR       "1.3.130"
+#define CLP_VSN_STR       "1.3.131"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        3
-#define CLP_VSN_REVISION       130
+#define CLP_VSN_REVISION       131
 
 /* Definition der Konstanten ******************************************/
 
@@ -1000,7 +1002,8 @@ static void vdClpFree(
             psHdl->psPtr[i].siSiz=0;
          }
       }
-      if (GETENV("CLP_MALLOC_STATISTICS")!=NULL) {
+      const char* pcEnv=GETENV("CLP_MALLOC_STATISTICS");
+      if (pcEnv!=NULL && (strcmp(pcEnv,"YES")==0 || strcmp(pcEnv,"ON")==0)) {
          char acTs[24];
          fprintf(stderr,"%s CLP_MALLOC_STATISTICS(Amount(%"PRIu64"),Table(%d(%"PRIu64")),Size(%"PRIu64"))\n",cstime(0,acTs),uiCnt,psHdl->szPtr,((uint64_t)sizeof(TsPtr))*((uint64_t)psHdl->szPtr),uiSiz);
       }
@@ -1156,7 +1159,8 @@ extern void* pvClpOpen(
             uint64_t uiCnt=0;
             uint64_t uiSiz=0;
             vdClpSymDel(psHdl->psTab,&uiCnt,&uiSiz);
-            if (GETENV("CLP_SYMTAB_STATISTICS")!=NULL) {
+            const char* pcEnv=GETENV("CLP_SYMTAB_STATISTICS");
+            if (pcEnv!=NULL && (strcmp(pcEnv,"YES")==0 || strcmp(pcEnv,"ON")==0)) {
                char acTs[24];
                fprintf(stderr,"%s CLP_SYMTAB_STATISTICS(Amount(%"PRIu64"),Size(%"PRIu64")) after fail of in siClpSymIni()\n",cstime(0,acTs),uiCnt,uiSiz);
             }
@@ -1178,7 +1182,8 @@ extern void* pvClpOpen(
             uint64_t uiCnt=0;
             uint64_t uiSiz=0;
             vdClpSymDel(psHdl->psTab,&uiCnt,&uiSiz);
-            if (GETENV("CLP_SYMTAB_STATISTICS")!=NULL) {
+            const char* pcEnv=GETENV("CLP_SYMTAB_STATISTICS");
+            if (pcEnv!=NULL && (strcmp(pcEnv,"YES")==0 || strcmp(pcEnv,"ON")==0)) {
                char acTs[24];
                fprintf(stderr,"%s CLP_SYMTAB_STATISTICS(Amount(%"PRIu64"),Size(%"PRIu64")) after fail of in siClpSymCal()\n",cstime(0,acTs),uiCnt,uiSiz);
             }
@@ -2432,7 +2437,8 @@ extern void vdClpClose(
          uint64_t uiCnt=0;
          uint64_t uiSiz=0;
          vdClpSymDel(psHdl->psTab,&uiCnt,&uiSiz);
-         if (GETENV("CLP_SYMTAB_STATISTICS")!=NULL) {
+         const char* pcEnv=GETENV("CLP_SYMTAB_STATISTICS");
+         if (pcEnv!=NULL && (strcmp(pcEnv,"YES")==0 || strcmp(pcEnv,"ON")==0)) {
             char acTs[24];
             fprintf(stderr,"%s CLP_SYMTAB_STATISTICS(Amount(%"PRIu64"),Size(%"PRIu64")) in vdClpClose()\n",cstime(0,acTs),uiCnt,uiSiz);
          }
