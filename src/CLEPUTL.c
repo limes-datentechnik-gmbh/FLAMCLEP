@@ -43,6 +43,7 @@
 #endif
 #ifdef __WIN__
 #  include <windows.h>
+#  include <olectl.h>
 #endif
 #if defined(__ZOS__) && defined(__FL5__)
 #  include "FSTATZOS.h"
