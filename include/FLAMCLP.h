@@ -478,14 +478,17 @@ extern void vdClpClose(
  * @param[in]    pvPtr Pointer of the dynamic allocated area or NULL if it is a new one
  * @param[in]    siSiz Required size for the dynamic area
  * @param[inout] piInd Pointer to the index of the memory area or NULL (improves performance)
+ * @param[in]    uiFlg Flag word (use CLPFLG_PWD for secure erase)
  *
  * @return Pointer to allocated and initialized memory or NULL if error
  */
-extern void* pvClpAlloc(
+#define pvClpAlloc(h,p,s,i) pvClpAllocFlg(h,p,s,i,0)
+extern void* pvClpAllocFlg(
    void*                         pvHdl,
    void*                         pvPtr,
-   int                           siSiz,
-   int*                          piInd);
+   const int                     siSiz,
+   int*                          piInd,
+   const unsigned int            uiFlg);
 
 /**
  * @brief Provides error message

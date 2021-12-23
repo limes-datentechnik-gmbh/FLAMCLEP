@@ -1241,6 +1241,13 @@ extern char* safe_getenv(const char* name, char* buffer, size_t bufsiz) {
 
 /**********************************************************************/
 
+typedef void *(*memset_t)(void *,int,size_t);
+static volatile memset_t memset_func=memset;
+extern void secure_memset(void *ptr,size_t len)
+{
+    memset_func(ptr,0,len);
+}
+
 extern char* unEscape(const char* input, char* output)
 {
    const char*                   i=input;

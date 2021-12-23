@@ -941,6 +941,12 @@ extern long long getFileSize(const char* name);
 
 /**********************************************************************/
 
+/**
+ * Calculates FNV1A hash value
+ * @param uiLen   length of the data
+ * @param pcDat   pointer to the data
+ * @return
+ */
 static inline unsigned int fnvHash(const unsigned int uiLen, const unsigned char* pcDat) {
    unsigned int         uiHsh=0x811C9DC5U;
    const unsigned char* pcEnd=pcDat+uiLen;
@@ -949,6 +955,13 @@ static inline unsigned int fnvHash(const unsigned int uiLen, const unsigned char
    }
    return(uiHsh);
 }
+
+/**
+ * Ensure memset is not eliminate by the compiler
+ * @param ptr  pointer to the data
+ * @param len  size of the data
+ */
+extern void secure_memset(void *ptr,size_t len);
 
 /**
  * Returns the current user id.
