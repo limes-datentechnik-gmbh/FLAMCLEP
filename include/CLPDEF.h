@@ -207,9 +207,9 @@ typedef struct ClpError {
 #define CLPFLG_EBC               0x00080000U   /**< @brief This flag will set the default method of interpretation of a binary string to EBCDIC. */
 #define CLPFLG_HEX               0x00100000U   /**< @brief This flag will set the default method of interpretation of a binary string to hexadecimal. */
 #define CLPFLG_PDF               0x00200000U   /**< @brief This flag will be set if a property value was defined from outside, it will be FALSE if the property value was hard coded in the tables. */
-#define CLPFLG_TIM               0x00400000U   /**< @brief This flag mark a number as time value (only used to print out the corressponing time stamp). */
-#define CLPFLG_DYN               0x00800000U   /**< @brief This flag mark a string or array as dynamic (only a pointer to allocated memory is used and must be freeed by the user). */
-#define CLPFLG_PWD               0x01000000U   /**< @brief This flag will ensure that the clear value is only put into the data structure but not traced, logged or given away elsewhere (include secure erase at the end). */
+#define CLPFLG_TIM               0x00400000U   /**< @brief This flag mark a number as time value (only used to print out the corresponding time stamp). */
+#define CLPFLG_DYN               0x00800000U   /**< @brief This flag mark a string or array as dynamic (only a pointer to allocated memory is used and must be free'ed by the user). */
+#define CLPFLG_PWD               0x01000000U   /**< @brief This flag will ensure that the clear value is only put into the data structure but not traced, logged or given away elsewhere (include secure erase if dynamic at the end). */
 #define CLPFLG_DLM               0x02000000U   /**< @brief This flag ensures that fix size arrays has a empty (initialized) last element (max-1) as delimiter. Additional you enforce 0xFF at the and of a non fix size string array (size-1). */
 #define CLPFLG_UNS               0x04000000U   /**< @brief Marks a number as unsigned (prevent negative values). */
 #define CLPFLG_XML               0x08000000U   /**< @brief Marks zero terminated string as XML path where '(' and ')' are used to replace environment variables. */
