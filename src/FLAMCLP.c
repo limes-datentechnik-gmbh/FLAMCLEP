@@ -934,6 +934,67 @@ static inline I64 ClpRndFnv(const I64 siRnd)
    h^=p[7]; h*=0x100000001b3LLU;
    return h;
 }
+
+static inline void* pvClpAllocNew(
+   TsHdl*                        psHdl,
+   const int                     siSiz,
+   int*                          piInd,
+   const unsigned int            uiFlg)
+{
+   if (siSiz>0) {
+      if (psHdl->siPtr>=psHdl->szPtr) {
+         void* pvHlp=realloc_nowarn(psHdl->psPtr,sizeof(TsPtr)*(psHdl->szPtr+CLPINI_PTRCNT));
+         if (pvHlp==NULL) return(NULL);
+         psHdl->psPtr=pvHlp;
+         psHdl->szPtr+=CLPINI_PTRCNT;
+      }
+      void* pvPtr=calloc(1,siSiz);
+      if (pvPtr==NULL) return(NULL);
+      psHdl->psPtr[psHdl->siPtr].pvPtr=pvPtr;
+      psHdl->psPtr[psHdl->siPtr].siSiz=siSiz;
+      psHdl->psPtr[psHdl->siPtr].uiFlg=uiFlg;
+      if (piInd!=NULL) *piInd=psHdl->siPtr;
+      psHdl->siPtr++;
+      return(pvPtr);
+   } else return(NULL);
+}
+
+static inline void* pvClpAllocAgain(
+   TsPtr*                        psPtr,
+   const int                     siSiz,
+   const unsigned int            uiFlg)
+{
+   if (siSiz<=0) { // free
+      if (psPtr->pvPtr!=NULL) {
+         if (psPtr->siSiz) {
+            if (CLPISF_PWD(psPtr->uiFlg)) {
+               secure_memset(psPtr->pvPtr,psPtr->siSiz);
+            }
+         }
+         free(psPtr->pvPtr);
+         psPtr->pvPtr =NULL;
+      }
+      psPtr->siSiz =0;
+      psPtr->uiFlg|=uiFlg;
+      return(NULL);
+   } else {
+      if (psPtr->siSiz>siSiz) { // smaller
+         if (CLPISF_PWD(psPtr->uiFlg)) {
+            secure_memset(psPtr->pvPtr+siSiz,psPtr->siSiz-siSiz);
+         }
+      }
+      void* pvPtr=realloc_nowarn(psPtr->pvPtr,siSiz);
+      if (pvPtr==NULL) return(NULL);
+      if (psPtr->siSiz<siSiz) { // larger
+         memset(((char*)pvPtr)+psPtr->siSiz,0,siSiz-psPtr->siSiz);
+      }
+      psPtr->pvPtr =pvPtr;
+      psPtr->siSiz =siSiz;
+      psPtr->uiFlg|=uiFlg;
+      return(pvPtr);
+   }
+}
+
 extern void* pvClpAllocFlg(
    void*                         pvHdl,
    void*                         pvPtr,
@@ -943,53 +1004,21 @@ extern void* pvClpAllocFlg(
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    if (pvPtr==NULL) {
-      if (siSiz>0) {
-         if (psHdl->siPtr>=psHdl->szPtr) {
-            void* pvHlp=realloc_nowarn(psHdl->psPtr,sizeof(TsPtr)*(psHdl->szPtr+CLPINI_PTRCNT));
-            if (pvHlp==NULL) return(NULL);
-            psHdl->psPtr=pvHlp;
-            psHdl->szPtr+=CLPINI_PTRCNT;
-         }
-         pvPtr=calloc(1,siSiz);
-         if (pvPtr!=NULL) {
-            psHdl->psPtr[psHdl->siPtr].pvPtr =pvPtr;
-            psHdl->psPtr[psHdl->siPtr].siSiz =siSiz;
-            psHdl->psPtr[psHdl->siPtr].uiFlg|=uiFlg;
-            if (piInd!=NULL) *piInd=psHdl->siPtr;
-            psHdl->siPtr++;
-         }
-      } else return(NULL);
+      return(pvClpAllocNew(psHdl,siSiz,piInd,uiFlg));
    } else {
       if (piInd!=NULL && *piInd>=0 && *piInd<psHdl->siPtr && psHdl->psPtr[*piInd].pvPtr==pvPtr) {
-         pvPtr=realloc_nowarn(pvPtr,siSiz);
-         if (pvPtr!=NULL) {
-            if (psHdl->psPtr[*piInd].siSiz<siSiz) {
-               memset(((char*)pvPtr)+psHdl->psPtr[*piInd].siSiz,0,siSiz-psHdl->psPtr[*piInd].siSiz);
-            }
-            psHdl->psPtr[*piInd].pvPtr =pvPtr;
-            psHdl->psPtr[*piInd].siSiz =siSiz;
-            psHdl->psPtr[*piInd].uiFlg|=uiFlg;
-         }
+         return(pvClpAllocAgain(psHdl->psPtr+(*piInd),siSiz,uiFlg));
       } else {
          for (int i=0;i<psHdl->siPtr;i++) {
             if (psHdl->psPtr[i].pvPtr==pvPtr) {
-               pvPtr=realloc_nowarn(pvPtr,siSiz);
-               if (pvPtr!=NULL) {
-                  if (psHdl->psPtr[i].siSiz<siSiz) {
-                     memset(((char*)pvPtr)+psHdl->psPtr[i].siSiz,0,siSiz-psHdl->psPtr[i].siSiz);
-                  }
-                  psHdl->psPtr[i].pvPtr =pvPtr;
-                  psHdl->psPtr[i].siSiz =siSiz;
-                  psHdl->psPtr[i].uiFlg|=uiFlg;
-                  if (piInd!=NULL) *piInd=i;
-               }
+               pvPtr=pvClpAllocAgain(psHdl->psPtr+i,siSiz,uiFlg);
+               if (piInd!=NULL) *piInd=i;
                return(pvPtr);
             }
          }
-         return(pvClpAllocFlg(pvHdl,NULL,siSiz,piInd,uiFlg));
+         return(pvClpAllocNew(psHdl,siSiz,piInd,uiFlg));
       }
    }
-   return(pvPtr);
 }
 
 static void vdClpFree(
@@ -1011,6 +1040,7 @@ static void vdClpFree(
             free(psHdl->psPtr[i].pvPtr);
             psHdl->psPtr[i].pvPtr=NULL;
             psHdl->psPtr[i].siSiz=0;
+            psHdl->psPtr[i].uiFlg=0;
          }
       }
       const char* pcEnv=GETENV("CLP_MALLOC_STATISTICS");
