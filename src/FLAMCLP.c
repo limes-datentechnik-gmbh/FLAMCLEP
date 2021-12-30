@@ -980,7 +980,7 @@ static inline void* pvClpAllocAgain(
    } else {
       if (psPtr->siSiz>siSiz) { // smaller
          if (CLPISF_PWD(psPtr->uiFlg)) {
-            secure_memset(psPtr->pvPtr+siSiz,psPtr->siSiz-siSiz);
+            secure_memset(((char*)psPtr->pvPtr)+siSiz,psPtr->siSiz-siSiz);
          }
       }
       void* pvPtr=realloc_nowarn(psPtr->pvPtr,siSiz);
