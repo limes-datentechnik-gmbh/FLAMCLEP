@@ -292,7 +292,7 @@ typedef int (TfMap)(
  * means that the run don't fail, but something was happen.
  *
  * If additional dynamic memory required in the FLC structure (from mapping)
- * the provided handle can be used for pvClpAlloc().
+ * the provided handle can be used for pvClpAlloc() or pvClpAllocFlg().
  *
  * @param[in]  pvHdl Pointer to the CLP handle for allocation of memory in the FLC structure.
  * @param[in]  pfOut File pointer for outputs (given over structure CleExecute, see siCleExecute()).

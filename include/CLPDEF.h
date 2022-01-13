@@ -199,7 +199,7 @@ typedef struct ClpError {
 #define CLPFLG_IND               0x00000400U   /**< @brief This link will be filled with the index (position) in the CLP string (byte offset of the current key word). */
 #define CLPFLG_HID               0x00000800U   /**< @brief If set the parameter is not visible, meaning it is a hidden parameter. */
 #define CLPFLG_ELN               0x00001000U   /**< @brief This link will be filled by the calculated length of an element (fixed types == data size, packed types == data length). */
-#define CLPFLG_SLN               0x00002000U   /**< @brief This link will be filled by the calculated string length for an element (only for null-terminated strings). */
+#define CLPFLG_SLN               0x00002000U   /**< @brief This link will be filled by the calculated string length for an element (without zero termination (data length if binary)). */
 #define CLPFLG_TLN               0x00004000U   /**< @brief This link will be filled by the calculated total length for the argument (sum of all element lengths). */
 #define CLPFLG_DEF               0x00010000U   /**< @brief This flag enables to use the OID as default for numbers if no value is assigned (only the keyword is used (syntax extension)). */
 #define CLPFLG_CHR               0x00020000U   /**< @brief This flag will set the default method of interpretation of a binary string to local character string (DEFAULT). */
@@ -207,9 +207,9 @@ typedef struct ClpError {
 #define CLPFLG_EBC               0x00080000U   /**< @brief This flag will set the default method of interpretation of a binary string to EBCDIC. */
 #define CLPFLG_HEX               0x00100000U   /**< @brief This flag will set the default method of interpretation of a binary string to hexadecimal. */
 #define CLPFLG_PDF               0x00200000U   /**< @brief This flag will be set if a property value was defined from outside, it will be FALSE if the property value was hard coded in the tables. */
-#define CLPFLG_TIM               0x00400000U   /**< @brief This flag mark a number as time value (only used to print out the corressponing time stamp). */
-#define CLPFLG_DYN               0x00800000U   /**< @brief This flag mark a string or array as dynamic (only a pointer to allocated memory is used and must be freeed by the user). */
-#define CLPFLG_PWD               0x01000000U   /**< @brief This flag will ensure that the clear value is only put into the data structure but not traced, logged or given away elsewhere. */
+#define CLPFLG_TIM               0x00400000U   /**< @brief This flag mark a number as time value (only used to print out the corresponding time stamp). */
+#define CLPFLG_DYN               0x00800000U   /**< @brief This flag mark a string or array as dynamic (only a pointer to allocated memory is used and must be free'ed by the user). */
+#define CLPFLG_PWD               0x01000000U   /**< @brief This flag will ensure that the clear value is only put into the data structure but not traced, logged or given away elsewhere (include secure erase if dynamic at the end). */
 #define CLPFLG_DLM               0x02000000U   /**< @brief This flag ensures that fix size arrays has a empty (initialized) last element (max-1) as delimiter. Additional you enforce 0xFF at the and of a non fix size string array (size-1). */
 #define CLPFLG_UNS               0x04000000U   /**< @brief Marks a number as unsigned (prevent negative values). */
 #define CLPFLG_XML               0x08000000U   /**< @brief Marks zero terminated string as XML path where '(' and ')' are used to replace environment variables. */
@@ -421,7 +421,7 @@ typedef struct ClpArgument {
 #define CLPCONTAB_EBCSTR(kyw,dat,man,hlp)       {CLPTYP_STRING,(kyw),NULL,0,0,  0  ,0,0,CLPFLG_CON|CLPFLG_EBC,NULL,NULL,(man),(hlp),  0  , 0.0 ,(U08*)(dat),NULL},
 
 /**
- * @brief Defines a binary literal with the command line keyword *kyw* and the value *dat*.
+ * @brief Defines a binary literal with the command line keyword *kyw* and the value *dat* in size *siz*.
  *
  * @param[in]   kyw   Pointer to command line keyword *kyw*.
  * @param[in]   dat   Pointer to target definition in case of reading.

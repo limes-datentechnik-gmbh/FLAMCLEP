@@ -36,7 +36,7 @@
 
 /* Makros zum Struktur-Aufbau */
 #define CLPARGTAB_SKALAR(kyw,nam,typ,min,max,atyp,flg,oid,tab,dft,man,hlp) typ   nam;
-#define CLPARGTAB_STRING(kyw,nam,siz,min,max,atyp,flg,oid,tab,dft,man,hlp) U08   nam[siz];
+#define CLPARGTAB_STRING(kyw,nam,siz,min,max,atyp,flg,oid,tab,dft,man,hlp) U08   nam[siz+1];
 #define CLPARGTAB_ARRAY( kyw,nam,typ,min,max,atyp,flg,oid,tab,dft,man,hlp) typ   nam[max];
 #define CLPARGTAB_DYNSTR(kyw,nam,siz,min,max,atyp,flg,oid,tab,dft,man,hlp) U08*  nam;
 #define CLPARGTAB_DYNARY(kyw,nam,typ,min,max,atyp,flg,oid,tab,dft,man,hlp) typ*  nam;
