@@ -181,13 +181,14 @@
  * 1.3.130: Support ASCII, EBCDIC and HEX entry also for non binary flagged strings
  * 1.3.131: Envar 'CLP_MALLOC_STATISTICS' and 'CLP_SYMTAB_STATISTICS' requires now "YES" or "ON"
  * 1.3.132: Secure erase memory for dynamic entries in CLP structure if CLPFLG_PWD used
+ * 1.3.133: Add new about function with indentation
  *
 **/
 
-#define CLP_VSN_STR       "1.3.131"
+#define CLP_VSN_STR       "1.3.133"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        3
-#define CLP_VSN_REVISION       131
+#define CLP_VSN_REVISION       133
 
 /* Definition der Konstanten ******************************************/
 
@@ -1059,22 +1060,55 @@ static void vdClpFree(
 
 /* Implementierung der externen Funktionen ****************************/
 
-extern const char* pcClpVersion(const int l, const int s, char* b)
+extern const char* pcClpVersion2(const int l, const int s, char* b, const char* is)
 {
-   snprintc(b,s,"%2.2d FLAM-CLP VERSION: %s-%u BUILD: %s %s %s\n",l,CLP_VSN_STR,__BUILDNR__,__BUILD__,__DATE__,__TIME__);
+   if (is!=NULL) {
+      int  i;
+      int  k=strlen(is);
+      char acIndent[(l)*k+1];
+      for (acIndent[0]=0x00,i=0;i<(l);i++) {
+         snprintc(acIndent,sizeof(acIndent),"%s",is);
+      }
+      snprintc(b,s,"%s FLAM-CLP VERSION: %s-%u BUILD: %s %s %s\n",acIndent,CLP_VSN_STR,__BUILDNR__,__BUILD__,__DATE__,__TIME__);
+   } else {
+      snprintc(b,s,"%2.2d FLAM-CLP VERSION: %s-%u BUILD: %s %s %s\n",l,CLP_VSN_STR,__BUILDNR__,__BUILD__,__DATE__,__TIME__);
+   }
    return(b);
 }
 
+extern const char* pcClpVersion(const int l, const int s, char* b)
+{
+   return(pcClpVersion2(l,s,b,NULL));
+}
+
+extern const char* pcClpAbout2(const int l, const int s, char* b, const char* is)
+{
+   if (is!=NULL) {
+      int  i;
+      int  k=strlen(is);
+      char acIndent[(l)*k+1];
+      for (acIndent[0]=0x00,i=0;i<(l);i++) {
+         snprintc(acIndent,sizeof(acIndent),"%s",is);
+      }
+      snprintc(b,s,"%s Frankenstein Limes Command Line Parser (FLAM-CLP)\n",acIndent);
+      snprintc(b,s,"%s   Version: %s-%u Build: %s %s %s\n",acIndent,CLP_VSN_STR,__BUILDNR__,__BUILD__,__DATE__,__TIME__);
+      snprintc(b,s,"%s   Copyright (C) limes datentechnik (R) gmbh\n",acIndent);
+      snprintc(b,s,"%s   This library is open source from the FLAM(R) project: http://www.flam.de\n",acIndent);
+      snprintc(b,s,"%s   for license see: https://github.com/limes-datentechnik-gmbh/flamclep\n",acIndent);
+   } else {
+      snprintc(b,s,
+            "%2.2d Frankenstein Limes Command Line Parser (FLAM-CLP)\n"
+            "   Version: %s-%u Build: %s %s %s\n"
+            "   Copyright (C) limes datentechnik (R) gmbh\n"
+            "   This library is open source from the FLAM(R) project: http://www.flam.de\n"
+            "   for license see: https://github.com/limes-datentechnik-gmbh/flamclep\n"
+            ,l,CLP_VSN_STR,__BUILDNR__,__BUILD__,__DATE__,__TIME__);
+   }
+   return(b);
+}
 extern const char* pcClpAbout(const int l, const int s, char* b)
 {
-   snprintc(b,s,
-   "%2.2d Frankenstein Limes Command Line Parser (FLAM-CLP)\n"
-   "   Version: %s-%u Build: %s %s %s\n"
-   "   Copyright (C) limes datentechnik (R) gmbh\n"
-   "   This library is open source from the FLAM(R) project: http://www.flam.de\n"
-   "   for license see: https://github.com/limes-datentechnik-gmbh/flamclep\n"
-   ,l,CLP_VSN_STR,__BUILDNR__,__BUILD__,__DATE__,__TIME__);
-   return(b);
+   return(pcClpAbout2(l,s,b,NULL));
 }
 
 extern char* pcClpError(
