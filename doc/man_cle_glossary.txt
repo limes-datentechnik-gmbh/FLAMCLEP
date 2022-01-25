@@ -26,15 +26,15 @@
 :CLEP: Command line executor and parser
 :CLEP-ABOUT: Built-in command to show information about the software product:
    version number, dependence of external libraries and more.
-:CLEP-COMMANDS: The top level arguments of a program using CLEP to implement its
+:CLEP-COMMANDS: The top level arguments of a program using CLE/P(R) to implement its
    command line interface.
-   With CLEP the commands a program supports are defined within a tree
+   With CLE/P(R) the commands a program supports are defined within a tree
    of tables whoose values are automatically stored in a preinitialized
    data structure, which is mapped to the parameter structure of the
    subprogram, which provides the actual functionality.
 :CLEP-CONFIGURATION: Built-in command to show the current configuration: owner, property
    file names, trace options and more.
-:CLEP-TRACE: Built-in command to set the tracing options of CLEP: switch tracing
+:CLEP-TRACE: Built-in command to set the tracing options of CLE/P(R): switch tracing
    ON or OFF and set a file name where trace output will be written to.
    When no file name is set, the trace is redirected to stdin/stdout.
 :COMMAND LINE ARGUMENTS: Format and meaning of the parameters depend upon the command
@@ -83,7 +83,7 @@
    `:> &{PGM} DELPROP command`
 :GEN: Generate
 :GENERATION OF PROPERTY FILE: With the help of command GENPROP you can generate a property file
-   for the CLEP, which enables you to specify default
+   for the CLE/P(R), which enables you to specify default
    properties of the processed command line. The actual owner is able
    to activate the property file. For each parameter a property entry
    is written to a text file. The definition of properties can be
@@ -120,18 +120,18 @@
    created with the tool found under
    http://www.methods.co.nz/asciidoc/[ASCIIDOC].
 :OBJECT: An object argument has one or more members. Each of them can be an
-   object or an overlay or a simple value. It is implemented by CLEP as
-   a C struct.
+   object or an overlay or a simple value. It is implemented by CLE/P(R)
+   as a C struct.
 :OWNER: The owner of a file in UNIX/LUNIX or WINDOWS controls how
    permissions are set on the file and to whom permissions are granted.
-   If you generate a property file for the CLEP, you will be able to
+   If you generate a property file for the CLE/P(R), you will be able to
    change the owner with the command SETOWNER. Thus you can run your own
    management of automated commands. This is a powerful concept when
    working in different or separated environments.
 :OVERLAY: An overlay argument may only have one out of several values at a time.
-   It is implemented by CLEP as a C union.
-:PATH: Each argument of a CLEP program has a position in the command tree
-   structure. This position is specified by the path: a DOT separated
+   It is implemented by CLE/P(R) as a C union.
+:PATH: Each argument of a CLE/P(R) program has a position in the command
+   tree structure. This position is specified by the path: a DOT separated
    list of argument names, very similar to a file system path.
 :PROP: Property
 :PROPERTY FILES: Property files are used to configure applications. The
@@ -145,19 +145,20 @@
    owner. If you have successfully created the property file you can
    activate it, but it will be still inactive until you alter the
    default settings.
-:SHELL SCRIPT: Commands can be stored in a text file called shell script. The Shell
-   Script is itself a command and can be called like a system command
-   also with parameters.
-:SYNTAX: Built-in function of CLEP to show the syntax of a program. Each built
-   command string must follow special rules and refers to an argument
-   list which is interpreted by a shell or command-line interpreter
+:SHELL SCRIPT: Commands can be stored in a text file called shell script.
+   The Shell Script is itself a command and can be called like a system
+   command also with parameters.
+:SYNTAX: Built-in function of CLE/P(R) to show the syntax of a program.
+   Each built command string must follow special rules and refers to an
+   argument list which is interpreted by a shell or command-line interpreter
    when running the program. Commands can be from type object or
    overlay. In dependence from command depth the syntax is printed in
    one line or in a structured form.
-:TRACING: If switched ON CLEP tracing shows verbose information while the
-   command line is evaluated.
-:UTF8 TO MSDOS COMMAND LINE ENCODING: Windows cmd line by default does not support UTF8 but understands
-   it. If you want to output multibyte characters in your cmd line,
-   you will have to open a command prompt window, change the properties
-   of the window to the Lucida Console True Type font. Then you must
-   run "chcp 65001" on the command prompt to be able to output UTF8.
+:TRACING: If switched ON CLE/P(R) tracing shows verbose information
+    while the command line is evaluated.
+:UTF8 TO MSDOS COMMAND LINE ENCODING: Windows cmd line by default does
+   not support UTF8 but understands it. If you want to output multibyte
+   characters in your cmd line, you will have to open a command prompt
+   window, change the properties of the window to the Lucida Console
+   True Type font. Then you must run "chcp 65001" on the command prompt
+   to be able to output UTF8.

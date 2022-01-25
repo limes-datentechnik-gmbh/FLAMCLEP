@@ -77,7 +77,7 @@
  * @defgroup CLE_DOCANC CLE Docu Anchors
  * @brief The anchors for chapters and appendixes (5. column).
  *
- * This anchors are required to fulfill the CLEP internal links
+ * This anchors are required to fulfill the CLE/P(R) internal links
  * and must be assigned to the corresponding chapters in the table below.
  * @{
  */

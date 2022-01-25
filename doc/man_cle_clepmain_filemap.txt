@@ -1,5 +1,5 @@
-All filenames used by CLEP are additionally mapped based on the rules
-below:
+All filenames used by CLE/P(R) are additionally mapped based on the
+rules below:
 
 * The tilde character (`~`) is replaced with the string `<HOME>`
 * DD names on mainframes must be prefixed with "DD:"

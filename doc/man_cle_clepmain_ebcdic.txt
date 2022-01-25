@@ -32,9 +32,9 @@ If possible, these critical characters are also converted for print
 outs. At output it is not possible to convert anything correctly,
 because some strings for print out are coming from other sources (like
 system messages and others). Only all known literals are converted, for
-unknown variables such a conversion is not possible and CLEP expects that
-such strings are encoded in the correct system code page, but there is no
-guaranty for this.
+unknown variables such a conversion is not possible and CLE/P(R) expects
+that such strings are encoded in the correct system code page, but there
+is no guaranty for this.
 
 To be independent of the environment escaping of the CLP strings is
 possible for the critical punctuation characters on EBCDIC systems.

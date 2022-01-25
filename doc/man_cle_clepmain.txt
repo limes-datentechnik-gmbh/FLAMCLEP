@@ -1,8 +1,8 @@
-The COMMAND LINE PROCESSOR (CLEP) is a user application programming
+The COMMAND LINE PROCESSOR (CLE/P(R)) is a user application programming
 interface for several platforms including Windows, Unix and z/OS that
 simplifies and standardizes parameter string processing.
 
-The CLEP provides two separate functions:
+The CLE/P(R) provides two separate functions:
 
 * COMMAND LINE PARSER (CLP)   - Compiles a parameter string from a command to a data structure
 * COMMAND LINE EXECUTOR (CLE) - Supporting execution of different commands with parameter strings
