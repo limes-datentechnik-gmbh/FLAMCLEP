@@ -586,7 +586,6 @@ extern const char* pcCleAbout2(const int l, const int s, char* b,const char* is)
             "   for license see: https://github.com/limes-datentechnik-gmbh/flamclep\n"
             "This library uses the internal library below:\n"
             ,l,CLE_VSN_STR,__BUILDNR__,__BUILD__,__DATE__,__TIME__);
-
    }
    return(pcClpAbout2(l+1,s,b,is));
 }
