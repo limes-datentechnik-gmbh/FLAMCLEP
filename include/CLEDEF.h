@@ -45,6 +45,7 @@
  */
 #define CLE_DOCTYP_COVER                  1U    /**< @brief Cover page (level must be 1). */
 #define CLE_DOCTYP_CHAPTER                2U    /**< @brief A chapter (level must > 1 and < 6). */
+#define CLE_DOCTYP_USEDENVAR              3U    /**< @brief Used environment variables (level must > 1 and < 6). */
 #define CLE_DOCTYP_PROGRAM                10U   /**< @brief The main program chapter (like chapter but level must < 5). */
 #define CLE_DOCTYP_PGMSYNOPSIS            11U   /**< @brief The program synopsis. */
 #define CLE_DOCTYP_PGMSYNTAX              12U   /**< @brief The program syntax. */

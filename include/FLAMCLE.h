@@ -114,6 +114,8 @@ extern const char* pcCleAbout(const int l, const int s, char* b);
  * - SETENV variable=name
  * - GETENV
  * - DELENV variable
+ * - LSTENV
+ * - HLPENV
  * - TRACE ON | OFF | FILE=filename
  * - CONFIG [CLEAR]
  * - GRAMMAR
@@ -122,6 +124,23 @@ extern const char* pcCleAbout(const int l, const int s, char* b);
  * - VERSION
  * - ABOUT
  * - ERRORS
+ *
+ * The table with the list of environment variables (psEnv) are optional
+ * and build also as CLP argument list but with a limited usage only
+ * for docu generation and the LSTENV and HLPENV built-in functions.
+ * This argument table use only the key word as environment variable
+ * name and the help message as help message for it. Additional
+ * the selections for certain constant definitions can be use and
+ * will be checked by LSTENV built-in function. If the manpage pointer
+ * defined, then this string is printed in brackets behind the environment
+ * variable name and can be used for alternative system variable names or
+ * JCL symbols representing the same environment variable. All other fields are
+ * not used and free for a potential misuse. If no environment variable
+ * list provided a internal list with environment variables used by
+ * CLE/P is used. This list can be found in FLAMCLE.c and should be used
+ * as beginning for a own list. An additional manpage can be provided
+ * which will be printed at the and of the 'Used Environemnt Variable'
+ * chapter.
  *
  * @param[in]  pvGbl Pointer to a global handle given to called functions in the command table
  * @param[in]  psCmd Pointer to the table which defines the commands
@@ -157,6 +176,8 @@ extern const char* pcCleAbout(const int l, const int s, char* b);
  *                   The file name is used if only a command without assignment or parameter is provided
  * @param[in]  siNoR Define this reason code to the values the mapping function returns if no run is requested (0 is nothing)
  * @param[in]  psDoc Table for documentation generation (must be defined)
+ * @param[in]  psEnv Table for possible usable environment variables (argument table of strings without manpage and possible selections, NULL internal table used)
+ * @param[in]  pcEnv Optional main page behind the environment variable list specific for the program using FLAMCLE (NULL nothing is printed)
  *
  * @return signed integer with the condition codes below:\n
  * 0  - command line, command syntax, mapping, execution and finish of the command was successful\n
@@ -210,7 +231,9 @@ extern int siCleExecute(
    TfSaf*                        pfSaf,//
    const char*                   pcDpa,//
    const int                     siNoR,
-   const TsCleDoc*               psDoc);
+   const TsCleDoc*               psDoc,
+   const TsClpArgument*          psEnv,
+   const char*                   pcEnv);
 /** @}*/
 /**********************************************************************/
 /*! @cond PRIVATE */

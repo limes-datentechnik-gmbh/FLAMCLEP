@@ -1051,7 +1051,7 @@ static void vdClpFree(
          }
       }
       const char* pcEnv=GETENV("CLP_MALLOC_STATISTICS");
-      if (pcEnv!=NULL && (strcmp(pcEnv,"YES")==0 || strcmp(pcEnv,"ON")==0)) {
+      if (CHECK_ENVAR_ON(pcEnv)) {
          char acTs[24];
          fprintf(stderr,"%s CLP_MALLOC_STATISTICS(Amount(%"PRIu64"),Table(%d(%"PRIu64")),Size(%"PRIu64"))\n",cstime(0,acTs),uiCnt,psHdl->szPtr,((uint64_t)sizeof(TsPtr))*((uint64_t)psHdl->szPtr),uiSiz);
       }
@@ -1241,7 +1241,7 @@ extern void* pvClpOpen(
             uint64_t uiSiz=0;
             vdClpSymDel(psHdl->psTab,&uiCnt,&uiSiz);
             const char* pcEnv=GETENV("CLP_SYMTAB_STATISTICS");
-            if (pcEnv!=NULL && (strcmp(pcEnv,"YES")==0 || strcmp(pcEnv,"ON")==0)) {
+            if (CHECK_ENVAR_ON(pcEnv)) {
                char acTs[24];
                fprintf(stderr,"%s CLP_SYMTAB_STATISTICS(Amount(%"PRIu64"),Size(%"PRIu64")) after fail of in siClpSymIni()\n",cstime(0,acTs),uiCnt,uiSiz);
             }
@@ -1264,7 +1264,7 @@ extern void* pvClpOpen(
             uint64_t uiSiz=0;
             vdClpSymDel(psHdl->psTab,&uiCnt,&uiSiz);
             const char* pcEnv=GETENV("CLP_SYMTAB_STATISTICS");
-            if (pcEnv!=NULL && (strcmp(pcEnv,"YES")==0 || strcmp(pcEnv,"ON")==0)) {
+            if (CHECK_ENVAR_ON(pcEnv)) {
                char acTs[24];
                fprintf(stderr,"%s CLP_SYMTAB_STATISTICS(Amount(%"PRIu64"),Size(%"PRIu64")) after fail of in siClpSymCal()\n",cstime(0,acTs),uiCnt,uiSiz);
             }
@@ -2525,7 +2525,7 @@ extern void vdClpClose(
          uint64_t uiSiz=0;
          vdClpSymDel(psHdl->psTab,&uiCnt,&uiSiz);
          const char* pcEnv=GETENV("CLP_SYMTAB_STATISTICS");
-         if (pcEnv!=NULL && (strcmp(pcEnv,"YES")==0 || strcmp(pcEnv,"ON")==0)) {
+         if (CHECK_ENVAR_ON(pcEnv)) {
             char acTs[24];
             fprintf(stderr,"%s CLP_SYMTAB_STATISTICS(Amount(%"PRIu64"),Size(%"PRIu64")) in vdClpClose()\n",cstime(0,acTs),uiCnt,uiSiz);
          }
@@ -2645,11 +2645,8 @@ static TsSym* psClpSymIns(
       }
    }
    pcEnv=GETENV("CLEP_NO_SECRETS");
-   if (pcEnv!=NULL) {
-      if (strcmp(pcEnv,"OFF")==0) {
-         psSym->psStd->uiFlg&=~CLPFLG_PWD;
-      }
-      pcEnv=NULL;
+   if (CHECK_ENVAR_OFF(pcEnv)) {
+      psSym->psStd->uiFlg&=~CLPFLG_PWD;
    }
    psSym->psStd->psAli=NULL;
    psSym->psStd->siKwl=strlen(psSym->psStd->pcKyw);
@@ -2657,6 +2654,7 @@ static TsSym* psClpSymIns(
    psSym->psStd->siPos=siPos;
    psSym->psFix->pcMan=psArg->pcMan;
    psSym->psFix->pcHlp=psArg->pcHlp;
+   pcEnv=NULL;
    if (CLPISF_ARG(psArg->uiFlg)) {
       pcEnv=get_env(acVar,sizeof(acVar),"%s.%s.%s.%s",psHdl->pcOwn,psHdl->pcPgm,pcPat,psArg->pcKyw);
       if (pcEnv==NULL) {

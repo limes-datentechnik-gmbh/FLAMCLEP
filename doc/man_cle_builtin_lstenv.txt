@@ -1,0 +1,8 @@
+This function will list the status of all possible useable environment
+variables.
+
+.Examples
+
+-----------------------------------------------------------------------
+   :> &{PGM} LSTENV
+-----------------------------------------------------------------------

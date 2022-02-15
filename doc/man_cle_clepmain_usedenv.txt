@@ -1,22 +1,3 @@
-Below you can find the list of environment variables used by CLE and CLP. 
-
-* LANG    - to determine the CCSID on EBCDIC systems
-* HOME    - to determine the home directory on UNIX/WIN
-* USER    - to determine the current user id on UNIX/WIN
-* ENVID   - for the current environment qualifier (D/T/P) if key label template mapping used (default is 'T')
-* OWNERID - used for current owner if not already defined
-* CLE_QUIET  - Disables the normal log output of the command line executer (must set to YES or ON)
-* CLE_SILENT - Disables log and errors messages of the command line executer (must set to YES or ON)
-* CLP_NOW - The current point in time used for predefined constants (0tYYYY/MM/DD.HH:MM:SS)
-* CLP_STRING_CCSID - CCSID used for interpretation of critical punctuation character on EBCDIC systems (default is taken from LANG)
-* CLP_DEFAULT_DCB - The default record format and record length in C file mode format (default is 'recfm=VB, lrecl=516' only for z/OS)
-* CLP_SYMTAB_STATISTICS - Print symbol table statistics to STDERR stream at close (must set to YES or ON)
-* CLP_MALLOC_STATISTICS - Print memory allocation statistics to STDERR stream at close (must set to YES or ON)
-* &{PGM}_CONFIG_FILE - the configuration filename (default is '$HOME/.&{pgm}.config' on UNIX/WIN or '&SYSUID..&{PGM}.CONFIG' on mainframes)
-* &{PGM}_DEFAULT_OWNER_ID - the default owner ID (default is '&{oWn}')
-* owner_&{PGM}_command_PROPERTY_FILENAME - To override default property file names
-* path_argument - to override the hard coded default property value
-
 Environment variables can be set from the system or in the program
 configuration file with the built-in function <<CLEP.BUILTIN.SETENV,SETENV>>.
 Particularly on mainframe systems the configuration file is an easy way
@@ -117,3 +98,48 @@ FLCL_ICNV_TO=UTF-8                # "UTF-8" could result in errors
 
 See <<CLEP.APPENDIX.PROPERTIES,Appendix Properties>> for the current
 property file content.
+
+
+
+
+
+All these environment variables can be managed through the built-in
+functions SETENV, GETENV and DELENV within the &{PGM} configuration file.
+On mainframes, you can also use the 'DD:STDENV' or the data set name
+'&SYSUID..STDENV' to define environment variables. On UNIX and Windows
+like platform the files '.stdenv' are read from the working and if this
+not available from the home directory. For Micro Focus EDZ environments
+the DD name SYSVAR is additional supported to define system variables.
+The function used to read the 'keyword=value' pairs automatically detect
+if EBCDIC used (character > 0x80) and convert the lines automatically in
+the local character set. Some of these environment variables (LANG,
+ENVID, ...) can also be defined through system variable (&FLZEDC)
+definitions (see install.txt) on z/OS.
+
+The environment variable LANG is also used on EBCDIC systems to
+interpret several syntax characters correctly, which depends on the
+codepage. It is important to set this variable to the correct value on
+EBCDIC systems. If this environment variable is not set, literals are
+interpreted in IBM-1047 on ZOS and USS. If you use another CCSID for
+entry, you must define the environment variable LANG to enable correct
+parsing for strings that contain special characters like '~'. We
+recommend to define the corresponding system variables (&FLANGLC,
+&FLANGCC and &FLANGCS) for it on z/OS.
+
+The variable FLAM4MF and (if needed) FLAM4MF_TRACEFILE should be set in
+the environment of the Microfocus Enterprise Server instance where the
+FLAM or FLUC record interfaces are used. To define static and dynamic
+system variables, the FLAM4MF_STATIC/DYNAMIC_SYSVAR environment variable
+can be used to read the system variables to the environment. The second
+file was mainly introduce for the MF-EDZ JCL user exit, which can be
+used to provide the dynamic symbols like JOBNAME as 'keyword=value' pair
+as the dynamic file. All the files read to build the environment undergo
+automatic ASCII and EBCDIC detection. A semicolon can be used to mark
+the end of a keyword-value pair (an inline FB80 encoding in JCL on EDZ
+does not contain new line characters).
+To undefine an environment variable, there must be no characters behind
+the equal sign. To replace a variable with nothing upon use, the
+environment variable must be set to one or more whitespace character(s).
+Trailing whitespace is removed from the value string, so a value which
+contains only whitespace characters will result in an empty string upon
+substitution.

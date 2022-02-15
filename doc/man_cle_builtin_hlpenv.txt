@@ -1,0 +1,8 @@
+This function will print the help message for all possible usable
+environment variables.
+
+.Examples
+
+-----------------------------------------------------------------------
+   :> &{PGM} LSTENV
+-----------------------------------------------------------------------

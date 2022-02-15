@@ -435,9 +435,41 @@ typedef struct ClpArgument {
  */
 #define CLPCONTAB_BINARY(kyw,dat,siz,man,hlp)   {CLPTYP_STRING,(kyw),NULL,0,0,(siz),0,0,CLPFLG_CON|CLPFLG_BIN,NULL,NULL,(man),(hlp),  0  , 0.0 ,(U08*)(dat),NULL},
 
+/**
+ * @brief Defines a default string literal for environment variable lists.
+ *
+ * @param[in]   kyw   Pointer to command line keyword *kyw*.
+ * @param[in]   hlp   Pointer to a null-terminated string for context sensitive help for this constant
+ *                    (also used as head line or in bullet list in documentation generation).
+ */
+#define CLPCONTAB_ENVAR(kyw,hlp)                {CLPTYP_STRING,(kyw),NULL,0,0,  0  ,0,0,CLPFLG_CON           ,NULL,NULL,NULL,(hlp),  0  , 0.0 ,(U08*)(kyw),NULL},
+
 /** Ends a table with constant definitions
  */
 #define CLPCONTAB_CLS                           {CLPTYP_NON   , NULL,NULL,0,0,  0  ,0,0,CLPFLG_NON           ,NULL,NULL, NULL, NULL,  0  , 0.0 ,NULL       ,NULL}
+
+/**
+ * @brief Starts a table with environment variables
+ *
+ * @param[in]  name   Name of this table\n
+ */
+#define CLPENVTAB_OPN(name)      TsClpArgument name[]
+
+/**
+ * @brief Defines a environment variable list entry.
+ *
+ * @param[in]   kyw   Pointer to environment variable name.
+ * @param[in]   flg   Only CLPFLG_NON or CLPFLG_SEL are useful.
+ * @param[in]   tab   is NULL or a pointer to a selection (constant definition).
+ * @param[in]   dft   is the hard coded default value which will be set if defined.
+ * @param[in]   man   is a pointer to alternate list of names also supported for the variable (can be misused for system symbols or others).
+ * @param[in]   hlp   is a pointer to a single line help message.
+ */
+#define CLPENVTAB_ENTRY(kyw,flg,tab,dft,man,hlp) { CLPTYP_STRING,(kyw), NULL,0,0,0,0,0,(flg),(tab),(dft),(man),(hlp),0,0.0,NULL,NULL},
+
+/** Ends a table with environment variables
+ */
+#define CLPENVTAB_CLS                            {CLPTYP_NON   , NULL,NULL,0,0,  0  ,0,0,CLPFLG_NON           ,NULL,NULL, NULL, NULL,  0  , 0.0 ,NULL       ,NULL}
 /** @} */
 
 /**********************************************************************/

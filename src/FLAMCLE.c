@@ -159,11 +159,12 @@
  * 1.3.83: Initialize dia-critical characters support also if quiet defined
  * 1.3.84: Correct handling of pfOut and pfErr for built-in functions
  * 1.3.85: Add new about function with indentation
+ * 1.3.86: Add new LSTENV and HLPENV built-in functions and use HLPENV to generate docu about used environment variables
  */
-#define CLE_VSN_STR       "1.3.85"
+#define CLE_VSN_STR       "1.3.86"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        3
-#define CLE_VSN_REVISION       85
+#define CLE_VSN_REVISION       86
 
 /* Definition der Konstanten ******************************************/
 
@@ -184,14 +185,16 @@
 #define CLE_BUILTIN_IDX_SETENV      12
 #define CLE_BUILTIN_IDX_GETENV      13
 #define CLE_BUILTIN_IDX_DELENV      14
-#define CLE_BUILTIN_IDX_TRACE       15
-#define CLE_BUILTIN_IDX_CONFIG      16
-#define CLE_BUILTIN_IDX_GRAMMAR     17
-#define CLE_BUILTIN_IDX_LEXEMES     18
-#define CLE_BUILTIN_IDX_LICENSE     19
-#define CLE_BUILTIN_IDX_VERSION     20
-#define CLE_BUILTIN_IDX_ABOUT       21
-#define CLE_BUILTIN_IDX_ERRORS      22
+#define CLE_BUILTIN_IDX_LSTENV      15
+#define CLE_BUILTIN_IDX_HLPENV      16
+#define CLE_BUILTIN_IDX_TRACE       17
+#define CLE_BUILTIN_IDX_CONFIG      18
+#define CLE_BUILTIN_IDX_GRAMMAR     19
+#define CLE_BUILTIN_IDX_LEXEMES     20
+#define CLE_BUILTIN_IDX_LICENSE     21
+#define CLE_BUILTIN_IDX_VERSION     22
+#define CLE_BUILTIN_IDX_ABOUT       23
+#define CLE_BUILTIN_IDX_ERRORS      24
 
 /* Definition der Strukturen ******************************************/
 
@@ -263,6 +266,8 @@ typedef struct CleDocPar {
    int                           siPs1;
    int                           siPs2;
    int                           siPr3;
+   const TsClpArgument*          psEnv;
+   const char*                   pcEnv;
 }TsCleDocPar;
 
 /* Deklaration der internen Funktionen ********************************/
@@ -598,6 +603,7 @@ static inline const char* pcMapDocTyp(const unsigned int uiTyp) {
    switch(uiTyp) {
       case CLE_DOCTYP_COVER:        return("CLE_DOCTYP_COVER");
       case CLE_DOCTYP_CHAPTER:      return("CLE_DOCTYP_CHAPTER");
+      case CLE_DOCTYP_USEDENVAR:    return("CLE_DOCTYP_USEDENVAR");
       case CLE_DOCTYP_BUILTIN:      return("CLE_DOCTYP_BUILTIN");
       case CLE_DOCTYP_PROGRAM:      return("CLE_DOCTYP_PROGRAM");
       case CLE_DOCTYP_PGMSYNOPSIS:  return("CLE_DOCTYP_PGMSYNOPSIS");
@@ -784,6 +790,21 @@ static inline TsCnfHdl* psOpenConfig(FILE* pfOut, FILE* pfErr, const char* pcHom
 
 /**********************************************************************/
 
+static void vdPrintEnvars(FILE* pfDoc,const TsClpArgument* psEnvTab) {
+   if (pfDoc!=NULL) {
+      for (const TsClpArgument* p=psEnvTab;p->pcKyw!=NULL;p++) {
+         if (p->pcMan!=NULL) {
+            fprintf(pfDoc,"* %s (%s) - %s\n",p->pcKyw,p->pcMan,p->pcHlp);
+         } else {
+            fprintf(pfDoc,"* %s - %s\n",p->pcKyw,p->pcHlp);
+         }
+         for (const TsClpArgument* s=p->psTab; s!=NULL && s->pcKyw!=NULL; s++) {
+            fprintf(pfDoc,"** %s - %s\n",s->pcKyw,s->pcHlp);
+         }
+      }
+   }
+}
+
 static int siPrintChapter(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const char* pcOwn, const char* pcPgm, const char* pcAut, const char* pcAdr, const char* pcBld, const int isHdr, const int isNbr, const int isIdt) {
    if (psDoc->pcHdl!=NULL && *psDoc->pcHdl) {
       if (psDoc->pcKyw!=NULL && *psDoc->pcKyw) {
@@ -851,12 +872,37 @@ static int siClePrintCover(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, cons
    return(siPrintChapter(pfErr,pfDoc,psDoc,pcOwn,pcPgm,pcAut,pcAdr,pcBld,isHdr,isNbr,isIdt));
 }
 
+
 static int siClePrintChapter(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const char* pcOwn, const char* pcPgm, const char* pcBld, const int isNbr, const int isIdt) {
    if (psDoc->uiLev<2 || psDoc->uiLev>5) {
       if (pfErr!=NULL) fprintf(pfErr,"The level (%u) for a chapter must be between 2 and 6\n",psDoc->uiLev);
       return(CLERTC_ITF);
    }
    return(siPrintChapter(pfErr,pfDoc,psDoc,pcOwn,pcPgm,NULL,NULL,pcBld,FALSE,isNbr,isIdt));
+}
+
+static int siClePrintUsedEnvar(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const char* pcOwn, const char* pcPgm, const char* pcBld, const int isNbr, const int isIdt,const TsClpArgument* psEnvTab, const C08* pcEnvTxt) {
+   U32 i;
+   C08 acPGM[strlen(pcPgm)+1];
+   int siErr=siClePrintChapter(pfErr,pfDoc,psDoc,pcOwn,pcPgm,pcBld,isNbr,isIdt);
+   if (siErr) return(siErr);
+   for (i=0;pcPgm[i];i++) {
+      acPGM[i]=toupper(pcPgm[i]);
+   }
+   acPGM[i]=0x00;
+   efprintf(pfDoc,"Below you can find the list of static environment variables.\n\n");
+   vdPrintEnvars(pfDoc,psEnvTab);
+   efprintf(pfDoc,
+         "\nBeside the static environment variables there a lot of dynamic formed environment variables supported.\n"
+         "\n"
+         "* %s_CONFIG_FILE - the configuration filename (default is '%cHOME/.%s.config' on UNIX/WIN or '&SYSUID..%s.CONFIG' on mainframes)\n"
+         "* %s_DEFAULT_OWNER_ID - the default owner ID (default is '%s')\n"
+         "* owner_%s_command_PROPERTY_FILENAME - To override default property file names\n"
+         "* path_argument - to override the hard coded default property value\n\n",acPGM,C_DLR,pcPgm,acPGM,acPGM,pcOwn,acPGM);
+   if (pcEnvTxt!=NULL && *pcEnvTxt) {
+      fprintm(pfDoc,pcOwn,pcPgm,pcBld,pcEnvTxt,2);
+   }
+   return(CLERTC_OK);
 }
 
 static int siClePrintPgmSynopsis(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const char* pcOwn, const char* pcPgm, const char* pcBld, const char* pcHlp, const int isPat, const int isNbr, const int isIdt) {
@@ -1012,6 +1058,7 @@ static int siCleWritePage(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const
    switch (psDoc->uiTyp) {
       case CLE_DOCTYP_COVER:        return(siClePrintCover(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->pcAut,psPar->pcAdr,psPar->pcBld,psPar->isHdr,psPar->isNbr,psPar->isIdt));
       case CLE_DOCTYP_CHAPTER:      return(siClePrintChapter(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->pcBld,psPar->isNbr,psPar->isIdt));
+      case CLE_DOCTYP_USEDENVAR:    return(siClePrintUsedEnvar(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->pcBld,psPar->isNbr,psPar->isIdt,psPar->psEnv,psPar->pcEnv));
       case CLE_DOCTYP_BUILTIN:      return(siClePrintBuiltIn(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->pcBld,psPar->isPat,psPar->isNbr,psPar->isShl,psPar->isIdt,psPar->psBif));
       case CLE_DOCTYP_PROGRAM:      return(siClePrintChapter(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->pcBld,psPar->isNbr,psPar->isIdt));
       case CLE_DOCTYP_PGMSYNOPSIS:  return(siClePrintPgmSynopsis(pfErr,pfDoc,psDoc,psPar->pcOwn,psPar->pcPgm,psPar->pcBld,psPar->pcHlp,psPar->isPat,psPar->isNbr,psPar->isIdt));
@@ -1247,6 +1294,32 @@ static int siPrintDocu(
    return(CLERTC_OK);
 }
 
+/*********************************************************************/
+
+CLPCONTAB_OPN(asCleYesOnNoOff) = {
+   CLPCONTAB_ENVAR("YES", "Yes, do it")
+   CLPCONTAB_ENVAR("ON" , "Activate it")
+   CLPCONTAB_ENVAR("NO" , "No, don't do it")
+   CLPCONTAB_ENVAR("OFF", "Deactivate it")
+   CLPCONTAB_CLS
+};
+
+CLPENVTAB_OPN(asCleEnvVarTab) = {
+   CLPENVTAB_ENTRY("LANG"                 ,CLPFLG_NON,NULL           ,NULL,NULL,"To determine the CCSID on EBCDIC systems")
+   CLPENVTAB_ENTRY("HOME"                 ,CLPFLG_NON,NULL           ,NULL,NULL,"To determine the home directory on UNIX/WIN")
+   CLPENVTAB_ENTRY("USER"                 ,CLPFLG_NON,NULL           ,NULL,NULL,"To determine the current user id on UNIX/WIN")
+   CLPENVTAB_ENTRY("ENVID"                ,CLPFLG_NON,NULL           ,NULL,NULL,"For the current environment qualifier (D/T/P) if key label template mapping used (default is 'T')")
+   CLPENVTAB_ENTRY("OWNERID"              ,CLPFLG_NON,NULL           ,NULL,NULL,"Used for current owner if not already defined")
+   CLPENVTAB_ENTRY("CLE_QUIET"            ,CLPFLG_SEL,asCleYesOnNoOff,NULL,NULL,"Disables the normal log output of the command line executer (must set to YES or ON)")
+   CLPENVTAB_ENTRY("CLE_SILENT"           ,CLPFLG_SEL,asCleYesOnNoOff,NULL,NULL,"Disables log and errors messages of the command line executer (must set to YES or ON)")
+   CLPENVTAB_ENTRY("CLP_NOW"              ,CLPFLG_NON,NULL           ,NULL,NULL,"The current point in time used for predefined constants (0tYYYY/MM/DD.HH:MM:SS)")
+   CLPENVTAB_ENTRY("CLP_STRING_CCSID"     ,CLPFLG_NON,NULL           ,NULL,NULL,"CCSID used for interpretation of critical punctuation character on EBCDIC systems (default is taken from LANG)")
+   CLPENVTAB_ENTRY("CLP_DEFAULT_DCB"      ,CLPFLG_NON,NULL           ,NULL,NULL,"The default record format and record length in C file mode format (default is 'recfm=VB, lrecl=516' only for z/OS)")
+   CLPENVTAB_ENTRY("CLP_SYMTAB_STATISTICS",CLPFLG_SEL,asCleYesOnNoOff,NULL,NULL,"Print symbol table statistics to STDERR stream at close (must set to YES or ON)")
+   CLPENVTAB_ENTRY("CLP_MALLOC_STATISTICS",CLPFLG_SEL,asCleYesOnNoOff,NULL,NULL,"Print memory allocation statistics to STDERR stream at close (must set to YES or ON)")
+   CLPENVTAB_CLS
+};
+
 /***********************************************************************/
 
 extern int siCleExecute(
@@ -1282,7 +1355,9 @@ extern int siCleExecute(
    TfSaf*                        pfSaf,
    const char*                   pcDpa,
    const int                     siNoR,
-   const TsCleDoc*               psDoc)
+   const TsCleDoc*               psDoc,
+   const TsClpArgument*          psEnv,
+   const char*                   pcEnv)
 {
    int                           i,j,l,siErr,siDep,siCnt;
    TsCnfHdl*                     psCnf=NULL;
@@ -1316,6 +1391,7 @@ extern int siCleExecute(
    char                          acTs[24];
    time_t                        uiTime=time(NULL);
    clock_t                       uiClock=clock();
+   const TsClpArgument*          psEnvTab;
 
    CLEBIF_OPN(asBif) = {
       CLETAB_BIF(CLE_BUILTIN_IDX_SYNTAX  ,"SYNTAX"  ,HLP_CLE_BUILTIN_SYNTAX  ,SYN_CLE_BUILTIN_SYNTAX  ,MAN_CLE_BUILTIN_SYNTAX  ,TRUE)
@@ -1333,6 +1409,8 @@ extern int siCleExecute(
       CLETAB_BIF(CLE_BUILTIN_IDX_SETENV  ,"SETENV"  ,HLP_CLE_BUILTIN_SETENV  ,SYN_CLE_BUILTIN_SETENV  ,MAN_CLE_BUILTIN_SETENV  ,TRUE)
       CLETAB_BIF(CLE_BUILTIN_IDX_GETENV  ,"GETENV"  ,HLP_CLE_BUILTIN_GETENV  ,SYN_CLE_BUILTIN_GETENV  ,MAN_CLE_BUILTIN_GETENV  ,TRUE)
       CLETAB_BIF(CLE_BUILTIN_IDX_DELENV  ,"DELENV"  ,HLP_CLE_BUILTIN_DELENV  ,SYN_CLE_BUILTIN_DELENV  ,MAN_CLE_BUILTIN_DELENV  ,TRUE)
+      CLETAB_BIF(CLE_BUILTIN_IDX_LSTENV  ,"LSTENV"  ,HLP_CLE_BUILTIN_LSTENV  ,SYN_CLE_BUILTIN_LSTENV  ,MAN_CLE_BUILTIN_LSTENV  ,TRUE)
+      CLETAB_BIF(CLE_BUILTIN_IDX_HLPENV  ,"HLPENV"  ,HLP_CLE_BUILTIN_HLPENV  ,SYN_CLE_BUILTIN_HLPENV  ,MAN_CLE_BUILTIN_HLPENV  ,TRUE)
       CLETAB_BIF(CLE_BUILTIN_IDX_TRACE   ,"TRACE"   ,HLP_CLE_BUILTIN_TRACE   ,SYN_CLE_BUILTIN_TRACE   ,MAN_CLE_BUILTIN_TRACE   ,TRUE)
       CLETAB_BIF(CLE_BUILTIN_IDX_CONFIG  ,"CONFIG"  ,HLP_CLE_BUILTIN_CONFIG  ,SYN_CLE_BUILTIN_CONFIG  ,MAN_CLE_BUILTIN_CONFIG  ,TRUE)
       CLETAB_BIF(CLE_BUILTIN_IDX_GRAMMAR ,"GRAMMAR" ,HLP_CLE_BUILTIN_GRAMMAR ,SYN_CLE_BUILTIN_GRAMMAR ,MAN_CLE_BUILTIN_GRAMMAR ,TRUE)
@@ -1343,6 +1421,26 @@ extern int siCleExecute(
       CLETAB_BIF(CLE_BUILTIN_IDX_ERRORS  ,"ERRORS"  ,HLP_CLE_BUILTIN_ERRORS  ,SYN_CLE_BUILTIN_ERRORS  ,MAN_CLE_BUILTIN_ERRORS  ,TRUE)
       CLEBIF_CLS
    };
+
+   if (psEnv==NULL) {
+      psEnvTab=asCleEnvVarTab;
+   } else {
+      psEnvTab=psEnv;
+   }
+
+   for (const TsClpArgument* p=psEnvTab;p!=NULL && p->pcKyw!=NULL;p++) {
+      if (p->pcHlp==NULL || *p->pcHlp==0x00) {
+         if (pfErr!=NULL) fprintf(pfErr,"Help message for environment variable '%s' is not defined\n",p->pcKyw);
+         return(CLERTC_TAB);
+      }
+      if (p->pcDft!=NULL) {
+         if (GETENV(p->pcKyw)==NULL) {
+            if (SETENV(p->pcKyw,p->pcDft)) {
+               if (pfErr!=NULL) fprintf(pfErr,"Put default value for variable (%s=%s) to environment failed (%d - %s)\n",p->pcKyw,p->pcDft,errno,strerror(errno));
+            }
+         }
+      }
+   }
 
    if (argc>0) {
       if (strxcmp(isCas,argv[argc-1],"SILENT",0,0,FALSE)==0) {
@@ -1357,13 +1455,13 @@ extern int siCleExecute(
    }
 
    m=GETENV("CLE_SILENT");
-   if (m!=NULL && (strcmp(m,"YES")==0 || strcmp(m,"ON")==0)) {
+   if (CHECK_ENVAR_ON(m)) {
       pfErr=NULL;
       pfOut=NULL;
    }
 
    m=GETENV("CLE_QUIET");
-   if (m!=NULL && (strcmp(m,"YES")==0 || strcmp(m,"ON")==0)) {
+   if (CHECK_ENVAR_ON(m)) {
       pfErr=pfOut;
       pfOut=NULL;
    }
@@ -2169,6 +2267,7 @@ EVALUATE:
             stDocPar.siMkl=siMkl; stDocPar.psBif=asBif; stDocPar.psCmd=psCmd; stDocPar.psOth=psOth;
             stDocPar.pvF2S=pvF2S; stDocPar.pfF2S=pfF2S; stDocPar.pvSaf=pvSaf; stDocPar.pfSaf=pfSaf;
             stDocPar.siPs1='/';   stDocPar.siPs2='-';   stDocPar.siPr3='_';   stDocPar.isShl=FALSE;
+            stDocPar.psEnv=psEnvTab; stDocPar.pcEnv=pcEnv;
             siErr=siPrintDocu(pvGbl,pfDoc,pfErr,psDoc,&stDocPar,pfDoc,siPrintPage);
             if (siErr) {
                if (pfErr!=NULL) fprintf(pfErr,"Generation of documentation for program '%s' failed\n",pcPgm);
@@ -2247,6 +2346,7 @@ EVALUATE:
       stDocPar.siMkl=siMkl; stDocPar.psBif=asBif; stDocPar.psCmd=psCmd; stDocPar.psOth=psOth;
       stDocPar.pvF2S=pvF2S; stDocPar.pfF2S=pfF2S; stDocPar.pvSaf=pvSaf; stDocPar.pfSaf=pfSaf;
       stDocPar.siPs1='-';   stDocPar.siPs2='-';   stDocPar.siPr3='_';   stDocPar.isShl=isShl;
+      stDocPar.psEnv=psEnvTab; stDocPar.pcEnv=pcEnv;
       if (pfHtmlOpn!=NULL && pfHtmlPrn!=NULL && pfHtmlCls!=NULL) {
          void* pvDocHdl=pfHtmlOpn(pfStd,pfErr,pcPat,pcOwn,pcPgm,pcBld,&stDocPar.isHdr,&stDocPar.isAnc,&stDocPar.isIdt,&stDocPar.isPat,&stDocPar.siPs1,&stDocPar.siPs2,&stDocPar.siPr3);
          if (pvDocHdl==NULL) {
@@ -2712,6 +2812,64 @@ EVALUATE:
       if (pfErr!=NULL) {
          fprintf(pfErr,"Syntax for built-in function 'DELENV' not valid\n");
          fprintf(pfErr,"%s %s DELENV variable\n",pcDep,argv[0]);
+      }
+      ERROR(CLERTC_CMD,NULL);
+   } else if (asBif[CLE_BUILTIN_IDX_LSTENV].isBif && strxcmp(isCas,argv[1],"LSTENV",0,0,FALSE)==0) {
+      if (argc==2) {
+         if (pfOut!=NULL) fprintf(pfOut,"Status for all possible usable environment variables:\n");
+         if (pfStd!=NULL) {
+            for (const TsClpArgument* p=psEnvTab;p!=NULL && p->pcKyw!=NULL;p++) {
+               char acEnv[1024];
+               const C08* pcHlp=getenvar(p->pcKyw,0,sizeof(acEnv),acEnv);
+               if (pcHlp!=NULL) {
+                  U32 isList=FALSE;
+                  U32 isMatch=FALSE;
+                  fprintf(pfStd,"%s=%s",p->pcKyw,pcHlp);
+                  for (const TsClpArgument* s=p->psTab; s!=NULL && s->pcKyw!=NULL; s++) {
+                     isList=TRUE;
+                     if (strcmp(s->pcKyw,pcHlp)==0) {
+                        isMatch=TRUE;
+                     }
+                  }
+                  if (isList && isMatch==FALSE) {
+                     U32 i=0;
+                     if (CLPISF_SEL(p->uiFlg)) {
+                        fprintf(pfStd," (invalid value defined (valid are: ");
+                     } else {
+                        fprintf(pfStd," (free value defined (possible also: ");
+                     }
+                     for (const TsClpArgument* s=p->psTab; s!=NULL && s->pcKyw!=NULL; s++) {
+                        if (i) {
+                           fprintf(pfStd,"/%s",s->pcKyw);
+                        } else {
+                           fprintf(pfStd,"%s",s->pcKyw);
+                        }
+                        i++;
+                     }
+                     fprintf(pfStd,"))");
+                  }
+                  fprintf(pfStd,"\n");
+               } else {
+                  fprintf(pfStd,"%s is undefined\n",p->pcKyw);
+               }
+            }
+         }
+         ERROR(CLERTC_OK,NULL);
+      }
+      if (pfErr!=NULL) {
+         fprintf(pfErr,"Syntax for built-in function 'LSTENV' not valid\n");
+         fprintf(pfErr,"%s %s LSTENV\n",pcDep,argv[0]);
+      }
+      ERROR(CLERTC_CMD,NULL);
+   } else if (asBif[CLE_BUILTIN_IDX_HLPENV].isBif && strxcmp(isCas,argv[1],"HLPENV",0,0,FALSE)==0) {
+      if (argc==2) {
+         if (pfOut!=NULL) fprintf(pfOut,"Help for all possible usable environment variables:\n");
+         vdPrintEnvars(pfStd,psEnvTab);
+         ERROR(CLERTC_OK,NULL);
+      }
+      if (pfErr!=NULL) {
+         fprintf(pfErr,"Syntax for built-in function 'HLPENV' not valid\n");
+         fprintf(pfErr,"%s %s HLPENV\n",pcDep,argv[0]);
       }
       ERROR(CLERTC_CMD,NULL);
    } else if (asBif[CLE_BUILTIN_IDX_TRACE].isBif && strxcmp(isCas,argv[1],"TRACE",0,0,FALSE)==0) {

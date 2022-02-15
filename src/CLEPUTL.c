@@ -821,14 +821,14 @@ TsDiaChr gsDiaChr={{0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0},
                    {0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0},
                    {0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0}};
 
-extern char init_char(char* p) {
+extern char init_char(const char* p) {
    unsigned int uiCcsId=localccsid();
    printd("Initialize gsDiaChr structure with CCSID %u\n",uiCcsId);
    init_diachr(&gsDiaChr,uiCcsId);
    return(p[0]);
 }
 
-extern char* init_string(char* p) {
+extern const char* init_string(const char* p) {
    init_char(p);
    return(p);
 }

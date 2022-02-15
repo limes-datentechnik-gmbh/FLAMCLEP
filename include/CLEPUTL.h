@@ -297,7 +297,7 @@
  *       CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,2,NULL     ,CLE_DOCKYW_PREFACE ,NULL                             ,"Preface"                           ,MAN_FLCL_PREFACE                          ,NULL)
  *       CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,2,"1."     ,NULL               ,"clep.main"                      ,"Command line parser"               ,MAN_CLE_CLEPMAIN                          ,NULL)
  *       CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,3,"1.1."   ,NULL               ,NULL                             ,"Command line considerations"       ,MAN_CLE_CLEPMAIN_CONSID                   ,NULL)
- *       CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,3,"1.2."   ,NULL               ,"clep.main.usedenv"              ,"Used environment variables"        ,MAN_CLE_CLEPMAIN_USEDENV                  ,NULL)
+ *       CLETAB_DOC(CLE_DOCTYP_USEDENVAR     ,3,"1.2."   ,NULL               ,"clep.main.usedenv"              ,"Used environment variables"        ,MAN_CLE_CLEPMAIN_USEDENV                  ,NULL)
  *       CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,3,"1.3."   ,NULL               ,NULL                             ,"Environment variable mapping"      ,MAN_CLE_CLEPMAIN_ENVARMAP                 ,NULL)
  *       CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,3,"1.4."   ,NULL               ,"clep.main.filemap"              ,"Filename mapping"                  ,MAN_CLE_CLEPMAIN_FILEMAP                  ,NULL)
  *       CLETAB_DOC(CLE_DOCTYP_CHAPTER       ,3,"1.5."   ,NULL               ,NULL                             ,"Key label name mapping"            ,MAN_CLE_CLEPMAIN_KEYLABMAP                ,NULL)
@@ -821,6 +821,9 @@
 
 /** Free memory space */
 #define SAFE_FREE(x) do { if ((x) != NULL) {free((void*)(x)); (x)=NULL;} } while(0)
+
+#define CHECK_ENVAR_ON(e)     ((e)!=NULL && (strcmp((e),"NO")==0 || strcmp((e),"OFF")==0))
+#define CHECK_ENVAR_OFF(e)    ((e)!=NULL && (strcmp((e),"NO")==0 || strcmp((e),"OFF")==0))
 
 typedef struct EnVarList {
 /**
@@ -1527,8 +1530,8 @@ extern int           ebcdic_snprintf(char* string, size_t size, const char* form
 extern int           ebcdic_sprintf(char* string, const char* format, ...);
 extern int           ebcdic_fprintf(FILE* file, const char* format, ...);
 
-extern char          init_char(char* p);
-extern char*         init_string(char* p);
+extern char          init_char(const char* p);
+extern const char*   init_string(const char* p);
 
 #  define HSH_PBRK   "\x7B\x4A\x63\xB1\x69"
 #  define ATS_PBRK   "\x7C\xB5\x80\xEC\x44\xAC"
