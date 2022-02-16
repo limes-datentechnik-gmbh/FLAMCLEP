@@ -822,8 +822,8 @@
 /** Free memory space */
 #define SAFE_FREE(x) do { if ((x) != NULL) {free((void*)(x)); (x)=NULL;} } while(0)
 
-#define CHECK_ENVAR_ON(e)     ((e)!=NULL && (strcmp((e),"NO")==0 || strcmp((e),"OFF")==0))
-#define CHECK_ENVAR_OFF(e)    ((e)!=NULL && (strcmp((e),"NO")==0 || strcmp((e),"OFF")==0))
+#define CHECK_ENVAR_ON(e)     ((e)!=NULL && (strcmp((e),"ON")==0 || strcmp((e),"YES")==0))
+#define CHECK_ENVAR_OFF(e)    ((e)!=NULL && (strcmp((e),"OFF")==0 || strcmp((e),"NO")==0))
 
 typedef struct EnVarList {
 /**

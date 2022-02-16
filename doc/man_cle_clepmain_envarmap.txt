@@ -5,12 +5,14 @@ at each starting point of a lexeme and inside of a normal string.
 If the environment variable not defined the replacements below are still
 possible:
 
-* <SYSUID> - Current user id in upper case
-* <USER>   - Current user id (case sensitive)
-* <CUSER>  - Current user id in upper case == <SYSUID>
-* <Cuser>  - Current user id in title case
-* <cuser>  - Current user id in lower case
-* <HOME>   - Replaces with the users data directory, if this not
+* <SYSUID>   - Current user id in upper case
+* <USER>     - Current user id (case sensitive)
+* <CUSER>    - Current user id in upper case == <SYSUID>
+* <Cuser>    - Current user id in title case
+* <cuser>    - Current user id in lower case
+* <HOSTNAME> - The current host name of the system
+* <ENVID>    - The environment ID (default is T for test)
+* <HOME>     - Replaces with the users data directory, if this not
                available the replacements below are done:
 ** On UNIX with /home/<USER>
 ** On USS with /u/<USER>

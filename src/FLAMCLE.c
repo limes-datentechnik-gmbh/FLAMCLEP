@@ -835,13 +835,13 @@ static int siPrintChapter(FILE* pfErr, FILE* pfDoc, const TsCleDoc* psDoc, const
          fprintm(pfDoc,pcOwn,pcPgm,pcBld,psDoc->pcHdl,2);
       }
       if (isIdt && psDoc->pcIdt!=NULL && *psDoc->pcIdt) {
-         const char* pcHlp;
+         const char* pcTmp;
          const char* pcIdt=psDoc->pcIdt;
-         for (pcHlp=strchr(pcIdt,'\n');pcHlp!=NULL;pcHlp=strchr(pcIdt,'\n')) {
+         for (pcTmp=strchr(pcIdt,'\n');pcTmp!=NULL;pcTmp=strchr(pcIdt,'\n')) {
             char acIdt[strlen(pcIdt)+16];
-            snprintf(acIdt,sizeof(acIdt),"indexterm:[%.*s]",(int)(pcHlp-pcIdt),pcIdt);/*nodiac*/
+            snprintf(acIdt,sizeof(acIdt),"indexterm:[%.*s]",(int)(pcTmp-pcIdt),pcIdt);/*nodiac*/
             fprintm(pfDoc,pcOwn,pcPgm,pcBld,acIdt,1);
-            pcIdt=pcHlp+1;
+            pcIdt=pcTmp+1;
          }
          char acIdt[strlen(pcIdt)+16];
          snprintf(acIdt,sizeof(acIdt),"indexterm:[%s]",pcIdt);/*nodiac*/
@@ -2710,7 +2710,7 @@ EVALUATE:
       }
       if (pfErr!=NULL) {
          fprintf(pfErr,"Syntax for built-in function 'GETPROP' not valid\n");
-         for (i=0;psCmd[i].pcKyw!=NULL ;i++) {
+         for (i=0;psCmd[i].pcKyw!=NULL;i++) {
             if (psCmd[i].siFlg) {
                fprintf(pfErr,"%s %s GETPROP %s",pcDep,argv[0],psCmd[i].pcKyw);
                efprintf(pfErr,"[.path] [DEPTH1 | DEPTH2 | ... | DEPTH9 | DEPALL | DEFALL]\n");
@@ -2751,10 +2751,10 @@ EVALUATE:
    } else if (asBif[CLE_BUILTIN_IDX_SETENV].isBif && strxcmp(isCas,argv[1],"SETENV",0,0,FALSE)==0) {
       if (argc==3) {
          const char* pcVal;
-         const char* pcEnv="";
+         const char* pcTmp="";
          pcVal=strchr(argv[2],'=');
          if (pcVal!=NULL) {
-            *((char*)pcVal)=EOS; pcVal++; pcEnv=argv[2];
+            *((char*)pcVal)=EOS; pcVal++; pcTmp=argv[2];
          } else {
             if (pfErr!=NULL) {
                fprintf(pfErr,"Syntax for built-in function 'SETENV' not valid\n");
@@ -2762,7 +2762,7 @@ EVALUATE:
             }
             ERROR(CLERTC_CMD,NULL);
          }
-         srprintf(&pcCnf,&szCnf,strlen(pcOwn)+strlen(pcPgm)+strlen(pcEnv),"%s.%s.envar.%s",pcOwn,pcPgm,pcEnv);
+         srprintf(&pcCnf,&szCnf,strlen(pcOwn)+strlen(pcPgm)+strlen(pcTmp),"%s.%s.envar.%s",pcOwn,pcPgm,pcTmp);
          if (pcCnf==NULL) {
             if (pfErr!=NULL) {
                fprintf(pfErr,"Allocation of memory for envar string failed\n");
@@ -2819,38 +2819,36 @@ EVALUATE:
          if (pfOut!=NULL) fprintf(pfOut,"Status for all possible usable environment variables:\n");
          if (pfStd!=NULL) {
             for (const TsClpArgument* p=psEnvTab;p!=NULL && p->pcKyw!=NULL;p++) {
-               char acEnv[1024];
-               const C08* pcHlp=getenvar(p->pcKyw,0,sizeof(acEnv),acEnv);
-               if (pcHlp!=NULL) {
+               char        acEnv[1024];
+               const C08*  pcTmp=getenvar(p->pcKyw,0,sizeof(acEnv),acEnv);
+               if (pcTmp!=NULL) {
                   U32 isList=FALSE;
                   U32 isMatch=FALSE;
-                  fprintf(pfStd,"%s=%s",p->pcKyw,pcHlp);
+                  fprintf(pfStd,"%s=%s",p->pcKyw,pcTmp);
                   for (const TsClpArgument* s=p->psTab; s!=NULL && s->pcKyw!=NULL; s++) {
                      isList=TRUE;
-                     if (strcmp(s->pcKyw,pcHlp)==0) {
+                     if (strcmp(s->pcKyw,pcTmp)==0) {
                         isMatch=TRUE;
                      }
                   }
                   if (isList && isMatch==FALSE) {
-                     U32 i=0;
                      if (CLPISF_SEL(p->uiFlg)) {
                         fprintf(pfStd," (invalid value defined (valid are: ");
                      } else {
                         fprintf(pfStd," (free value defined (possible also: ");
                      }
                      for (const TsClpArgument* s=p->psTab; s!=NULL && s->pcKyw!=NULL; s++) {
-                        if (i) {
-                           fprintf(pfStd,"/%s",s->pcKyw);
-                        } else {
+                        if (s==p->psTab) {
                            fprintf(pfStd,"%s",s->pcKyw);
+                        } else {
+                           fprintf(pfStd,"/%s",s->pcKyw);
                         }
-                        i++;
                      }
                      fprintf(pfStd,"))");
                   }
                   fprintf(pfStd,"\n");
                } else {
-                  fprintf(pfStd,"%s is undefined\n",p->pcKyw);
+                  fprintf(pfStd,"* %s - %s -> is undefined\n",p->pcKyw,p->pcHlp);
                }
             }
          }
