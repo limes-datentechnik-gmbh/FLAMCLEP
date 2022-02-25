@@ -2820,17 +2820,12 @@ EVALUATE:
          if (pfStd!=NULL) {
             for (const TsClpArgument* p=psEnvTab;p!=NULL && p->pcKyw!=NULL;p++) {
                char        acEnv[1024];
-               const C08*  pcTmp=getenvar(p->pcKyw,0,sizeof(acEnv),acEnv);
+               const C08*  pcTmp=GETENV(p->pcKyw);
                if (pcTmp!=NULL) {
-                  U32 isList=FALSE;
-                  U32 isMatch=FALSE;
+                  const TsClpArgument* psArg=psClpFindAgument(isCas,siMkl,pcTmp,p->psTab);
+                  U32                  isList=(p->psTab!=NULL)?TRUE:FALSE;
+                  U32                  isMatch=(psArg!=NULL)?TRUE:FALSE;
                   fprintf(pfStd,"%s=%s",p->pcKyw,pcTmp);
-                  for (const TsClpArgument* s=p->psTab; s!=NULL && s->pcKyw!=NULL; s++) {
-                     isList=TRUE;
-                     if (strcmp(s->pcKyw,pcTmp)==0) {
-                        isMatch=TRUE;
-                     }
-                  }
                   if (isList && isMatch==FALSE) {
                      if (CLPISF_SEL(p->uiFlg)) {
                         fprintf(pfStd," (invalid value defined (valid are: ");
@@ -2848,7 +2843,12 @@ EVALUATE:
                   }
                   fprintf(pfStd,"\n");
                } else {
-                  fprintf(pfStd,"* %s - %s -> is undefined\n",p->pcKyw,p->pcHlp);
+                  pcTmp=getenvar(p->pcKyw,0,sizeof(acEnv),acEnv);
+                  if (pcTmp!=NULL) {
+                     fprintf(pfStd,"* %s (%s) -> is undefined but default for replacement\n",p->pcKyw,pcTmp);
+                  } else {
+                     fprintf(pfStd,"* %s -> is undefined\n",p->pcKyw);
+                  }
                }
             }
          }

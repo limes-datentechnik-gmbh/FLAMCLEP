@@ -1,8 +1,11 @@
 Environment variables can be managed via the operating system or via the
 &{PGM} configuration. The latter can be managed with the built-in
 functions <<CLEP.BUILTIN.SETENV,SETENV>>, <<CLEP.BUILTIN.GETENV,GETENV>>
-and <<CLEP.BUILTIN.DELENV,DELENV>>. There are also some platform-specific
-mechanishms that can be used to set environment variables:
+and <<CLEP.BUILTIN.DELENV,DELENV>>. To list the current state of all usable environment
+variables the built-in function <<CLEP.BUILTIN.LSTENV,LSTENV>> can be used.
+For help messages for each usable environment variable please use <<CLEP.BUILTIN.HLPENV,HLPENV>>
+There are also some platform-specific mechanishms that can be used to
+set environment variables:
 
 ..Linux, Windows, USS and other Unix-like OS
 Environment variables are read from the file `.stdenv` in the current

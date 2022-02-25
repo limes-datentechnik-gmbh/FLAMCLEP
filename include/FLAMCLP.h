@@ -535,6 +535,26 @@ extern int siClpSymbolTableUpdate(
    void*                         pvHdl,
    TsClpSymUpd*                  psSym);
 
+/**
+ * @brief Find a argument in a argument table
+ *
+ * The function can be used for selections of environment variables.
+ * There is no determination of the minimum key word length for each
+ * entry. This means that the qualifier must be unique for the minimum
+ * length provided.
+ *
+ * @param isCas   True for case sensitive compare
+ * @param siKwl   The minimum key word length which must be match
+ * @param pcKyw   The keyword lokking for
+ * @param psTab   The table
+ * @return        The pointer to the argument if found or NULL without a match.
+ */
+extern const TsClpArgument* psClpFindAgument(
+   const int                     isCas,
+   const int                     siKwl,
+   const char*                   pcKyw,
+   const TsClpArgument*          psTab);
+
 /**********************************************************************/
 
 #endif // INC_FLAMCLP_H

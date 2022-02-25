@@ -182,13 +182,14 @@
  * 1.3.131: Envar 'CLP_MALLOC_STATISTICS' and 'CLP_SYMTAB_STATISTICS' requires now "YES" or "ON"
  * 1.3.132: Secure erase memory for dynamic entries in CLP structure if CLPFLG_PWD used
  * 1.3.133: Add new about function with indentation
+ * 1.3.134: Add new function psClpFindAgument to find arguments in a table (for envar processing)
  *
 **/
 
-#define CLP_VSN_STR       "1.3.133"
+#define CLP_VSN_STR       "1.3.134"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        3
-#define CLP_VSN_REVISION       133
+#define CLP_VSN_REVISION       134
 
 /* Definition der Konstanten ******************************************/
 
@@ -3229,6 +3230,33 @@ static int siClpSymCal(
       }
    }
    return(CLP_OK);
+}
+
+extern const TsClpArgument* psClpFindAgument(
+   const int                     isCas,
+   const int                     siKwl,
+   const char*                   pcKyw,
+   const TsClpArgument*          psTab)
+{
+   const TsClpArgument*          psHlp=NULL;
+   int                           i,j,k;
+   for (i=0,psHlp=psTab;psHlp!=NULL && psHlp->pcKyw!=NULL;psHlp++,i++) {
+      if (!CLPISF_LNK(psHlp->uiFlg)) {
+         if (isCas) {
+            for (k=j=0;k==0 && pcKyw[j]!=EOS && psHlp->pcKyw!=NULL;j++) {
+               if (pcKyw[j]!=psHlp->pcKyw[j]) k++;
+            }
+         } else {
+            for (k=j=0;k==0 && pcKyw[j]!=EOS && psHlp->pcKyw!=NULL;j++) {
+               if (toupper(pcKyw[j])!=toupper(psHlp->pcKyw[j])) k++;
+            }
+         }
+         if (k==0 && j>=siKwl) {
+            return(psHlp);
+         }
+      }
+   }
+   return(NULL);
 }
 
 static const TsSym* psClpFndSym(
