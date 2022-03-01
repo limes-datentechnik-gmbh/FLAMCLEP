@@ -1,6 +1,6 @@
 # CLE/P documentation files
 
-CLE_DOCF = clepmain clepmain_consid clepmain_usedenv clepmain_envarmap clepmain_filemap clepmain_keylabmap clepmain_ebcdic
+CLE_DOCF = main main_consid main_usedenv main_envarmap main_filemap main_keylabmap main_ebcdic
 CLE_DOCF += program_synopsis program_help program_syntax program_commands builtin_functions
 CLE_DOCF += builtin_version builtin_about builtin_license builtin_grammar builtin_lexemes builtin_syntax  
 CLE_DOCF += builtin_setenv builtin_getenv builtin_delenv builtin_lstenv builtin_hlpenv builtin_getowner builtin_setowner builtin_errors

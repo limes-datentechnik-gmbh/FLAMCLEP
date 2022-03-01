@@ -72,7 +72,7 @@ Below, you can find a possibly incomplete list of FLAMCLE feature:
  * * Support property definitions over environment variables to overrule hard coded default properties
  * * Keywords (commands, built-in functions, ON, OFF, ALL, DEPTH1, ...) can start optional with "-" or "--"
  * * Support for parameter files per command, object or overlay
- * * File name mapping and DD:NAME support (see man_cle_main.txt)
+ * * File name mapping and DD:NAME support (see man_clep_main.txt)
  * * Return/condition/exit code and reason code handling
  * * On EBCDIC systems we use a code page specific interpretation of punctuation characters (<pre>!$#@[\]^`{|}~</pre>) dependent on the environment variable LANG
  * * Extensive manual page management including replacement of owner (&{OWN}) and program name (&{PGM})

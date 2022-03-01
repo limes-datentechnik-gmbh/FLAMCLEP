@@ -4,7 +4,7 @@ functions <<CLEP.BUILTIN.SETENV,SETENV>>, <<CLEP.BUILTIN.GETENV,GETENV>>
 and <<CLEP.BUILTIN.DELENV,DELENV>>. To list the current state of all usable environment
 variables the built-in function <<CLEP.BUILTIN.LSTENV,LSTENV>> can be used.
 For help messages for each usable environment variable please use <<CLEP.BUILTIN.HLPENV,HLPENV>>
-There are also some platform-specific mechanishms that can be used to
+There are also some platform-specific mechanisms that can be used to
 set environment variables:
 
 ..Linux, Windows, USS and other Unix-like OS
@@ -13,17 +13,9 @@ working directory or the user's home directory. The file in the home
 directory is only considered if the file does not exist in the working
 directory or cannot be read.
 
-..Micro Focus EDZ
-For Micro Focus EDZ environments, the DD name SYSVAR is supported to
-define system variables. The function used to read the `keyword=value`
-pairs automatically detects if EBCDIC is used (character > 0x80) and
-converts the lines automatically to the local character set.
-
 ..Mainframe systems
 `DD:STDENV` or the data set name `&SYSUID..STDENV` can alternatively be
-used to set environment variables. Some of the environment variables
-(e.g. LANG, ENVID, ...) can also be set through system variable
-(`&FLZEDC`) definitions (see install.txt) on z/OS.
+used to set environment variables.
 
 The `STDENV` file allows to define the `&{PGM}_CONFIG_FILE`,
 `&{PGM}_DEFAULT_OWNER_ID`, `LANG` and other environment variables
@@ -82,7 +74,7 @@ the correct syntax. Beside `recfm` with a valid record format (not
 + or *) and `lrecl`, the `space` parameter can be set.
 All other file mode parameters are managed by CLP.
 
-.Property file vs. environment variables
+..Property file vs. environment variables
 Beside all the environment variables managed by CLE it is possible to
 set all properties as environment variables to override the hard coded
 default values with CLP. If a property is defined as environment variable
@@ -119,3 +111,5 @@ FLCL_ICNV_TO=UTF-8                # "UTF-8" could result in errors
 
 See <<CLEP.APPENDIX.PROPERTIES,Appendix Properties>> for the current
 property file content.
+
+..Usable environment variables
