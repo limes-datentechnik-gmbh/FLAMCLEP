@@ -462,7 +462,8 @@ typedef struct ClpArgument {
  * @param[in]   flg   Only CLPFLG_NON or CLPFLG_SEL are useful.
  * @param[in]   tab   is NULL or a pointer to a selection (constant definition).
  * @param[in]   dft   is the hard coded default value which will be set if defined.
- * @param[in]   man   is a pointer to alternate list of names also supported for the variable (can be misused for system symbols or others).
+ * @param[in]   man   if no '\n' found, it will be print in round brackets as alternate list of names also supported for the variable (can be used for system symbols or others).
+ *                    if a '\n' found it will be printed as additional manpage behind the environment variable and the help message.
  * @param[in]   hlp   is a pointer to a single line help message.
  */
 #define CLPENVTAB_ENTRY(kyw,flg,tab,dft,man,hlp) { CLPTYP_STRING,(kyw), NULL,0,0,0,0,0,(flg),(tab),(dft),(man),(hlp),0,0.0,NULL,NULL},

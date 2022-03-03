@@ -794,7 +794,11 @@ static void vdPrintEnvars(FILE* pfDoc,const TsClpArgument* psEnvTab) {
    if (pfDoc!=NULL) {
       for (const TsClpArgument* p=psEnvTab;p->pcKyw!=NULL;p++) {
          if (p->pcMan!=NULL) {
-            fprintf(pfDoc,"* %s (%s) - %s\n",p->pcKyw,p->pcMan,p->pcHlp);
+            if (strchr(p->pcMan,'\n')!=NULL) {
+               fprintf(pfDoc,"* %s - %s\n%s\n",p->pcKyw,p->pcHlp,p->pcMan);
+            } else {
+               fprintf(pfDoc,"* %s (%s) - %s\n",p->pcKyw,p->pcMan,p->pcHlp);
+            }
          } else {
             fprintf(pfDoc,"* %s - %s\n",p->pcKyw,p->pcHlp);
          }
