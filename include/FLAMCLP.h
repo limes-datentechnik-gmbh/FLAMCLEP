@@ -549,7 +549,7 @@ extern int siClpSymbolTableUpdate(
  * @param psTab   The table
  * @return        The pointer to the argument if found or NULL without a match.
  */
-extern const TsClpArgument* psClpFindAgument(
+extern const TsClpArgument* psClpFindArgument(
    const int                     isCas,
    const int                     siKwl,
    const char*                   pcKyw,

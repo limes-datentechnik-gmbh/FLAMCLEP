@@ -2826,7 +2826,7 @@ EVALUATE:
                char        acEnv[1024];
                const C08*  pcTmp=GETENV(p->pcKyw);
                if (pcTmp!=NULL) {
-                  const TsClpArgument* psArg=psClpFindAgument(isCas,siMkl,pcTmp,p->psTab);
+                  const TsClpArgument* psArg=psClpFindArgument(isCas,siMkl,pcTmp,p->psTab);
                   U32                  isList=(p->psTab!=NULL)?TRUE:FALSE;
                   U32                  isMatch=(psArg!=NULL)?TRUE:FALSE;
                   fprintf(pfStd,"%s=%s",p->pcKyw,pcTmp);

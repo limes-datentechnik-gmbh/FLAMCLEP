@@ -182,7 +182,7 @@
  * 1.3.131: Envar 'CLP_MALLOC_STATISTICS' and 'CLP_SYMTAB_STATISTICS' requires now "YES" or "ON"
  * 1.3.132: Secure erase memory for dynamic entries in CLP structure if CLPFLG_PWD used
  * 1.3.133: Add new about function with indentation
- * 1.3.134: Add new function psClpFindAgument to find arguments in a table (for envar processing)
+ * 1.3.134: Add new function psClpFindArgument to find arguments in a table (for envar processing)
  *
 **/
 
@@ -3232,14 +3232,15 @@ static int siClpSymCal(
    return(CLP_OK);
 }
 
-extern const TsClpArgument* psClpFindAgument(
+extern const TsClpArgument* psClpFindArgument(
    const int                     isCas,
    const int                     siKwl,
    const char*                   pcKyw,
    const TsClpArgument*          psTab)
 {
    const TsClpArgument*          psHlp=NULL;
-   int                           i,j,k;
+   int                           i,j,k,l=strlen(pcKyw);
+   if (l>siKwl) l=siKwl;
    for (i=0,psHlp=psTab;psHlp!=NULL && psHlp->pcKyw!=NULL;psHlp++,i++) {
       if (!CLPISF_LNK(psHlp->uiFlg)) {
          if (isCas) {
@@ -3251,7 +3252,7 @@ extern const TsClpArgument* psClpFindAgument(
                if (toupper(pcKyw[j])!=toupper(psHlp->pcKyw[j])) k++;
             }
          }
-         if (k==0 && j>=siKwl) {
+         if (k==0 && j>=l) {
             return(psHlp);
          }
       }
