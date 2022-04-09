@@ -37,6 +37,10 @@
 
 /**********************************************************************/
 
+// TODO: The macros below are defined in multiple places.
+// The standard header stdbool.h already defines true and false which is part of ISO C / C99.
+// Either use the macros from stdbool.h or put the below defines in a separte header BOOL.h
+// and includ it where needed.
 #ifndef FALSE
 #  define FALSE               0
 #endif
