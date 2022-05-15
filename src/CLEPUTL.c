@@ -2683,7 +2683,7 @@ static const char* adjpfx(char* file, int size)
     } else {
        return "<SYSUID>";
     }
-# elif __USS__
+# elif defined(__USS__)
     if (file[0]=='/' && file[1]=='/' && file[2]=='D' && file[3]=='S' && file[4]==':') {
        file[2] = '\'';
        for (p1=file+3,p2=file+5 ; *p2 ; p1++,p2++) {
@@ -2756,7 +2756,7 @@ static char* dadjpfx(const char* file,char** tilde)
        strcpy(b,file);
        *tilde=ISPATHNAME(b)?"<HOME>":"<SYSUID>";
     }
-# elif __USS__
+# elif defined(__USS__)
     if (file[0]=='/' && file[1]=='/' && file[2]=='D' && file[3]=='S' && file[4]==':') {
        b[0]='/';
        b[1]='/';
