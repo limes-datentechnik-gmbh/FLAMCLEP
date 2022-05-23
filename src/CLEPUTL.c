@@ -2863,6 +2863,20 @@ extern char* mapfil(char* file,int size)
    return(file);
 }
 
+extern char* mapfil2(char* file,int size)
+{
+   unEscape(file,file);
+   rplchar(file,size,1,C_TLD,adjpfx(file,size));
+   rplenvar(file,size,'<','>');
+#ifdef __WIN__
+   size_t l=strlen(file);
+   for (size_t i=0;i<l;i++) {
+      if (file[i]=='/') file[i]=C_BSL;
+   }
+#endif
+   return(file);
+}
+
 extern char* dmapfil(const char* file, int method)
 {
    char* pfx="";

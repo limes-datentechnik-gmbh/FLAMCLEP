@@ -1169,6 +1169,16 @@ extern char* dmapxml(const char* string,int method);
 extern char* mapfil(char* file,int size);
 
 /**
+ * Replace '~' with "<HOME>" and all environment variables enclosed with '<' and '>' to build a file name
+ * and change all slashes to backslashes on windows systems
+ * @param file string for replacement
+ * @param size size of replacement string
+ * @return pointer to file
+ */
+extern char* mapfil2(char* file,int size);
+
+
+/**
  * Replace '~' with "<HOME>" and all environment variables enclosed with '<' and '>' to build a dynamic file name
  * @param file string for replacement
  * @param method conversion method (1 - to upper, 2 - to lower, else nothing)
