@@ -142,7 +142,9 @@ extern const char* pcCleAbout(const int l, const int s, char* b);
  * which will be printed at the and of the 'Used Environemnt Variable'
  * chapter.
  *
- * @param[in]  pvGbl Pointer to a global handle given to called functions in the command table
+ * @param[in]  pfEnv Optional callback function to load own environment
+ * @param[in]  pfOpn Optional callback function to open a global handle for INI, MAP, RUN and FIN functions
+ * @param[in]  pfCls Callback to close the global handle (must be provided if open callback given)
  * @param[in]  psCmd Pointer to the table which defines the commands
  * @param[in]  argc  Number of command line parameters (argc of main(int argc, char* argv[]))
  * @param[in]  argv  List of pointers to the command line parameters (argv of main(int argc, char* argv[]))
@@ -153,7 +155,6 @@ extern const char* pcCleAbout(const int l, const int s, char* b);
  * @param[in]  isCas Switch to enable case sensitive interpretation of the command line (recommended is FALSE)
  * @param[in]  isPfl Switch to enable parameter file support for object, overlays and arrays (recommended is TRUE)
  * @param[in]  isRpl Switch to enable replacement of environment variables (recommended is TRUE)
- * @param[in]  isEnv Switch to load environment variables from default files (recommended is TRUE if no own load done else FALSE)
  * @param[in]  siMkl Integer defining the minimal key word length (siMkl<=0 --> full length, no auto abbreviation)
  * @param[in]  pfOut File pointer for help and error messages (if not defined stderr will be used)
  * @param[in]  pfTrc Default trace file if no trace file is defined with the configuration data management (recommended: NULL, stdout or stderr)
@@ -199,7 +200,9 @@ extern const char* pcCleAbout(const int l, const int s, char* b);
  *>64 - Special condition code for job control\n
  */
 extern int siCleExecute(
-   void*                         pvGbl,
+   TfEnv*                        pfEnv,
+   TfOpn*                        pfOpn,
+   TfCls*                        pfCls,
    const TsCleCommand*           psCmd,
    int                           argc,
    char*                         argv[],
@@ -210,7 +213,6 @@ extern int siCleExecute(
    const int                     isCas,//
    const int                     isPfl,//
    const int                     isRpl,//
-   const int                     isEnv,
    const int                     siMkl,//
    FILE*                         pfOut,
    FILE*                         pfTrc,

@@ -112,7 +112,7 @@
  * 1.1.60: Fix wrong hour at time entry if daylight saving time used
  * 1.1.62: Support optional headline in the first level of docu generation
  * 1.1.63: Accept decimal number as a float if it is a integer and the expected type is float
- * 1.1.64: Make acPro and acSrc dynamic to reduce memory consumption of symbol table
+ * 1.1.64: Make acPro and acSrc dynamic to reduce memory utilization of symbol table
  * 1.1.65: Support also grave (` - 0x60) to enclose strings
  * 1.1.66: Add new flag bit to separate default from defined properties
  * 1.1.67: Correct type of variable t to time_t to get correct time on z/OS
@@ -869,6 +869,8 @@ static inline int CLPERR(TsHdl* psHdl,int siErr, char* pcMsg, ...) {
             fprintf(psHdl->pfErr,"%s Cause: Row=%d Column=%d from string file '%s'\n",              fpcPre(psHdl,1),psHdl->siRow,psHdl->siCol,psHdl->pcSrc+strlen(CLPSRC_SRF));
          } else if (strncmp(psHdl->pcSrc,CLPSRC_CMF,strlen(CLPSRC_CMF))==0) {
             fprintf(psHdl->pfErr,"%s Cause: Row=%d Column=%d from command file '%s'\n",             fpcPre(psHdl,1),psHdl->siRow,psHdl->siCol,psHdl->pcSrc+strlen(CLPSRC_CMF));
+         } else if (strncmp(psHdl->pcSrc,CLPSRC_ISR,strlen(CLPSRC_ISR))==0) {
+            fprintf(psHdl->pfErr,"%s Cause: Row=%d Column=%d from internal string\n",               fpcPre(psHdl,1),psHdl->siRow,psHdl->siCol);
          } else {
             fprintf(psHdl->pfErr,"%s Cause: Row=%d Column=%d in file '%s'\n",                       fpcPre(psHdl,1),psHdl->siRow,psHdl->siCol,psHdl->pcSrc);
          }

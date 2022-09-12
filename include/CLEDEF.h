@@ -216,7 +216,7 @@ typedef int (TfCleClosePrint)(void* pvHdl);
  * @param[in]  pvHdl Pointer to the CLP handle for allocation of memory in the CLP structure.
  * @param[in]  pfOut File pointer for outputs (given over CleExecute, see siCleExecute()).
  * @param[in]  pfTrc File pointer for tracing (given over CleExecute, see siCleExecute()).
- * @param[in]  pvGbl Pointer to a global handle as black box pass through (given over CleExecute, see siCleExecute()).
+ * @param[in]  pvGbl Pointer to a global handle as black box pass through (given over CleExecute if callback pfOpn defined, see siCleExecute()).
  * @param[in]  pcOwn Current owner name (given over CleExecute, see siCleExecute()).
  * @param[in]  pcPgm Current program name (given over CleExecute, see siCleExecute()).
  * @param[out] pvClp Pointer to the corresonding FLAMCLP structure for initialisation.
@@ -261,7 +261,7 @@ typedef int (TfIni)(
  * @param[in]  pvClp Pointer to the CLP handle for allocation of memory in the CLP structure.
  * @param[in]  pfOut File pointer for outputs (mainly error messages, given over CleExecute, see siCleExecute()).
  * @param[in]  pfTrc File pointer for tracing (mainly for complex stuff, given over CleExecute, see siCleExecute()).
- * @param[in]  pvGbl Pointer to a global handle as black box pass through (given over CleExecute, see siCleExecute()).
+ * @param[in]  pvGbl Pointer to a global handle as black box pass through (given over CleExecute if callback pfOpn defined, see siCleExecute()).
  * @param[in]  piOid Pointer to the object identifier for overlay commands, if the pointer set at siCleExecute().
  * @param[in]  pvClp Pointer to the filled FLAMCLP structure (output from the command line parser).
  * @param[out] pvPar Pointer to the parameter structure, which will be filled based on the FLAMCLP structure with this function.
@@ -298,7 +298,7 @@ typedef int (TfMap)(
  * @param[in]  pvHdl Pointer to the CLP handle for allocation of memory in the FLC structure.
  * @param[in]  pfOut File pointer for outputs (given over structure CleExecute, see siCleExecute()).
  * @param[in]  pfTrc File pointer for tracing (given over structure CleExecute, see siCleExecute()).
- * @param[in]  pvGbl Pointer to a global handle as black box pass through (given over structure CleExecute, see siCleExecute()).
+ * @param[in]  pvGbl Pointer to a global handle as black box pass through (given over structure CleExecute if callback pfOpn defined, see siCleExecute()).
  * @param[in]  pcOwn Current owner name (given over structure CleExecute, see siCleExecute()).
  * @param[in]  pcPgm Current program name (given over structure CleExecute, see siCleExecute())
  * @param[in]  pcVsn Current version information (given from structure CleExecute, see siCleExecute()).
@@ -339,7 +339,7 @@ typedef int (TfRun)(
  *
  * @param[in]  pfOut File pointer for outputs (given over CleExecute, see siCleExecute()).
  * @param[in]  pfTrc File pointer for tracing (given over CleExecute, see siCleExecute()).
- * @param[in]  pvGbl Pointer to a global handle as black box pass through (given over CleExecute, see siCleExecute()).
+ * @param[in]  pvGbl Pointer to a global handle as black box pass through (given over CleExecute if callback pfOpn defined, see siCleExecute()).
  * @param[in]  pvPar Pointer to the filled parameter structure for cleanup.
  * @return     Reason code (!=0) for termination or 0 for success.
  */
@@ -348,6 +348,40 @@ typedef int (TfFin)(
    FILE*                         pfTrc,
    void*                         pvGbl,
    void*                         pvPar);
+
+/**
+ * @brief Type definition for the optional callback function to load the environment
+ *
+ * The CLEP has a own function to load the environment. This function is exported over
+ * the CLEPUTL interface and can be used to setup a more complex function to load the
+ * environment. This function can be provided to CleExecute if needed.
+ *
+ * @param[in] pfOut  File pointer for outputs (given over CleExecute, see siCleExecute()).
+ * @param[in] pfErr  File pointer for outputs (given over CleExecute, see siCleExecute()).
+ * @return  0 if success else CLE completion code
+ */
+typedef int (TfEnv)(FILE* pfOut, FILE* pfErr);
+
+/**
+ * @brief Type definition for the optional callback function to open a global handle
+ *
+ * The CleExecute open a global handle for INI, MAP, RUN and FIN function
+ * if the callback function provided.
+ *
+ * @param[in] szSiz   Size of the error message buffer below
+ * @param[out] pcMsg  Optional buffer for an error message
+ * @return Pointer to the global handle or NULL if fails
+ */
+typedef void* (TfOpn)(const size_t szSiz, char* pcMsg);
+
+/**
+ * @brief Type definition for the optional callback function to close the global handle
+ *
+ * If a open of the global handle done, then the corresponding close function must be provided.
+ *
+ * @param[in] pvGbl Pointer to the global handle to close
+ */
+typedef void (TfCls)(void* pvGbl);
 
 /**
  * @brief Type definition for the CLE message function

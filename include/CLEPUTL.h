@@ -351,17 +351,16 @@
  *       CLEDOC_CLS
  *    };
  *
- *    TsFl5Gbl*   psGbl=psFl5GblOpn(sizeof(acMsg),acMsg);
- *     siErr=siCleExecute(psGbl,asCmdTab,argc,argv,FLM_CLEP_DEFAULT_OWNER,FLM_CLEP_PROGRAM,
+ *     siErr=siCleExecute(loadEnv4Utility,(TfOpn*)psFl5GblOpn,(TfCls*)vdFl5GblCls,
+ *              argc,argv,FLM_CLEP_DEFAULT_OWNER,FLM_CLEP_PROGRAM,
  *              "limes datentechnik(R) gmbh","support@flam.de",
- *              FLM_CLEP_CASE_SENSITIVITY,TRUE,TRUE,FALSE,FLM_CLEP_MINIMAL_KEYWORDLEN,
+ *              FLM_CLEP_CASE_SENSITIVITY,TRUE,TRUE,FLM_CLEP_MINIMAL_KEYWORDLEN,
  *              pfErr,pfTrc,FLM_CLEP_DEPTH_STRING_1047,FLM_CLEP_OPTION_STRING,
  *              FLM_CLEP_SEPARATION_STRING,psMain->acLicTxt,
  *              FLM_VSN_STR"-"__BUILDNRSTR__,psMain->acVersion,psMain->acAbout,
  *              FLM_CLEP_PROGRAM_HELP,
  *              NULL,pcFlmErrors,asOthTab,NULL,siClpFile2String,
  *              NULL,(psGbl->isSafClpControl)?siClpSaf:NULL,pcDpa,0,asDocTab,asFl5EnvVarTab,MAN_FLCL_MAIN_USEDENV);
- *    vdFl5GblCls(psGbl);
  * }
  * @endcode
  *

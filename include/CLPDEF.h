@@ -125,6 +125,7 @@
 #define CLPSRC_CMF               ":command file:"         /**< @brief From command file*/
 #define CLPSRC_PAF               ":parameter file:"       /**< @brief Parameter file*/
 #define CLPSRC_SRF               ":string file:"          /**< @brief String file*/
+#define CLPSRC_ISR               ":internal string:"      /**< @brief Internal string*/
 
 /**
  * @brief Defines a structure with error information

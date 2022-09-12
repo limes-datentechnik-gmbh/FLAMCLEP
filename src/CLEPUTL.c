@@ -4178,6 +4178,7 @@ extern int loadEnvars(const unsigned int uiLen, const char* pcBuf, FILE* pfOut, 
       char*          pcHlp;
       const char*    pcCnt;
       const char*    pcEnd;
+      const char*    pcCmp;
       char*          pcEnv=malloc(uiLen+1);
       // cppcheck-suppress knownConditionTrueFalse
       if (pcEnv==NULL) return(-1*CLERTC_MEM);
@@ -4240,7 +4241,8 @@ extern int loadEnvars(const unsigned int uiLen, const char* pcBuf, FILE* pfOut, 
                         }
                         siErr=CLERTC_SYS;
                      } else {
-                        if (strcmp(pcVal,GETENV(pcKey))) {
+                        pcCmp=GETENV(pcKey);
+                        if (pcCmp==NULL || strcmp(pcVal,pcCmp)) {
                            if (pfErr!=NULL) {
                               fprintf(pfErr,"Put variable (%s=%s) to environment failed (strcmp(%s,GETENV(%s)))\n",pcKey,pcVal,pcVal,pcKey);
                            }

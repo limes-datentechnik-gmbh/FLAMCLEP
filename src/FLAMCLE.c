@@ -160,11 +160,12 @@
  * 1.3.84: Correct handling of pfOut and pfErr for built-in functions
  * 1.3.85: Add new about function with indentation
  * 1.3.86: Add new LSTENV and HLPENV built-in functions and use HLPENV to generate docu about used environment variables
+ * 1.3.87: Build complete environment using call back functions
  */
-#define CLE_VSN_STR       "1.3.86"
+#define CLE_VSN_STR       "1.3.87"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        3
-#define CLE_VSN_REVISION       86
+#define CLE_VSN_REVISION       87
 
 /* Definition der Konstanten ******************************************/
 
@@ -678,6 +679,7 @@ static int siClpFile2String(void* gbl, void* hdl, const char* filename, char** b
    SAFE_FREE(pcCnf); \
    SAFE_FREE(pcOwn); \
    SAFE_FREE(pcFil); \
+   if (pvGbl!=NULL && pfCls!=NULL) pfCls(pvGbl);\
    return(r); \
 } while(FALSE)
 
@@ -1327,7 +1329,9 @@ CLPENVTAB_OPN(asCleEnvVarTab) = {
 /***********************************************************************/
 
 extern int siCleExecute(
-   void*                         pvGbl,
+   TfEnv*                        pfEnv,
+   TfOpn*                        pfOpn,
+   TfCls*                        pfCls,
    const TsCleCommand*           psCmd,
    int                           argc,
    char*                         argv[],
@@ -1338,7 +1342,6 @@ extern int siCleExecute(
    const int                     isCas,
    const int                     isPfl,
    const int                     isRpl,
-   const int                     isEnv,
    const int                     siMkl,
    FILE*                         pfOut,
    FILE*                         pfTrc,
@@ -1364,6 +1367,7 @@ extern int siCleExecute(
    const char*                   pcEnv)
 {
    int                           i,j,l,siErr,siDep,siCnt;
+   void*                         pvGbl=NULL;
    TsCnfHdl*                     psCnf=NULL;
    size_t                        szCnf=0;
    char*                         pcCnf=NULL;
@@ -1520,7 +1524,10 @@ extern int siCleExecute(
       pfF2S=siClpFile2String;
    }
 
-   if (isEnv) {
+   if (pfEnv!=NULL) {
+      siErr = pfEnv(pfOut,pfErr);
+      if (siErr<0) return(-1*siErr);
+   } else {
       siErr = readEnvars(NULL,pfOut,pfErr,NULL);
       if (siErr<0) return(-1*siErr);
    }
@@ -1594,7 +1601,8 @@ extern int siCleExecute(
       if (SETENV("OWNERID",pcOwn)) {
          if (pfErr!=NULL) fprintf(pfErr,"Put variable (%s=%s) to environment failed (%d - %s)\n","OWNERID",pcOwn,errno,strerror(errno));
       } else {
-         if (strcmp(pcOwn,GETENV("OWNERID"))) {
+         m=GETENV("OWNERID");
+         if (m==NULL || strcmp(pcOwn,m)) {
             if (pfErr!=NULL) fprintf(pfErr,"Put variable (%s=%s) to environment failed (strcmp(%s,GETENV(%s)))\n","OWNERID",pcOwn,pcOwn,"OWNERID");
          } else {
 #ifdef __DEBUG__
@@ -1655,6 +1663,19 @@ extern int siCleExecute(
          }
       }
    } else pfTrc=NULL;
+
+   if (pfOpn!=NULL) {
+      char  acMsg[1028];
+      if (pfCls==NULL) {
+         if (pfErr!=NULL) fprintf(pfErr,"If a gloabl open callback provided the corresponding close callback must be given\n");
+         ERROR(CLERTC_ITF,NULL);
+      }
+      pvGbl=pfOpn(sizeof(acMsg),acMsg);
+      if (pvGbl==NULL) {
+         if (pfErr!=NULL) fprintf(pfErr,"Open of global resources failed (%s)\n",acMsg);
+         ERROR(CLERTC_SYS,NULL);
+      }
+   }
 
    for (i=0; psCmd[i].pcKyw!=NULL; i++) {
       if (psCmd[i].psTab==NULL || psCmd[i].pvClp==NULL || psCmd[i].pvPar==NULL ||
