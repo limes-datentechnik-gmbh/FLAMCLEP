@@ -702,7 +702,7 @@ static inline TsCnfHdl* psOpenConfig(FILE* pfOut, FILE* pfErr, const char* pcHom
    }
    m=GETENV(pcCnf);
 
-   if (m==NULL) {
+   if (m==NULL || *m==0x00) {
    #ifdef __ZOS__
       {
          int   i,j;
