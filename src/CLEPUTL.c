@@ -1613,7 +1613,7 @@ extern const char* mapl2c(unsigned isEBCDIC) {
    const char* pcEnv=GETENV("LANG");
    static char acHlp[32];
    size_t      i;
-   if (pcEnv!=NULL) {
+   if (pcEnv!=NULL && *pcEnv) {
       // cppcheck-suppress knownConditionTrueFalse
       if ((isEBCDIC && '0'==0xF0) || (!isEBCDIC && '0'==0x30)) {
          pcPtr=strchr(pcEnv,'.');
