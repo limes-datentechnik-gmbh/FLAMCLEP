@@ -78,30 +78,61 @@
  *                 the size including the 0-byte is the limit
  *                 if (strlen(b)==s-1) then more space is required for the complete version string
  *                 a good size for the version string is 256 byte
- * @param[int]  is Indentation string used depending on the level (NULL for a number)
+ * @param[in]   is Indentation string used depending on the level (NULL for a number)
  *
  * @return Pointer to a null-terminated version string (return(b))
  */
 extern const char* pcClpVersion2(const int l, const int s, char* b, const char* is);
+/**
+ * @brief Get version information
+ *
+ * The function returns the version information for this library
+ *
+ * @param[in]    l level of visible hierarchy of the string
+ * @param[in]    s size of the provided string buffer (including space for null termination)
+ * @param[inout] b buffer for the version string
+ *                 must contain a null-terminated string
+ *                 the version string will be concatenated
+ *                 the size including the 0-byte is the limit
+ *                 if (strlen(b)==s-1) then more space is required for the complete version string
+ *                 a good size for the version string is 256 byte
+ *
+ * @return Pointer to a null-terminated version string (return(b))
+ */
 extern const char* pcClpVersion(const int l, const int s, char* b);
 
 /**
  * @brief Get about information
  *
-* @param[in]    l level of visible hierarchy of the string
-*               the number can later be used to better visualize the hierarchy
-* @param[in]    s size of the provided string buffer (including space for null termination)
-* @param[inout] b buffer for the about string
-*                 must contain a null-terminated string
-*                 the about string will be concatenated
-*                 the size including the 0-byte is the limit
-*                 if (strlen(b)==s-1) then more space is required for the complete about string
-*               a good size for the about string is 1024 byte
-* @param[int]  is Indentation string used depending on the level (NULL for a number)
+ * @param[in]    l level of visible hierarchy of the string
+ *               the number can later be used to better visualize the hierarchy
+ * @param[in]    s size of the provided string buffer (including space for null termination)
+ * @param[inout] b buffer for the about string
+ *                 must contain a null-terminated string
+ *                 the about string will be concatenated
+ *                 the size including the 0-byte is the limit
+ *                 if (strlen(b)==s-1) then more space is required for the complete about string
+ *               a good size for the about string is 1024 byte
+ * @param[in]   is Indentation string used depending on the level (NULL for a number)
  *
  * @return pointer to a null-terminated about string (return(b))
  */
 extern const char* pcClpAbout2(const int l, const int s, char* b, const char* is);
+/**
+ * @brief Get about information
+ *
+ * @param[in]    l level of visible hierarchy of the string
+ *               the number can later be used to better visualize the hierarchy
+ * @param[in]    s size of the provided string buffer (including space for null termination)
+ * @param[inout] b buffer for the about string
+ *                 must contain a null-terminated string
+ *                 the about string will be concatenated
+ *                 the size including the 0-byte is the limit
+ *                 if (strlen(b)==s-1) then more space is required for the complete about string
+ *               a good size for the about string is 1024 byte
+ *
+ * @return pointer to a null-terminated about string (return(b))
+ */
 extern const char* pcClpAbout(const int l, const int s, char* b);
 
 /**
@@ -483,13 +514,13 @@ extern void vdClpClose(
  *
  * @return Pointer to allocated and initialized memory or NULL if error
  */
-#define pvClpAlloc(h,p,s,i) pvClpAllocFlg(h,p,s,i,0)
 extern void* pvClpAllocFlg(
    void*                         pvHdl,
    void*                         pvPtr,
    const int                     siSiz,
    int*                          piInd,
    const unsigned int            uiFlg);
+#define pvClpAlloc(h,p,s,i) pvClpAllocFlg(h,p,s,i,0)
 
 /**
  * @brief Provides error message
