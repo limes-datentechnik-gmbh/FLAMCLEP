@@ -1468,10 +1468,10 @@ extern int strxcmp(
  *
  * @return pointer to the time string
  */
+extern char* cstime(signed long long t, char* p);
 
 #define CSTIME_BUFSIZ   24
 
-extern char* cstime(signed long long t, char* p);
 
 /**
  * Load environment variables from buffer
