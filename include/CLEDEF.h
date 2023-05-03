@@ -258,7 +258,7 @@ typedef int (TfIni)(
  * If additional dynamic memory required in the CLP structure the provided
  * handle can be used for pvClpAlloc.
  *
- * @param[in]  pvClp Pointer to the CLP handle for allocation of memory in the CLP structure.
+ * @param[in]  pvHdl Pointer to the CLP handle for allocation of memory in the CLP structure.
  * @param[in]  pfOut File pointer for outputs (mainly error messages, given over CleExecute, see siCleExecute()).
  * @param[in]  pfTrc File pointer for tracing (mainly for complex stuff, given over CleExecute, see siCleExecute()).
  * @param[in]  pvGbl Pointer to a global handle as black box pass through (given over CleExecute if callback pfOpn defined, see siCleExecute()).
