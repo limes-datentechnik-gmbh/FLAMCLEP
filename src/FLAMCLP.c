@@ -183,13 +183,14 @@
  * 1.3.132: Secure erase memory for dynamic entries in CLP structure if CLPFLG_PWD used
  * 1.3.133: Add new about function with indentation
  * 1.3.134: Add new function psClpFindArgument to find arguments in a table (for envar processing)
+ * 1.3.135: Support GMOFFSET and LCOFFSET as keyword for difference between local and GM time
  *
 **/
 
-#define CLP_VSN_STR       "1.3.134"
+#define CLP_VSN_STR       "1.3.135"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        3
-#define CLP_VSN_REVISION       134
+#define CLP_VSN_REVISION       135
 
 /* Definition der Konstanten ******************************************/
 
@@ -3534,6 +3535,7 @@ extern int siClpLexemes(
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," LCHOUR    STRING - current local hour in format:            HH             \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," LCMINUTE  STRING - current local minute in format:          MM             \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," LCSECOND  STRING - current local second in format:          SS             \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," LCOFFSET  STRING - difference to Greenwich mean time:       HH             \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," GMSTAMP   STRING - current Greenwich mean stamp in format:  YYYYMMDD.HHMMSS\n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," GMDATE    STRING - current Greenwich mean date in format:   YYYYMMDD       \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," GMYEAR    STRING - current Greenwich mean year in format:   YYYY           \n");
@@ -3544,7 +3546,7 @@ extern int siClpLexemes(
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," GMHOUR    STRING - current Greenwich mean hour in format:   HH             \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," GMMINUTE  STRING - current Greenwich mean minute in format: MM             \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," GMSECOND  STRING - current Greenwich mean second in format: SS             \n");
-      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," GMSECOND  STRING - current Greenwich mean second in format: SS             \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," GMOFFSET  STRING - difference to local time:                HH             \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," SnRND10   STRING - decimal random number of length n (1 to 8)              \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," SnRND16   STRING - hexadecimal random number of length n (1 to 8)          \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                                                                            \n");
@@ -3804,6 +3806,15 @@ static int siClpConNat(
          TRACE(pfTrc,"CONSTANT-TOKEN(STR)-LEXEME(%s)\n",*ppLex);
       }
       return(CLPTOK_STR);
+   } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,pcKyw,"LCOFFSET",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         const time_t t=psHdl->siNow;
+         const I64 lt=localtime(&t)->tm_hour;
+         const I64 gt=gmtime(&t)->tm_hour;
+         snprintf(*ppLex,*pzLex,"d'%02d",(I32)(gt-lt));
+         TRACE(pfTrc,"CONSTANT-TOKEN(STR)-LEXEME(%s)\n",*ppLex);
+      }
+      return(CLPTOK_STR);
    } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,pcKyw,"GMSTAMP",0,0,FALSE)==0) {
       if (pzLex!=NULL) {
          struct tm   st;
@@ -3881,6 +3892,15 @@ static int siClpConNat(
          struct tm   st;
          time_t      t=psHdl->siNow;
          strftime(*ppLex,*pzLex,"d'%S",gmtime_r(&t,&st));
+         TRACE(pfTrc,"CONSTANT-TOKEN(STR)-LEXEME(%s)\n",*ppLex);
+      }
+      return(CLPTOK_STR);
+   } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,pcKyw,"GMOFFSET",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         const time_t t=psHdl->siNow;
+         const I64 lt=localtime(&t)->tm_hour;
+         const I64 gt=gmtime(&t)->tm_hour;
+         snprintf(*ppLex,*pzLex,"d'%02d",(I32)(lt-gt));
          TRACE(pfTrc,"CONSTANT-TOKEN(STR)-LEXEME(%s)\n",*ppLex);
       }
       return(CLPTOK_STR);
