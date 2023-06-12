@@ -184,13 +184,13 @@
  * 1.3.133: Add new about function with indentation
  * 1.3.134: Add new function psClpFindArgument to find arguments in a table (for envar processing)
  * 1.3.135: Support GMOFFSET/ABS and LCOFFSET/ABS as keyword for difference between local and GM time
- *
+ * 1.3.136: Make change of pvDat optional available at reset of CLP
 **/
 
-#define CLP_VSN_STR       "1.3.135"
+#define CLP_VSN_STR       "1.3.136"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        3
-#define CLP_VSN_REVISION       135
+#define CLP_VSN_REVISION       136
 
 /* Definition der Konstanten ******************************************/
 
@@ -1315,11 +1315,15 @@ extern void* pvClpOpen(
 }
 
 extern void vdClpReset(
-   void*                         pvHdl)
+   void*                         pvHdl,
+   void*                         pvDat)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    if (psHdl!=NULL) {
       psHdl->siTok=CLPTOK_INI;
+      if (pvDat!=NULL) {
+         psHdl->pvDat=pvDat;
+      }
    }
 }
 
@@ -1333,10 +1337,13 @@ extern int siClpParsePro(
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    int                           siCnt;
 
-   if (pcPro==NULL)
+   if (pcPro==NULL) {
       return CLPERR(psHdl,CLPERR_INT,"Property string is NULL");
+   }
 
-   if (psHdl->pcLst!=NULL) psHdl->pcLst[0]=0x00;
+   if (psHdl->pcLst!=NULL) {
+      psHdl->pcLst[0]=0x00;
+   }
 
    if (pcSrc!=NULL && *pcSrc) {
       srprintf(&psHdl->pcSrc,&psHdl->szSrc,strlen(CLPSRC_PRF)+strlen(pcSrc),"%s%s",CLPSRC_PRF,pcSrc);
@@ -1399,10 +1406,13 @@ extern int siClpParseCmd(
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    int                           siCnt;
 
-   if (pcCmd==NULL)
+   if (pcCmd==NULL) {
       return CLPERR(psHdl,CLPERR_INT,"Command string is NULL");
+   }
 
-   if (psHdl->pcLst!=NULL) psHdl->pcLst[0]=0x00;
+   if (psHdl->pcLst!=NULL) {
+      psHdl->pcLst[0]=0x00;
+   }
 
    if (pcSrc!=NULL && *pcSrc) {
       srprintf(&psHdl->pcSrc,&psHdl->szSrc,strlen(CLPSRC_CMF)+strlen(pcSrc),"%s%s",CLPSRC_CMF,pcSrc);

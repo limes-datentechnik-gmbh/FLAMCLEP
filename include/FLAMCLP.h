@@ -210,9 +210,11 @@ extern void* pvClpOpen(
  * Required after an error which was handled by the calling application to parse properties or commands correctly
  *
  * @param[inout] pvHdl Pointer to the corresponding handle created with \a pvClpOpen
+ * @param[in]    pvDat Pointer to the structure where the parsed values are stored (can be NULL if command line parsing not used or already set)
  */
 extern void vdClpReset(
-   void*                         pvHdl);
+   void*                         pvHdl,
+   void*                         pvDat);
 
 /**
  * @brief Parse the property list
