@@ -211,10 +211,16 @@ extern void* pvClpOpen(
  *
  * @param[inout] pvHdl Pointer to the corresponding handle created with \a pvClpOpen
  * @param[in]    pvDat Pointer to the structure where the parsed values are stored (can be NULL if command line parsing not used or already set)
+ * @param[out]   psErr Pointer to the error structure. If the pointer != NULL the structure is filled with pointers to
+ *                   certain error information in the CLP handle. If pfErr defined all error information are printed
+ *                   by CLP. In this case these structure is not required. If pfErr==NULL you can use these structure
+ *                   to gather all error information of CLP in memory. The pointer are only valid until vsClpClose().
  */
 extern void vdClpReset(
    void*                         pvHdl,
-   void*                         pvDat);
+   void*                         pvDat,
+   TsClpError*                   psErr)
+;
 
 /**
  * @brief Parse the property list

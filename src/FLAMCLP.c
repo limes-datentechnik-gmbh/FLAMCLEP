@@ -184,7 +184,7 @@
  * 1.3.133: Add new about function with indentation
  * 1.3.134: Add new function psClpFindArgument to find arguments in a table (for envar processing)
  * 1.3.135: Support GMOFFSET/ABS and LCOFFSET/ABS as keyword for difference between local and GM time
- * 1.3.136: Make change of pvDat optional available at reset of CLP
+ * 1.3.136: Make pvDat and psErr optional available at reset of CLP (and improve reset)
 **/
 
 #define CLP_VSN_STR       "1.3.136"
@@ -1316,13 +1316,28 @@ extern void* pvClpOpen(
 
 extern void vdClpReset(
    void*                         pvHdl,
-   void*                         pvDat)
+   void*                         pvDat,
+   TsClpError*                   psErr)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    if (psHdl!=NULL) {
       psHdl->siTok=CLPTOK_INI;
+      psHdl->siRow=1;
+      psHdl->siCol=0;
+      psHdl->siErr=0;
+      psHdl->pcInp=NULL;
+      psHdl->pcCur=NULL;
+      psHdl->pcOld=NULL;
+      psHdl->pcLex[0]=EOS;
+      psHdl->isChk=FALSE;
       if (pvDat!=NULL) {
          psHdl->pvDat=pvDat;
+      }
+      if (psErr!=NULL) {
+         psErr->ppMsg=(const char**)&psHdl->pcMsg;
+         psErr->ppSrc=(const char**)&psHdl->pcSrc;
+         psErr->piRow=&psHdl->siRow;
+         psErr->piCol=&psHdl->siCol;
       }
    }
 }
