@@ -1429,8 +1429,12 @@ extern int siClpParseCmd(
       psHdl->pcLst[0]=0x00;
    }
 
-   if (pcSrc!=NULL && *pcSrc) {
-      srprintf(&psHdl->pcSrc,&psHdl->szSrc,strlen(CLPSRC_CMF)+strlen(pcSrc),"%s%s",CLPSRC_CMF,pcSrc);
+   if (pcSrc!=NULL && *pcSrc && *pcSrc!=':') {
+      if (*pcSrc!=':') { // file
+         srprintf(&psHdl->pcSrc,&psHdl->szSrc,strlen(CLPSRC_CMF)+strlen(pcSrc),"%s%s",CLPSRC_CMF,pcSrc);
+      } else { // other source
+         srprintf(&psHdl->pcSrc,&psHdl->szSrc,strlen(pcSrc),"%s",pcSrc);
+      }
    } else {
       srprintf(&psHdl->pcSrc,&psHdl->szSrc,strlen(CLPSRC_CMD),"%s",CLPSRC_CMD);
    }
