@@ -31,6 +31,7 @@
 #include <stdio.h>
 #include <errno.h>
 #include <ctype.h>
+#include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
@@ -2287,14 +2288,15 @@ static char* drplchar(const char* string, const size_t limit, const char c, cons
             out++;
             string+=2;
          } else { // replacement
+            ptrdiff_t offset=out-buf;
             char* h=realloc_nowarn(buf,size+(valueLen-1));
             if (h==NULL) {
                free(buf);
                return NULL;
             }
             size+=valueLen-1;
-            out+=h-buf;
             buf=h;
+            out=buf+offset;
             memcpy(out,value,valueLen);
             out+=valueLen;
             string++;
@@ -2535,7 +2537,8 @@ static char* drplenvar(const char* string,const char opn, const char cls)
    char*       b=malloc(s);
    char*       r=b;
    // cppcheck-suppress knownConditionTrueFalse
-   if (b==NULL) return(NULL);
+   if (b==NULL)
+      return(NULL);
 
    while(p[0]) {
       if (p[0]==opn) {
@@ -2550,12 +2553,15 @@ static char* drplenvar(const char* string,const char opn, const char cls)
                char* v=getenvar(p+1,x,sizeof(e),e);
                if (v!=NULL) {
                   int   l=strlen(v);
+                  ptrdiff_t offset=r-b;
                   char* h=realloc_nowarn(b,s+(l-x));
                   if (h==NULL) {
                      free(b);
                      return(NULL);
                   }
-                  s+=l-x; r+=h-b; b=h;
+                  s+=l-x;
+                  b=h;
+                  r=b+offset;
                   memcpy(r,v,l);
                   r+=l; p=c+1;
                } else {
@@ -2609,7 +2615,8 @@ static char* drpltpl(const char* templ,const char* values) {
    char*       b=malloc(s);
    char*       r=b;
    // cppcheck-suppress knownConditionTrueFalse
-   if (b==NULL) return(NULL);
+   if (b==NULL)
+      return(NULL);
 
    while(p[0]) {
       if (p[0]=='%') {
@@ -2620,14 +2627,18 @@ static char* drpltpl(const char* templ,const char* values) {
             for (const char* v=values;v[0];v++) {
                if (toupper(v[0])==toupper(p[1]) && v[1]==':') {
                   const char* x=v+2;
-                  while (x[0] && x[0]!='\n') x++;
+                  while (x[0] && x[0]!='\n')
+                     x++;
                   int l=x-(v+2);
+                  ptrdiff_t offset=r-b;
                   char* h=realloc_nowarn(b,s+(l-2));
                   if (h==NULL) {
                      free(b);
                      return(NULL);
                   }
-                  s+=l-2; r+=h-b; b=h;
+                  s+=l-2;
+                  b=h;
+                  r=b+offset;
                   memcpy(r,v+2,l);
                   r+=l;
                   break;
@@ -3054,8 +3065,7 @@ extern int snprintc(char* buffer,size_t size,const char* format,...)
       va_start(argv, format);
       r = vsnprintf(buffer+h, size-h, format, argv);
       va_end(argv);
-      buffer[size-1]=0;
-      return(h+r);
+      return(r<0?r:h+r);
    } else {
       return (0);
    }
@@ -3070,15 +3080,15 @@ extern int srprintc(char** buffer,size_t* size,const size_t expansion,const char
    if ((*size)<s || *buffer==NULL) {
       s=(*size>s)?*size:2*s;
       char* b=(char*)realloc_nowarn(*buffer,s);
-      if (b==NULL) return(0);
+      if (b==NULL)
+         return(0);
       (*buffer)=b;
       (*size)=s;
    }
    va_start(argv, format);
    r = vsnprintf((*buffer)+h, (*size)-h, format, argv);
    va_end(argv);
-   (*buffer)[(*size)-1]=0;
-   return(h+r);
+   return(r<0?r:h+r);
 }
 
 extern int srprintf(char** buffer,size_t* size,const size_t expansion,const char* format,...)
@@ -3096,7 +3106,6 @@ extern int srprintf(char** buffer,size_t* size,const size_t expansion,const char
    va_start(argv, format);
    r = vsnprintf((*buffer), (*size), format, argv);
    va_end(argv);
-   (*buffer)[(*size)-1]=0;
    return(r);
 }
 
