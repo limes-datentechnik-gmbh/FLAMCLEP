@@ -2775,9 +2775,8 @@ EVALUATE:
       ERROR(CLERTC_CMD,NULL);
    } else if (asBif[CLE_BUILTIN_IDX_SETENV].isBif && strxcmp(isCas,argv[1],"SETENV",0,0,FALSE)==0) {
       if (argc==3) {
-         const char* pcVal;
+         const char* pcVal=strchr(argv[2],'=');
          const char* pcTmp="";
-         pcVal=strchr(argv[2],'=');
          if (pcVal!=NULL) {
             *((char*)pcVal)=EOS; pcVal++; pcTmp=argv[2];
          } else {
