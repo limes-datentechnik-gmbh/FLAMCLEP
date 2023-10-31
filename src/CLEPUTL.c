@@ -3891,7 +3891,7 @@ extern int file2str(void* hdl, const char* filename, char** buf, int* bufsize, c
       }
 #endif
    errno=0;
-   pfFile=fopen_hfq(filename, "r");
+   pfFile=fopen_hfq(filename, "rb");
    if (pfFile == NULL) {
       if (errmsg!=NULL && msgsiz) {
          snprintf(errmsg,msgsiz,"Open of file (%s) failed (%d - %s)",filename,errno,strerror(errno));
