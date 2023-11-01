@@ -1491,18 +1491,18 @@ extern void fprintm(FILE* file,const char* own, const char* pgm, const char* bld
          }
          ptr=hlp+6;
       } else if (strncmp(hlp+2,"DATE}",5)==0) { /*nodiac*/
-         char        acBuf[20];
-         time_t      h=time(NULL);
-         struct tm   st;
-         struct tm*  x=localtime_r(&h,&st);
+         char              acBuf[20];
+         time_t            h=time(NULL);
+         struct tm         st;
+         const struct tm*  x=localtime_r(&h,&st);
          strftime(acBuf,sizeof(acBuf),"%Y-%m-%d",x);
          fprintf(file,"%s",acBuf);
          ptr=hlp+7;
       } else if (strncmp(hlp+2,"TIME}",5)==0) { /*nodiac*/
-         char        acBuf[20];
-         time_t      h=time(NULL);
-         struct tm   st;
-         struct tm*  x=localtime_r(&h,&st);
+         char              acBuf[20];
+         time_t            h=time(NULL);
+         struct tm         st;
+         const struct tm*  x=localtime_r(&h,&st);
          strftime(acBuf,sizeof(acBuf),"%H:%M:%S",x);
          fprintf(file,"%s",acBuf);
          ptr=hlp+7;
@@ -1574,7 +1574,7 @@ extern unsigned int localccsid(void) {
    // On startup of the main program, the portable "C" locale is selected
    // as default.
    // TODO: avoid using setlocale()/localeconv() anywhere in the project (except in main()) as they are not thread-safe
-   char* oldLocale = setlocale(LC_ALL, NULL);
+   const char* oldLocale = setlocale(LC_ALL, NULL);
    setlocale(LC_ALL, "");
    charset = nl_langinfo(CODESET);
    setlocale(LC_ALL, oldLocale);
@@ -1612,13 +1612,13 @@ extern unsigned int localccsid(void) {
 extern const char* mapl2c(unsigned isEBCDIC) {
    const char* pcPtr=NULL;
    const char* pcEnv=GETENV("LANG");
-   static char acHlp[32];
-   size_t      i;
    if (pcEnv!=NULL && *pcEnv) {
       // cppcheck-suppress knownConditionTrueFalse
       if ((isEBCDIC && '0'==0xF0) || (!isEBCDIC && '0'==0x30)) {
          pcPtr=strchr(pcEnv,'.');
          if (pcPtr!=NULL) {
+            size_t      i;
+            static char acHlp[32];
             pcPtr++;
             for (i=0;i<(sizeof(acHlp)-1) && (isalnum(pcPtr[i]) || pcPtr[i]=='-' || pcPtr[i]=='_');i++) {
                acHlp[i]=pcPtr[i];
@@ -1754,8 +1754,8 @@ extern const char* lng2ccsd(const char* pcLang, unsigned isEbcdic) {
 }
 
 extern unsigned int mapcdstr(const char* p) {
-   int            o;
    if (p!=NULL) {
+      int o;
       while (1) {
          if (*p==0x00) {
             return(0);
@@ -2550,7 +2550,7 @@ static char* drplenvar(const char* string,const char opn, const char cls)
             if (c!=NULL) {
                char  e[1024];
                int   x=c-(p+1);
-               char* v=getenvar(p+1,x,sizeof(e),e);
+               const char* v=getenvar(p+1,x,sizeof(e),e);
                if (v!=NULL) {
                   int   l=strlen(v);
                   ptrdiff_t offset=r-b;
@@ -3058,10 +3058,10 @@ extern int printd(const char* format,...)
 
 extern int snprintc(char* buffer,size_t size,const char* format,...)
 {
-   va_list  argv;
-   int      r;
    unsigned int h = strlen(buffer);
    if (size >= (h+1)) {
+      int      r;
+      va_list  argv;
       va_start(argv, format);
       r = vsnprintf(buffer+h, size-h, format, argv);
       va_end(argv);
@@ -3873,9 +3873,11 @@ extern int file2str(void* hdl, const char* filename, char** buf, int* bufsize, c
    FILE* pfFile=NULL;
    const int freadLen=65536;
 
-   if (filename==NULL || buf==NULL || bufsize==NULL || *bufsize<0) {
+   (void)(hdl);//unsued
+
+   if (filename==NULL || buf==NULL || bufsize==NULL || (*buf!=NULL && (*bufsize<=0))) {
       if (errmsg!=NULL && msgsiz) {
-         snprintf(errmsg,msgsiz,"Illegal parameters passed to file2str(%p,%p,%p,%p) (Bug)",hdl,filename,buf,bufsize);
+         snprintf(errmsg,msgsiz,"Illegal parameters passed to file2str(%p,%p,%p) (Bug)",filename,buf,bufsize);
       }
       return -1; // bad args
    }
@@ -4102,11 +4104,11 @@ extern int strxcmp(
 }
 
 extern char* cstime(signed long long t, char* p) {
-   static char    acBuf[20];
-   char*          pcStr=(p!=NULL)?p:acBuf;
-   time_t         h=(t)?(time_t)t:time(NULL);
-   struct tm      st;
-   struct tm*     x=localtime_r(&h,&st);
+   static char       acBuf[20];
+   char*             pcStr=(p!=NULL)?p:acBuf;
+   time_t            h=(t)?(time_t)t:time(NULL);
+   struct tm         st;
+   const struct tm*  x=localtime_r(&h,&st);
    if (x!=NULL) {
       strftime(pcStr,sizeof(acBuf),"%Y-%m-%d %H:%M:%S",x);
    } else {
