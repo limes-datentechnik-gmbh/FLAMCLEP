@@ -273,6 +273,22 @@ extern int siClpParseCmd(
    char**                        ppLst);
 
 /**
+ * @brief Parse only the main overlay to determine to object id
+ *
+ * The function parses the beginning of command line to determine the object id for the main overlay and then it stops processing.
+ * If pvHdl or pcCmd are NULL or if the CLP handle not defined for overlay then nothing is parsed and 0 returned.
+ * If the command string parsed then the CLP handle will be reset afterwards.
+ *
+ * @param[in]  pvHdl Pointer to the corresponding handle created with \a pvClpOpen
+ * @param[in]  pcCmd Pointer to a null-terminated string containing the command for parsing
+ *
+ * @return signed integer object identifier if an overlay (>0) or 0 in each over case
+ */
+extern int siClpParseOvl(
+   void*                         pvHdl,
+   const char*                   pcCmd);
+
+/**
  * @brief Print command line syntax
  *
  * The function prints the command line syntax

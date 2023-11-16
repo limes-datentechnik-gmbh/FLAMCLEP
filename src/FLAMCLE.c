@@ -161,11 +161,12 @@
  * 1.3.85: Add new about function with indentation
  * 1.3.86: Add new LSTENV and HLPENV built-in functions and use HLPENV to generate docu about used environment variables
  * 1.3.87: Build complete environment using call back functions
+ * 1.4.88: Correct support for command overlays
  */
-#define CLE_VSN_STR       "1.3.87"
+#define CLE_VSN_STR       "1.4.88"
 #define CLE_VSN_MAJOR      1
-#define CLE_VSN_MINOR        3
-#define CLE_VSN_REVISION       87
+#define CLE_VSN_MINOR        4
+#define CLE_VSN_REVISION       88
 
 /* Definition der Konstanten ******************************************/
 
@@ -359,7 +360,7 @@ static int siCleCommandInit(
    const char*                   pcCmd,
    const char*                   pcMan,
    const char*                   pcHlp,
-   const int*                    piOid,
+   int*                          piOid,
    const TsClpArgument*          psTab,
    const int                     isCas,
    const int                     isPfl,
@@ -377,7 +378,8 @@ static int siCleCommandInit(
    void*                         pvF2S,
    TfF2S*                        pfF2S,
    void*                         pvSaf,
-   TfSaf*                        pfSaf);
+   TfSaf*                        pfSaf,
+   const char*                   pcStr);
 
 static int siCleSimpleInit(
    FILE*                         pfOut,
@@ -1248,7 +1250,7 @@ static int siPrintDocu(
                   void* pvClp=NULL;
                   char  acNum[64];
                   siErr=siCleCommandInit(pvGbl,psPar->psCmd[j].pfIni,psPar->psCmd[j].pvClp,psPar->pcOwn,psPar->pcPgm,psPar->pcBld,psPar->psCmd[j].pcKyw,psPar->psCmd[j].pcMan,psPar->psCmd[j].pcHlp,psPar->psCmd[j].piOid,psPar->psCmd[j].psTab,
-                        psPar->isCas,psPar->isPfl,psPar->isRpl,psPar->siMkl,pfOut,pfErr,NULL,psPar->pcDep,psPar->pcOpt,psPar->pcEnt,psPar->pvCnf,&pvClp,psPar->pfMsg,psPar->pvF2S,psPar->pfF2S,psPar->pvSaf,psPar->pfSaf);
+                        psPar->isCas,psPar->isPfl,psPar->isRpl,psPar->siMkl,pfOut,pfErr,NULL,psPar->pcDep,psPar->pcOpt,psPar->pcEnt,psPar->pvCnf,&pvClp,psPar->pfMsg,psPar->pvF2S,psPar->pfF2S,psPar->pvSaf,psPar->pfSaf,NULL);
                   if (siErr) return(siErr);
                   if (psDoc[i].pcNum!=NULL && *psDoc[i].pcNum) {
                      snprintf(acNum,sizeof(acNum),"%s%d.",psDoc[i].pcNum,j+1);
@@ -1862,7 +1864,7 @@ EVALUATE:
          for (i=0;psCmd[i].pcKyw!=NULL;i++) {
             if (strxcmp(isCas,argv[2],psCmd[i].pcKyw,strlen(psCmd[i].pcKyw),'.',TRUE)==0) {
                siErr=siCleCommandInit(pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,pcOwn,pcPgm,pcBld,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,psCmd[i].piOid,psCmd[i].psTab,
-                                      isCas,isPfl,isRpl,siMkl,pfStd,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf);
+                                      isCas,isPfl,isRpl,siMkl,pfStd,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf,NULL);
                if (siErr) ERROR(siErr,NULL);
                if (strlen(argv[2])==strlen(psCmd[i].pcKyw)) {
                   if (pfOut!=NULL) fprintf(pfOut,"Syntax for command '%s':\n",argv[2]);
@@ -1878,7 +1880,7 @@ EVALUATE:
                if (strxcmp(isCas,pcDef,psCmd[i].pcKyw,0,0,FALSE)==0) {
                   char acPat[strlen(pcDef)+strlen(argv[2])+2];
                   siErr=siCleCommandInit(pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,pcOwn,pcPgm,pcBld,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,psCmd[i].piOid,psCmd[i].psTab,
-                                         isCas,isPfl,isRpl,siMkl,pfStd,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf);
+                                         isCas,isPfl,isRpl,siMkl,pfStd,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf,NULL);
                   if (siErr) ERROR(siErr,NULL);
                   sprintf(acPat,"%s.%s",pcDef,argv[2]);
                   if (pfOut!=NULL) fprintf(pfOut,"Syntax for argument '%s':\n",acPat);
@@ -1970,7 +1972,7 @@ EVALUATE:
          for (i=0;psCmd[i].pcKyw!=NULL;i++) {
             if (strxcmp(isCas,argv[2],psCmd[i].pcKyw,strlen(psCmd[i].pcKyw),'.',TRUE)==0) {
                siErr=siCleCommandInit(pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,pcOwn,pcPgm,pcBld,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,psCmd[i].piOid,psCmd[i].psTab,
-                                      isCas,isPfl,isRpl,siMkl,pfStd,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf);
+                                      isCas,isPfl,isRpl,siMkl,pfStd,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf,NULL);
                if (siErr) ERROR(siErr,NULL);
                if (strlen(argv[2])==strlen(psCmd[i].pcKyw)) {
                   if (pfOut!=NULL) fprintf(pfOut,"Help for command '%s': %s\n",argv[2],psCmd[i].pcHlp);
@@ -1991,7 +1993,7 @@ EVALUATE:
                if (strxcmp(isCas,pcDef,psCmd[i].pcKyw,0,0,FALSE)==0) {
                   char acPat[strlen(psCmd[i].pcKyw)+strlen(argv[2])+2];
                   siErr=siCleCommandInit(pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,pcOwn,pcPgm,pcBld,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,psCmd[i].piOid,psCmd[i].psTab,
-                                         isCas,isPfl,isRpl,siMkl,pfStd,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf);
+                                         isCas,isPfl,isRpl,siMkl,pfStd,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf,NULL);
                   if (siErr) ERROR(siErr,NULL);
                   sprintf(acPat,"%s.%s",psCmd[i].pcKyw,argv[2]);
                   if (pfOut!=NULL) fprintf(pfOut,"Help for argument '%s': %s\n",acPat,pcClpInfo(pvHdl,acPat));
@@ -2094,7 +2096,7 @@ EVALUATE:
             }
             if (strxcmp(isCas,pcCmd,psCmd[i].pcKyw,strlen(psCmd[i].pcKyw),'.',TRUE)==0) {
                siErr=siCleCommandInit(pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,pcOwn,pcPgm,pcBld,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,psCmd[i].piOid,psCmd[i].psTab,
-                                      isCas,isPfl,isRpl,siMkl,pfStd,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf);
+                                      isCas,isPfl,isRpl,siMkl,pfStd,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf,NULL);
                if (siErr) ERROR(siErr,NULL);
                if (isMan==FALSE) {
                   if (strlen(pcCmd)==strlen(psCmd[i].pcKyw)) {
@@ -2122,7 +2124,7 @@ EVALUATE:
                if (strxcmp(isCas,pcDef,psCmd[i].pcKyw,0,0,FALSE)==0) {
                   char acPat[strlen(pcDef)+strlen(pcCmd)+2];
                   siErr=siCleCommandInit(pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,pcOwn,pcPgm,pcBld,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,psCmd[i].piOid,psCmd[i].psTab,
-                                         isCas,isPfl,isRpl,siMkl,pfStd,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf);
+                                         isCas,isPfl,isRpl,siMkl,pfStd,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf,NULL);
                   if (siErr) ERROR(siErr,NULL);
                   sprintf(acPat,"%s.%s",pcDef,pcCmd);
                   if (pfOut!=NULL) fprintf(pfOut,"Manual page fo'argument '%s':\n\n",acPat);
@@ -2243,7 +2245,7 @@ EVALUATE:
                if (strxcmp(isCas,pcCmd,psCmd[i].pcKyw,strlen(psCmd[i].pcKyw),'.',TRUE)==0) {
                   char acNum[64];
                   siErr=siCleCommandInit(pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,pcOwn,pcPgm,pcBld,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,psCmd[i].piOid,psCmd[i].psTab,
-                                         isCas,isPfl,isRpl,siMkl,pfStd,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf);
+                                         isCas,isPfl,isRpl,siMkl,pfStd,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf,NULL);
                   if (siErr) ERROR(siErr,NULL);
                   snprintf(acNum,sizeof(acNum),"%s%d.",pcCmdNum,i+1);
                   siErr=siClpDocu(pvHdl,pfDoc,pcCmd,acNum,"Command",TRUE,TRUE,FALSE,FALSE,isNbr,FALSE,TRUE,0);
@@ -2266,7 +2268,7 @@ EVALUATE:
                      char acNum[64];
                      char acPat[strlen(pcDef)+strlen(pcCmd)+2];
                      siErr=siCleCommandInit(pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,pcOwn,pcPgm,pcBld,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,psCmd[i].piOid,psCmd[i].psTab,
-                                            isCas,isPfl,isRpl,siMkl,pfStd,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf);
+                                            isCas,isPfl,isRpl,siMkl,pfStd,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf,NULL);
                      if (siErr) ERROR(siErr,NULL);
                      snprintf(acNum,sizeof(acNum),"%s%d.",pcCmdNum,i+1);
                      sprintf(acPat,"%s.%s",pcDef,pcCmd);
@@ -3019,19 +3021,12 @@ EVALUATE:
                 strxcmp(isCas,argv[1],psCmd[i].pcKyw,l,'=',TRUE)==0 ||
                 strxcmp(isCas,argv[1],psCmd[i].pcKyw,l,'(',TRUE)==0 ||
                 strxcmp(isCas,argv[1],psCmd[i].pcKyw,l,'.',TRUE)==0) {
+               int                           siOid=0;
                char*                         pcCmd=NULL;
                char*                         pcTls=NULL;
                char*                         pcLst=NULL;
                clock_t                       ckCpu1=clock();
                clock_t                       ckCpu2;
-               siErr=siCleCommandInit(pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,pcOwn,pcPgm,pcBld,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,psCmd[i].piOid,psCmd[i].psTab,
-                                      isCas,isPfl,isRpl,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf);
-               if (siErr) ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
-               if (pfOut!=NULL) {
-                  ckCpu2=clock();
-                  fprintf(pfOut,"%s Initializing of command '%s' was successful (CPU time %3.3fs)\n",cstime(0,acTs),psCmd[i].pcKyw,((double)(ckCpu2-ckCpu1))/CLOCKS_PER_SEC);
-                  ckCpu1=ckCpu2;
-               }
 
                siErr=siCleGetCommand(pfOut,pfErr,pfTrc,pcDep,psCmd[i].pcKyw,argc,argv,&pcFil,&pcCmd,pvGbl,pvF2S,pfF2S,pcDpa);
                if (siErr) ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
@@ -3041,12 +3036,27 @@ EVALUATE:
                   ckCpu1=ckCpu2;
                }
 
+               siErr=siCleCommandInit(pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,pcOwn,pcPgm,pcBld,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,psCmd[i].piOid,psCmd[i].psTab,
+                                      isCas,isPfl,isRpl,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf,pcCmd);
+               if (siErr) {
+                  SAFE_FREE(pcCmd);
+                  ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+               }
+               if (pfOut!=NULL) {
+                  ckCpu2=clock();
+                  fprintf(pfOut,"%s Initializing of command '%s' was successful (CPU time %3.3fs)\n",cstime(0,acTs),psCmd[i].pcKyw,((double)(ckCpu2-ckCpu1))/CLOCKS_PER_SEC);
+                  ckCpu1=ckCpu2;
+               }
+
                siErr=siClpParseCmd(pvHdl,pcFil,pcCmd,TRUE,TRUE,psCmd[i].piOid,&pcTls);
                if (siErr<0) {
                   if (pfErr!=NULL) fprintf(pfErr,"%s Command line parser for command '%s' failed\n",cstime(0,acTs),psCmd[i].pcKyw);
                   SAFE_FREE(pcCmd);
                   siErr=CLERTC_SYN;
                   ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+               }
+               if (psCmd[i].piOid!=NULL) {
+                  siOid=*psCmd[i].piOid;
                }
                if (pcTls!=NULL) {
                   pcLst=(char*)malloc(strlen(pcTls)+1);
@@ -3061,7 +3071,7 @@ EVALUATE:
                   ckCpu1=ckCpu2;
                }
 
-               siErr=psCmd[i].pfMap(pvHdl,pfErr,pfTrc,pvGbl,psCmd[i].piOid,psCmd[i].pvClp,psCmd[i].pvPar);
+               siErr=psCmd[i].pfMap(pvHdl,pfErr,pfTrc,pvGbl,siOid,psCmd[i].pvClp,psCmd[i].pvPar);
                if (siErr) {
                   if (siErr!=siNoR) {
                      if (pfMsg!=NULL && (pcMsg=pfMsg(siErr))!=NULL) {
@@ -3074,7 +3084,7 @@ EVALUATE:
                      siErr=CLERTC_OK;
                   }
                   SAFE_FREE(pcCmd); SAFE_FREE(pcLst);
-                  psCmd[i].pfFin(pfErr,pfTrc,pvGbl,psCmd[i].pvPar);
+                  psCmd[i].pfFin(pfErr,pfTrc,pvGbl,siOid,psCmd[i].pvPar);
                   ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
                }
                if (pfOut!=NULL) {
@@ -3083,7 +3093,7 @@ EVALUATE:
                   ckCpu1=ckCpu2;
                }
 
-               siErr=psCmd[i].pfRun(pvHdl,pfErr,pfTrc,pvGbl,pcOwn,pcPgm,pcVsn,pcAbo,pcLic,psCmd[i].pcKyw,pcCmd,pcLst,psCmd[i].pvPar,&isWrn,&siScc);
+               siErr=psCmd[i].pfRun(pvHdl,pfErr,pfTrc,pvGbl,pcOwn,pcPgm,pcVsn,pcAbo,pcLic,psCmd[i].pcKyw,pcCmd,pcLst,siOid,psCmd[i].pvPar,&isWrn,&siScc);
                SAFE_FREE(pcCmd); SAFE_FREE(pcLst);
                if (siErr) {
                   if (isWrn&0x00010000) {
@@ -3092,7 +3102,7 @@ EVALUATE:
                      } else {
                         if (pfErr!=NULL) fprintf(pfErr,"%s Run of command '%s' ends with warning (Return code: %d / Reason code: %d)\n",cstime(0,acTs),psCmd[i].pcKyw,CLERTC_WRN,siErr);
                      }
-                     psCmd[i].pfFin(pfErr,pfTrc,pvGbl,psCmd[i].pvPar);
+                     psCmd[i].pfFin(pfErr,pfTrc,pvGbl,siOid,psCmd[i].pvPar);
                      siErr=CLERTC_WRN;
                      ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
                   } else {
@@ -3101,7 +3111,7 @@ EVALUATE:
                      } else {
                         if (pfErr!=NULL) fprintf(pfErr,"%s Run of command '%s' failed (Return code: %d / Reason code: %d)\n",cstime(0,acTs),psCmd[i].pcKyw,CLERTC_RUN,siErr);
                      }
-                     psCmd[i].pfFin(pfErr,pfTrc,pvGbl,psCmd[i].pvPar);
+                     psCmd[i].pfFin(pfErr,pfTrc,pvGbl,siOid,psCmd[i].pvPar);
                      if (siScc>CLERTC_MAX) {
                         siErr=siScc;
                         ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
@@ -3117,7 +3127,7 @@ EVALUATE:
                   ckCpu1=ckCpu2;
                }
 
-               siErr=psCmd[i].pfFin(pfErr,pfTrc,pvGbl,psCmd[i].pvPar);
+               siErr=psCmd[i].pfFin(pfErr,pfTrc,pvGbl,siOid,psCmd[i].pvPar);
                vdClpClose(pvHdl,CLPCLS_MTD_ALL); pvHdl=NULL;
                if (siErr) {
                   if (pfMsg!=NULL && (pcMsg=pfMsg(siErr))!=NULL) {
@@ -3193,19 +3203,20 @@ static int siClePropertyInit(
    TfSaf*                        pfSaf)
 {
    int                           siErr;
-   int                           isOvl=(piOid==NULL)?FALSE:TRUE;
    char*                         pcPro=NULL;
    char*                         pcFil=NULL;
    int                           siFil=0;
 
    if (piFil!=NULL) *piFil=0;
    if (ppFil!=NULL) *ppFil=NULL;
-   *ppHdl=pvClpOpen(isCas,isPfl,isRpl,siMkl,pcOwn,pcPgm,pcBld,pcCmd,pcMan,pcHlp,isOvl,psTab,pvClp,pfOut,pfErr,pfTrc,pfTrc,pfTrc,pfTrc,pcDep,pcOpt,pcEnt,NULL,pvGbl,pvF2S,pfF2S,pvSaf,pfSaf);
+
+   *ppHdl=pvClpOpen(isCas,isPfl,isRpl,siMkl,pcOwn,pcPgm,pcBld,pcCmd,pcMan,pcHlp,piOid!=NULL,psTab,pvClp,pfOut,pfErr,pfTrc,pfTrc,pfTrc,pfTrc,pcDep,pcOpt,pcEnt,NULL,pvGbl,pvF2S,pfF2S,pvSaf,pfSaf);
    if (*ppHdl==NULL) {
       if (pfErr!=NULL) fprintf(pfErr,"Open of property parser for command '%s' failed\n",pcCmd);
       return(CLERTC_TAB);
    }
-   siErr=pfIni(*ppHdl,pfErr,pfTrc,pvGbl,pcOwn,pcPgm,pvClp);
+
+   siErr=pfIni(*ppHdl,pfErr,pfTrc,pvGbl,pcOwn,pcPgm,0,pvClp);
    if (siErr) {
       const char* pcMsg;
       if (pfMsg!=NULL && (pcMsg=pfMsg(siErr))!=NULL) {
@@ -3216,6 +3227,7 @@ static int siClePropertyInit(
       vdClpClose(*ppHdl,CLPCLS_MTD_ALL);*ppHdl=NULL;
       return(CLERTC_INI);
    }
+
    siErr=siCleGetProperties(pfErr,psCnf,pcOwn,pcPgm,pcCmd,&pcFil,&pcPro,&siFil,pvGbl,pvF2S,pfF2S);
    if (siErr) {
       SAFE_FREE(pcPro);
@@ -3223,6 +3235,7 @@ static int siClePropertyInit(
       vdClpClose(*ppHdl,CLPCLS_MTD_ALL);*ppHdl=NULL;
       return(siErr);
    }
+
    if (pcPro!=NULL) {
       siErr=siClpParsePro(*ppHdl,pcFil,pcPro,FALSE,NULL);
       if (siErr<0) {
@@ -3364,7 +3377,7 @@ static int siCleCommandInit(
    const char*                   pcCmd,
    const char*                   pcMan,
    const char*                   pcHlp,
-   const int*                    piOid,
+   int*                          piOid,
    const TsClpArgument*          psTab,
    const int                     isCas,
    const int                     isPfl,
@@ -3382,17 +3395,18 @@ static int siCleCommandInit(
    void*                         pvF2S,
    TfF2S*                        pfF2S,
    void*                         pvSaf,
-   TfSaf*                        pfSaf)
+   TfSaf*                        pfSaf,
+   const char*                   pcStr)
 {
    int                           siErr,siFil=0;
-   int                           isOvl=(piOid==NULL)?FALSE:TRUE;
+   int                           siOid=0;
    char*                         pcFil=NULL;
    char*                         pcPro=NULL;
    clock_t                       ckCpu1=clock();
    clock_t                       ckCpu2;
    char                          acTs[24];
 
-   *ppHdl=pvClpOpen(isCas,isPfl,isRpl,siMkl,pcOwn,pcPgm,pcBld,pcCmd,pcMan,pcHlp,isOvl,psTab,pvClp,pfOut,pfErr,pfTrc,pfTrc,pfTrc,pfTrc,pcDep,pcOpt,pcEnt,NULL,pvGbl,pvF2S,pfF2S,pvSaf,pfSaf);
+   *ppHdl=pvClpOpen(isCas,isPfl,isRpl,siMkl,pcOwn,pcPgm,pcBld,pcCmd,pcMan,pcHlp,piOid!=NULL,psTab,pvClp,pfOut,pfErr,pfTrc,pfTrc,pfTrc,pfTrc,pcDep,pcOpt,pcEnt,NULL,pvGbl,pvF2S,pfF2S,pvSaf,pfSaf);
    if (*ppHdl==NULL) {
       if (pfErr!=NULL) fprintf(pfErr,"Open of parser for command '%s' failed\n",pcCmd);
       return(CLERTC_TAB);
@@ -3403,7 +3417,12 @@ static int siCleCommandInit(
       ckCpu1=ckCpu2;
    }
 
-   siErr=pfIni(*ppHdl,pfErr,pfTrc,pvGbl,pcOwn,pcPgm,pvClp);
+   if (piOid!=NULL) {
+      siOid=siClpParseOvl(*ppHdl,pcStr);
+      *piOid=siOid;
+   }
+
+   siErr=pfIni(*ppHdl,pfErr,pfTrc,pvGbl,pcOwn,pcPgm,siOid,pvClp);
    if (siErr) {
       const char* pcMsg;
       if (pfMsg!=NULL && (pcMsg=pfMsg(siErr))!=NULL) {

@@ -185,12 +185,13 @@
  * 1.3.134: Add new function psClpFindArgument to find arguments in a table (for envar processing)
  * 1.3.135: Support GMOFFSET/ABS and LCOFFSET/ABS as keyword for difference between local and GM time
  * 1.3.136: Make pvDat and psErr optional available at reset of CLP (and improve reset)
+ * 1.4.137: Correct support for command overlays
 **/
 
-#define CLP_VSN_STR       "1.3.136"
+#define CLP_VSN_STR       "1.4.137"
 #define CLP_VSN_MAJOR      1
-#define CLP_VSN_MINOR        3
-#define CLP_VSN_REVISION       136
+#define CLP_VSN_MINOR        4
+#define CLP_VSN_REVISION       137
 
 /* Definition der Konstanten ******************************************/
 
@@ -535,6 +536,7 @@ static int siClpConSrc(
 static int siClpPrsMain(
    void*                         pvHdl,
    TsSym*                        psTab,
+   const int                     isOvl,
    int*                          piOid);
 
 static int siClpPrsParLst(
@@ -547,6 +549,7 @@ static int siClpPrsPar(
    const int                     siLev,
    const int                     siPos,
    const TsSym*                  psTab,
+   const int                     isOvl,
    int*                          piOid);
 
 static int siClpPrsNum(
@@ -1409,12 +1412,13 @@ extern int siClpParsePro(
    }
 }
 
-extern int siClpParseCmd(
+static int siClpParseCmd2(
    void*                         pvHdl,
    const char*                   pcSrc,
    const char*                   pcCmd,
    const int                     isChk,
    const int                     isPwd,
+   const int                     isOvl,
    int*                          piOid,
    char**                        ppLst)
 {
@@ -1457,7 +1461,7 @@ extern int siClpParseCmd(
       TRACE(psHdl->pfPrs,"COMMAND-PARSER-BEGIN\n");
       psHdl->siTok=siClpScnSrc(pvHdl,0,NULL);
       if (psHdl->siTok<0) return(psHdl->siTok);
-      siCnt=siClpPrsMain(pvHdl,psHdl->psTab,piOid);
+      siCnt=siClpPrsMain(pvHdl,psHdl->psTab,isOvl,piOid);
       if (siCnt<0) return (siCnt);
 #if defined(__DEBUG__) && defined(__HEAP_STATISTIC__)
       long siEndCurHeapSize=CUR_HEAP_SIZE();
@@ -1481,6 +1485,34 @@ extern int siClpParseCmd(
       if (ppLst!=NULL) *ppLst=psHdl->pcLst;
       return CLPERR(psHdl,CLPERR_SYN,"Initial token (%s) in handle is not valid",pcMapClpTok(psHdl->siTok));
    }
+}
+
+
+extern int siClpParseCmd(
+   void*                         pvHdl,
+   const char*                   pcSrc,
+   const char*                   pcCmd,
+   const int                     isChk,
+   const int                     isPwd,
+   int*                          piOid,
+   char**                        ppLst)
+{
+   return(siClpParseCmd2(pvHdl,pcSrc,pcCmd,isChk,isPwd,FALSE,piOid,ppLst));
+}
+
+extern int siClpParseOvl(
+   void*                         pvHdl,
+   const char*                   pcCmd)
+{
+   int siOid=0;
+   if (pvHdl!=NULL && pcCmd!=NULL) {
+      TsHdl* psHdl=(TsHdl*)pvHdl;
+      if (psHdl->isOvl) {
+         siClpParseCmd2(pvHdl,"",pcCmd,FALSE,FALSE,TRUE,&siOid,NULL);
+         vdClpReset(pvHdl,NULL,NULL);
+      }
+   }
+   return(siOid);
 }
 
 extern int siClpSyntax(
@@ -4882,7 +4914,7 @@ static int siClpPrsParLst(
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    int                           siPos=0;
    while (psHdl->siTok==CLPTOK_KYW) {
-      int siErr=siClpPrsPar(pvHdl,siLev,siPos,psTab,NULL);
+      int siErr=siClpPrsPar(pvHdl,siLev,siPos,psTab,FALSE,NULL);
       if (siErr<0) return(siErr);
       siPos++;
    }
@@ -4894,6 +4926,7 @@ static int siClpPrsPar(
    const int                     siLev,
    const int                     siPos,
    const TsSym*                  psTab,
+   const int                     isOvl,
    int*                          piOid)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
@@ -4908,6 +4941,9 @@ static int siClpPrsPar(
       siErr=siClpBldLnk(pvHdl,siLev,siPos,(psHdl->pcOld-psHdl->pcInp),psArg->psFix->psInd,TRUE);
       if (siErr<0) return(siErr);
       if (piOid!=NULL) *piOid=psArg->psFix->siOid;
+      if (isOvl) { // stop parsing if object id for main overlay known
+         return(CLP_OK);
+      }
       psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
       if (psHdl->siTok<0) return(psHdl->siTok);
       if (psHdl->siTok==CLPTOK_SGN) {
@@ -5199,7 +5235,7 @@ static int siClpPrsOvl(
    TRACE(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d OVL(%s.par)\n",fpcPre(pvHdl,siLev),siLev,siPos,psArg->psStd->pcKyw);
    siErr=siClpIniOvl(pvHdl,siLev,siPos,psArg,&psDep,asSav);
    if (siErr<0) return(siErr);
-   siCnt=siClpPrsPar(pvHdl,siLev+1,siPos,psDep,&siOid);
+   siCnt=siClpPrsPar(pvHdl,siLev+1,siPos,psDep,FALSE,&siOid);
    if (siCnt<0) return(siCnt);
    siErr=siClpFinOvl(pvHdl,siLev,siPos,psArg,psDep,asSav,siOid);
    if (siErr<0) return(siErr);
@@ -5209,6 +5245,7 @@ static int siClpPrsOvl(
 static int siClpPrsMain(
    void*                         pvHdl,
    TsSym*                        psTab,
+   const int                     isOvl,
    int*                          piOid)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
@@ -5222,7 +5259,7 @@ static int siClpPrsMain(
       }
       siErr=siClpIniMainOvl(pvHdl,psTab,asSav);
       if (siErr<0) return(siErr);
-      siErr=siClpPrsPar(pvHdl,0,0,psTab,&siOid);
+      siErr=siClpPrsPar(pvHdl,0,0,psTab,isOvl,&siOid);
       if (siErr<0) return(siErr);
       siErr=siClpFinMainOvl(pvHdl,psTab,asSav,siOid);
       if (siErr<0) return(siErr);

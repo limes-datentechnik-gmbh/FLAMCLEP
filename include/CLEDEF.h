@@ -219,7 +219,8 @@ typedef int (TfCleClosePrint)(void* pvHdl);
  * @param[in]  pvGbl Pointer to a global handle as black box pass through (given over CleExecute if callback pfOpn defined, see siCleExecute()).
  * @param[in]  pcOwn Current owner name (given over CleExecute, see siCleExecute()).
  * @param[in]  pcPgm Current program name (given over CleExecute, see siCleExecute()).
- * @param[out] pvClp Pointer to the corresonding FLAMCLP structure for initialisation.
+ * @param[in]  siOid Object identifier if the command is an overlay to determine the correct structure else 0 (in case of property parsing also 0 (only memset to union possible))
+ * @param[out] pvClp Pointer to the corresponding FLAMCLP structure for initialization.
  *
  * @return     Reason code (!=0) for termination or 0 for success.
  */
@@ -230,6 +231,7 @@ typedef int (TfIni)(
    void*                         pvGbl,
    const char*                   pcOwn,
    const char*                   pcPgm,
+   const int                     siOid,
    void*                         pvClp);
 
 /**
@@ -262,7 +264,7 @@ typedef int (TfIni)(
  * @param[in]  pfOut File pointer for outputs (mainly error messages, given over CleExecute, see siCleExecute()).
  * @param[in]  pfTrc File pointer for tracing (mainly for complex stuff, given over CleExecute, see siCleExecute()).
  * @param[in]  pvGbl Pointer to a global handle as black box pass through (given over CleExecute if callback pfOpn defined, see siCleExecute()).
- * @param[in]  piOid Pointer to the object identifier for overlay commands, if the pointer set at siCleExecute().
+ * @param[in]  siOid Object identifier if the command is an overlay to determine the correct structure else 0
  * @param[in]  pvClp Pointer to the filled FLAMCLP structure (output from the command line parser).
  * @param[out] pvPar Pointer to the parameter structure, which will be filled based on the FLAMCLP structure with this function.
  *
@@ -274,7 +276,7 @@ typedef int (TfMap)(
    FILE*                         pfOut,
    FILE*                         pfTrc,
    void*                         pvGbl,
-   int*                          piOid,
+   const int                     siOid,
    void*                         pvClp,
    void*                         pvPar);
 
@@ -307,6 +309,7 @@ typedef int (TfMap)(
  * @param[in]  pcFkt Current function name (key word of the command).
  * @param[in]  pcCmd Current command (complete entered line of user).
  * @param[in]  pcLst Current list of parsed arguments (given from FLAMCLP, could be NULL or empty).
+ * @param[in]  siOid Object identifier if the command is an overlay to determine the correct structure else 0
  * @param[in]  pvPar Pointer to the filled parameter for the run of the subprogram.
  * @param[out] piWrn Pointer to an integer (the fist half word is true (0x0001), if warnings collated by directory walk, the second halfword is true (0x0001) if warnings are logged).
  * @param[out] piScc Pointer to an integer containing a special condition code (if greater CLERTC_MAX(64) then used instead of CLERTC_RUN(8)).
@@ -326,6 +329,7 @@ typedef int (TfRun)(
    const char*                   pcFkt,
    const char*                   pcCmd,
    const char*                   pcLst,
+   const int                     siOid,
    const void*                   pvPar,
    int*                          piWrn,
    int*                          piScc);
@@ -340,6 +344,7 @@ typedef int (TfRun)(
  * @param[in]  pfOut File pointer for outputs (given over CleExecute, see siCleExecute()).
  * @param[in]  pfTrc File pointer for tracing (given over CleExecute, see siCleExecute()).
  * @param[in]  pvGbl Pointer to a global handle as black box pass through (given over CleExecute if callback pfOpn defined, see siCleExecute()).
+ * @param[in]  siOid Object identifier if the command is an overlay to determine the correct structure else 0
  * @param[in]  pvPar Pointer to the filled parameter structure for cleanup.
  * @return     Reason code (!=0) for termination or 0 for success.
  */
@@ -347,6 +352,7 @@ typedef int (TfFin)(
    FILE*                         pfOut,
    FILE*                         pfTrc,
    void*                         pvGbl,
+   const int                     siOid,
    void*                         pvPar);
 
 /**
