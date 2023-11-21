@@ -4942,6 +4942,7 @@ static int siClpPrsPar(
       if (siErr<0) return(siErr);
       if (piOid!=NULL) *piOid=psArg->psFix->siOid;
       if (isOvl) { // stop parsing if object id for main overlay known
+         psHdl->siTok=CLPTOK_END;
          return(CLP_OK);
       }
       psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
