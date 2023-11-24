@@ -12,8 +12,6 @@ ALLPDFS = $(addprefix $(PDFDIR)/, $(PDFFILES))
 $(ZIPDIR)/%.zip: %.doxy
 	@echo generate zipped docs in $@ ...
 	doxygen $<
-	make -C $(<:.doxy=)/latex
-	cp $(<:.doxy=)/latex/refman.pdf $(PDFDIR)/$(<:.doxy=.pdf)
 	zip -r $@ $(<:.doxy=)/html
 
 
