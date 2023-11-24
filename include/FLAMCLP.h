@@ -210,9 +210,17 @@ extern void* pvClpOpen(
  * Required after an error which was handled by the calling application to parse properties or commands correctly
  *
  * @param[inout] pvHdl Pointer to the corresponding handle created with \a pvClpOpen
+ * @param[in]    pvDat Pointer to the structure where the parsed values are stored (can be NULL if command line parsing not used or already set)
+ * @param[out]   psErr Pointer to the error structure. If the pointer != NULL the structure is filled with pointers to
+ *                   certain error information in the CLP handle. If pfErr defined all error information are printed
+ *                   by CLP. In this case these structure is not required. If pfErr==NULL you can use these structure
+ *                   to gather all error information of CLP in memory. The pointer are only valid until vsClpClose().
  */
 extern void vdClpReset(
-   void*                         pvHdl);
+   void*                         pvHdl,
+   void*                         pvDat,
+   TsClpError*                   psErr)
+;
 
 /**
  * @brief Parse the property list
@@ -263,6 +271,22 @@ extern int siClpParseCmd(
    const int                     isPwd,
    int*                          piOid,
    char**                        ppLst);
+
+/**
+ * @brief Parse only the main overlay to determine to object id
+ *
+ * The function parses the beginning of command line to determine the object id for the main overlay and then it stops processing.
+ * If pvHdl or pcCmd are NULL or if the CLP handle not defined for overlay then nothing is parsed and 0 returned.
+ * If the command string parsed then the CLP handle will be reset afterwards.
+ *
+ * @param[in]  pvHdl Pointer to the corresponding handle created with \a pvClpOpen
+ * @param[in]  pcCmd Pointer to a null-terminated string containing the command for parsing
+ *
+ * @return signed integer object identifier if an overlay (>0) or 0 in each over case
+ */
+extern int siClpParseOvl(
+   void*                         pvHdl,
+   const char*                   pcCmd);
 
 /**
  * @brief Print command line syntax

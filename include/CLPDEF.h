@@ -503,7 +503,7 @@ typedef struct ClpArgument {
  */
 typedef int (TfF2S)(
    void*                         pvGbl,
-   void*                         pvHdl,
+   const void*                   pvHdl,
    const char*                   pcFil,
    char**                        ppBuf,
    int*                          piBuf,

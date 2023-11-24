@@ -1416,7 +1416,7 @@ extern void chr_ebc(
  *         * -4: realloc() failed
  *         * -5: file read error
  */
-extern int file2str(void* hdl, const char* filename, char** buf, int* bufsize, char* errmsg, const int msgsiz);
+extern int file2str(const void* hdl, const char* filename, char** buf, int* bufsize, char* errmsg, const int msgsiz);
 
 /**
  * Takes an array of null-terminated strings and concatenates all strings

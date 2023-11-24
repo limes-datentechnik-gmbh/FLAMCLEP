@@ -183,13 +183,15 @@
  * 1.3.132: Secure erase memory for dynamic entries in CLP structure if CLPFLG_PWD used
  * 1.3.133: Add new about function with indentation
  * 1.3.134: Add new function psClpFindArgument to find arguments in a table (for envar processing)
- *
+ * 1.3.135: Support GMOFFSET/ABS and LCOFFSET/ABS as keyword for difference between local and GM time
+ * 1.3.136: Make pvDat and psErr optional available at reset of CLP (and improve reset)
+ * 1.4.137: Correct support for command overlays
 **/
 
-#define CLP_VSN_STR       "1.3.134"
+#define CLP_VSN_STR       "1.4.137"
 #define CLP_VSN_MAJOR      1
-#define CLP_VSN_MINOR        3
-#define CLP_VSN_REVISION       134
+#define CLP_VSN_MINOR        4
+#define CLP_VSN_REVISION       137
 
 /* Definition der Konstanten ******************************************/
 
@@ -534,6 +536,7 @@ static int siClpConSrc(
 static int siClpPrsMain(
    void*                         pvHdl,
    TsSym*                        psTab,
+   const int                     isOvl,
    int*                          piOid);
 
 static int siClpPrsParLst(
@@ -546,6 +549,7 @@ static int siClpPrsPar(
    const int                     siLev,
    const int                     siPos,
    const TsSym*                  psTab,
+   const int                     isOvl,
    int*                          piOid);
 
 static int siClpPrsNum(
@@ -1133,7 +1137,7 @@ extern char* pcClpError(
    }
 }
 
-static int siOwnFile2String(void* gbl, void* hdl, const char* filename, char** buf, int* bufsize, char* errmsg, const int msgsiz) {
+static int siOwnFile2String(void* gbl, const void* hdl, const char* filename, char** buf, int* bufsize, char* errmsg, const int msgsiz) {
    (void)gbl;
    char* pcFil=dcpmapfil(filename);
    if (pcFil==NULL) return(-1);
@@ -1314,11 +1318,30 @@ extern void* pvClpOpen(
 }
 
 extern void vdClpReset(
-   void*                         pvHdl)
+   void*                         pvHdl,
+   void*                         pvDat,
+   TsClpError*                   psErr)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    if (psHdl!=NULL) {
       psHdl->siTok=CLPTOK_INI;
+      psHdl->siRow=1;
+      psHdl->siCol=0;
+      psHdl->siErr=0;
+      psHdl->pcInp=NULL;
+      psHdl->pcCur=NULL;
+      psHdl->pcOld=NULL;
+      psHdl->pcLex[0]=EOS;
+      psHdl->isChk=FALSE;
+      if (pvDat!=NULL) {
+         psHdl->pvDat=pvDat;
+      }
+      if (psErr!=NULL) {
+         psErr->ppMsg=(const char**)&psHdl->pcMsg;
+         psErr->ppSrc=(const char**)&psHdl->pcSrc;
+         psErr->piRow=&psHdl->siRow;
+         psErr->piCol=&psHdl->siCol;
+      }
    }
 }
 
@@ -1332,10 +1355,13 @@ extern int siClpParsePro(
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    int                           siCnt;
 
-   if (pcPro==NULL)
+   if (pcPro==NULL) {
       return CLPERR(psHdl,CLPERR_INT,"Property string is NULL");
+   }
 
-   if (psHdl->pcLst!=NULL) psHdl->pcLst[0]=0x00;
+   if (psHdl->pcLst!=NULL) {
+      psHdl->pcLst[0]=0x00;
+   }
 
    if (pcSrc!=NULL && *pcSrc) {
       srprintf(&psHdl->pcSrc,&psHdl->szSrc,strlen(CLPSRC_PRF)+strlen(pcSrc),"%s%s",CLPSRC_PRF,pcSrc);
@@ -1386,25 +1412,33 @@ extern int siClpParsePro(
    }
 }
 
-extern int siClpParseCmd(
+static int siClpParseCmd2(
    void*                         pvHdl,
    const char*                   pcSrc,
    const char*                   pcCmd,
    const int                     isChk,
    const int                     isPwd,
+   const int                     isOvl,
    int*                          piOid,
    char**                        ppLst)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    int                           siCnt;
 
-   if (pcCmd==NULL)
+   if (pcCmd==NULL) {
       return CLPERR(psHdl,CLPERR_INT,"Command string is NULL");
+   }
 
-   if (psHdl->pcLst!=NULL) psHdl->pcLst[0]=0x00;
+   if (psHdl->pcLst!=NULL) {
+      psHdl->pcLst[0]=0x00;
+   }
 
    if (pcSrc!=NULL && *pcSrc) {
-      srprintf(&psHdl->pcSrc,&psHdl->szSrc,strlen(CLPSRC_CMF)+strlen(pcSrc),"%s%s",CLPSRC_CMF,pcSrc);
+      if (*pcSrc!=':') { // file
+         srprintf(&psHdl->pcSrc,&psHdl->szSrc,strlen(CLPSRC_CMF)+strlen(pcSrc),"%s%s",CLPSRC_CMF,pcSrc);
+      } else { // other source
+         srprintf(&psHdl->pcSrc,&psHdl->szSrc,strlen(pcSrc),"%s",pcSrc);
+      }
    } else {
       srprintf(&psHdl->pcSrc,&psHdl->szSrc,strlen(CLPSRC_CMD),"%s",CLPSRC_CMD);
    }
@@ -1427,7 +1461,7 @@ extern int siClpParseCmd(
       TRACE(psHdl->pfPrs,"COMMAND-PARSER-BEGIN\n");
       psHdl->siTok=siClpScnSrc(pvHdl,0,NULL);
       if (psHdl->siTok<0) return(psHdl->siTok);
-      siCnt=siClpPrsMain(pvHdl,psHdl->psTab,piOid);
+      siCnt=siClpPrsMain(pvHdl,psHdl->psTab,isOvl,piOid);
       if (siCnt<0) return (siCnt);
 #if defined(__DEBUG__) && defined(__HEAP_STATISTIC__)
       long siEndCurHeapSize=CUR_HEAP_SIZE();
@@ -1451,6 +1485,34 @@ extern int siClpParseCmd(
       if (ppLst!=NULL) *ppLst=psHdl->pcLst;
       return CLPERR(psHdl,CLPERR_SYN,"Initial token (%s) in handle is not valid",pcMapClpTok(psHdl->siTok));
    }
+}
+
+
+extern int siClpParseCmd(
+   void*                         pvHdl,
+   const char*                   pcSrc,
+   const char*                   pcCmd,
+   const int                     isChk,
+   const int                     isPwd,
+   int*                          piOid,
+   char**                        ppLst)
+{
+   return(siClpParseCmd2(pvHdl,pcSrc,pcCmd,isChk,isPwd,FALSE,piOid,ppLst));
+}
+
+extern int siClpParseOvl(
+   void*                         pvHdl,
+   const char*                   pcCmd)
+{
+   int siOid=0;
+   if (pvHdl!=NULL && pcCmd!=NULL) {
+      TsHdl* psHdl=(TsHdl*)pvHdl;
+      if (psHdl->isOvl) {
+         siClpParseCmd2(pvHdl,"",pcCmd,FALSE,FALSE,TRUE,&siOid,NULL);
+         vdClpReset(pvHdl,NULL,NULL);
+      }
+   }
+   return(siOid);
 }
 
 extern int siClpSyntax(
@@ -3534,6 +3596,8 @@ extern int siClpLexemes(
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," LCHOUR    STRING - current local hour in format:            HH             \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," LCMINUTE  STRING - current local minute in format:          MM             \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," LCSECOND  STRING - current local second in format:          SS             \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," LCOFFSET  STRING - difference to Greenwich mean time:    +/-HH             \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," LCOFFABS  STRING - difference to GMT (absolute):             HH             \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," GMSTAMP   STRING - current Greenwich mean stamp in format:  YYYYMMDD.HHMMSS\n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," GMDATE    STRING - current Greenwich mean date in format:   YYYYMMDD       \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," GMYEAR    STRING - current Greenwich mean year in format:   YYYY           \n");
@@ -3544,7 +3608,8 @@ extern int siClpLexemes(
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," GMHOUR    STRING - current Greenwich mean hour in format:   HH             \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," GMMINUTE  STRING - current Greenwich mean minute in format: MM             \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," GMSECOND  STRING - current Greenwich mean second in format: SS             \n");
-      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," GMSECOND  STRING - current Greenwich mean second in format: SS             \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," GMOFFSET  STRING - difference to local time:             +/-HH             \n");
+      fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," GMOFFABS  STRING - difference to local time (absolute):     HH             \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," SnRND10   STRING - decimal random number of length n (1 to 8)              \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," SnRND16   STRING - hexadecimal random number of length n (1 to 8)          \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                                                                            \n");
@@ -3804,6 +3869,32 @@ static int siClpConNat(
          TRACE(pfTrc,"CONSTANT-TOKEN(STR)-LEXEME(%s)\n",*ppLex);
       }
       return(CLPTOK_STR);
+   } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,pcKyw,"LCOFFSET",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         const time_t t=psHdl->siNow;
+         const I64 lt=localtime(&t)->tm_hour;
+         const I64 gt=gmtime(&t)->tm_hour;
+         if (gt>=lt) {
+            snprintf(*ppLex,*pzLex,"d'+%02d",(I32)(gt-lt));
+         } else {
+            snprintf(*ppLex,*pzLex,"d'-%02d",(I32)(lt-gt));
+         }
+         TRACE(pfTrc,"CONSTANT-TOKEN(STR)-LEXEME(%s)\n",*ppLex);
+      }
+      return(CLPTOK_STR);
+   } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,pcKyw,"LCOFFABS",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         const time_t t=psHdl->siNow;
+         const I64 lt=localtime(&t)->tm_hour;
+         const I64 gt=gmtime(&t)->tm_hour;
+         if (gt>lt) {
+            snprintf(*ppLex,*pzLex,"d'%02d",(I32)(gt-lt));
+         } else {
+            snprintf(*ppLex,*pzLex,"d'%02d",(I32)(lt-gt));
+         }
+   TRACE(pfTrc,"CONSTANT-TOKEN(STR)-LEXEME(%s)\n",*ppLex);
+      }
+      return(CLPTOK_STR);
    } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,pcKyw,"GMSTAMP",0,0,FALSE)==0) {
       if (pzLex!=NULL) {
          struct tm   st;
@@ -3881,6 +3972,32 @@ static int siClpConNat(
          struct tm   st;
          time_t      t=psHdl->siNow;
          strftime(*ppLex,*pzLex,"d'%S",gmtime_r(&t,&st));
+         TRACE(pfTrc,"CONSTANT-TOKEN(STR)-LEXEME(%s)\n",*ppLex);
+      }
+      return(CLPTOK_STR);
+   } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,pcKyw,"GMOFFSET",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         const time_t t=psHdl->siNow;
+         const I64 lt=localtime(&t)->tm_hour;
+         const I64 gt=gmtime(&t)->tm_hour;
+         if (gt>lt) {
+            snprintf(*ppLex,*pzLex,"d'-%02d",(I32)(gt-lt));
+         } else {
+            snprintf(*ppLex,*pzLex,"d'+%02d",(I32)(lt-gt));
+         }
+         TRACE(pfTrc,"CONSTANT-TOKEN(STR)-LEXEME(%s)\n",*ppLex);
+      }
+      return(CLPTOK_STR);
+   } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,pcKyw,"GMOFFABS",0,0,FALSE)==0) {
+      if (pzLex!=NULL) {
+         const time_t t=psHdl->siNow;
+         const I64 lt=localtime(&t)->tm_hour;
+         const I64 gt=gmtime(&t)->tm_hour;
+         if (gt>lt) {
+            snprintf(*ppLex,*pzLex,"d'%02d",(I32)(gt-lt));
+         } else {
+            snprintf(*ppLex,*pzLex,"d'%02d",(I32)(lt-gt));
+         }
          TRACE(pfTrc,"CONSTANT-TOKEN(STR)-LEXEME(%s)\n",*ppLex);
       }
       return(CLPTOK_STR);
@@ -4797,7 +4914,7 @@ static int siClpPrsParLst(
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    int                           siPos=0;
    while (psHdl->siTok==CLPTOK_KYW) {
-      int siErr=siClpPrsPar(pvHdl,siLev,siPos,psTab,NULL);
+      int siErr=siClpPrsPar(pvHdl,siLev,siPos,psTab,FALSE,NULL);
       if (siErr<0) return(siErr);
       siPos++;
    }
@@ -4809,6 +4926,7 @@ static int siClpPrsPar(
    const int                     siLev,
    const int                     siPos,
    const TsSym*                  psTab,
+   const int                     isOvl,
    int*                          piOid)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
@@ -4823,6 +4941,10 @@ static int siClpPrsPar(
       siErr=siClpBldLnk(pvHdl,siLev,siPos,(psHdl->pcOld-psHdl->pcInp),psArg->psFix->psInd,TRUE);
       if (siErr<0) return(siErr);
       if (piOid!=NULL) *piOid=psArg->psFix->siOid;
+      if (isOvl) { // stop parsing if object id for main overlay known
+         psHdl->siTok=CLPTOK_END;
+         return(CLP_OK);
+      }
       psHdl->siTok=siClpScnSrc(pvHdl,0,psArg);
       if (psHdl->siTok<0) return(psHdl->siTok);
       if (psHdl->siTok==CLPTOK_SGN) {
@@ -5114,7 +5236,7 @@ static int siClpPrsOvl(
    TRACE(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d OVL(%s.par)\n",fpcPre(pvHdl,siLev),siLev,siPos,psArg->psStd->pcKyw);
    siErr=siClpIniOvl(pvHdl,siLev,siPos,psArg,&psDep,asSav);
    if (siErr<0) return(siErr);
-   siCnt=siClpPrsPar(pvHdl,siLev+1,siPos,psDep,&siOid);
+   siCnt=siClpPrsPar(pvHdl,siLev+1,siPos,psDep,FALSE,&siOid);
    if (siCnt<0) return(siCnt);
    siErr=siClpFinOvl(pvHdl,siLev,siPos,psArg,psDep,asSav,siOid);
    if (siErr<0) return(siErr);
@@ -5124,6 +5246,7 @@ static int siClpPrsOvl(
 static int siClpPrsMain(
    void*                         pvHdl,
    TsSym*                        psTab,
+   const int                     isOvl,
    int*                          piOid)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
@@ -5137,7 +5260,7 @@ static int siClpPrsMain(
       }
       siErr=siClpIniMainOvl(pvHdl,psTab,asSav);
       if (siErr<0) return(siErr);
-      siErr=siClpPrsPar(pvHdl,0,0,psTab,&siOid);
+      siErr=siClpPrsPar(pvHdl,0,0,psTab,isOvl,&siOid);
       if (siErr<0) return(siErr);
       siErr=siClpFinMainOvl(pvHdl,psTab,asSav,siOid);
       if (siErr<0) return(siErr);
