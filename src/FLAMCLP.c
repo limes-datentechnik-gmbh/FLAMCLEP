@@ -1137,7 +1137,7 @@ extern char* pcClpError(
    }
 }
 
-static int siOwnFile2String(void* gbl, void* hdl, const char* filename, char** buf, int* bufsize, char* errmsg, const int msgsiz) {
+static int siOwnFile2String(void* gbl, const void* hdl, const char* filename, char** buf, int* bufsize, char* errmsg, const int msgsiz) {
    (void)gbl;
    char* pcFil=dcpmapfil(filename);
    if (pcFil==NULL) return(-1);

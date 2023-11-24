@@ -3867,7 +3867,7 @@ extern void chr_ebc(
    }
 }
 
-extern int file2str(void* hdl, const char* filename, char** buf, int* bufsize, char* errmsg, const int msgsiz) {
+extern int file2str(const void* hdl, const char* filename, char** buf, int* bufsize, char* errmsg, const int msgsiz) {
    int siLen=0, siHlp;
    char* pcHlp;
    FILE* pfFile=NULL;

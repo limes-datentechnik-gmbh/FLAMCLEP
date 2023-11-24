@@ -648,7 +648,7 @@ static inline const char* pcMapCleRtc(int siRtc) {
    }
 }
 
-static int siClpFile2String(void* gbl, void* hdl, const char* filename, char** buf, int* bufsize, char* errmsg, const int msgsiz) {
+static int siClpFile2String(void* gbl, const void* hdl, const char* filename, char** buf, int* bufsize, char* errmsg, const int msgsiz) {
    (void)gbl;
    char* pcFil=dcpmapfil(filename);
    if (pcFil==NULL) return(-1);
