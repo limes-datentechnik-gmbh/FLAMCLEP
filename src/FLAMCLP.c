@@ -929,7 +929,7 @@ static inline void CLPERRADD(TsHdl* psHdl,int siLev, char* pcMsg, ...) {
 
 static inline I64 ClpRndFnv(const I64 siRnd)
 {
-   unsigned char* p=(unsigned char*)&siRnd;
+   const unsigned char* p=(unsigned char*)&siRnd;
    U64            h=0xcbf29ce48422232LLU;
    h^=p[0]; h*=0x100000001b3LLU;
    // cppcheck-suppress objectIndex
@@ -1506,7 +1506,7 @@ extern int siClpParseOvl(
 {
    int siOid=0;
    if (pvHdl!=NULL && pcCmd!=NULL) {
-      TsHdl* psHdl=(TsHdl*)pvHdl;
+      const TsHdl* psHdl=(TsHdl*)pvHdl;
       if (psHdl->isOvl) {
          siClpParseCmd2(pvHdl,"",pcCmd,FALSE,FALSE,TRUE,&siOid,NULL);
          vdClpReset(pvHdl,NULL,NULL);
@@ -1789,7 +1789,7 @@ extern int siClpHelp(
    return(CLP_OK);
 }
 
-static inline void vdPrintHdl(FILE* pfDoc,TsHdl* psHdl, const TsParamDescription* psParamDesc, const char* pcKnd, const char* pcKyw, const char chHdl) {
+static inline void vdPrintHdl(FILE* pfDoc, const TsHdl* psHdl, const TsParamDescription* psParamDesc, const char* pcKnd, const char* pcKyw, const char chHdl) {
    unsigned int   l,i,isLev=psHdl->uiLev>1;
    unsigned int   uiLev=psHdl->uiLev;
 
@@ -4489,7 +4489,7 @@ static int siClpScnNat(
             if (isReqStrOpr3(*(*ppCur)) || isSeparation(*(*ppCur))) {
                if (isClpKywStr(pvHdl,pfErr,pfTrc,(*ppLex)+2,psArg,ppVal,*(*ppCur))) {
                   char* p1=pcHlp;
-                  char* p2=(*ppLex)+2;
+                  const char* p2=(*ppLex)+2;
                   while (*p2) {
                      *p1++=*p2++;
                   }
@@ -4837,7 +4837,7 @@ extern int siClpGrammar(
    FILE*                         pfOut)
 {
    if (pfOut!=NULL) {
-      TsHdl*                        psHdl=(TsHdl*)pvHdl;
+      const TsHdl*               psHdl=(TsHdl*)pvHdl;
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," Command Line Parser                                              \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut," command        -> ['('] parameter_list [')']       (main=object) \n");
       fprintf(pfOut,"%s",fpcPre(pvHdl,0)); efprintf(pfOut,"                |  ['.'] parameter                  (main=overlay)\n");
@@ -4911,7 +4911,7 @@ static int siClpPrsParLst(
    const int                     siLev,
    const TsSym*                  psTab)
 {
-   TsHdl*                        psHdl=(TsHdl*)pvHdl;
+   const TsHdl*                  psHdl=(TsHdl*)pvHdl;
    int                           siPos=0;
    while (psHdl->siTok==CLPTOK_KYW) {
       int siErr=siClpPrsPar(pvHdl,siLev,siPos,psTab,FALSE,NULL);
@@ -5344,7 +5344,7 @@ static int siClpPrsValLstFlexible(
    const int                     siTok,
    TsSym*                        psArg)
 {
-   TsHdl*                        psHdl=(TsHdl*)pvHdl;
+   const TsHdl*                  psHdl=(TsHdl*)pvHdl;
    int                           siPos=0;
    while (psHdl->siTok==siTok || psHdl->siTok==CLPTOK_KYW || psHdl->siTok==CLPTOK_RBO) {
       int siErr=siClpPrsVal(pvHdl,siLev,siPos,TRUE,psArg);
@@ -5377,7 +5377,7 @@ static int siClpPrsObjLst(
    const int                     siLev,
    TsSym*                        psArg)
 {
-   TsHdl*                        psHdl=(TsHdl*)pvHdl;
+   const TsHdl*                  psHdl=(TsHdl*)pvHdl;
    int                           siPos=0;
    while (psHdl->siTok==CLPTOK_RBO) {
       int siErr=siClpPrsObj(pvHdl,siLev,siPos,psArg);
@@ -5392,7 +5392,7 @@ static int siClpPrsOvlLst(
    const int                     siLev,
    TsSym*                        psArg)
 {
-   TsHdl*                        psHdl=(TsHdl*)pvHdl;
+   const TsHdl*                  psHdl=(TsHdl*)pvHdl;
    int                           siPos=0;
    while (psHdl->siTok==CLPTOK_KYW) {
       int siErr=siClpPrsOvl(pvHdl,siLev,siPos,psArg);
@@ -5594,7 +5594,7 @@ static int siClpPrsFac(
          case CLPTYP_STRING:
             if (siInd>0) {
                char* pcDat=pvDat;
-               char* pcEnd=pcDat+psVal->psVar->siLen;
+               const char* pcEnd=pcDat+psVal->psVar->siLen;
                if (CLPISF_FIX(psVal->psStd->uiFlg)) {
                   pcDat+=siInd*psVal->psFix->siSiz;
                } else {
@@ -6093,7 +6093,7 @@ static int siClpPrsProLst(
    void*                         pvHdl,
    const TsSym*                  psTab)
 {
-   TsHdl*                        psHdl=(TsHdl*)pvHdl;
+   const TsHdl*                  psHdl=(TsHdl*)pvHdl;
    int                           siPos=0;
    while (psHdl->siTok==CLPTOK_KYW) {
       int siErr=siClpPrsPro(pvHdl,psTab);
@@ -7567,7 +7567,7 @@ static void vdClpPrnArg(
    const unsigned int            isSel,
    const unsigned int            isCon)
 {
-   TsHdl*                        psHdl=(TsHdl*)pvHdl;
+   const TsHdl*                  psHdl=(TsHdl*)pvHdl;
    const char*                   p=fpcPre(pvHdl,siLev);
    const char*                   a="TYPE";
    const char*                   b=(isSel)?"SELECTION":((isCon)?"KEYWORD":pcMapClpTyp(siTyp));
