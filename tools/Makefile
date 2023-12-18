@@ -2,9 +2,7 @@
 
 CFLAGS = -Wall
 
-include docFiles.mk
-
-CLE_DOCS = $(addprefix ../doc/man_clep_, $(CLE_DOCFILES))
+CLE_DOCS ::= $(shell ls ../doc/man_clep_*.txt)
 
 CINC = ../include/CLEMAN.h
 
