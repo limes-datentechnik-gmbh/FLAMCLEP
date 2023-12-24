@@ -1,4 +1,0 @@
-This chapter contains other CLP string. This parameter strings are not
-used by the describt commands above but used by service provider (SPI)
-or application programming (API) interfaces or other input to this
-solution.
