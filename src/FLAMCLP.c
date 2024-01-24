@@ -5415,10 +5415,10 @@ static int siFromNumberLexeme(
 
    errno=0;
    switch (pcVal[0]) {
-   case 'b':*piVal=strtoll(pcVal+1,&pcHlp, 2); break;
-   case 'o':*piVal=strtoll(pcVal+1,&pcHlp, 8); break;
+   case 'b':*piVal=strtoull(pcVal+1,&pcHlp, 2); break;
+   case 'o':*piVal=strtoull(pcVal+1,&pcHlp, 8); break;
    case 'd':*piVal=strtoll(pcVal+1,&pcHlp,10); break;
-   case 'x':*piVal=strtoll(pcVal+1,&pcHlp,16); break;
+   case 'x':*piVal=strtoull(pcVal+1,&pcHlp,16); break;
    case 't':*piVal=strtoll(pcVal+1,&pcHlp,10); break;
    default: return CLPERR(psHdl,CLPERR_SEM,"Base (%c) of number literal (%s.%s=%s) not supported",pcVal[0],fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,isPrnStr(psArg,pcVal+1));
    }
@@ -6571,11 +6571,11 @@ static int siClpBldLit(
       }
       siErr=siFromNumberLexeme(pvHdl,siLev,psArg,pcVal,&siVal);
       if (siErr) return(siErr);
-      if (siVal<0 && CLPISF_UNS(psArg->psStd->uiFlg)) {
-         return CLPERR(psHdl,CLPERR_SEM,"Literal number (%s) of '%s.%s' is negative (%"PRIi64") but marked as unsigned",isPrnStr(psArg,pcVal),pcPat,psArg->psStd->pcKyw,siVal);
-      }
       switch (psArg->psFix->siSiz) {
       case 1:
+         if (siVal<0 && CLPISF_UNS(psArg->psStd->uiFlg)) {
+            return CLPERR(psHdl,CLPERR_SEM,"Literal number (%s) of '%s.%s' is negative (%"PRIi64") but marked as unsigned",isPrnStr(psArg,pcVal),pcPat,psArg->psStd->pcKyw,siVal);
+         }
          if (siVal<(-128) || siVal>255) {
             return CLPERR(psHdl,CLPERR_SEM,"Literal number (%s) of '%s.%s' need more than 8 Bit",isPrnStr(psArg,pcVal),pcPat,psArg->psStd->pcKyw);
          }
@@ -6584,6 +6584,9 @@ static int siClpBldLit(
                                  fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnInt(psArg,siVal));
          break;
       case 2:
+         if (siVal<0 && CLPISF_UNS(psArg->psStd->uiFlg)) {
+            return CLPERR(psHdl,CLPERR_SEM,"Literal number (%s) of '%s.%s' is negative (%"PRIi64") but marked as unsigned",isPrnStr(psArg,pcVal),pcPat,psArg->psStd->pcKyw,siVal);
+         }
          if (siVal<(-32768) || siVal>65535) {
             return CLPERR(psHdl,CLPERR_SEM,"Literal number (%s) of '%s.%s' need more than 16 Bit",isPrnStr(psArg,pcVal),pcPat,psArg->psStd->pcKyw);
          }
@@ -6592,6 +6595,9 @@ static int siClpBldLit(
                                  fpcPre(pvHdl,siLev),psArg->psVar->pvPtr,psArg->psVar->siCnt,psArg->psVar->siLen,psArg->psVar->siRst,psArg->psStd->pcKyw,isPrnInt(psArg,siVal));
          break;
       case 4:
+         if (siVal<0 && CLPISF_UNS(psArg->psStd->uiFlg)) {
+            return CLPERR(psHdl,CLPERR_SEM,"Literal number (%s) of '%s.%s' is negative (%"PRIi64") but marked as unsigned",isPrnStr(psArg,pcVal),pcPat,psArg->psStd->pcKyw,siVal);
+         }
          if (siVal<(-2147483648LL) || siVal>4294967295LL) {
             return CLPERR(psHdl,CLPERR_SEM,"Literal number (%s) of '%s.%s' need more than 32 Bit",isPrnStr(psArg,pcVal),pcPat,psArg->psStd->pcKyw);
          }
