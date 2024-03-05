@@ -2,7 +2,7 @@
 
 CFLAGS = -Wall
 
-CLE_DOCS ::= $(shell ls ../doc/man_clep_*.txt)
+CLE_DOCS ::= $(wildcard ../doc/man_clep_*.txt)
 
 CINC = ../include/CLEMAN.h
 

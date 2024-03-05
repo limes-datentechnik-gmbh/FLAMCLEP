@@ -1050,7 +1050,7 @@ extern int printd(const char* format,...) __PRINTF_CHECK__(1, 2);
 extern int snprintc(char* buffer,const size_t size,const char* format,...) __PRINTF_CHECK__(3, 4);
 
 /**
- * Works like snprintf but does reallocation of the buffer (maximal expansion of the format string can be specified).
+ * Works like snprintc but does reallocation of the buffer (maximal expansion of the format string can be specified).
  * @param buffer    pointer to pointer to the string buffer (is updated, could be NULL at beginning)
  * @param size      pointer to size of the string buffer (is updated, could be 0 at beginning)
  * @param expansion maximal expected expansion of the format string (size must be fit strlen(*buffer)+strlen(format)+expansion+1)
