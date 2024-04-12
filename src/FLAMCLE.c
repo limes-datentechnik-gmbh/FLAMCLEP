@@ -2788,7 +2788,7 @@ EVALUATE:
             }
             ERROR(CLERTC_CMD,NULL);
          }
-         // cppcheck-suppress uninitvar
+         // cppcheck-suppress [uninitvar, legacyUninitvar]
          srprintf(&pcCnf,&szCnf,strlen(pcOwn)+strlen(pcPgm)+strlen(pcTmp),"%s.%s.envar.%s",pcOwn,pcPgm,pcTmp);
          if (pcCnf==NULL) {
             if (pfErr!=NULL) {
