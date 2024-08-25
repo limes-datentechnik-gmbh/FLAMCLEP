@@ -354,6 +354,7 @@ typedef struct ClpArgument {
  *                    (also used as head line or in bullet list in documentation generation).
  */
 #define CLPCONTAB_NUMBER(kyw,dat,man,hlp)       {CLPTYP_NUMBER,(kyw),NULL,0,0,  0  ,0,0,CLPFLG_CON           ,NULL,NULL,(man),(hlp),(dat), 0.0 ,NULL       ,NULL},
+#define CLPCONTAB_NUMHID(kyw,dat,man,hlp)       {CLPTYP_NUMBER,(kyw),NULL,0,0,  0  ,0,0,CLPFLG_CON|CLPFLG_HID,NULL,NULL,(man),(hlp),(dat), 0.0 ,NULL       ,NULL},
 
 /**
  * @brief Defines a floating point literal with the command line keyword *kyw* and the value *dat*.
