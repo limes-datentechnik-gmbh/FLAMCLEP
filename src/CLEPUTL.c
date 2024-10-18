@@ -2266,7 +2266,7 @@ extern const char* mapccsid(const unsigned int uiCcsId){
 static char* drplchar(const char* string, const size_t limit, const char c, const char* value)
 {
    char*       buf;
-   char*       out;
+   char*       out;/* TODO: out pointer muss integer index werden. */
    const char* end;
    size_t      size;
    size_t      valueLen=strlen(value);
