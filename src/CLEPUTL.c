@@ -1635,10 +1635,10 @@ extern const char* mapl2c(unsigned isEBCDIC) {
 }
 
 extern const char* lng2ccsd(const char* pcLang, unsigned isEbcdic) {
-   char     pcLngCpy[2];
-   char*    pcPtr =NULL;
-   int      isEuro=FALSE;
-   size_t   uiLen=strlen(pcLang);
+   char        pcLngCpy[2];
+   const char* pcPtr =NULL;
+   int         isEuro=FALSE;
+   size_t      uiLen=strlen(pcLang);
 
    if (uiLen<1) return NULL;
    pcLngCpy[0] = tolower(pcLang[0]);
@@ -2262,11 +2262,10 @@ extern const char* mapccsid(const unsigned int uiCcsId){
 
 /**********************************************************************/
 
-
 static char* drplchar(const char* string, const size_t limit, const char c, const char* value)
 {
    char*       buf;
-   char*       out;/* TODO: out pointer muss integer index werden. */
+   int         o=0;
    const char* end;
    size_t      size;
    size_t      valueLen=strlen(value);
@@ -2276,7 +2275,6 @@ static char* drplchar(const char* string, const size_t limit, const char c, cons
 
    size=strlen(string)+1;
    buf=malloc(size);
-   out=buf;
    // cppcheck-suppress knownConditionTrueFalse
    if (buf==NULL) return(NULL);
 
@@ -2284,11 +2282,9 @@ static char* drplchar(const char* string, const size_t limit, const char c, cons
    while (string[0]) {
       if (string[0]==c && string < end) {
          if (string[1]==c) { // escape sequence
-            out[0]=string[0];
-            out++;
-            string+=2;
+            buf[o]=string[0];
+            o++; string+=2;
          } else { // replacement
-            ptrdiff_t offset=out-buf;
             char* h=realloc_nowarn(buf,size+(valueLen-1));
             if (h==NULL) {
                free(buf);
@@ -2296,37 +2292,30 @@ static char* drplchar(const char* string, const size_t limit, const char c, cons
             }
             size+=valueLen-1;
             buf=h;
-            out=buf+offset;
-            memcpy(out,value,valueLen);
-            out+=valueLen;
-            string++;
+            memcpy(buf+o,value,valueLen);
+            o+=valueLen; string++;
          }
       } else { // copy
-         out[0]=string[0];
-         out++;
-         string++;
+         buf[o]=string[0];
+         o++; string++;
       }
    }
-   out[0]=0x00;
+   buf[o]=0x00;
    return buf;
 }
 
 static void rplchar(char* string, const size_t size, const size_t limit, const char c, const char* value)
 {
-   char        h[size];
-   char*       in;
-   char*       out;
-   char*       inEnd;
-   char*       match;
-   int         inHelper = 0;
-   size_t      vlen=strlen(value);
 
    // check whether we even have a match
-   match = strchr(string, c);
+   char* match = strchr(string, c);
    if (match != NULL) {
-      in = match;
-      out = match;
-      inEnd = limit > 0 ? string + limit : string + size;
+      char        h[size];
+      const char* in       = match;
+      char*       out      = match;
+      const char* inEnd    = limit > 0 ? string + limit : string + size;
+      int         inHelper = 0;
+      size_t      vlen     = strlen(value);
 
       while (*in != '\0' && out + 1 < string + size) {
          if (*in == c && in < inEnd) {
@@ -2493,7 +2482,7 @@ static void rplenvar(char* name,const size_t size,const char opn, const char cls
    char*       a=name;
    char*       b;
    char*       c;
-   char*       v;
+   const char* v;
    char*       p;
    int         match;
    ssize_t     catlen, hlen, vlen;
@@ -2535,7 +2524,7 @@ static char* drplenvar(const char* string,const char opn, const char cls)
    const char* p=string;
    size_t      s=strlen(string)+1;
    char*       b=malloc(s);
-   char*       r=b;
+   int         o=0;
    // cppcheck-suppress knownConditionTrueFalse
    if (b==NULL)
       return(NULL);
@@ -2543,8 +2532,8 @@ static char* drplenvar(const char* string,const char opn, const char cls)
    while(p[0]) {
       if (p[0]==opn) {
          if (p[1]==opn) {
-            r[0]=p[0];
-            r++; p+=2;
+            b[o]=p[0];
+            o++; p+=2;
          } else {
             char* c=strchr(p+1,cls);
             if (c!=NULL) {
@@ -2553,7 +2542,6 @@ static char* drplenvar(const char* string,const char opn, const char cls)
                const char* v=getenvar(p+1,x,sizeof(e),e);
                if (v!=NULL) {
                   int   l=strlen(v);
-                  ptrdiff_t offset=r-b;
                   char* h=realloc_nowarn(b,s+(l-x));
                   if (h==NULL) {
                      free(b);
@@ -2561,24 +2549,23 @@ static char* drplenvar(const char* string,const char opn, const char cls)
                   }
                   s+=l-x;
                   b=h;
-                  r=b+offset;
-                  memcpy(r,v,l);
-                  r+=l; p=c+1;
+                  memcpy(b+o,v,l);
+                  o+=l; p=c+1;
                } else {
-                  r[0]=p[0];
-                  r++; p++;
+                  b[o]=p[0];
+                  o++; p++;
                }
             } else {
-               r[0]=p[0];
-               r++; p++;
+               b[o]=p[0];
+               o++; p++;
             }
          }
       } else {
-         r[0]=p[0];
-         r++; p++;
+         b[o]=p[0];
+         o++; p++;
       }
    }
-   r[0]=0x00;
+   b[o]=0x00;
    return(b);
 }
 
@@ -2613,7 +2600,7 @@ static char* drpltpl(const char* templ,const char* values) {
    const char* p=templ;
    size_t      s=strlen(templ)+1;
    char*       b=malloc(s);
-   char*       r=b;
+   int         o=0;
    // cppcheck-suppress knownConditionTrueFalse
    if (b==NULL)
       return(NULL);
@@ -2621,8 +2608,8 @@ static char* drpltpl(const char* templ,const char* values) {
    while(p[0]) {
       if (p[0]=='%') {
          if (p[1]=='%') {
-            r[0]=p[0];
-            r++; p+=2;
+            b[o]=p[0];
+            o++; p+=2;
          } else if (p[1]) {
             for (const char* v=values;v[0];v++) {
                if (toupper(v[0])==toupper(p[1]) && v[1]==':') {
@@ -2630,7 +2617,6 @@ static char* drpltpl(const char* templ,const char* values) {
                   while (x[0] && x[0]!='\n')
                      x++;
                   int l=x-(v+2);
-                  ptrdiff_t offset=r-b;
                   char* h=realloc_nowarn(b,s+(l-2));
                   if (h==NULL) {
                      free(b);
@@ -2638,23 +2624,22 @@ static char* drpltpl(const char* templ,const char* values) {
                   }
                   s+=l-2;
                   b=h;
-                  r=b+offset;
-                  memcpy(r,v+2,l);
-                  r+=l;
+                  memcpy(b+o,v+2,l);
+                  o+=l;
                   break;
                }
             }
             p+=2;
          } else {
-            r[0]=p[0];
-            r++; p++;
+            b[o]=p[0];
+            o++; p++;
          }
       } else {
-         r[0]=p[0];
-         r++; p++;
+         b[o]=p[0];
+         o++; p++;
       }
    }
-   r[0]=0x00;
+   b[o]=0x00;
    return(b);
 }
 
