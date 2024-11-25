@@ -3876,9 +3876,10 @@ static int siClpConNat(
       return(CLPTOK_STR);
    } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,pcKyw,"LCOFFSET",0,0,FALSE)==0) {
       if (pzLex!=NULL) {
+         struct tm st;
          const time_t t=psHdl->siNow;
-         const I64 lt=localtime(&t)->tm_hour;
-         const I64 gt=gmtime(&t)->tm_hour;
+         const I64 lt=localtime_r(&t,&st)->tm_hour;
+         const I64 gt=gmtime_r(&t,&st)->tm_hour;
          if (gt>=lt) {
             snprintf(*ppLex,*pzLex,"d'+%02d",(I32)(gt-lt));
          } else {
@@ -3889,9 +3890,10 @@ static int siClpConNat(
       return(CLPTOK_STR);
    } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,pcKyw,"LCOFFABS",0,0,FALSE)==0) {
       if (pzLex!=NULL) {
+         struct tm st;
          const time_t t=psHdl->siNow;
-         const I64 lt=localtime(&t)->tm_hour;
-         const I64 gt=gmtime(&t)->tm_hour;
+         const I64 lt=localtime_r(&t,&st)->tm_hour;
+         const I64 gt=gmtime_r(&t,&st)->tm_hour;
          if (gt>lt) {
             snprintf(*ppLex,*pzLex,"d'%02d",(I32)(gt-lt));
          } else {
@@ -3982,9 +3984,10 @@ static int siClpConNat(
       return(CLPTOK_STR);
    } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,pcKyw,"GMOFFSET",0,0,FALSE)==0) {
       if (pzLex!=NULL) {
+         struct tm st;
          const time_t t=psHdl->siNow;
-         const I64 lt=localtime(&t)->tm_hour;
-         const I64 gt=gmtime(&t)->tm_hour;
+         const I64 lt=localtime_r(&t,&st)->tm_hour;
+         const I64 gt=gmtime_r(&t,&st)->tm_hour;
          if (gt>lt) {
             snprintf(*ppLex,*pzLex,"d'-%02d",(I32)(gt-lt));
          } else {
@@ -3995,9 +3998,10 @@ static int siClpConNat(
       return(CLPTOK_STR);
    } else if ((siTyp==CLPTYP_STRING || siTyp==-1) && strxcmp(psHdl->isCas,pcKyw,"GMOFFABS",0,0,FALSE)==0) {
       if (pzLex!=NULL) {
+         struct tm st;
          const time_t t=psHdl->siNow;
-         const I64 lt=localtime(&t)->tm_hour;
-         const I64 gt=gmtime(&t)->tm_hour;
+         const I64 lt=localtime_r(&t,&st)->tm_hour;
+         const I64 gt=gmtime_r(&t,&st)->tm_hour;
          if (gt>lt) {
             snprintf(*ppLex,*pzLex,"d'%02d",(I32)(gt-lt));
          } else {
