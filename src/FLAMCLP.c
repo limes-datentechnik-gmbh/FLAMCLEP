@@ -1524,7 +1524,7 @@ extern int siClpSyntax(
    const char*                   pcPat)
 {
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
-   TsSym*                        psTab=psHdl->psTab;
+   const TsSym*                  psTab=psHdl->psTab;
    TsSym*                        psArg=NULL;
    const char*                   pcPtr=NULL;
    const char*                   pcKyw=NULL;
@@ -4302,7 +4302,7 @@ static int siClpScnNat(
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    char*                         pcLex=(*ppLex);
    char*                         pcHlp=(*ppLex);
-   char*                         pcEnd=(*ppLex)+(*pzLex);
+   const char*                   pcEnd=(*ppLex)+(*pzLex);
    const char*                   pcCur=(*ppCur);
    int                           isEnv=psHdl->isEnv;
    const char*                   pcEnv=NULL;
