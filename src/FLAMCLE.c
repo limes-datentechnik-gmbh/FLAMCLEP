@@ -162,11 +162,13 @@
  * 1.3.86: Add new LSTENV and HLPENV built-in functions and use HLPENV to generate docu about used environment variables
  * 1.3.87: Build complete environment using call back functions
  * 1.4.88: Correct support for command overlays
+ * 1.4.89: Support environment variables CLE_MAX/MIN_CC
+ * 1.4.90: Fix handling of owner and MAX/MINCC (make it independent of default command)
  */
-#define CLE_VSN_STR       "1.4.88"
+#define CLE_VSN_STR       "1.4.90"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        4
-#define CLE_VSN_REVISION       88
+#define CLE_VSN_REVISION       90
 
 /* Definition der Konstanten ******************************************/
 
@@ -1692,6 +1694,42 @@ extern int siCleExecute(
       ERROR(CLERTC_TAB,NULL);
    }
 
+   int siMaxCC=0x0FFFFFFF;
+   int siMinCC=0x00000000;
+   const C08* pcMaxCC=GETENV("CLE_MAX_CC");
+   if (pcMaxCC!=NULL && isdigit(*pcMaxCC)) {
+      siMaxCC=atoi(pcMaxCC);
+   }
+   const C08* pcMinCC=GETENV("CLE_MIN_CC");
+   if (pcMinCC!=NULL && isdigit(*pcMinCC)) {
+      siMinCC=atoi(pcMinCC);
+   }
+   if (strxcmp(isCas,argv[argc-1],"MAXCC=",6,0,FALSE)==0) {
+       const char* h=strchr(&(argv[argc-1][6]),'-');
+       if (h!=NULL && isdigit(h[1])) siMinCC=atoi(h+1);
+       if (isdigit(argv[argc-1][6])) siMaxCC=atoi(&(argv[argc-1][6]));
+       argc--;
+   }
+   if (strxcmp(isCas,argv[1],"OWNER=",6,0,FALSE)==0) {
+      srprintf(&pcOwn,&szOwn,strlen(&argv[1][6]),"%s",&argv[1][6]);
+      if (pcOwn==NULL) {
+         if (pfErr!=NULL) fprintf(pfErr,"Allocation of memory for owner string failed\n");
+         siErr=CLERTC_MEM;
+         ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+      }
+      if (isEnvOwn) {
+         if (SETENV("OWNERID",pcOwn)) {
+            if (pfOut!=NULL) fprintf(pfOut,"Use owner: '%s' (set as environment variable failed (%d - %s))\n",pcOwn,errno,strerror(errno));
+         } else {
+            if (pfOut!=NULL) fprintf(pfOut,"Use owner: '%s' (set as environment variable was successful)\n",pcOwn);
+         }
+      } else {
+         if (pfOut!=NULL) fprintf(pfOut,"Use owner: '%s' (environment variable was already defined)\n",pcOwn);
+      }
+      for (i=2;i<argc;i++) argv[i-1]=argv[i];
+      argc--;
+   }
+
    if (argc<2) {
       if (pcDef!=NULL && *pcDef) {
          ppArg=malloc((argc+1)*sizeof(*ppArg));
@@ -1711,6 +1749,8 @@ extern int siCleExecute(
 
    if (argv[1][0]=='-') argv[1]++;
    if (argv[1][0]=='-') argv[1]++;
+
+   if (pfOut!=NULL) fprintf(pfOut,"%s RUN(Program='%s' Owner='%s' Command='%s' ParameterCount=%d MINCC=%d MAXCC=%d)\n", cstime(0,acTs), argv[0], pcOwn, argv[1], argc-2, siMinCC, siMaxCC);
 
 EVALUATE:
    if (asBif[CLE_BUILTIN_IDX_LICENSE].isBif && strxcmp(isCas,argv[1],"LICENSE",0,0,FALSE)==0) {
@@ -2988,33 +3028,6 @@ EVALUATE:
       }
       ERROR(CLERTC_CMD,NULL);
    } else {
-      int siMaxCC=0x0FFFFFFF;
-      int siMinCC=0x00000000;
-      if (strxcmp(isCas,argv[argc-1],"MAXCC=",6,0,FALSE)==0) {
-          const char* h=strchr(&(argv[argc-1][6]),'-');
-          if (h!=NULL && isdigit(h[1])) siMinCC=atoi(h+1);
-          if (isdigit(argv[argc-1][6])) siMaxCC=atoi(&(argv[argc-1][6]));
-          argc--;
-      }
-      if (strxcmp(isCas,argv[1],"OWNER=",6,0,FALSE)==0) {
-         srprintf(&pcOwn,&szOwn,strlen(&argv[1][6]),"%s",&argv[1][6]);
-         if (pcOwn==NULL) {
-            if (pfErr!=NULL) fprintf(pfErr,"Allocation of memory for owner string failed\n");
-            siErr=CLERTC_MEM;
-            ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
-         }
-         if (isEnvOwn) {
-            if (SETENV("OWNERID",pcOwn)) {
-               if (pfOut!=NULL) fprintf(pfOut,"Use owner: '%s' (set as environment variable failed (%d - %s))\n",pcOwn,errno,strerror(errno));
-            } else {
-               if (pfOut!=NULL) fprintf(pfOut,"Use owner: '%s' (set as environment variable was successful)\n",pcOwn);
-            }
-         } else {
-            if (pfOut!=NULL) fprintf(pfOut,"Use owner: '%s' (environment variable was already defined)\n",pcOwn);
-         }
-         for (i=2;i<argc;i++) argv[i-1]=argv[i];
-         argc--;
-      }
       if (argc>1) {
          for (i=0;psCmd[i].pcKyw!=NULL;i++) {
             l=strlen(psCmd[i].pcKyw);
