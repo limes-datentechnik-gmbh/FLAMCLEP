@@ -30,10 +30,13 @@ The command line is interpreted by CLE the command string by CLP. For example:
     |    |-- conv is part of the command line
     |-- flcl is part of the command line
  
- :> flcl conv=para.txt
-    |    |    |-- para.txt is part of the command line, but the content
-    |    |        of para.txt might contain a CLP syntax error
-    |    |-- conv is part of the command line
+ :> flcl owner=xxx conv=para.txt maxcc=-2 quiet
+    |    |         |    |        |        |-- silent or quiet is part of the comand line
+    |    |         |    |        |-- maxx is part of the comand line
+    |    |         |    |-- para.txt is part of the command line, but the content
+    |    |         |        of para.txt might contain a CLP syntax error
+    |    |         |-- conv is part of the command line
+    |    |-- owner is part of the comand line
     |-- flcl is part of the command line
     
 ------------------------------------------------------------------------
@@ -57,3 +60,6 @@ A relevant warning is a warning written to the log by a used component.
 Warnings written by components which are removed from procession because
 the format does not fit or something else, are still in the log but not
 relevant for the completion code 1.
+
+If the return codes 1 and 2 are to be 0 and therefore ignored, the
+parameter MAXCC=-2 must be set.
