@@ -3,9 +3,9 @@ returned at program termination. This content is printed on the screen
 with the built-in function <<CLEP.BUILTIN.ERRORS,ERRORS>>.
 
 :0:   command line, command syntax, mapping, execution and finish of the command was successful
-:1:   command line, command syntax, mapping, execution and finish of the command was successful but a warning can be found in the log
-:2:   command line, command syntax, mapping, execution was successful but cleanup of the command failed (may not happened)
-:4:   command line, command syntax and mapping was successful but execution of the command returned with a warning
+:1:   command line, command syntax, mapping, execution and finish of the command was successful but a warning or error can be found in the log
+:2:   command line, command syntax, mapping, execution was successful but cleanup of the command failed (may not happened and can be ignored)
+:4:   command line, command syntax and mapping was successful but execution of the command returned with a warning (some files not processed)
 :8:   command line, command syntax and mapping was successful but execution of the command returned with an error
 :12:  command line and command syntax was OK but mapping of the parameter for command execution failed
 :16:  command line was OK but command syntax was wrong (error from command line parser)
