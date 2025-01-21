@@ -1704,30 +1704,33 @@ extern int siCleExecute(
    if (pcMinCC!=NULL && isdigit(*pcMinCC)) {
       siMinCC=atoi(pcMinCC);
    }
-   if (strxcmp(isCas,argv[argc-1],"MAXCC=",6,0,FALSE)==0) {
-       const char* h=strchr(&(argv[argc-1][6]),'-');
-       if (h!=NULL && isdigit(h[1])) siMinCC=atoi(h+1);
-       if (isdigit(argv[argc-1][6])) siMaxCC=atoi(&(argv[argc-1][6]));
-       argc--;
-   }
-   if (strxcmp(isCas,argv[1],"OWNER=",6,0,FALSE)==0) {
-      srprintf(&pcOwn,&szOwn,strlen(&argv[1][6]),"%s",&argv[1][6]);
-      if (pcOwn==NULL) {
-         if (pfErr!=NULL) fprintf(pfErr,"Allocation of memory for owner string failed\n");
-         siErr=CLERTC_MEM;
-         ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+
+   if (argc>1) {
+      if (strxcmp(isCas,argv[argc-1],"MAXCC=",6,0,FALSE)==0) {
+          const char* h=strchr(&(argv[argc-1][6]),'-');
+          if (h!=NULL && isdigit(h[1])) siMinCC=atoi(h+1);
+          if (isdigit(argv[argc-1][6])) siMaxCC=atoi(&(argv[argc-1][6]));
+          argc--;
       }
-      if (isEnvOwn) {
-         if (SETENV("OWNERID",pcOwn)) {
-            if (pfOut!=NULL) fprintf(pfOut,"Use owner: '%s' (set as environment variable failed (%d - %s))\n",pcOwn,errno,strerror(errno));
-         } else {
-            if (pfOut!=NULL) fprintf(pfOut,"Use owner: '%s' (set as environment variable was successful)\n",pcOwn);
+      if (strxcmp(isCas,argv[1],"OWNER=",6,0,FALSE)==0) {
+         srprintf(&pcOwn,&szOwn,strlen(&argv[1][6]),"%s",&argv[1][6]);
+         if (pcOwn==NULL) {
+            if (pfErr!=NULL) fprintf(pfErr,"Allocation of memory for owner string failed\n");
+            siErr=CLERTC_MEM;
+            ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
          }
-      } else {
-         if (pfOut!=NULL) fprintf(pfOut,"Use owner: '%s' (environment variable was already defined)\n",pcOwn);
+         if (isEnvOwn) {
+            if (SETENV("OWNERID",pcOwn)) {
+               if (pfOut!=NULL) fprintf(pfOut,"Use owner: '%s' (set as environment variable failed (%d - %s))\n",pcOwn,errno,strerror(errno));
+            } else {
+               if (pfOut!=NULL) fprintf(pfOut,"Use owner: '%s' (set as environment variable was successful)\n",pcOwn);
+            }
+         } else {
+            if (pfOut!=NULL) fprintf(pfOut,"Use owner: '%s' (environment variable was already defined)\n",pcOwn);
+         }
+         for (i=2;i<argc;i++) argv[i-1]=argv[i];
+         argc--;
       }
-      for (i=2;i<argc;i++) argv[i-1]=argv[i];
-      argc--;
    }
 
    if (argc<2) {
