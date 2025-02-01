@@ -2475,7 +2475,7 @@ EVALUATE:
       if (pvLib==NULL) {
          if (pfErr!=NULL) fprintf(pfErr,"There is no service provider DLL/SO (libhtmldoc) available for HTML generation\n");
          siErr=CLERTC_FAT;
-         ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+         ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),pcPat);
       }
       TsCleDocPar stDocPar;
       stDocPar.isHdr=TRUE;  stDocPar.pcAut=pcAut; stDocPar.pcAdr=pcAdr;
