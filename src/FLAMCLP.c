@@ -2683,12 +2683,12 @@ static TsSym* psClpSymIns(
 
    if (psArg->pcKyw!=NULL) {
       if (!isalpha(*psArg->pcKyw)) {
-         CLPERR(psHdl,CLPERR_TAB,"Invalid first letter (%c) in keyword '%s.%s'",*psArg->pcKyw,pcPat,psArg->pcKyw);
+         CLPERR(psHdl,CLPERR_TAB,"Invalid first letter (%c(0x%02X)) in keyword '%s.%s'",*psArg->pcKyw,*psArg->pcKyw,pcPat,psArg->pcKyw);
          ERROR(psSym);
       }
       for (const char* p=psArg->pcKyw+1; *p; p++) {
          if (CLPISF_CON(psArg->uiFlg)?!isCon(*p):!isKyw(*p)) {
-            CLPERR(psHdl,CLPERR_TAB,"Invalid letter (%c) in keyword '%s.%s'",*p,pcPat,psArg->pcKyw);
+            CLPERR(psHdl,CLPERR_TAB,"Invalid letter (%c(0x%02X)) in keyword '%s.%s'",*p,*p,pcPat,psArg->pcKyw);
             ERROR(psSym);
          }
       }
@@ -2696,12 +2696,12 @@ static TsSym* psClpSymIns(
 
    if (psArg->pcAli!=NULL) {
       if (!isalpha(*psArg->pcAli)) {
-         CLPERR(psHdl,CLPERR_TAB,"Invalid first letter (%c) in alias '%s.%s'",*psArg->pcAli,pcPat,psArg->pcKyw);
+         CLPERR(psHdl,CLPERR_TAB,"Invalid first letter (%c(0x%02X)) in alias '%s.%s'",*psArg->pcAli,*psArg->pcAli,pcPat,psArg->pcKyw);
          ERROR(psSym);
       }
       for (const char* p=psArg->pcAli+1; *p; p++) {
          if (CLPISF_CON(psArg->uiFlg)?!isCon(*p):!isKyw(*p)) {
-            CLPERR(psHdl,CLPERR_TAB,"Invalid letter (%c) in alias '%s.%s'",*p,pcPat,psArg->pcAli);
+            CLPERR(psHdl,CLPERR_TAB,"Invalid letter (%c(0x%02X)) in alias '%s.%s'",*p,*p,pcPat,psArg->pcAli);
             ERROR(psSym);
          }
       }
@@ -5429,7 +5429,7 @@ static int siFromNumberLexeme(
    case 'd':*piVal=strtoll(pcVal+1,&pcHlp,10); break;
    case 'x':*piVal=strtoull(pcVal+1,&pcHlp,16); break;
    case 't':*piVal=strtoll(pcVal+1,&pcHlp,10); break;
-   default: return CLPERR(psHdl,CLPERR_SEM,"Base (%c) of number literal (%s.%s=%s) not supported",pcVal[0],fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,isPrnStr(psArg,pcVal+1));
+   default: return CLPERR(psHdl,CLPERR_SEM,"Base (%c(0x%02X)) of number literal (%s.%s=%s) not supported",pcVal[0],pcVal[0],fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,isPrnStr(psArg,pcVal+1));
    }
    if (errno || (pcHlp!=NULL && *pcHlp)) {
       if (pcHlp!=NULL && *pcHlp) {
@@ -5462,7 +5462,7 @@ static int siFromFloatLexeme(
          *p='.';
       }
       break;
-   default: return CLPERR(psHdl,CLPERR_SEM,"Base (%c) of floating point literal (%s.%s=%s) not supported",pcVal[0],fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,isPrnStr(psArg,pcVal+1));
+   default: return CLPERR(psHdl,CLPERR_SEM,"Base (%c(0x%02X)) of floating point literal (%s.%s=%s) not supported",pcVal[0],pcVal[0],fpcPat(pvHdl,siLev),psArg->psStd->pcKyw,isPrnStr(psArg,pcVal+1));
    }
    if (errno ||  (pcHlp!=NULL && *pcHlp)) {
       if (pcHlp!=NULL && *pcHlp) {
@@ -6936,7 +6936,7 @@ static int siClpBldLit(
             isNotDone = TRUE;
             break;
          default:
-            CLPERR(psHdl,CLPERR_LEX,"String prefix (%c) of '%s.%s' is not supported",pcVal[0],pcPat,psArg->psStd->pcKyw);
+            CLPERR(psHdl,CLPERR_LEX,"String prefix (%c(0x%02X)) of '%s.%s' is not supported",pcVal[0],pcVal[0],pcPat,psArg->psStd->pcKyw);
             CLPERRADD(psHdl,0,"Please use one of the following values:%s","");
             CLPERRADD(psHdl,1,"x - for conversion from hex to bin%s","");
             CLPERRADD(psHdl,1,"a - for conversion in ASCII%s","");
