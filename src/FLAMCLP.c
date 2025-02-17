@@ -187,12 +187,14 @@
  * 1.3.136: Make pvDat and psErr optional available at reset of CLP (and improve reset)
  * 1.4.137: Correct support for command overlays
  * 1.4.138: Hide parameter with hide flag in each case
+ * 1.4.139: Fix memory leak in re-allocation of lexem buffer in CLP (runs re-alloc in a loop with doubling the space until a pointer change was happen)
+ *
 **/
 
-#define CLP_VSN_STR       "1.4.138"
+#define CLP_VSN_STR       "1.4.139"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        4
-#define CLP_VSN_REVISION       138
+#define CLP_VSN_REVISION       139
 
 /* Definition der Konstanten ******************************************/
 
@@ -3657,18 +3659,18 @@ extern int siClpLexemes(
 
 #define LEX_REALLOC \
    if (pcLex>=(pcEnd-4)) {\
-      size_t l=pcLex-(*ppLex);\
-      size_t h=pcHlp-(*ppLex);\
+      intptr_t l=pcLex-(*ppLex);\
+      intptr_t h=pcHlp-(*ppLex);\
       size_t s=(*pzLex)?(*pzLex)*2:CLPINI_LEXSIZ;\
       char*  b=(char*)realloc_nowarn(*ppLex,s);\
-      if (b==NULL) return CLPERR(psHdl,CLPERR_MEM,"Re-allocation to store the lexeme failed");\
+      if (b==NULL) return CLPERR(psHdl,CLPERR_MEM,"Re-allocation of buffer in size %d to store the lexeme failed",(int)s);\
       (*pzLex)=s;\
       if (b!=(*ppLex)) {\
          (*ppLex)=b;\
          pcLex=(*ppLex)+l;\
          pcHlp=(*ppLex)+h;\
-         pcEnd=(*ppLex)+(*pzLex);\
       }\
+      pcEnd=(*ppLex)+s;\
    }
 
 static int siClpConNat(
