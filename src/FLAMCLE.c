@@ -1189,7 +1189,10 @@ static void* pfLoadHtmlDoc(TfCleOpenPrint** ppHtmlOpn, TfClpPrintPage** ppHtmlPr
    *ppHtmlCls=(TfCleClosePrint*)GetProcAddress(pvHtmlDoc, "clsHtmlDoc");
 #else
    void* pvHtmlDoc=dlopen("libhtmldoc.so",RTLD_LAZY);
-   if (pvHtmlDoc==NULL) return(NULL);
+   if (pvHtmlDoc==NULL) {
+      pvHtmlDoc=dlopen("libhtmldoc5.so",RTLD_LAZY);
+      if (pvHtmlDoc==NULL) return(NULL);
+   }
    *ppHtmlOpn=(TfCleOpenPrint* )dlsym(pvHtmlDoc, "opnHtmlDoc");
    *ppHtmlPrn=(TfClpPrintPage* )dlsym(pvHtmlDoc, "prnHtmlDoc");
    *ppHtmlCls=(TfCleClosePrint*)dlsym(pvHtmlDoc, "clsHtmlDoc");
