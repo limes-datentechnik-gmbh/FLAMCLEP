@@ -2212,59 +2212,61 @@ static int siClpPrintWritten(
 {
    int                           i;
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
-   size_t s=(size_t)ftell(pfDoc);
-   rewind(pfDoc);
-   char* pcPge=malloc(s+1);
-   if (pcPge==NULL) {
-      return CLPERR(psHdl,CLPERR_SYS,"Allocation of memory for temporary file to print page for argument '%s' failed",psHdl->pcCmd);
-   }
-   size_t r=fread(pcPge,1,s,pfDoc);
-   if (r!=s) {
-      free(pcPge);
-      return CLPERR(psHdl,CLPERR_SYS,"Read of temporary file to print page for command '%s' failed",psHdl->pcCmd);
-   }
-   pcPge[r]=0x00;
-
-   const char* p=strchr(pcPge,'=');
-   if (p==NULL) {
-      free(pcPge);
-      return CLPERR(psHdl,CLPERR_INT,"No headline found in manual page for command '%s' (no sign)",psHdl->pcCmd);
-   }
-   while (*p=='=') p++;
-   if (*p!=' ') {
-      free(pcPge);
-      return CLPERR(psHdl,CLPERR_INT,"No headline found in manual page for command '%s' (no blank after sign)",psHdl->pcCmd);
-   }
-   p++;
-   const char* e=strchr(p,'\n');
-   if (e==NULL) {
-      free(pcPge);
-      return CLPERR(psHdl,CLPERR_INT,"No end of headline found in manual page for command '%s'",psHdl->pcCmd);
-   }
-   int l=e-p;
-   char acHdl[l+1];
-   memcpy(acHdl,p,l);
-   acHdl[l]=0x00;
-   l=strlen(pcFil);
-   char acFil[l+16];
-   unsigned int uiHsh=fnvHash(l,(const unsigned char*)pcFil);
-   for (i=0;i<l;i++) {
-      if (pcFil[i]=='\t') {
-         acFil[i]=psHdl->siPs1;
-      } else if (pcFil[i]=='\v') {
-         acFil[i]=psHdl->siPs2;
-      } else if (isalnum(pcFil[i])) {
-         acFil[i]=tolower(pcFil[i]);
-      } else {
-         acFil[i]=psHdl->siPr3;
+   long int s=ftell(pfDoc);
+   if (s>0) {
+      rewind(pfDoc);
+      char* pcPge=malloc(s+1);
+      if (pcPge==NULL) {
+         return CLPERR(psHdl,CLPERR_SYS,"Allocation of memory for temporary file to print page for argument '%s' failed",psHdl->pcCmd);
       }
-   }
-   acFil[i]=0x00;
-   snprintc(acFil,sizeof(acFil),"%c%04x",psHdl->siPr3,uiHsh&0xFFFF);
-   int siErr=psHdl->pfPrn(psHdl->pvPrn,psHdl->uiLev+siLev,acHdl,pcPat,acFil,pcMan,pcPge);
-   free(pcPge);
-   if (siErr) {
-      return CLPERR(psHdl,CLPERR_SYS,"Print page over call back function for command '%s' failed with %d",psHdl->pcCmd,siErr);
+      size_t r=fread(pcPge,1,s,pfDoc);
+      if (r!=s) {
+         free(pcPge);
+         return CLPERR(psHdl,CLPERR_SYS,"Read of temporary file to print page for command '%s' failed",psHdl->pcCmd);
+      }
+      pcPge[r]=0x00;
+
+      const char* p=strchr(pcPge,'=');
+      if (p==NULL) {
+         free(pcPge);
+         return CLPERR(psHdl,CLPERR_INT,"No headline found in manual page for command '%s' (no sign)",psHdl->pcCmd);
+      }
+      while (*p=='=') p++;
+      if (*p!=' ') {
+         free(pcPge);
+         return CLPERR(psHdl,CLPERR_INT,"No headline found in manual page for command '%s' (no blank after sign)",psHdl->pcCmd);
+      }
+      p++;
+      const char* e=strchr(p,'\n');
+      if (e==NULL) {
+         free(pcPge);
+         return CLPERR(psHdl,CLPERR_INT,"No end of headline found in manual page for command '%s'",psHdl->pcCmd);
+      }
+      int l=e-p;
+      char acHdl[l+1];
+      memcpy(acHdl,p,l);
+      acHdl[l]=0x00;
+      l=strlen(pcFil);
+      char acFil[l+16];
+      unsigned int uiHsh=fnvHash(l,(const unsigned char*)pcFil);
+      for (i=0;i<l;i++) {
+         if (pcFil[i]=='\t') {
+            acFil[i]=psHdl->siPs1;
+         } else if (pcFil[i]=='\v') {
+            acFil[i]=psHdl->siPs2;
+         } else if (isalnum(pcFil[i])) {
+            acFil[i]=tolower(pcFil[i]);
+         } else {
+            acFil[i]=psHdl->siPr3;
+         }
+      }
+      acFil[i]=0x00;
+      snprintc(acFil,sizeof(acFil),"%c%04x",psHdl->siPr3,uiHsh&0xFFFF);
+      int siErr=psHdl->pfPrn(psHdl->pvPrn,psHdl->uiLev+siLev,acHdl,pcPat,acFil,pcMan,pcPge);
+      free(pcPge);
+      if (siErr) {
+         return CLPERR(psHdl,CLPERR_SYS,"Print page over call back function for command '%s' failed with %d",psHdl->pcCmd,siErr);
+      }
    }
    return(CLP_OK);
 }

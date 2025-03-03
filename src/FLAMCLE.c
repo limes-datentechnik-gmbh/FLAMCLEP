@@ -1113,67 +1113,69 @@ static int siClePrintPage(FILE* pfOut, FILE* pfErr, const TsCleDoc* psDoc, const
       fclose_tmp(pfDoc);
       return(siErr);
    }
-   size_t s=(size_t)ftell(pfDoc);
-   rewind(pfDoc);
-   char* pcPge=malloc(s+1);
-   if (pcPge==NULL) {
-      if (pfErr!=NULL) fprintf(pfErr,"Allocation of memory for temporary file to print manual '%s' page failed\n",psDoc->pcHdl);
-      fclose_tmp(pfDoc);
-      return(CLERTC_MEM);
-   }
-   size_t r=fread(pcPge,1,s,pfDoc);
-   fclose_tmp(pfDoc);
-   if (r!=s) {
-      free(pcPge);
-      if (pfErr!=NULL) fprintf(pfErr,"Read of temporary file to print manual page '%s' failed (%d - %s)\n",psDoc->pcHdl,errno,strerror(errno));
-      return(CLERTC_SYS);
-   }
-   pcPge[r]=0x00;
-
-   const char* p=strchr(pcPge,'=');
-   if (p==NULL) {
-      free(pcPge);
-      if (pfErr!=NULL) fprintf(pfErr,"No headline found in manual page '%s' (no sign)\n",psDoc->pcHdl);
-      return(CLERTC_FAT);
-   }
-   while (*p=='=') p++;
-   if (*p!=' ') {
-      free(pcPge);
-      if (pfErr!=NULL) fprintf(pfErr,"No headline found in manual page '%s' (no blank after sign)\n",psDoc->pcHdl);
-      return(CLERTC_FAT);
-   }
-   p++;
-   const char* e=strchr(p,'\n');
-   if (e==NULL) {
-      free(pcPge);
-      if (pfErr!=NULL) fprintf(pfErr,"No end of headline found in manual page '%s'\n",psDoc->pcHdl);
-      return(CLERTC_FAT);
-   }
-   int l=e-p;
-   char acHdl[l+1];
-   memcpy(acHdl,p,l);
-   acHdl[l]=0x00;
-   l=strlen(pcFil);
-   char acFil[l+16];
-   unsigned int uiHsh=fnvHash(l,(const unsigned char*)pcFil);
-   for (i=0;i<l;i++) {
-      if (pcFil[i]=='\t') {
-         acFil[i]=psPar->siPs1;
-      } else if (pcFil[i]=='\v') {
-         acFil[i]=psPar->siPs2;
-      } else if (isalnum(pcFil[i])) {
-         acFil[i]=tolower(pcFil[i]);
-      } else {
-         acFil[i]=psPar->siPr3;
+   long int s=ftell(pfDoc);
+   if (s>0) {
+      rewind(pfDoc);
+      char* pcPge=malloc(s+1);
+      if (pcPge==NULL) {
+         if (pfErr!=NULL) fprintf(pfErr,"Allocation of memory for temporary file to print manual '%s' page failed\n",psDoc->pcHdl);
+         fclose_tmp(pfDoc);
+         return(CLERTC_MEM);
       }
-   }
-   acFil[i]=0x00;
-   snprintc(acFil,sizeof(acFil),"%c%04x",psPar->siPr3,uiHsh&0xFFFF);
-   siErr=pfPrn(pvPrn,psDoc->uiLev,acHdl,NULL,acFil,psDoc->pcMan,pcPge);
-   free(pcPge);
-   if (siErr) {
-      if (pfErr!=NULL) fprintf(pfErr,"Print page over call back function for command '%s' failed with %d\n",psDoc->pcHdl,siErr);
-      return(CLERTC_MEM);
+      size_t r=fread(pcPge,1,s,pfDoc);
+      fclose_tmp(pfDoc);
+      if (r!=s) {
+         free(pcPge);
+         if (pfErr!=NULL) fprintf(pfErr,"Read of temporary file to print manual page '%s' failed (%d - %s)\n",psDoc->pcHdl,errno,strerror(errno));
+         return(CLERTC_SYS);
+      }
+      pcPge[r]=0x00;
+
+      const char* p=strchr(pcPge,'=');
+      if (p==NULL) {
+         free(pcPge);
+         if (pfErr!=NULL) fprintf(pfErr,"No headline found in manual page '%s' (no sign)\n",psDoc->pcHdl);
+         return(CLERTC_FAT);
+      }
+      while (*p=='=') p++;
+      if (*p!=' ') {
+         free(pcPge);
+         if (pfErr!=NULL) fprintf(pfErr,"No headline found in manual page '%s' (no blank after sign)\n",psDoc->pcHdl);
+         return(CLERTC_FAT);
+      }
+      p++;
+      const char* e=strchr(p,'\n');
+      if (e==NULL) {
+         free(pcPge);
+         if (pfErr!=NULL) fprintf(pfErr,"No end of headline found in manual page '%s'\n",psDoc->pcHdl);
+         return(CLERTC_FAT);
+      }
+      int l=e-p;
+      char acHdl[l+1];
+      memcpy(acHdl,p,l);
+      acHdl[l]=0x00;
+      l=strlen(pcFil);
+      char acFil[l+16];
+      unsigned int uiHsh=fnvHash(l,(const unsigned char*)pcFil);
+      for (i=0;i<l;i++) {
+         if (pcFil[i]=='\t') {
+            acFil[i]=psPar->siPs1;
+         } else if (pcFil[i]=='\v') {
+            acFil[i]=psPar->siPs2;
+         } else if (isalnum(pcFil[i])) {
+            acFil[i]=tolower(pcFil[i]);
+         } else {
+            acFil[i]=psPar->siPr3;
+         }
+      }
+      acFil[i]=0x00;
+      snprintc(acFil,sizeof(acFil),"%c%04x",psPar->siPr3,uiHsh&0xFFFF);
+      siErr=pfPrn(pvPrn,psDoc->uiLev,acHdl,NULL,acFil,psDoc->pcMan,pcPge);
+      free(pcPge);
+      if (siErr) {
+         if (pfErr!=NULL) fprintf(pfErr,"Print page over call back function for command '%s' failed with %d\n",psDoc->pcHdl,siErr);
+         return(CLERTC_MEM);
+      }
    }
    return(CLERTC_OK);
 }

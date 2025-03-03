@@ -1541,26 +1541,25 @@ extern void fprintm(FILE* file,const char* own, const char* pgm, const char* bld
 }
 
 extern int snprintm(char* buffer, size_t size, const char* own, const char* pgm, const char* bld, const char* man, const int cnt) {
-   FILE*       f=fopen_tmp();
+   FILE* f=fopen_tmp();
    if (f!=NULL) {
       fprintm(f,own,pgm,bld,man,cnt);
-      size_t s=(size_t)ftell(f);
-      rewind(f);
-      char* p=malloc(s+1);
-      if (p!=NULL) {
-         size_t r=fread(p,1,s,f);
-         fclose_tmp(f);
-         if (r==s) {
-            p[r]=0x00;
-            int i=snprintf(buffer,size,"%s",p);
-            free(p);
-            return(i);
-         } else {
+      long int s=ftell(f);
+      if (s>0) {
+         rewind(f);
+         char* p=malloc(s+1);
+         if (p!=NULL) {
+            size_t r=fread(p,1,s,f);
+            if (r==s) {
+               p[r]=0x00;
+               int i=snprintf(buffer,size,"%s",p);
+               fclose_tmp(f); free(p);
+               return(i);
+            }
             free(p);
          }
-      } else {
-         fclose_tmp(f);
       }
+      fclose_tmp(f);
    }
    return(snprintf(buffer,size,"Convert of manual page failed"));
 }
