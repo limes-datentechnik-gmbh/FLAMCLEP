@@ -188,13 +188,14 @@
  * 1.4.137: Correct support for command overlays
  * 1.4.138: Hide parameter with hide flag in each case
  * 1.4.139: Fix memory leak in re-allocation of lexem buffer in CLP (runs re-alloc in a loop with doubling the space until a pointer change was happen)
+ * 1.4.140: Improve error message if and of list determined based on string type which could be a wrong written keyword
  *
 **/
 
-#define CLP_VSN_STR       "1.4.139"
+#define CLP_VSN_STR       "1.4.140"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        4
-#define CLP_VSN_REVISION       139
+#define CLP_VSN_REVISION       140
 
 /* Definition der Konstanten ******************************************/
 
@@ -5229,7 +5230,11 @@ static int siClpPrsObj(
       if (psHdl->siTok<0) return(psHdl->siTok);
       TRACE(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d CNT=%d OBJ(%s(parlst))-CLS)\n",fpcPre(pvHdl,siLev),siLev,siPos,siCnt,psArg->psStd->pcKyw);
    } else {
-      return CLPERR(psHdl,CLPERR_SYN,"Character ')' missing to enclose object (%s)",fpcPat(pvHdl,siLev));
+      if (psHdl->siTok==CLPTOK_STR) {
+         return CLPERR(psHdl,CLPERR_SYN,"Character ')' missing to enclose object (%s) - String (%s) given -> possible wrong keyword ",fpcPat(pvHdl,siLev),psHdl->pcLex);
+      } else {
+         return CLPERR(psHdl,CLPERR_SYN,"Character ')' missing to enclose object (%s)",fpcPat(pvHdl,siLev));
+      }
    }
    return(CLP_OK);
 }
@@ -5291,7 +5296,11 @@ static int siClpPrsMain(
             psHdl->siTok=siClpScnSrc(pvHdl,0,NULL);
             if (psHdl->siTok<0) return(psHdl->siTok);
          } else {
-            return CLPERR(psHdl,CLPERR_SYN,"Character ')' missing to enclose object (%s)","***MAIN***");
+            if (psHdl->siTok==CLPTOK_STR) {
+               return CLPERR(psHdl,CLPERR_SYN,"Character ')' missing to enclose object (%s) - String (%s) given -> possible wrong keyword ","***MAIN***",psHdl->pcLex);
+            } else {
+               return CLPERR(psHdl,CLPERR_SYN,"Character ')' missing to enclose object (%s)","***MAIN***");
+            }
          }
       } else {
          siCnt=siClpPrsParLst(pvHdl,0,psTab);
@@ -5345,7 +5354,11 @@ static int siClpPrsAry(
       TRACE(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d CNT=%d ARY(%s%ctyplst%c)-CLS)\n",fpcPre(pvHdl,siLev),siLev,siPos,siCnt,psArg->psStd->pcKyw,C_SBO,C_SBC);
       return(CLP_OK);
    } else {
-      return CLPERR(psHdl,CLPERR_SYN,"Character '%c' missing to enclose the array (%s)",C_SBC,fpcPat(pvHdl,siLev));
+      if (psHdl->siTok==CLPTOK_STR) {
+         return CLPERR(psHdl,CLPERR_SYN,"Character '%c' missing to enclose the array (%s) - String (%s) given -> possible wrong keyword",C_SBC,fpcPat(pvHdl,siLev),psHdl->pcLex);
+      } else {
+         return CLPERR(psHdl,CLPERR_SYN,"Character '%c' missing to enclose the array (%s)",C_SBC,fpcPat(pvHdl,siLev));
+      }
    }
 }
 
@@ -5663,9 +5676,13 @@ static int siClpPrsFac(
          if (psHdl->siTok<0) return(psHdl->siTok);
          return(CLP_OK);
       } else {
-         return CLPERR(psHdl,CLPERR_SYN,"Character ')' missing to enclose expression (%s)",fpcPat(pvHdl,siLev));
+         if (psHdl->siTok==CLPTOK_STR) {
+            return CLPERR(psHdl,CLPERR_SYN,"Character ')' missing to enclose expression (%s) - String (%s) given -> possible wrong keyword",fpcPat(pvHdl,siLev),psHdl->pcLex);
+         } else {
+            return CLPERR(psHdl,CLPERR_SYN,"Character ')' missing to enclose expression (%s)",fpcPat(pvHdl,siLev));
+         }
       }
-   default://Empty string behind = and infront of the next not matching token
+   default://Empty string behind = and in front of the next not matching token
       if (CLPISF_SEL(psArg->psStd->uiFlg)) {
          CLPERR(psHdl,CLPERR_SEM,"The argument '%s.%s' requires one of the defined keywords as value",fpcPat(pvHdl,siLev),psArg->psStd->pcKyw);
          CLPERRADD(psHdl,0,"Please use one of the following arguments:%s","");
