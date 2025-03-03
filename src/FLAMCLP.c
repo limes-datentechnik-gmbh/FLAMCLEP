@@ -1408,11 +1408,11 @@ extern int siClpParsePro(
          return(siCnt);
       } else {
          if (ppLst!=NULL) *ppLst=psHdl->pcLst;
-         return CLPERR(psHdl,CLPERR_SYN,"Last token (%s) of property list is not EOS",pcMapClpTok(psHdl->siTok));
+         return CLPERR(psHdl,CLPERR_SYN,"Last token (%s(%s)) of property list is not EOS",pcMapClpTok(psHdl->siTok),psHdl->pcLex);
       }
    } else {
       if (ppLst!=NULL) *ppLst=psHdl->pcLst;
-      return CLPERR(psHdl,CLPERR_SYN,"Initial token (%s) in handle is not valid",pcMapClpTok(psHdl->siTok));
+      return CLPERR(psHdl,CLPERR_SYN,"Initial token (%s(%s)) in handle is not valid",pcMapClpTok(psHdl->siTok),psHdl->pcLex);
    }
 }
 
@@ -1483,11 +1483,11 @@ static int siClpParseCmd2(
          return(siCnt);
       } else {
          if (ppLst!=NULL) *ppLst=psHdl->pcLst;
-         return CLPERR(psHdl,CLPERR_SYN,"Last token (%s) of parameter list is not EOS",pcMapClpTok(psHdl->siTok));
+         return CLPERR(psHdl,CLPERR_SYN,"Last token (%s(%s)) of parameter list is not EOS",pcMapClpTok(psHdl->siTok),psHdl->pcLex);
       }
    } else {
       if (ppLst!=NULL) *ppLst=psHdl->pcLst;
-      return CLPERR(psHdl,CLPERR_SYN,"Initial token (%s) in handle is not valid",pcMapClpTok(psHdl->siTok));
+      return CLPERR(psHdl,CLPERR_SYN,"Initial token (%s(%s)) in handle is not valid",pcMapClpTok(psHdl->siTok),psHdl->pcLex);
    }
 }
 
@@ -5005,7 +5005,7 @@ static int siClpPrsPar(
          }
       }
    } else {
-      CLPERR(psHdl,CLPERR_SYN,"Keyword expected (%s.?)",fpcPat(pvHdl,siLev));
+      CLPERR(psHdl,CLPERR_SYN,"Keyword instead token (%s(%s)) expected (%s.?)",pcMapClpTok(psHdl->siTok),psHdl->pcLex,fpcPat(pvHdl,siLev));
       CLPERRADD(psHdl,0,"Please use one of the following arguments:%s","");
       vdClpPrnArgTab(pvHdl,psHdl->pfErr,1,-1,psTab);
       return(CLPERR_SYN);
@@ -5186,7 +5186,7 @@ static int siClpPrsFil(
       if (psHdl->siTok<0) return(psHdl->siTok);
       return(siCnt);
    } else {
-      return(CLPERR(psHdl,CLPERR_SYN,"Last token (%s) of parameter file '%s' is not EOF",pcMapClpTok(psHdl->siTok),acFil));
+      return(CLPERR(psHdl,CLPERR_SYN,"Last token (%s(%s)) of parameter file '%s' is not EOF",pcMapClpTok(psHdl->siTok),psHdl->pcLex,acFil));
    }
 }
 
@@ -5231,9 +5231,9 @@ static int siClpPrsObj(
       TRACE(psHdl->pfPrs,"%s PARSER(LEV=%d POS=%d CNT=%d OBJ(%s(parlst))-CLS)\n",fpcPre(pvHdl,siLev),siLev,siPos,siCnt,psArg->psStd->pcKyw);
    } else {
       if (psHdl->siTok==CLPTOK_STR) {
-         return CLPERR(psHdl,CLPERR_SYN,"Character ')' missing to enclose object (%s) - String (%s) given -> possible wrong keyword ",fpcPat(pvHdl,siLev),psHdl->pcLex);
+         return CLPERR(psHdl,CLPERR_SYN,"Character ')' missing to enclose object (%s) - String (%s) given -> possible wrong keyword",fpcPat(pvHdl,siLev),psHdl->pcLex);
       } else {
-         return CLPERR(psHdl,CLPERR_SYN,"Character ')' missing to enclose object (%s)",fpcPat(pvHdl,siLev));
+         return CLPERR(psHdl,CLPERR_SYN,"Character ')' missing to enclose object (%s) - Token (%s(%s)) don't match expectations",fpcPat(pvHdl,siLev),pcMapClpTok(psHdl->siTok),psHdl->pcLex);
       }
    }
    return(CLP_OK);
@@ -5297,9 +5297,9 @@ static int siClpPrsMain(
             if (psHdl->siTok<0) return(psHdl->siTok);
          } else {
             if (psHdl->siTok==CLPTOK_STR) {
-               return CLPERR(psHdl,CLPERR_SYN,"Character ')' missing to enclose object (%s) - String (%s) given -> possible wrong keyword ","***MAIN***",psHdl->pcLex);
+               return CLPERR(psHdl,CLPERR_SYN,"Character ')' missing to enclose object (%s) - String (%s) given -> possible wrong keyword","***MAIN***",psHdl->pcLex);
             } else {
-               return CLPERR(psHdl,CLPERR_SYN,"Character ')' missing to enclose object (%s)","***MAIN***");
+               return CLPERR(psHdl,CLPERR_SYN,"Character ')' missing to enclose object (%s) - Token (%s(%s)) don't match expectations","***MAIN***",pcMapClpTok(psHdl->siTok),psHdl->pcLex);
             }
          }
       } else {
@@ -5357,7 +5357,7 @@ static int siClpPrsAry(
       if (psHdl->siTok==CLPTOK_STR) {
          return CLPERR(psHdl,CLPERR_SYN,"Character '%c' missing to enclose the array (%s) - String (%s) given -> possible wrong keyword",C_SBC,fpcPat(pvHdl,siLev),psHdl->pcLex);
       } else {
-         return CLPERR(psHdl,CLPERR_SYN,"Character '%c' missing to enclose the array (%s)",C_SBC,fpcPat(pvHdl,siLev));
+         return CLPERR(psHdl,CLPERR_SYN,"Character '%c' missing to enclose the array (%s) - Token (%s(%s)) don't match expectations",C_SBC,fpcPat(pvHdl,siLev),pcMapClpTok(psHdl->siTok),psHdl->pcLex);
       }
    }
 }
@@ -5679,7 +5679,7 @@ static int siClpPrsFac(
          if (psHdl->siTok==CLPTOK_STR) {
             return CLPERR(psHdl,CLPERR_SYN,"Character ')' missing to enclose expression (%s) - String (%s) given -> possible wrong keyword",fpcPat(pvHdl,siLev),psHdl->pcLex);
          } else {
-            return CLPERR(psHdl,CLPERR_SYN,"Character ')' missing to enclose expression (%s)",fpcPat(pvHdl,siLev));
+            return CLPERR(psHdl,CLPERR_SYN,"Character ')' missing to enclose expression (%s) - Token (%s(%s)) don't match expectations",fpcPat(pvHdl,siLev),pcMapClpTok(psHdl->siTok),psHdl->pcLex);
          }
       }
    default://Empty string behind = and in front of the next not matching token
@@ -6164,12 +6164,12 @@ static int siClpPrsPro(
          free(pcPat);
          return(siErr);
       } else {
-         siErr=CLPERR(psHdl,CLPERR_SYN,"Property string (\"...\") missing (%s)",pcPat);
+         siErr=CLPERR(psHdl,CLPERR_SYN,"Property string (\"...\") missing (%s) - Token (%s(%s)) don't match expectations",pcPat,pcMapClpTok(psHdl->siTok),psHdl->pcLex);
          free(pcPat);
          return(siErr);
       }
    } else {
-      siErr=CLPERR(psHdl,CLPERR_SYN,"Assignment character ('=') missing (%s)",pcPat);
+      siErr=CLPERR(psHdl,CLPERR_SYN,"Assignment character ('=') missing (%s) - Token (%s(%s)) don't match expectations",pcPat,pcMapClpTok(psHdl->siTok),psHdl->pcLex);
       free(pcPat);
       return(siErr);
    }
