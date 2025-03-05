@@ -2214,10 +2214,15 @@ static int siClpPrintWritten(
    TsHdl*                        psHdl=(TsHdl*)pvHdl;
    long int s=ftell(pfDoc);
    if (s>0) {
-      rewind(pfDoc);
       char* pcPge=malloc(s+1);
       if (pcPge==NULL) {
          return CLPERR(psHdl,CLPERR_SYS,"Allocation of memory for temporary file to print page for argument '%s' failed",psHdl->pcCmd);
+      }
+      errno=0;
+      rewind(pfDoc);
+      if (errno) {
+         free(pcPge);
+         return CLPERR(psHdl,CLPERR_SYS,"Rewind of temporary file to print page for command '%s' failed",psHdl->pcCmd);
       }
       size_t r=fread(pcPge,1,s,pfDoc);
       if (r!=s) {

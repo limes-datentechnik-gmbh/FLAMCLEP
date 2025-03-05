@@ -1546,17 +1546,20 @@ extern int snprintm(char* buffer, size_t size, const char* own, const char* pgm,
       fprintm(f,own,pgm,bld,man,cnt);
       long int s=ftell(f);
       if (s>0) {
+         errno=0;
          rewind(f);
-         char* p=malloc(s+1);
-         if (p!=NULL) {
-            size_t r=fread(p,1,s,f);
-            if (r==s) {
-               p[r]=0x00;
-               int i=snprintf(buffer,size,"%s",p);
-               fclose_tmp(f); free(p);
-               return(i);
+         if (errno==0) {
+            char* p=malloc(s+1);
+            if (p!=NULL) {
+               size_t r=fread(p,1,s,f);
+               if (r==s) {
+                  p[r]=0x00;
+                  int i=snprintf(buffer,size,"%s",p);
+                  fclose_tmp(f); free(p);
+                  return(i);
+               }
+               free(p);
             }
-            free(p);
          }
       }
       fclose_tmp(f);
@@ -4355,7 +4358,7 @@ extern int readEnvars(const char* pcFil, FILE* pfOut, FILE* pfErr, TsEnVarList**
          return(-1*CLERTC_MEM);
       }
       uiLen=fread(pcBuf+uiPos,1,4096,pfTmp);
-      while(uiLen) {
+      while (uiLen) {
          uiSiz+=(uiLen>=4096)?4096:uiLen;
          pcHlp=realloc(pcBuf,uiSiz+1);
          if (pcHlp==NULL) {
@@ -4364,7 +4367,11 @@ extern int readEnvars(const char* pcFil, FILE* pfOut, FILE* pfErr, TsEnVarList**
             return(-1*CLERTC_MEM);
          }
          pcBuf=pcHlp; uiPos+=uiLen;
-         uiLen=fread(pcBuf+uiPos,1,uiSiz-uiPos,pfTmp);
+         if (ferror(pfTmp) || feof(pfTmp)) {
+            uiLen=0;
+         } else {
+            uiLen=fread(pcBuf+uiPos,1,uiSiz-uiPos,pfTmp);
+         }
       }
       uiLen+=uiPos;
       pcBuf[uiLen]=0x00;
