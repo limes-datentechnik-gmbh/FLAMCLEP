@@ -1576,10 +1576,12 @@ extern unsigned int localccsid(void) {
    // On startup of the main program, the portable "C" locale is selected
    // as default.
    // TODO: avoid using setlocale()/localeconv() anywhere in the project (except in main()) as they are not thread-safe
+   char acOldLocale[1024];
    const char* oldLocale = setlocale(LC_ALL, NULL);
+   strlcpy(acOldLocale, oldLocale, sizeof(acOldLocale));
    setlocale(LC_ALL, "");
    charset = nl_langinfo(CODESET);
-   setlocale(LC_ALL, oldLocale);
+   setlocale(LC_ALL, acOldLocale);
    ccsid = mapcdstr(charset);
 
 #elif defined(__WIN__)
