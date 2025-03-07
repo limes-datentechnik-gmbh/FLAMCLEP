@@ -1115,14 +1115,15 @@ static int siClePrintPage(FILE* pfOut, FILE* pfErr, const TsCleDoc* psDoc, const
    }
    long int s=ftell(pfDoc);
    if (s>0) {
-      rewind(pfDoc);
       char* pcPge=malloc(s+1);
       if (pcPge==NULL) {
          if (pfErr!=NULL) fprintf(pfErr,"Allocation of memory for temporary file to print manual '%s' page failed\n",psDoc->pcHdl);
          fclose_tmp(pfDoc);
          return(CLERTC_MEM);
       }
-      size_t r=fread(pcPge,1,s,pfDoc);
+      errno=0;
+      rewind(pfDoc);
+      size_t r=(errno)?0:fread(pcPge,1,s,pfDoc);
       fclose_tmp(pfDoc);
       if (r!=s) {
          free(pcPge);
@@ -4619,7 +4620,7 @@ extern int siCleParseString(
                    pcDep,pcOpt,pcEnt,&stErr,pvGbl,pvF2S,pfF2S,pvSaf,pfSaf);
    if (pvHdl==NULL) {
       snprintf(pcErr,uiErr,"CTX-MESSAGE : Open of string parser for command '%s' failed\n",pcCmd);
-      if (pfTmp!=NULL) {rewind(pfTmp); size_t l=strlen(pcErr); size_t r=fread(pcErr+l,1,uiErr-(l+1),pfTmp); fclose_tmp(pfTmp); pcErr[l+r]=0x00;}
+      if (pfTmp!=NULL) {size_t l=strlen(pcErr); errno=0; rewind(pfTmp); size_t r=(errno)?0:fread(pcErr+l,1,uiErr-(l+1),pfTmp); fclose_tmp(pfTmp); pcErr[l+r]=0x00;}
       return -1;
    }
    siErr=siClpParseCmd(pvHdl,NULL,pcStr,TRUE,TRUE,(int*)piMod,NULL);
@@ -4632,7 +4633,7 @@ extern int siCleParseString(
             "CLP-SOURCE  : %s (ROW: %d COL: %d)\n",
             pcCmd,pcStr,siErr,pcClpError(siErr),
             *stErr.ppMsg,*stErr.ppSrc,*stErr.piRow,*stErr.piCol);
-      if (pfTmp!=NULL) {rewind(pfTmp); size_t l=strlen(pcErr); size_t r=fread(pcErr+l,1,uiErr-(l+1),pfTmp); fclose_tmp(pfTmp); pcErr[l+r]=0x00;}
+      if (pfTmp!=NULL) {size_t l=strlen(pcErr); errno=0; rewind(pfTmp); size_t r=(errno)?0:fread(pcErr+l,1,uiErr-(l+1),pfTmp); fclose_tmp(pfTmp); pcErr[l+r]=0x00;}
       vdClpClose(pvHdl,CLPCLS_MTD_ALL);
       return siErr;
    }
