@@ -1577,13 +1577,10 @@ extern unsigned int localccsid(void) {
    // as default.
    // TODO: avoid using setlocale()/localeconv() anywhere in the project (except in main()) as they are not thread-safe
    char acOldLocale[1024];
-   const char* oldLocale = setlocale(LC_ALL, NULL);
-   strlcpy(acOldLocale, oldLocale, sizeof(acOldLocale));
+   strlcpy_null(acOldLocale, setlocale(LC_ALL, NULL), sizeof(acOldLocale));
    setlocale(LC_ALL, "");
-   charset = nl_langinfo(CODESET);
+   ccsid = mapcdstr(nl_langinfo(CODESET));
    setlocale(LC_ALL, acOldLocale);
-   ccsid = mapcdstr(charset);
-
 #elif defined(__WIN__)
    static CPINFOEX info;
 
@@ -3027,6 +3024,21 @@ extern size_t strlcpy(char *dest, const char *src, size_t n)
    memmove(dest, src, len);
    dest[len]='\0';
    return len;
+}
+
+extern size_t strlcpy_null(char *dest, const char *src, size_t n)
+{
+   if (src!=NULL) {
+      size_t len = strlen(src);
+      if (len>n-1)
+         len=n-1;
+      memmove(dest, src, len);
+      dest[len]='\0';
+      return len;
+   } else {
+      dest[0]='\0';
+      return 0;
+   }
 }
 
 extern int printd(const char* format,...)

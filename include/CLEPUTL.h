@@ -1124,6 +1124,7 @@ extern const char* prsdstr(const char** hdl, const char* str, int len);
  * @return        number of bytes actually copied (excludes NUL-termination)
  */
 extern size_t strlcpy(char *dest, const char *src, size_t n);
+extern size_t strlcpy_null(char *dest, const char *src, size_t n);
 
 /**
  * Get environment variable and handle HOME, USER, CUSEr, Cuser, cuser, OWNER, ENVID if not defined
