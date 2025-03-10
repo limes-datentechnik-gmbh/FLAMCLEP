@@ -1571,13 +1571,18 @@ extern unsigned int localccsid(void) {
    unsigned int ccsid = 0;
    const char* charset;
 #ifdef __UNIX__
-
    // From man page:
    // On startup of the main program, the portable "C" locale is selected
    // as default.
    // TODO: avoid using setlocale()/localeconv() anywhere in the project (except in main()) as they are not thread-safe
    char acOldLocale[1024];
-   strlcpy_null(acOldLocale, setlocale(LC_ALL, NULL), sizeof(acOldLocale));
+   const char* pcLocale=setlocale(LC_ALL, NULL);
+   if (pcLocale!=NULL && *pcLocale) {
+      strlcpy(acOldLocale, pcLocale, sizeof(acOldLocale));
+   } else {
+      strcpy(acOldLocale,"C");
+      fprintf(stderr, "%s:%d:1: warning: %s: Query current locale (LC_ALL) for reset failed (%p)\n", __FILE__ , __LINE__ , __FUNCTION__, pcLocale);
+   }
    setlocale(LC_ALL, "");
    ccsid = mapcdstr(nl_langinfo(CODESET));
    setlocale(LC_ALL, acOldLocale);
