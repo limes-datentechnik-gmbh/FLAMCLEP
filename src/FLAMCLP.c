@@ -189,13 +189,14 @@
  * 1.4.138: Hide parameter with hide flag in each case
  * 1.4.139: Fix memory leak in re-allocation of lexem buffer in CLP (runs re-alloc in a loop with doubling the space until a pointer change was happen)
  * 1.4.140: Improve error message if and of list determined based on string type which could be a wrong written keyword
+ * 1.4.141: Support hidden flag also for aliases
  *
 **/
 
-#define CLP_VSN_STR       "1.4.140"
+#define CLP_VSN_STR       "1.4.141"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        4
-#define CLP_VSN_REVISION       140
+#define CLP_VSN_REVISION       141
 
 /* Definition der Konstanten ******************************************/
 
@@ -2829,7 +2830,7 @@ static TsSym* psClpSymIns(
          if (CLPISF_ARG(psHlp->psStd->uiFlg) && strxcmp(psHdl->isCas,psArg->pcAli,psHlp->psStd->pcKyw,0,0,FALSE)==0) {
             if (k==0) {
                psSym->psStd->psAli=psHlp;
-               psSym->psStd->uiFlg=psHlp->psStd->uiFlg|CLPFLG_ALI;
+               psSym->psStd->uiFlg=psHlp->psStd->uiFlg|psArg->uiFlg|CLPFLG_ALI;
                free(psSym->psFix); psSym->psFix=psHlp->psFix;
                free(psSym->psVar); psSym->psVar=psHlp->psVar;
             } else {
@@ -7706,7 +7707,7 @@ static void vdClpPrnAli(
    if (pfOut!=NULL && psTab!=NULL && !CLPISF_HID(psTab->psStd->uiFlg)) {
       fprintf(pfOut,"%s",psTab->psStd->pcKyw);
       for (psHlp=psTab->psNxt;psHlp!=NULL;psHlp=psHlp->psNxt) {
-         if (CLPISF_ALI(psHlp->psStd->uiFlg) && psHlp->psStd->psAli==psTab  && !CLPISF_HID(psHlp->psStd->uiFlg)) {
+         if (CLPISF_ALI(psHlp->psStd->uiFlg) && psHlp->psStd->psAli==psTab && !CLPISF_HID(psHlp->psStd->uiFlg)) {
             fprintf(pfOut,"%s",pcSep);
             fprintf(pfOut,"%s",psHlp->psStd->pcKyw);
          }
@@ -7772,7 +7773,7 @@ static int siClpPrnCmd(
             }
          }
          for (psHlp=psTab;psHlp!=NULL;psHlp=psHlp->psNxt) {
-            if (CLPISF_CMD(psHlp->psStd->uiFlg) && !CLPISF_LNK(psHlp->psStd->uiFlg) && !CLPISF_ALI(psHlp->psStd->uiFlg)) {
+            if (CLPISF_CMD(psHlp->psStd->uiFlg) && !CLPISF_LNK(psHlp->psStd->uiFlg) && !CLPISF_ALI(psHlp->psStd->uiFlg) && !CLPISF_HID(psHlp->psStd->uiFlg)) {
                if (isSkr) {
                   if (k) fprintf(pfOut,"\n%s ",fpcPre(pvHdl,siLev));
                     else fprintf(pfOut,"%s "  ,fpcPre(pvHdl,siLev));
@@ -8017,7 +8018,7 @@ static int siClpPrnHlp(
             }
          }
          for (psHlp=psTab;psHlp!=NULL;psHlp=psHlp->psNxt) {
-            if ((psHlp->psFix->siTyp==siTyp || siTyp<0) && CLPISF_CMD(psHlp->psStd->uiFlg) && !CLPISF_LNK(psHlp->psStd->uiFlg)) {
+            if ((psHlp->psFix->siTyp==siTyp || siTyp<0) && CLPISF_CMD(psHlp->psStd->uiFlg) && !CLPISF_LNK(psHlp->psStd->uiFlg) && !CLPISF_HID(psHlp->psStd->uiFlg)) {
                if (!CLPISF_ALI(psHlp->psStd->uiFlg) || (CLPISF_ALI(psHlp->psStd->uiFlg) && isAli)) {
                   vdClpPrnArg(pvHdl,pfOut,siLev,psHlp->psStd->pcKyw,GETALI(psHlp),psHlp->psStd->siKwl,psHlp->psFix->siTyp,psHlp->psFix->pcHlp,psHlp->psFix->pcDft,
                               CLPISF_SEL(psHlp->psStd->uiFlg),CLPISF_CON(psHlp->psStd->uiFlg));
