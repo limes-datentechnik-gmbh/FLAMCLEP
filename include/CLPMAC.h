@@ -30,6 +30,7 @@
 #undef CLPARGTAB_DYNSTR
 #undef CLPARGTAB_DYNARY
 #undef CLPARGTAB_ALIAS
+#undef CLPARGTAB_ALIAS_HIDDEN
 #undef CLPARGTAB_CLS
 
 #ifdef DEFINE_STRUCT
@@ -41,6 +42,7 @@
 #define CLPARGTAB_DYNSTR(kyw,nam,siz,min,max,atyp,flg,oid,tab,dft,man,hlp) U08*  nam;
 #define CLPARGTAB_DYNARY(kyw,nam,typ,min,max,atyp,flg,oid,tab,dft,man,hlp) typ*  nam;
 #define CLPARGTAB_ALIAS( kyw,ali                                         )
+#define CLPARGTAB_ALIAS_HIDDEN( kyw,ali                                         )
 #define CLPARGTAB_CLS
 
 #else
@@ -147,6 +149,8 @@
  * @param[in]   ali   is the alternative keyword accepted on the command line in place of the keyword given in *kyw*.
  */
 #define CLPARGTAB_ALIAS( kyw,ali                                         ) { CLPTYP_XALIAS,(kyw),(ali),  0  ,  0  ,        0  ,                       0  ,  0  , CLPFLG_ALI, NULL, NULL, NULL, NULL,0,0.0,NULL,NULL},
+
+#define CLPARGTAB_ALIAS_HIDDEN( kyw,ali                                  ) { CLPTYP_XALIAS,(kyw),(ali),  0  ,  0  ,        0  ,                       0  ,  0  , CLPFLG_ALI|CLPFLG_HID, NULL, NULL, NULL, NULL,0,0.0,NULL,NULL},
 /**
  * @brief Will mark the end of an argument table.
  */
