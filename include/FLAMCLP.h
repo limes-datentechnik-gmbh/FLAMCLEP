@@ -26,13 +26,13 @@
  *
  **********************************************************************/
 
+#ifndef INC_CLP_H
+#define INC_CLP_H
 /*! @cond PRIVATE */
 #ifdef __cplusplus
    extern "C" {
 #endif
 
-#ifndef INC_CLP_H
-#define INC_CLP_H
 /*! @endcond */
 
 #include <stdio.h>
@@ -612,9 +612,9 @@ extern const TsClpArgument* psClpFindArgument(
 
 /**********************************************************************/
 
-#endif // INC_FLAMCLP_H
-
 #ifdef __cplusplus
 }
 #endif
 /*! @endcond */
+
+#endif // INC_FLAMCLP_H

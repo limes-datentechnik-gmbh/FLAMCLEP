@@ -28,12 +28,12 @@
  **********************************************************************/
 
 /*! @cond PRIVATE */
+#ifndef INC_CLPDEF_H
+#define INC_CLPDEF_H
+
 #ifdef __cplusplus
    extern "C" {
 #endif
-
-#ifndef INC_CLPDEF_H
-#define INC_CLPDEF_H
 
 /**********************************************************************/
 
@@ -650,9 +650,9 @@ typedef struct ClpSymUpd {
   const char*                   pcPro;      /**< @brief Pointer to a property supplement string replacing the current default value */
 }TsClpSymUpd;
 
-#endif // INC_CLPDEF_H
-
 #ifdef __cplusplus
 }
 #endif
+
+#endif // INC_CLPDEF_H
 /*! @endcond */

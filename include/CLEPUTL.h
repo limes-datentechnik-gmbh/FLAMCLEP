@@ -795,11 +795,11 @@
  *
  **********************************************************************/
 /*! @cond PRIVATE */
+#ifndef INC_CLEPUTL_H
+#define INC_CLEPUTL_H
 #ifdef __cplusplus
    extern "C" {
 #endif
-#ifndef INC_CLEPUTL_H
-#define INC_CLEPUTL_H
 /*! @endcond */
 
 #include <stdio.h>
@@ -1638,9 +1638,9 @@ extern const char*   init_string(const char* p);
 /**********************************************************************/
 
 /*! @cond PRIVATE */
-#endif /* INC_CLEPUTL_H */
-
 #ifdef __cplusplus
    }
 #endif
+
+#endif /* INC_CLEPUTL_H */
 /*! @endcond */

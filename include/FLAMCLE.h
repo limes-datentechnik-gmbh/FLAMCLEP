@@ -28,13 +28,13 @@
  *
  **********************************************************************/
 
+#ifndef INC_FLAMCLE_H
+#define INC_FLAMCLE_H
 /*! @cond PRIVATE */
 #ifdef __cplusplus
    extern "C" {
 #endif
 
-#ifndef INC_FLAMCLE_H
-#define INC_FLAMCLE_H
 /*! @endcond */
 
 #include "CLEDEF.h"
@@ -304,9 +304,9 @@ extern int siCleParseString(
 
 /**********************************************************************/
 
-#endif /*INC_FLAMCLE_H*/
-
 #ifdef __cplusplus
 }
 #endif
 /*! @endcond */
+
+#endif /*INC_FLAMCLE_H*/
