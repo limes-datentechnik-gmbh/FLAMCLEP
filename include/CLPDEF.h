@@ -448,7 +448,7 @@ typedef struct ClpArgument {
  * @param[in]   hlp   Pointer to a null-terminated string for context sensitive help for this constant
  *                    (also used as head line or in bullet list in documentation generation).
  */
-#define CLPCONTAB_ENVAR(kyw,hlp)                {CLPTYP_STRING,(kyw),NULL,0,0,  0  ,0,0,CLPFLG_CON           ,NULL,NULL, NULL,(hlp),  0  , 0.0 ,(U08*)(kyw),NULL},
+#define CLPCONTAB_ENVAR(kyw,hlp)                {CLPTYP_STRING,(kyw),NULL,0,0,  0  ,0,0,CLPFLG_CON           ,NULL,NULL, NULL,(hlp),  0  , 0.0 ,(const U08*)(kyw),NULL},
 
 /** Ends a table with constant definitions
  */

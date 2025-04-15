@@ -168,14 +168,14 @@ static inline int flzjsy(const char* pcDat, const int* piSln, char* pcVal, int* 
       char        acMode[strlen(mode)+32];
       char*       pcRecfm;
       const char* pcDefDcb=GETENV("CLP_DEFAULT_DCB");
-      if (pcDefDcb==NULL || *pcDefDcb) pcDefDcb=DEFAULT_DCB;
+      if (pcDefDcb==NULL || *pcDefDcb) { pcDefDcb=DEFAULT_DCB };
       strcpy(acMode,mode);
       if ((acMode[0]=='a' && acMode[1]=='b' && acMode[2]=='+') ||
           (acMode[0]=='a' && acMode[1]=='t' && acMode[2]=='+') ||
           (acMode[0]=='a' && acMode[1]=='+')) {
          acMode[0]='r';
          f=fopen(name, acMode);
-         if (f!=NULL) return(f);
+         if (f!=NULL) { return(f); }
          acMode[0]='w';
          pcRecfm=strstr(acMode,"recfm=*");
          if (pcRecfm!=NULL) {
@@ -212,14 +212,14 @@ static inline int flzjsy(const char* pcDat, const int* piSln, char* pcVal, int* 
       char        acMode[strlen(mode)+32];
       char*       pcRecfm;
       const char* pcDefDcb=GETENV("CLP_DEFAULT_DCB");
-      if (pcDefDcb==NULL || *pcDefDcb==0x00) pcDefDcb=DEFAULT_DCB;
+      if (pcDefDcb==NULL || *pcDefDcb==0x00) { pcDefDcb=DEFAULT_DCB; }
       strcpy(acMode,mode);
       if ((acMode[0]=='a' && acMode[1]=='b' && acMode[2]=='+') ||
           (acMode[0]=='a' && acMode[1]=='t' && acMode[2]=='+') ||
           (acMode[0]=='a' && acMode[1]=='+')) {
          acMode[0]='r';
          f=fopen_nowarn(name, acMode);
-         if (f!=NULL) return(f);
+         if (f!=NULL) { return(f) };
          acMode[0]='w';
          pcRecfm=strstr(acMode,"recfm=*");
          if (pcRecfm!=NULL) {
@@ -477,7 +477,7 @@ static inline int flzjsy(const char* pcDat, const int* piSln, char* pcVal, int* 
           (acMode[0]=='a' && acMode[1]=='+')) {
          acMode[0]='r';
          f=fopen(name, acMode);
-         if (f!=NULL) return(f);
+         if (f!=NULL) { return(f); }
          acMode[0]='w';
       }
       f=fopen(name, acMode);
@@ -492,7 +492,7 @@ static inline int flzjsy(const char* pcDat, const int* piSln, char* pcVal, int* 
           (acMode[0]=='a' && acMode[1]=='+')) {
          acMode[0]='r';
          f=fopen_nowarn(name, acMode);
-         if (f!=NULL) return(f);
+         if (f!=NULL) { return(f); }
          acMode[0]='w';
       }
       f=fopen_nowarn(name, acMode);
@@ -863,7 +863,7 @@ extern int ebcdic_srprintc(char** buffer, size_t* size, const size_t expansion, 
    if ((*size)<s || *buffer==NULL) {
       s=(*size>s)?*size:2*s;
       char* b=(char*)realloc_nowarn(*buffer,s);
-      if (b==NULL) return(0);
+      if (b==NULL) { return(0); }
       (*buffer)=b;
       (*size)=s;
    }
@@ -1062,7 +1062,7 @@ extern char* userid(const int size, char* buffer) {
       strlcpy(buffer,acUid,size);
       return(buffer);
    } else {
-      if (size>=0) buffer[0]=0x00;
+      if (size>=0) { buffer[0]=0x00; }
    }
 #endif
    char           acBuffer[1024];
@@ -1072,7 +1072,7 @@ extern char* userid(const int size, char* buffer) {
    if (0==e && NULL != uP) {
       strlcpy(buffer,uP->pw_name,size);
    } else {
-      if (size>=0) buffer[0]=0x00;
+      if (size>=0) { buffer[0]=0x00; }
    }
    return(buffer);
 }
@@ -1151,7 +1151,7 @@ extern char* homedir(int flag, const int size, char* buffer) {
             if (flag) {
                snprintf(buffer,size,"/");
             } else {
-               if (size>=0) buffer[0]=0x00;
+               if (size>=0) { buffer[0]=0x00; }
             }
          }
       }
@@ -1408,9 +1408,9 @@ extern char* unEscape(const char* input, char* output)
 extern char* dynUnEscape(const char* input) {
    if (input!=NULL) {
       char* output=malloc(strlen(input)+1);
-      if (output==NULL) return(NULL);
+      if (output==NULL) { return(NULL); }
       return(unEscape(input,output));
-   } else return NULL;
+   } else { return NULL; }
 }
 
 extern void fprintm(FILE* file,const char* own, const char* pgm, const char* bld, const char* man, const int cnt) {
@@ -1429,18 +1429,18 @@ extern void fprintm(FILE* file,const char* own, const char* pgm, const char* bld
       efprintf(file,"%s",ptr);
       if (strncmp(hlp+2,"OWN}",4)==0) { /*nodiac*/
          if (own!=NULL) {
-            for (const char* p=own;*p;p++) fprintf(file,"%c",toupper(*p));
+            for (const char* p=own;*p;p++) { fprintf(file,"%c",toupper(*p)); }
          }
          ptr=hlp+6;
       } else if (strncmp(hlp+2,"own}",4)==0) { /*nodiac*/
          if (own!=NULL) {
-            for (const char* p=own;*p;p++) fprintf(file,"%c",tolower(*p));
+            for (const char* p=own;*p;p++) { fprintf(file,"%c",tolower(*p)); }
          }
          ptr=hlp+6;
       } else if (strncmp(hlp+2,"Own}",4)==0) { /*nodiac*/
          if (own!=NULL) {
             fprintf(file,"%c",toupper(*own));
-            for (const char* p=own+1;*p;p++) fprintf(file,"%c",tolower(*p));
+            for (const char* p=own+1;*p;p++) { fprintf(file,"%c",tolower(*p)); }
          }
          ptr=hlp+6;
       } else if (strncmp(hlp+2,"oWn}",4)==0) { /*nodiac*/
@@ -1450,18 +1450,18 @@ extern void fprintm(FILE* file,const char* own, const char* pgm, const char* bld
          ptr=hlp+6;
       } else if (strncmp(hlp+2,"PGM}",4)==0) { /*nodiac*/
          if (pgm!=NULL) {
-            for (const char* p=pgm;*p;p++) fprintf(file,"%c",toupper(*p));
+            for (const char* p=pgm;*p;p++) { fprintf(file,"%c",toupper(*p)); }
          }
          ptr=hlp+6;
       } else if (strncmp(hlp+2,"pgm}",4)==0) { /*nodiac*/
          if (pgm!=NULL) {
-            for (const char* p=pgm;*p;p++) fprintf(file,"%c",tolower(*p));
+            for (const char* p=pgm;*p;p++) { fprintf(file,"%c",tolower(*p)); }
          }
          ptr=hlp+6;
       } else if (strncmp(hlp+2,"Pgm}",4)==0) { /*nodiac*/
          if (pgm!=NULL) {
             fprintf(file,"%c",toupper(*pgm));
-            for (const char* p=pgm+1;*p;p++) fprintf(file,"%c",tolower(*p));
+            for (const char* p=pgm+1;*p;p++) { fprintf(file,"%c",tolower(*p)); }
          }
          ptr=hlp+6;
       } else if (strncmp(hlp+2,"pGm}",4)==0) { /*nodiac*/
@@ -1471,18 +1471,18 @@ extern void fprintm(FILE* file,const char* own, const char* pgm, const char* bld
          ptr=hlp+6;
       } else if (strncmp(hlp+2,"BLD}",4)==0) { /*nodiac*/
          if (bld!=NULL) {
-            for (const char* p=bld;*p;p++) fprintf(file,"%c",toupper(*p));
+            for (const char* p=bld;*p;p++) { fprintf(file,"%c",toupper(*p)); }
          }
          ptr=hlp+6;
       } else if (strncmp(hlp+2,"bld}",4)==0) { /*nodiac*/
          if (bld!=NULL) {
-            for (const char* p=bld;*p;p++) fprintf(file,"%c",tolower(*p));
+            for (const char* p=bld;*p;p++) { fprintf(file,"%c",tolower(*p)); }
          }
          ptr=hlp+6;
       } else if (strncmp(hlp+2,"Bld}",4)==0) { /*nodiac*/
          if (bld!=NULL) {
             fprintf(file,"%c",toupper(*bld));
-            for (const char* p=bld+1;*p;p++) fprintf(file,"%c",tolower(*p));
+            for (const char* p=bld+1;*p;p++) { fprintf(file,"%c",tolower(*p)); }
          }
          ptr=hlp+6;
       } else if (strncmp(hlp+2,"bLd}",4)==0) { /*nodiac*/
@@ -1532,7 +1532,7 @@ extern void fprintm(FILE* file,const char* own, const char* pgm, const char* bld
          if (nxt!=NULL) {
             ptr=nxt+1;
          } else {
-            while (*ptr) ptr++;
+            while (*ptr) { ptr++; }
          }
       }
       hlp=strstr(ptr,"&{"); /*nodiac*/
@@ -1605,10 +1605,11 @@ extern unsigned int localccsid(void) {
       if (ccsid == 0) {
          // fallback to platform default (aka. we don't know any better)
          // cppcheck-suppress knownConditionTrueFalse
-         if (' ' == 0x40)
+         if (' ' == 0x40) {
             return CLEP_DEFAULT_CCSID_EBCDIC; // IBM-1047 (EBCDIC (Open Systems Latin-1))
-         else
+         } else {
             return CLEP_DEFAULT_CCSID_ASCII; // ISO-8859-1 (ASCII (Latin-1))
+         }
       }
    }
 
@@ -1646,12 +1647,12 @@ extern const char* lng2ccsd(const char* pcLang, unsigned isEbcdic) {
    int         isEuro=FALSE;
    size_t      uiLen=strlen(pcLang);
 
-   if (uiLen<1) return NULL;
+   if (uiLen<1) { return NULL; }
    pcLngCpy[0] = tolower(pcLang[0]);
 
    if (uiLen==1) {
-      if(pcLngCpy[0]=='c') return(isEbcdic?"IBM-1047":"US-ASCII");
-      else                 return NULL;
+      if(pcLngCpy[0]=='c') { return(isEbcdic?"IBM-1047":"US-ASCII");
+      } else               { return NULL; }
    }
    pcLngCpy[1] = tolower(pcLang[1]);
 
@@ -1663,98 +1664,98 @@ extern const char* lng2ccsd(const char* pcLang, unsigned isEbcdic) {
    }
 
    if(pcLngCpy[0]=='a') {
-      if(pcLngCpy[1]=='a') return (isEbcdic?NULL:isEuro?"ISO8859-15":"ISO8859-1");
-      if(pcLngCpy[1]=='f') return (isEbcdic?NULL:isEuro?"ISO8859-15":"ISO8859-1");
-      if(pcLngCpy[1]=='n') return (isEbcdic?NULL:"ISO8859-15");
-      if(pcLngCpy[1]=='r') return (isEbcdic?"IBM-420":"ISO8859-6");
+      if(pcLngCpy[1]=='a') { return (isEbcdic?NULL:isEuro?"ISO8859-15":"ISO8859-1"); }
+      if(pcLngCpy[1]=='f') { return (isEbcdic?NULL:isEuro?"ISO8859-15":"ISO8859-1"); }
+      if(pcLngCpy[1]=='n') { return (isEbcdic?NULL:"ISO8859-15"); }
+      if(pcLngCpy[1]=='r') { return (isEbcdic?"IBM-420":"ISO8859-6"); }
    } else if(pcLngCpy[0]=='b') {
-      if(pcLngCpy[1]=='e') return (isEbcdic?NULL:"CP1251");
-      if(pcLngCpy[1]=='g') return (isEbcdic?NULL:"CP1251");
-      if(pcLngCpy[1]=='r') return (isEbcdic?NULL:isEuro?"ISO8859-15":"ISO8859-1");
-      if(pcLngCpy[1]=='s') return (isEbcdic?"IBM-1153":"ISO8859-2");
+      if(pcLngCpy[1]=='e') { return (isEbcdic?NULL:"CP1251"); }
+      if(pcLngCpy[1]=='g') { return (isEbcdic?NULL:"CP1251"); }
+      if(pcLngCpy[1]=='r') { return (isEbcdic?NULL:isEuro?"ISO8859-15":"ISO8859-1"); }
+      if(pcLngCpy[1]=='s') { return (isEbcdic?"IBM-1153":"ISO8859-2"); }
    } else if(pcLngCpy[0]=='c') {
-      if(pcLngCpy[1]=='a') return (isEbcdic?NULL:"ISO8859-15");
-      if(pcLngCpy[1]=='s') return (isEbcdic?"IBM-1153":"ISO8859-2");
-      if(pcLngCpy[1]=='y') return (isEbcdic?NULL:"ISO8859-14");
+      if(pcLngCpy[1]=='a') { return (isEbcdic?NULL:"ISO8859-15"); }
+      if(pcLngCpy[1]=='s') { return (isEbcdic?"IBM-1153":"ISO8859-2"); }
+      if(pcLngCpy[1]=='y') { return (isEbcdic?NULL:"ISO8859-14"); }
    } else if(pcLngCpy[0]=='d') {
-      if(pcLngCpy[1]=='a') return (isEbcdic?"IBM-1142":isEuro?"ISO8859-15":"ISO8859-1");
-      if(pcLngCpy[1]=='e') return (isEbcdic?"IBM-1141":isEuro?"ISO8859-15":"ISO8859-1");
+      if(pcLngCpy[1]=='a') { return (isEbcdic?"IBM-1142":isEuro?"ISO8859-15":"ISO8859-1"); }
+      if(pcLngCpy[1]=='e') { return (isEbcdic?"IBM-1141":isEuro?"ISO8859-15":"ISO8859-1"); }
    } else if(pcLngCpy[0]=='e') {
-      if(pcLngCpy[1]=='l') return (isEbcdic?"IBM-875":"ISO8859-7");
-      if(pcLngCpy[1]=='n') return (isEbcdic?"IBM-1140":isEuro?"ISO8859-15":"ISO8859-1");
-      if(pcLngCpy[1]=='o') return (isEbcdic?NULL:"ISO8859-3");
-      if(pcLngCpy[1]=='s') return (isEbcdic?"IBM-1145":isEuro?"ISO8859-15":"ISO8859-1");
-      if(pcLngCpy[1]=='t') return (isEbcdic?"IBM-1122":isEuro?"ISO8859-15":"ISO8859-1");
-      if(pcLngCpy[1]=='u') return (isEbcdic?NULL:isEuro?"ISO8859-15":"ISO8859-1");
+      if(pcLngCpy[1]=='l') { return (isEbcdic?"IBM-875":"ISO8859-7"); }
+      if(pcLngCpy[1]=='n') { return (isEbcdic?"IBM-1140":isEuro?"ISO8859-15":"ISO8859-1"); }
+      if(pcLngCpy[1]=='o') { return (isEbcdic?NULL:"ISO8859-3"); }
+      if(pcLngCpy[1]=='s') { return (isEbcdic?"IBM-1145":isEuro?"ISO8859-15":"ISO8859-1"); }
+      if(pcLngCpy[1]=='t') { return (isEbcdic?"IBM-1122":isEuro?"ISO8859-15":"ISO8859-1"); }
+      if(pcLngCpy[1]=='u') { return (isEbcdic?NULL:isEuro?"ISO8859-15":"ISO8859-1"); }
    } else if(pcLngCpy[0]=='f') {
-      if(pcLngCpy[1]=='i') return (isEbcdic?"IBM-1143":isEuro?"ISO8859-15":"ISO8859-1");
-      if(pcLngCpy[1]=='o') return (isEbcdic?NULL:isEuro?"ISO8859-15":"ISO8859-1");
-      if(pcLngCpy[1]=='r') return (isEbcdic?"IBM-1147":isEuro?"ISO8859-15":"ISO8859-1");
+      if(pcLngCpy[1]=='i') { return (isEbcdic?"IBM-1143":isEuro?"ISO8859-15":"ISO8859-1"); }
+      if(pcLngCpy[1]=='o') { return (isEbcdic?NULL:isEuro?"ISO8859-15":"ISO8859-1"); }
+      if(pcLngCpy[1]=='r') { return (isEbcdic?"IBM-1147":isEuro?"ISO8859-15":"ISO8859-1"); }
    } else if(pcLngCpy[0]=='g') {
-      if(pcLngCpy[1]=='a') return (isEbcdic?"IBM-1146":isEuro?"ISO8859-15":"ISO8859-1");
-      if(pcLngCpy[1]=='d') return (isEbcdic?"IBM-1146":"ISO8859-15");
-      if(pcLngCpy[1]=='l') return (isEbcdic?NULL:isEuro?"ISO8859-15":"ISO8859-1");
-      if(pcLngCpy[1]=='v') return (isEbcdic?NULL:isEuro?"ISO8859-15":"ISO8859-1");
+      if(pcLngCpy[1]=='a') { return (isEbcdic?"IBM-1146":isEuro?"ISO8859-15":"ISO8859-1"); }
+      if(pcLngCpy[1]=='d') { return (isEbcdic?"IBM-1146":"ISO8859-15"); }
+      if(pcLngCpy[1]=='l') { return (isEbcdic?NULL:isEuro?"ISO8859-15":"ISO8859-1"); }
+      if(pcLngCpy[1]=='v') { return (isEbcdic?NULL:isEuro?"ISO8859-15":"ISO8859-1"); }
    } else if(pcLngCpy[0]=='h') {
-      if(pcLngCpy[1]=='e') return (isEbcdic?"IBM-424":"ISO8859-8");
-      if(pcLngCpy[1]=='r') return (isEbcdic?"IBM-1153":"ISO8859-2");
-      if(pcLngCpy[1]=='u') return (isEbcdic?"IBM-1153":"ISO8859-2");
+      if(pcLngCpy[1]=='e') { return (isEbcdic?"IBM-424":"ISO8859-8"); }
+      if(pcLngCpy[1]=='r') { return (isEbcdic?"IBM-1153":"ISO8859-2"); }
+      if(pcLngCpy[1]=='u') { return (isEbcdic?"IBM-1153":"ISO8859-2"); }
    } else if(pcLngCpy[0]=='i') {
-      if(pcLngCpy[1]=='d') return (isEbcdic?NULL:isEuro?"ISO8859-15":"ISO8859-1");
-      if(pcLngCpy[1]=='s') return (isEbcdic?"IBM-1149":isEuro?"ISO8859-15":"ISO8859-1");
-      if(pcLngCpy[1]=='t') return (isEbcdic?"IBM-1144":isEuro?"ISO8859-15":"ISO8859-1");
-      if(pcLngCpy[1]=='w') return (isEbcdic?NULL:"ISO8859-8");
+      if(pcLngCpy[1]=='d') { return (isEbcdic?NULL:isEuro?"ISO8859-15":"ISO8859-1"); }
+      if(pcLngCpy[1]=='s') { return (isEbcdic?"IBM-1149":isEuro?"ISO8859-15":"ISO8859-1"); }
+      if(pcLngCpy[1]=='t') { return (isEbcdic?"IBM-1144":isEuro?"ISO8859-15":"ISO8859-1"); }
+      if(pcLngCpy[1]=='w') { return (isEbcdic?NULL:"ISO8859-8"); }
    } else if(pcLngCpy[0]=='k') {
-      if(pcLngCpy[1]=='l') return (isEbcdic?NULL:isEuro?"ISO8859-15":"ISO8859-1");
-      if(pcLngCpy[1]=='u') return (isEbcdic?NULL:"ISO8859-9");
-      if(pcLngCpy[1]=='w') return (isEbcdic?NULL:isEuro?"ISO8859-15":"ISO8859-1");
+      if(pcLngCpy[1]=='l') { return (isEbcdic?NULL:isEuro?"ISO8859-15":"ISO8859-1"); }
+      if(pcLngCpy[1]=='u') { return (isEbcdic?NULL:"ISO8859-9"); }
+      if(pcLngCpy[1]=='w') { return (isEbcdic?NULL:isEuro?"ISO8859-15":"ISO8859-1"); }
    } else if(pcLngCpy[0]=='l') {
-      if(pcLngCpy[1]=='g') return (isEbcdic?NULL:"ISO8859-10");
-      if(pcLngCpy[1]=='t') return (isEbcdic?"IBM-1156":"ISO8859-13");
-      if(pcLngCpy[1]=='v') return (isEbcdic?"IBM-1156":"ISO8859-13");
+      if(pcLngCpy[1]=='g') { return (isEbcdic?NULL:"ISO8859-10"); }
+      if(pcLngCpy[1]=='t') { return (isEbcdic?"IBM-1156":"ISO8859-13"); }
+      if(pcLngCpy[1]=='v') { return (isEbcdic?"IBM-1156":"ISO8859-13"); }
    } else if(pcLngCpy[0]=='m') {
-      if(pcLngCpy[1]=='g') return (isEbcdic?NULL:"ISO8859-15");
-      if(pcLngCpy[1]=='i') return (isEbcdic?NULL:"ISO8859-13");
-      if(pcLngCpy[1]=='k') return (isEbcdic?NULL:"ISO8859-5");
-      if(pcLngCpy[1]=='s') return (isEbcdic?NULL:isEuro?"ISO8859-15":"ISO8859-1");
-      if(pcLngCpy[1]=='t') return (isEbcdic?NULL:"ISO8859-3");
+      if(pcLngCpy[1]=='g') { return (isEbcdic?NULL:"ISO8859-15"); }
+      if(pcLngCpy[1]=='i') { return (isEbcdic?NULL:"ISO8859-13"); }
+      if(pcLngCpy[1]=='k') { return (isEbcdic?NULL:"ISO8859-5"); }
+      if(pcLngCpy[1]=='s') { return (isEbcdic?NULL:isEuro?"ISO8859-15":"ISO8859-1"); }
+      if(pcLngCpy[1]=='t') { return (isEbcdic?NULL:"ISO8859-3"); }
    } else if(pcLngCpy[0]=='n') {
-      if(pcLngCpy[1]=='b') return (isEbcdic?"IBM-1142":isEuro?"ISO8859-15":"ISO8859-1");
-      if(pcLngCpy[1]=='l') return (isEbcdic?"IBM-1140":isEuro?"ISO8859-15":"ISO8859-1");
-      if(pcLngCpy[1]=='n') return (isEbcdic?"IBM-1142":isEuro?"ISO8859-15":"ISO8859-1");
+      if(pcLngCpy[1]=='b') { return (isEbcdic?"IBM-1142":isEuro?"ISO8859-15":"ISO8859-1"); }
+      if(pcLngCpy[1]=='l') { return (isEbcdic?"IBM-1140":isEuro?"ISO8859-15":"ISO8859-1"); }
+      if(pcLngCpy[1]=='n') { return (isEbcdic?"IBM-1142":isEuro?"ISO8859-15":"ISO8859-1"); }
    } else if(pcLngCpy[0]=='o') {
-      if(pcLngCpy[1]=='c') return (isEbcdic?NULL:isEuro?"ISO8859-15":"ISO8859-1");
-      if(pcLngCpy[1]=='m') return (isEbcdic?NULL:isEuro?"ISO8859-15":"ISO8859-1");
+      if(pcLngCpy[1]=='c') { return (isEbcdic?NULL:isEuro?"ISO8859-15":"ISO8859-1"); }
+      if(pcLngCpy[1]=='m') { return (isEbcdic?NULL:isEuro?"ISO8859-15":"ISO8859-1"); }
    } else if(pcLngCpy[0]=='p') {
-      if(pcLngCpy[1]=='l') return (isEbcdic?"IBM-1153":"ISO8859-2");
-      if(pcLngCpy[1]=='t') return (isEbcdic?"IBM-1140":isEuro?"ISO8859-15":"ISO8859-1");
+      if(pcLngCpy[1]=='l') { return (isEbcdic?"IBM-1153":"ISO8859-2"); }
+      if(pcLngCpy[1]=='t') { return (isEbcdic?"IBM-1140":isEuro?"ISO8859-15":"ISO8859-1"); }
    } else if(pcLngCpy[0]=='r') {
-      if(pcLngCpy[1]=='o') return (isEbcdic?"IBM-1153":"ISO8859-2");
-      if(pcLngCpy[1]=='u') return (isEbcdic?"IBM-1154":"ISO8859-5");
+      if(pcLngCpy[1]=='o') { return (isEbcdic?"IBM-1153":"ISO8859-2"); }
+      if(pcLngCpy[1]=='u') { return (isEbcdic?"IBM-1154":"ISO8859-5"); }
    } else if(pcLngCpy[0]=='s') {
-      if(pcLngCpy[1]=='k') return (isEbcdic?"IBM-1153":"ISO8859-2");
-      if(pcLngCpy[1]=='l') return (isEbcdic?"IBM-1153":"ISO8859-2");
-      if(pcLngCpy[1]=='o') return (isEbcdic?NULL:isEuro?"ISO8859-15":"ISO8859-1");
-      if(pcLngCpy[1]=='q') return (isEbcdic?"IBM-1153":isEuro?"ISO8859-15":"ISO8859-1");
-      if(pcLngCpy[1]=='r') return (isEbcdic?"IBM-1153":"UTF-8");
-      if(pcLngCpy[1]=='t') return (isEbcdic?NULL:isEuro?"ISO8859-15":"ISO8859-1");
-      if(pcLngCpy[1]=='v') return (isEbcdic?"IBM-1143":isEuro?"ISO8859-15":"ISO8859-1");
+      if(pcLngCpy[1]=='k') { return (isEbcdic?"IBM-1153":"ISO8859-2"); }
+      if(pcLngCpy[1]=='l') { return (isEbcdic?"IBM-1153":"ISO8859-2"); }
+      if(pcLngCpy[1]=='o') { return (isEbcdic?NULL:isEuro?"ISO8859-15":"ISO8859-1"); }
+      if(pcLngCpy[1]=='q') { return (isEbcdic?"IBM-1153":isEuro?"ISO8859-15":"ISO8859-1"); }
+      if(pcLngCpy[1]=='r') { return (isEbcdic?"IBM-1153":"UTF-8"); }
+      if(pcLngCpy[1]=='t') { return (isEbcdic?NULL:isEuro?"ISO8859-15":"ISO8859-1"); }
+      if(pcLngCpy[1]=='v') { return (isEbcdic?"IBM-1143":isEuro?"ISO8859-15":"ISO8859-1"); }
    } else if(pcLngCpy[0]=='t') {
-      if(pcLngCpy[1]=='g') return (isEbcdic?NULL:"KOI8-T");
-      if(pcLngCpy[1]=='h') return (isEbcdic?NULL:"TIS-620");
-      if(pcLngCpy[1]=='l') return (isEbcdic?NULL:isEuro?"ISO8859-15":"ISO8859-1");
-      if(pcLngCpy[1]=='r') return (isEbcdic?NULL:"ISO8859-9");
+      if(pcLngCpy[1]=='g') { return (isEbcdic?NULL:"KOI8-T"); }
+      if(pcLngCpy[1]=='h') { return (isEbcdic?NULL:"TIS-620"); }
+      if(pcLngCpy[1]=='l') { return (isEbcdic?NULL:isEuro?"ISO8859-15":"ISO8859-1"); }
+      if(pcLngCpy[1]=='r') { return (isEbcdic?NULL:"ISO8859-9"); }
    } else if(pcLngCpy[0]=='u') {
-      if(pcLngCpy[1]=='k') return (isEbcdic?NULL:"KOI8-U");
-      if(pcLngCpy[1]=='z') return (isEbcdic?NULL:isEuro?"ISO8859-15":"ISO8859-1");
+      if(pcLngCpy[1]=='k') { return (isEbcdic?NULL:"KOI8-U"); }
+      if(pcLngCpy[1]=='z') { return (isEbcdic?NULL:isEuro?"ISO8859-15":"ISO8859-1"); }
    } else if(pcLngCpy[0]=='w') {
-      if(pcLngCpy[1]=='a') return (isEbcdic?NULL:isEuro?"ISO8859-15":"ISO8859-1");
+      if(pcLngCpy[1]=='a') { return (isEbcdic?NULL:isEuro?"ISO8859-15":"ISO8859-1"); }
    } else if(pcLngCpy[0]=='x') {
-      if(pcLngCpy[1]=='h') return (isEbcdic?NULL:isEuro?"ISO8859-15":"ISO8859-1");
+      if(pcLngCpy[1]=='h') { return (isEbcdic?NULL:isEuro?"ISO8859-15":"ISO8859-1"); }
    } else if(pcLngCpy[0]=='y') {
-      if(pcLngCpy[1]=='i') return (isEbcdic?NULL:"CP1255");
+      if(pcLngCpy[1]=='i') { return (isEbcdic?NULL:"CP1255"); }
    } else if(pcLngCpy[0]=='z') {
-      if(pcLngCpy[1]=='u') return (isEbcdic?NULL:isEuro?"ISO8859-15":"ISO8859-1");
+      if(pcLngCpy[1]=='u') { return (isEbcdic?NULL:isEuro?"ISO8859-15":"ISO8859-1"); }
    }
    return NULL;
 }
@@ -1768,7 +1769,7 @@ extern unsigned int mapcdstr(const char* p) {
          } else if (isspace(*p)) {
             p++;
          } else if (toupper(p[0])=='U' && toupper(p[1])=='T' && toupper(p[2])=='F') { /*UTF-xxxx*/
-            p+=3; if (p[0]=='-' || p[0]=='_') p++;
+            p+=3; if (p[0]=='-' || p[0]=='_') { p++; }
             if ((p[0]=='8' || p[0]=='1') && (p[1]==0x00 || isspace(p[1]))) {
                return(1208);
             } else if (p[0]=='0' && (p[1]=='8' || p[1]=='1') && (p[2]==0x00 || isspace(p[2]))) {
@@ -1785,17 +1786,17 @@ extern unsigned int mapcdstr(const char* p) {
                o=0;  p+=1;
             } else if (p[0]=='4') {
                o=32; p+=1;
-            } else return(0);
+            } else  { return 0; }
             if ((p[0]==0x00 || isspace(p[0]))) {
                o+=4;
             } else if (toupper(p[0])=='L' && toupper(p[1])=='E' && (p[2]==0x00 || isspace(p[2]))) {
                o+=2;
             } else if (toupper(p[0])=='B' && toupper(p[1])=='E' && (p[2]==0x00 || isspace(p[2]))) {
                o+=0;
-            } else return(0);
+            } else  { return 0; }
             return(1200+o);
          } else if (toupper(p[0])=='U' && toupper(p[1])=='C' && toupper(p[2])=='S') { /*UCS-xxxx*/
-            p+=3; if (p[0]=='-' || p[0]=='_') p++;
+            p+=3; if (p[0]=='-' || p[0]=='_') { p++; }
             if ((p[0]=='8' || p[0]=='1') && (p[1]==0x00 || isspace(p[1]))) {
                return(13496);
             } else if (p[0]=='0' && (p[1]=='8' || p[1]=='1') && (p[2]==0x00 || isspace(p[2]))) {
@@ -1812,19 +1813,19 @@ extern unsigned int mapcdstr(const char* p) {
                o=0;  p+=1;
             } else if (p[0]=='4') {
                o=32; p+=1;
-            } else return(0);
+            } else  { return 0; }
             if ((p[0]==0x00 || isspace(p[0]))) {
                o+=4;
             } else if (toupper(p[0])=='L' && toupper(p[1])=='E' && (p[2]==0x00 || isspace(p[2]))) {
                o+=2;
             } else if (toupper(p[0])=='B' && toupper(p[1])=='E' && (p[2]==0x00 || isspace(p[2]))) {
                o+=0;
-            } else return(0);
+            } else  { return 0; }
             return(13488+o);
          } else if (toupper(p[0])=='I' && toupper(p[1])=='S' && toupper(p[2])=='O') { /*ISO*/
-            p+=3; if (p[0]=='-' || p[0]=='_') p++;
+            p+=3; if (p[0]=='-' || p[0]=='_') { p++; }
             if (p[0]=='8' && p[1]=='8' && p[2]=='5'  && p[3]=='9') { /*ISO-8859-xx*/
-               p+=4; if (p[0]=='-' || p[0]=='_') p++;
+               p+=4; if (p[0]=='-' || p[0]=='_') { p++; }
                for (o=0;isdigit(p[0]);p++) {
                   o=(o*10)+(p[0]-'0');
                }
@@ -1849,19 +1850,19 @@ extern unsigned int mapcdstr(const char* p) {
                   default: return(   0);
                   }
                } else if (o==8) {
-                  p+=1; if (p[0]=='-') p++;
+                  p+=1; if (p[0]=='-') { p++; }
                   if (toupper(p[0])=='I' && (p[1]==0x00 || isspace(p[1]))) {
                      return(62238);
-                  } else return(0);
-               } else return(0);
+                  } else  { return 0; }
+               } else  { return 0; }
             } else if (p[0]=='2' && p[1]=='0' && p[2]=='2'  && p[3]=='2') { /*ISO-2022-xx*/
-               p+=4; if (p[0]=='-' || p[0]=='_') p++;
+               p+=4; if (p[0]=='-' || p[0]=='_') { p++; }
                if (toupper(p[0])=='J' && toupper(p[1])=='P' && (p[2]==0x00 || isspace(p[2]))) {
                   return(5052);
-               } else return(0);
-            } else return(0);
+               } else  { return 0; }
+            } else  { return 0; }
          } else if (toupper(p[0])=='L' && toupper(p[1])=='A' && toupper(p[2])=='T' && toupper(p[3])=='I' && toupper(p[4])=='N') { /*LATIN*/
-            p+=5; if (p[0]=='-' || p[0]=='_') p++;
+            p+=5; if (p[0]=='-' || p[0]=='_') { p++; }
             if (p[0]=='1' && (p[1]==0x00 || isspace(p[1]))) {
                return(819);
             } else if (p[0]=='2' && (p[1]==0x00 || isspace(p[1]))) {
@@ -1882,41 +1883,41 @@ extern unsigned int mapcdstr(const char* p) {
                   return(923);
             } else if (p[0]=='1' && p[1]=='0' && (p[2]==0x00 || isspace(p[2]))) {
                   return(0);// no CCSID defined
-            } else return(0);
+            } else  { return 0; }
          } else if (toupper(p[0])=='C' && toupper(p[1])=='P') { /*CP-125x*/
-            p+=2; if (p[0]=='-') p++;
+            p+=2; if (p[0]=='-') { p++; }
             if (p[0]=='1' && p[1]=='2' && p[2]=='5' && isdigit(p[3]) && (p[4]==0x00 || isspace(p[4]))) {
                return(1250+(p[3]-'0'));
-            } else return(0);
+            } else  { return 0; }
          } else if (toupper(p[0])=='I' && toupper(p[1])=='B'  && toupper(p[2])=='M') { /*IBM-xxxx*/
-            p+=3; if (p[0]=='-' || p[0]=='_') p++;
+            p+=3; if (p[0]=='-' || p[0]=='_') { p++; }
             for (o=0;isdigit(p[0]);p++) {
                o=(o*10)+(p[0]-'0');
             }
-            if ((p[0]==0x00 || isspace(p[0])) && o && o<65536) return (o); else return(0);
+            if ((p[0]==0x00 || isspace(p[0])) && o && o<65536) { return (o); } else { return(0); }
          } else if (toupper(p[0])=='U' && toupper(p[1])=='S') { /*US-ASCII*/
-            p+=2; if (p[0]=='-' || p[0]=='_') p++;
+            p+=2; if (p[0]=='-' || p[0]=='_') { p++; }
             if (toupper(p[0])=='A' && toupper(p[1])=='S' && toupper(p[2])=='C'  && toupper(p[3])=='I'  && toupper(p[4])=='I' && (p[5]==0x00 || isspace(p[5]))) {
                return(367);
-            } else return(0);
+            } else  { return 0; }
          } else if (toupper(p[0])=='D' && toupper(p[1])=='E') { /*DE-ASCII*/
-            p+=2; if (p[0]=='-' || p[0]=='_') p++;
+            p+=2; if (p[0]=='-' || p[0]=='_') { p++; }
             if (toupper(p[0])=='A' && toupper(p[1])=='S' && toupper(p[2])=='C'  && toupper(p[3])=='I'  && toupper(p[4])=='I' && (p[5]==0x00 || isspace(p[5]))) {
                return(66003);
-            } else return(0);
+            } else  { return 0; }
          } else if (toupper(p[0])=='A' && toupper(p[1])=='S' && toupper(p[2])=='C'  && toupper(p[3])=='I'  && toupper(p[4])=='I' && (p[5]==0x00 || isspace(p[5]))) {
             return(367);
          } else if (toupper(p[0])=='K' && toupper(p[1])=='O' && toupper(p[2])=='I'  && p[3]=='8') { /*KOI8-xx*/
-            p+=4; if (p[0]=='-' || p[0]=='_') p++;
+            p+=4; if (p[0]=='-' || p[0]=='_') { p++; }
             if (toupper(p[0])=='R' && (p[1]==0x00 || isspace(p[1]))) {
                return(878);
             } else if (toupper(p[0])=='R' && toupper(p[1])=='U' && (p[2]==0x00 || isspace(p[2]))) {
                return(1167);
             } else if (toupper(p[0])=='U' && (p[1]==0x00 || isspace(p[1]))) {
                return(1168);
-            } else return(0);
+            } else  { return 0; }
          } else if (toupper(p[0])=='E' && toupper(p[1])=='U' && toupper(p[2])=='C') { /*EUC-xx*/
-            p+=3; if (p[0]=='-' || p[0]=='_') p++;
+            p+=3; if (p[0]=='-' || p[0]=='_') { p++; }
             if (toupper(p[0])=='J' && toupper(p[1])=='P' && (p[2]==0x00 || isspace(p[2]))) {
                return(954);
             } else if (toupper(p[0])=='T' && toupper(p[1])=='W' && (p[2]==0x00 || isspace(p[2]))) {
@@ -1925,68 +1926,68 @@ extern unsigned int mapcdstr(const char* p) {
                return(949);
             } else if (toupper(p[0])=='C' && toupper(p[1])=='N' && (p[2]==0x00 || isspace(p[2]))) {
                return(1383);
-            } else return(0);
+            } else  { return 0; }
          } else if (toupper(p[0])=='B' && toupper(p[1])=='I' && toupper(p[2])=='G') { /*BIG-5*/
-            p+=3; if (p[0]=='-' || p[0]=='_') p++;
+            p+=3; if (p[0]=='-' || p[0]=='_') { p++; }
             if (p[0]=='5' && (p[1]==0x00 || isspace(p[1]))) {
                return(950);
-            } else return(0);
+            } else  { return 0; }
          } else if (toupper(p[0])=='G' && toupper(p[1])=='B') { /*GB*/
             if (toupper(p[2])=='K' && (p[3]==0x00 || isspace(p[3]))) {
                return(1386);
             }
-            p+=2; if (p[0]=='-' || p[0]=='_') p++;
+            p+=2; if (p[0]=='-' || p[0]=='_') { p++; }
             if (p[0]=='1' && p[1]=='8' && p[2]=='0' && p[3]=='3' && p[4]=='0' && (p[5]==0x00 || isspace(p[5]))) {
                return(5488);
             } else if (p[0]=='2' && p[1]=='3' && p[2]=='1' && p[3]=='2' && (p[4]==0x00 || isspace(p[4]))) {
                return(1381);
-            } else return(0);
+            } else  { return 0; }
          } else if (toupper(p[0])=='S' && toupper(p[1])=='H' && toupper(p[2])=='I' && toupper(p[3])=='F' && toupper(p[4])=='T') { /*SHIFT*/
-            p+=5; if (p[0]=='-' || p[0]=='_') p++;
+            p+=5; if (p[0]=='-' || p[0]=='_') { p++; }
             if (toupper(p[0])=='J' && toupper(p[1])=='I' && toupper(p[2])=='S' && (p[3]==0x00 || isspace(p[3]))) {
                return(932);
-            } else return(0);
+            } else  { return 0; }
          } else if (toupper(p[0])=='W' && toupper(p[1])=='I' && toupper(p[2])=='N' && toupper(p[3])=='D' && toupper(p[4])=='O' && toupper(p[5])=='W' && toupper(p[6])=='S') { /*SHIFT*/
-            p+=7; if (p[0]=='-' || p[0]=='_') p++;
+            p+=7; if (p[0]=='-' || p[0]=='_') { p++; }
             if (toupper(p[0])=='3' && toupper(p[1])=='1' && toupper(p[2])=='J' && (p[3]==0x00 || isspace(p[3]))) {
                return(943);
-            } else return(0);
+            } else  { return 0; }
          } else if (toupper(p[0])=='K' && toupper(p[1])=='S' && toupper(p[2])=='C') { /*KSC-xx*/
-            p+=3; if (p[0]=='-' || p[0]=='_') p++;
+            p+=3; if (p[0]=='-' || p[0]=='_') { p++; }
             if (p[0]=='5' && p[1]=='6' && p[2]=='0' && p[3]=='1' && (p[4]==0x00 || isspace(p[4]))) {
                return(1363);
-            } else return(0);
+            } else  { return 0; }
          } else if (toupper(p[0])=='T' && toupper(p[1])=='I' && toupper(p[2])=='S') { /*TIS-xx*/
-            p+=3; if (p[0]=='-' || p[0]=='_') p++;
+            p+=3; if (p[0]=='-' || p[0]=='_') { p++; }
             if (p[0]=='6' && p[1]=='2' && p[2]=='0' && (p[3]==0x00 || isspace(p[3]))) {
                return(1162);
-            } else return(0);
+            } else  { return 0; }
          } else if (toupper(p[0])=='V' && toupper(p[1])=='I' && toupper(p[2])=='S' && toupper(p[3])=='C' && toupper(p[4])=='I' && toupper(p[5])=='I') { /*VISCII*/
             p+=6;
             if (p[0]==0x00 || isspace(p[0])) {
                return(1129);
-            } else return(0);
+            } else  { return 0; }
          } else if (toupper(p[0])=='M' && toupper(p[1])=='A' && toupper(p[2])=='C' && toupper(p[3])=='I' && toupper(p[4])=='N' && toupper(p[5])=='T' && toupper(p[6])=='O'  && toupper(p[7])=='S' && toupper(p[8])=='H') { /*MACINTOSH*/
             p+=9;
             if (p[0]==0x00 || isspace(p[0])) {
                return(1275);
-            } else return(0);
+            } else  { return 0; }
          } else if (toupper(p[0])=='D' && toupper(p[1])=='I'  && toupper(p[2])=='N') { /*DIN-xxxx*/
-            p+=3; if (p[0]=='-' || p[0]=='_') p++;
+            p+=3; if (p[0]=='-' || p[0]=='_') { p++; }
             for (o=0;isdigit(p[0]);p++) {
                o=(o*10)+(p[0]-'0');
             }
-            if ((p[0]==0x00 || isspace(p[0])) && o == 66003) return (o); else return(0);
+            if ((p[0]==0x00 || isspace(p[0])) && o == 66003) { return (o); } else { return(0); }
          } else if (isdigit(p[0])) { /*CCSID*/
             for (o=(p[0]-'0'),p++;isdigit(p[0]);p++) {
                o=(o*10)+(p[0]-'0');
             }
             if ((p[0]==0x00 || isspace(p[0])) && o<65536) {
                return(o);
-            } else return(0);
-         } else return(0);
+            } else  { return 0; }
+         } else  { return 0; }
       }
-   } else return(0);
+   } else  { return 0; }
 }
 
 /* TODO: add to mapping above
@@ -2276,13 +2277,13 @@ static char* drplchar(const char* string, const size_t limit, const char c, cons
    size_t      size;
    size_t      valueLen=strlen(value);
 
-   if (valueLen==0)
+   if (valueLen==0) {
       return NULL;
-
+   }
    size=strlen(string)+1;
    buf=malloc(size);
    // cppcheck-suppress knownConditionTrueFalse
-   if (buf==NULL) return(NULL);
+   if (buf==NULL) { return(NULL); }
 
    end = limit > 0 ? string + limit : string + size;
    while (string[0]) {
@@ -2377,7 +2378,7 @@ static const char* getjclvar(const char* symbol, int size, char* value)
    err=flzjsy(symbol,&siSln,value,&siVln);
    if (err==0) {
       if (siVln!=siSln || memcmp(symbol,value,siVln)) {                  // check if real replacement
-         while (siVln>0 && isspace(value[siVln-1])) siVln--;            // remove trailing whitespace
+         while (siVln>0 && isspace(value[siVln-1])) { siVln--; }         // remove trailing whitespace
          if (siVln) {
             value[siVln]=0x00;
             return(value);
@@ -2402,7 +2403,7 @@ static const char* getsysvar(const char* symbol, int size, char* value)
    err=flzsym(symbol,&siSln,value,&siVln);
    if (err==0) {
       if (siVln!=siSln || memcmp(symbol,value,siVln)) {                  // check if real replacement
-         while (siVln>0 && isspace(value[siVln-1])) siVln--;            // remove trailing whitespace
+         while (siVln>0 && isspace(value[siVln-1])) { siVln--; }         // remove trailing whitespace
          if (siVln) {
             value[siVln]=0x00;
             return(value);
@@ -2423,8 +2424,8 @@ extern char* getenvar(const char* name,const size_t length,const size_t size,cha
    char acVal[256];
    memset(acVal,0,sizeof(acVal));
    const char* v=GETENV(name);
-   if (v==NULL) v=getjclvar(name,sizeof(acVal)-1,acVal);
-   if (v==NULL) v=getsysvar(name,sizeof(acVal)-1,acVal);
+   if (v==NULL) { v=getjclvar(name,sizeof(acVal)-1,acVal); }
+   if (v==NULL) { v=getsysvar(name,sizeof(acVal)-1,acVal); }
    if (v!=NULL && *v) {
       size_t lv=strlen(v);
       while(lv>0 && isspace(v[lv-1])) {
@@ -2442,17 +2443,17 @@ extern char* getenvar(const char* name,const size_t length,const size_t size,cha
       return(userid(size,string));
    } else if (strcmp(name,"CUSER")==0) {
       userid(size,string);
-      for(char* p=string;*p;p++) *p = toupper(*p);
+      for(char* p=string;*p;p++) { *p = toupper(*p); }
       return(string);
    } else if (strcmp(name,"cuser")==0) {
       userid(size,string);
-      for(char* p=string;*p;p++) *p = tolower(*p);
+      for(char* p=string;*p;p++) { *p = tolower(*p); }
       return(string);
    } else if (strcmp(name,"Cuser")==0) {
       userid(size,string);
       if (*string) {
          *string = toupper(*string);
-         for(char* p=string+1;*p;p++) *p = tolower(*p);
+         for(char* p=string+1;*p;p++) { *p = tolower(*p); }
       }
       return(string);
    } else if (strcmp(name,"OWNERID")==0) {
@@ -2467,10 +2468,11 @@ extern char* getenvar(const char* name,const size_t length,const size_t size,cha
 
       if (WSAStartup(wVersionRequested, &wsaData)==0) {
       #endif
-         if (gethostname(string, size)==0)
+         if (gethostname(string, size)==0) {
             string[size-1]='\0';
-         else
+         } else {
             string[0]='\0'; //gethostname() failed => empty string
+         }
       #ifdef __WIN__
          WSACleanup( );
       }
@@ -2495,7 +2497,7 @@ static void rplenvar(char* name,const size_t size,const char opn, const char cls
 
    for (b=strchr(a,opn); b!=NULL ;b=strchr(a,opn)) {
       if (b[1]==opn) {
-         for (p=b;*p;p++) p[0]=p[1];
+         for (p=b;*p;p++) { p[0]=p[1]; }
          p[0]=0x00;
          a=b+1;
       } else {
@@ -2511,11 +2513,11 @@ static void rplenvar(char* name,const size_t size,const char opn, const char cls
             if (match) {
                vlen = strlen(v);
                catlen = (ssize_t)size - (ssize_t)strlen(name) - 1;
-               if (catlen > 0) strncat(a, v, catlen); else catlen = 0;
-               if (vlen >= catlen) name[size-1] = 0;
+               if (catlen > 0) { strncat(a, v, catlen); } else { catlen = 0; }
+               if (vlen >= catlen) { name[size-1] = 0; }
                catlen = (ssize_t)size - (ssize_t)strlen(name) - 1;
-               if (catlen > 0) strncat(a, h, catlen); else catlen = 0;
-               if (hlen >= catlen) name[size-1] = 0;
+               if (catlen > 0) { strncat(a, h, catlen); } else { catlen = 0; }
+               if (hlen >= catlen) { name[size-1] = 0; }
                a=b+vlen;
             }
          } else {
@@ -2532,8 +2534,7 @@ static char* drplenvar(const char* string,const char opn, const char cls)
    char*       b=malloc(s);
    int         o=0;
    // cppcheck-suppress knownConditionTrueFalse
-   if (b==NULL)
-      return(NULL);
+   if (b==NULL) {   return(NULL); }
 
    while(p[0]) {
       if (p[0]==opn) {
@@ -2597,7 +2598,7 @@ static char* rpltpl(char* string,int size,const char* templ,const char* values) 
          s[0]=t[0]; s++;
       }
    }
-   if (s<e) s[0]=0x00; else e[0]=0x00;
+   if (s<e) { s[0]=0x00; } else { e[0]=0x00; }
    return(string);
 }
 
@@ -2608,8 +2609,7 @@ static char* drpltpl(const char* templ,const char* values) {
    char*       b=malloc(s);
    int         o=0;
    // cppcheck-suppress knownConditionTrueFalse
-   if (b==NULL)
-      return(NULL);
+   if (b==NULL) {  return(NULL); }
 
    while(p[0]) {
       if (p[0]=='%') {
@@ -2620,8 +2620,9 @@ static char* drpltpl(const char* templ,const char* values) {
             for (const char* v=values;v[0];v++) {
                if (toupper(v[0])==toupper(p[1]) && v[1]==':') {
                   const char* x=v+2;
-                  while (x[0] && x[0]!='\n')
+                  while (x[0] && x[0]!='\n') {
                      x++;
+                  }
                   int l=x-(v+2);
                   char* h=realloc_nowarn(b,s+(l-2));
                   if (h==NULL) {
@@ -2733,7 +2734,7 @@ static const char* adjpfx(char* file, int size)
 static char* dadjpfx(const char* file,char** tilde)
 {
     char* b=malloc(strlen(file)+8);
-    if (b==NULL) return(NULL);
+   if (b==NULL) { return(NULL); }
 # ifdef __ZOS__
     if (file[0]=='/' && file[1]=='/' && file[2]=='D' && file[3]=='S' && file[4]==':') {
        strcpy(b,file+5);
@@ -2796,7 +2797,7 @@ static char* dadjpfx(const char* file,char** tilde)
        b[4]=':';
        strcpy(b+5,file+3);
        int l=strlen(b);
-       if (l>0 && b[l-1]=='\'') b[l-1]=0x00;
+       if (l>0 && b[l-1]=='\'') { b[l-1]=0x00; }
        *tilde="<SYSUID>";
     } else if (file[0]=='/' && file[1]=='/') { // insert DS:~.
        b[0]='/';
@@ -2831,8 +2832,8 @@ extern char* dmapstr(const char* string,int method)
       free(h0);
       if (h1!=NULL){
          switch (method) {
-         case 1: for(char* p=h1;*p;p++) *p=toupper(*p); break;
-         case 2: for(char* p=h1;*p;p++) *p=tolower(*p); break;
+         case 1: for(char* p=h1;*p;p++) { *p=toupper(*p); } break;
+         case 2: for(char* p=h1;*p;p++) { *p=tolower(*p); } break;
          }
       }
       return(h1);
@@ -2848,8 +2849,8 @@ extern char* dmapxml(const char* string,int method)
       free(h0);
       if (h1!=NULL){
          switch (method) {
-         case 1: for(char* p=h1;*p;p++) *p=toupper(*p); break;
-         case 2: for(char* p=h1;*p;p++) *p=tolower(*p); break;
+         case 1: for(char* p=h1;*p;p++) { *p=toupper(*p); } break;
+         case 2: for(char* p=h1;*p;p++) { *p=tolower(*p); } break;
          }
       }
       return(h1);
@@ -2873,7 +2874,7 @@ extern char* mapfil2(char* file,int size)
 #ifdef __WIN__
    size_t l=strlen(file);
    for (size_t i=0;i<l;i++) {
-      if (file[i]=='/') file[i]=C_BSL;
+      if (file[i]=='/') { file[i]=C_BSL; }
    }
 #endif
    return(file);
@@ -2894,8 +2895,8 @@ extern char* dmapfil(const char* file, int method)
             free(h2);
             if (h3!=NULL){
                switch (method) {
-               case 1: for(char* p=h3;*p;p++) *p=toupper(*p); break;
-               case 2: for(char* p=h3;*p;p++) *p=tolower(*p); break;
+               case 1: for(char* p=h3;*p;p++) { *p=toupper(*p); } break;
+               case 2: for(char* p=h3;*p;p++) { *p=tolower(*p); } break;
                }
             }
             return(h3);
@@ -2959,8 +2960,8 @@ extern char* dmaplab(const char* label, int method)
                free(h3);
                if (h4!=NULL){
                   switch (method) {
-                  case 1: for(char* p=h4;*p;p++) *p=toupper(*p); break;
-                  case 2: for(char* p=h4;*p;p++) *p=tolower(*p); break;
+                  case 1: for(char* p=h4;*p;p++) { *p=toupper(*p); } break;
+                  case 2: for(char* p=h4;*p;p++) { *p=tolower(*p); } break;
                   }
                }
                return(h4);
@@ -3016,7 +3017,7 @@ extern const char* prsdstr(const char** hdl, const char* str, int len)
    } else {
       hlp=(*hdl);
    }
-   if (hlp==NULL || (end!=NULL && hlp>=end) || ((unsigned char*)hlp)[0]==0xFFU) return(NULL);
+   if (hlp==NULL || (end!=NULL && hlp>=end) || ((unsigned char*)hlp)[0]==0xFFU) { return(NULL); }
    (*hdl)+=strlen(hlp)+1;
    return(hlp);
 }
@@ -3024,8 +3025,7 @@ extern const char* prsdstr(const char** hdl, const char* str, int len)
 extern size_t strlcpy(char *dest, const char *src, size_t n)
 {
    size_t len = strlen(src);
-   if (len>n-1)
-      len=n-1;
+   if (len>n-1) {   len=n-1; }
    memmove(dest, src, len);
    dest[len]='\0';
    return len;
@@ -3035,8 +3035,7 @@ extern size_t strlcpy_null(char *dest, const char *src, size_t n)
 {
    if (src!=NULL) {
       size_t len = strlen(src);
-      if (len>n-1)
-         len=n-1;
+      if (len>n-1) {    len=n-1; }
       memmove(dest, src, len);
       dest[len]='\0';
       return len;
@@ -3086,8 +3085,7 @@ extern int srprintc(char** buffer,size_t* size,const size_t expansion,const char
    if ((*size)<s || *buffer==NULL) {
       s=(*size>s)?*size:2*s;
       char* b=(char*)realloc_nowarn(*buffer,s);
-      if (b==NULL)
-         return(0);
+      if (b==NULL) { return(0); }
       (*buffer)=b;
       (*size)=s;
    }
@@ -3105,7 +3103,7 @@ extern int srprintf(char** buffer,size_t* size,const size_t expansion,const char
    if ((*size)<s || *buffer==NULL) {
       s=(*size>s)?*size:2*s;
       char* b=(char*)realloc_nowarn(*buffer,s);
-      if (b==NULL) return(0);
+      if (b==NULL) { return(0); }
       (*buffer)=b;
       (*size)=s;
    }
@@ -3483,7 +3481,7 @@ extern unsigned int asc2chr(
    0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0};
    for (i=0;i<len;i++) {
       chr[i]=asc_map[*((unsigned char*)(asc+i))];
-      if (chr[i]==0x0) return(i);
+      if (chr[i]==0x0) { return(i); }
    }
    return(i);
 }
@@ -3887,8 +3885,9 @@ extern int file2str(const void* hdl, const char* filename, char** buf, int* bufs
       }
       return -1; // bad args
    }
-   if (*buf==NULL)
+   if (*buf==NULL) {
       *bufsize=0;
+   }
 #if !defined(__USS__) && !defined(__ZOS__) && defined(__FL5__)
       int r=siGetMFNameNative(filename, &filename, NULL);
       if (r && r!=-4) {
@@ -3937,14 +3936,16 @@ extern int file2str(const void* hdl, const char* filename, char** buf, int* bufs
       return -5; // read error
    }
    fclose(pfFile);
-   if (*buf!=NULL) // empty file
+   if (*buf!=NULL) {// empty file
       (*buf)[siLen]='\0';
+   }
    return siLen;
 }
 
 extern int arry2str(char* array[], const int count, const char* separ, const int separLen, char** out, int* outlen) {
-   if (count<0 || array==NULL || out==NULL || outlen==NULL || (separLen>0 && separ==NULL))
+   if (count<0 || array==NULL || out==NULL || outlen==NULL || (separLen>0 && separ==NULL)) {
       return -1; // bad args
+   }
    size_t uiSumLen=((count)*separLen)+1;
    size_t uiLens[count+1];
    char*  pcHlp;
@@ -3967,8 +3968,9 @@ extern int arry2str(char* array[], const int count, const char* separ, const int
    }
 
    if (*outlen<(int)uiSumLen || *out==NULL) {
-      if (uiSumLen < 1)
+      if (uiSumLen < 1) {
          uiSumLen = 4;
+      }
       pcHlp=(char*)realloc_nowarn(*out, uiSumLen);
       if (pcHlp==NULL) {
          return -2; // realloc failed
@@ -4019,8 +4021,8 @@ extern int strxcmp(
                s1++; s2++; i++;
                d=*s1-*s2;
             }
-            if (i<n) return(n-i);
-            if (f && (!isKyw(*s1) || !isKyw(*s2))) return(0);
+            if (i<n) { return(n-i); }
+            if (f && (!isKyw(*s1) || !isKyw(*s2))) { return(0); }
          } else if (c==0) {
             int i=1;
             while (d==0 && *s1!=0 && *s2!=0 && i<n) {
@@ -4033,8 +4035,8 @@ extern int strxcmp(
                s1++; s2++; i++;
                d=*s1-*s2;
             }
-            if (i<n) return(n-i);
-            if (f && (*s1==c || *s2==c)) return(0);
+            if (i<n) { return(n-i); }
+            if (f && (*s1==c || *s2==c)) { return(0); }
          }
          return(d);
       } else {
@@ -4043,7 +4045,7 @@ extern int strxcmp(
                s1++; s2++;
                d=*s1-*s2;
             }
-            if (f && (!isKyw(*s1) || !isKyw(*s2))) return(0);
+            if (f && (!isKyw(*s1) || !isKyw(*s2))) { return(0); }
          } else if (c==0) {
             while (d==0 && *s1!=0 && *s2!=0) {
                s1++; s2++;
@@ -4054,7 +4056,7 @@ extern int strxcmp(
                s1++; s2++;
                d=*s1-*s2;
             }
-            if (f && (*s1==c || *s2==c)) return(0);
+            if (f && (*s1==c || *s2==c)) { return(0); }
          }
          return(d);
       }
@@ -4067,8 +4069,8 @@ extern int strxcmp(
                s1++; s2++; i++;
                d=tolower(*s1)-tolower(*s2);
             }
-            if (i<n) return(n-i);
-            if (f && (!isKyw(*s1) || !isKyw(*s2))) return(0);
+            if (i<n) { return(n-i); }
+            if (f && (!isKyw(*s1) || !isKyw(*s2))) { return(0); }
          } else if (c==0) {
             int i=1;
             while (d==0 && *s1!=0 && *s2!=0 && i<n) {
@@ -4081,8 +4083,8 @@ extern int strxcmp(
                s1++; s2++; i++;
                d=tolower(*s1)-tolower(*s2);
             }
-            if (i<n) return(n-i);
-            if (f && (tolower(*s1)==tolower(c) || tolower(*s2)==tolower(c))) return(0);
+            if (i<n) { return(n-i); }
+            if (f && (tolower(*s1)==tolower(c) || tolower(*s2)==tolower(c))) { return(0); }
          }
          return(d);
       } else {
@@ -4091,7 +4093,7 @@ extern int strxcmp(
                s1++; s2++;
                d=tolower(*s1)-tolower(*s2);
             }
-            if (f && (!isKyw(*s1) || !isKyw(*s2))) return(0);
+            if (f && (!isKyw(*s1) || !isKyw(*s2))) { return(0); }
          } else if (c==0) {
             while (d==0 && *s1!=0 && *s2!=0) {
                s1++; s2++;
@@ -4102,7 +4104,7 @@ extern int strxcmp(
                s1++; s2++;
                d=tolower(*s1)-tolower(*s2);
             }
-            if (f && (tolower(*s1)==tolower(c) || tolower(*s2)==tolower(c))) return(0);
+            if (f && (tolower(*s1)==tolower(c) || tolower(*s2)==tolower(c))) { return(0); }
          }
          return(d);
       }
@@ -4163,9 +4165,9 @@ extern int resetEnvars(TsEnVarList** ppList) {
          TsEnVarList* psHelp=(*ppList);
          (*ppList)=(*ppList)->psNext;
          if (psHelp->pcValue!=NULL) {
-            if (SETENV(psHelp->pcName,psHelp->pcValue)) r--; else c++;
+            if (SETENV(psHelp->pcName,psHelp->pcValue)) { r--; } else { c++; }
          } else {
-            if (UNSETENV(psHelp->pcName)) r--; else c++;
+            if (UNSETENV(psHelp->pcName)) { r--; } else { c++; }
          }
          SAFE_FREE(psHelp->pcName);
          SAFE_FREE(psHelp->pcValue);
@@ -4173,7 +4175,7 @@ extern int resetEnvars(TsEnVarList** ppList) {
       }
       *ppList=NULL;
    }
-   if (r) return(-1*CLERTC_SYS); else return(c);
+   if (r) { return(-1*CLERTC_SYS); } else { return(c); }
 }
 
 #ifdef __EBCDIC__
@@ -4198,13 +4200,13 @@ extern int loadEnvars(const unsigned int uiLen, const char* pcBuf, FILE* pfOut, 
       const char*    pcCmp;
       char*          pcEnv=malloc(uiLen+1);
       // cppcheck-suppress knownConditionTrueFalse
-      if (pcEnv==NULL) return(-1*CLERTC_MEM);
+      if (pcEnv==NULL) { return(-1*CLERTC_MEM); }
 
    // EBCDIC/ASCII detection and conversion to local character set
       for (pcCnt=pcBuf,pcEnd=pcBuf+uiLen;pcCnt<pcEnd && e==0 && a==0;pcCnt++) {
-         if ((unsigned char)(*pcCnt)>=0x80U) x++;
-         if ((unsigned char)(*pcCnt)==0x7EU) e++;
-         if ((unsigned char)(*pcCnt)==0x3DU) a++;
+         if ((unsigned char)(*pcCnt)>=0x80U) { x++; }
+         if ((unsigned char)(*pcCnt)==0x7EU) { e++; }
+         if ((unsigned char)(*pcCnt)==0x3DU) { a++; }
       }
       if (!a && e && x) {
          // cppcheck-suppress knownConditionTrueFalse
@@ -4226,10 +4228,10 @@ extern int loadEnvars(const unsigned int uiLen, const char* pcBuf, FILE* pfOut, 
       pcHlp=pcEnv;
       pcEnd=pcEnv+uiLen;
       while(pcHlp<pcEnd) {
-         while (pcHlp<pcEnd && isspace(*pcHlp)) pcHlp++;
+         while (pcHlp<pcEnd && isspace(*pcHlp)) { pcHlp++; }
          if (pcHlp<pcEnd) {
             pcKey=pcHlp;
-            while(pcHlp<pcEnd && *pcHlp!='=') pcHlp++;
+            while(pcHlp<pcEnd && *pcHlp!='=') { pcHlp++; }
             if (*pcHlp=='=') {
                *pcHlp=0x00; pcHlp++;
                pcTws=pcKey+strlen(pcKey);
@@ -4237,9 +4239,9 @@ extern int loadEnvars(const unsigned int uiLen, const char* pcBuf, FILE* pfOut, 
                   pcTws--; *pcTws=0x00;
                }
                if (pcHlp<pcEnd) {
-                  while(pcHlp<pcEnd && isspace(*pcHlp) && !IS_ENVAR_LE(*pcHlp)) pcHlp++;
+                  while(pcHlp<pcEnd && isspace(*pcHlp) && !IS_ENVAR_LE(*pcHlp)) { pcHlp++; }
                   pcVal=pcHlp;
-                  while(pcHlp<pcEnd && !IS_ENVAR_LE(*pcHlp)) pcHlp++;
+                  while(pcHlp<pcEnd && !IS_ENVAR_LE(*pcHlp)) { pcHlp++; }
                   *pcHlp=0x00; pcHlp++;
                   pcTws=pcVal+strlen(pcVal);
                   while (isspace(*(pcTws-1))) {
