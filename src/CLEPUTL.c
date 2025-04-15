@@ -168,7 +168,7 @@ static inline int flzjsy(const char* pcDat, const int* piSln, char* pcVal, int* 
       char        acMode[strlen(mode)+32];
       char*       pcRecfm;
       const char* pcDefDcb=GETENV("CLP_DEFAULT_DCB");
-      if (pcDefDcb==NULL || *pcDefDcb) { pcDefDcb=DEFAULT_DCB };
+      if (pcDefDcb==NULL || *pcDefDcb) { pcDefDcb=DEFAULT_DCB; }
       strcpy(acMode,mode);
       if ((acMode[0]=='a' && acMode[1]=='b' && acMode[2]=='+') ||
           (acMode[0]=='a' && acMode[1]=='t' && acMode[2]=='+') ||
@@ -219,7 +219,7 @@ static inline int flzjsy(const char* pcDat, const int* piSln, char* pcVal, int* 
           (acMode[0]=='a' && acMode[1]=='+')) {
          acMode[0]='r';
          f=fopen_nowarn(name, acMode);
-         if (f!=NULL) { return(f) };
+         if (f!=NULL) { return(f); }
          acMode[0]='w';
          pcRecfm=strstr(acMode,"recfm=*");
          if (pcRecfm!=NULL) {
