@@ -240,8 +240,8 @@ extern int siCleExecute(
    const TsCleCommand*           psCmd,
    int                           argc,
    char*                         argv[],
-   const char*                   pcOwn,//
-   const char*                   pcPgm,//
+   const char*                   pcOwner,//
+   const char*                   pcProgram,//
    const char*                   pcAut,//
    const char*                   pcAdr,//
    const int                     isCas,//

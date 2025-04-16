@@ -242,9 +242,6 @@
 #define isPrnStr(p,v) ((CLPISF_PWD((p)->psStd->uiFlg) && psHdl->isPwd) ? ("***SECRET***") : (v))
 #define isPrnLen(p,v) (CLPISF_PWD((p)->psStd->uiFlg) ? ((int)0) : (v))
 
-#define GETALI(sym) (((sym)->psStd->psAli!=NULL)?(sym)->psStd->psAli->psStd->pcKyw:NULL)
-#define GETKYW(sym) (((sym)->psStd->psAli!=NULL)?(sym)->psStd->psAli->psStd->pcKyw:(sym)->psStd->pcKyw)
-
 #ifndef realloc_nowarn
 #  define realloc_nowarn      realloc
 #endif
@@ -458,6 +455,9 @@ typedef struct Hdl {
    int                           siPs2;
    int                           siPr3;
 } TsHdl;
+
+static inline const char* GETALI(const TsSym* sym) { return (sym->psStd->psAli != NULL) ? sym->psStd->psAli->psStd->pcKyw : NULL; }
+static inline const char* GETKYW(const TsSym* sym) { return (sym->psStd->psAli != NULL) ? sym->psStd->psAli->psStd->pcKyw : sym->psStd->pcKyw; }
 
 /* Deklaration der internen Funktionen ********************************/
 
@@ -3657,15 +3657,15 @@ extern int siClpLexemes(
    return(CLP_OK);
 }
 
-#define isPrintF(p)     (((p)!=NULL)?(CLPISF_PWD((p)->psStd->uiFlg)==FALSE):(TRUE))
-#define isPrnLex(p,l)   (isPrintF(p)?(l):("***SECRET***"))
-#define isPrintF2(p)    (CLPISF_PWD((p)->psStd->uiFlg)==FALSE)
-#define isPrnLex2(p,l)  (isPrintF2(p)?(l):("***SECRET***"))
-#define isStringChr(c)  ((c)==STRCHR || (c)==SPMCHR || (c)==ALTCHR)
-#define isSeparation(c) (isspace((c)) || iscntrl((c)) || ((c))==',')
-#define isReqStrOpr1(c) ((c)=='=' || (c)=='+' || (c)==')' || (c)==C_SBC || (c)==C_CBC)                          // required string cannot start with this characters
-#define isReqStrOpr2(c) ((c)==';' || (c)==C_HSH)                                                                // required string must end at this
-#define isReqStrOpr3(c) (isReqStrOpr1(c) || (c)=='('  || (c)=='.' || (c)==C_SBO || (c)==C_CBO || isStringChr(c))// required string must end at key word if one of this follows
+static inline int isPrintF(const TsSym* p) { return (p != NULL) ? (CLPISF_PWD(p->psStd->uiFlg) == FALSE) : TRUE; }
+static inline char* isPrnLex(const TsSym* p, char* l) { return (isPrintF(p)) ? l : "***SECRET***"; }
+static inline int isPrintF2(const TsSym* p) { return (CLPISF_PWD(p->psStd->uiFlg)==FALSE); }
+static inline const char* isPrnLex2(const TsSym* p, const char* l) { return (isPrintF2(p)) ? l : "***SECRET***"; }
+static inline int isStringChr(int c) { return (c == STRCHR || c == SPMCHR || c == ALTCHR); }
+static inline int isSeparation(int c) { return (isspace(c) || iscntrl(c) || c == ','); }
+static inline int isReqStrOpr1(int c) { return (c == '=' || c == '+' || c == ')' || c == C_SBC || c == C_CBC); }// required string cannot start with this characters
+static inline int isReqStrOpr2(int c) { return (c == ';' || c == C_HSH); }                                      // required string must end at this
+static inline int isReqStrOpr3(int c) { return (isReqStrOpr1(c) || c == '(' || c == '.' || c == C_SBO || c == C_CBO || isStringChr(c)); }// required string must end at key word if one of this follows
 
 #define LEX_REALLOC do {\
    if (pcLex>=(pcEnd-4)) {\

@@ -797,6 +797,8 @@
 /*! @cond PRIVATE */
 #ifndef INC_CLEPUTL_H
 #define INC_CLEPUTL_H
+#include <ctype.h>
+#include <string.h>
 #ifdef __cplusplus
    extern "C" {
 #endif
@@ -831,10 +833,11 @@
 #define CLEP_DEFAULT_CCSID_EBCDIC    1047 // "IBM-1047"  Open Systems Latin-1
 
 /** Free memory space */
-#define SAFE_FREE(x) do { if ((x) != NULL) {free((void*)(x)); (x)=NULL;} } while(0)
+static inline void do_save_free(void** x) { if (NULL != *x) { free(*x); *x = NULL; } }
+#define SAFE_FREE(x) do_save_free((void**)(&(x)))
 
-#define CHECK_ENVAR_ON(e)     ((e)!=NULL && (strcmp((e),"ON")==0 || strcmp((e),"YES")==0))
-#define CHECK_ENVAR_OFF(e)    ((e)!=NULL && (strcmp((e),"OFF")==0 || strcmp((e),"NO")==0))
+static inline int CHECK_ENVAR_ON(const char* e) { return (e != NULL && (strcmp(e, "ON")==0 || strcmp(e, "YES")==0)); }
+static inline int CHECK_ENVAR_OFF(const char* e) { return (e != NULL && (strcmp(e,"OFF")==0 || strcmp(e,"NO")==0)); }
 
 typedef struct EnVarList {
 /**
@@ -876,15 +879,7 @@ extern int win_unsetenv(const char* name);
 #  define UNSETENV(name)      unsetenv((name))
 #endif
 
-#define isStr(c) (isprint(c) || (c)==C_TLD  || (c)==C_DLR || (c)==C_ATS || (c)==C_BSL || (c)==C_CRT || (c)==C_EXC)
-#define isKyw(c) (isalnum(c) || (c)=='_')
-#define isCon(c) (isKyw(c)   || (c)=='-' || (c)=='/')
 
-#define ISDDNAME(p)     (strlen(p)>3 && toupper((p)[0])=='D' && toupper((p)[1])=='D' && (p)[2]==':')
-#define ISPATHNAME(p)   (strchr((p),'/')!=NULL)
-#define ISDSNAME(p)     (strlen(p)>2 && toupper((p)[0])=='/' && toupper((p)[1])=='/')
-#define ISGDGMBR(m)     ((m)[0]=='0' || (m)[0]=='+' || (m)[0]=='-')
-#define ISDDN(c)        (isalnum(c) || (c)==C_DLR || (c)==C_HSH || (c)==C_ATS)
 
 extern FILE* fopen_hfq(const char* name, const char* mode);
 extern FILE* fopen_hfq_nowarn(const char* name, const char* mode);
@@ -1253,7 +1248,7 @@ extern unsigned int localccsid(void);
  * @param isEBCDIC if true returns EBCDIC code pages else ASCII
  * @return NULL in case of an error or pointer to a static string containing the CCSID
  */
-extern const char* mapl2c(unsigned isEBCDIC);
+extern const char* mapl2c(unsigned int isEBCDIC);
 
 /**
  * Map environment variable LANG to CCSID
@@ -1261,7 +1256,7 @@ extern const char* mapl2c(unsigned isEBCDIC);
  * @param isEbcdic if true returns EBCDIC code pages else ASCII
  * @return NULL in case of an error or pointer to a static string containing the CCSID
  */
-extern const char* lng2ccsd(const char* pcLang, unsigned isEbcdic);
+extern const char* lng2ccsd(const char* pcLang, unsigned int isEbcdic);
 
 /**
  * Map CCSID in encoding string
@@ -1634,6 +1629,16 @@ extern const char*   init_string(const char* p);
 #  define efprintf   fprintf
 
 #endif
+
+static inline int isStr(int c) { return (isprint(c) || c==C_TLD  || c==C_DLR || c==C_ATS || c==C_BSL || c==C_CRT || c==C_EXC); }
+static inline int isKyw(int c) { return (isalnum(c) || c=='_'); }
+static inline int isCon(int c) { return (isKyw(c)   || c=='-' || c=='/'); }
+
+static inline int ISDDNAME(const char* p)   { return (strlen(p) > 3 && toupper(p[0])=='D' && toupper(p[1])=='D' && p[2]==':'); }
+static inline int ISPATHNAME(const char* p) { return (strchr(p, '/') != NULL); }
+static inline int ISDSNAME(const char* p)   { return (strlen(p) > 2 && toupper(p[0])=='/' && toupper(p[1])=='/'); }
+static inline int ISGDGMBR(const char* m)   { return (m[0]=='0' || m[0]=='+' || m[0]=='-'); }
+static inline int ISDDN(int c)              { return (isalnum(c) || c==C_DLR || c==C_HSH || c==C_ATS); }
 
 /**********************************************************************/
 

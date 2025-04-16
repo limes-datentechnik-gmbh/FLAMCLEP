@@ -106,17 +106,17 @@
  * @{
  */
 #define CLP_OK                    0                       /**< @brief Return code for a successful parsing: 0, otherwize > 0. */
-#define CLPERR_LEX               -1                       /**< @brief Lexical error (determined by scanner). */
-#define CLPERR_SYN               -2                       /**< @brief Syntax error (determined by parser). */
-#define CLPERR_SEM               -3                       /**< @brief Semantic error (determined by builder). */
-#define CLPERR_TYP               -4                       /**< @brief Type error (internal error with argument types). */
-#define CLPERR_TAB               -5                       /**< @brief Table error (internal error with argument tables). */
-#define CLPERR_SIZ               -6                       /**< @brief Size error (internal error with argument tables and data structures). */
-#define CLPERR_PAR               -7                       /**< @brief Parameter error (internal error with argument tables and data structures). */
-#define CLPERR_MEM               -8                       /**< @brief Memory error (internal error with argument tables and data structures). */
-#define CLPERR_INT               -9                       /**< @brief Internal error (internal error with argument tables and data structures). */
-#define CLPERR_SYS               -10                      /**< @brief System error (internal error with argument tables and data structures). */
-#define CLPERR_AUT               -11                      /**< @brief Authorization request failed. */
+#define CLPERR_LEX               (-1)                     /**< @brief Lexical error (determined by scanner). */
+#define CLPERR_SYN               (-2)                     /**< @brief Syntax error (determined by parser). */
+#define CLPERR_SEM               (-3)                     /**< @brief Semantic error (determined by builder). */
+#define CLPERR_TYP               (-4)                     /**< @brief Type error (internal error with argument types). */
+#define CLPERR_TAB               (-5)                     /**< @brief Table error (internal error with argument tables). */
+#define CLPERR_SIZ               (-6)                     /**< @brief Size error (internal error with argument tables and data structures). */
+#define CLPERR_PAR               (-7)                     /**< @brief Parameter error (internal error with argument tables and data structures). */
+#define CLPERR_MEM               (-8)                     /**< @brief Memory error (internal error with argument tables and data structures). */
+#define CLPERR_INT               (-9)                     /**< @brief Internal error (internal error with argument tables and data structures). */
+#define CLPERR_SYS               (-10)                    /**< @brief System error (internal error with argument tables and data structures). */
+#define CLPERR_AUT               (-11)                    /**< @brief Authorization request failed. */
 #define CLPSRC_CMD               ":command line:"         /**< @brief From command line*/
 #define CLPSRC_PRO               ":property list:"        /**< @brief From property list*/
 #define CLPSRC_DEF               ":default value:"        /**< @brief From default value*/
@@ -161,7 +161,7 @@ typedef struct ClpError {
 #define CLPTYP_STRING            4   /**< @brief String literal (binary (HEX, ASCII, EBCDIC, CHARS) or null-terminated (default)). */
 #define CLPTYP_OBJECT            5   /**< @brief Object (KEYWORD(parameter_list)) can contain arbitrary list of other types. */
 #define CLPTYP_OVRLAY            6   /**< @brief Overlay (KEYWORD.KEYWORD...) contains one of its list as in a C union. */
-#define CLPTYP_XALIAS           -1   /**< @brief For alias definition (used in the corresponding table macro)*/
+#define CLPTYP_XALIAS           (-1) /**< @brief For alias definition (used in the corresponding table macro)*/
 /** @} */
 
 /**
@@ -338,7 +338,7 @@ typedef struct ClpArgument {
  *
  * @param[in]  name   Name of this table\n
  */
-#define CLPCONTAB_OPN(name)      TsClpArgument name[]
+#define CLPCONTAB_OPN(name)      TsClpArgument (name)[]
 
 /**
  *
@@ -459,7 +459,7 @@ typedef struct ClpArgument {
  *
  * @param[in]  name   Name of this table\n
  */
-#define CLPENVTAB_OPN(name)      TsClpArgument name[]
+#define CLPENVTAB_OPN(name)      TsClpArgument (name)[]
 
 /**
  * @brief Defines a environment variable list entry.
@@ -596,9 +596,9 @@ typedef int (TfClpPrintPage)(
 #define CLPISF_LAB(flg)          ((flg)&CLPFLG_LAB)
 #define CLPISF_UPP(flg)          ((flg)&CLPFLG_UPP)
 #define CLPISF_LOW(flg)          ((flg)&CLPFLG_LOW)
-#define CLPISF_LNK(flg)          (CLPISF_CNT(flg) ||  CLPISF_OID(flg) || CLPISF_IND(flg) ||  CLPISF_ELN(flg) || CLPISF_SLN(flg) ||  CLPISF_TLN(flg))
-#define CLPISF_ARG(flg)          ((!CLPISF_LNK(flg)) && (!CLPISF_CON(flg)) && (!CLPISF_ALI(flg)))
-#define CLPISF_ENT(flg)          ((!CLPISF_LNK(flg)) && (!CLPISF_ALI(flg)))
+static inline int CLPISF_LNK(int flg) { return (CLPISF_CNT(flg) ||  CLPISF_OID(flg) || CLPISF_IND(flg) || CLPISF_ELN(flg) || CLPISF_SLN(flg) || CLPISF_TLN(flg)); }
+static inline int CLPISF_ARG(int flg) { return (!CLPISF_LNK(flg) && !CLPISF_CON(flg) && !CLPISF_ALI(flg)); }
+static inline int CLPISF_ENT(int flg) { return (!CLPISF_LNK(flg) && !CLPISF_ALI(flg)); }
 
 #define CLPSYM_NON               0x00000000U   /**< @brief No operation done*/
 #define CLPSYM_ROOT              0x00000001U   /**< @brief Go to symbol table root */

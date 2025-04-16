@@ -834,24 +834,24 @@ extern const char* init_string(const char* p) {
    return(p);
 }
 
-#define RPLDIAC(str) {                            \
-   for (char* p=(str); *p; p++) {                 \
-      switch (*p) {                               \
-      case '!' : *p=C_EXC; break;/*nodiac*/       \
-      case '$' : *p=C_DLR; break;/*nodiac*/       \
-      case '#' : *p=C_HSH; break;/*nodiac*/       \
-      case '@' : *p=C_ATS; break;/*nodiac*/       \
-      case '[' : *p=C_SBO; break;/*nodiac*/       \
-      case '\\': *p=C_BSL; break;/*nodiac*/       \
-      case ']' : *p=C_SBC; break;/*nodiac*/       \
-      case '^' : *p=C_CRT; break;/*nodiac*/       \
-      case '`' : *p=C_GRV; break;/*nodiac*/       \
-      case '{' : *p=C_CBO; break;/*nodiac*/       \
-      case '|' : *p=C_VBR; break;/*nodiac*/       \
-      case '}' : *p=C_CBC; break;/*nodiac*/       \
-      case '~' : *p=C_TLD; break;/*nodiac*/       \
-      }                                           \
-   }                                              \
+static inline void RPLDIAC(char* str) {
+   for (char* p=(str); *p; p++) {
+      switch (*p) {
+      case '!' : *p=C_EXC; break;/*nodiac*/
+      case '$' : *p=C_DLR; break;/*nodiac*/
+      case '#' : *p=C_HSH; break;/*nodiac*/
+      case '@' : *p=C_ATS; break;/*nodiac*/
+      case '[' : *p=C_SBO; break;/*nodiac*/
+      case '\\': *p=C_BSL; break;/*nodiac*/
+      case ']' : *p=C_SBC; break;/*nodiac*/
+      case '^' : *p=C_CRT; break;/*nodiac*/
+      case '`' : *p=C_GRV; break;/*nodiac*/
+      case '{' : *p=C_CBO; break;/*nodiac*/
+      case '|' : *p=C_VBR; break;/*nodiac*/
+      case '}' : *p=C_CBC; break;/*nodiac*/
+      case '~' : *p=C_TLD; break;/*nodiac*/
+      }
+   }
 }
 
 extern int ebcdic_srprintc(char** buffer, size_t* size, const size_t expansion, const char* format, ...) {
@@ -947,7 +947,6 @@ extern int ebcdic_fprintf(FILE* file, const char* format, ...) {
 #ifdef __WIN__
 #undef _WIN32_IE
 #define _WIN32_IE 0x5000
-#include <windows.h>
 #include <shlobj.h>
 #include <versionhelpers.h>
 
@@ -1616,7 +1615,7 @@ extern unsigned int localccsid(void) {
    return ccsid;
 }
 
-extern const char* mapl2c(unsigned isEBCDIC) {
+extern const char* mapl2c(unsigned int isEBCDIC) {
    const char* pcPtr=NULL;
    const char* pcEnv=GETENV("LANG");
    if (pcEnv!=NULL && *pcEnv) {
@@ -1641,7 +1640,7 @@ extern const char* mapl2c(unsigned isEBCDIC) {
    return(NULL);
 }
 
-extern const char* lng2ccsd(const char* pcLang, unsigned isEbcdic) {
+extern const char* lng2ccsd(const char* pcLang, unsigned int isEbcdic) {
    char        pcLngCpy[2];
    const char* pcPtr =NULL;
    int         isEuro=FALSE;
@@ -3024,6 +3023,10 @@ extern const char* prsdstr(const char** hdl, const char* str, int len)
 
 extern size_t strlcpy(char *dest, const char *src, size_t n)
 {
+   if (n == 0) {
+      dest[0]='\0';
+      return 0;
+   }
    size_t len = strlen(src);
    if (len>n-1) {   len=n-1; }
    memmove(dest, src, len);
@@ -3033,16 +3036,15 @@ extern size_t strlcpy(char *dest, const char *src, size_t n)
 
 extern size_t strlcpy_null(char *dest, const char *src, size_t n)
 {
-   if (src!=NULL) {
-      size_t len = strlen(src);
-      if (len>n-1) {    len=n-1; }
-      memmove(dest, src, len);
-      dest[len]='\0';
-      return len;
-   } else {
+   if (src == NULL || n == 0) {
       dest[0]='\0';
       return 0;
    }
+   size_t len = strlen(src);
+   if (len>n-1) {    len=n-1; }
+   memmove(dest, src, len);
+   dest[len]='\0';
+   return len;
 }
 
 extern int printd(const char* format,...)
@@ -3064,7 +3066,7 @@ extern int printd(const char* format,...)
 extern int snprintc(char* buffer,size_t size,const char* format,...)
 {
    unsigned int h = strlen(buffer);
-   if (size >= (h+1)) {
+   if (size > h) {
       int      r;
       va_list  argv;
       va_start(argv, format);
@@ -3082,6 +3084,9 @@ extern int srprintc(char** buffer,size_t* size,const size_t expansion,const char
    int      r;
    size_t   h=(*buffer!=NULL)?strlen(*buffer):0;
    size_t   s=h+strlen(format)+expansion+1;
+   if (s < h || s < expansion) { // overflow
+      return -1;
+   }
    if ((*size)<s || *buffer==NULL) {
       s=(*size>s)?*size:2*s;
       char* b=(char*)realloc_nowarn(*buffer,s);
@@ -3099,7 +3104,11 @@ extern int srprintf(char** buffer,size_t* size,const size_t expansion,const char
 {
    va_list  argv;
    int      r;
-   size_t   s=strlen(format)+expansion+1;
+   size_t   flen = strlen(format);
+   size_t   s=flen+expansion+1;
+   if (s < flen || s < expansion) {
+      return -1;
+   }
    if ((*size)<s || *buffer==NULL) {
       s=(*size>s)?*size:2*s;
       char* b=(char*)realloc_nowarn(*buffer,s);
