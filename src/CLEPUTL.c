@@ -855,7 +855,6 @@ static inline void RPLDIAC(char* str) {
 }
 
 extern int ebcdic_srprintc(char** buffer, size_t* size, const size_t expansion, const char* format, ...) {
-
    va_list  argv;
    int      r;
    size_t   h=(*buffer!=NULL)?strlen(*buffer):0;
