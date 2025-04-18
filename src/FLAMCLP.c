@@ -852,10 +852,15 @@ static const char* fpcPat(
 
 static inline int CLPERR(TsHdl* psHdl,int siErr, char* pcMsg, ...) {
    va_list              argv;
-   int                  f=FALSE;
+   int                  r,f=FALSE;
    const char*          pcErr=pcClpErr(siErr);
-   char                 acMsg[1024];
-   va_start(argv,pcMsg); vsnprintf(acMsg,sizeof(acMsg),pcMsg,argv); va_end(argv);
+   char                 acMsg[1024]="";
+   va_start(argv,pcMsg);
+   r=vsnprintf(acMsg,sizeof(acMsg),pcMsg,argv);
+   if (r>=sizeof(acMsg)) {
+      acMsg[sizeof(acMsg)-1]=0x00;
+   }
+   va_end(argv);
    srprintf(&psHdl->pcMsg,&psHdl->szMsg,strlen(pcErr)+strlen(acMsg),"%s: %s",pcErr,acMsg);
    psHdl->siErr=siErr;
    if (psHdl->pcRow!=NULL && psHdl->pcOld>=psHdl->pcRow) {
@@ -2648,9 +2653,14 @@ extern void vdClpClose(
 
 static const char* get_env(char* var,const size_t size,const char* fmtstr, ...)
 {
-   int                  i;
+   int                  i,r;
    va_list              argv;
-   va_start(argv,fmtstr); vsnprintf(var,size,fmtstr,argv); va_end(argv);
+   va_start(argv,fmtstr);
+   r=vsnprintf(var,size,fmtstr,argv);
+   va_end(argv);
+   if (r>=size) {
+      var[size-1]=0x00;
+   }
    for (i=0;var[i];i++) {
       var[i]=toupper(var[i]);
       if (var[i]=='.') { var[i]='_'; }
