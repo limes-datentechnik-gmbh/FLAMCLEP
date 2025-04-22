@@ -1635,7 +1635,14 @@ static inline int isKyw(int c) { return (isalnum(c) || c=='_'); }
 static inline int isCon(int c) { return (isKyw(c)   || c=='-' || c=='/'); }
 
 static inline int ISDDNAME(const char* p)   { return (strlen(p) > 3 && toupper(p[0])=='D' && toupper(p[1])=='D' && p[2]==':'); }
-static inline int ISPATHNAME(const char* p) { return (strchr(p, '/') != NULL); }
+static inline int ISPATHNAME(const char* p) {
+   const char* h=strchr(p, '/');
+   if (h!=NULL) {
+      return(TRUE);
+   } else {
+      return(FALSE);
+   }
+}
 static inline int ISDSNAME(const char* p)   { return (strlen(p) > 2 && toupper(p[0])=='/' && toupper(p[1])=='/'); }
 static inline int ISGDGMBR(const char* m)   { return (m[0]=='0' || m[0]=='+' || m[0]=='-'); }
 static inline int ISDDN(int c)              { return (isalnum(c) || c==C_DLR || c==C_HSH || c==C_ATS); }
