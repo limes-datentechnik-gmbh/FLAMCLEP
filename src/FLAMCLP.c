@@ -4484,7 +4484,7 @@ static int siClpScnNat(
             return(CLPTOK_SUB);
          } else {
             if (pcOld!=NULL && !isClpKywVal(psHdl,pfErr,pfTrc,pcHlp,psArg,ppVal)) {
-               *pcZro=0x00;
+               if (pcZro!=NULL) *pcZro=0x00;
                *ppCur=pcOld;
             }
             TRACE(pfTrc,"SCANNER-TOKEN(KYW)-LEXEME(%s)-DEFINED\n",pcHlp);
@@ -4564,7 +4564,7 @@ static int siClpScnNat(
          }
          *pcLex=EOS;
          if (pcOld!=NULL && !isClpKywVal(psHdl,pfErr,pfTrc,pcHlp,psArg,ppVal)) {
-            *pcZro=0x00;
+            if (pcZro!=NULL) *pcZro=0x00;
             *ppCur=pcOld;
          }
          TRACE(pfTrc,"SCANNER-TOKEN(KYW)-LEXEME(%s)-SIMPLE\n",pcHlp);
