@@ -69,8 +69,13 @@ static inline int flzjsy(const char* pcDat, const int* piSln, char* pcVal, int* 
 #  include "mfinit.h"
 #endif
 
-#if defined(__DEBUG__) && defined(__FL5__)
-#  include "CHKMEM.h"
+#ifdef __FL5__
+#  include "GBLSTD.h"
+#else
+#  undef  flclose
+#  define flclose  fclose
+#  undef  flflush
+#  define flflush  fflush
 #endif
 #include "CLEPUTL.h"
 
@@ -193,7 +198,7 @@ static inline int flzjsy(const char* pcDat, const int* piSln, char* pcVal, int* 
                   acMode[0]='r';
                   f=fopen(name, acMode);
                   if (f!=NULL) {
-                     fclose(f);
+                     flclose(f);
                      acMode[0]=m;
                      pcRecfm[0]=r;
                   } else {
@@ -237,7 +242,7 @@ static inline int flzjsy(const char* pcDat, const int* piSln, char* pcVal, int* 
                   acMode[0]='r';
                   f=fopen_nowarn(name, acMode);
                   if (f!=NULL) {
-                     fclose(f);
+                     flclose(f);
                      acMode[0]=m;
                      pcRecfm[0]=r;
                   } else {
@@ -368,7 +373,7 @@ static inline int flzjsy(const char* pcDat, const int* piSln, char* pcVal, int* 
       char     fn[FILENAME_MAX]="";
       fldata_t fi={0};
       fldata((fp),fn,&fi);
-      r=fclose((fp));
+      r=flclose((fp));
       remove(fn);
       return(r);
    }
@@ -3054,7 +3059,7 @@ extern int printd(const char* format,...)
    va_start(argv, format);
    r=vfprintf (stderr, format, argv );
    va_end(argv);
-   fflush(stderr);
+   flflush(stderr);
    return r;
 #else
    (void)format;
@@ -3919,7 +3924,7 @@ extern int file2str(const void* hdl, const char* filename, char** buf, int* bufs
             if (errmsg!=NULL && msgsiz) {
                snprintf(errmsg,msgsiz,"File (%s) is too big (integer overflow)",filename);
             }
-            fclose(pfFile);
+            flclose(pfFile);
             return -3; // integer overflow
          }
          siHlp=*bufsize+freadLen*2+1;
@@ -3928,7 +3933,7 @@ extern int file2str(const void* hdl, const char* filename, char** buf, int* bufs
             if (errmsg!=NULL && msgsiz) {
                snprintf(errmsg,msgsiz,"Allocation of memory to read file (%s) failed",filename);
             }
-            fclose(pfFile);
+            flclose(pfFile);
             return -4; // realloc failed
          }
          *bufsize=siHlp;
@@ -3940,10 +3945,10 @@ extern int file2str(const void* hdl, const char* filename, char** buf, int* bufs
       if (errmsg!=NULL && msgsiz) {
          snprintf(errmsg,msgsiz,"Read of file (%s) to string in memory failed (%d - %s)",filename,errno,strerror(errno));
       }
-      fclose(pfFile);
+      flclose(pfFile);
       return -5; // read error
    }
-   fclose(pfFile);
+   flclose(pfFile);
    if (*buf!=NULL) {// empty file
       (*buf)[siLen]='\0';
    }
@@ -4383,7 +4388,7 @@ extern int readEnvars(const char* pcFil, FILE* pfOut, FILE* pfErr, TsEnVarList**
 // read the file into buffer
       // cppcheck-suppress knownConditionTrueFalse
       if (pcBuf==NULL) {
-         fclose(pfTmp);
+         flclose(pfTmp);
          return(-1*CLERTC_MEM);
       }
       uiLen=fread(pcBuf+uiPos,1,4096,pfTmp);
@@ -4392,7 +4397,7 @@ extern int readEnvars(const char* pcFil, FILE* pfOut, FILE* pfErr, TsEnVarList**
          pcHlp=realloc(pcBuf,uiSiz+1);
          if (pcHlp==NULL) {
             free(pcBuf);
-            fclose(pfTmp);
+            flclose(pfTmp);
             return(-1*CLERTC_MEM);
          }
          pcBuf=pcHlp; uiPos+=uiLen;
@@ -4404,7 +4409,7 @@ extern int readEnvars(const char* pcFil, FILE* pfOut, FILE* pfErr, TsEnVarList**
       }
       uiLen+=uiPos;
       pcBuf[uiLen]=0x00;
-      fclose(pfTmp);
+      flclose(pfTmp);
       // load the environment
       c=loadEnvars(uiLen,pcBuf,pfOut,pfErr,ppList);
       free(pcBuf);

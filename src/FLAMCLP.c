@@ -39,9 +39,14 @@
 #include <stdarg.h>
 #include <locale.h>
 
-#if defined(__DEBUG__) && defined(__FL5__)
+#ifdef __FL5__
 //#  define __HEAP_STATISTIC__
-#  include "CHKMEM.h"
+#  include "GBLSTD.h"
+#else
+#  undef  flclose
+#  define flclose  fclose
+#  undef  flflush
+#  define flflush  fflush
 #endif
 #include "CLEPUTL.h"
 /* Include der Schnittstelle ******************************************/
@@ -251,7 +256,7 @@
       char acTs[24];\
       fprintf((f), "%s ", cstime(0, acTs));\
       efprintf((f), __VA_ARGS__);\
-      fflush((f));\
+      flflush((f));\
    }\
 } while (0)
 
@@ -3494,7 +3499,7 @@ static void vdClpSymPrn(
             cstime(0,acTs),fpcPre(psHdl,siLev),psHlp->psStd->siPos+1,psHlp->psStd->pcKyw,psHlp->psStd->siKwl,pcMapClpTyp(psHlp->psFix->siTyp),psHlp->psFix->siMin,psHlp->psFix->siMax,psHlp->psFix->siSiz,
             psHlp->psFix->siOfs,psHlp->psFix->siOid,psHlp->psStd->uiFlg,psHlp->psNxt,psHlp->psBak,psHlp->psDep,psHlp->psHih,psHlp->psStd->psAli,psHlp->psFix->psCnt,psHlp->psFix->psOid,
             psHlp->psFix->psInd,psHlp->psFix->psEln,psHlp->psFix->psSln,psHlp->psFix->psTln,psHlp->psFix->psLnk,psHlp->psFix->pcHlp);
-         fflush(psHdl->pfSym);
+         flflush(psHdl->pfSym);
       }
       if (psHlp->psDep!=NULL) {
          vdClpSymPrn(psHdl,siLev+1,psHlp->psDep);
@@ -3509,10 +3514,10 @@ static void vdClpSymTrc(
    if (psHdl->pfSym!=NULL) {
       char acTs[24];
       fprintf(psHdl->pfSym,"%s BEGIN-SYMBOL-TABLE-TRACE\n",cstime(0,acTs));
-      fflush(psHdl->pfSym);
+      flflush(psHdl->pfSym);
       vdClpSymPrn(psHdl,0,psHdl->psTab);
       fprintf(psHdl->pfSym,"%s END-SYMBOL-TABLE-TRACE\n",cstime(0,acTs));
-      fflush(psHdl->pfSym);
+      flflush(psHdl->pfSym);
    }
 }
 

@@ -891,7 +891,7 @@ extern long long getFileSize(const char* name);
    extern int   remove_hfq(const char* name);
 #else
 #  define fopen_tmp()            tmpfile()
-#  define fclose_tmp(fp)         fclose((fp))
+#  define fclose_tmp(fp)         flclose((fp))
 #  define remove_hfq(n)          remove(n)
 #endif
 
