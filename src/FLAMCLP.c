@@ -47,6 +47,14 @@
 #  define flclose  fclose
 #  undef  flflush
 #  define flflush  fflush
+#  undef  flstrtoi
+#  define flstrtoi(s,b) ((signed long int)strtol((s),NULL,(b)))
+#  undef  flstrtou
+#  define flstrtou(s,b) ((unsigned long int)strtol((s),NULL,(b)))
+#  undef  flstrtoil
+#  define flstrtoil(s,b) ((signed long long int)strtol((s),NULL,(b)))
+#  undef  flstrtoul
+#  define flstrtoul(s,b) ((unsigned long long int)strtol((s),NULL,(b)))
 #endif
 #include "CLEPUTL.h"
 /* Include der Schnittstelle ******************************************/
@@ -4609,7 +4617,7 @@ static int siClpScnNat(
             tm.tm_hour=0;
             tm.tm_min=0;
             tm.tm_sec=0;
-            tm.tm_year=strtol(pcHlp+2,NULL,10);
+            tm.tm_year=flstrtoi(pcHlp+2,10);
             if ((*ppCur)[0]=='/' && isdigit((*ppCur)[1])) {
                pcLex=pcHlp+2; (*ppCur)++;
                while (isdigit(*(*ppCur))) {
@@ -4618,7 +4626,7 @@ static int siClpScnNat(
                   (*ppCur)++; pcLex++;
                }
                *pcLex=EOS;
-               tm.tm_mon=strtol(pcHlp+2,NULL,10);
+               tm.tm_mon=flstrtoi(pcHlp+2,10);
                if ((*ppCur)[0]=='/' && isdigit((*ppCur)[1])) {
                   pcLex=pcHlp+2; (*ppCur)++;
                   while (isdigit(*(*ppCur))) {
@@ -4627,7 +4635,7 @@ static int siClpScnNat(
                      (*ppCur)++; pcLex++;
                   }
                   *pcLex=EOS;
-                  tm.tm_mday=strtol(pcHlp+2,NULL,10);
+                  tm.tm_mday=flstrtoi(pcHlp+2,10);
                   if ((*ppCur)[0]=='.' && isdigit((*ppCur)[1])) {
                      pcLex=pcHlp+2; (*ppCur)++;
                      while (isdigit(*(*ppCur))) {
@@ -4636,7 +4644,7 @@ static int siClpScnNat(
                         (*ppCur)++; pcLex++;
                      }
                      *pcLex=EOS;
-                     tm.tm_hour=strtol(pcHlp+2,NULL,10);
+                     tm.tm_hour=flstrtoi(pcHlp+2,10);
                      if ((*ppCur)[0]==':' && isdigit((*ppCur)[1])) {
                         pcLex=pcHlp+2; (*ppCur)++;
                         while (isdigit(*(*ppCur))) {
@@ -4645,7 +4653,7 @@ static int siClpScnNat(
                            (*ppCur)++; pcLex++;
                         }
                         *pcLex=EOS;
-                        tm.tm_min=strtol(pcHlp+2,NULL,10);
+                        tm.tm_min=flstrtoi(pcHlp+2,10);
                         if ((*ppCur)[0]==':' && isdigit((*ppCur)[1])) {
                            pcLex=pcHlp+2; (*ppCur)++;
                            while (isdigit(*(*ppCur))) {
@@ -4654,7 +4662,7 @@ static int siClpScnNat(
                               (*ppCur)++; pcLex++;
                            }
                            *pcLex=EOS;
-                           tm.tm_sec=strtol(pcHlp+2,NULL,10);
+                           tm.tm_sec=flstrtoi(pcHlp+2,10);
                         }
                      }
                   }
