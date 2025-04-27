@@ -2775,22 +2775,24 @@ static TsSym* psClpSymIns(
       }
       strcpy(psSym->psFix->pcPro,pcEnv);
       psSym->psFix->pcDft=psSym->psFix->pcPro;
-      psSym->psFix->pcSrc=malloc(strlen(CLPSRC_ENV)+strlen(acVar)+1);
+      const size_t szSrc=strlen(CLPSRC_ENV)+strlen(acVar)+1;
+      psSym->psFix->pcSrc=malloc(szSrc);
       if (psSym->psFix->pcSrc==NULL) {
          CLPERR(psHdl,CLPERR_MEM,"Allocation of memory for symbol element source '%s.%s' failed",pcPat,psArg->pcKyw);
          ERROR(psSym);
       }
-      sprintf(psSym->psFix->pcSrc,"%s%s",CLPSRC_ENV,acVar);
+      snprintf(psSym->psFix->pcSrc,szSrc,"%s%s",CLPSRC_ENV,acVar);
       psSym->psFix->siRow=1;
    } else {
       psSym->psFix->pcDft=psArg->pcDft;
       if (psArg->pcDft!=NULL) {
-         psSym->psFix->pcSrc=malloc(strlen(CLPSRC_DEF)+strlen(pcPat)+strlen(psArg->pcKyw)+2);
+         const size_t szSrc=strlen(CLPSRC_DEF)+strlen(pcPat)+strlen(psArg->pcKyw)+2;
+         psSym->psFix->pcSrc=malloc(szSrc);
          if (psSym->psFix->pcSrc==NULL) {
             CLPERR(psHdl,CLPERR_MEM,"Allocation of memory for symbol element source '%s.%s' failed",pcPat,psArg->pcKyw);
             ERROR(psSym);
          }
-         sprintf(psSym->psFix->pcSrc,"%s%s.%s",CLPSRC_DEF,pcPat,psArg->pcKyw);
+         snprintf(psSym->psFix->pcSrc,szSrc,"%s%s.%s",CLPSRC_DEF,pcPat,psArg->pcKyw);
          psSym->psFix->siRow=1;
       }
    }
@@ -4704,7 +4706,17 @@ static int siClpScnNat(
                if (tm.tm_isdst>0) { t-=60*60; }//correct daylight saving time
             }
             pcHlp[1]='+';
-            sprintf(pcHlp+2,"%"PRIu64"",(U64)t);
+            const ssize_t szRst=pcEnd-(pcHlp+2);
+            if (szRst>0) {
+               int e=(snprintf)(pcHlp+2,szRst,"%"PRIu64"",(U64)t);
+               if (e<0 || e>=szRst) {
+                  return CLPERR(psHdl,CLPERR_LEX,"The given time value (0t%4.4d/%2.2d/%2.2d.%2.2d:%2.2d:%2.2d (%"PRIu64")) cannot be stored (%d)",(U64)t,(I32)szRst,
+                                                 tm.tm_year+1900,tm.tm_mon+1,tm.tm_mday,tm.tm_hour,tm.tm_min,tm.tm_sec);
+               }
+            } else {
+               return CLPERR(psHdl,CLPERR_LEX,"The given time value (0t%4.4d/%2.2d/%2.2d.%2.2d:%2.2d:%2.2d (%"PRIu64")) cannot be stored (%d)",(U64)t,(I32)szRst,
+                                              tm.tm_year+1900,tm.tm_mon+1,tm.tm_mday,tm.tm_hour,tm.tm_min,tm.tm_sec);
+            }
             TRACE(pfTrc,"SCANNER-TOKEN(NUM)-LEXEME(%s)-TIME\n",isPrnLex(psArg,pcHlp));
             if (psArg!=NULL) { psArg->psStd->uiFlg|=CLPFLG_TIM; }
             return(CLPTOK_NUM);

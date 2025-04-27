@@ -1970,7 +1970,7 @@ EVALUATE:
                   if (siErr) {
                      ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
                   }
-                  sprintf(acPat,"%s.%s",pcDef,argv[2]);
+                  snprintf(acPat,sizeof(acPat),"%s.%s",pcDef,argv[2]);
                   if (pfOut!=NULL) { fprintf(pfOut,"Syntax for argument '%s':\n",acPat); }
                   vdPrnCommandSyntax(pvHdl,pfStd,argv[0],acPat,pcDep,siDep);
                   ERROR(CLERTC_OK,NULL);
@@ -2091,7 +2091,7 @@ EVALUATE:
                   if (siErr) {
                      ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
                   }
-                  sprintf(acPat,"%s.%s",psCmd[i].pcKyw,argv[2]);
+                  snprintf(acPat,sizeof(acPat),"%s.%s",psCmd[i].pcKyw,argv[2]);
                   if (pfOut!=NULL) { fprintf(pfOut,"Help for argument '%s': %s\n",acPat,pcClpInfo(pvHdl,acPat)); }
                   vdPrnCommandHelp(pvHdl,acPat,siDep,siDep>9,TRUE);
                   if (siDep==0) {
@@ -2232,7 +2232,7 @@ EVALUATE:
                   if (siErr) {
                      ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
                   }
-                  sprintf(acPat,"%s.%s",pcDef,pcCmd);
+                  snprintf(acPat,sizeof(acPat),"%s.%s",pcDef,pcCmd);
                   if (pfOut!=NULL) { fprintf(pfOut,"Manual page fo'argument '%s':\n\n",acPat); }
                   vdPrnCommandManpage(pvHdl,pfDoc,pcCmdNum,acPat,i,isMan,TRUE);
                   if (isMan==TRUE) {
@@ -2390,7 +2390,7 @@ EVALUATE:
                         ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
                      }
                      snprintf(acNum,sizeof(acNum),"%s%d.",pcCmdNum,i+1);
-                     sprintf(acPat,"%s.%s",pcDef,pcCmd);
+                     snprintf(acPat,sizeof(acPat),"%s.%s",pcDef,pcCmd);
                      siErr=siClpDocu(pvHdl,pfDoc,acPat,acNum,"Command",TRUE,TRUE,FALSE,FALSE,isNbr,FALSE,TRUE,0);
                      if (siErr<0) {
                         if (pfErr!=NULL) { fprintf(pfErr,"Creation of documentation file (%s) failed (%d - %s)\n",pcFil,errno,strerror(errno)); }
@@ -2890,7 +2890,7 @@ EVALUATE:
                   if (siErr) {
                      ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
                   }
-                  sprintf(acPat,"%s.%s",pcDef,argv[2]);
+                  snprintf(acPat,sizeof(acPat),"%s.%s",pcDef,argv[2]);
                   if (pfOut!=NULL) { fprintf(pfOut,"Properties for argument '%s':\n",acPat); }
                   vdPrnProperties(pvHdl,acPat,siDep);
                   ERROR(CLERTC_OK,NULL);
