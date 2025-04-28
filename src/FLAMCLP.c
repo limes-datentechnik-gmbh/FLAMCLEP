@@ -38,6 +38,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <locale.h>
+#include <limits.h>
 
 #ifdef __FL5__
 //#  define __HEAP_STATISTIC__
@@ -47,14 +48,14 @@
 #  define flclose  fclose
 #  undef  flflush
 #  define flflush  fflush
-#  undef  flstrtoi
-#  define flstrtoi(s,b) ((signed long int)strtol((s),NULL,(b)))
-#  undef  flstrtou
-#  define flstrtou(s,b) ((unsigned long int)strtol((s),NULL,(b)))
-#  undef  flstrtoil
-#  define flstrtoil(s,b) ((signed long long int)strtol((s),NULL,(b)))
-#  undef  flstrtoul
-#  define flstrtoul(s,b) ((unsigned long long int)strtol((s),NULL,(b)))
+#  undef  strtoI32
+#  define strtoI32(s,b) ((signed long int)strtol((s),NULL,(b)))
+#  undef  strtoU32
+#  define strtoU32(s,b) ((unsigned long int)strtol((s),NULL,(b)))
+#  undef  strtoI64
+#  define strtoI64(s,b) ((signed long long int)strtol((s),NULL,(b)))
+#  undef  strtoU64
+#  define strtoU64(s,b) ((unsigned long long int)strtol((s),NULL,(b)))
 #endif
 #include "CLEPUTL.h"
 /* Include der Schnittstelle ******************************************/
@@ -4617,7 +4618,7 @@ static int siClpScnNat(
             tm.tm_hour=0;
             tm.tm_min=0;
             tm.tm_sec=0;
-            tm.tm_year=flstrtoi(pcHlp+2,10);
+            tm.tm_year=strtoI32(pcHlp+2,10);
             if ((*ppCur)[0]=='/' && isdigit((*ppCur)[1])) {
                pcLex=pcHlp+2; (*ppCur)++;
                while (isdigit(*(*ppCur))) {
@@ -4626,7 +4627,7 @@ static int siClpScnNat(
                   (*ppCur)++; pcLex++;
                }
                *pcLex=EOS;
-               tm.tm_mon=flstrtoi(pcHlp+2,10);
+               tm.tm_mon=strtoI32(pcHlp+2,10);
                if ((*ppCur)[0]=='/' && isdigit((*ppCur)[1])) {
                   pcLex=pcHlp+2; (*ppCur)++;
                   while (isdigit(*(*ppCur))) {
@@ -4635,7 +4636,7 @@ static int siClpScnNat(
                      (*ppCur)++; pcLex++;
                   }
                   *pcLex=EOS;
-                  tm.tm_mday=flstrtoi(pcHlp+2,10);
+                  tm.tm_mday=strtoI32(pcHlp+2,10);
                   if ((*ppCur)[0]=='.' && isdigit((*ppCur)[1])) {
                      pcLex=pcHlp+2; (*ppCur)++;
                      while (isdigit(*(*ppCur))) {
@@ -4644,7 +4645,7 @@ static int siClpScnNat(
                         (*ppCur)++; pcLex++;
                      }
                      *pcLex=EOS;
-                     tm.tm_hour=flstrtoi(pcHlp+2,10);
+                     tm.tm_hour=strtoI32(pcHlp+2,10);
                      if ((*ppCur)[0]==':' && isdigit((*ppCur)[1])) {
                         pcLex=pcHlp+2; (*ppCur)++;
                         while (isdigit(*(*ppCur))) {
@@ -4653,7 +4654,7 @@ static int siClpScnNat(
                            (*ppCur)++; pcLex++;
                         }
                         *pcLex=EOS;
-                        tm.tm_min=flstrtoi(pcHlp+2,10);
+                        tm.tm_min=strtoI32(pcHlp+2,10);
                         if ((*ppCur)[0]==':' && isdigit((*ppCur)[1])) {
                            pcLex=pcHlp+2; (*ppCur)++;
                            while (isdigit(*(*ppCur))) {
@@ -4662,7 +4663,7 @@ static int siClpScnNat(
                               (*ppCur)++; pcLex++;
                            }
                            *pcLex=EOS;
-                           tm.tm_sec=flstrtoi(pcHlp+2,10);
+                           tm.tm_sec=strtoI32(pcHlp+2,10);
                         }
                      }
                   }
@@ -5462,18 +5463,22 @@ static int siFromNumberLexeme(
 
    errno=0;
    switch (pcVal[0]) {
-   case 'b':*piVal=strtoull(pcVal+1,&pcHlp, 2); break;
-   case 'o':*piVal=strtoull(pcVal+1,&pcHlp, 8); break;
-   case 'd':*piVal=strtoll(pcVal+1,&pcHlp,10); break;
-   case 'x':*piVal=strtoull(pcVal+1,&pcHlp,16); break;
-   case 't':*piVal=strtoll(pcVal+1,&pcHlp,10); break;
+   case 'b':(*piVal)=strtoull(pcVal+1,&pcHlp, 2); break;
+   case 'o':(*piVal)=strtoull(pcVal+1,&pcHlp, 8); break;
+   case 'd':(*piVal)=strtoll(pcVal+1,&pcHlp,10); break;
+   case 'x':(*piVal)=strtoull(pcVal+1,&pcHlp,16); break;
+   case 't':(*piVal)=strtoll(pcVal+1,&pcHlp,10); break;
    default: return CLPERR(psHdl,CLPERR_SEM,"Base (%c(0x%02X)) of number literal (%s.%s=%s) not supported",pcVal[0],pcVal[0],fpcPat(psHdl,siLev),psArg->psStd->pcKyw,isPrnStr(psArg,pcVal+1));
    }
-   if (errno || (pcHlp!=NULL && *pcHlp)) {
-      if (pcHlp!=NULL && *pcHlp) {
+   if ((*piVal)==LLONG_MIN || (*piVal)==LLONG_MAX || errno==ERANGE || pcHlp==NULL || pcHlp[0]) {
+      if (pcHlp==NULL) {
+         return CLPERR(psHdl,CLPERR_SEM,"Number (%s) of '%s.%s' cannot be converted to a valid 64 bit value (end pointer is NULL)",isPrnStr(psArg,pcVal),fpcPat(psHdl,siLev),psArg->psStd->pcKyw);
+      } else if (*pcHlp) {
          return CLPERR(psHdl,CLPERR_SEM,"Number (%s) of '%s.%s' cannot be converted to a valid 64 bit value (rest: %s)",isPrnStr(psArg,pcVal),fpcPat(psHdl,siLev),psArg->psStd->pcKyw,isPrnStr(psArg,pcHlp));
+      } else if (errno){
+         return CLPERR(psHdl,CLPERR_SEM,"Number (%s) of '%s.%s' cannot be converted to a valid 64 bit value (errno: %d - %s)",isPrnStr(psArg,pcVal),fpcPat(psHdl,siLev),psArg->psStd->pcKyw,ERANGE,"Math result not representable");
       } else {
-         return CLPERR(psHdl,CLPERR_SEM,"Number (%s) of '%s.%s' cannot be converted to a valid 64 bit value (errno: %d - %s)",isPrnStr(psArg,pcVal),fpcPat(psHdl,siLev),psArg->psStd->pcKyw,errno,strerror(errno));
+         return CLPERR(psHdl,CLPERR_SEM,"Number (%s) of '%s.%s' cannot be converted to a valid 64 bit value (limits achieved)",isPrnStr(psArg,pcVal),fpcPat(psHdl,siLev),psArg->psStd->pcKyw);
       }
    }
    return(CLP_OK);
