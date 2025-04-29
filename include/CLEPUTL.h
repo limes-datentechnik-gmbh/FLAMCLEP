@@ -849,20 +849,6 @@ typedef struct EnVarList {
 }TsEnVarList;
 
 #ifdef __WIN__
-#  ifndef __FL5__
-#     ifndef localtime_r
-#        define localtime_r(t,s)   localtime(t)
-#     endif
-#     ifndef gmtime_r
-#        define gmtime_r(t,s)      gmtime(t)
-#     endif
-#     ifndef asctime_r
-#        define asctime_r(s,b)     asctime(s)
-#     endif
-#     ifndef ctime_r
-#        define ctime_r(t,b)       ctime(t)
-#     endif
-#  endif
 extern char* windowsversionstring(char** vstr, size_t* size);
 extern int win_setenv(const char* name, const char* value);
 extern int win_unsetenv(const char* name);

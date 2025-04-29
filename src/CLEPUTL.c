@@ -182,7 +182,9 @@ static inline int flzjsy(const char* pcDat, const int* piSln, char* pcVal, int* 
           (acMode[0]=='a' && acMode[1]=='+')) {
          acMode[0]='r';
          f=fopen(name, acMode);
-         if (f!=NULL) { return(f); }
+         if (f!=NULL) {
+            return(f);
+         }
          acMode[0]='w';
          pcRecfm=strstr(acMode,"recfm=*");
          if (pcRecfm!=NULL) {
@@ -484,7 +486,9 @@ static inline int flzjsy(const char* pcDat, const int* piSln, char* pcVal, int* 
           (acMode[0]=='a' && acMode[1]=='+')) {
          acMode[0]='r';
          f=fopen(name, acMode);
-         if (f!=NULL) { return(f); }
+         if (f!=NULL) {
+            return(f);
+         }
          acMode[0]='w';
       }
       f=fopen(name, acMode);
@@ -3076,7 +3080,12 @@ extern int snprintc(char* buffer,size_t size,const char* format,...)
       va_start(argv, format);
       r = vsnprintf(buffer+h, size-h, format, argv);
       va_end(argv);
-      return(r<0?r:h+r);
+      buffer[size-1]=0;
+      if (r<0) {
+         return(r);
+      } else {
+         return(h+r);
+      }
    } else {
       return (0);
    }
