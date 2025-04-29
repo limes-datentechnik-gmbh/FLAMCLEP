@@ -76,6 +76,8 @@ static inline int flzjsy(const char* pcDat, const int* piSln, char* pcVal, int* 
 #  define flclose  fclose
 #  undef  flflush
 #  define flflush  fflush
+#  undef  flstrerror
+#  define flstrerror strerror
 #endif
 #include "CLEPUTL.h"
 
@@ -3912,7 +3914,7 @@ extern int file2str(const void* hdl, const char* filename, char** buf, int* bufs
    pfFile=fopen_hfq(filename, "rb");
    if (pfFile == NULL) {
       if (errmsg!=NULL && msgsiz) {
-         snprintf(errmsg,msgsiz,"Open of file (%s) failed (%d - %s)",filename,errno,strerror(errno));
+         snprintf(errmsg,msgsiz,"Open of file (%s) failed (%d - %s)",filename,errno,flstrerror(errno));
       }
       return -2; // fopen failed
    }
@@ -3941,7 +3943,7 @@ extern int file2str(const void* hdl, const char* filename, char** buf, int* bufs
    }
    if (ferror(pfFile)) {
       if (errmsg!=NULL && msgsiz) {
-         snprintf(errmsg,msgsiz,"Read of file (%s) to string in memory failed (%d - %s)",filename,errno,strerror(errno));
+         snprintf(errmsg,msgsiz,"Read of file (%s) to string in memory failed (%d - %s)",filename,errno,flstrerror(errno));
       }
       flclose(pfFile);
       return -5; // read error
@@ -4267,7 +4269,7 @@ extern int loadEnvars(const unsigned int uiLen, const char* pcBuf, FILE* pfOut, 
                   if (*pcVal) {
                      if (SETENV(pcKey,pcVal)) {
                         if (pfErr!=NULL) {
-                           fprintf(pfErr,"Put variable (%s=%s) to environment failed (%d - %s)\n",pcKey,pcVal,errno,strerror(errno));
+                           fprintf(pfErr,"Put variable (%s=%s) to environment failed (%d - %s)\n",pcKey,pcVal,errno,flstrerror(errno));
                         }
                         siErr=CLERTC_SYS;
                      } else {
@@ -4289,7 +4291,7 @@ extern int loadEnvars(const unsigned int uiLen, const char* pcBuf, FILE* pfOut, 
                   } else {
                      if (UNSETENV(pcKey)) {
                         if (pfErr!=NULL) {
-                           fprintf(pfErr,"Remove variable (%s=%s(EMPTY->UNSET)) from environment failed (%d - %s)\n",pcKey,pcVal,errno,strerror(errno));
+                           fprintf(pfErr,"Remove variable (%s=%s(EMPTY->UNSET)) from environment failed (%d - %s)\n",pcKey,pcVal,errno,flstrerror(errno));
                         }
                         siErr=CLERTC_SYS;
                      } else {

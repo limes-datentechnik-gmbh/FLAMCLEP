@@ -44,6 +44,8 @@
 //#  define __HEAP_STATISTIC__
 #  include "GBLSTD.h"
 #else
+#  undef  flstrerror
+#  define flstrerror strerror
 #  undef  flclose
 #  define flclose  fclose
 #  undef  flflush
@@ -5510,7 +5512,7 @@ static int siFromFloatLexeme(
       if (pcHlp!=NULL && *pcHlp) {
          return CLPERR(psHdl,CLPERR_SEM,"Floating number (%s) of '%s.%s' cannot be converted to a valid 64 bit value (rest: %s)",isPrnStr(psArg,pcVal),fpcPat(psHdl,siLev),psArg->psStd->pcKyw,pcHlp);
       } else {
-         return CLPERR(psHdl,CLPERR_SEM,"Floating number (%s) of '%s.%s' cannot be converted to a valid 64 bit value (errno: %d - %s)",isPrnStr(psArg,pcVal),fpcPat(psHdl,siLev),psArg->psStd->pcKyw,errno,strerror(errno));
+         return CLPERR(psHdl,CLPERR_SEM,"Floating number (%s) of '%s.%s' cannot be converted to a valid 64 bit value (errno: %d - %s)",isPrnStr(psArg,pcVal),fpcPat(psHdl,siLev),psArg->psStd->pcKyw,errno,flstrerror(errno));
       }
    }
    return(CLP_OK);
