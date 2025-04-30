@@ -3073,7 +3073,7 @@ extern int printd(const char* format,...)
 
 extern int snprintc(char* buffer,size_t size,const char* format,...)
 {
-   unsigned int h = strlen(buffer);
+   size_t h = strlen(buffer);
    if (size > h) {
       int      r;
       va_list  argv;
