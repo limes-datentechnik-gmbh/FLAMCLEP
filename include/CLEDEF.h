@@ -26,15 +26,15 @@
  ***********************************************************************/
 
 /*! @cond PRIVATE */
+#ifndef INC_CLEDEF_H
+#define INC_CLEDEF_H
+
 #ifdef __cplusplus
    extern "C" {
 #endif
-
-#ifndef INC_CLEDEF_H
-#define INC_CLEDEF_H
 /*! @endcond */
 
-#include "stdio.h"
+#include <stdio.h>
 #include "CLPDEF.h"
 
 /**********************************************************************/
@@ -122,7 +122,7 @@ typedef struct CleDoc {
  *
  * @param name  Name of this table. \n
  */
-#define CLEDOC_OPN(name)               TsCleDoc name[]
+#define CLEDOC_OPN(name)               TsCleDoc (name)[]
 
 /**
  * @brief Starts the documentation generation table
@@ -445,7 +445,7 @@ typedef struct CleCommand {
  *
  * @param[in] name Name of this table.\n
  */
-#define CLECMD_OPN(name)         TsCleCommand name[]
+#define CLECMD_OPN(name)         TsCleCommand (name)[]
 
 /**
  * @brief Defines a command with the command line keyword *kyw*.
@@ -506,7 +506,7 @@ typedef struct CleOtherClp {
  *
  * @param[in] name Name of this table.
  */
-#define CLEOTH_OPN(name)               TsCleOtherClp name[]
+#define CLEOTH_OPN(name)               TsCleOtherClp (name)[]
 
 /**
  * @brief Defines a appendix for the object or overlay *cmd* of the root *rot* with the headline of *hdl* for a certain other CLP string.\n
@@ -534,9 +534,9 @@ typedef struct CleOtherClp {
 /**********************************************************************/
 
 /*! @cond PRIVATE */
-#endif /*INC_CLEDEF_H*/
-
 #ifdef __cplusplus
 }
 #endif
+
+#endif /*INC_CLEDEF_H*/
 /*! @endcond */
