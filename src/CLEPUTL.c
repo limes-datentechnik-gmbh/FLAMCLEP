@@ -955,8 +955,7 @@ extern int ebcdic_fprintf(FILE* file, const char* format, ...) {
 #endif
 
 #ifdef __WIN__
-#undef _WIN32_IE
-#define _WIN32_IE 0x5000
+
 #include <shlobj.h>
 #include <versionhelpers.h>
 
