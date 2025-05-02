@@ -1104,9 +1104,9 @@ extern const char* pcClpVersion2(const int l, const int s, char* b, const char* 
       for (acIndent[0]=0x00,i=0;i<(l);i++) {
          snprintc(acIndent,sizeof(acIndent),"%s",is);
       }
-      snprintc(b,s,"%s FLAM-CLP VERSION: %s-%u BUILD: %s %s %s\n",acIndent,CLP_VSN_STR,__BUILDNR__,__BUILD__,__DATE__,__TIME__);
+      snprintc(b,s,"%s FLAM-CLP VERSION: %s-%u BUILD: %s %s %s\n",acIndent,CLP_VSN_STR,__BUILDNR__,BUILD_STR,__DATE__,__TIME__);
    } else {
-      snprintc(b,s,"%2.2d FLAM-CLP VERSION: %s-%u BUILD: %s %s %s\n",l,CLP_VSN_STR,__BUILDNR__,__BUILD__,__DATE__,__TIME__);
+      snprintc(b,s,"%2.2d FLAM-CLP VERSION: %s-%u BUILD: %s %s %s\n",l,CLP_VSN_STR,__BUILDNR__,BUILD_STR,__DATE__,__TIME__);
    }
    return(b);
 }
@@ -1126,7 +1126,7 @@ extern const char* pcClpAbout2(const int l, const int s, char* b, const char* is
          snprintc(acIndent,sizeof(acIndent),"%s",is);
       }
       snprintc(b,s,"%s Frankenstein Limes Command Line Parser (FLAM-CLP)\n",acIndent);
-      snprintc(b,s,"%s   Version: %s-%u Build: %s %s %s\n",acIndent,CLP_VSN_STR,__BUILDNR__,__BUILD__,__DATE__,__TIME__);
+      snprintc(b,s,"%s   Version: %s-%u Build: %s %s %s\n",acIndent,CLP_VSN_STR,__BUILDNR__,BUILD_STR,__DATE__,__TIME__);
       snprintc(b,s,"%s   Copyright (C) limes datentechnik (R) gmbh\n",acIndent);
       snprintc(b,s,"%s   This library is open source from the FLAM(R) project: https://flam.de\n",acIndent);
       snprintc(b,s,"%s   for license see: https://github.com/limes-datentechnik-gmbh/flamclep\n",acIndent);
@@ -1137,7 +1137,7 @@ extern const char* pcClpAbout2(const int l, const int s, char* b, const char* is
             "   Copyright (C) limes datentechnik (R) gmbh\n"
             "   This library is open source from the FLAM(R) project: https://flam.de\n"
             "   for license see: https://github.com/limes-datentechnik-gmbh/flamclep\n"
-            ,l,CLP_VSN_STR,__BUILDNR__,__BUILD__,__DATE__,__TIME__);
+            ,l,CLP_VSN_STR,__BUILDNR__,BUILD_STR,__DATE__,__TIME__);
    }
    return(b);
 }

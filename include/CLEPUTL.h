@@ -82,7 +82,7 @@
    __ZOS__          for ZOS mainframe platforms
    __USS__          for unix system services (USS) on ZOS mainframe platforms
    __BUILDNR__      to define the build number (integer, default is 0)
-   __BUILD__        to define the build string ("debug", "release", "alpha", ...)
+   BUILD_STR        to define the build string ("debug", "release", "alpha", ...)
    __HOSTSHORTING__ to short function names to 8 character for mainframes
    @endverbatim
  *

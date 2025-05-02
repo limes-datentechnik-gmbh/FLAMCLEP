@@ -563,9 +563,9 @@ extern const char* pcCleVersion2(const int l, const int s, char* b, const char* 
       for (acIndent[0]=0x00,i=0;i<(l);i++) {
          snprintc(acIndent,sizeof(acIndent),"%s",is);
       }
-      snprintc(b,s,"%s FLAM-CLE VERSION: %s-%u BUILD: %s %s %s\n",acIndent,CLE_VSN_STR,__BUILDNR__,__BUILD__,__DATE__,__TIME__);
+      snprintc(b,s,"%s FLAM-CLE VERSION: %s-%u BUILD: %s %s %s\n",acIndent,CLE_VSN_STR,__BUILDNR__,BUILD_STR,__DATE__,__TIME__);
    } else {
-      snprintc(b,s,"%2.2d FLAM-CLE VERSION: %s-%u BUILD: %s %s %s\n",l,CLE_VSN_STR,__BUILDNR__,__BUILD__,__DATE__,__TIME__);
+      snprintc(b,s,"%2.2d FLAM-CLE VERSION: %s-%u BUILD: %s %s %s\n",l,CLE_VSN_STR,__BUILDNR__,BUILD_STR,__DATE__,__TIME__);
    }
    return(pcClpVersion2(l+1,s,b,is));
 }
@@ -584,7 +584,7 @@ extern const char* pcCleAbout2(const int l, const int s, char* b,const char* is)
          snprintc(acIndent,sizeof(acIndent),"%s",is);
       }
       snprintc(b,s,"%s Frankenstein Limes Command Line Execution (FLAM-CLE)\n",acIndent);
-      snprintc(b,s,"%s   Version: %s-%u Build: %s %s %s\n",acIndent,CLE_VSN_STR,__BUILDNR__,__BUILD__,__DATE__,__TIME__);
+      snprintc(b,s,"%s   Version: %s-%u Build: %s %s %s\n",acIndent,CLE_VSN_STR,__BUILDNR__,BUILD_STR,__DATE__,__TIME__);
       snprintc(b,s,"%s   Copyright (C) limes datentechnik (R) gmbh\n",acIndent);
       snprintc(b,s,"%s   This library is open source from the FLAM(R) project: https://flam.de\n",acIndent);
       snprintc(b,s,"%s   for license see: https://github.com/limes-datentechnik-gmbh/flamclep\n",acIndent);
@@ -597,7 +597,7 @@ extern const char* pcCleAbout2(const int l, const int s, char* b,const char* is)
             "   This library is open source from the FLAM(R) project: https://flam.de\n"
             "   for license see: https://github.com/limes-datentechnik-gmbh/flamclep\n"
             "This library uses the internal library below:\n"
-            ,l,CLE_VSN_STR,__BUILDNR__,__BUILD__,__DATE__,__TIME__);
+            ,l,CLE_VSN_STR,__BUILDNR__,BUILD_STR,__DATE__,__TIME__);
    }
    return(pcClpAbout2(l+1,s,b,is));
 }

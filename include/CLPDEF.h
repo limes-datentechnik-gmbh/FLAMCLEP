@@ -52,13 +52,13 @@
 #  define __BUILDNR__         0
 #endif
 #ifdef __RELEASE__
-#  define  __BUILD__          "RELEASE"
+#  define  BUILD_STR          "RELEASE"
 #endif
 #ifdef __DEBUG__
-#  define  __BUILD__          "DEBUG"
+#  define  BUILD_STR          "DEBUG"
 #endif
-#ifndef __BUILD__
-#  define  __BUILD__          "UNKNOWN"
+#ifndef BUILD_STR
+#  define  BUILD_STR          "UNKNOWN"
 #endif
 
 #ifndef INC_TYPDEF_H
