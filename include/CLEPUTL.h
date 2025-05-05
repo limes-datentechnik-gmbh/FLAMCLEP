@@ -807,11 +807,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+
 /*! @cond PRIVATE */
- // TODO: The macros below are defined in multiple places.
- // The standard header stdbool.h already defines true and false which is part of ISO C / C99.
- // Either use the macros from stdbool.h or put the below defines in a separte header BOOL.h
- // and includ it where needed.
+// TODO: The macros below are defined in multiple places.
+// The standard header stdbool.h already defines true and false which is part of ISO C / C99.
+// Either use the macros from stdbool.h or put the below defines in a separte header BOOL.h
+// and includ it where needed.
+
+#ifndef __PRINTF_CHECK__
+#  define __PRINTF_CHECK__(A,B)
+#endif
+
+
 #ifndef TRUE
 #  define TRUE             (1)
 #endif
@@ -1528,10 +1535,10 @@ extern void          init_diachr(TsDiaChr* psDiaChr,const unsigned int uiCcsId);
 
 extern TsDiaChr      gsDiaChr;
 
-extern int           ebcdic_srprintc(char** buffer, size_t* size, const size_t expansion, const char* format, ...);
-extern int           ebcdic_snprintf(char* string, size_t size, const char* format, ...);
-extern int           ebcdic_sprintf(char* string, const char* format, ...);
-extern int           ebcdic_fprintf(FILE* file, const char* format, ...);
+extern int           ebcdic_srprintc(char** buffer, size_t* size, const size_t expansion, const char* format, ...) __PRINTF_CHECK__(4, 5);
+extern int           ebcdic_snprintf(char* string, size_t size, const char* format, ...) __PRINTF_CHECK__(3, 4);
+extern int           ebcdic_sprintf(char* string, const char* format, ...) __PRINTF_CHECK__(2, 3);
+extern int           ebcdic_fprintf(FILE* file, const char* format, ...) __PRINTF_CHECK__(2, 3);
 
 extern char          init_char(const char* p);
 extern const char*   init_string(const char* p);
