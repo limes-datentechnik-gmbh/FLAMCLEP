@@ -3699,7 +3699,8 @@ static inline int isReqStrOpr3(int c) { return (isReqStrOpr1(c) || c == '(' || c
    if (pcLex>=(pcEnd-4)) {\
       intptr_t l=pcLex-(*ppLex);\
       intptr_t h=pcHlp-(*ppLex);\
-      size_t s=(*pzLex)?(*pzLex)*2:CLPINI_LEXSIZ;\
+      intptr_t z=(pcZro!=NULL)?pcZro-(*ppLex):0;\
+      size_t s=(*pzLex)+CLPINI_LEXSIZ;\
       char*  b=(char*)realloc_nowarn(*ppLex,s);\
       if (b==NULL) { return CLPERR(psHdl,CLPERR_MEM,"Re-allocation of buffer in size %d to store the lexeme failed",(int)s); }\
       (*pzLex)=s;\
@@ -3707,6 +3708,7 @@ static inline int isReqStrOpr3(int c) { return (isReqStrOpr1(c) || c == '(' || c
          (*ppLex)=b;\
          pcLex=(*ppLex)+l;\
          pcHlp=(*ppLex)+h;\
+         pcZro=(pcZro!=NULL)?(*ppLex)+z:NULL;\
       }\
       pcEnd=(*ppLex)+s;\
    }\
