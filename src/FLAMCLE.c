@@ -56,6 +56,8 @@
 #  define flclose  fclose
 #  undef  flflush
 #  define flflush  fflush
+#  undef  flstrerror
+#  define flstrerror strerror
 #endif
 #include "CLEPUTL.h"
 #include "FLAMCLP.h"
