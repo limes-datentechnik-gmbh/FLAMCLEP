@@ -56,8 +56,8 @@
 #  define flclose  fclose
 #  undef  flflush
 #  define flflush  fflush
-#  undef  flstrerror
-#  define flstrerror strerror
+#  undef  pcSysError
+#  define pcSysError strerror
 #endif
 #include "CLEPUTL.h"
 #include "FLAMCLP.h"
@@ -1109,7 +1109,7 @@ static int siClePrintPage(FILE* pfOut, FILE* pfErr, const TsCleDoc* psDoc, const
    }
    FILE* pfDoc=fopen_tmp();
    if (pfDoc==NULL) {
-      if (pfErr!=NULL) { fprintf(pfErr,"Open of temporary file to print manual page '%s' failed (%d - %s)\n",psDoc->pcHdl,errno,flstrerror(errno)); }
+      if (pfErr!=NULL) { fprintf(pfErr,"Open of temporary file to print manual page '%s' failed (%d - %s)\n",psDoc->pcHdl,errno,pcSysError(errno)); }
       return(CLERTC_SYS);
    }
    int siErr=siCleWritePage(pfErr,pfDoc,psDoc,psPar);
@@ -1131,7 +1131,7 @@ static int siClePrintPage(FILE* pfOut, FILE* pfErr, const TsCleDoc* psDoc, const
       fclose_tmp(pfDoc);
       if (r!=s) {
          free(pcPge);
-         if (pfErr!=NULL) { fprintf(pfErr,"Read of temporary file to print manual page '%s' failed (%d - %s)\n",psDoc->pcHdl,errno,flstrerror(errno)); }
+         if (pfErr!=NULL) { fprintf(pfErr,"Read of temporary file to print manual page '%s' failed (%d - %s)\n",psDoc->pcHdl,errno,pcSysError(errno)); }
          return(CLERTC_SYS);
       }
       pcPge[r]=0x00;
@@ -1458,7 +1458,7 @@ extern int siCleExecute(
       if (p->pcDft!=NULL) {
          if (GETENV(p->pcKyw)==NULL) {
             if (SETENV(p->pcKyw,p->pcDft)) {
-               if (pfErr!=NULL) { fprintf(pfErr,"Put default value for variable (%s=%s) to environment failed (%d - %s)\n",p->pcKyw,p->pcDft,errno,flstrerror(errno)); }
+               if (pfErr!=NULL) { fprintf(pfErr,"Put default value for variable (%s=%s) to environment failed (%d - %s)\n",p->pcKyw,p->pcDft,errno,pcSysError(errno)); }
             }
          }
       }
@@ -1613,7 +1613,7 @@ extern int siCleExecute(
    m=GETENV("OWNERID");
    if (m==NULL || *m==0x00) {
       if (SETENV("OWNERID",pcOwn)) {
-         if (pfErr!=NULL) { fprintf(pfErr,"Put variable (%s=%s) to environment failed (%d - %s)\n","OWNERID",pcOwn,errno,flstrerror(errno)); }
+         if (pfErr!=NULL) { fprintf(pfErr,"Put variable (%s=%s) to environment failed (%d - %s)\n","OWNERID",pcOwn,errno,pcSysError(errno)); }
       } else {
          m=GETENV("OWNERID");
          if (m==NULL || strcmp(pcOwn,m)) {
@@ -1670,7 +1670,7 @@ extern int siCleExecute(
          }
          if (isEnvOwn) {
             if (SETENV("OWNERID",pcOwn)) {
-               if (pfOut!=NULL) { fprintf(pfOut,"Use owner: '%s' (set as environment variable failed (%d - %s))\n",pcOwn,errno,flstrerror(errno)); }
+               if (pfOut!=NULL) { fprintf(pfOut,"Use owner: '%s' (set as environment variable failed (%d - %s))\n",pcOwn,errno,pcSysError(errno)); }
             } else {
                if (pfOut!=NULL) { fprintf(pfOut,"Use owner: '%s' (set as environment variable was successful)\n",pcOwn); }
             }
@@ -2145,7 +2145,7 @@ EVALUATE:
 //          szFil=strlen(pcFil)+1; not used
             pfDoc=fopen_hfq(pcFil,"w");
             if (pfDoc==NULL) {
-               if (pfErr!=NULL) { fprintf(pfErr,"Open of manual page file (\"%s\",\"%s\") failed (%d - %s)\n",pcFil,"w",errno,flstrerror(errno)); }
+               if (pfErr!=NULL) { fprintf(pfErr,"Open of manual page file (\"%s\",\"%s\") failed (%d - %s)\n",pcFil,"w",errno,pcSysError(errno)); }
                siErr=CLERTC_SYS;
                ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
             }
@@ -2253,7 +2253,7 @@ EVALUATE:
          isMan=TRUE;
          pfDoc=fopen_hfq(pcFil,"w");
          if (pfDoc==NULL) {
-            if (pfErr!=NULL) { fprintf(pfErr,"Open of manual page file (\"%s\",\"%s\") failed (%d - %s)\n",pcFil,"w",errno,flstrerror(errno)); }
+            if (pfErr!=NULL) { fprintf(pfErr,"Open of manual page file (\"%s\",\"%s\") failed (%d - %s)\n",pcFil,"w",errno,pcSysError(errno)); }
             siErr=CLERTC_SYS;
             ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
          }
@@ -2349,7 +2349,7 @@ EVALUATE:
          szFil=strlen(pcFil)+1;
          pfDoc=fopen_hfq(pcFil,"w");
          if (pfDoc==NULL) {
-            if (pfErr!=NULL) { fprintf(pfErr,"Open of documentation file (\"%s\",\"%s\") failed (%d - %s)\n",pcFil,"w",errno,flstrerror(errno)); }
+            if (pfErr!=NULL) { fprintf(pfErr,"Open of documentation file (\"%s\",\"%s\") failed (%d - %s)\n",pcFil,"w",errno,pcSysError(errno)); }
             siErr=CLERTC_SYS;
             ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
          }
@@ -2365,7 +2365,7 @@ EVALUATE:
                   snprintf(acNum,sizeof(acNum),"%s%d.",pcCmdNum,i+1);
                   siErr=siClpDocu(pvHdl,pfDoc,pcCmd,acNum,"Command",TRUE,TRUE,FALSE,FALSE,isNbr,FALSE,TRUE,0);
                   if (siErr<0) {
-                     if (pfErr!=NULL) { fprintf(pfErr,"Creation of documentation file (%s) failed (%d - %s)\n",pcFil,errno,flstrerror(errno)); }
+                     if (pfErr!=NULL) { fprintf(pfErr,"Creation of documentation file (%s) failed (%d - %s)\n",pcFil,errno,pcSysError(errno)); }
                      siErr=CLERTC_SYN;
                      ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
                   } else {
@@ -2392,7 +2392,7 @@ EVALUATE:
                      snprintf(acPat,sizeof(acPat),"%s.%s",pcDef,pcCmd);
                      siErr=siClpDocu(pvHdl,pfDoc,acPat,acNum,"Command",TRUE,TRUE,FALSE,FALSE,isNbr,FALSE,TRUE,0);
                      if (siErr<0) {
-                        if (pfErr!=NULL) { fprintf(pfErr,"Creation of documentation file (%s) failed (%d - %s)\n",pcFil,errno,flstrerror(errno)); }
+                        if (pfErr!=NULL) { fprintf(pfErr,"Creation of documentation file (%s) failed (%d - %s)\n",pcFil,errno,pcSysError(errno)); }
                         siErr=CLERTC_SYN;
                         ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
                      } else {
@@ -2545,7 +2545,7 @@ EVALUATE:
          szFil=strlen(pcFil)+1;
          pfPro=fopen_hfq(pcFil,"w");
          if (pfPro==NULL) {
-            if (pfErr!=NULL) { fprintf(pfErr,"Open of property file (\"%s\",\"%s\") failed (%d-%s)\n",pcFil,"w",errno,flstrerror(errno)); }
+            if (pfErr!=NULL) { fprintf(pfErr,"Open of property file (\"%s\",\"%s\") failed (%d-%s)\n",pcFil,"w",errno,pcSysError(errno)); }
             siErr=CLERTC_SYS;
             ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
          }
@@ -2564,7 +2564,7 @@ EVALUATE:
                vdClpClose(pvHdl,CLPCLS_MTD_ALL); pvHdl=NULL;
             }
             if (siErr<0) {
-               if (pfErr!=NULL) { fprintf(pfErr,"Write property file (%s) for program '%s' failed (%d-%s)\n",pcFil,pcPgm,errno,flstrerror(errno)); }
+               if (pfErr!=NULL) { fprintf(pfErr,"Write property file (%s) for program '%s' failed (%d-%s)\n",pcFil,pcPgm,errno,pcSysError(errno)); }
                siErr=CLERTC_SYN;
                ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
             } else {
@@ -2582,7 +2582,7 @@ EVALUATE:
                   siErr=siClpProperties(pvHdl,CLPPRO_MTD_CMT,10,psCmd[i].pcKyw,pfPro);
                   vdClpClose(pvHdl,CLPCLS_MTD_ALL); pvHdl=NULL;
                   if (siErr<0) {
-                     if (pfErr!=NULL) { fprintf(pfErr,"Write property file (%s) for command '%s' failed (%d-%s)\n",pcFil,pcCmd,errno,flstrerror(errno)); }
+                     if (pfErr!=NULL) { fprintf(pfErr,"Write property file (%s) for command '%s' failed (%d-%s)\n",pcFil,pcCmd,errno,pcSysError(errno)); }
                      siErr=CLERTC_SYN;
                      ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
                   } else {
@@ -3508,7 +3508,7 @@ static int siClePropertyFinish(
    }
    pfPro=fopen_hfq(pcHlp,"w");
    if (pfPro==NULL) {
-      if (pfErr!=NULL) { fprintf(pfErr,"Cannot open the property file (\"%s\",\"%s\") for write operation (%d-%s)\n",pcHlp,"w",errno,flstrerror(errno)); }
+      if (pfErr!=NULL) { fprintf(pfErr,"Cannot open the property file (\"%s\",\"%s\") for write operation (%d-%s)\n",pcHlp,"w",errno,pcSysError(errno)); }
       SAFE_FREE(pcHlp); SAFE_FREE(pcEnv);
       vdClpClose(pvHdl,CLPCLS_MTD_ALL);
       return(CLERTC_SYS);
@@ -3517,7 +3517,7 @@ static int siClePropertyFinish(
    siErr=siClpProperties(pvHdl,CLPPRO_MTD_CMT,10,pcCmd,pfPro);
    vdClpClose(pvHdl,CLPCLS_MTD_ALL); flclose(pfPro);
    if (siErr<0) {
-      if (pfErr!=NULL) { fprintf(pfErr,"Write property file (%s) for command '%s' failed (%d-%s)\n",pcHlp,pcCmd,errno,flstrerror(errno)); }
+      if (pfErr!=NULL) { fprintf(pfErr,"Write property file (%s) for command '%s' failed (%d-%s)\n",pcHlp,pcCmd,errno,pcSysError(errno)); }
       SAFE_FREE(pcHlp); SAFE_FREE(pcEnv);
       return(CLERTC_SYN);
    }
@@ -4176,7 +4176,7 @@ static int siCleGetCommand(
             SAFE_FREE(*ppCmd);
             switch(siErr) {
             case -1: if (pfErr!=NULL) { fprintf(pfErr,"Illegal parameters passed to arry2str() (Bug)\n");                                 } return(CLERTC_FAT);
-            case -2: if (pfErr!=NULL) { fprintf(pfErr,"Allocation of memory for command line failed (%d - %s).\n",errno,flstrerror(errno)); } return(CLERTC_MEM);
+            case -2: if (pfErr!=NULL) { fprintf(pfErr,"Allocation of memory for command line failed (%d - %s).\n",errno,pcSysError(errno)); } return(CLERTC_MEM);
             default: if (pfErr!=NULL) { fprintf(pfErr,"An unknown error occurred while reading command line.\n");                         } return(CLERTC_FAT);
             }
          }
@@ -4195,7 +4195,7 @@ static int siCleGetCommand(
             } else {
                char* pcHlp=(char*)realloc(*ppCmd,1);
                if (pcHlp==NULL) {
-                  if (pfErr!=NULL) { fprintf(pfErr,"Allocation of memory for command line failed (%d - %s).\n",errno,flstrerror(errno)); }
+                  if (pfErr!=NULL) { fprintf(pfErr,"Allocation of memory for command line failed (%d - %s).\n",errno,pcSysError(errno)); }
                   return(CLERTC_MEM);
                }
                pcHlp[0]=0x00;
@@ -4204,7 +4204,7 @@ static int siCleGetCommand(
          } else {
             char* pcHlp=(char*)realloc(*ppCmd,1);
             if (pcHlp==NULL) {
-               if (pfErr!=NULL) { fprintf(pfErr,"Allocation of memory for command line failed (%d - %s).\n",errno,flstrerror(errno)); }
+               if (pfErr!=NULL) { fprintf(pfErr,"Allocation of memory for command line failed (%d - %s).\n",errno,pcSysError(errno)); }
                return(CLERTC_MEM);
             }
             pcHlp[0]=0x00;
@@ -4218,7 +4218,7 @@ static int siCleGetCommand(
          SAFE_FREE(*ppCmd);
          switch(siErr) {
          case -1: if (pfErr!=NULL) { fprintf(pfErr,"Illegal parameters passed to arry2str() (Bug)\n");                                 } return(CLERTC_FAT);
-         case -2: if (pfErr!=NULL) { fprintf(pfErr,"Allocation of memory for command line failed (%d - %s).\n",errno,flstrerror(errno)); } return(CLERTC_MEM);
+         case -2: if (pfErr!=NULL) { fprintf(pfErr,"Allocation of memory for command line failed (%d - %s).\n",errno,pcSysError(errno)); } return(CLERTC_MEM);
          default: if (pfErr!=NULL) { fprintf(pfErr,"An unknown error occurred while reading command line.\n");                         } return(CLERTC_FAT);
          }
       }
@@ -4308,7 +4308,7 @@ static TsCnfHdl* psCnfOpn(
    pfFil=fopen_hfq(psHdl->pcFil,"r");
    if (pfFil==NULL && (errno==2 || errno==49 || errno==129)) { return(psHdl); }
    if (pfFil==NULL) {
-      if (pfErr!=NULL) { fprintf(pfErr,"Cannot open the configuration file (\"%s\",\"r\") for read operation (%d - %s)\n",psHdl->pcFil,errno,flstrerror(errno)); }
+      if (pfErr!=NULL) { fprintf(pfErr,"Cannot open the configuration file (\"%s\",\"r\") for read operation (%d - %s)\n",psHdl->pcFil,errno,pcSysError(errno)); }
       vdCnfCls(psHdl);
       return(NULL);
    }
