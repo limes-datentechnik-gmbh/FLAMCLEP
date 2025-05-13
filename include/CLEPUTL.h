@@ -843,9 +843,6 @@
 static inline void do_save_free(void** x) { if (NULL != *x) { free(*x); *x = NULL; } }
 #define SAFE_FREE(x) do_save_free((void**)(&(x)))
 
-static inline int CHECK_ENVAR_ON(const char* e) { return (e != NULL && (strcmp(e, "ON")==0 || strcmp(e, "YES")==0)); }
-static inline int CHECK_ENVAR_OFF(const char* e) { return (e != NULL && (strcmp(e,"OFF")==0 || strcmp(e,"NO")==0)); }
-
 typedef struct EnVarList {
 /**
  * @brief Environment variable list\n
@@ -872,7 +869,28 @@ extern int win_unsetenv(const char* name);
 #  define UNSETENV(name)      unsetenv((name))
 #endif
 
-
+static inline int CHECK_ENVAL_ON(const char* pcEnv) {
+   return (pcEnv != NULL && (strcmp(pcEnv, "ON")==0 || strcmp(pcEnv, "YES")==0));
+}
+static inline int CHECK_ENVAR_ON(const char* pcVar) {
+   const char* pcEnv=GETENV(pcVar);
+   if (pcEnv!=NULL) {
+      return(strcmp(pcEnv,"ON")==0 || strcmp(pcEnv,"YES")==0);
+   } else {
+      return(FALSE);
+   }
+}
+static inline int CHECK_ENVAL_OFF(const char* pcEnv) {
+   return (pcEnv != NULL && (strcmp(pcEnv,"OFF")==0 || strcmp(pcEnv,"NO")==0));
+}
+static inline int CHECK_ENVAR_OFF(const char* pcVar) {
+   const char* pcEnv=GETENV(pcVar);
+   if (pcEnv!=NULL) {
+      return(strcmp(pcEnv,"OFF")==0 || strcmp(pcEnv,"NO")==0);
+   } else {
+      return(FALSE);
+   }
+}
 
 extern FILE* fopen_hfq(const char* name, const char* mode);
 extern FILE* fopen_hfq_nowarn(const char* name, const char* mode);
@@ -1625,7 +1643,7 @@ extern const char*   init_string(const char* p);
 
 static inline int isStr(int c) { return (isprint(c) || c==C_TLD  || c==C_DLR || c==C_ATS || c==C_BSL || c==C_CRT || c==C_EXC); }
 static inline int isKyw(int c) { return (isalnum(c) || c=='_'); }
-static inline int isCon(int c) { return (isKyw(c)   || c=='-' || c=='/'); }
+static inline int isCst(int c) { return (isKyw(c)   || c=='-' || c=='/'); }
 
 static inline int ISDDNAME(const char* p)   { return (strlen(p) > 3 && toupper(p[0])=='D' && toupper(p[1])=='D' && p[2]==':'); }
 static inline int ISPATHNAME(const char* p) {

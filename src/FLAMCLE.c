@@ -1476,14 +1476,12 @@ extern int siCleExecute(
       }
    }
 
-   m=GETENV("CLE_SILENT");
-   if (CHECK_ENVAR_ON(m)) {
+   if (CHECK_ENVAR_ON("CLE_SILENT")) {
       pfErr=NULL;
       pfOut=NULL;
    }
 
-   m=GETENV("CLE_QUIET");
-   if (CHECK_ENVAR_ON(m)) {
+   if (CHECK_ENVAR_ON("CLE_QUIET")) {
       pfErr=pfOut;
       pfOut=NULL;
    }

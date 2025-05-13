@@ -58,8 +58,12 @@
 #  define strtoI64(s,b) ((signed long long int)strtol((s),NULL,(b)))
 #  undef  strtoU64
 #  define strtoU64(s,b) ((unsigned long long int)strtol((s),NULL,(b)))
+#  undef  flseed
+#  define flseed     ((U32)time(NULL)^(U32)clock())
+#  undef  flsrand
+#  define flsrand    srand
 #  undef  flrand
-#  define flrand  rand
+#  define flrand     rand
 #endif
 #include "CLEPUTL.h"
 /* Include der Schnittstelle ******************************************/
@@ -1087,8 +1091,7 @@ static void vdClpFree(
             psHdl->psPtr[i].uiFlg=0;
          }
       }
-      const char* pcEnv=GETENV("CLP_MALLOC_STATISTICS");
-      if (CHECK_ENVAR_ON(pcEnv)) {
+      if (CHECK_ENVAR_ON("CLP_MALLOC_STATISTICS")) {
          char acTs[24];
          fprintf(stderr,"%s CLP_MALLOC_STATISTICS(Amount(%"PRIu64"),Table(%d(%"PRIu64")),Size(%"PRIu64"))\n",cstime(0,acTs),uiCnt,psHdl->szPtr,((uint64_t)sizeof(TsPtr))*((uint64_t)psHdl->szPtr),uiSiz);
       }
@@ -1211,6 +1214,7 @@ extern void* pvClpOpen(
    I64                           siNow=0;
    int                           siErr,i;
    if (psTab!=NULL) {
+      flsrand(flseed);
       psHdl=(TsHdl*)calloc(1,sizeof(TsHdl));
       if (psHdl!=NULL) {
          psHdl->isCas=isCas;
@@ -1277,8 +1281,7 @@ extern void* pvClpOpen(
             uint64_t uiCnt=0;
             uint64_t uiSiz=0;
             vdClpSymDel(psHdl->psTab,&uiCnt,&uiSiz);
-            const char* pcEnv=GETENV("CLP_SYMTAB_STATISTICS");
-            if (CHECK_ENVAR_ON(pcEnv)) {
+            if (CHECK_ENVAR_ON("CLP_SYMTAB_STATISTICS")) {
                char acTs[24];
                fprintf(stderr,"%s CLP_SYMTAB_STATISTICS(Amount(%"PRIu64"),Size(%"PRIu64")) after fail of in siClpSymIni()\n",cstime(0,acTs),uiCnt,uiSiz);
             }
@@ -1300,8 +1303,7 @@ extern void* pvClpOpen(
             uint64_t uiCnt=0;
             uint64_t uiSiz=0;
             vdClpSymDel(psHdl->psTab,&uiCnt,&uiSiz);
-            const char* pcEnv=GETENV("CLP_SYMTAB_STATISTICS");
-            if (CHECK_ENVAR_ON(pcEnv)) {
+            if (CHECK_ENVAR_ON("CLP_SYMTAB_STATISTICS")) {
                char acTs[24];
                fprintf(stderr,"%s CLP_SYMTAB_STATISTICS(Amount(%"PRIu64"),Size(%"PRIu64")) after fail of in siClpSymCal()\n",cstime(0,acTs),uiCnt,uiSiz);
             }
@@ -1323,7 +1325,7 @@ extern void* pvClpOpen(
          }
          psHdl->siNow=time(NULL);
          srand(psHdl->siNow+clock());
-         psHdl->siRnd=ClpRndFnv(flrand()+clock());
+         psHdl->siRnd=ClpRndFnv(flrand()^clock());
          pcNow=GETENV("CLP_NOW");
          if (pcNow!=NULL && *pcNow) {
             siErr=siClpScnNat(psHdl,psHdl->pfErr,psHdl->pfScn,&pcNow,&psHdl->szLex,&psHdl->pcLex,CLPTYP_NUMBER,NULL,NULL,NULL);
@@ -2633,8 +2635,7 @@ extern void vdClpClose(
          uint64_t uiCnt=0;
          uint64_t uiSiz=0;
          vdClpSymDel(psHdl->psTab,&uiCnt,&uiSiz);
-         const char* pcEnv=GETENV("CLP_SYMTAB_STATISTICS");
-         if (CHECK_ENVAR_ON(pcEnv)) {
+         if (CHECK_ENVAR_ON("CLP_SYMTAB_STATISTICS")) {
             char acTs[24];
             fprintf(stderr,"%s CLP_SYMTAB_STATISTICS(Amount(%"PRIu64"),Size(%"PRIu64")) in vdClpClose()\n",cstime(0,acTs),uiCnt,uiSiz);
          }
@@ -2733,7 +2734,7 @@ static TsSym* psClpSymIns(
          ERROR(psSym);
       }
       for (const char* p=psArg->pcKyw+1; *p; p++) {
-         if (CLPISF_CON(psArg->uiFlg)?!isCon(*p):!isKyw(*p)) {
+         if (CLPISF_CON(psArg->uiFlg)?!isCst(*p):!isKyw(*p)) {
             CLPERR(psHdl,CLPERR_TAB,"Invalid letter (%c(0x%02X)) in keyword '%s.%s'",*p,*p,pcPat,psArg->pcKyw);
             ERROR(psSym);
          }
@@ -2746,7 +2747,7 @@ static TsSym* psClpSymIns(
          ERROR(psSym);
       }
       for (const char* p=psArg->pcAli+1; *p; p++) {
-         if (CLPISF_CON(psArg->uiFlg)?!isCon(*p):!isKyw(*p)) {
+         if (CLPISF_CON(psArg->uiFlg)?!isCst(*p):!isKyw(*p)) {
             CLPERR(psHdl,CLPERR_TAB,"Invalid letter (%c(0x%02X)) in alias '%s.%s'",*p,*p,pcPat,psArg->pcAli);
             ERROR(psSym);
          }
@@ -2760,8 +2761,7 @@ static TsSym* psClpSymIns(
          psSym->psStd->uiFlg|=CLPFLG_UNS;
       }
    }
-   pcEnv=GETENV("CLEP_NO_SECRETS");
-   if (CHECK_ENVAR_OFF(pcEnv)) {
+   if (CHECK_ENVAR_OFF("CLEP_NO_SECRETS")) {
       psSym->psStd->uiFlg&=~CLPFLG_PWD;
    }
    psSym->psStd->psAli=NULL;
@@ -4488,7 +4488,7 @@ static int siClpScnNat(
          }
          *pcLex=*(*ppCur);
          (*ppCur)++; pcLex++;
-         while (isCon(*(*ppCur))) {
+         while (isCst(*(*ppCur))) {
             LEX_REALLOC;
             if (!isKyw(*(*ppCur)) && pcOld==NULL) {
                pcOld=(*ppCur);
@@ -4531,7 +4531,7 @@ static int siClpScnNat(
          if (psArg!=NULL && isalpha(*(*ppCur))) {
             *pcLex=*(*ppCur);
             (*ppCur)++; pcLex++;
-            while (isCon(*(*ppCur))) {
+            while (isCst(*(*ppCur))) {
                LEX_REALLOC;
                *pcLex=*(*ppCur);
                (*ppCur)++; pcLex++;
@@ -4575,7 +4575,7 @@ static int siClpScnNat(
       } else if (isalpha((*ppCur)[0])) { /*simple keyword*/
          *pcLex=*(*ppCur);
          (*ppCur)++; pcLex++;
-         while (isCon(*(*ppCur))) {
+         while (isCst(*(*ppCur))) {
             LEX_REALLOC;
             if (!isKyw(*(*ppCur)) && pcOld==NULL) {
                pcOld=(*ppCur);
