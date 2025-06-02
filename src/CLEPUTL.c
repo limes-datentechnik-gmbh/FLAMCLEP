@@ -870,7 +870,7 @@ extern int ebcdic_srprintc(char** buffer, size_t* size, const size_t expansion, 
    va_list  argv;
    int      r;
    size_t   h=(*buffer!=NULL)?strlen(*buffer):0;
-   site_t   l=strlen(format);
+   size_t   l=strlen(format);
    size_t   s=h+l+expansion+1;
    if (s<h || s<l || s<expansion || s<1) {
       return(-1);
