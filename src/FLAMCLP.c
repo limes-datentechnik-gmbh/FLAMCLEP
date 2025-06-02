@@ -39,6 +39,7 @@
 #include <stdarg.h>
 #include <locale.h>
 #include <limits.h>
+#include <math.h>
 
 #ifdef __FL5__
 //#  define __HEAP_STATISTIC__
@@ -51,9 +52,9 @@
 #  undef  flflush
 #  define flflush  fflush
 #  undef  strtoI32
-#  define strtoI32(s,b) ((signed long int)strtol((s),NULL,(b)))
+#  define strtoI32(s,b) ((signed int)strtol((s),NULL,(b)))
 #  undef  strtoU32
-#  define strtoU32(s,b) ((unsigned long int)strtol((s),NULL,(b)))
+#  define strtoU32(s,b) ((unsigned int)strtol((s),NULL,(b)))
 #  undef  strtoI64
 #  define strtoI64(s,b) ((signed long long int)strtol((s),NULL,(b)))
 #  undef  strtoU64
@@ -716,22 +717,22 @@ static int siClpBldLit(
 static int siClpIniMainObj(
    TsHdl*                        psHdl,
    TsSym*                        psTab,
-   TsVar*                        psSav);
+   TsVar                         asSav[]);
 
 static int siClpFinMainObj(
    TsHdl*                        psHdl,
    TsSym*                        psTab,
-   const TsVar*                  psSav);
+   const TsVar                   asSav[]);
 
 static int siClpIniMainOvl(
    TsHdl*                        psHdl,
    TsSym*                        psTab,
-   TsVar*                        psSav);
+   TsVar                         asSav[]);
 
 static int siClpFinMainOvl(
    TsHdl*                        psHdl,
    TsSym*                        psTab,
-   const TsVar*                  psSav,
+   const TsVar                   asSav[],
    const int                     siOid);
 
 static int siClpIniObj(
@@ -740,7 +741,7 @@ static int siClpIniObj(
    const int                     siPos,
    TsSym*                        psArg,
    TsSym**                       ppDep,
-   TsVar*                        psSav);
+   TsVar                         asSav[]);
 
 static int siClpFinObj(
    TsHdl*                        psHdl,
@@ -748,7 +749,7 @@ static int siClpFinObj(
    const int                     siPos,
    TsSym*                        psArg,
    TsSym*                        psDep,
-   const TsVar*                  psSav);
+   const TsVar                   asSav[]);
 
 static int siClpIniOvl(
    TsHdl*                        psHdl,
@@ -756,7 +757,7 @@ static int siClpIniOvl(
    const int                     siPos,
    TsSym*                        psArg,
    TsSym**                       ppDep,
-   TsVar*                        psSav);
+   TsVar                         asSav[]);
 
 static int siClpFinOvl(
    TsHdl*                        psHdl,
@@ -764,7 +765,7 @@ static int siClpFinOvl(
    const int                     siPos,
    TsSym*                        psArg,
    TsSym*                        psDep,
-   const TsVar*                  psSav,
+   const TsVar                   asSav[],
    const int                     siOid);
 
 static int siClpSetDefault(
@@ -4369,7 +4370,7 @@ static int siClpScnNat(
          TRACE(pfTrc,"SCANNER-TOKEN(END)-LEXEME(%s)\n",isPrnLex(psArg,pcHlp));
          return(CLPTOK_END);
       } else if (isSeparation(*(*ppCur))) { /*separation*/
-         if (piSep!=NULL) { *piSep=*(*ppCur); }
+         if (piSep!=NULL) { *piSep=(unsigned char)(*(*ppCur)); }
          if (*(*ppCur)=='\n') {
             psHdl->siRow++;
             psHdl->pcRow=(*ppCur)+1;
@@ -5467,24 +5468,55 @@ static int siFromNumberLexeme(
 {
    char*                         pcHlp=NULL;
 
-   errno=0;
    switch (pcVal[0]) {
-   case 'b':(*piVal)=strtoull(pcVal+1,&pcHlp, 2); break;
-   case 'o':(*piVal)=strtoull(pcVal+1,&pcHlp, 8); break;
-   case 'd':(*piVal)=strtoll(pcVal+1,&pcHlp,10); break;
-   case 'x':(*piVal)=strtoull(pcVal+1,&pcHlp,16); break;
-   case 't':(*piVal)=strtoll(pcVal+1,&pcHlp,10); break;
-   default: return CLPERR(psHdl,CLPERR_SEM,"Base (%c(0x%02X)) of number literal (%s.%s=%s) not supported",pcVal[0],pcVal[0],fpcPat(psHdl,siLev),psArg->psStd->pcKyw,isPrnStr(psArg,pcVal+1));
+   case 'b': {
+      errno=0;
+      unsigned long long int l=strtoull(pcVal+1,&pcHlp, 2);
+      if ((l==ULLONG_MAX && errno==ERANGE)) {
+         return CLPERR(psHdl,CLPERR_SEM,"Number (%s) of '%s.%s' cannot be converted to a valid 64 bit value (limits achieved)",isPrnStr(psArg,pcVal),fpcPat(psHdl,siLev),psArg->psStd->pcKyw);
+      }
+      (*piVal)=l;
+   } break;
+   case 'o': {
+      errno=0;
+      unsigned long long int l=strtoull(pcVal+1,&pcHlp, 8);
+      if ((l==ULLONG_MAX && errno==ERANGE)) {
+         return CLPERR(psHdl,CLPERR_SEM,"Number (%s) of '%s.%s' cannot be converted to a valid 64 bit value (limits achieved)",isPrnStr(psArg,pcVal),fpcPat(psHdl,siLev),psArg->psStd->pcKyw);
+      }
+      (*piVal)=l;
+   } break;
+   case 'd': {
+      errno=0;
+      long long int l=strtoll(pcVal+1,&pcHlp,10);
+      if ((l==LLONG_MIN || l==LLONG_MAX) && errno==ERANGE) {
+         return CLPERR(psHdl,CLPERR_SEM,"Number (%s) of '%s.%s' cannot be converted to a valid 64 bit value (limits achieved)",isPrnStr(psArg,pcVal),fpcPat(psHdl,siLev),psArg->psStd->pcKyw);
+      }
+      (*piVal)=l;
+   } break;
+   case 'x': {
+      errno=0;
+      unsigned long long int l=strtoull(pcVal+1,&pcHlp,16);
+      if ((l==ULLONG_MAX && errno==ERANGE)) {
+         return CLPERR(psHdl,CLPERR_SEM,"Number (%s) of '%s.%s' cannot be converted to a valid 64 bit value (limits achieved)",isPrnStr(psArg,pcVal),fpcPat(psHdl,siLev),psArg->psStd->pcKyw);
+      }
+      (*piVal)=l;
+   } break;
+   case 't': {
+      errno=0;
+      long long int l=strtoll(pcVal+1,&pcHlp,10);
+      if ((l==LLONG_MIN || l==LLONG_MAX) && errno==ERANGE) {
+         return CLPERR(psHdl,CLPERR_SEM,"Number (%s) of '%s.%s' cannot be converted to a valid 64 bit value (limits achieved)",isPrnStr(psArg,pcVal),fpcPat(psHdl,siLev),psArg->psStd->pcKyw);
+      }
+      (*piVal)=l;
+   } break;
+   default:
+      return CLPERR(psHdl,CLPERR_SEM,"Base (%c(0x%02X)) of number literal (%s.%s=%s) not supported",pcVal[0],pcVal[0],fpcPat(psHdl,siLev),psArg->psStd->pcKyw,isPrnStr(psArg,pcVal+1));
    }
-   if ((*piVal)==LLONG_MIN || (*piVal)==LLONG_MAX || errno==ERANGE || pcHlp==NULL || pcHlp[0]) {
+   if (pcHlp==NULL || pcHlp[0]) {
       if (pcHlp==NULL) {
          return CLPERR(psHdl,CLPERR_SEM,"Number (%s) of '%s.%s' cannot be converted to a valid 64 bit value (end pointer is NULL)",isPrnStr(psArg,pcVal),fpcPat(psHdl,siLev),psArg->psStd->pcKyw);
-      } else if (*pcHlp) {
-         return CLPERR(psHdl,CLPERR_SEM,"Number (%s) of '%s.%s' cannot be converted to a valid 64 bit value (rest: %s)",isPrnStr(psArg,pcVal),fpcPat(psHdl,siLev),psArg->psStd->pcKyw,isPrnStr(psArg,pcHlp));
-      } else if (errno){
-         return CLPERR(psHdl,CLPERR_SEM,"Number (%s) of '%s.%s' cannot be converted to a valid 64 bit value (errno: %d - %s)",isPrnStr(psArg,pcVal),fpcPat(psHdl,siLev),psArg->psStd->pcKyw,ERANGE,"Math result not representable");
       } else {
-         return CLPERR(psHdl,CLPERR_SEM,"Number (%s) of '%s.%s' cannot be converted to a valid 64 bit value (limits achieved)",isPrnStr(psArg,pcVal),fpcPat(psHdl,siLev),psArg->psStd->pcKyw);
+         return CLPERR(psHdl,CLPERR_SEM,"Number (%s) of '%s.%s' cannot be converted to a valid 64 bit value (rest: %s)",isPrnStr(psArg,pcVal),fpcPat(psHdl,siLev),psArg->psStd->pcKyw,isPrnStr(psArg,pcHlp));
       }
    }
    return(CLP_OK);
@@ -5499,24 +5531,32 @@ static int siFromFloatLexeme(
 {
    char*                         pcHlp=NULL;
 
-   errno=0;
    switch (pcVal[0]) {
-   case 'd':
-      *pfVal=strtod(pcVal+1,&pcHlp);
+   case 'd': {
+      errno=0;
+      double d=strtod(pcVal+1,&pcHlp);
+      if (d==HUGE_VAL && errno==ERANGE) {
+         return CLPERR(psHdl,CLPERR_SEM,"Floating number (%s) of '%s.%s' cannot be converted to a valid 64 bit value (limits achieved)",isPrnStr(psArg,pcVal),fpcPat(psHdl,siLev),psArg->psStd->pcKyw);
+      }
       if (pcHlp!=NULL && *pcHlp=='.') {
          char* p=pcHlp;
          *p=',';
-         *pfVal=strtod(pcVal+1,&pcHlp);
+         errno=0;
+         d=strtod(pcVal+1,&pcHlp);
+         if (d==HUGE_VAL && errno==ERANGE) {
+            return CLPERR(psHdl,CLPERR_SEM,"Floating number (%s) of '%s.%s' cannot be converted to a valid 64 bit value (limits achieved)",isPrnStr(psArg,pcVal),fpcPat(psHdl,siLev),psArg->psStd->pcKyw);
+         }
          *p='.';
       }
-      break;
+      *pfVal=d;
+   } break;
    default: return CLPERR(psHdl,CLPERR_SEM,"Base (%c(0x%02X)) of floating point literal (%s.%s=%s) not supported",pcVal[0],pcVal[0],fpcPat(psHdl,siLev),psArg->psStd->pcKyw,isPrnStr(psArg,pcVal+1));
    }
-   if (errno ||  (pcHlp!=NULL && *pcHlp)) {
-      if (pcHlp!=NULL && *pcHlp) {
-         return CLPERR(psHdl,CLPERR_SEM,"Floating number (%s) of '%s.%s' cannot be converted to a valid 64 bit value (rest: %s)",isPrnStr(psArg,pcVal),fpcPat(psHdl,siLev),psArg->psStd->pcKyw,pcHlp);
+   if (pcHlp!=NULL && *pcHlp) {
+      if (pcHlp==NULL) {
+         return CLPERR(psHdl,CLPERR_SEM,"Floating number (%s) of '%s.%s' cannot be converted to a valid 64 bit value (end pointer is NULL)",isPrnStr(psArg,pcVal),fpcPat(psHdl,siLev),psArg->psStd->pcKyw);
       } else {
-         return CLPERR(psHdl,CLPERR_SEM,"Floating number (%s) of '%s.%s' cannot be converted to a valid 64 bit value (errno: %d - %s)",isPrnStr(psArg,pcVal),fpcPat(psHdl,siLev),psArg->psStd->pcKyw,errno,pcSysError(errno));
+         return CLPERR(psHdl,CLPERR_SEM,"Floating number (%s) of '%s.%s' cannot be converted to a valid 64 bit value (rest: %s)",isPrnStr(psArg,pcVal),fpcPat(psHdl,siLev),psArg->psStd->pcKyw,isPrnStr(psArg,pcHlp));
       }
    }
    return(CLP_OK);
@@ -7068,7 +7108,7 @@ static int siClpBldLit(
 static int siClpIniMainObj(
    TsHdl*                        psHdl,
    TsSym*                        psTab,
-   TsVar*                        psSav)
+   TsVar                         asSav[])
 {
    const char*                   pcPat=fpcPat(psHdl,0);
    TsSym*                        psHlp;
@@ -7084,8 +7124,8 @@ static int siClpIniMainObj(
    }
 
    if (psHdl->pvDat!=NULL) {
-      for (psHlp=psTab;psHlp!=NULL;psHlp=psHlp->psNxt,psSav++) {
-         *psSav=*psHlp->psVar;
+      for (psHlp=psTab;psHlp!=NULL;psHlp=psHlp->psNxt,asSav++) {
+         asSav[0]=psHlp->psVar[0];
          psHlp->psVar->pvDat=((char*)psHdl->pvDat)+psHlp->psFix->siOfs;
          psHlp->psVar->pvPtr=psHlp->psVar->pvDat;
          psHlp->psVar->siCnt=0;
@@ -7105,7 +7145,7 @@ static int siClpIniMainObj(
 static int siClpFinMainObj(
    TsHdl*                        psHdl,
    TsSym*                        psTab,
-   const TsVar*                  psSav)
+   const TsVar                   asSav[])
 {
    TsSym*                        psHlp=NULL;
    int                           i;
@@ -7141,7 +7181,7 @@ static int siClpFinMainObj(
       }
    }
 
-   for (psHlp=psTab;psHlp!=NULL;psHlp=psHlp->psNxt,psSav++) { *psHlp->psVar=*psSav; }
+   for (psHlp=psTab;psHlp!=NULL;psHlp=psHlp->psNxt,asSav++) { psHlp->psVar[0]=asSav[0]; }
 
    TRACE(psHdl->pfBld,"BUILD-END-MAIN-ARGUMENT-LIST\n");
    return(CLP_OK);
@@ -7150,7 +7190,7 @@ static int siClpFinMainObj(
 static int siClpIniMainOvl(
    TsHdl*                        psHdl,
    TsSym*                        psTab,
-   TsVar*                        psSav)
+   TsVar                         asSav[])
 {
    const char*                   pcPat=fpcPat(psHdl,0);
    TsSym*                        psHlp;
@@ -7166,8 +7206,8 @@ static int siClpIniMainOvl(
    }
 
    if (psHdl->pvDat!=NULL) {
-      for (psHlp=psTab;psHlp!=NULL;psHlp=psHlp->psNxt,psSav++) {
-         *psSav=*psHlp->psVar;
+      for (psHlp=psTab;psHlp!=NULL;psHlp=psHlp->psNxt,asSav++) {
+         asSav[0]=psHlp->psVar[0];
          psHlp->psVar->pvDat=((char*)psHdl->pvDat);
          psHlp->psVar->pvPtr=psHlp->psVar->pvDat;
          psHlp->psVar->siCnt=0;
@@ -7187,7 +7227,7 @@ static int siClpIniMainOvl(
 static int siClpFinMainOvl(
    TsHdl*                        psHdl,
    TsSym*                        psTab,
-   const TsVar*                  psSav,
+   const TsVar                   asSav[],
    const int                     siOid)
 {
    TsSym*                        psHlp=NULL;
@@ -7228,7 +7268,7 @@ static int siClpFinMainOvl(
       }
    }
 
-   for (psHlp=psTab;psHlp!=NULL;psHlp=psHlp->psNxt,psSav++) { *psHlp->psVar=*psSav; }
+   for (psHlp=psTab;psHlp!=NULL;psHlp=psHlp->psNxt,asSav++) { psHlp->psVar[0]=asSav[0]; }
 
    TRACE(psHdl->pfBld,"BUILD-END-MAIN-ARGUMENT\n");
    return(CLP_OK);
@@ -7240,7 +7280,7 @@ static int siClpIniObj(
    const int                     siPos,
    TsSym*                        psArg,
    TsSym**                       ppDep,
-   TsVar*                        psSav)
+   TsVar                         asSav[])
 {
    const int                     siTyp=CLPTYP_OBJECT;
    const char*                   pcPat=fpcPat(psHdl,siLev);
@@ -7278,8 +7318,8 @@ static int siClpIniObj(
       }
    }
 
-   for (psHlp=psArg->psDep;psHlp!=NULL;psHlp=psHlp->psNxt,psSav++) {
-      *psSav=*psHlp->psVar;
+   for (psHlp=psArg->psDep;psHlp!=NULL;psHlp=psHlp->psNxt,asSav++) {
+      asSav[0]=psHlp->psVar[0];
       psHlp->psVar->pvDat=((char*)psArg->psVar->pvPtr)+psHlp->psFix->siOfs;
       psHlp->psVar->pvPtr=psHlp->psVar->pvDat;
       psHlp->psVar->siCnt=0;
@@ -7305,7 +7345,7 @@ static int siClpFinObj(
    const int                     siPos,
    TsSym*                        psArg,
    TsSym*                        psDep,
-   const TsVar*                  psSav)
+   const TsVar                   asSav[])
 {
    const int                     siTyp=CLPTYP_OBJECT;
    TsSym*                        psHlp;
@@ -7346,7 +7386,7 @@ static int siClpFinObj(
       }
    }
 
-   for (psHlp=psDep;psHlp!=NULL;psHlp=psHlp->psNxt,psSav++) { *psHlp->psVar=*psSav; }
+   for (psHlp=psDep;psHlp!=NULL;psHlp=psHlp->psNxt,asSav++) { psHlp->psVar[0]=asSav[0]; }
 
    psArg->psVar->pvPtr=((char*)psArg->psVar->pvPtr)+psArg->psFix->siSiz;
    psArg->psVar->siLen+=psArg->psFix->siSiz;
@@ -7378,7 +7418,7 @@ static int siClpIniOvl(
    const int                     siPos,
    TsSym*                        psArg,
    TsSym**                       ppDep,
-   TsVar*                        psSav)
+   TsVar                         asSav[])
 {
    const int                     siTyp=CLPTYP_OVRLAY;
    const char*                   pcPat=fpcPat(psHdl,siLev);
@@ -7416,8 +7456,8 @@ static int siClpIniOvl(
       }
    }
 
-   for (psHlp=psArg->psDep;psHlp!=NULL;psHlp=psHlp->psNxt,psSav++) {
-      *psSav=*psHlp->psVar;
+   for (psHlp=psArg->psDep;psHlp!=NULL;psHlp=psHlp->psNxt,asSav++) {
+      asSav[0]=psHlp->psVar[0];
       psHlp->psVar->pvDat=(char*)psArg->psVar->pvPtr;
       psHlp->psVar->pvPtr=psHlp->psVar->pvDat;
       psHlp->psVar->siCnt=0;
@@ -7440,7 +7480,7 @@ static int siClpFinOvl(
    const int                     siPos,
    TsSym*                        psArg,
    TsSym*                        psDep,
-   const TsVar*                  psSav,
+   const TsVar                   asSav[],
    const int                     siOid)
 {
    const int                     siTyp=CLPTYP_OVRLAY;
@@ -7485,7 +7525,7 @@ static int siClpFinOvl(
       }
    }
 
-   for (psHlp=psDep;psHlp!=NULL;psHlp=psHlp->psNxt,psSav++) { *psHlp->psVar=*psSav; }
+   for (psHlp=psDep;psHlp!=NULL;psHlp=psHlp->psNxt,asSav++) { psHlp->psVar[0]=asSav[0]; }
 
    psArg->psVar->pvPtr=((char*)psArg->psVar->pvPtr)+psArg->psFix->siSiz;
    psArg->psVar->siLen+=psArg->psFix->siSiz;

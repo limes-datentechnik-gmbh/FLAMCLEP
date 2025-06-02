@@ -79,6 +79,7 @@ static inline int flzjsy(const char* pcDat, const int* piSln, char* pcVal, int* 
 #  undef  pcSysError
 #  define pcSysError strerror
 #endif
+
 #include "CLEPUTL.h"
 
 #ifndef realloc_nowarn
@@ -869,7 +870,11 @@ extern int ebcdic_srprintc(char** buffer, size_t* size, const size_t expansion, 
    va_list  argv;
    int      r;
    size_t   h=(*buffer!=NULL)?strlen(*buffer):0;
-   size_t   s=h+strlen(format)+expansion+1;
+   site_t   l=strlen(format);
+   size_t   s=h+l+expansion+1;
+   if (s<h || s<l || s<expansion || s<1) {
+      return(-1);
+   }
    if ((*size)<s || *buffer==NULL) {
       s=(*size>s)?*size:2*s;
       char* b=(char*)realloc_nowarn(*buffer,s);
@@ -1282,8 +1287,12 @@ extern char* unEscape(const char* input, char* output)
                o[0]='&';
                i+=2; o++;
             } else if (isdigit(i[2])) {
+               errno=0;
                const char* x=i;
-               strtol(i+2,(char**)&x,10);
+               const unsigned long int l=strtoul(i+2,(char**)&x,10);
+               if (l==ULONG_MAX && errno==ERANGE) {
+                  ;//CPPCHECK
+               }
                if (x[0]==';') {
                   o[0]='&';
                   i+=2; o++;
@@ -1337,7 +1346,7 @@ extern char* unEscape(const char* input, char* output)
             o[0]=C_TLD;
             i+=5; o++;
          } else if (toupper(i[1])=='X' && isxdigit(i[2]) && isxdigit(i[3]) && i[4]==';') {
-            char h,l;
+            unsigned char h,l;
             if (toupper(i[2])>='A' && toupper(i[2])<='F') {
                h=(toupper(i[2])-'A')+10;
             } else {
@@ -1348,11 +1357,16 @@ extern char* unEscape(const char* input, char* output)
             } else {
                l=i[3]-'0';
             }
-            o[0]=(h<<4)+l;
+            o[0]=((h<<4)+l);
             i+=5; o++;
          } else if (isdigit(i[1])) {
+            errno=0;
             const char* x=i;
-            init_diachr(&stDiaChr,(unsigned int)strtol(i+1,(char**)&x,10));
+            const unsigned long int uiCcsId=strtoul(i+1,(char**)&x,10);
+            if (uiCcsId==ULONG_MAX && errno==ERANGE) {
+               ;//CPPCHECK
+            }
+            init_diachr(&stDiaChr,uiCcsId);
             if (x[0]==';') {
                i=x+1;
             } else {
@@ -1768,7 +1782,7 @@ extern const char* lng2ccsd(const char* pcLang, unsigned int isEbcdic) {
 
 extern unsigned int mapcdstr(const char* p) {
    if (p!=NULL) {
-      int o;
+      unsigned int o;
       while (1) {
          if (*p==0x00) {
             return(0);
@@ -1832,8 +1846,8 @@ extern unsigned int mapcdstr(const char* p) {
             p+=3; if (p[0]=='-' || p[0]=='_') { p++; }
             if (p[0]=='8' && p[1]=='8' && p[2]=='5'  && p[3]=='9') { /*ISO-8859-xx*/
                p+=4; if (p[0]=='-' || p[0]=='_') { p++; }
-               for (o=0;isdigit(p[0]);p++) {
-                  o=(o*10)+(p[0]-'0');
+               for (o=0;isdigit((unsigned char)p[0]);p++) {
+                  o=(o*10)+((unsigned char)p[0]-(unsigned char)'0');
                }
                if (p[0]==0x00 || isspace(p[0])) {
                   switch (o) {
@@ -1892,13 +1906,13 @@ extern unsigned int mapcdstr(const char* p) {
             } else  { return 0; }
          } else if (toupper(p[0])=='C' && toupper(p[1])=='P') { /*CP-125x*/
             p+=2; if (p[0]=='-') { p++; }
-            if (p[0]=='1' && p[1]=='2' && p[2]=='5' && isdigit(p[3]) && (p[4]==0x00 || isspace(p[4]))) {
+            if (p[0]=='1' && p[1]=='2' && p[2]=='5' && isdigit((unsigned char)p[3]) && (p[4]==0x00 || isspace(p[4]))) {
                return(1250+(p[3]-'0'));
             } else  { return 0; }
          } else if (toupper(p[0])=='I' && toupper(p[1])=='B'  && toupper(p[2])=='M') { /*IBM-xxxx*/
             p+=3; if (p[0]=='-' || p[0]=='_') { p++; }
-            for (o=0;isdigit(p[0]);p++) {
-               o=(o*10)+(p[0]-'0');
+            for (o=0;isdigit((unsigned char)p[0]);p++) {
+               o=(o*10)+((unsigned char)p[0]-(unsigned char)'0');
             }
             if ((p[0]==0x00 || isspace(p[0])) && o && o<65536) { return (o); } else { return(0); }
          } else if (toupper(p[0])=='U' && toupper(p[1])=='S') { /*US-ASCII*/
@@ -1980,13 +1994,13 @@ extern unsigned int mapcdstr(const char* p) {
             } else  { return 0; }
          } else if (toupper(p[0])=='D' && toupper(p[1])=='I'  && toupper(p[2])=='N') { /*DIN-xxxx*/
             p+=3; if (p[0]=='-' || p[0]=='_') { p++; }
-            for (o=0;isdigit(p[0]);p++) {
-               o=(o*10)+(p[0]-'0');
+            for (o=0;isdigit((unsigned char)p[0]);p++) {
+               o=(o*10)+((unsigned char)p[0]-(unsigned char)'0');
             }
             if ((p[0]==0x00 || isspace(p[0])) && o == 66003) { return (o); } else { return(0); }
-         } else if (isdigit(p[0])) { /*CCSID*/
-            for (o=(p[0]-'0'),p++;isdigit(p[0]);p++) {
-               o=(o*10)+(p[0]-'0');
+         } else if (isdigit((unsigned char)p[0])) { /*CCSID*/
+            for (o=((unsigned char)p[0]-(unsigned char)'0'),p++;isdigit((unsigned char)p[0]);p++) {
+               o=(o*10)+((unsigned char)p[0]-(unsigned char)'0');
             }
             if ((p[0]==0x00 || isspace(p[0])) && o<65536) {
                return(o);
@@ -3095,8 +3109,9 @@ extern int srprintc(char** buffer,size_t* size,const size_t expansion,const char
    va_list  argv;
    int      r;
    size_t   h=(*buffer!=NULL)?strlen(*buffer):0;
-   size_t   s=h+strlen(format)+expansion+1;
-   if (s < h || s < expansion) { // overflow
+   size_t   l=strlen(format);
+   size_t   s=h+l+expansion+1;
+   if (s < h || s<l || s < expansion || s<1) { // overflow
       return -1;
    }
    if ((*size)<s || *buffer==NULL) {
@@ -3118,7 +3133,7 @@ extern int srprintf(char** buffer,size_t* size,const size_t expansion,const char
    int      r;
    size_t   flen = strlen(format);
    size_t   s=flen+expansion+1;
-   if (s < flen || s < expansion) {
+   if (s < flen || s < expansion || s<1) {
       return -1;
    }
    if ((*size)<s || *buffer==NULL) {
@@ -4034,13 +4049,13 @@ extern int strxcmp(
    const int            f)
 {
    if (ca) {
-      int d=*s1-*s2;
+      int d=(unsigned char)s1[0]-(unsigned char)s2[0];
       if (n) {
          if (c==-1) {
             int i=0;
             while (d==0 && *s1!=0 && *s2!=0 && isKyw(*s1) && isKyw(*s2)) {
                s1++; s2++; i++;
-               d=*s1-*s2;
+               d=(unsigned char)s1[0]-(unsigned char)s2[0];
             }
             if (i<n) { return(n-i); }
             if (f && (!isKyw(*s1) || !isKyw(*s2))) { return(0); }
@@ -4048,13 +4063,13 @@ extern int strxcmp(
             int i=1;
             while (d==0 && *s1!=0 && *s2!=0 && i<n) {
                s1++; s2++; i++;
-               d=*s1-*s2;
+               d=(unsigned char)s1[0]-(unsigned char)s2[0];
             }
          } else {
             int i=0;
             while (d==0 && *s1!=0 && *s2!=0 && *s1!=c && *s2!=c) {
                s1++; s2++; i++;
-               d=*s1-*s2;
+               d=(unsigned char)s1[0]-(unsigned char)s2[0];
             }
             if (i<n) { return(n-i); }
             if (f && (*s1==c || *s2==c)) { return(0); }
@@ -4064,18 +4079,18 @@ extern int strxcmp(
          if (c==-1) {
             while (d==0 && *s1!=0 && *s2!=0 && isKyw(*s1) && isKyw(*s2)) {
                s1++; s2++;
-               d=*s1-*s2;
+               d=(unsigned char)s1[0]-(unsigned char)s2[0];
             }
             if (f && (!isKyw(*s1) || !isKyw(*s2))) { return(0); }
          } else if (c==0) {
             while (d==0 && *s1!=0 && *s2!=0) {
                s1++; s2++;
-               d=*s1-*s2;
+               d=(unsigned char)s1[0]-(unsigned char)s2[0];
             }
          } else {
             while (d==0 && *s1!=0 && *s2!=0 && *s1!=c && *s2!=c) {
                s1++; s2++;
-               d=*s1-*s2;
+               d=(unsigned char)s1[0]-(unsigned char)s2[0];
             }
             if (f && (*s1==c || *s2==c)) { return(0); }
          }
