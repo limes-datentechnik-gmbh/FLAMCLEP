@@ -814,8 +814,8 @@
 // Either use the macros from stdbool.h or put the below defines in a separte header BOOL.h
 // and includ it where needed.
 
-#ifndef __PRINTF_CHECK__
-#  define __PRINTF_CHECK__(A,B)
+#ifndef PRINTF_CHECK
+#  define PRINTF_CHECK(A,B)
 #endif
 
 
@@ -831,8 +831,8 @@
    #define EOS             (0x00)
 #endif
 
-#ifndef __PRINTF_CHECK__
-#  define __PRINTF_CHECK__(A,B)
+#ifndef PRINTF_CHECK
+#  define PRINTF_CHECK(A,B)
 #endif
 /*! @endcond */
 
@@ -1044,7 +1044,7 @@ extern char* dynUnEscape(const char* input);
  * @param format  format string
  * @return        amount of characters printed (0 are mainly a error)
  */
-extern int printd(const char* format,...) __PRINTF_CHECK__(1, 2);
+extern int printd(const char* format,...) PRINTF_CHECK(1, 2);
 
 /**
  * Works like snprintf but concatenates the format string to the buffer.
@@ -1053,7 +1053,7 @@ extern int printd(const char* format,...) __PRINTF_CHECK__(1, 2);
  * @param format  format string
  * @return        amount of characters printed (0 are mainly a error)
  */
-extern int snprintc(char* buffer,const size_t size,const char* format,...) __PRINTF_CHECK__(3, 4);
+extern int snprintc(char* buffer,const size_t size,const char* format,...) PRINTF_CHECK(3, 4);
 
 /**
  * Works like snprintc but does reallocation of the buffer (maximal expansion of the format string can be specified).
@@ -1063,7 +1063,7 @@ extern int snprintc(char* buffer,const size_t size,const char* format,...) __PRI
  * @param format    format string
  * @return          amount of characters printed (0 are mainly a error)
  */
-extern int srprintc(char** buffer,size_t* size,const size_t expansion,const char* format,...) __PRINTF_CHECK__(4, 5);
+extern int srprintc(char** buffer,size_t* size,const size_t expansion,const char* format,...) PRINTF_CHECK(4, 5);
 
 /**
  * Works like snprintc but does reallocation of the buffer (maximal expansion of the format string can be specified).
@@ -1073,7 +1073,7 @@ extern int srprintc(char** buffer,size_t* size,const size_t expansion,const char
  * @param format    format string
  * @return          amount of characters printed (0 are mainly a error)
  */
-extern int srprintf(char** buffer,size_t* size,const size_t expansion,const char* format,...) __PRINTF_CHECK__(4, 5);
+extern int srprintf(char** buffer,size_t* size,const size_t expansion,const char* format,...) PRINTF_CHECK(4, 5);
 
 /**
  * Prints man pages to a file, inserting owner, program name, build number, state and date into placeholders
@@ -1553,10 +1553,10 @@ extern void          init_diachr(TsDiaChr* psDiaChr,const unsigned int uiCcsId);
 
 extern TsDiaChr      gsDiaChr;
 
-extern int           ebcdic_srprintc(char** buffer, size_t* size, const size_t expansion, const char* format, ...) __PRINTF_CHECK__(4, 5);
-extern int           ebcdic_snprintf(char* string, size_t size, const char* format, ...) __PRINTF_CHECK__(3, 4);
-extern int           ebcdic_sprintf(char* string, const char* format, ...) __PRINTF_CHECK__(2, 3);
-extern int           ebcdic_fprintf(FILE* file, const char* format, ...) __PRINTF_CHECK__(2, 3);
+extern int           ebcdic_srprintc(char** buffer, size_t* size, const size_t expansion, const char* format, ...) PRINTF_CHECK(4, 5);
+extern int           ebcdic_snprintf(char* string, size_t size, const char* format, ...) PRINTF_CHECK(3, 4);
+extern int           ebcdic_sprintf(char* string, const char* format, ...) PRINTF_CHECK(2, 3);
+extern int           ebcdic_fprintf(FILE* file, const char* format, ...) PRINTF_CHECK(2, 3);
 
 extern char          init_char(const char* p);
 extern const char*   init_string(const char* p);
