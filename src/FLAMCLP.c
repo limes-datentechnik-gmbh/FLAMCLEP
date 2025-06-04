@@ -43,14 +43,17 @@
 
 #ifdef __FL5__
 //#  define __HEAP_STATISTIC__
-#  include "GBLSTD.h"
+#  include "STDIOL.h"
+#  include "STDLIBL.h"
+#  include "STRINGL.h"
+#  include "CHKMEM.h"
 #else
 #  undef  pcSysError
 #  define pcSysError strerror
-#  undef  flclose
-#  define flclose  fclose
-#  undef  flflush
-#  define flflush  fflush
+#  undef  fclose_unchecked
+#  define fclose_unchecked  fclose
+#  undef  fflush_unchecked
+#  define fflush_unchecked  fflush
 #  undef  strtoI32
 #  define strtoI32(s,b) ((signed int)strtol((s),NULL,(b)))
 #  undef  strtoU32
@@ -274,7 +277,7 @@
       char acTs[24];\
       fprintf((f), "%s ", cstime(0, acTs));\
       efprintf((f), __VA_ARGS__);\
-      flflush((f));\
+      fflush_unchecked((f));\
    }\
 } while (0)
 
@@ -3515,7 +3518,7 @@ static void vdClpSymPrn(
             cstime(0,acTs),fpcPre(psHdl,siLev),psHlp->psStd->siPos+1,psHlp->psStd->pcKyw,psHlp->psStd->siKwl,pcMapClpTyp(psHlp->psFix->siTyp),psHlp->psFix->siMin,psHlp->psFix->siMax,psHlp->psFix->siSiz,
             psHlp->psFix->siOfs,psHlp->psFix->siOid,psHlp->psStd->uiFlg,psHlp->psNxt,psHlp->psBak,psHlp->psDep,psHlp->psHih,psHlp->psStd->psAli,psHlp->psFix->psCnt,psHlp->psFix->psOid,
             psHlp->psFix->psInd,psHlp->psFix->psEln,psHlp->psFix->psSln,psHlp->psFix->psTln,psHlp->psFix->psLnk,psHlp->psFix->pcHlp);
-         flflush(psHdl->pfSym);
+         fflush_unchecked(psHdl->pfSym);
       }
       if (psHlp->psDep!=NULL) {
          vdClpSymPrn(psHdl,siLev+1,psHlp->psDep);
@@ -3530,10 +3533,10 @@ static void vdClpSymTrc(
    if (psHdl->pfSym!=NULL) {
       char acTs[24];
       fprintf(psHdl->pfSym,"%s BEGIN-SYMBOL-TABLE-TRACE\n",cstime(0,acTs));
-      flflush(psHdl->pfSym);
+      fflush_unchecked(psHdl->pfSym);
       vdClpSymPrn(psHdl,0,psHdl->psTab);
       fprintf(psHdl->pfSym,"%s END-SYMBOL-TABLE-TRACE\n",cstime(0,acTs));
-      flflush(psHdl->pfSym);
+      fflush_unchecked(psHdl->pfSym);
    }
 }
 

@@ -814,11 +814,6 @@
 // Either use the macros from stdbool.h or put the below defines in a separte header BOOL.h
 // and includ it where needed.
 
-#ifndef PRINTF_CHECK
-#  define PRINTF_CHECK(A,B)
-#endif
-
-
 #ifndef TRUE
 #  define TRUE             (1)
 #endif
@@ -829,10 +824,6 @@
 
 #ifndef EOS
    #define EOS             (0x00)
-#endif
-
-#ifndef PRINTF_CHECK
-#  define PRINTF_CHECK(A,B)
 #endif
 /*! @endcond */
 
@@ -902,7 +893,7 @@ extern long long getFileSize(const char* name);
    extern int   remove_hfq(const char* name);
 #else
 #  define fopen_tmp()            tmpfile()
-#  define fclose_tmp(fp)         flclose((fp))
+#  define fclose_tmp(fp)         fclose_unchecked((fp))
 #  define remove_hfq(n)          remove(n)
 #endif
 

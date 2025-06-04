@@ -50,12 +50,12 @@
 /* Include eigener Bibliotheken  **************************************/
 
 #ifdef __FL5__
-#  include "GBLSTD.h"
+#  include "STDIOL.h"
+#  include "STRINGL.h"
+#  include "CHKMEM.h"
 #else
-#  undef  flclose
-#  define flclose  fclose
-#  undef  flflush
-#  define flflush  fflush
+#  undef  fclose_unchecked
+#  define fclose_unchecked  fclose
 #  undef  pcSysError
 #  define pcSysError strerror
 #endif
@@ -756,7 +756,7 @@ static inline TsCnfHdl* psOpenConfig(FILE* pfOut, FILE* pfErr, const char* pcHom
                fprintf(pfOut,"%s Use default configuration file (%s) in home directory\n",cstime(0,acTs),pcFil);
             }
          } else {
-            flclose(pfTmp);
+            fclose_unchecked(pfTmp);
             if (pfOut!=NULL) {
                char  acTs[24];
                fprintf(pfOut,"%s Use existing configuration file (%s) in working directory\n",cstime(0,acTs),pcFil);
@@ -3513,8 +3513,8 @@ static int siClePropertyFinish(
    }
 
    siErr=siClpProperties(pvHdl,CLPPRO_MTD_CMT,10,pcCmd,pfPro);
-   vdClpClose(pvHdl,CLPCLS_MTD_ALL); flclose(pfPro);
-   if (siErr<0) {
+   vdClpClose(pvHdl,CLPCLS_MTD_ALL);
+   if (fclose(pfPro) || siErr<0) {
       if (pfErr!=NULL) { fprintf(pfErr,"Write property file (%s) for command '%s' failed (%d-%s)\n",pcHlp,pcCmd,errno,pcSysError(errno)); }
       SAFE_FREE(pcHlp); SAFE_FREE(pcEnv);
       return(CLERTC_SYN);
@@ -3741,9 +3741,9 @@ static int siCleEndExecution(
    char*                         pcBuf)
 {
    if (psCnf!=NULL) { vdCnfCls(psCnf); }
-   if (pfTrc!=NULL) { flclose(pfTrc); }
-   if (pfDoc!=NULL) { flclose(pfDoc); }
-   if (pfPro!=NULL) { flclose(pfPro); }
+   if (pfTrc!=NULL) { fclose_unchecked(pfTrc); }
+   if (pfDoc!=NULL) { fclose_unchecked(pfDoc); }
+   if (pfPro!=NULL) { fclose_unchecked(pfPro); }
    if (ppArg!=NULL) { free(ppArg); }
    if (pvHdl!=NULL) { vdClpClose(pvHdl,CLPCLS_MTD_ALL); }
    if (pcBuf!=NULL) { free(pcBuf); }
@@ -4330,7 +4330,7 @@ static TsCnfHdl* psCnfOpn(
             psEnt=(TsCnfEnt*)calloc(1,sizeof(TsCnfEnt));
             if (psEnt==NULL) {
                if (pfErr!=NULL) { fprintf(pfErr,"Memory allocation for configuration data element failed\n"); }
-               flclose(pfFil);
+               fclose_unchecked(pfFil);
                vdCnfCls(psHdl);
                return(NULL);
             }
@@ -4341,7 +4341,7 @@ static TsCnfHdl* psCnfOpn(
                if (psEnt->pcKyw==NULL || psEnt->pcVal==NULL) {
                   if (pfErr!=NULL) { fprintf(pfErr,"Memory allocation for configuration data (%s=%s) failed\n",pcKyw,pcVal); }
                   free(psEnt);
-                  flclose(pfFil);
+                  fclose_unchecked(pfFil);
                   vdCnfCls(psHdl);
                   return(NULL);
                }
@@ -4365,7 +4365,7 @@ static TsCnfHdl* psCnfOpn(
       }
    }
 
-   flclose(pfFil);
+   fclose_unchecked(pfFil);
    return(psHdl);
 }
 
@@ -4577,7 +4577,9 @@ static void vdCnfCls(
          free(psEnt->pcVal);
          free(psEnt);
       }
-      if (pfFil!=NULL) { flclose(pfFil); }
+      if (pfFil!=NULL) {
+         fclose_unchecked(pfFil);
+      }
       free(psHdl);
    }
 }

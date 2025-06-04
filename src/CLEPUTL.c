@@ -70,12 +70,14 @@ static inline int flzjsy(const char* pcDat, const int* piSln, char* pcVal, int* 
 #endif
 
 #ifdef __FL5__
-#  include "GBLSTD.h"
+#  include "STDIOL.h"
+#  include "STRINGL.h"
+#  include "CHKMEM.h"
 #else
-#  undef  flclose
-#  define flclose  fclose
-#  undef  flflush
-#  define flflush  fflush
+#  undef  fclose_unchecked
+#  define fclose_unchecked  fclose
+#  undef  fflush_unchecked
+#  define fflush_unchecked  fflush
 #  undef  pcSysError
 #  define pcSysError strerror
 #endif
@@ -203,7 +205,7 @@ static inline int flzjsy(const char* pcDat, const int* piSln, char* pcVal, int* 
                   acMode[0]='r';
                   f=fopen(name, acMode);
                   if (f!=NULL) {
-                     flclose(f);
+                     fclose_unchecked(f);
                      acMode[0]=m;
                      pcRecfm[0]=r;
                   } else {
@@ -247,7 +249,7 @@ static inline int flzjsy(const char* pcDat, const int* piSln, char* pcVal, int* 
                   acMode[0]='r';
                   f=fopen_nowarn(name, acMode);
                   if (f!=NULL) {
-                     flclose(f);
+                     fclose_unchecked(f);
                      acMode[0]=m;
                      pcRecfm[0]=r;
                   } else {
@@ -378,7 +380,7 @@ static inline int flzjsy(const char* pcDat, const int* piSln, char* pcVal, int* 
       char     fn[FILENAME_MAX]="";
       fldata_t fi={0};
       fldata((fp),fn,&fi);
-      r=flclose((fp));
+      r=fclose((fp));
       remove(fn);
       return(r);
    }
@@ -3076,7 +3078,7 @@ extern int printd(const char* format,...)
    va_start(argv, format);
    r=vfprintf (stderr, format, argv );
    va_end(argv);
-   flflush(stderr);
+   fflush_unchecked(stderr);
    return r;
 #else
    (void)format;
@@ -3947,7 +3949,7 @@ extern int file2str(const void* hdl, const char* filename, char** buf, int* bufs
             if (errmsg!=NULL && msgsiz) {
                snprintf(errmsg,msgsiz,"File (%s) is too big (integer overflow)",filename);
             }
-            flclose(pfFile);
+            fclose_unchecked(pfFile);
             return -3; // integer overflow
          }
          siHlp=*bufsize+freadLen*2+1;
@@ -3956,7 +3958,7 @@ extern int file2str(const void* hdl, const char* filename, char** buf, int* bufs
             if (errmsg!=NULL && msgsiz) {
                snprintf(errmsg,msgsiz,"Allocation of memory to read file (%s) failed",filename);
             }
-            flclose(pfFile);
+            fclose_unchecked(pfFile);
             return -4; // realloc failed
          }
          *bufsize=siHlp;
@@ -3968,10 +3970,10 @@ extern int file2str(const void* hdl, const char* filename, char** buf, int* bufs
       if (errmsg!=NULL && msgsiz) {
          snprintf(errmsg,msgsiz,"Read of file (%s) to string in memory failed (%d - %s)",filename,errno,pcSysError(errno));
       }
-      flclose(pfFile);
+      fclose_unchecked(pfFile);
       return -5; // read error
    }
-   flclose(pfFile);
+   fclose_unchecked(pfFile);
    if (*buf!=NULL) {// empty file
       (*buf)[siLen]='\0';
    }
@@ -4411,7 +4413,7 @@ extern int readEnvars(const char* pcFil, FILE* pfOut, FILE* pfErr, TsEnVarList**
 // read the file into buffer
       // cppcheck-suppress knownConditionTrueFalse
       if (pcBuf==NULL) {
-         flclose(pfTmp);
+         fclose_unchecked(pfTmp);
          return(-1*CLERTC_MEM);
       }
       uiLen=fread(pcBuf+uiPos,1,4096,pfTmp);
@@ -4420,7 +4422,7 @@ extern int readEnvars(const char* pcFil, FILE* pfOut, FILE* pfErr, TsEnVarList**
          pcHlp=realloc(pcBuf,uiSiz+1);
          if (pcHlp==NULL) {
             free(pcBuf);
-            flclose(pfTmp);
+            fclose_unchecked(pfTmp);
             return(-1*CLERTC_MEM);
          }
          pcBuf=pcHlp; uiPos+=uiLen;
@@ -4432,7 +4434,7 @@ extern int readEnvars(const char* pcFil, FILE* pfOut, FILE* pfErr, TsEnVarList**
       }
       uiLen+=uiPos;
       pcBuf[uiLen]=0x00;
-      flclose(pfTmp);
+      fclose_unchecked(pfTmp);
       // load the environment
       c=loadEnvars(uiLen,pcBuf,pfOut,pfErr,ppList);
       free(pcBuf);
