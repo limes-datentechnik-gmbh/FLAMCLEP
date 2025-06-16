@@ -5555,7 +5555,7 @@ static int siFromFloatLexeme(
    } break;
    default: return CLPERR(psHdl,CLPERR_SEM,"Base (%c(0x%02X)) of floating point literal (%s.%s=%s) not supported",pcVal[0],pcVal[0],fpcPat(psHdl,siLev),psArg->psStd->pcKyw,isPrnStr(psArg,pcVal+1));
    }
-   if (pcHlp!=NULL && *pcHlp) {
+   if (pcHlp==NULL || pcHlp[0]) {
       if (pcHlp==NULL) {
          return CLPERR(psHdl,CLPERR_SEM,"Floating number (%s) of '%s.%s' cannot be converted to a valid 64 bit value (end pointer is NULL)",isPrnStr(psArg,pcVal),fpcPat(psHdl,siLev),psArg->psStd->pcKyw);
       } else {
