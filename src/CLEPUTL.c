@@ -4150,13 +4150,17 @@ extern int strxcmp(
 }
 
 extern char* cstime(signed long long t, char* p) {
-   static char       acBuf[20];
+   static char       acBuf[24];
    char*             pcStr=(p!=NULL)?p:acBuf;
-   time_t            h=(t)?(time_t)t:time(NULL);
+   time_t            h=(t>0)?(time_t)t:time(NULL);
    struct tm         st;
    const struct tm*  x=localtime_r(&h,&st);
    if (x!=NULL) {
-      strftime(pcStr,sizeof(acBuf),"%Y-%m-%d %H:%M:%S",x);
+      if (t==-1LL) {
+         strftime(pcStr,sizeof(acBuf),"%Y-%m-%dT%H:%M:%SZ",x);
+      } else {
+         strftime(pcStr,sizeof(acBuf),"%Y-%m-%d %H:%M:%S",x);
+      }
    } else {
       snprintf(acBuf,sizeof(acBuf),"NO-VALID-TIME-FOUND");
    }
