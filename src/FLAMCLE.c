@@ -2933,7 +2933,7 @@ EVALUATE:
       ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
    } else if (asBif[CLE_BUILTIN_IDX_GETOWNER].isBif && strxcmp(isCas,argv[1],"GETOWNER",0,0,FALSE)==0) {
       if (argc==2) {
-         if (pfOut!=NULL) { fprintf(pfOut,"Current owner id for '%s' is: ",argv[0]); }
+         if (pfOut!=NULL) { fprintf(pfOut,"Current owner id for '%s' is:\n",argv[0]); }
          fprintf(pfStd,"%s\n",pcOwn);
          ERROR(CLERTC_OK,NULL);
       }
