@@ -168,11 +168,12 @@
  * 1.4.88: Correct support for command overlays
  * 1.4.89: Support environment variables CLE_MAX/MIN_CC
  * 1.4.90: Fix handling of owner and MAX/MINCC (make it independent of default command)
+ * 1.4.91: Use always stdout for pfStd
  */
-#define CLE_VSN_STR       "1.4.90"
+#define CLE_VSN_STR       "1.4.91"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        4
-#define CLE_VSN_REVISION       90
+#define CLE_VSN_REVISION       91
 
 /* Definition der Konstanten ******************************************/
 
@@ -1395,7 +1396,7 @@ extern int siCleExecute(
    void*                         pvHdl=NULL;
    FILE*                         pfDoc=NULL;
    FILE*                         pfPro=NULL;
-   FILE*                         pfStd=(pfOut!=NULL)?pfOut:stderr;
+   FILE*                         pfStd=stdout;
    FILE*                         pfErr=(pfOut!=NULL)?pfOut:stderr;
    char**                        ppArg=NULL;
    size_t                        szFil=0;
@@ -3023,38 +3024,36 @@ EVALUATE:
    } else if (asBif[CLE_BUILTIN_IDX_LSTENV].isBif && strxcmp(isCas,argv[1],"LSTENV",0,0,FALSE)==0) {
       if (argc==2) {
          if (pfOut!=NULL) { fprintf(pfOut,"Status for all possible usable environment variables:\n"); }
-         if (pfStd!=NULL) {
-            for (const TsClpArgument* p=psEnvTab;p!=NULL && p->pcKyw!=NULL;p++) {
-               char        acEnv[1024];
-               const C08*  pcTmp=GETENV(p->pcKyw);
-               if (pcTmp!=NULL) {
-                  const TsClpArgument* psArg=psClpFindArgument(isCas,siMkl,pcTmp,p->psTab);
-                  U32                  isList=(p->psTab!=NULL)?TRUE:FALSE;
-                  U32                  isMatch=(psArg!=NULL)?TRUE:FALSE;
-                  fprintf(pfStd,"%s=%s",p->pcKyw,pcTmp);
-                  if (isList && isMatch==FALSE) {
-                     if (CLPISF_SEL(p->uiFlg)) {
-                        fprintf(pfStd," (invalid value defined (valid are: ");
-                     } else {
-                        fprintf(pfStd," (free value defined (possible also: ");
-                     }
-                     for (const TsClpArgument* s=p->psTab; s!=NULL && s->pcKyw!=NULL; s++) {
-                        if (s==p->psTab) {
-                           fprintf(pfStd,"%s",s->pcKyw);
-                        } else {
-                           fprintf(pfStd,"/%s",s->pcKyw);
-                        }
-                     }
-                     fprintf(pfStd,"))");
-                  }
-                  fprintf(pfStd,"\n");
-               } else {
-                  pcTmp=getenvar(p->pcKyw,0,sizeof(acEnv),acEnv);
-                  if (pcTmp!=NULL) {
-                     fprintf(pfStd,"* %s (%s) -> is undefined but default for replacement\n",p->pcKyw,pcTmp);
+         for (const TsClpArgument* p=psEnvTab;p!=NULL && p->pcKyw!=NULL;p++) {
+            char        acEnv[1024];
+            const C08*  pcTmp=GETENV(p->pcKyw);
+            if (pcTmp!=NULL) {
+               const TsClpArgument* psArg=psClpFindArgument(isCas,siMkl,pcTmp,p->psTab);
+               U32                  isList=(p->psTab!=NULL)?TRUE:FALSE;
+               U32                  isMatch=(psArg!=NULL)?TRUE:FALSE;
+               fprintf(pfStd,"%s=%s",p->pcKyw,pcTmp);
+               if (isList && isMatch==FALSE) {
+                  if (CLPISF_SEL(p->uiFlg)) {
+                     fprintf(pfStd," (invalid value defined (valid are: ");
                   } else {
-                     fprintf(pfStd,"* %s -> is undefined\n",p->pcKyw);
+                     fprintf(pfStd," (free value defined (possible also: ");
                   }
+                  for (const TsClpArgument* s=p->psTab; s!=NULL && s->pcKyw!=NULL; s++) {
+                     if (s==p->psTab) {
+                        fprintf(pfStd,"%s",s->pcKyw);
+                     } else {
+                        fprintf(pfStd,"/%s",s->pcKyw);
+                     }
+                  }
+                  fprintf(pfStd,"))");
+               }
+               fprintf(pfStd,"\n");
+            } else {
+               pcTmp=getenvar(p->pcKyw,0,sizeof(acEnv),acEnv);
+               if (pcTmp!=NULL) {
+                  fprintf(pfStd,"* %s (%s) -> is undefined but default for replacement\n",p->pcKyw,pcTmp);
+               } else {
+                  fprintf(pfStd,"* %s -> is undefined\n",p->pcKyw);
                }
             }
          }
