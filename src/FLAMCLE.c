@@ -1445,26 +1445,6 @@ extern int siCleExecute(
       CLEBIF_CLS
    };
 
-   if (psEnv==NULL) {
-      psEnvTab=asCleEnvVarTab;
-   } else {
-      psEnvTab=psEnv;
-   }
-
-   for (const TsClpArgument* p=psEnvTab;p!=NULL && p->pcKyw!=NULL;p++) {
-      if (p->pcHlp==NULL || *p->pcHlp==0x00) {
-         if (pfErr!=NULL) { fprintf(pfErr,"Help message for environment variable '%s' is not defined\n",p->pcKyw); }
-         return(CLERTC_TAB);
-      }
-      if (p->pcDft!=NULL) {
-         if (GETENV(p->pcKyw)==NULL) {
-            if (SETENV(p->pcKyw,p->pcDft)) {
-               if (pfErr!=NULL) { fprintf(pfErr,"Put default value for variable (%s=%s) to environment failed (%d - %s)\n",p->pcKyw,p->pcDft,errno,pcSysError(errno)); }
-            }
-         }
-      }
-   }
-
    if (argc>0) {
       if (strxcmp(isCas,argv[argc-1],"SILENT",0,0,FALSE)==0) {
          pfErr=NULL;
@@ -1485,6 +1465,26 @@ extern int siCleExecute(
    if (CHECK_ENVAR_ON("CLE_QUIET")) {
       pfErr=pfOut;
       pfOut=NULL;
+   }
+
+   if (psEnv==NULL) {
+      psEnvTab=asCleEnvVarTab;
+   } else {
+      psEnvTab=psEnv;
+   }
+
+   for (const TsClpArgument* p=psEnvTab;p!=NULL && p->pcKyw!=NULL;p++) {
+      if (p->pcHlp==NULL || *p->pcHlp==0x00) {
+         if (pfErr!=NULL) { fprintf(pfErr,"Help message for environment variable '%s' is not defined\n",p->pcKyw); }
+         return(CLERTC_TAB);
+      }
+      if (p->pcDft!=NULL) {
+         if (GETENV(p->pcKyw)==NULL) {
+            if (SETENV(p->pcKyw,p->pcDft)) {
+               if (pfErr!=NULL) { fprintf(pfErr,"Put default value for variable (%s=%s) to environment failed (%d - %s)\n",p->pcKyw,p->pcDft,errno,pcSysError(errno)); }
+            }
+         }
+      }
    }
 
    if (psCmd==NULL || argc==0     || argv==NULL  ||  pcOwner==NULL ||  pcProgram==NULL ||  pcHlp==NULL ||
