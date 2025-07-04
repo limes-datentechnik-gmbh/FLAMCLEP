@@ -3101,9 +3101,8 @@ extern int snprintc(char* buffer,size_t size,const char* format,...)
       } else {
          return(h+r);
       }
-   } else {
-      return (0);
    }
+   return (h);
 }
 
 extern int srprintc(char** buffer,size_t* size,const size_t expansion,const char* format,...)

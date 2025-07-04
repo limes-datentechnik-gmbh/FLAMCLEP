@@ -1042,7 +1042,7 @@ extern int printd(const char* format,...) PRINTF_CHECK(1, 2);
  * @param buffer  pointer to the string buffer
  * @param size    size of the string buffer
  * @param format  format string
- * @return        amount of characters printed (0 are mainly a error)
+ * @return        amount of characters in the new string after append, negativ in case of error
  */
 extern int snprintc(char* buffer,const size_t size,const char* format,...) PRINTF_CHECK(3, 4);
 
