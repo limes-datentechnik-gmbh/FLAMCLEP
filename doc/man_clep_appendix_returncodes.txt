@@ -43,7 +43,8 @@ The command line is interpreted by CLE the command string by CLP. For example:
  
 A command execution (run) will return 0 or 1 on success, 4 if a warning
 occurs (only some of the files converted), 8 in case of an error or
-special condition codes greater then 64 can be returned.
+odd special condition codes or special condition codes greater then 64
+can be returned.
 
 If the command execution was successful (return code 0) but a relevant
 warnings was logged then the return code is 1 (anything was fine, but
