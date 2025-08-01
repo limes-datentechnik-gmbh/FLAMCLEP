@@ -3340,7 +3340,7 @@ static int siClpSymCal(
             return CLPERR(psHdl,CLPERR_TAB,"Required keyword length (%d) of argument '%s.%s' is smaller or equal to zero",psSym->psStd->siKwl,fpcPat(psHdl,siLev),psArg->psStd->pcKyw);
          }
          if (psSym->psStd->siKwl>(int)strlen(psSym->psStd->pcKyw)) {
-            return CLPERR(psHdl,CLPERR_TAB,"Required keyword length (%d) of argument '%s.%s' is greater then keyword length",psSym->psStd->siKwl,fpcPat(psHdl,siLev),psArg->psStd->pcKyw);
+            return CLPERR(psHdl,CLPERR_TAB,"Required keyword length (%d) of argument '%s.%s' is greater than keyword length",psSym->psStd->siKwl,fpcPat(psHdl,siLev),psArg->psStd->pcKyw);
          }
       }
       if (CLPISF_ALI(psSym->psStd->uiFlg)) {
