@@ -386,11 +386,25 @@ static inline int flzjsy(const char* pcDat, const int* piSln, char* pcVal, int* 
    }
    extern int remove_hfq(const char* name) {
       if (ISPATHNAME(name) || ISDDNAME(name) || name[0]=='\'' || name[0]=='(') {
-         return(remove(name));
+         int e=remove(name);
+         if (e && name[0]=='\'') {
+            char h2[strlen(name)+3];
+            snprintf(h2,sizeof(h2),"//%s",name);
+            return(remove(h2));
+         } else {
+            return(e);
+         }
       } else {
-         char help[strlen(name)+3];
-         snprintf(help,sizeof(help),"'%s'",name);
-         return(remove(help));
+         char h1[strlen(name)+3];
+         snprintf(h1,sizeof(h1),"'%s'",name);
+         int e=remove(h1);
+         if (e) {
+            char h2[strlen(h1)+3];
+            snprintf(h2,sizeof(h2),"//%s",h1);
+            return(remove(h2));
+         } else {
+            return(e);
+         }
       }
    }
    extern long long getFileSize(const char* name) {
