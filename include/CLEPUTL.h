@@ -891,10 +891,12 @@ extern long long getFileSize(const char* name);
    extern FILE* fopen_tmp(void);
    extern int   fclose_tmp(FILE* fp);
    extern int   remove_hfq(const char* name);
+   extern int   rename_hfq(const char* old, const char* new);
 #else
 #  define fopen_tmp()            tmpfile()
 #  define fclose_tmp(fp)         fclose_unchecked((fp))
-#  define remove_hfq(n)          remove(n)
+#  define remove_hfq(n)          remove((n))
+#  define rename_hfq(o,n)        rename((o),(n))
 #endif
 
 /* Definition of return/condition/exit codes **************************/

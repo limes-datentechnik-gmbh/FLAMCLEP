@@ -386,10 +386,12 @@ static inline int flzjsy(const char* pcDat, const int* piSln, char* pcVal, int* 
    }
    extern int remove_hfq(const char* name) {
       if (ISPATHNAME(name) || ISDDNAME(name) || name[0]=='\'' || name[0]=='(') {
+         errno=0;
          int e=remove(name);
          if (e && name[0]=='\'') {
             char h2[strlen(name)+3];
             snprintf(h2,sizeof(h2),"//%s",name);
+            errno=0;
             return(remove(h2));
          } else {
             return(e);
@@ -397,11 +399,44 @@ static inline int flzjsy(const char* pcDat, const int* piSln, char* pcVal, int* 
       } else {
          char h1[strlen(name)+3];
          snprintf(h1,sizeof(h1),"'%s'",name);
+         errno=0;
          int e=remove(h1);
          if (e) {
             char h2[strlen(h1)+3];
             snprintf(h2,sizeof(h2),"//%s",h1);
+            errno=0;
             return(remove(h2));
+         } else {
+            return(e);
+         }
+      }
+   }
+   extern int rename_hfq(const char* old, const char* new) {
+      if (ISPATHNAME(old) || ISPATHNAME(new)) {
+         errno=0;
+         return(rename(old,new));
+      } else {
+         char acOld1[strlen(old)+3];
+         char acNew1[strlen(new)+3];
+         if (old[0]=='\'') {
+            strcpy(acOld1,old);
+         } else {
+            snprintf(acOld1,sizeof(acOld1),"'%s'",old);
+         }
+         if (new[0]=='\'') {
+            strcpy(acNew1,new);
+         } else {
+            snprintf(acNew1,sizeof(acNew1),"'%s'",new);
+         }
+         errno=0;
+         int e=rename(acOld1,acNew1);
+         if (e) {
+            char acOld2[strlen(acOld1)+3];
+            char acNew2[strlen(acNew1)+3];
+            snprintf(acOld2,sizeof(acOld2),"//%s",acOld1);
+            snprintf(acNew2,sizeof(acNew2),"//%s",acNew1);
+            errno=0;
+            return(rename(acOld2,acNew2));
          } else {
             return(e);
          }
