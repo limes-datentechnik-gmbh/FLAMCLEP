@@ -3282,7 +3282,7 @@ EVALUATE:
                         if (pfErr!=NULL) { fprintf(pfErr,"%s Run of command '%s' failed (Return code: %d / Reason code: %d)\n",cstime(0,acTs),psCmd[i].pcKyw,CLERTC_RUN,siErr); }
                      }
                      psCmd[i].pfFin(pfErr,pfTrc,pvGbl,siOid,psCmd[i].pvPar);
-                     if (siScc>CLERTC_MAX || siScc&0x00000001) {
+                     if ((siScc>CLERTC_MAX) || (siScc&0x00000001)) {
                         siErr=siScc;
                         ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
                      } else {
