@@ -73,13 +73,24 @@ static inline int flzjsy(const char* pcDat, const int* piSln, char* pcVal, int* 
 #  include "STDIOL.h"
 #  include "STRINGL.h"
 #  include "CHKMEM.h"
+#  include "GBLSTD.h"
+#  include "ENVUTL.h"
 #else
+#  include <inttypes.h>
 #  undef  fclose_unchecked
 #  define fclose_unchecked  fclose
 #  undef  fflush_unchecked
 #  define fflush_unchecked  fflush
 #  undef  pcSysError
 #  define pcSysError strerror
+   static const union TuEndian {
+      uint32_t      uiEndian;
+      unsigned char acEndian[4];
+   }unEndian={.uiEndian=1UL};
+#  define IS_LITTLE_ENDIAN() (unEndian.acEndian[0]!=0)
+   static inline int isLittleEndian(void) {
+      return(IS_LITTLE_ENDIAN());
+   }
 #endif
 
 #include "CLEPUTL.h"
@@ -1860,6 +1871,10 @@ extern unsigned int mapcdstr(const char* p) {
             } else  { return 0; }
             if ((p[0]==0x00 || isspace(p[0]))) {
                o+=4;
+            } else if (toupper(p[0])=='E' && toupper(p[1])=='E' && (p[2]==0x00 || isspace(p[2]))) {
+               o+=(isLittleEndian())?2:0;
+            } else if (toupper(p[0])=='M' && toupper(p[1])=='E' && (p[2]==0x00 || isspace(p[2]))) {
+               o+=(IS_LITTLE_ENDIAN())?2:0;
             } else if (toupper(p[0])=='L' && toupper(p[1])=='E' && (p[2]==0x00 || isspace(p[2]))) {
                o+=2;
             } else if (toupper(p[0])=='B' && toupper(p[1])=='E' && (p[2]==0x00 || isspace(p[2]))) {
@@ -1887,6 +1902,10 @@ extern unsigned int mapcdstr(const char* p) {
             } else  { return 0; }
             if ((p[0]==0x00 || isspace(p[0]))) {
                o+=4;
+            } else if (toupper(p[0])=='E' && toupper(p[1])=='E' && (p[2]==0x00 || isspace(p[2]))) {
+               o+=(isLittleEndian())?2:0;
+            } else if (toupper(p[0])=='M' && toupper(p[1])=='E' && (p[2]==0x00 || isspace(p[2]))) {
+               o+=(IS_LITTLE_ENDIAN())?2:0;
             } else if (toupper(p[0])=='L' && toupper(p[1])=='E' && (p[2]==0x00 || isspace(p[2]))) {
                o+=2;
             } else if (toupper(p[0])=='B' && toupper(p[1])=='E' && (p[2]==0x00 || isspace(p[2]))) {
