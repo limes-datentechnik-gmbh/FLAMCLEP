@@ -3603,6 +3603,7 @@ extern int siClpLexemes(
       fprintf(pfOut,"%s",fpcPre(psHdl,0)); efprintf(pfOut," OPERATOR '=' | '.' | '(' | ')' | '[' | ']' | (SGN, DOT, RBO, RBC, SBO, SBC)\n");
       fprintf(pfOut,"%s",fpcPre(psHdl,0)); efprintf(pfOut,"  '=>'| '+' | '-' | '*' | '/' | '{' | '}' (SAB, ADD, SUB, MUL, DIV, CBO,CBC)\n");
       fprintf(pfOut,"%s",fpcPre(psHdl,0)); efprintf(pfOut," KEYWORD   ['-'['-']][:alpha:]+[:alnum: | '_']*          (always predefined)\n");
+      fprintf(pfOut,"%s",fpcPre(psHdl,0)); efprintf(pfOut," SELECTION ['-'['-']][:alpha:]+[:alnum: | '_' | '-' | '/']*     (predefined)\n");
       fprintf(pfOut,"%s",fpcPre(psHdl,0)); efprintf(pfOut," NUMBER    ([+|-]  [ :digit:]+)  |                       (decimal (default))\n");
       fprintf(pfOut,"%s",fpcPre(psHdl,0)); efprintf(pfOut," num       ([+|-]0b[ :digit:]+)  |                                  (binary)\n");
       fprintf(pfOut,"%s",fpcPre(psHdl,0)); efprintf(pfOut," num       ([+|-]0o[ :digit:]+)  |                                   (octal)\n");
@@ -4909,7 +4910,7 @@ extern int siClpGrammar(
       fprintf(pfOut,"%s",fpcPre(psHdl,0)); efprintf(pfOut," parameter      -> switch | assignment | object | overlay | array \n");
       fprintf(pfOut,"%s",fpcPre(psHdl,0)); efprintf(pfOut," switch         -> KEYWORD                                        \n");
       fprintf(pfOut,"%s",fpcPre(psHdl,0)); efprintf(pfOut," assignment     -> KEYWORD '=' value                              \n");
-      fprintf(pfOut,"%s",fpcPre(psHdl,0)); efprintf(pfOut,"                |  KEYWORD '=' KEYWORD # SELECTION #              \n");
+      fprintf(pfOut,"%s",fpcPre(psHdl,0)); efprintf(pfOut,"                |  KEYWORD '=' SELECTION                          \n");
    if (psHdl->isPfl) {
       fprintf(pfOut,"%s",fpcPre(psHdl,0)); efprintf(pfOut,"                |  KEYWORD '=>' STRING # parameter file #         \n");
    }
