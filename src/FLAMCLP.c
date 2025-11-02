@@ -3597,7 +3597,7 @@ static int siClpSymFnd(
       return(CLPERR_SYN);
    }
    if (psTab->psBak!=NULL) {
-      CLPERR(psHdl,CLPERR_INT,"Entry '%s.%s' not at beginning of a table",fpcPat(psHdl,siLev),psTab->psStd->pcKyw);
+      CLPERR(psHdl,CLPERR_INT,"Entry '%s.%s' not at beginning of a table (1)",fpcPat(psHdl,siLev),psTab->psStd->pcKyw);
       CLPERRADD(psHdl,      1,"Try to find keyword '%s' in this table",pcKyw);
       return(CLPERR_INT);
    }
@@ -3678,7 +3678,7 @@ static void vdClpSymDel(
    uint64_t*                     piSiz)
 {
    TsSym*                        psHlp=psSym;
-   while (psHlp!=NULL && psHlp->psBak!=NULL) {
+   while (psHlp!=NULL && psHlp->psBak!=NULL) { // not rely required
       psHlp=psHlp->psBak;
    }
    while (psHlp!=NULL) {
@@ -3711,10 +3711,10 @@ static void vdClpSymDel(
          free(psHlp->psStd);
          psHlp->psStd=NULL;
       }
-      if (psHlp->psHih!=NULL) {
+      if (psHlp->psHih!=NULL) { // not realy required
          psHlp->psHih->psDep=NULL;
       }
-      if (psHlp->psNxt!=NULL) {
+      if (psHlp->psNxt!=NULL) { // not realy required
          psHlp->psNxt->psBak=NULL;
       }
       TsSym* psOld=psHlp;
@@ -7264,7 +7264,7 @@ static int siClpIniMainObj(
    TsSym*                        psHlp;
 
    if (psTab->psBak!=NULL) {
-      return CLPERR(psHdl,CLPERR_INT,"Entry '%s.%s' not at beginning of a table",pcPat,psTab->psStd->pcKyw);
+      return CLPERR(psHdl,CLPERR_INT,"Entry '%s.%s' not at beginning of a table (2)",pcPat,psTab->psStd->pcKyw);
    }
 
    if (psHdl->pfSaf!=NULL) {
@@ -7301,7 +7301,7 @@ static int siClpFinMainObj(
    int                           i;
 
    if (psTab->psBak!=NULL) {
-      return CLPERR(psHdl,CLPERR_INT,"Entry '%s.%s' not at beginning of a table",fpcPat(psHdl,0),psTab->psStd->pcKyw);
+      return CLPERR(psHdl,CLPERR_INT,"Entry '%s.%s' not at beginning of a table (3)",fpcPat(psHdl,0),psTab->psStd->pcKyw);
    }
 
    for (i=0,psHlp=psTab;psHlp!=NULL;psHlp=psHlp->psNxt,i++) {
@@ -7346,7 +7346,7 @@ static int siClpIniMainOvl(
    TsSym*                        psHlp;
 
    if (psTab->psBak!=NULL) {
-      return CLPERR(psHdl,CLPERR_INT,"Entry '%s.%s' not at beginning of a table",pcPat,psTab->psStd->pcKyw);
+      return CLPERR(psHdl,CLPERR_INT,"Entry '%s.%s' not at beginning of a table (4)",pcPat,psTab->psStd->pcKyw);
    }
 
    if (psHdl->pfSaf!=NULL) {
@@ -7384,7 +7384,7 @@ static int siClpFinMainOvl(
    int                           siErr,i;
 
    if (psTab->psBak!=NULL) {
-      return CLPERR(psHdl,CLPERR_INT,"Entry '%s.%s' not at beginning of a table",fpcPat(psHdl,0),psTab->psStd->pcKyw);
+      return CLPERR(psHdl,CLPERR_INT,"Entry '%s.%s' not at beginning of a table (5)",fpcPat(psHdl,0),psTab->psStd->pcKyw);
    }
 
    for (i=0,psHlp=psTab;psHlp!=NULL;psHlp=psHlp->psNxt,i++) {
@@ -7934,7 +7934,7 @@ static int siClpPrnCmd(
    }
 
    if (psTab->psBak!=NULL) {
-      return CLPERR(psHdl,CLPERR_INT,"Entry '%s.%s' not at beginning of a table",fpcPat(psHdl,siLev),psTab->psStd->pcKyw);
+      return CLPERR(psHdl,CLPERR_INT,"Entry '%s.%s' not at beginning of a table (6)",fpcPat(psHdl,siLev),psTab->psStd->pcKyw);
    }
 
    if (pfOut!=NULL) {
@@ -8148,7 +8148,7 @@ static int siClpPrnCmd(
                   siErr=siExtentSymTab(psHdl,siLev,psHlp);
                   if (siErr<0) { return(siErr); }
                   if (psHlp->psDep==NULL) {
-                     return CLPERR(psHdl,CLPERR_TAB,"Argument table for object '%s' not defined",psHlp->psStd->pcKyw);
+                     return CLPERR(psHdl,CLPERR_TAB,"Argument table for overlay '%s' not defined",psHlp->psStd->pcKyw);
                   }
                   if (psHlp->psFix->siMax==1) {
                      vdClpPrnAli(pfOut,psHdl->pcOpt,psHlp);fprintf(pfOut,".%c",C_CBO);
@@ -8208,7 +8208,7 @@ static int siClpPrnHlp(
    }
 
    if (psTab->psBak!=NULL) {
-      return CLPERR(psHdl,CLPERR_INT,"Entry '%s.%s' not at beginning of a table",fpcPat(psHdl,siLev),psTab->psStd->pcKyw);
+      return CLPERR(psHdl,CLPERR_INT,"Entry '%s.%s' not at beginning of a table (7)",fpcPat(psHdl,siLev),psTab->psStd->pcKyw);
    }
 
    if (pfOut!=NULL) {
@@ -8398,6 +8398,9 @@ static int siClpPrnSyn(
       case CLPTYP_OBJECT:
          siErr=siExtentSymTab(psHdl,siLev,psArg);
          if (siErr<0) { return(siErr); }
+         if (psArg->psDep==NULL) {
+            return CLPERR(psHdl,CLPERR_TAB,"Argument table for object '%s' not defined",psArg->psStd->pcKyw);
+         }
          if (psArg->psFix->siMax==1) {
             vdClpPrnAli(pfOut,psHdl->pcOpt,psArg);
             fprintf(pfOut,"(");
@@ -8415,6 +8418,9 @@ static int siClpPrnSyn(
       case CLPTYP_OVRLAY:
          siErr=siExtentSymTab(psHdl,siLev,psArg);
          if (siErr<0) { return(siErr); }
+         if (psArg->psDep==NULL) {
+            return CLPERR(psHdl,CLPERR_TAB,"Argument table for overlay '%s' not defined",psArg->psStd->pcKyw);
+         }
          if (psArg->psFix->siMax==1) {
             vdClpPrnAli(pfOut,psHdl->pcOpt,psArg);
             fprintf(pfOut,".%c",C_CBO);
@@ -8452,7 +8458,7 @@ static int siClpPrnDoc(
       const TsSym*                  apMan[CLPMAX_TABCNT];
       const TsSym*                  apLst[CLPMAX_TABCNT];
       if (psTab->psBak!=NULL) {
-         return CLPERR(psHdl,CLPERR_INT,"Entry '%s.%s' not at beginning of a table",fpcPat(psHdl,siLev),psTab->psStd->pcKyw);
+         return CLPERR(psHdl,CLPERR_INT,"Entry '%s.%s' not at beginning of a table (8)",fpcPat(psHdl,siLev),psTab->psStd->pcKyw);
       }
       for (isCon=FALSE,psHlp=psTab;psHlp!=NULL;psHlp=psHlp->psNxt) {
          if (CLPISF_ARG(psHlp->psStd->uiFlg) && CLPISF_CMD(psHlp->psStd->uiFlg)) {
@@ -8708,7 +8714,7 @@ static int siClpPrintTable(
    const TsSym*                  psHlp;
 
    if (psTab->psBak!=NULL) {
-      return CLPERR(psHdl,CLPERR_INT,"Entry '%s.%s' not at beginning of a table.",pcPat,psTab->psStd->pcKyw);
+      return CLPERR(psHdl,CLPERR_INT,"Entry '%s.%s' not at beginning of a table (9)",pcPat,psTab->psStd->pcKyw);
    }
    if (psParamDesc==NULL) {
       return CLPERR(psHdl,CLPERR_INT,"Parameter psParamDesc must not be NULL.");
@@ -8762,7 +8768,7 @@ static int siClpPrnPro(
    }
 
    if (psTab->psBak!=NULL) {
-      return CLPERR(psHdl,CLPERR_INT,"Entry '%s.%s' not at beginning of a table",fpcPat(psHdl,siLev),psTab->psStd->pcKyw);
+      return CLPERR(psHdl,CLPERR_INT,"Entry '%s.%s' not at beginning of a table (10)",fpcPat(psHdl,siLev),psTab->psStd->pcKyw);
    }
 
    if (pfOut!=NULL) {
