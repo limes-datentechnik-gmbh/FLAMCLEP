@@ -3683,18 +3683,15 @@ static void vdClpSymDel(
    uint64_t*                     piSiz)
 {
    TsSym*                        psHlp=psSym;
-   while (psHlp!=NULL && psHlp->psBak!=NULL) { // not rely required
-      psHlp=psHlp->psBak;
-   }
    while (psHlp!=NULL) {
       if (psHlp->psStd!=NULL) {
          if (!CLPISF_ALI(psHlp->psStd->uiFlg) && psHlp->psDep!=NULL) {
             vdClpSymDel(psHlp->psDep,piCnt,piSiz);
          }
-         if (psHlp->psHih!=NULL) { // not realy required
+         if (psHlp->psHih!=NULL) { // not really required
             psHlp->psHih->psDep=NULL;
          }
-         if (psHlp->psNxt!=NULL) { // not realy required
+         if (psHlp->psNxt!=NULL) { // not really required
             psHlp->psNxt->psBak=NULL;
          }
          if (!CLPISF_ALI(psHlp->psStd->uiFlg) && psHlp->psVar!=NULL) {
