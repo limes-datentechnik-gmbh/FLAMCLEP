@@ -3187,7 +3187,8 @@ static int siClpSymIni(
                if (siErr<0) { return(siErr); }
             }
             break;
-         case CLPTYP_XALIAS: break;
+         case CLPTYP_XALIAS:
+            break;
          default:
             return CLPERR(psHdl,CLPERR_TYP,"Type (%d) of parameter '%s.%s' not supported",psTab[i].siTyp,fpcPat(psHdl,siLev),psTab[i].pcKyw);
          }
