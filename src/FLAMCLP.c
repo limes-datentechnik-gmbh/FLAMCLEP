@@ -3087,6 +3087,12 @@ static TsSym* psClpSymIns(
                   ERROR(psSym);
                }
             }
+         } else {
+            psHlp=psHih->psNxt;
+            while(psHlp!=NULL && psHlp->psStd->psAli==psHih) { // Propagate psDep for each alias
+               psHlp->psDep=(psSym->psStd->psAli!=NULL)?psSym->psStd->psAli:psSym;
+               psHlp=psHlp->psNxt;
+            }
          }
       }
    }
