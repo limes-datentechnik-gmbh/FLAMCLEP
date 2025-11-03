@@ -3074,10 +3074,10 @@ static TsSym* psClpSymIns(
       psSym->psNxt=NULL;
       psSym->psBak=NULL;
       if (psHih!=NULL) {
-         psHih->psDep=psSym;
+         psHih->psDep=(psSym->psStd->psAli!=NULL)?psSym->psStd->psAli:psSym;
          if (psHih->psStd->psAli!=NULL) {
             if (psHih->psStd->psAli->psDep==NULL) {
-               psHih->psStd->psAli->psDep=psSym;
+               psHih->psStd->psAli->psDep=(psSym->psStd->psAli!=NULL)?psSym->psStd->psAli:psSym;
             } else {
                if (psHih->psStd->psAli->psDep->psStd->pcKyw!=psSym->psStd->pcKyw) {
                   CLPERR(psHdl,CLPERR_TAB,"Keyword to alias (%p/%p(%s/%s)) of argument '%s.%s' mismatch",
