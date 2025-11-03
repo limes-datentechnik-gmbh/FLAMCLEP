@@ -3149,7 +3149,7 @@ static int siClpSymIni(
       }
 
       if (!CLPISF_DMY(psTab[i].uiFlg)) {
-         psCur=psClpSymIns(psHdl,siLev,i,psTab+i,psTab[i].psTab,psHih,psCur);
+         psCur=psClpSymIns(psHdl,siLev,j,psTab+i,psTab[i].psTab,psHih,psCur);
          if (psCur==NULL) {
             return CLPERR(psHdl,CLPERR_SYS,"Insert of symbol (%s.%s) in symbol table failed",fpcPat(psHdl,siLev),psTab[i].pcKyw);
          }
