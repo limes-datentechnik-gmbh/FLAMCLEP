@@ -3684,6 +3684,12 @@ static void vdClpSymDel(
          if (!CLPISF_ALI(psHlp->psStd->uiFlg) && psHlp->psDep!=NULL) {
             vdClpSymDel(psHlp->psDep,piCnt,piSiz);
          }
+         if (psHlp->psHih!=NULL) { // not realy required
+            psHlp->psHih->psDep=NULL;
+         }
+         if (psHlp->psNxt!=NULL) { // not realy required
+            psHlp->psNxt->psBak=NULL;
+         }
          if (!CLPISF_ALI(psHlp->psStd->uiFlg) && psHlp->psVar!=NULL) {
             (*piSiz)+=sizeof(TsVar);
             memset(psHlp->psVar,0,sizeof(TsVar));
@@ -3708,12 +3714,6 @@ static void vdClpSymDel(
          memset(psHlp->psStd,0,sizeof(TsStd));
          free(psHlp->psStd);
          psHlp->psStd=NULL;
-      }
-      if (psHlp->psHih!=NULL) { // not realy required
-         psHlp->psHih->psDep=NULL;
-      }
-      if (psHlp->psNxt!=NULL) { // not realy required
-         psHlp->psNxt->psBak=NULL;
       }
       TsSym* psOld=psHlp;
       psHlp=psHlp->psNxt;
