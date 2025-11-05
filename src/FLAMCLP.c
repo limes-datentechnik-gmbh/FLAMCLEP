@@ -420,6 +420,7 @@ typedef struct Hdl {
    const char*                   pcOpt;
    const char*                   pcEnt;
    const char*                   pcRow;
+   int                           isFul;
    int                           siMkl;
    int                           isOvl;
    int                           isChk;
@@ -1242,6 +1243,9 @@ extern void* pvClpOpen(
       flsrand(flseed);
       psHdl=(TsHdl*)calloc(1,sizeof(TsHdl));
       if (psHdl!=NULL) {
+         if (CHECK_ENVAR_ON("CLP_FULL_SYMTAB")) {
+            psHdl->isFul=TRUE;
+         }
          psHdl->isCas=isCas;
          psHdl->isPfl=isPfl;
          psHdl->isEnv=isEnv;
@@ -3181,7 +3185,7 @@ static int siClpSymIni(
             break;
          case CLPTYP_OBJECT:
          case CLPTYP_OVRLAY:
-            if (CHECK_ENVAR_ON("CLP_FULL_SYMTAB")) {
+            if (psHdl->isFul) {
                psHdl->apPat[siLev]=psCur;
                siErr=siClpSymIni(psHdl,siLev+1,psTab+i,psTab[i].psTab,psCur,NULL);
                if (siErr<0) { return(siErr); }
