@@ -3092,7 +3092,19 @@ static TsSym* psClpSymIns(
                }
             }
          } else {
-#ifdef __DEBUG__
+#ifdef __CLPALI_EGAL__
+            psHlp=psHih;
+            while(psHlp->psBak!=NULL) {
+               psHlp=psHlp->psBak;
+            }
+            while(psHlp!=NULL) { // Propagate psDep for each alias
+               if (psHlp->psStd->psAli==psHih) {
+                  psHlp->psDep=(psSym->psStd->psAli!=NULL)?psSym->psStd->psAli:psSym;
+               }
+               psHlp=psHlp->psNxt;
+            }
+#else
+#  ifdef __DEBUG__
             int i=0;
             int j=0;
             psHlp=psHih;
@@ -3114,25 +3126,14 @@ static TsSym* psClpSymIns(
                psHlp=psHlp->psNxt;
                i++;
             }
-#else
+#  else
             psHlp=psHih->psNxt;
             while(psHlp!=NULL && psHlp->psStd->psAli==psHih) { // Propagate psDep for each alias
                psHlp->psDep=(psSym->psStd->psAli!=NULL)?psSym->psStd->psAli:psSym;
                psHlp=psHlp->psNxt;
             }
+#  endif
 #endif
-            /*
-            psHlp=psHih;
-            while(psHlp->psBak!=NULL) {
-               psHlp=psHlp->psBak
-            )
-            while(psHlp!=NULL) { // Propagate psDep for each alias
-               if (psHlp->psStd->psAli==psHih) {
-                  psHlp->psDep=(psSym->psStd->psAli!=NULL)?psSym->psStd->psAli:psSym;
-               }
-               psHlp=psHlp->psNxt;
-            }
-            */
          }
       }
    }

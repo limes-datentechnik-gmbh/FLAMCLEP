@@ -145,6 +145,14 @@
 /**
  * @brief Defines an alias name for another argument.
  *
+ * Since version 1.5.143 of CLP, an alias definition must follow directly after the corresponding argument,
+ * otherwise propagation will not work completely during dynamic extension of the symbol table.
+ * The __CLPALI_EGAL__ compiler switch means that the order does not matter, but the complete
+ * correlation requires a little more effort. If you do not define the switch, you must first define
+ * the links (OID, CNT, LEN), then the actual argument, and then the aliases for this argument,
+ * otherwise symbols will be created twice and will not be released at the end. To detect this,
+ * a check is built into the __DEBUG__ code, which writes a warning to STDERR.
+ *
  * @param[in]   kyw   is the keyword accepted on the command line in place of the keyword given in *ali*.
  * @param[in]   ali   is the alternative keyword accepted on the command line in place of the keyword given in *kyw*.
  */
