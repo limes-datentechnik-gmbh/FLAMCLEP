@@ -345,8 +345,9 @@ typedef struct Std {
    struct Sym*                   psAli;
    unsigned int                  uiFlg;
    int                           siKwl;
+#ifdef __DEBUG__
    int                           siLev;
-   int                           siPos;
+#endif
 }TsStd;
 
 typedef struct Fix {
@@ -494,7 +495,6 @@ static inline const char* GETKYW(const TsSym* sym) { return (sym->psStd->psAli !
 static TsSym* psClpSymIns(
    TsHdl*                        psHdl,
    const int                     siLev,
-   const int                     siPos,
    const TsClpArgument*          psArg,
    const TsClpArgument*          psTab,
    TsSym*                        psHih,
@@ -2773,7 +2773,6 @@ static const char* get_env(char* var,const size_t size,const char* fmtstr, ...)
 static TsSym* psClpSymIns(
    TsHdl*                        psHdl,
    const int                     siLev,
-   const int                     siPos,
    const TsClpArgument*          psArg,
    const TsClpArgument*          psTab,
    TsSym*                        psHih,
@@ -2838,8 +2837,9 @@ static TsSym* psClpSymIns(
    psSym->psTab=psTab;
    psSym->psStd->psAli=NULL;
    psSym->psStd->siKwl=strlen(psSym->psStd->pcKyw);
+#ifdef __DEBUG__
    psSym->psStd->siLev=siLev;
-   psSym->psStd->siPos=siPos;
+#endif
    psSym->psFix->pcMan=psArg->pcMan;
    psSym->psFix->pcHlp=psArg->pcHlp;
    pcEnv=NULL;
@@ -3153,7 +3153,7 @@ static int siClpSymIni(
       }
 
       if (!CLPISF_DMY(psTab[i].uiFlg)) {
-         psCur=psClpSymIns(psHdl,siLev,j,psTab+i,psTab[i].psTab,psHih,psCur);
+         psCur=psClpSymIns(psHdl,siLev,psTab+i,psTab[i].psTab,psHih,psCur);
          if (psCur==NULL) {
             return CLPERR(psHdl,CLPERR_SYS,"Insert of symbol (%s.%s) in symbol table failed",fpcPat(psHdl,siLev),psTab[i].pcKyw);
          }
@@ -3330,6 +3330,7 @@ static int siClpSymCal(
    int                           siErr,siPos,k,h;
 
    for (siPos=0,psSym=psTab;psSym!=NULL;psSym=psSym->psNxt,siPos++) {
+#ifdef __DEBUG__
       if (psSym->psStd->siLev!=siLev) {
          if (psArg==NULL) {
             return CLPERR(psHdl,CLPERR_INT,"Argument table not in sync with symbol table%s","");
@@ -3337,7 +3338,7 @@ static int siClpSymCal(
             return CLPERR(psHdl,CLPERR_INT,"Parameter table of argument '%s.%s' not in sync with symbol table",fpcPat(psHdl,siLev),psArg->psStd->pcKyw);
          }
       }
-
+#endif
       if (CLPISF_ALI(psSym->psStd->uiFlg)) {
          isPar=TRUE;
       } else if (CLPISF_ARG(psSym->psStd->uiFlg)) {
@@ -3651,8 +3652,8 @@ static int siClpSymPrn(
       if (siErr<0) { return(siErr); }
       if (psHdl->pfSym!=NULL) {
          char acTs[24];
-         efprintf(psHdl->pfSym,"%s %s %3.3d - %s (KWL=%d TYP=%s MIN=%d MAX=%d SIZ=%d OFS=%d OID=%d FLG=%8.8X (NXT=%p BAK=%p DEP=%p HIH=%p ALI=%p CNT=%p OID=%p IND=%p ELN=%p SLN=%p TLN=%p LNK=%p)) - %s\n",
-            cstime(0,acTs),fpcPre(psHdl,siLev),psHlp->psStd->siPos+1,psHlp->psStd->pcKyw,psHlp->psStd->siKwl,pcMapClpTyp(psHlp->psFix->siTyp),psHlp->psFix->siMin,psHlp->psFix->siMax,psHlp->psFix->siSiz,
+         efprintf(psHdl->pfSym,"%s %s - %s (KWL=%d TYP=%s MIN=%d MAX=%d SIZ=%d OFS=%d OID=%d FLG=%8.8X (NXT=%p BAK=%p DEP=%p HIH=%p ALI=%p CNT=%p OID=%p IND=%p ELN=%p SLN=%p TLN=%p LNK=%p)) - %s\n",
+            cstime(0,acTs),fpcPre(psHdl,siLev),psHlp->psStd->pcKyw,psHlp->psStd->siKwl,pcMapClpTyp(psHlp->psFix->siTyp),psHlp->psFix->siMin,psHlp->psFix->siMax,psHlp->psFix->siSiz,
             psHlp->psFix->siOfs,psHlp->psFix->siOid,psHlp->psStd->uiFlg,psHlp->psNxt,psHlp->psBak,psHlp->psDep,psHlp->psHih,psHlp->psStd->psAli,psHlp->psFix->psCnt,psHlp->psFix->psOid,
             psHlp->psFix->psInd,psHlp->psFix->psEln,psHlp->psFix->psSln,psHlp->psFix->psTln,psHlp->psFix->psLnk,psHlp->psFix->pcHlp);
          fflush_unchecked(psHdl->pfSym);
