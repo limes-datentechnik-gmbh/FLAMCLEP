@@ -3092,11 +3092,47 @@ static TsSym* psClpSymIns(
                }
             }
          } else {
+#ifdef __DEBUG__
+            int i=0;
+            int j=0;
+            psHlp=psHih;
+            while (psHlp->psBak!=NULL) {
+               psHlp=psHlp->psBak;
+            }
+            while(psHlp!=NULL) { // Propagate psDep for each alias
+               if (psHlp==psHih) {
+                  j=i;
+               }
+               if (psHlp->psStd->psAli==psHih) {
+                  psHlp->psDep=(psSym->psStd->psAli!=NULL)?psSym->psStd->psAli:psSym;
+                  j++;
+                  if (j!=i) {
+                     fprintf(stderr, "%s:%d:1: warning: %s: Aliases for '%s' must be defined sequential after this symbol\n",
+                           __FILE__ , (int)__LINE__ , __FUNCTION__, psHih->psStd->pcKyw);
+                  }
+               }
+               psHlp=psHlp->psNxt;
+               i++;
+            }
+#else
             psHlp=psHih->psNxt;
             while(psHlp!=NULL && psHlp->psStd->psAli==psHih) { // Propagate psDep for each alias
                psHlp->psDep=(psSym->psStd->psAli!=NULL)?psSym->psStd->psAli:psSym;
                psHlp=psHlp->psNxt;
             }
+#endif
+            /*
+            psHlp=psHih;
+            while(psHlp->psBak!=NULL) {
+               psHlp=psHlp->psBak
+            )
+            while(psHlp!=NULL) { // Propagate psDep for each alias
+               if (psHlp->psStd->psAli==psHih) {
+                  psHlp->psDep=(psSym->psStd->psAli!=NULL)?psSym->psStd->psAli:psSym;
+               }
+               psHlp=psHlp->psNxt;
+            }
+            */
          }
       }
    }
