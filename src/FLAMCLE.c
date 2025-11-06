@@ -680,7 +680,7 @@ static int siClpFile2String(void* gbl, const void* hdl, const char* filename, ch
          if (pfOut!=NULL) { efprintf(pfOut,"%s Program '%s' (Build: %s %s) run successfully\n",cstime(0,acTs),(pcProgram!=NULL)?pcProgram:"-NULL-",__DATE__,__TIME__); }\
       }\
    }\
-   if (pfOut!=NULL) { efprintf(pfOut,"%s Total runtime %us / Total CPU time %3.3fs\n",cstime(0,acTs),(U32)(time(NULL)-uiTime),((double)(clock()-uiClock))/CLOCKS_PER_SEC); }\
+   if (pfOut!=NULL) { efprintf(pfOut,"%s Total runtime %us / Total CPU time %7.5fs\n",cstime(0,acTs),(U32)(time(NULL)-uiTime),((double)(clock()-uiClock))/CLOCKS_PER_SEC); }\
    SAFE_FREE(pcHom); \
    SAFE_FREE(pcPgm); \
    SAFE_FREE(pcPgu); \
@@ -3202,7 +3202,7 @@ EVALUATE:
                }
                if (pfOut!=NULL) {
                   ckCpu2=clock();
-                  fprintf(pfOut,"%s Determination of parameter string for command '%s' was successful (CPU time %3.3fs)\n",cstime(0,acTs),psCmd[i].pcKyw,((double)(ckCpu2-ckCpu1))/CLOCKS_PER_SEC);
+                  fprintf(pfOut,"%s Determination of parameter string for command '%s' was successful (CPU time %7.5fs)\n",cstime(0,acTs),psCmd[i].pcKyw,((double)(ckCpu2-ckCpu1))/CLOCKS_PER_SEC);
                   ckCpu1=ckCpu2;
                }
 
@@ -3214,7 +3214,7 @@ EVALUATE:
                }
                if (pfOut!=NULL) {
                   ckCpu2=clock();
-                  fprintf(pfOut,"%s Initializing of command '%s' was successful (CPU time %3.3fs)\n",cstime(0,acTs),psCmd[i].pcKyw,((double)(ckCpu2-ckCpu1))/CLOCKS_PER_SEC);
+                  fprintf(pfOut,"%s Initializing of command '%s' was successful (CPU time %7.5fs)\n",cstime(0,acTs),psCmd[i].pcKyw,((double)(ckCpu2-ckCpu1))/CLOCKS_PER_SEC);
                   ckCpu1=ckCpu2;
                }
 
@@ -3237,7 +3237,7 @@ EVALUATE:
                vdClpClose(pvHdl,CLPCLS_MTD_KEP);
                if (pfOut!=NULL) {
                   ckCpu2=clock();
-                  fprintf(pfOut,"%s Parsing of parameter string for command '%s' was successful (CPU time %3.3fs)\n",cstime(0,acTs),psCmd[i].pcKyw,((double)(ckCpu2-ckCpu1))/CLOCKS_PER_SEC);
+                  fprintf(pfOut,"%s Parsing of parameter string for command '%s' was successful (CPU time %7.5fs)\n",cstime(0,acTs),psCmd[i].pcKyw,((double)(ckCpu2-ckCpu1))/CLOCKS_PER_SEC);
                   ckCpu1=ckCpu2;
                }
 
@@ -3259,7 +3259,7 @@ EVALUATE:
                }
                if (pfOut!=NULL) {
                   ckCpu2=clock();
-                  fprintf(pfOut,"%s Mapping of parameter structures for command '%s' was successful (CPU time %3.3fs)\n",cstime(0,acTs),psCmd[i].pcKyw,((double)(ckCpu2-ckCpu1))/CLOCKS_PER_SEC);
+                  fprintf(pfOut,"%s Mapping of parameter structures for command '%s' was successful (CPU time %7.5fs)\n",cstime(0,acTs),psCmd[i].pcKyw,((double)(ckCpu2-ckCpu1))/CLOCKS_PER_SEC);
                   ckCpu1=ckCpu2;
                }
 
@@ -3293,7 +3293,7 @@ EVALUATE:
                }
                if (pfOut!=NULL) {
                   ckCpu2=clock();
-                  fprintf(pfOut,"%s Run of command '%s' was successful (CPU time %3.3fs)\n",cstime(0,acTs),psCmd[i].pcKyw,((double)(ckCpu2-ckCpu1))/CLOCKS_PER_SEC);
+                  fprintf(pfOut,"%s Run of command '%s' was successful (CPU time %7.5fs)\n",cstime(0,acTs),psCmd[i].pcKyw,((double)(ckCpu2-ckCpu1))/CLOCKS_PER_SEC);
                   ckCpu1=ckCpu2;
                }
 
@@ -3310,7 +3310,7 @@ EVALUATE:
                }
                if (pfOut!=NULL) {
                   ckCpu2=clock();
-                  fprintf(pfOut,"%s Finalize for command '%s' was successful (CPU time %3.3fs)\n",cstime(0,acTs),psCmd[i].pcKyw,((double)(ckCpu2-ckCpu1))/CLOCKS_PER_SEC);
+                  fprintf(pfOut,"%s Finalize for command '%s' was successful (CPU time %7.5fs)\n",cstime(0,acTs),psCmd[i].pcKyw,((double)(ckCpu2-ckCpu1))/CLOCKS_PER_SEC);
                }
                siErr=isWrn&0x00000001;
                ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
@@ -3583,7 +3583,7 @@ static int siCleCommandInit(
    }
    if (pfTrc!=NULL) {
       ckCpu2=clock();
-      fprintf(pfTrc,"%s Open of command line parser (CLP) for command '%s' was successful (CPU time %3.3fs)\n",cstime(0,acTs),pcCmd,((double)(ckCpu2-ckCpu1))/CLOCKS_PER_SEC);
+      fprintf(pfTrc,"%s Open of command line parser (CLP) for command '%s' was successful (CPU time %7.5fs)\n",cstime(0,acTs),pcCmd,((double)(ckCpu2-ckCpu1))/CLOCKS_PER_SEC);
       ckCpu1=ckCpu2;
    }
 
@@ -3605,7 +3605,7 @@ static int siCleCommandInit(
    }
    if (pfTrc!=NULL) {
       ckCpu2=clock();
-      fprintf(pfTrc,"%s Initialization of CLP structure for command '%s' was successful (CPU time %3.3fs)\n",cstime(0,acTs),pcCmd,((double)(ckCpu2-ckCpu1))/CLOCKS_PER_SEC);
+      fprintf(pfTrc,"%s Initialization of CLP structure for command '%s' was successful (CPU time %7.5fs)\n",cstime(0,acTs),pcCmd,((double)(ckCpu2-ckCpu1))/CLOCKS_PER_SEC);
       ckCpu1=ckCpu2;
    }
    siErr=siCleGetProperties(pfErr,psCnf,pcOwn,pcPgm,pcCmd,&pcFil,&pcPro,&siFil,pvGbl,pvF2S,pfF2S);
@@ -3616,7 +3616,7 @@ static int siCleCommandInit(
    }
    if (pfTrc!=NULL) {
       ckCpu2=clock();
-      fprintf(pfTrc,"%s Determine properties for command '%s' was successful (CPU time %3.3fs)\n",cstime(0,acTs),pcCmd,((double)(ckCpu2-ckCpu1))/CLOCKS_PER_SEC);
+      fprintf(pfTrc,"%s Determine properties for command '%s' was successful (CPU time %7.5fs)\n",cstime(0,acTs),pcCmd,((double)(ckCpu2-ckCpu1))/CLOCKS_PER_SEC);
       ckCpu1=ckCpu2;
    }
    if (pcPro!=NULL) {
@@ -3630,7 +3630,7 @@ static int siCleCommandInit(
       free(pcPro);
       if (pfTrc!=NULL) {
          ckCpu2=clock();
-         fprintf(pfTrc,"%s Parsing of properties for command '%s' was successful (CPU time %3.3fs)\n",cstime(0,acTs),pcCmd,((double)(ckCpu2-ckCpu1))/CLOCKS_PER_SEC);
+         fprintf(pfTrc,"%s Parsing of properties for command '%s' was successful (CPU time %7.5fs)\n",cstime(0,acTs),pcCmd,((double)(ckCpu2-ckCpu1))/CLOCKS_PER_SEC);
       }
    }
    SAFE_FREE(pcFil);
