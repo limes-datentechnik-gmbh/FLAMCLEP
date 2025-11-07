@@ -2770,6 +2770,8 @@ static const char* get_env(char* var,const size_t size,const char* fmtstr, ...)
    } return NULL;\
 } while (0)
 
+//#define __CLPALI_EGAL__
+
 static TsSym* psClpSymIns(
    TsHdl*                        psHdl,
    const int                     siLev,
@@ -3078,11 +3080,13 @@ static TsSym* psClpSymIns(
       psSym->psNxt=NULL;
       psSym->psBak=NULL;
       if (psHih!=NULL) {
+         TsSym* psCmp;
          psHih->psDep=(psSym->psStd->psAli!=NULL)?psSym->psStd->psAli:psSym;
          if (psHih->psStd->psAli!=NULL) {
             if (psHih->psStd->psAli->psDep==NULL) {
                psHih->psStd->psAli->psDep=(psSym->psStd->psAli!=NULL)?psSym->psStd->psAli:psSym;
             } else {
+#ifdef __DEBUG__
                if (psHih->psStd->psAli->psDep->psStd->pcKyw!=psSym->psStd->pcKyw) {
                   CLPERR(psHdl,CLPERR_TAB,"Keyword to alias (%p/%p(%s/%s)) of argument '%s.%s' mismatch",
                         psHih->psStd->psAli->psDep->psStd->pcKyw,psSym->psStd->pcKyw,
@@ -3090,51 +3094,52 @@ static TsSym* psClpSymIns(
                         pcPat,psSym->psStd->pcKyw);
                   ERROR(psSym);
                }
+#endif
             }
+            psHlp=psCmp=psHih->psStd->psAli;
          } else {
+            psHlp=psCmp=psHih;
+         }
 #ifdef __CLPALI_EGAL__
-            psHlp=psHih;
-            while(psHlp->psBak!=NULL) {
-               psHlp=psHlp->psBak;
+         while(psHlp->psBak!=NULL) {
+            psHlp=psHlp->psBak;
+         }
+         while(psHlp!=NULL) { // Propagate psDep for each alias
+            if (psHlp->psStd->psAli==psCmp) {
+               psHlp->psDep=(psSym->psStd->psAli!=NULL)?psSym->psStd->psAli:psSym;
             }
-            while(psHlp!=NULL) { // Propagate psDep for each alias
-               if (psHlp->psStd->psAli==psHih) {
-                  psHlp->psDep=(psSym->psStd->psAli!=NULL)?psSym->psStd->psAli:psSym;
-               }
-               psHlp=psHlp->psNxt;
-            }
+            psHlp=psHlp->psNxt;
+         }
 #else
 #  ifdef __DEBUG__
-            int i=0;
-            int j=0;
-            psHlp=psHih;
-            while (psHlp->psBak!=NULL) {
-               psHlp=psHlp->psBak;
+         int i=0;
+         int j=0;
+         while (psHlp->psBak!=NULL) {
+            psHlp=psHlp->psBak;
+         }
+         while(psHlp!=NULL) { // Propagate psDep for each alias
+            if (psHlp==psCmp) {
+               j=i;
             }
-            while(psHlp!=NULL) { // Propagate psDep for each alias
-               if (psHlp==psHih) {
-                  j=i;
-               }
-               if (psHlp->psStd->psAli==psHih) {
-                  psHlp->psDep=(psSym->psStd->psAli!=NULL)?psSym->psStd->psAli:psSym;
-                  j++;
-                  if (j!=i) {
-                     fprintf(stderr, "%s:%d:1: warning: %s: Aliases for '%s' must be defined sequential after this symbol\n",
-                           __FILE__ , (int)__LINE__ , __FUNCTION__, psHih->psStd->pcKyw);
-                  }
-               }
-               psHlp=psHlp->psNxt;
-               i++;
-            }
-#  else
-            psHlp=psHih->psNxt;
-            while(psHlp!=NULL && psHlp->psStd->psAli==psHih) { // Propagate psDep for each alias
+            if (psHlp->psStd->psAli==psCmp) {
                psHlp->psDep=(psSym->psStd->psAli!=NULL)?psSym->psStd->psAli:psSym;
-               psHlp=psHlp->psNxt;
+               j++;
+               if (j!=i) {
+                  fprintf(stderr, "%s:%d:1: warning: %s: Aliases for '%s' must be defined sequential after this symbol\n",
+                        __FILE__ , (int)__LINE__ , __FUNCTION__, psHih->psStd->pcKyw);
+               }
             }
+            psHlp=psHlp->psNxt;
+            i++;
+         }
+#  else
+         psHlp=psHlp->psNxt;
+         while(psHlp!=NULL && psHlp->psStd->psAli==psCmp) { // Propagate psDep for each alias
+            psHlp->psDep=(psSym->psStd->psAli!=NULL)?psSym->psStd->psAli:psSym;
+            psHlp=psHlp->psNxt;
+         }
 #  endif
 #endif
-         }
       }
    }
    psSym->psDep=NULL;
