@@ -4339,6 +4339,8 @@ static TsCnfHdl* psCnfOpn(
                srprintf(&psEnt->pcVal,&psEnt->szVal,siVal,"%s",pcVal);
                if (psEnt->pcKyw==NULL || psEnt->pcVal==NULL) {
                   if (pfErr!=NULL) { fprintf(pfErr,"Memory allocation for configuration data (%s=%s) failed\n",pcKyw,pcVal); }
+                  SAFE_FREE(psEnt->pcKyw);
+                  SAFE_FREE(psEnt->pcVal);
                   free(psEnt);
                   fclose_unchecked(pfFil);
                   vdCnfCls(psHdl);
