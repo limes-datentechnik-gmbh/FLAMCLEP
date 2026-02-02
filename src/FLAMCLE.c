@@ -664,6 +664,9 @@ static int siClpFile2String(void* gbl, const void* hdl, const char* filename, ch
    return(siErr);
 }
 
+#undef ELIMIT
+#define ELIMIT(e) (((e) > siMaxCC) ? siMaxCC : (((e) < siMinCC) ? 0 : (e)))
+
 #undef  ERROR
 #define ERROR(x,b) do { \
    int r = siCleEndExecution((x),psCnf,pfTrh,pfDoc,pfPro,ppArg,pvHdl,(b));\
@@ -1665,7 +1668,7 @@ extern int siCleExecute(
          if (pcOwn==NULL) {
             if (pfErr!=NULL) { fprintf(pfErr,"Allocation of memory for owner string failed\n"); }
             siErr=CLERTC_MEM;
-            ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+            ERROR(ELIMIT(siErr),NULL);
          }
          if (isEnvOwn) {
             if (SETENV("OWNERID",pcOwn)) {
@@ -1695,7 +1698,7 @@ extern int siCleExecute(
    if (pcCnf==NULL) {
       if (pfErr!=NULL) { fprintf(pfErr,"Memory allocation for configuration element trace failed\n"); }
       siErr=CLERTC_MEM;
-      ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+      ERROR(ELIMIT(siErr),NULL);
    }
    m=pcCnfGet(psCnf,pcCnf);
    if (m!=NULL && strxcmp(isCas,m,"ON",0,0,FALSE)==0) {
@@ -1703,7 +1706,7 @@ extern int siCleExecute(
       if (pcCnf==NULL) {
          if (pfErr!=NULL) { fprintf(pfErr,"Memory allocation for configuration element trace file failed\n"); }
          siErr=CLERTC_MEM;
-         ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+         ERROR(ELIMIT(siErr),NULL);
       }
       m=pcCnfGet(psCnf,pcCnf);
       if (m!=NULL && *m) {
@@ -1723,13 +1726,13 @@ extern int siCleExecute(
       if (pfCls==NULL) {
          if (pfErr!=NULL) { fprintf(pfErr,"If a global open callback provided the corresponding close callback must be given\n"); }
          siErr=CLERTC_ITF;
-         ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+         ERROR(ELIMIT(siErr),NULL);
       }
       pvGbl=pfOpn(sizeof(acMsg),acMsg);
       if (pvGbl==NULL) {
          if (pfErr!=NULL) { fprintf(pfErr,"Open of global resources failed (%s)\n",acMsg); }
          siErr=CLERTC_SYS;
-         ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+         ERROR(ELIMIT(siErr),NULL);
       }
    }
 
@@ -1739,13 +1742,13 @@ extern int siCleExecute(
           psCmd[i].pcMan==NULL || psCmd[i].pcHlp==NULL || *psCmd[i].pcKyw==0 || *psCmd[i].pcMan==0 || *psCmd[i].pcHlp==0) {
          if (pfErr!=NULL) { fprintf(pfErr,"Row %d of command table not initialized properly\n",i); }
          siErr=CLERTC_TAB;
-         ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+         ERROR(ELIMIT(siErr),NULL);
       }
    }
    if (i==0) {
       if (pfErr!=NULL) { fprintf(pfErr,"Command table is empty\n"); }
       siErr=CLERTC_TAB;
-      ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+      ERROR(ELIMIT(siErr),NULL);
    }
 
    if (argc<2) {
@@ -1754,7 +1757,7 @@ extern int siCleExecute(
          if (ppArg == NULL) {
             if (pfErr!=NULL) { fprintf(pfErr,"Memory allocation for argument list to run the default command '%s' failed\n",pcDef); }
             siErr=CLERTC_MEM;
-            ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+            ERROR(ELIMIT(siErr),NULL);
          }
          ppArg[0]=argv[0]; ppArg[1]=(char*)pcDef; argc=2; argv=ppArg;
       } else {
@@ -1763,7 +1766,7 @@ extern int siCleExecute(
             vdPrnStaticSyntax(pfErr,psCmd,asBif,argv[0],pcDep,pcOpt,pcDpa);
          }
          siErr=CLERTC_CMD;
-         ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+         ERROR(ELIMIT(siErr),NULL);
       }
    }
 
@@ -1788,7 +1791,7 @@ EVALUATE:
          fprintf(pfErr,"%s %s LICENSE\n",pcDep,argv[0]);
       }
       siErr=CLERTC_CMD;
-      ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+      ERROR(ELIMIT(siErr),NULL);
    } else if (asBif[CLE_BUILTIN_IDX_VERSION].isBif && strxcmp(isCas,argv[1],"VERSION",0,0,FALSE)==0) {
       if (argc==2) {
          if (pfOut!=NULL) { fprintf(pfOut,"Version for program '%s':\n",pcPgm); }
@@ -1804,7 +1807,7 @@ EVALUATE:
          fprintf(pfErr,"%s %s VERSION\n",pcDep,argv[0]);
       }
       siErr=CLERTC_CMD;
-      ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+      ERROR(ELIMIT(siErr),NULL);
    } else if (asBif[CLE_BUILTIN_IDX_ABOUT].isBif && strxcmp(isCas,argv[1],"ABOUT",0,0,FALSE)==0) {
       if (argc==2) {
          if (pfOut!=NULL) { fprintf(pfOut,"About program '%s':\n",pcPgm); }
@@ -1820,18 +1823,18 @@ EVALUATE:
          fprintf(pfErr,"%s %s ABOUT\n",pcDep,argv[0]);
       }
       siErr=CLERTC_CMD;
-      ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+      ERROR(ELIMIT(siErr),NULL);
    } else if (asBif[CLE_BUILTIN_IDX_LEXEMES].isBif && (strxcmp(isCas,argv[1],"LEXEMES",0,0,FALSE)==0 || strxcmp(isCas,argv[1],"LEXEM",0,0,FALSE)==0)) {
       if (argc==2) {
          siErr=siCleSimpleInit(pfOut,pfErr,isPfl,isRpl,pcDep,pcOpt,pcEnt,&pvHdl);
          if (siErr) {
-            ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+            ERROR(ELIMIT(siErr),NULL);
          }
          if (pfOut!=NULL) { fprintf(pfOut,"Lexemes (regular expressions) for argument list or parameter file:\n"); }
          siErr=siClpLexemes(pvHdl,pfStd);
          if (siErr<0) {
             siErr=CLERTC_SYN;
-            ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+            ERROR(ELIMIT(siErr),NULL);
          } else {
             ERROR(CLERTC_OK,NULL);
          }
@@ -1841,18 +1844,18 @@ EVALUATE:
          fprintf(pfErr,"%s %s LEXEMES\n",pcDep,argv[0]);
       }
       siErr=CLERTC_CMD;
-      ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+      ERROR(ELIMIT(siErr),NULL);
    } else if (asBif[CLE_BUILTIN_IDX_GRAMMAR].isBif && strxcmp(isCas,argv[1],"GRAMMAR",0,0,FALSE)==0) {
       if (argc==2) {
          siErr=siCleSimpleInit(pfOut,pfErr,isPfl,isRpl,pcDep,pcOpt,pcEnt,&pvHdl);
          if (siErr) {
-            ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+            ERROR(ELIMIT(siErr),NULL);
          }
          if (pfOut!=NULL) { fprintf(pfOut,"Grammar for argument list, parameter file or property file\n"); }
          siErr=siClpGrammar(pvHdl,pfStd);
          if (siErr<0) {
             siErr=CLERTC_SYN;
-            ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+            ERROR(ELIMIT(siErr),NULL);
          } else {
             ERROR(CLERTC_OK,NULL);
          }
@@ -1862,7 +1865,7 @@ EVALUATE:
          fprintf(pfErr,"%s %s GRAMMAR\n",pcDep,argv[0]);
       }
       siErr=CLERTC_CMD;
-      ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+      ERROR(ELIMIT(siErr),NULL);
    } else if (asBif[CLE_BUILTIN_IDX_ERRORS].isBif && strxcmp(isCas,argv[1],"ERRORS",0,0,FALSE)==0) {
       if (argc==2) {
          efprintf(pfStd,"\n=Return/condition/exit codes of the executable\n\n");
@@ -1885,7 +1888,7 @@ EVALUATE:
          fprintf(pfErr,"%s %s ERRORS\n",pcDep,argv[0]);
       }
       siErr=CLERTC_CMD;
-      ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+      ERROR(ELIMIT(siErr),NULL);
    } else if (asBif[CLE_BUILTIN_IDX_SYNTAX].isBif && strxcmp(isCas,argv[1],"SYNTAX",0,0,FALSE)==0) {
       if (argc==2) {
          if (pfOut!=NULL) { fprintf(pfOut,"Syntax for program '%s':\n",pcPgm); }
@@ -1928,7 +1931,7 @@ EVALUATE:
                   }
                }
                siErr=CLERTC_CMD;
-               ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+               ERROR(ELIMIT(siErr),NULL);
             }
          } else {
             if (pfErr!=NULL) {
@@ -1941,14 +1944,14 @@ EVALUATE:
                }
             }
             siErr=CLERTC_CMD;
-            ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+            ERROR(ELIMIT(siErr),NULL);
          }
          for (i=0;psCmd[i].pcKyw!=NULL;i++) {
             if (strxcmp(isCas,argv[2],psCmd[i].pcKyw,strlen(psCmd[i].pcKyw),'.',TRUE)==0) {
                siErr=siCleCommandInit(pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,pcOwn,pcPgm,pcBld,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,psCmd[i].piOid,psCmd[i].psTab,
                                       isCas,isPfl,isRpl,siMkl,pfStd,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf,NULL);
                if (siErr) {
-                  ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+                  ERROR(ELIMIT(siErr),NULL);
                }
                if (strlen(argv[2])==strlen(psCmd[i].pcKyw)) {
                   if (pfOut!=NULL) { fprintf(pfOut,"Syntax for command '%s':\n",argv[2]); }
@@ -1966,7 +1969,7 @@ EVALUATE:
                   siErr=siCleCommandInit(pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,pcOwn,pcPgm,pcBld,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,psCmd[i].piOid,psCmd[i].psTab,
                                          isCas,isPfl,isRpl,siMkl,pfStd,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf,NULL);
                   if (siErr) {
-                     ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+                     ERROR(ELIMIT(siErr),NULL);
                   }
                   snprintf(acPat,sizeof(acPat),"%s.%s",pcDef,argv[2]);
                   if (pfOut!=NULL) { fprintf(pfOut,"Syntax for argument '%s':\n",acPat); }
@@ -1986,7 +1989,7 @@ EVALUATE:
          }
       }
       siErr=CLERTC_CMD;
-      ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+      ERROR(ELIMIT(siErr),NULL);
    } else if (asBif[CLE_BUILTIN_IDX_HELP].isBif && strxcmp(isCas,argv[1],"HELP",0,0,FALSE)==0) {
       if (argc==2) {
          if (pfOut!=NULL) { fprintf(pfOut,"Help for program '%s':\n",pcPgm); }
@@ -2005,7 +2008,7 @@ EVALUATE:
                      fprintf(pfErr,"CLE_DOCTYP_PROGRAM not found in documentation table\n");
                   }
                   siErr=CLERTC_TAB;
-                  ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+                  ERROR(ELIMIT(siErr),NULL);
                }
             } else siDep=1;
          } else if (argc==4) {
@@ -2044,7 +2047,7 @@ EVALUATE:
                   }
                }
                siErr=CLERTC_CMD;
-               ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+               ERROR(ELIMIT(siErr),NULL);
             }
          } else {
             if (pfErr!=NULL) {
@@ -2057,14 +2060,14 @@ EVALUATE:
                }
             }
             siErr=CLERTC_CMD;
-            ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+            ERROR(ELIMIT(siErr),NULL);
          }
          for (i=0;psCmd[i].pcKyw!=NULL;i++) {
             if (strxcmp(isCas,argv[2],psCmd[i].pcKyw,strlen(psCmd[i].pcKyw),'.',TRUE)==0) {
                siErr=siCleCommandInit(pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,pcOwn,pcPgm,pcBld,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,psCmd[i].piOid,psCmd[i].psTab,
                                       isCas,isPfl,isRpl,siMkl,pfStd,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf,NULL);
                if (siErr) {
-                  ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+                  ERROR(ELIMIT(siErr),NULL);
                }
                if (strlen(argv[2])==strlen(psCmd[i].pcKyw)) {
                   if (pfOut!=NULL) { fprintf(pfOut,"Help for command '%s': %s\n",argv[2],psCmd[i].pcHlp); }
@@ -2087,7 +2090,7 @@ EVALUATE:
                   siErr=siCleCommandInit(pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,pcOwn,pcPgm,pcBld,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,psCmd[i].piOid,psCmd[i].psTab,
                                          isCas,isPfl,isRpl,siMkl,pfStd,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf,NULL);
                   if (siErr) {
-                     ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+                     ERROR(ELIMIT(siErr),NULL);
                   }
                   snprintf(acPat,sizeof(acPat),"%s.%s",psCmd[i].pcKyw,argv[2]);
                   if (pfOut!=NULL) { fprintf(pfOut,"Help for argument '%s': %s\n",acPat,pcClpInfo(pvHdl,acPat)); }
@@ -2112,7 +2115,7 @@ EVALUATE:
          }
       }
       siErr=CLERTC_CMD;
-      ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+      ERROR(ELIMIT(siErr),NULL);
    } else if (asBif[CLE_BUILTIN_IDX_MANPAGE].isBif && strxcmp(isCas,argv[1],"MANPAGE",0,0,FALSE)==0) {
       if (argc==2) {
          if (pcPgmMan!=NULL && *pcPgmMan) {
@@ -2125,7 +2128,7 @@ EVALUATE:
                fprintf(pfErr,"CLE_DOCTYP_PROGRAM not found in documentation table\n");
             }
             siErr=CLERTC_TAB;
-            ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+            ERROR(ELIMIT(siErr),NULL);
          }
       } else if (argc==3) {
          const char*                pcSgn;
@@ -2139,14 +2142,14 @@ EVALUATE:
             if (pcFil==NULL) {
                if (pfErr!=NULL) { fprintf(pfErr,"Allocation of memory for file name (%s) failed\n",pcSgn); }
                siErr=CLERTC_MEM;
-               ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+               ERROR(ELIMIT(siErr),NULL);
             }
 //          szFil=strlen(pcFil)+1; not used
             pfDoc=fopen_hfq(pcFil,"w");
             if (pfDoc==NULL) {
                if (pfErr!=NULL) { fprintf(pfErr,"Open of manual page file (\"%s\",\"%s\") failed (%d - %s)\n",pcFil,"w",errno,pcSysError(errno)); }
                siErr=CLERTC_SYS;
-               ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+               ERROR(ELIMIT(siErr),NULL);
             }
          } else {
             pcCmd=argv[2];
@@ -2156,7 +2159,7 @@ EVALUATE:
             if (pcFil==NULL) {
                if (pfErr!=NULL) { fprintf(pfErr,"Allocation of memory for file name (:STDOUT:) failed\n"); }
                siErr=CLERTC_MEM;
-               ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+               ERROR(ELIMIT(siErr),NULL);
             }
          }
          if (strxcmp(isCas,pcCmd,"ALL",0,0,FALSE)==0 || strxcmp(isCas,pcCmd,"-ALL",0,0,FALSE)==0 || strxcmp(isCas,pcCmd,"--ALL",0,0,FALSE)==0) {
@@ -2171,7 +2174,7 @@ EVALUATE:
                   fprintf(pfErr,"CLE_DOCTYP_PROGRAM not found in documentation table\n");
                }
                siErr=CLERTC_TAB;
-               ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+               ERROR(ELIMIT(siErr),NULL);
             }
          }
          for (i=0;asBif[i].pcKyw!=NULL;i++) {
@@ -2198,7 +2201,7 @@ EVALUATE:
                siErr=siCleCommandInit(pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,pcOwn,pcPgm,pcBld,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,psCmd[i].piOid,psCmd[i].psTab,
                                       isCas,isPfl,isRpl,siMkl,pfStd,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf,NULL);
                if (siErr) {
-                  ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+                  ERROR(ELIMIT(siErr),NULL);
                }
                if (isMan==FALSE) {
                   if (strlen(pcCmd)==strlen(psCmd[i].pcKyw)) {
@@ -2228,7 +2231,7 @@ EVALUATE:
                   siErr=siCleCommandInit(pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,pcOwn,pcPgm,pcBld,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,psCmd[i].piOid,psCmd[i].psTab,
                                          isCas,isPfl,isRpl,siMkl,pfStd,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf,NULL);
                   if (siErr) {
-                     ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+                     ERROR(ELIMIT(siErr),NULL);
                   }
                   snprintf(acPat,sizeof(acPat),"%s.%s",pcDef,pcCmd);
                   if (pfOut!=NULL) { fprintf(pfOut,"Manual page fo'argument '%s':\n\n",acPat); }
@@ -2246,7 +2249,7 @@ EVALUATE:
          if (pcFil==NULL) {
             if (pfErr!=NULL) { fprintf(pfErr,"Allocation of memory for file name (%s) failed\n",argv[2]); }
             siErr=CLERTC_MEM;
-            ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+            ERROR(ELIMIT(siErr),NULL);
          }
 //       szFil=strlen(pcFil)+1; not used
          isMan=TRUE;
@@ -2254,7 +2257,7 @@ EVALUATE:
          if (pfDoc==NULL) {
             if (pfErr!=NULL) { fprintf(pfErr,"Open of manual page file (\"%s\",\"%s\") failed (%d - %s)\n",pcFil,"w",errno,pcSysError(errno)); }
             siErr=CLERTC_SYS;
-            ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+            ERROR(ELIMIT(siErr),NULL);
          }
          if (pcPgmMan!=NULL && *pcPgmMan) {
             vdCleManProgram(pfDoc,psCmd,asBif,pcOwn,pcPgm,pcBld,pcHlp,pcPgmMan,pcDep,pcOpt,pcDpa,pcPgmNum,isMan,TRUE);
@@ -2266,7 +2269,7 @@ EVALUATE:
                fprintf(pfErr,"CLE_DOCTYP_PROGRAM not found in documentation table\n");
             }
             siErr=CLERTC_TAB;
-            ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+            ERROR(ELIMIT(siErr),NULL);
          }
       }
       if (pfErr!=NULL) {
@@ -2281,7 +2284,7 @@ EVALUATE:
          fprintf(pfErr,"%s %s MANPAGE\n",pcDep,argv[0]);
       }
       siErr=CLERTC_CMD;
-      ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+      ERROR(ELIMIT(siErr),NULL);
    } else if (asBif[CLE_BUILTIN_IDX_GENDOCU].isBif && strxcmp(isCas,argv[1],"GENDOCU",0,0,FALSE)==0) {
       const char*                pcCmd=NULL;
       const char*                pcSgn=NULL;
@@ -2306,7 +2309,7 @@ EVALUATE:
                   efprintf(pfErr,"%s %s GENDOCU filename [NONBR][SHORT]\n",pcDep,argv[0]);
                }
                siErr=CLERTC_CMD;
-               ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+               ERROR(ELIMIT(siErr),NULL);
             }
          } else if (argc==5) {
             if (argv[3][0]=='-') { argv[3]++; }
@@ -2330,7 +2333,7 @@ EVALUATE:
                   efprintf(pfErr,"%s %s GENDOCU filename [NONBR][SHORT]\n",pcDep,argv[0]);
                }
                siErr=CLERTC_CMD;
-               ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+               ERROR(ELIMIT(siErr),NULL);
             }
          }
          pcSgn=strchr(argv[2],'=');
@@ -2343,14 +2346,14 @@ EVALUATE:
          if (pcFil==NULL) {
             if (pfErr!=NULL) { fprintf(pfErr,"Allocation of memory for file name (%s) failed\n",pcSgn); }
             siErr=CLERTC_MEM;
-            ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+            ERROR(ELIMIT(siErr),NULL);
          }
          szFil=strlen(pcFil)+1;
          pfDoc=fopen_hfq(pcFil,"w");
          if (pfDoc==NULL) {
             if (pfErr!=NULL) { fprintf(pfErr,"Open of documentation file (\"%s\",\"%s\") failed (%d - %s)\n",pcFil,"w",errno,pcSysError(errno)); }
             siErr=CLERTC_SYS;
-            ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+            ERROR(ELIMIT(siErr),NULL);
          }
          if (pcCmd!=NULL) {
             for (i=0;psCmd[i].pcKyw!=NULL;i++) {
@@ -2359,14 +2362,14 @@ EVALUATE:
                   siErr=siCleCommandInit(pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,pcOwn,pcPgm,pcBld,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,psCmd[i].piOid,psCmd[i].psTab,
                                          isCas,isPfl,isRpl,siMkl,pfStd,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf,NULL);
                   if (siErr) {
-                     ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+                     ERROR(ELIMIT(siErr),NULL);
                   }
                   snprintf(acNum,sizeof(acNum),"%s%d.",pcCmdNum,i+1);
                   siErr=siClpDocu(pvHdl,pfDoc,pcCmd,acNum,"Command",TRUE,TRUE,FALSE,FALSE,isNbr,FALSE,TRUE,0);
                   if (siErr<0) {
                      if (pfErr!=NULL) { fprintf(pfErr,"Creation of documentation file (%s) failed (%d - %s)\n",pcFil,errno,pcSysError(errno)); }
                      siErr=CLERTC_SYN;
-                     ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+                     ERROR(ELIMIT(siErr),NULL);
                   } else {
                      if (strlen(pcCmd)==strlen(psCmd[i].pcKyw)) {
                         if (pfOut!=NULL) { fprintf(pfOut,"Documentation for command '%s' successfully created\n",pcCmd); }
@@ -2385,7 +2388,7 @@ EVALUATE:
                      siErr=siCleCommandInit(pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,pcOwn,pcPgm,pcBld,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,psCmd[i].piOid,psCmd[i].psTab,
                                             isCas,isPfl,isRpl,siMkl,pfStd,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf,NULL);
                      if (siErr) {
-                        ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+                        ERROR(ELIMIT(siErr),NULL);
                      }
                      snprintf(acNum,sizeof(acNum),"%s%d.",pcCmdNum,i+1);
                      snprintf(acPat,sizeof(acPat),"%s.%s",pcDef,pcCmd);
@@ -2393,7 +2396,7 @@ EVALUATE:
                      if (siErr<0) {
                         if (pfErr!=NULL) { fprintf(pfErr,"Creation of documentation file (%s) failed (%d - %s)\n",pcFil,errno,pcSysError(errno)); }
                         siErr=CLERTC_SYN;
-                        ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+                        ERROR(ELIMIT(siErr),NULL);
                      } else {
                         if (pfOut!=NULL) { fprintf(pfOut,"Documentation for argument '%s' successfully created\n",acPat); }
                         ERROR(CLERTC_OK,NULL);
@@ -2416,7 +2419,7 @@ EVALUATE:
             siErr=siPrintDocu(pvGbl,pfDoc,pfErr,psDoc,&stDocPar,pfDoc,siPrintPage);
             if (siErr) {
                if (pfErr!=NULL) { fprintf(pfErr,"Generation of documentation for program '%s' failed\n",pcPgm); }
-               ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+               ERROR(ELIMIT(siErr),NULL);
             } else {
                if (pfOut!=NULL) { fprintf(pfOut,"Documentation for program '%s' successfully created\n",pcPgm); }
                ERROR(CLERTC_OK,NULL);
@@ -2434,7 +2437,7 @@ EVALUATE:
          efprintf(pfErr,"%s %s GENDOCU filename [NONBR][SHORT]\n",pcDep,argv[0]);
       }
       siErr=CLERTC_CMD;
-      ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+      ERROR(ELIMIT(siErr),NULL);
    } else if (asBif[CLE_BUILTIN_IDX_HTMLDOC].isBif && strxcmp(isCas,argv[1],"HTMLDOC",0,0,FALSE)==0) {
       int              isPat=FALSE;
       const char*      pcPar=".";
@@ -2447,7 +2450,7 @@ EVALUATE:
             efprintf(pfErr,"%s %s %s\n",pcDep,argv[0],SYN_CLE_BUILTIN_HTMLDOC);
          }
          siErr=CLERTC_CMD;
-         ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+         ERROR(ELIMIT(siErr),NULL);
       }
       for (i=2;i<argc;i++) {
          if (argv[i][0]=='-') { argv[i]++; }
@@ -2465,7 +2468,7 @@ EVALUATE:
                   efprintf(pfErr,"%s %s %s\n",pcDep,argv[0],SYN_CLE_BUILTIN_HTMLDOC);
                }
                siErr=CLERTC_CMD;
-               ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+               ERROR(ELIMIT(siErr),NULL);
             }
             pcPar=argv[i];
             isPat=TRUE;
@@ -2478,13 +2481,13 @@ EVALUATE:
       if (pcPat==NULL) {
          if (pfErr!=NULL) { fprintf(pfErr,"Allocation of memory for path name (%s) failed\n",pcHlp); }
          siErr=CLERTC_MEM;
-         ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+         ERROR(ELIMIT(siErr),NULL);
       }
       void* pvLib=pfLoadHtmlDoc(&pfHtmlOpn,&pfHtmlPrn,&pfHtmlCls);
       if (pvLib==NULL) {
          if (pfErr!=NULL) { fprintf(pfErr,"There is no service provider DLL/SO (libhtmldoc) available for HTML generation\n"); }
          siErr=CLERTC_FAT;
-         ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),pcPat);
+         ERROR(ELIMIT(siErr),pcPat);
       }
       TsCleDocPar stDocPar;
       stDocPar.isHdr=TRUE;  stDocPar.pcAut=pcAut; stDocPar.pcAdr=pcAdr;
@@ -2502,19 +2505,19 @@ EVALUATE:
          if (pvDocHdl==NULL) {
             if (pfErr!=NULL) { fprintf(pfErr,"Open service provider for HTML generation failed\n"); }
             siErr=CLERTC_FAT;
-            ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),pcPat);
+            ERROR(ELIMIT(siErr),pcPat);
          }
          siErr=siPrintDocu(pvGbl,pfStd,pfErr,psDoc,&stDocPar,pvDocHdl,pfHtmlPrn);
          if (siErr) {
             if (pfErr!=NULL) { fprintf(pfErr,"Generation of %s HTML documentation to folder '%s' failed\n",isDep?"long":"short",pcPat); }
             pfHtmlCls(pvDocHdl);
-            ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),pcPat);
+            ERROR(ELIMIT(siErr),pcPat);
          }
          siErr=pfHtmlCls(pvDocHdl);
          if (siErr) {
              if (pfErr!=NULL) { fprintf(pfErr,"Finalise generation of HTML documentation to folder '%s' failed (%d)\n",pcPat,siErr); }
              siErr=CLERTC_SYS;
-             ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),pcPat);
+             ERROR(ELIMIT(siErr),pcPat);
          } else {
              if (pfErr!=NULL) { fprintf(pfErr,"Generation of %s HTML documentation to folder '%s' was successful\n",isDep?"long":"short",pcPat); }
              ERROR(CLERTC_OK,pcPat);
@@ -2523,7 +2526,7 @@ EVALUATE:
          vdFreeHtmlDoc(&pvLib);
          if (pfErr!=NULL) { fprintf(pfErr,"There is no service provider function (opnHtmlDoc, prnHtmlDoc or clsHtmlDoc) available for HTML generation\n"); }
          siErr=CLERTC_FAT;
-         ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),pcPat);
+         ERROR(ELIMIT(siErr),pcPat);
       }
    } else if (asBif[CLE_BUILTIN_IDX_GENPROP].isBif && strxcmp(isCas,argv[1],"GENPROP",0,0,FALSE)==0) {
       if (argc==3) {
@@ -2539,14 +2542,14 @@ EVALUATE:
          if (pcFil==NULL) {
             if (pfErr!=NULL) { fprintf(pfErr,"Allocation of memory for file name (%s) failed\n",pcSgn); }
             siErr=CLERTC_MEM;
-            ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+            ERROR(ELIMIT(siErr),NULL);
          }
          szFil=strlen(pcFil)+1;
          pfPro=fopen_hfq(pcFil,"w");
          if (pfPro==NULL) {
             if (pfErr!=NULL) { fprintf(pfErr,"Open of property file (\"%s\",\"%s\") failed (%d-%s)\n",pcFil,"w",errno,pcSysError(errno)); }
             siErr=CLERTC_SYS;
-            ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+            ERROR(ELIMIT(siErr),NULL);
          }
          if (pcCmd==NULL) { fprintf(pfPro,"\n%c Property file for: %s.%s %c\n\n",C_HSH,pcOwn,pcPgm,C_HSH);
                    } else { fprintf(pfPro,"\n%c Property file for: %s.%s.%s %c\n\n",C_HSH,pcOwn,pcPgm,pcCmd,C_HSH); }
@@ -2557,7 +2560,7 @@ EVALUATE:
                siErr=siClePropertyInit(pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,pcOwn,pcPgm,pcBld,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,
                                        psCmd[i].piOid,psCmd[i].psTab,isCas,isPfl,isRpl,siMkl,pfStd,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,NULL,NULL,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf);
                if (siErr) {
-                  ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+                  ERROR(ELIMIT(siErr),NULL);
                }
                siErr=siClpProperties(pvHdl,CLPPRO_MTD_CMT,10,psCmd[i].pcKyw,pfPro);
                vdClpClose(pvHdl,CLPCLS_MTD_ALL); pvHdl=NULL;
@@ -2565,7 +2568,7 @@ EVALUATE:
             if (siErr<0) {
                if (pfErr!=NULL) { fprintf(pfErr,"Write property file (%s) for program '%s' failed (%d-%s)\n",pcFil,pcPgm,errno,pcSysError(errno)); }
                siErr=CLERTC_SYN;
-               ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+               ERROR(ELIMIT(siErr),NULL);
             } else {
                if (pfOut!=NULL) { fprintf(pfOut,"Property file (%s) for program '%s' successfully written\n",pcFil,pcPgm); }
                ERROR(CLERTC_OK,NULL);
@@ -2576,14 +2579,14 @@ EVALUATE:
                   siErr=siClePropertyInit(pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,pcOwn,pcPgm,pcBld,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,
                                           psCmd[i].piOid,psCmd[i].psTab,isCas,isPfl,isRpl,siMkl,pfStd,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,NULL,NULL,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf);
                   if (siErr) {
-                     ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+                     ERROR(ELIMIT(siErr),NULL);
                   }
                   siErr=siClpProperties(pvHdl,CLPPRO_MTD_CMT,10,psCmd[i].pcKyw,pfPro);
                   vdClpClose(pvHdl,CLPCLS_MTD_ALL); pvHdl=NULL;
                   if (siErr<0) {
                      if (pfErr!=NULL) { fprintf(pfErr,"Write property file (%s) for command '%s' failed (%d-%s)\n",pcFil,pcCmd,errno,pcSysError(errno)); }
                      siErr=CLERTC_SYN;
-                     ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+                     ERROR(ELIMIT(siErr),NULL);
                   } else {
                      if (pfOut!=NULL) { fprintf(pfOut,"Property file (%s) for command '%s' successfully written\n",pcFil,pcCmd); }
                      ERROR(CLERTC_OK,NULL);
@@ -2602,7 +2605,7 @@ EVALUATE:
          fprintf(pfErr,"%s %s GENPROP filename\n",pcDep,argv[0]);
       }
       siErr=CLERTC_CMD;
-      ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+      ERROR(ELIMIT(siErr),NULL);
    } else if (asBif[CLE_BUILTIN_IDX_SETPROP].isBif && strxcmp(isCas,argv[1],"SETPROP",0,0,FALSE)==0) {
       if (argc==3) {
          const char* pcSgn;
@@ -2621,13 +2624,13 @@ EVALUATE:
                   }
                }
                siErr=CLERTC_CMD;
-               ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+               ERROR(ELIMIT(siErr),NULL);
             }
             srprintf(&pcCnf,&szCnf,strlen(pcOwn)+strlen(pcPgm)+strlen(pcCmd),"%s.%s.%s.property.file",pcOwn,pcPgm,pcCmd);
             if (pcCnf==NULL) {
                if (pfErr!=NULL) { fprintf(pfErr,"Allocation of memory for property string failed\n"); }
                siErr=CLERTC_MEM;
-               ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+               ERROR(ELIMIT(siErr),NULL);
             }
          } else {
             pcSgn=argv[2]; pcCmd=NULL;
@@ -2635,7 +2638,7 @@ EVALUATE:
             if (pcCnf==NULL) {
                if (pfErr!=NULL) { fprintf(pfErr,"Allocation of memory for property string failed\n"); }
                siErr=CLERTC_MEM;
-               ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+               ERROR(ELIMIT(siErr),NULL);
             }
          }
          if (*pcSgn==0) {
@@ -2650,12 +2653,12 @@ EVALUATE:
                              "To delete a property file from the list, please use the function DELPROP %ccommand%c\n",C_SBO,C_SBC);
             }
             siErr=CLERTC_CMD;
-            ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+            ERROR(ELIMIT(siErr),NULL);
          }
          siErr=siCnfSet(psCnf,pfErr,pcCnf,pcSgn,TRUE);
          if (siErr) {
             siErr=CLERTC_CFG;
-            ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+            ERROR(ELIMIT(siErr),NULL);
          } else {
             if (pfOut!=NULL) { fprintf(pfOut,"Setting configuration keyword '%s' to value '%s' was successful\n",pcCnf,pcSgn); }
             ERROR(CLERTC_OK,NULL);
@@ -2671,7 +2674,7 @@ EVALUATE:
          fprintf(pfErr,"%s %s SETPROP filename\n",pcDep,argv[0]);
       }
       siErr=CLERTC_CMD;
-      ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+      ERROR(ELIMIT(siErr),NULL);
    } else if ((asBif[CLE_BUILTIN_IDX_CHGPROP].isBif && strxcmp(isCas,argv[1],"CHGPROP",0,0,FALSE)==0) || (pcDef!=NULL && strxcmp(isCas,pcDef,"flam",0,0,FALSE)==0 && strxcmp(isCas,argv[1],"DEFAULTS",0,0,FALSE)==0)) {
       if (argc>=3) {
          for (i=0;psCmd[i].pcKyw!=NULL;i++) {
@@ -2681,7 +2684,7 @@ EVALUATE:
                if (pcPro==NULL) {
                   if (pfErr!=NULL) { fprintf(pfErr,"Memory allocation for property list failed\n"); }
                   siErr=CLERTC_MEM;
-                  ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),pcPro);
+                  ERROR(ELIMIT(siErr),pcPro);
                }
                for (j=3;j<argc;j++) {
                   if (j>3) {
@@ -2699,7 +2702,7 @@ EVALUATE:
                }
                siErr=siCleChangeProperties(pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,pcHom,pcOwn,pcPgm,pcBld,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,pcPro,
                      psCmd[i].piOid,psCmd[i].psTab,isCas,isPfl,isRpl,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf);
-               ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),pcPro);
+               ERROR(ELIMIT(siErr),pcPro);
             }
          }
       }
@@ -2711,7 +2714,7 @@ EVALUATE:
                if (pcPro==NULL) {
                   if (pfErr!=NULL) { fprintf(pfErr,"Memory allocation for property list failed\n"); }
                   siErr=CLERTC_MEM;
-                  ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),pcPro);
+                  ERROR(ELIMIT(siErr),pcPro);
                }
                for (j=2;j<argc;j++) {
                   if (j>2) {
@@ -2729,7 +2732,7 @@ EVALUATE:
                }
                siErr=siCleChangeProperties(pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,pcHom,pcOwn,pcPgm,pcBld,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,pcPro,
                      psCmd[i].piOid,psCmd[i].psTab,isCas,isPfl,isRpl,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf);
-               ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),pcPro);
+               ERROR(ELIMIT(siErr),pcPro);
             }
          }
       }
@@ -2743,14 +2746,14 @@ EVALUATE:
          }
       }
       siErr=CLERTC_CMD;
-      ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+      ERROR(ELIMIT(siErr),NULL);
    } else if (asBif[CLE_BUILTIN_IDX_DELPROP].isBif && strxcmp(isCas,argv[1],"DELPROP",0,0,FALSE)==0) {
       if (argc==2) {
          srprintf(&pcCnf,&szCnf,strlen(pcOwn)+strlen(pcPgm),"%s.%s.property.file",pcOwn,pcPgm);
           if (pcCnf==NULL) {
              if (pfErr!=NULL) { fprintf(pfErr,"Allocation of memory for property string failed\n"); }
              siErr=CLERTC_MEM;
-             ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+             ERROR(ELIMIT(siErr),NULL);
           }
       } else if (argc==3) {
          for (i=0;psCmd[i].pcKyw!=NULL && strxcmp(isCas,argv[2],psCmd[i].pcKyw,0,0,FALSE);i++) {}
@@ -2764,13 +2767,13 @@ EVALUATE:
                }
             }
             siErr=CLERTC_CMD;
-            ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+            ERROR(ELIMIT(siErr),NULL);
          }
          srprintf(&pcCnf,&szCnf,strlen(pcOwn)+strlen(pcPgm)+strlen(argv[2]),"%s.%s.%s.property.file",pcOwn,pcPgm,argv[2]);
          if (pcCnf==NULL) {
             if (pfErr!=NULL) { fprintf(pfErr,"Allocation of memory for property string failed\n"); }
             siErr=CLERTC_MEM;
-            ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+            ERROR(ELIMIT(siErr),NULL);
          }
       } else {
          if (pfErr!=NULL) {
@@ -2783,12 +2786,12 @@ EVALUATE:
             fprintf(pfErr,"%s %s DELPROP\n",pcDep,argv[0]);
          }
          siErr=CLERTC_CMD;
-         ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+         ERROR(ELIMIT(siErr),NULL);
       }
       siErr=siCnfSet(psCnf,pfErr,pcCnf,"",TRUE);
       if (siErr) {
          siErr=CLERTC_CFG;
-         ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+         ERROR(ELIMIT(siErr),NULL);
       } else {
          if (pfOut!=NULL) { fprintf(pfOut,"Delete configuration keyword '%s' was successful\n",pcCnf); }
          ERROR(CLERTC_OK,NULL);
@@ -2801,7 +2804,7 @@ EVALUATE:
                                     psCmd[i].piOid,psCmd[i].psTab,isCas,isPfl,isRpl,siMkl,pfStd,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,
                                     &pvHdl,NULL,NULL,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf);
             if (siErr) {
-               ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+               ERROR(ELIMIT(siErr),NULL);
             }
             vdPrnProperties(pvHdl,psCmd[i].pcKyw,10);
             vdClpClose(pvHdl,CLPCLS_MTD_ALL); pvHdl=NULL;
@@ -2846,7 +2849,7 @@ EVALUATE:
                   }
                }
                siErr=CLERTC_CMD;
-               ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+               ERROR(ELIMIT(siErr),NULL);
             }
          } else {
             if (pfErr!=NULL) {
@@ -2859,7 +2862,7 @@ EVALUATE:
                }
             }
             siErr=CLERTC_CMD;
-            ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+            ERROR(ELIMIT(siErr),NULL);
          }
          for (i=0;psCmd[i].pcKyw!=NULL;i++) {
             if (strxcmp(isCas,argv[2],psCmd[i].pcKyw,strlen(psCmd[i].pcKyw),'.',TRUE)==0) {
@@ -2867,7 +2870,7 @@ EVALUATE:
                                        psCmd[i].piOid,psCmd[i].psTab,isCas,isPfl,isRpl,siMkl,pfStd,pfErr,pfTrc,pcDep,pcOpt,pcEnt,
                                        psCnf,&pvHdl,NULL,NULL,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf);
                if (siErr) {
-                  ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+                  ERROR(ELIMIT(siErr),NULL);
                }
                if (strlen(argv[2])==strlen(psCmd[i].pcKyw)) {
                   if (pfOut!=NULL) { fprintf(pfOut,"Properties for command '%s':\n",argv[2]); }
@@ -2886,7 +2889,7 @@ EVALUATE:
                                           psCmd[i].piOid,psCmd[i].psTab,isCas,isPfl,isRpl,siMkl,pfStd,pfErr,pfTrc,pcDep,pcOpt,pcEnt,
                                           psCnf,&pvHdl,NULL,NULL,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf);
                   if (siErr) {
-                     ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+                     ERROR(ELIMIT(siErr),NULL);
                   }
                   snprintf(acPat,sizeof(acPat),"%s.%s",pcDef,argv[2]);
                   if (pfOut!=NULL) { fprintf(pfOut,"Properties for argument '%s':\n",acPat); }
@@ -2907,19 +2910,19 @@ EVALUATE:
          fprintf(pfErr,"%s %s GETPROP\n",pcDep,argv[0]);
       }
       siErr=CLERTC_CMD;
-      ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+      ERROR(ELIMIT(siErr),NULL);
    } else if (asBif[CLE_BUILTIN_IDX_SETOWNER].isBif && strxcmp(isCas,argv[1],"SETOWNER",0,0,FALSE)==0) {
       if (argc==3) {
          srprintf(&pcCnf,&szCnf,strlen(pcPgm),"%s.owner.id",pcPgm);
          if (pcCnf==NULL) {
             if (pfErr!=NULL) { fprintf(pfErr,"Allocation of memory for owner string failed\n"); }
             siErr=CLERTC_MEM;
-            ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+            ERROR(ELIMIT(siErr),NULL);
          }
          siErr=siCnfSet(psCnf,pfErr,pcCnf,argv[2],TRUE);
          if (siErr) {
             siErr=CLERTC_CFG;
-            ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+            ERROR(ELIMIT(siErr),NULL);
          } else {
             if (pfOut!=NULL) { fprintf(pfOut,"Setting configuration key word '%s' to value '%s' was successful\n",pcCnf,argv[2]); }
             ERROR(CLERTC_OK,NULL);
@@ -2930,7 +2933,7 @@ EVALUATE:
          fprintf(pfErr,"%s %s SETOWNER name\n",pcDep,argv[0]);
       }
       siErr=CLERTC_CMD;
-      ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+      ERROR(ELIMIT(siErr),NULL);
    } else if (asBif[CLE_BUILTIN_IDX_GETOWNER].isBif && strxcmp(isCas,argv[1],"GETOWNER",0,0,FALSE)==0) {
       if (argc==2) {
          if (pfOut!=NULL) { fprintf(pfOut,"Current owner id for '%s' is:\n",argv[0]); }
@@ -2942,7 +2945,7 @@ EVALUATE:
          fprintf(pfErr,"%s %s GETOWNER\n",pcDep,argv[0]);
       }
       siErr=CLERTC_CMD;
-      ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+      ERROR(ELIMIT(siErr),NULL);
    } else if (asBif[CLE_BUILTIN_IDX_SETENV].isBif && strxcmp(isCas,argv[1],"SETENV",0,0,FALSE)==0) {
       if (argc==3) {
          const char* pcVal=strchr(argv[2],'=');
@@ -2955,7 +2958,7 @@ EVALUATE:
                fprintf(pfErr,"%s %s SETENV variable=value\n",pcDep,argv[0]);
             }
             siErr=CLERTC_CMD;
-            ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+            ERROR(ELIMIT(siErr),NULL);
          }
          // cppcheck-suppress [uninitvar, legacyUninitvar]
          srprintf(&pcCnf,&szCnf,strlen(pcOwn)+strlen(pcPgm)+strlen(pcTmp),"%s.%s.envar.%s",pcOwn,pcPgm,pcTmp);
@@ -2964,12 +2967,12 @@ EVALUATE:
                fprintf(pfErr,"Allocation of memory for envar string failed\n");
             }
             siErr=CLERTC_MEM;
-            ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+            ERROR(ELIMIT(siErr),NULL);
          }
          siErr=siCnfSet(psCnf,pfErr,pcCnf,pcVal,TRUE);
          if (siErr) {
             siErr=CLERTC_CFG;
-            ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+            ERROR(ELIMIT(siErr),NULL);
          } else {
             if (pfOut!=NULL) { fprintf(pfOut,"Setting environment variable '%s' to value '%s' was successful\n",pcCnf,pcVal); }
             ERROR(CLERTC_OK,NULL);
@@ -2980,7 +2983,7 @@ EVALUATE:
          fprintf(pfErr,"%s %s SETENV variable=value\n",pcDep,argv[0]);
       }
       siErr=CLERTC_CMD;
-      ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+      ERROR(ELIMIT(siErr),NULL);
    } else if (asBif[CLE_BUILTIN_IDX_GETENV].isBif && strxcmp(isCas,argv[1],"GETENV",0,0,FALSE)==0) {
       if (argc==2) {
          if (pfOut!=NULL) { fprintf(pfOut,"Current environment variables for owner '%s':\n",pcOwn); }
@@ -2997,19 +3000,19 @@ EVALUATE:
          fprintf(pfErr,"%s %s GETENV\n",pcDep,argv[0]);
       }
       siErr=CLERTC_CMD;
-      ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+      ERROR(ELIMIT(siErr),NULL);
    } else if (asBif[CLE_BUILTIN_IDX_DELENV].isBif && strxcmp(isCas,argv[1],"DELENV",0,0,FALSE)==0) {
       if (argc==3) {
          srprintf(&pcCnf,&szCnf,strlen(pcOwn)+strlen(pcPgm)+strlen(argv[2]),"%s.%s.envar.%s",pcOwn,pcPgm,argv[2]);
          if (pcCnf==NULL) {
             if (pfErr!=NULL) { fprintf(pfErr,"Allocation of memory for envar string failed\n"); }
             siErr=CLERTC_MEM;
-            ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+            ERROR(ELIMIT(siErr),NULL);
          }
          siErr=siCnfSet(psCnf,pfErr,pcCnf,"",TRUE);
          if (siErr) {
             siErr=CLERTC_CFG;
-            ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+            ERROR(ELIMIT(siErr),NULL);
          } else {
             if (pfOut!=NULL) { fprintf(pfOut,"Deleting the environment variable '%s' was successful\n",pcCnf); }
             ERROR(CLERTC_OK,NULL);
@@ -3020,7 +3023,7 @@ EVALUATE:
          fprintf(pfErr,"%s %s DELENV variable\n",pcDep,argv[0]);
       }
       siErr=CLERTC_CMD;
-      ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+      ERROR(ELIMIT(siErr),NULL);
    } else if (asBif[CLE_BUILTIN_IDX_LSTENV].isBif && strxcmp(isCas,argv[1],"LSTENV",0,0,FALSE)==0) {
       if (argc==2) {
          if (pfOut!=NULL) { fprintf(pfOut,"Status for all possible usable environment variables:\n"); }
@@ -3064,7 +3067,7 @@ EVALUATE:
          fprintf(pfErr,"%s %s LSTENV\n",pcDep,argv[0]);
       }
       siErr=CLERTC_CMD;
-      ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+      ERROR(ELIMIT(siErr),NULL);
    } else if (asBif[CLE_BUILTIN_IDX_HLPENV].isBif && strxcmp(isCas,argv[1],"HLPENV",0,0,FALSE)==0) {
       if (argc==2) {
          if (pfOut!=NULL) { fprintf(pfOut,"Help for all possible usable environment variables:\n"); }
@@ -3076,7 +3079,7 @@ EVALUATE:
          fprintf(pfErr,"%s %s HLPENV\n",pcDep,argv[0]);
       }
       siErr=CLERTC_CMD;
-      ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+      ERROR(ELIMIT(siErr),NULL);
    } else if (asBif[CLE_BUILTIN_IDX_TRACE].isBif && strxcmp(isCas,argv[1],"TRACE",0,0,FALSE)==0) {
       if (argc==3) {
          if (strxcmp(isCas,argv[2],"ON",0,0,FALSE)==0 || strxcmp(isCas,argv[2],"-ON",0,0,FALSE)==0 || strxcmp(isCas,argv[2],"--ON",0,0,FALSE)==0) {
@@ -3084,12 +3087,12 @@ EVALUATE:
             if (pcCnf==NULL) {
                if (pfErr!=NULL) { fprintf(pfErr,"Allocation of memory for envar string failed\n"); }
                siErr=CLERTC_MEM;
-               ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+               ERROR(ELIMIT(siErr),NULL);
             }
             siErr=siCnfSet(psCnf,pfErr,pcCnf,"ON",TRUE);
             if (siErr) {
                siErr=CLERTC_CFG;
-               ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+               ERROR(ELIMIT(siErr),NULL);
             } else {
                if (pfOut!=NULL) { fprintf(pfOut,"Setting configuration keyword '%s' to value 'ON' was successful\n",pcCnf); }
                ERROR(CLERTC_OK,NULL);
@@ -3099,12 +3102,12 @@ EVALUATE:
             if (pcCnf==NULL) {
                if (pfErr!=NULL) { fprintf(pfErr,"Allocation of memory for envar string failed\n"); }
                siErr=CLERTC_MEM;
-               ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+               ERROR(ELIMIT(siErr),NULL);
             }
             siErr=siCnfSet(psCnf,pfErr,pcCnf,"OFF",TRUE);
             if (siErr) {
                siErr=CLERTC_CFG;
-               ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+               ERROR(ELIMIT(siErr),NULL);
             } else {
                if (pfOut!=NULL) { fprintf(pfOut,"Setting configuration keyword '%s' to value 'OFF' was successful\n",pcCnf); }
                ERROR(CLERTC_OK,NULL);
@@ -3120,12 +3123,12 @@ EVALUATE:
                   if (pcCnf==NULL) {
                      if (pfErr!=NULL) { fprintf(pfErr,"Allocation of memory for envar string failed\n"); }
                      siErr=CLERTC_MEM;
-                     ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+                     ERROR(ELIMIT(siErr),NULL);
                   }
                   siErr=siCnfSet(psCnf,pfErr,pcCnf,pcSgn,TRUE);
                   if (siErr) {
                      siErr=CLERTC_CFG;
-                     ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+                     ERROR(ELIMIT(siErr),NULL);
                   } else {
                      if (pfOut!=NULL) {
                         if (*pcSgn) {
@@ -3146,7 +3149,7 @@ EVALUATE:
          fprintf(pfErr,"%s %s TRACE FILE=filenam\n",pcDep,argv[0]);
       }
       siErr=CLERTC_CMD;
-      ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+      ERROR(ELIMIT(siErr),NULL);
    } else if (asBif[CLE_BUILTIN_IDX_CONFIG].isBif && strxcmp(isCas,argv[1],"CONFIG",0,0,FALSE)==0) {
       if (argc==2) {
          if (pfOut!=NULL) { fprintf(pfOut,"Current configuration data:\n"); }
@@ -3180,7 +3183,7 @@ EVALUATE:
          fprintf(pfErr,"%s %s CONFIG CLEAR\n",pcDep,argv[0]);
       }
       siErr=CLERTC_CMD;
-      ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+      ERROR(ELIMIT(siErr),NULL);
    } else {
       if (argc>1) {
          for (i=0;psCmd[i].pcKyw!=NULL;i++) {
@@ -3198,7 +3201,7 @@ EVALUATE:
 
                siErr=siCleGetCommand(pfOut,pfErr,pfTrc,pcDep,psCmd[i].pcKyw,argc,argv,&pcFil,&pcCmd,pvGbl,pvF2S,pfF2S,pcDpa);
                if (siErr) {
-                  ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+                  ERROR(ELIMIT(siErr),NULL);
                }
                if (pfOut!=NULL) {
                   ckCpu2=clock();
@@ -3210,7 +3213,7 @@ EVALUATE:
                                       isCas,isPfl,isRpl,siMkl,pfOut,pfErr,pfTrc,pcDep,pcOpt,pcEnt,psCnf,&pvHdl,pfMsg,pvF2S,pfF2S,pvSaf,pfSaf,pcCmd);
                if (siErr) {
                   SAFE_FREE(pcCmd);
-                  ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+                  ERROR(ELIMIT(siErr),NULL);
                }
                if (pfOut!=NULL) {
                   ckCpu2=clock();
@@ -3223,7 +3226,7 @@ EVALUATE:
                   if (pfErr!=NULL) { fprintf(pfErr,"%s Command line parser for command '%s' failed\n",cstime(0,acTs),psCmd[i].pcKyw); }
                   SAFE_FREE(pcCmd);
                   siErr=CLERTC_SYN;
-                  ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+                  ERROR(ELIMIT(siErr),NULL);
                }
                if (psCmd[i].piOid!=NULL) {
                   siOid=*psCmd[i].piOid;
@@ -3255,7 +3258,7 @@ EVALUATE:
                   }
                   SAFE_FREE(pcCmd); SAFE_FREE(pcLst);
                   psCmd[i].pfFin(pfErr,pfTrc,pvGbl,siOid,psCmd[i].pvPar);
-                  ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+                  ERROR(ELIMIT(siErr),NULL);
                }
                if (pfOut!=NULL) {
                   ckCpu2=clock();
@@ -3274,7 +3277,7 @@ EVALUATE:
                      }
                      psCmd[i].pfFin(pfErr,pfTrc,pvGbl,siOid,psCmd[i].pvPar);
                      siErr=CLERTC_WRN;
-                     ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+                     ERROR(ELIMIT(siErr),NULL);
                   } else {
                      if (pfMsg!=NULL && (pcMsg=pfMsg(siErr))!=NULL) {
                         if (pfErr!=NULL) { fprintf(pfErr,"%s Run of command '%s' failed (Return code: %d / Reason code: %d (%s))\n",cstime(0,acTs),psCmd[i].pcKyw,CLERTC_RUN,siErr,pcMsg); }
@@ -3284,10 +3287,10 @@ EVALUATE:
                      psCmd[i].pfFin(pfErr,pfTrc,pvGbl,siOid,psCmd[i].pvPar);
                      if ((siScc>CLERTC_MAX) || (siScc&0x00000001)) {
                         siErr=siScc;
-                        ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+                        ERROR(ELIMIT(siErr),NULL);
                      } else {
                         siErr=CLERTC_RUN;
-                        ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+                        ERROR(ELIMIT(siErr),NULL);
                      }
                   }
                }
@@ -3306,14 +3309,14 @@ EVALUATE:
                      if (pfErr!=NULL) { fprintf(pfErr,"%s Finish/cleanup for command '%s' failed (Return code: %d / Reason code: %d)\n",cstime(0,acTs),psCmd[i].pcKyw,CLERTC_FIN,siErr); }
                   }
                   siErr=CLERTC_FIN;
-                  ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+                  ERROR(ELIMIT(siErr),NULL);
                }
                if (pfOut!=NULL) {
                   ckCpu2=clock();
                   fprintf(pfOut,"%s Finalize for command '%s' was successful (CPU time %7.5fs)\n",cstime(0,acTs),psCmd[i].pcKyw,((double)(ckCpu2-ckCpu1))/CLOCKS_PER_SEC);
                }
                siErr=isWrn&0x00000001;
-               ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+               ERROR(ELIMIT(siErr),NULL);
             }
          }
       }
@@ -3322,7 +3325,7 @@ EVALUATE:
          if (ppArg == NULL) {
             if (pfErr!=NULL) { fprintf(pfErr,"Memory allocation for argument list to run the default command '%s' failed\n",pcDef); }
             siErr=CLERTC_MEM;
-            ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+            ERROR(ELIMIT(siErr),NULL);
          }
          for (i=argc;i>1;i--) { ppArg[i]=argv[i-1]; }
          ppArg[0]=argv[0]; ppArg[1]=(char*)pcDef; argc++; argv=ppArg;
@@ -3333,10 +3336,11 @@ EVALUATE:
          vdPrnStaticSyntax(pfErr,psCmd,asBif,argv[0],pcDep,pcOpt,pcDpa);
       }
       siErr=CLERTC_CMD;
-      ERROR(((siErr>siMaxCC)?siMaxCC:(siErr<siMinCC)?0:siErr),NULL);
+      ERROR(ELIMIT(siErr),NULL);
    }
 }
 #undef ERROR
+#undef ELIMIT
 
 /* Interne Funktionen *************************************************/
 
