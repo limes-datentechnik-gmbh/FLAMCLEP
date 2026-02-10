@@ -596,8 +596,26 @@ typedef int (TfClpPrintPage)(
 #define CLPISF_LAB(flg)          ((flg)&CLPFLG_LAB)
 #define CLPISF_UPP(flg)          ((flg)&CLPFLG_UPP)
 #define CLPISF_LOW(flg)          ((flg)&CLPFLG_LOW)
+
+/**
+ * @brief Check if flag indicates a link parameter (counter, OID, index, or length)
+ * @param[in] flg Flag value to check
+ * @return Non-zero if flag indicates any link type, zero otherwise
+ */
 static inline int CLPISF_LNK(int flg) { return (CLPISF_CNT(flg) ||  CLPISF_OID(flg) || CLPISF_IND(flg) || CLPISF_ELN(flg) || CLPISF_SLN(flg) || CLPISF_TLN(flg)); }
+
+/**
+ * @brief Check if flag indicates a regular argument (not link, constant, or alias)
+ * @param[in] flg Flag value to check
+ * @return Non-zero if flag indicates a regular argument, zero otherwise
+ */
 static inline int CLPISF_ARG(int flg) { return (!CLPISF_LNK(flg) && !CLPISF_CON(flg) && !CLPISF_ALI(flg)); }
+
+/**
+ * @brief Check if flag indicates an entry (not link or alias)
+ * @param[in] flg Flag value to check
+ * @return Non-zero if flag indicates an entry, zero otherwise
+ */
 static inline int CLPISF_ENT(int flg) { return (!CLPISF_LNK(flg) && !CLPISF_ALI(flg)); }
 
 #define CLPSYM_NON               0x00000000U   /**< @brief No operation done*/
@@ -629,6 +647,14 @@ static inline int CLPISF_ENT(int flg) { return (!CLPISF_LNK(flg) && !CLPISF_ALI(
 #define CLPISS_SLN(flg)          ((flg)&CLPSYM_SLN)
 #define CLPISS_TLN(flg)          ((flg)&CLPSYM_TLN)
 
+/**
+ * @brief Symbol table walk structure
+ *
+ * This structure is used to retrieve information about a symbol during
+ * symbol table traversal operations. It contains all metadata associated
+ * with a symbol including its keyword, type, flags, constraints, and
+ * documentation strings.
+ */
 typedef struct ClpSymWlk {
   const char*                   pcKyw;      /**< @brief Pointer to the key word */
   const char*                   pcAli;      /**< @brief Pointer to the alias */
@@ -646,6 +672,13 @@ typedef struct ClpSymWlk {
   unsigned int                  uiOpr;      /**< @brief Bitmask for possible operations */
 }TsClpSymWlk;
 
+/**
+ * @brief Symbol table update structure
+ *
+ * This structure is used to update symbol information in the symbol table,
+ * particularly for modifying property values that override default values
+ * defined in the argument table.
+ */
 typedef struct ClpSymUpd {
   const char*                   pcPro;      /**< @brief Pointer to a property supplement string replacing the current default value */
 }TsClpSymUpd;

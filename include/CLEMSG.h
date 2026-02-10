@@ -36,57 +36,129 @@
 #define INC_CLEMSG_H
 /*! @endcond */
 
+/**
+ * @defgroup CLE_MESSAGES CLE Message Strings
+ * @brief Help and syntax messages for CLE built-in functions
+ *
+ * This group contains all help (HLP_*) and syntax (SYN_*) message strings
+ * used by the Command Line Executor's built-in functions. Each built-in
+ * function has two associated strings:
+ * - HLP_* provides a brief description of the function's purpose
+ * - SYN_* provides the command syntax pattern
+ *
+ * @{
+ */
+
+/** @brief Help message for SYNTAX built-in function */
 static const char* HLP_CLE_BUILTIN_SYNTAX  ="Provides the syntax for each command";
+/** @brief Syntax pattern for SYNTAX built-in function */
 static const char* SYN_CLE_BUILTIN_SYNTAX  ="SYNTAX [command[.path] [DEPTH1 | ... | DEPTH9 | ALL]]";
+/** @brief Help message for HELP built-in function */
 static const char* HLP_CLE_BUILTIN_HELP    ="Provides quick help for arguments";
+/** @brief Syntax pattern for HELP built-in function */
 static const char* SYN_CLE_BUILTIN_HELP    ="HELP [command[.path] [DEPTH1 | ... | DEPTH9 | ALL]] [MAN]";
+/** @brief Help message for MANPAGE built-in function */
 static const char* HLP_CLE_BUILTIN_MANPAGE ="Provides manual pages (detailed help)";
+/** @brief Syntax pattern for MANPAGE built-in function */
 static const char* SYN_CLE_BUILTIN_MANPAGE ="MANPAGE [function | command[.path][=filename]] | [filename]";
+/** @brief Help message for GENDOCU built-in function */
 static const char* HLP_CLE_BUILTIN_GENDOCU ="Generates auxiliary documentation (ASCIIDOC text format)";
+/** @brief Syntax pattern for GENDOCU built-in function */
 static const char* SYN_CLE_BUILTIN_GENDOCU ="GENDOCU [command[.path]=]filename [NONBR] [SHORT]";
+/** @brief Help message for HTMLDOC built-in function */
 static const char* HLP_CLE_BUILTIN_HTMLDOC ="Generates the complete HTML documentation into a folder";
+/** @brief Syntax pattern for HTMLDOC built-in function */
 static const char* SYN_CLE_BUILTIN_HTMLDOC ="HTMLDOC [path] [NUMBERS] [TYPES] [SHORT]";
+/** @brief Help message for GENPROP built-in function */
 static const char* HLP_CLE_BUILTIN_GENPROP ="Generates a property file";
+/** @brief Syntax pattern for GENPROP built-in function */
 static const char* SYN_CLE_BUILTIN_GENPROP ="GENPROP [command=]filename";
+/** @brief Help message for SETPROP built-in function */
 static const char* HLP_CLE_BUILTIN_SETPROP ="Activate a property file";
+/** @brief Syntax pattern for SETPROP built-in function */
 static const char* SYN_CLE_BUILTIN_SETPROP ="SETPROP [command=]filename";
+/** @brief Help message for CHGPROP built-in function */
 static const char* HLP_CLE_BUILTIN_CHGPROP ="Change a property value in the currently active property file";
+/** @brief Syntax pattern for CHGPROP built-in function */
 static const char* SYN_CLE_BUILTIN_CHGPROP ="CHGPROP command [path[=value]]*";
+/** @brief Help message for DELPROP built-in function */
 static const char* HLP_CLE_BUILTIN_DELPROP ="Remove a property file from configuration";
+/** @brief Syntax pattern for DELPROP built-in function */
 static const char* SYN_CLE_BUILTIN_DELPROP ="DELPROP [command]";
+/** @brief Help message for GETPROP built-in function */
 static const char* HLP_CLE_BUILTIN_GETPROP ="Show current properties";
+/** @brief Syntax pattern for GETPROP built-in function */
 static const char* SYN_CLE_BUILTIN_GETPROP ="GETPROP [command[.path] [DEPTH1 | ... | DEPTH9 | DEPALL | DEFALL]]";
+/** @brief Help message for SETOWNER built-in function */
 static const char* HLP_CLE_BUILTIN_SETOWNER="Defines the current owner";
+/** @brief Syntax pattern for SETOWNER built-in function */
 static const char* SYN_CLE_BUILTIN_SETOWNER="SETOWNER name";
+/** @brief Help message for GETOWNER built-in function */
 static const char* HLP_CLE_BUILTIN_GETOWNER="Show current owner setting";
+/** @brief Syntax pattern for GETOWNER built-in function */
 static const char* SYN_CLE_BUILTIN_GETOWNER="GETOWNER";
+/** @brief Help message for SETENV built-in function */
 static const char* HLP_CLE_BUILTIN_SETENV  ="Set an environment variable (defined in the config file)";
+/** @brief Syntax pattern for SETENV built-in function */
 static const char* SYN_CLE_BUILTIN_SETENV  ="SETENV variable=value";
+/** @brief Help message for GETENV built-in function */
 static const char* HLP_CLE_BUILTIN_GETENV  ="Show the environment variables (defined in the config file)";
+/** @brief Syntax pattern for GETENV built-in function */
 static const char* SYN_CLE_BUILTIN_GETENV  ="GETENV";
+/** @brief Help message for DELENV built-in function */
 static const char* HLP_CLE_BUILTIN_DELENV  ="Delete an environment variable (defined in the config file)";
+/** @brief Syntax pattern for DELENV built-in function */
 static const char* SYN_CLE_BUILTIN_DELENV  ="DELENV variable";
+/** @brief Help message for LSTENV built-in function */
 static const char* HLP_CLE_BUILTIN_LSTENV  ="List status of all possible usable environment variables";
+/** @brief Syntax pattern for LSTENV built-in function */
 static const char* SYN_CLE_BUILTIN_LSTENV  ="LSTENV";
+/** @brief Help message for HLPENV built-in function */
 static const char* HLP_CLE_BUILTIN_HLPENV  ="List help message for all possible usable environment variables";
+/** @brief Syntax pattern for HLPENV built-in function */
 static const char* SYN_CLE_BUILTIN_HLPENV  ="HLPENV";
+/** @brief Help message for TRACE built-in function */
 static const char* HLP_CLE_BUILTIN_TRACE   ="Manage trace capabilities";
+/** @brief Syntax pattern for TRACE built-in function */
 static const char* SYN_CLE_BUILTIN_TRACE   ="TRACE ON | OFF | FILE=filename";
+/** @brief Help message for CONFIG built-in function */
 static const char* HLP_CLE_BUILTIN_CONFIG  ="Shows or clear all the current configuration settings";
+/** @brief Syntax pattern for CONFIG built-in function */
 static const char* SYN_CLE_BUILTIN_CONFIG  ="CONFIG [CLEAR]";
+/** @brief Help message for GRAMMAR built-in function */
 static const char* HLP_CLE_BUILTIN_GRAMMAR ="Shows the grammar for commands and properties";
+/** @brief Syntax pattern for GRAMMAR built-in function */
 static const char* SYN_CLE_BUILTIN_GRAMMAR ="GRAMMAR";
+/** @brief Help message for LEXEMES built-in function */
 static const char* HLP_CLE_BUILTIN_LEXEMES ="Shows the regular expressions accepted in a command";
+/** @brief Syntax pattern for LEXEMES built-in function */
 static const char* SYN_CLE_BUILTIN_LEXEMES ="LEXEMES";
+/** @brief Help message for LICENSE built-in function */
 static const char* HLP_CLE_BUILTIN_LICENSE ="List license information for the program";
+/** @brief Syntax pattern for LICENSE built-in function */
 static const char* SYN_CLE_BUILTIN_LICENSE ="LICENSE";
+/** @brief Help message for VERSION built-in function */
 static const char* HLP_CLE_BUILTIN_VERSION ="List version information for the program";
+/** @brief Syntax pattern for VERSION built-in function */
 static const char* SYN_CLE_BUILTIN_VERSION ="VERSION";
+/** @brief Help message for ABOUT built-in function */
 static const char* HLP_CLE_BUILTIN_ABOUT   ="Show information about the program";
+/** @brief Syntax pattern for ABOUT built-in function */
 static const char* SYN_CLE_BUILTIN_ABOUT   ="ABOUT";
+/** @brief Help message for ERRORS built-in function */
 static const char* HLP_CLE_BUILTIN_ERRORS  ="Show information about return and reason codes of the program";
+/** @brief Syntax pattern for ERRORS built-in function */
 static const char* SYN_CLE_BUILTIN_ERRORS  ="ERRORS";
 
+/**
+ * @brief Template header text for generated property files
+ *
+ * This multiline string contains a formatted comment block that explains
+ * the syntax and usage of property files. It is automatically inserted
+ * at the beginning of property files generated by the GENPROP built-in function.
+ * The text provides examples for different data types including numbers,
+ * strings, floats, switches, objects, and overlays.
+ */
 static const char* HLP_CLE_PROPFIL =""
 "#------------------------------------------------------------------- #\n"
 "#                                                                    #\n"
@@ -122,6 +194,8 @@ static const char* HLP_CLE_PROPFIL =""
 "#   Example for a OVERLAY : \"RECTANGLE\"                              #\n"
 "#                                                                    #\n"
 "#------------------------------------------------------------------- #\n\n";
+
+/** @} */ /* end of CLE_MESSAGES group */
 
 /*! @cond PRIVATE */
 #endif /*INC_CLEMSG_H*/

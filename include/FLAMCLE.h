@@ -274,6 +274,43 @@ extern int siCleExecute(
 /**********************************************************************/
 /*! @cond PRIVATE */
 
+/**
+ * @brief Parse a command string and store results in a data structure (internal helper function)
+ *
+ * This internal function parses a command line string or property string according to
+ * the provided argument table and stores the parsed values directly into the specified
+ * data structure. It is used internally by CLE for parsing command arguments and
+ * property values.
+ *
+ * @param[in]     uiErr   Size of error message buffer
+ * @param[out]    pcErr   Buffer for error messages (may be NULL)
+ * @param[in]     isCas   Case-sensitive flag (TRUE for case-sensitive parsing)
+ * @param[in]     isPfl   Property file mode flag
+ * @param[in]     isRpl   Replacement mode flag
+ * @param[in]     siMkl   Minimum keyword length for abbreviations
+ * @param[in]     pcOwn   Owner identifier string
+ * @param[in]     pcPgm   Program name
+ * @param[in]     pcBld   Build information string
+ * @param[in]     pcCmd   Command keyword
+ * @param[in]     pcMan   Manual page text for this command
+ * @param[in]     pcHlp   Short help text for this command
+ * @param[in]     isOvl   Overlay mode flag (TRUE if parsing overlay structure)
+ * @param[in]     pcStr   String to parse (command line or property string)
+ * @param[in]     psTab   Pointer to argument table defining the command syntax
+ * @param[in]     pcDep   Dependency string (used in error messages)
+ * @param[in]     pcOpt   Option string (used in syntax display)
+ * @param[in]     pcEnt   Entry string (used in syntax display)
+ * @param[out]    piMod   Pointer to modification counter (number of values parsed)
+ * @param[inout]  pvDat   Pointer to data structure where parsed values are stored
+ * @param[in]     pvGbl   Global context pointer (application-specific)
+ * @param[in]     pvF2S   File-to-string context pointer
+ * @param[in]     pfF2S   File-to-string callback function
+ * @param[in]     pvSaf   String allocation function context
+ * @param[in]     pfSaf   String allocation callback function
+ * @param[out]    ppClp   Pointer to CLP handle (for cleanup on error)
+ *
+ * @return CLE return code (CLERTC_OK on success, error code otherwise)
+ */
 extern int siCleParseString(
     const int                     uiErr,
     char*                         pcErr,
@@ -289,7 +326,7 @@ extern int siCleParseString(
     const char*                   pcHlp,
     const int                     isOvl,
     const char*                   pcStr,
-    const TsClpArgument*          psCmd,
+    const TsClpArgument*          psTab,
     const char*                   pcDep,
     const char*                   pcOpt,
     const char*                   pcEnt,

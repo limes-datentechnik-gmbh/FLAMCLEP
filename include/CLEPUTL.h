@@ -844,8 +844,27 @@ typedef struct EnVarList {
 }TsEnVarList;
 
 #ifdef __WIN__
+/**
+ * @brief Get Windows version string
+ * @param[out] vstr  Pointer to string pointer that will be allocated
+ * @param[out] size  Pointer to size variable
+ * @return Pointer to allocated version string (must be freed by caller)
+ */
 extern char* windowsversionstring(char** vstr, size_t* size);
+
+/**
+ * @brief Set an environment variable on Windows
+ * @param[in] name  Name of the environment variable
+ * @param[in] value Value to set
+ * @return 0 on success, non-zero on error
+ */
 extern int win_setenv(const char* name, const char* value);
+
+/**
+ * @brief Unset an environment variable on Windows
+ * @param[in] name Name of the environment variable
+ * @return 0 on success, non-zero on error
+ */
 extern int win_unsetenv(const char* name);
 #  define GETENV(name)        getenv((name))
 #  define SETENV(name, value) win_setenv((name), (value))
@@ -860,9 +879,20 @@ extern int win_unsetenv(const char* name);
 #  define UNSETENV(name)      unsetenv((name))
 #endif
 
+/**
+ * @brief Check if environment variable value is "ON" or "YES"
+ * @param[in] pcEnv Environment variable value to check
+ * @return Non-zero if value is "ON" or "YES", zero otherwise
+ */
 static inline int CHECK_ENVAL_ON(const char* pcEnv) {
    return (pcEnv != NULL && (strcmp(pcEnv, "ON")==0 || strcmp(pcEnv, "YES")==0));
 }
+
+/**
+ * @brief Check if named environment variable is set to "ON" or "YES"
+ * @param[in] pcVar Name of environment variable
+ * @return Non-zero if variable is set to "ON" or "YES", zero otherwise
+ */
 static inline int CHECK_ENVAR_ON(const char* pcVar) {
    const char* pcEnv=GETENV(pcVar);
    if (pcEnv!=NULL) {
@@ -871,9 +901,21 @@ static inline int CHECK_ENVAR_ON(const char* pcVar) {
       return(FALSE);
    }
 }
+
+/**
+ * @brief Check if environment variable value is "OFF" or "NO"
+ * @param[in] pcEnv Environment variable value to check
+ * @return Non-zero if value is "OFF" or "NO", zero otherwise
+ */
 static inline int CHECK_ENVAL_OFF(const char* pcEnv) {
    return (pcEnv != NULL && (strcmp(pcEnv,"OFF")==0 || strcmp(pcEnv,"NO")==0));
 }
+
+/**
+ * @brief Check if named environment variable is set to "OFF" or "NO"
+ * @param[in] pcVar Name of environment variable
+ * @return Non-zero if variable is set to "OFF" or "NO", zero otherwise
+ */
 static inline int CHECK_ENVAR_OFF(const char* pcVar) {
    const char* pcEnv=GETENV(pcVar);
    if (pcEnv!=NULL) {
@@ -883,14 +925,65 @@ static inline int CHECK_ENVAR_OFF(const char* pcVar) {
    }
 }
 
+/**
+ * @brief Open file with HFS qualifier support
+ * @param[in] name File name (may include DD:NAME or HFS qualifiers)
+ * @param[in] mode File open mode (same as fopen)
+ * @return FILE pointer on success, NULL on error
+ */
 extern FILE* fopen_hfq(const char* name, const char* mode);
+
+/**
+ * @brief Open file with HFS qualifier support (no warning on missing file)
+ * @param[in] name File name (may include DD:NAME or HFS qualifiers)
+ * @param[in] mode File open mode (same as fopen)
+ * @return FILE pointer on success, NULL on error
+ */
 extern FILE* fopen_hfq_nowarn(const char* name, const char* mode);
+
+/**
+ * @brief Reopen file with HFS qualifier support
+ * @param[in] name   File name (may include DD:NAME or HFS qualifiers)
+ * @param[in] mode   File open mode (same as freopen)
+ * @param[in] stream Existing FILE stream to reopen
+ * @return FILE pointer on success, NULL on error
+ */
 extern FILE* freopen_hfq(const char* name, const char* mode, FILE* stream);
+
+/**
+ * @brief Get file size in bytes
+ * @param[in] name File name
+ * @return File size in bytes, -1 on error
+ */
 extern long long getFileSize(const char* name);
+
 #ifdef __ZOS__
+   /**
+    * @brief Create and open a temporary file (z/OS specific)
+    * @return FILE pointer to temporary file, NULL on error
+    */
    extern FILE* fopen_tmp(void);
+
+   /**
+    * @brief Close and delete a temporary file (z/OS specific)
+    * @param[in] fp FILE pointer to close
+    * @return 0 on success, non-zero on error
+    */
    extern int   fclose_tmp(FILE* fp);
+
+   /**
+    * @brief Remove file with HFS qualifier support (z/OS specific)
+    * @param[in] name File name to remove
+    * @return 0 on success, non-zero on error
+    */
    extern int   remove_hfq(const char* name);
+
+   /**
+    * @brief Rename file with HFS qualifier support (z/OS specific)
+    * @param[in] old Old file name
+    * @param[in] new New file name
+    * @return 0 on success, non-zero on error
+    */
    extern int   rename_hfq(const char* old, const char* new);
 #else
 #  define fopen_tmp()            tmpfile()
@@ -955,10 +1048,10 @@ extern long long getFileSize(const char* name);
 /**********************************************************************/
 
 /**
- * Calculates FNV1A hash value
- * @param uiLen   length of the data
- * @param pcDat   pointer to the data
- * @return
+ * @brief Calculate FNV1A hash value
+ * @param[in] uiLen Length of the data
+ * @param[in] pcDat Pointer to the data
+ * @return FNV1A hash value (32-bit unsigned integer)
  */
 static inline unsigned int fnvHash(const unsigned int uiLen, const unsigned char* pcDat) {
    unsigned int         uiHsh=0x811C9DC5U;
@@ -970,140 +1063,171 @@ static inline unsigned int fnvHash(const unsigned int uiLen, const unsigned char
 }
 
 /**
- * Ensure memset is not eliminate by the compiler
- * @param ptr  pointer to the data
- * @param len  size of the data
+ * @brief Ensure memset is not eliminated by the compiler
+ * @param[in] ptr Pointer to the data
+ * @param[in] len Size of the data
  */
 extern void secure_memset(void *ptr,size_t len);
 
 /**
- * Returns the current user id.
- * @param size    size of the buffer
- * @param buffer  pointer to the buffer
- * @return        pointer to the buffer containing the current user id (null-terminated)
+ * @brief Get the current user id
+ * @param[in]  size   Size of the buffer
+ * @param[out] buffer Pointer to the buffer
+ * @return Pointer to the buffer containing the current user id (null-terminated)
  */
 extern char* userid(const int size, char* buffer);
 
 /**
- * Returns the current home directory.
- * @param flag    if true then slash/backslash are added
- * @param size    size of the string buffer
- * @param buffer  pointer to the buffer
- * @return        pointer to the buffer containing the current home directory (null-terminated)
+ * @brief Get the current home directory
+ * @param[in]  flag   If true then slash/backslash are added
+ * @param[in]  size   Size of the string buffer
+ * @param[out] buffer Pointer to the buffer
+ * @return Pointer to the buffer containing the current home directory (null-terminated)
  */
 extern char* homedir(const int flag, const int size, char* buffer);
 
 /**
- * Returns the current user id.
- * @return        pointer to the buffer containing the current user id (null-terminated) must be freed by the caller
+ * @brief Get the current user id (dynamic allocation)
+ * @return Pointer to the buffer containing the current user id (null-terminated), must be freed by the caller
  */
 extern char* duserid(void);
 
 /**
- * Returns the current home directory.
- * @param flag    if true then slash/backslash are added
- * @return        pointer to the buffer containing the current home directory (null-terminated) must be freed by the caller
+ * @brief Get the current home directory (dynamic allocation)
+ * @param[in] flag If true then slash/backslash are added
+ * @return Pointer to the buffer containing the current home directory (null-terminated), must be freed by the caller
  */
 extern char* dhomedir(const int flag);
 
 /**
+ * @brief Get an environment variable safely
+ *
  * Gets an environment variable and stores it in the provided buffer. If
  * the buffer is not large enough, the variable value is truncated.
- * @param name Name of the environment variable
- * @param buffer Pointer to the buffer for the variable value
- * @param bufsiz Size of the buffer
+ *
+ * @param[in]  name   Name of the environment variable
+ * @param[out] buffer Pointer to the buffer for the variable value
+ * @param[in]  bufsiz Size of the buffer
  * @return If bufsiz > 0, returns the buffer pointer which contains a null-terminated string
  *         or NULL (variable does not exist). If bufsiz == 0, buffer is returned unmodified.
  */
 extern char* safe_getenv(const char* name, char* buffer, size_t bufsiz);
 
 /**
- * Un-escape a string as part of special character support in EBCDIC codepages (static version).
- * @param input     pointer to the input string containing the escape sequences
- * @param output    pointer to the output string for un-escaping (could be equal to the input pointer)
- * @return          pointer to the un-escaped output or NULL if error
+ * @brief Un-escape a string (static version)
+ *
+ * Un-escape a string as part of special character support in EBCDIC codepages.
+ *
+ * @param[in]  input  Pointer to the input string containing the escape sequences
+ * @param[out] output Pointer to the output string for un-escaping (could be equal to the input pointer)
+ * @return Pointer to the un-escaped output or NULL if error
  */
 extern char* unEscape(const char* input, char* output);
 
 /**
- * Un-escape a string as part of special character support in EBCDIC codepages (dynamic version).
- * @param input     pointer to the input string containing the escape sequences
- * @return          pointer to the un-escaped output or NULL if error (calling application must free the memory)
+ * @brief Un-escape a string (dynamic version)
+ *
+ * Un-escape a string as part of special character support in EBCDIC codepages.
+ * The output buffer is dynamically allocated and must be freed by the caller.
+ *
+ * @param[in] input Pointer to the input string containing the escape sequences
+ * @return Pointer to the un-escaped output or NULL if error (calling application must free the memory)
  */
 extern char* dynUnEscape(const char* input);
 
 /**
- * Works like printf but print only in debug mode.
- * @param format  format string
- * @return        amount of characters printed (0 are mainly a error)
+ * @brief Print formatted output in debug mode only
+ *
+ * Works like printf but prints only in debug mode.
+ *
+ * @param[in] format Format string
+ * @return Amount of characters printed (0 is mainly an error)
  */
 extern int printd(const char* format,...) PRINTF_CHECK(1, 2);
 
 /**
+ * @brief Concatenate formatted string to buffer
+ *
  * Works like snprintf but concatenates the format string to the buffer.
- * @param buffer  pointer to the string buffer
- * @param size    size of the string buffer
- * @param format  format string
- * @return        amount of characters in the new string after append, negativ in case of error
+ *
+ * @param[inout] buffer Pointer to the string buffer
+ * @param[in]    size   Size of the string buffer
+ * @param[in]    format Format string
+ * @return Amount of characters in the new string after append, negative in case of error
  */
 extern int snprintc(char* buffer,const size_t size,const char* format,...) PRINTF_CHECK(3, 4);
 
 /**
+ * @brief Concatenate formatted string to buffer with reallocation
+ *
  * Works like snprintc but does reallocation of the buffer (maximal expansion of the format string can be specified).
- * @param buffer    pointer to pointer to the string buffer (is updated, could be NULL at beginning)
- * @param size      pointer to size of the string buffer (is updated, could be 0 at beginning)
- * @param expansion maximal expected expansion of the format string (size must be fit strlen(*buffer)+strlen(format)+expansion+1)
- * @param format    format string
- * @return          amount of characters printed (0 are mainly a error)
+ *
+ * @param[inout] buffer    Pointer to pointer to the string buffer (is updated, could be NULL at beginning)
+ * @param[inout] size      Pointer to size of the string buffer (is updated, could be 0 at beginning)
+ * @param[in]    expansion Maximal expected expansion of the format string (size must fit strlen(*buffer)+strlen(format)+expansion+1)
+ * @param[in]    format    Format string
+ * @return Amount of characters printed (0 is mainly an error)
  */
 extern int srprintc(char** buffer,size_t* size,const size_t expansion,const char* format,...) PRINTF_CHECK(4, 5);
 
 /**
- * Works like snprintc but does reallocation of the buffer (maximal expansion of the format string can be specified).
- * @param buffer    pointer to pointer to the string buffer (is updated, could be NULL at beginning)
- * @param size      pointer to size of the string buffer (is updated, could be 0 at beginning)
- * @param expansion maximal expected expansion of the format string (size must be fit strlen(format)+expansion+1)
- * @param format    format string
- * @return          amount of characters printed (0 are mainly a error)
+ * @brief Print formatted string to buffer with reallocation
+ *
+ * Works like sprintf but does reallocation of the buffer (maximal expansion of the format string can be specified).
+ *
+ * @param[inout] buffer    Pointer to pointer to the string buffer (is updated, could be NULL at beginning)
+ * @param[inout] size      Pointer to size of the string buffer (is updated, could be 0 at beginning)
+ * @param[in]    expansion Maximal expected expansion of the format string (size must fit strlen(format)+expansion+1)
+ * @param[in]    format    Format string
+ * @return Amount of characters printed (0 is mainly an error)
  */
 extern int srprintf(char** buffer,size_t* size,const size_t expansion,const char* format,...) PRINTF_CHECK(4, 5);
 
 /**
- * Prints man pages to a file, inserting owner, program name, build number, state and date into placeholders
- * @param file    pointer to the file
- * @param own     owner name for replacement (&{OWN})
- * @param pgm     program name for replacement (&{PGM})
- * @param bld     build/version string for replacement (&{BLD})
- * @param man     manpage to print, which can contain &{PGM}, &{OWN}, &{BLD}, &{DATE} and &{STATE}
- * @param cnt     amount of '\n' added to man page (0,1,2 (>2=2))
+ * @brief Print manual page to file with placeholder replacement
+ *
+ * Prints man pages to a file, inserting owner, program name, build number, state and date into placeholders.
+ *
+ * @param[in] file Pointer to the file
+ * @param[in] own  Owner name for replacement (&{OWN})
+ * @param[in] pgm  Program name for replacement (&{PGM})
+ * @param[in] bld  Build/version string for replacement (&{BLD})
+ * @param[in] man  Manpage to print, which can contain &{PGM}, &{OWN}, &{BLD}, &{DATE} and &{STATE}
+ * @param[in] cnt  Amount of '\n' added to man page (0,1,2 (>2=2))
  */
 extern void fprintm(FILE* file,const char* own, const char* pgm, const char* bld, const char* man, const int cnt);
 
 /**
- * Prints man pages to a buffer, inserting owner, program name, build number, state and date into placeholders
- * @param buffer  pointer to the buffer
- * @param size    size of the buffer
- * @param own     owner name for replacement (&{OWN})
- * @param pgm     program name for replacement (&{PGM})
- * @param bld     build/version string for replacement (&{BLD})
- * @param man     manpage to print, which can contain &{PGM}, &{OWN}, &{BLD}, &{DATE} and &{STATE}
- * @param cnt     amount of '\n' added to man page (0,1,2 (>2=2))
- * @return        same as snprintf
+ * @brief Print manual page to buffer with placeholder replacement
+ *
+ * Prints man pages to a buffer, inserting owner, program name, build number, state and date into placeholders.
+ *
+ * @param[out] buffer Pointer to the buffer
+ * @param[in]  size   Size of the buffer
+ * @param[in]  own    Owner name for replacement (&{OWN})
+ * @param[in]  pgm    Program name for replacement (&{PGM})
+ * @param[in]  bld    Build/version string for replacement (&{BLD})
+ * @param[in]  man    Manpage to print, which can contain &{PGM}, &{OWN}, &{BLD}, &{DATE} and &{STATE}
+ * @param[in]  cnt    Amount of '\n' added to man page (0,1,2 (>2=2))
+ * @return Same as snprintf
  */
 extern int snprintm(char* buffer, size_t size, const char* own, const char* pgm, const char* bld, const char* man, const int cnt);
 
 
 /**
+ * @brief Parse zero-terminated string array
+ *
  * This function parses a zero terminated string array of a certain length or terminated with 0xFF.
  * Such a string array is the result of a variable length array of strings provided by CLP.
  * If you don't know the length, please provide a negative number to look for 0xFF termination.
  * For 0xFF termination you must define the CLPFLG_DLM. This is useful if there is no capability
  * to use the ELN link to determine the length of the string array. Each call returns the pointer to
  * the next string in the array, if no string is found anymore NULL is returned.
- * @param hdl     pointer of pointer to string initialized with NULL at beginning
- * @param str     pointer to the string arrays from CLP
- * @param len     -1 for 0xFF delimiter parsing or the ELN of the string array
- * @return        pointer to one string or NULL if no more string
+ *
+ * @param[inout] hdl Pointer of pointer to string initialized with NULL at beginning
+ * @param[in]    str Pointer to the string arrays from CLP
+ * @param[in]    len -1 for 0xFF delimiter parsing or the ELN of the string array
+ * @return Pointer to one string or NULL if no more string
  */
 extern const char* prsdstr(const char** hdl, const char* str, int len);
 
@@ -1116,28 +1240,45 @@ extern const char* prsdstr(const char** hdl, const char* str, int len);
 #endif
 
 /**
+ * @brief Copy string with guaranteed null-termination
+ *
  * Works like strncpy but ensures null-termination.
- * @param dest    pointer to destination string
- * @param src     pointer to source string
- * @param n       size of memory available for buffer
- * @return        number of bytes actually copied (excludes NUL-termination)
+ *
+ * @param[out] dest Pointer to destination string
+ * @param[in]  src  Pointer to source string
+ * @param[in]  n    Size of memory available for buffer
+ * @return Number of bytes actually copied (excludes NUL-termination)
  */
 extern size_t strlcpy(char *dest, const char *src, size_t n);
+
+/**
+ * @brief Copy string with guaranteed null-termination (variant)
+ * @param[out] dest Pointer to destination string
+ * @param[in]  src  Pointer to source string
+ * @param[in]  n    Size of memory available for buffer
+ * @return Number of bytes actually copied (excludes NUL-termination)
+ */
 extern size_t strlcpy_null(char *dest, const char *src, size_t n);
 
 /**
- * Get environment variable and handle HOME, USER, CUSEr, Cuser, cuser, OWNER, ENVID if not defined
- * @param name environment variable name
- * @param length optional length of the name if no zero termination (0 if zero termination)
- * @param size size of string
- * @param string containing the value for the corresponding environment variable
- * @return pointer to string
+ * @brief Get environment variable with fallback handling
+ *
+ * Get environment variable and handle HOME, USER, CUSEr, Cuser, cuser, OWNER, ENVID if not defined.
+ *
+ * @param[in]  name   Environment variable name
+ * @param[in]  length Optional length of the name if no zero termination (0 if zero termination)
+ * @param[in]  size   Size of string
+ * @param[out] string Containing the value for the corresponding environment variable
+ * @return Pointer to string
  */
 extern char* getenvar(const char* name,const size_t length,const size_t size,char* string);
 
 /**
- * Replace all environment variables enclosed with '<' and '>' to build a string
- * @param string string for replacement
+ * @brief Replace environment variables in string
+ *
+ * Replace all environment variables enclosed with '<' and '>' to build a string.
+ *
+ * @param[inout] string String for replacement
  * @param size size of replacement string
  * @return pointer to string
  */
@@ -1437,18 +1578,63 @@ extern int file2str(const void* hdl, const char* filename, char** buf, int* bufs
 extern int arry2str(char* array[], const int count, const char* separ, const int separLen, char** out, int* outlen);
 
 /**
- * Compare of two string
+ * Extended string comparison with multiple modes
  *
- * The procedure combines strcmp, stricmp, strncmp and strchr in one function.
+ * This function combines strcmp, stricmp, strncmp, and delimiter-based comparison
+ * in a single, flexible interface. It supports case-sensitive/insensitive comparison,
+ * length limits, keyword matching, and delimiter-based matching.
  *
- * @param[in]  ca Flag if case sensitiv (TRUE) or not (FALSE)
- * @param[in]  s1 String 1 to compare
- * @param[in]  s2 string 2 to compare
- * @param[in]  n  If c!=0 then minimum else maximum amount of character to compare  (0=disabled)
- * @param[in]  c  Character where the compare stops or -1 for keyword syntax
- * @param[in]  f  If true only compare up to null termination or stop char if false (normal compare) including null termination or stop char
+ * @param[in]  ca  Case sensitivity flag:
+ *                 - TRUE (non-zero): case-sensitive comparison (like strcmp)
+ *                 - FALSE (0): case-insensitive comparison (like stricmp/strcasecmp)
  *
- * @return signed integer with 0 for equal and !=0 for different
+ * @param[in]  s1  First string to compare (null-terminated)
+ *
+ * @param[in]  s2  Second string to compare (null-terminated)
+ *
+ * @param[in]  n   Minimum match length requirement (only used with c=-1 or c>0):
+ *                 - 0: no length requirement (matches can be any length)
+ *                 - >0: requires at least n matching characters before delimiter/keyword-end
+ *                       Returns (n-i) if match is shorter than n characters
+ *
+ * @param[in]  c   Comparison mode and delimiter:
+ *                 - -1: Keyword mode - compare only valid keyword characters (isKyw())
+ *                       Stops when non-keyword character is encountered
+ *                 - 0: Normal mode - compare until null-termination (standard strcmp behavior)
+ *                 - >0: Delimiter mode - compare until character 'c' is found in either string
+ *                       Stops when delimiter is encountered (respects case in case-insensitive mode)
+ *
+ * @param[in]  f   Stop character handling flag:
+ *                 - FALSE (0): Include stop character in comparison (stops after delimiter/non-keyword)
+ *                 - TRUE (non-zero): Exclude stop character and return 0 (equal) if delimiter/
+ *                   non-keyword character is reached, indicating successful match up to that point
+ *
+ * @return     Signed integer indicating comparison result:
+ *             - 0: strings are equal (or equal up to delimiter when f=TRUE)
+ *             - >0: s1 is greater than s2 (first differing character: s1[i] > s2[i])
+ *             - <0: s1 is less than s2 (first differing character: s1[i] < s2[i])
+ *             - (n-i): when n>0 and match length i < n, returns positive difference
+ *
+ * @note       This function is particularly useful for command-line parsing where:
+ *             - Keywords must match with minimum abbreviation length
+ *             - Comparison should stop at delimiters (e.g., '=' in "key=value")
+ *             - Case-insensitive matching is needed for user input
+ *
+ * @par Examples:
+ * @code
+ * // Exact match, case-sensitive
+ * strxcmp(TRUE, "Hello", "Hello", 0, 0, FALSE);  // returns 0
+ *
+ * // Case-insensitive match
+ * strxcmp(FALSE, "Hello", "HELLO", 0, 0, FALSE); // returns 0
+ *
+ * // Match up to delimiter (key=value parsing)
+ * strxcmp(TRUE, "key1=val", "key1=", 0, '=', TRUE); // returns 0
+ *
+ * // Keyword abbreviation with minimum length
+ * strxcmp(FALSE, "cmd", "command", 3, -1, TRUE); // returns 0 if "cmd" accepted as abbreviation
+ * strxcmp(FALSE, "cm", "command", 3, -1, TRUE);  // returns (3-2)=1 (too short)
+ * @endcode
  */
 extern int strxcmp(
    const int                     ca,

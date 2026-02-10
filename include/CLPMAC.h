@@ -35,7 +35,7 @@
 
 #ifdef DEFINE_STRUCT
 
-/* Makros zum Struktur-Aufbau */
+/* Macros for structure definition */
 #define CLPARGTAB_SKALAR(kyw,nam,typ,min,max,atyp,flg,oid,tab,dft,man,hlp) typ   nam;
 #define CLPARGTAB_STRING(kyw,nam,siz,min,max,atyp,flg,oid,tab,dft,man,hlp) U08   nam[siz+1];
 #define CLPARGTAB_ARRAY( kyw,nam,typ,min,max,atyp,flg,oid,tab,dft,man,hlp) typ   nam[max];
