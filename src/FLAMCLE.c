@@ -169,11 +169,16 @@
  * 1.4.89: Support environment variables CLE_MAX/MIN_CC
  * 1.4.90: Fix handling of owner and MAX/MINCC (make it independent of default command)
  * 1.4.91: Use always stdout for pfStd
+ * 1.4.92: Add abbreviation support for commands and built-in functions (minimum 3 characters)
+ *         Implement central siCleFindCommand() function for unique abbreviation matching
+ *         Add error messages for ambiguous abbreviations and too short inputs
+ * 1.4.93: Fix siCleGetCommand() to support command abbreviations by using matched length
+ *         Add siMln parameter to siCleGetCommand() for proper stop character handling
  */
-#define CLE_VSN_STR       "1.4.91"
+#define CLE_VSN_STR       "1.4.93"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        4
-#define CLE_VSN_REVISION       91
+#define CLE_VSN_REVISION       93
 
 /* Definition der Konstanten ******************************************/
 
@@ -226,6 +231,10 @@ typedef struct CnfHdl {
    TsCnfEnt*                     psLst;
 }TsCnfHdl;
 
+/* Forward declaration for built-in function pointer type */
+struct CleBuiltinContext;
+typedef int (*TfCleBuiltin)(struct CleBuiltinContext* psCtx);
+
 typedef struct CleBuiltin {
    int                           siIdx;
    const char*                   pcKyw;
@@ -233,11 +242,75 @@ typedef struct CleBuiltin {
    const char*                   pcSyn;
    const char*                   pcMan;
    int                           isBif;
+   TfCleBuiltin                  pfFunc;
 } TsCleBuiltin;
 
-#define CLEBIF_OPN(name)                     TsCleBuiltin (name)[]
-#define CLETAB_BIF(idx,kyw,hlp,syn,man,bif)  {(idx),(kyw),(hlp),(syn),(man), (bif)},
-#define CLEBIF_CLS                           { -1, NULL, NULL, NULL, NULL, FALSE}
+#define CLEBIF_OPN(name)                          TsCleBuiltin (name)[]
+#define CLETAB_BIF(idx,kyw,hlp,syn,man,bif,func)  {(idx),(kyw),(hlp),(syn),(man),(bif),(func)},
+#define CLEBIF_CLS                                { -1, NULL, NULL, NULL, NULL, FALSE, NULL}
+
+/* Context structure for built-in function implementations */
+typedef struct CleBuiltinContext {
+   /* Command line arguments */
+   int                           argc;
+   char**                        argv;
+   /* File pointers */
+   FILE*                         pfOut;
+   FILE*                         pfErr;
+   FILE*                         pfStd;
+   FILE*                         pfTrc;
+   /* Configuration strings */
+   const char*                   pcDep;
+   const char*                   pcOpt;
+   const char*                   pcEnt;
+   const char*                   pcOwn;
+   const char*                   pcPgm;
+   const char*                   pcBld;
+   const char*                   pcDef;
+   /* Tables and flags */
+   const TsCleBuiltin*           psBif;
+   const void*                   psCmd;  /* TsCleCommand* - avoid forward declaration issue */
+   int                           isCas;
+   int                           isPfl;
+   int                           isRpl;
+   int                           siMkl;
+   int                           isNbr;
+   int                           isShl;
+   /* Handles and pointers */
+   TsCnfHdl*                     psCnf;
+   void*                         pvGbl;
+   void**                        ppvHdl;
+   /* Callbacks */
+   void*                         pvF2S;
+   void*                         pfF2S;  /* TfF2S* */
+   void*                         pvSaf;
+   void*                         pfSaf;  /* TfSaf* */
+   void*                         pfMsg;  /* TfMsg* */
+   /* Info strings */
+   const char*                   pcLic;
+   const char*                   pcVsn;
+   const char*                   pcAbo;
+   const char*                   pcHlp;
+   const char*                   pcAut;
+   const char*                   pcAdr;
+   const char*                   pcDpa;
+   /* Working variables (pointers for modification) */
+   char**                        ppcFil;
+   size_t*                       pszFil;
+   char**                        ppcCnf;
+   size_t*                       pszCnf;
+   int*                          psiDep;
+   /* Special variables */
+   char*                         acTs;
+   /* Environment */
+   const void*                   psEnv;  /* TsClpArgument* */
+   const char*                   pcEnv;
+   /* Document/property file pointers */
+   FILE**                        ppfDoc;
+   FILE**                        ppfPro;
+   const void*                   psDoc;  /* TsCleDoc* */
+   const void*                   psOth;  /* TsCleOtherClp* */
+} TsCleBuiltinContext;
 
 typedef struct CleDocPar {
    const char*                   pcOwn;
@@ -513,6 +586,7 @@ static int siCleGetCommand(
    void*                         pvGbl,
    void*                         pvF2S,
    TfF2S*                        pfF2S,
+   const int                     siMln,
    const char*                   pcDpa);
 
 static TsCnfHdl* psCnfOpn(
@@ -1346,6 +1420,302 @@ CLPENVTAB_OPN(asCleEnvVarTab) = {
 
 /***********************************************************************/
 
+/**
+ * @brief Keyword entry for abbreviation matching
+ */
+typedef struct CleKywEntry {
+   const char*                   pcKyw;     /* Keyword string */
+   int                           siType;    /* 1=Built-in, 2=Command */
+   int                           siIndex;   /* Index in original table */
+   int                           siMinLen;  /* Minimum unique abbreviation length */
+} TsCleKywEntry;
+
+/**
+ * @brief Find a command or built-in function with abbreviation support
+ *
+ * This function searches for a command or built-in function that matches
+ * the provided input string. It supports abbreviations with a minimum
+ * length requirement calculated to ensure uniqueness among all keywords.
+ * The function also handles stop characters (=, (, .) similar to strxcmp.
+ *
+ * @param[in]  isCas     Case-sensitive flag (TRUE=case-sensitive)
+ * @param[in]  pcInput   Input command string (from user, may contain =, (, .)
+ * @param[in]  psCmd     Command table (or NULL)
+ * @param[in]  psBif     Built-in function table (or NULL)
+ * @param[in]  siMinLen  Global minimum abbreviation length (typically 3)
+ * @param[out] piType    Output: 0=not found, 1=Built-in, 2=Command
+ * @param[out] piIndex   Output: Index in the corresponding table
+ * @param[out] piMln     Output: Number of matched characters (0 if not found)
+ *
+ * @return 0=uniquely found, 1=ambiguous, -1=not found, -2=memory error
+ */
+static int siCleFindCommand(
+   const int                     isCas,
+   const char*                   pcInput,
+   const TsCleCommand*           psCmd,
+   const TsCleBuiltin*           psBif,
+   const int                     siMinLen,
+   int*                          piType,
+   int*                          piIndex,
+   int*                          piMln)
+{
+   int i, j, k, siCnt=0, siMatch=0;
+   int l=(int)strlen(pcInput);
+   int siInputLen=l;
+   const char* pcStop=NULL;
+   TsCleKywEntry* psKyw=NULL;
+   TsCleKywEntry* psEntry=NULL;
+
+   /* Initialize output parameters */
+   *piType = 0;
+   *piIndex = -1;
+   *piMln = 0;
+
+   /* Find stop characters in input (=, (, .) */
+   pcStop=strpbrk(pcInput,"=().");
+   if (pcStop != NULL) {
+      siInputLen=(int)(pcStop - pcInput);
+      if (siInputLen < 1) {
+         return(-1);  /* Invalid input */
+      }
+   }
+
+   /* Count total number of keywords */
+   if (psBif != NULL) {
+      for (i=0; psBif[i].pcKyw != NULL; i++) {
+         if (psBif[i].isBif) siCnt++;
+      }
+   }
+   if (psCmd != NULL) {
+      for (i=0; psCmd[i].pcKyw != NULL; i++) {
+         siCnt++;
+      }
+   }
+
+   if (siCnt == 0) {
+      return(-1);
+   }
+
+   /* Allocate keyword table */
+   psKyw=(TsCleKywEntry*)malloc(siCnt * sizeof(TsCleKywEntry));
+   if (psKyw == NULL) {
+      return(-1);
+   }
+
+   /* Build combined keyword table */
+   siCnt=0;
+   if (psBif != NULL) {
+      for (i=0; psBif[i].pcKyw != NULL; i++) {
+         if (psBif[i].isBif) {
+            psKyw[siCnt].pcKyw   = psBif[i].pcKyw;
+            psKyw[siCnt].siType  = 1;
+            psKyw[siCnt].siIndex = i;
+            psKyw[siCnt].siMinLen= siMinLen;
+            siCnt++;
+         }
+      }
+   }
+   if (psCmd != NULL) {
+      for (i=0; psCmd[i].pcKyw != NULL; i++) {
+         psKyw[siCnt].pcKyw   = psCmd[i].pcKyw;
+         psKyw[siCnt].siType  = 2;
+         psKyw[siCnt].siIndex = i;
+         psKyw[siCnt].siMinLen= siMinLen;
+         siCnt++;
+      }
+   }
+
+   /* Calculate minimum unique length for each keyword */
+   for (i=0; i<siCnt; i++) {
+      int siLenKyw1=(int)strlen(psKyw[i].pcKyw);
+      int siMinUnique=siMinLen;
+
+      for (j=0; j<siCnt; j++) {
+         if (i == j) continue;
+
+         int siLenKyw2=(int)strlen(psKyw[j].pcKyw);
+         int siLenMin=(siLenKyw1 < siLenKyw2) ? siLenKyw1 : siLenKyw2;
+
+         /* Find first differing character position */
+         for (k=0; k<siLenMin; k++) {
+            int c1=isCas ? psKyw[i].pcKyw[k] : toupper((unsigned char)psKyw[i].pcKyw[k]);
+            int c2=isCas ? psKyw[j].pcKyw[k] : toupper((unsigned char)psKyw[j].pcKyw[k]);
+            if (c1 != c2) break;
+         }
+
+         /* Update minimum unique length */
+         if (k > 0 && k < siLenKyw1) {
+            int siNeed=k+1;
+            if (siNeed > siMinUnique) {
+               siMinUnique=siNeed;
+            }
+         }
+      }
+
+      psKyw[i].siMinLen=siMinUnique;
+   }
+
+   /* Check for exact match first */
+   for (i=0; i<siCnt; i++) {
+      int siLenKyw=(int)strlen(psKyw[i].pcKyw);
+
+      if (siInputLen == siLenKyw && strxcmp(isCas, pcInput, psKyw[i].pcKyw, siInputLen, 0, FALSE) == 0) {
+         *piType = psKyw[i].siType;
+         *piIndex = psKyw[i].siIndex;
+         *piMln = siInputLen;
+         free(psKyw);
+         return(0);
+      }
+   }
+
+   /* Check for abbreviation matches */
+   for (i=0; i<siCnt; i++) {
+      int siLenKyw=(int)strlen(psKyw[i].pcKyw);
+
+      /* Input must be at least minimum length and shorter than full keyword */
+      if (siInputLen >= psKyw[i].siMinLen && siInputLen < siLenKyw) {
+         /* Check if input matches keyword prefix with minimum length requirement */
+         if (strxcmp(isCas, pcInput, psKyw[i].pcKyw, psKyw[i].siMinLen, 0, FALSE) == 0) {
+            /* Verify remaining characters also match */
+            int isMatch=1;
+            for (k=psKyw[i].siMinLen; k<siInputLen; k++) {
+               int c1=isCas ? pcInput[k] : toupper((unsigned char)pcInput[k]);
+               int c2=isCas ? psKyw[i].pcKyw[k] : toupper((unsigned char)psKyw[i].pcKyw[k]);
+               if (c1 != c2) {
+                  isMatch=0;
+                  break;
+               }
+            }
+            if (isMatch) {
+               siMatch++;
+               psEntry = &psKyw[i];
+            }
+         }
+      }
+   }
+
+   /* Evaluate results */
+   if (siMatch == 1) {
+      *piType = psEntry->siType;
+      *piIndex = psEntry->siIndex;
+      *piMln = siInputLen;
+      free(psKyw);
+      return(0);
+   } else if (siMatch > 1) {
+      free(psKyw);
+      return(1);  /* Ambiguous */
+   }
+
+   free(psKyw);
+   return(-1);  /* Not found */
+}
+
+/* Built-in function implementations **************************************/
+
+static int siCleBuiltinLicense(TsCleBuiltinContext* psCtx)
+{
+   if (!psCtx->psBif[CLE_BUILTIN_IDX_LICENSE].isBif) {
+      return(-1);  /* Not enabled */
+   }
+   if (psCtx->argc == 2) {
+      if (psCtx->pfOut != NULL) {
+         fprintf(psCtx->pfOut, "License of program '%s':\n", psCtx->pcPgm);
+      }
+      if (psCtx->pcLic == NULL) {
+         if (psCtx->pfOut != NULL) {
+            fprintf(psCtx->pfOut, "No license information available\n");
+         }
+      } else {
+         fprintf(psCtx->pfStd, "%s\n", psCtx->pcLic);
+      }
+      return(CLERTC_OK);
+   }
+   if (psCtx->pfErr != NULL) {
+      fprintf(psCtx->pfErr, "Syntax for built-in function 'LICENSE' not valid\n");
+      fprintf(psCtx->pfErr, "%s %s LICENSE\n", psCtx->pcDep, psCtx->argv[0]);
+   }
+   return(CLERTC_CMD);
+}
+
+static int siCleBuiltinVersion(TsCleBuiltinContext* psCtx)
+{
+   if (!psCtx->psBif[CLE_BUILTIN_IDX_VERSION].isBif) {
+      return(-1);  /* Not enabled */
+   }
+   if (psCtx->argc == 2) {
+      if (psCtx->pfOut != NULL) {
+         fprintf(psCtx->pfOut, "Version for program '%s':\n", psCtx->pcPgm);
+      }
+      if (psCtx->pcVsn == NULL) {
+         if (psCtx->pfOut != NULL) {
+            fprintf(psCtx->pfOut, "No version information available\n");
+         }
+      } else {
+         fprintf(psCtx->pfStd, "%s\n", psCtx->pcVsn);
+      }
+      return(CLERTC_OK);
+   }
+   if (psCtx->pfErr != NULL) {
+      fprintf(psCtx->pfErr, "Syntax for built-in function 'VERSION' not valid\n");
+      fprintf(psCtx->pfErr, "%s %s VERSION\n", psCtx->pcDep, psCtx->argv[0]);
+   }
+   return(CLERTC_CMD);
+}
+
+static int siCleBuiltinAbout(TsCleBuiltinContext* psCtx)
+{
+   if (!psCtx->psBif[CLE_BUILTIN_IDX_ABOUT].isBif) {
+      return(-1);  /* Not enabled */
+   }
+   if (psCtx->argc == 2) {
+      if (psCtx->pfOut != NULL) {
+         fprintf(psCtx->pfOut, "About program '%s':\n", psCtx->pcPgm);
+      }
+      if (psCtx->pcAbo == NULL) {
+         if (psCtx->pfOut != NULL) {
+            fprintf(psCtx->pfOut, "No about information available\n");
+         }
+      } else {
+         fprintf(psCtx->pfStd, "%s\n", psCtx->pcAbo);
+      }
+      return(CLERTC_OK);
+   }
+   if (psCtx->pfErr != NULL) {
+      fprintf(psCtx->pfErr, "Syntax for built-in function 'ABOUT' not valid\n");
+      fprintf(psCtx->pfErr, "%s %s ABOUT\n", psCtx->pcDep, psCtx->argv[0]);
+   }
+   return(CLERTC_CMD);
+}
+
+/* Note: The remaining 22 built-in functions will follow the same pattern
+ * but are more complex. I'll add them incrementally to avoid overwhelming edits.
+ * For now, these are placeholder stubs that return "not enabled". */
+
+static int siCleBuiltinLexemes(TsCleBuiltinContext* psCtx) { (void)psCtx; return(-1); }
+static int siCleBuiltinGrammar(TsCleBuiltinContext* psCtx) { (void)psCtx; return(-1); }
+static int siCleBuiltinErrors(TsCleBuiltinContext* psCtx) { (void)psCtx; return(-1); }
+static int siCleBuiltinSyntax(TsCleBuiltinContext* psCtx) { (void)psCtx; return(-1); }
+static int siCleBuiltinHelp(TsCleBuiltinContext* psCtx) { (void)psCtx; return(-1); }
+static int siCleBuiltinManpage(TsCleBuiltinContext* psCtx) { (void)psCtx; return(-1); }
+static int siCleBuiltinGendocu(TsCleBuiltinContext* psCtx) { (void)psCtx; return(-1); }
+static int siCleBuiltinHtmldoc(TsCleBuiltinContext* psCtx) { (void)psCtx; return(-1); }
+static int siCleBuiltinGenprop(TsCleBuiltinContext* psCtx) { (void)psCtx; return(-1); }
+static int siCleBuiltinSetprop(TsCleBuiltinContext* psCtx) { (void)psCtx; return(-1); }
+static int siCleBuiltinChgprop(TsCleBuiltinContext* psCtx) { (void)psCtx; return(-1); }
+static int siCleBuiltinDelprop(TsCleBuiltinContext* psCtx) { (void)psCtx; return(-1); }
+static int siCleBuiltinGetprop(TsCleBuiltinContext* psCtx) { (void)psCtx; return(-1); }
+static int siCleBuiltinSetowner(TsCleBuiltinContext* psCtx) { (void)psCtx; return(-1); }
+static int siCleBuiltinGetowner(TsCleBuiltinContext* psCtx) { (void)psCtx; return(-1); }
+static int siCleBuiltinSetenv(TsCleBuiltinContext* psCtx) { (void)psCtx; return(-1); }
+static int siCleBuiltinGetenv(TsCleBuiltinContext* psCtx) { (void)psCtx; return(-1); }
+static int siCleBuiltinDelenv(TsCleBuiltinContext* psCtx) { (void)psCtx; return(-1); }
+static int siCleBuiltinLstenv(TsCleBuiltinContext* psCtx) { (void)psCtx; return(-1); }
+static int siCleBuiltinHlpenv(TsCleBuiltinContext* psCtx) { (void)psCtx; return(-1); }
+static int siCleBuiltinTrace(TsCleBuiltinContext* psCtx) { (void)psCtx; return(-1); }
+static int siCleBuiltinConfig(TsCleBuiltinContext* psCtx) { (void)psCtx; return(-1); }
+
+/***********************************************************************/
+
 extern int siCleExecute(
    TfEnv*                        pfEnv,
    TfOpn*                        pfOpn,
@@ -1384,7 +1754,8 @@ extern int siCleExecute(
    const TsClpArgument*          psEnv,
    const char*                   pcEnv)
 {
-   int                           i,j,l,siErr,siDep,siCnt;
+   int                           i,j,siErr,siDep,siCnt;
+   int                           siType,siIdx,siRes,siMln;  /* For command/builtin matching */
    void*                         pvGbl=NULL;
    TsCnfHdl*                     psCnf=NULL;
    size_t                        szCnf=0;
@@ -1420,31 +1791,31 @@ extern int siCleExecute(
    const TsClpArgument*          psEnvTab;
 
    CLEBIF_OPN(asBif) = {
-      CLETAB_BIF(CLE_BUILTIN_IDX_SYNTAX  ,"SYNTAX"  ,HLP_CLE_BUILTIN_SYNTAX  ,SYN_CLE_BUILTIN_SYNTAX  ,MAN_CLEP_BUILTIN_SYNTAX  ,TRUE)
-      CLETAB_BIF(CLE_BUILTIN_IDX_HELP    ,"HELP"    ,HLP_CLE_BUILTIN_HELP    ,SYN_CLE_BUILTIN_HELP    ,MAN_CLEP_BUILTIN_HELP    ,TRUE)
-      CLETAB_BIF(CLE_BUILTIN_IDX_MANPAGE ,"MANPAGE" ,HLP_CLE_BUILTIN_MANPAGE ,SYN_CLE_BUILTIN_MANPAGE ,MAN_CLEP_BUILTIN_MANPAGE ,TRUE)
-      CLETAB_BIF(CLE_BUILTIN_IDX_GENDOCU ,"GENDOCU" ,HLP_CLE_BUILTIN_GENDOCU ,SYN_CLE_BUILTIN_GENDOCU ,MAN_CLEP_BUILTIN_GENDOCU ,TRUE)
-      CLETAB_BIF(CLE_BUILTIN_IDX_HTMLDOC ,"HTMLDOC" ,HLP_CLE_BUILTIN_HTMLDOC ,SYN_CLE_BUILTIN_HTMLDOC ,MAN_CLEP_BUILTIN_HTMLDOC ,TRUE)
-      CLETAB_BIF(CLE_BUILTIN_IDX_GENPROP ,"GENPROP" ,HLP_CLE_BUILTIN_GENPROP ,SYN_CLE_BUILTIN_GENPROP ,MAN_CLEP_BUILTIN_GENPROP ,TRUE)
-      CLETAB_BIF(CLE_BUILTIN_IDX_SETPROP ,"SETPROP" ,HLP_CLE_BUILTIN_SETPROP ,SYN_CLE_BUILTIN_SETPROP ,MAN_CLEP_BUILTIN_SETPROP ,TRUE)
-      CLETAB_BIF(CLE_BUILTIN_IDX_CHGPROP ,"CHGPROP" ,HLP_CLE_BUILTIN_CHGPROP ,SYN_CLE_BUILTIN_CHGPROP ,MAN_CLEP_BUILTIN_CHGPROP ,TRUE)
-      CLETAB_BIF(CLE_BUILTIN_IDX_DELPROP ,"DELPROP" ,HLP_CLE_BUILTIN_DELPROP ,SYN_CLE_BUILTIN_DELPROP ,MAN_CLEP_BUILTIN_DELPROP ,TRUE)
-      CLETAB_BIF(CLE_BUILTIN_IDX_GETPROP ,"GETPROP" ,HLP_CLE_BUILTIN_GETPROP ,SYN_CLE_BUILTIN_GETPROP ,MAN_CLEP_BUILTIN_GETPROP ,TRUE)
-      CLETAB_BIF(CLE_BUILTIN_IDX_SETOWNER,"SETOWNER",HLP_CLE_BUILTIN_SETOWNER,SYN_CLE_BUILTIN_SETOWNER,MAN_CLEP_BUILTIN_SETOWNER,TRUE)
-      CLETAB_BIF(CLE_BUILTIN_IDX_GETOWNER,"GETOWNER",HLP_CLE_BUILTIN_GETOWNER,SYN_CLE_BUILTIN_GETOWNER,MAN_CLEP_BUILTIN_GETOWNER,TRUE)
-      CLETAB_BIF(CLE_BUILTIN_IDX_SETENV  ,"SETENV"  ,HLP_CLE_BUILTIN_SETENV  ,SYN_CLE_BUILTIN_SETENV  ,MAN_CLEP_BUILTIN_SETENV  ,TRUE)
-      CLETAB_BIF(CLE_BUILTIN_IDX_GETENV  ,"GETENV"  ,HLP_CLE_BUILTIN_GETENV  ,SYN_CLE_BUILTIN_GETENV  ,MAN_CLEP_BUILTIN_GETENV  ,TRUE)
-      CLETAB_BIF(CLE_BUILTIN_IDX_DELENV  ,"DELENV"  ,HLP_CLE_BUILTIN_DELENV  ,SYN_CLE_BUILTIN_DELENV  ,MAN_CLEP_BUILTIN_DELENV  ,TRUE)
-      CLETAB_BIF(CLE_BUILTIN_IDX_LSTENV  ,"LSTENV"  ,HLP_CLE_BUILTIN_LSTENV  ,SYN_CLE_BUILTIN_LSTENV  ,MAN_CLEP_BUILTIN_LSTENV  ,TRUE)
-      CLETAB_BIF(CLE_BUILTIN_IDX_HLPENV  ,"HLPENV"  ,HLP_CLE_BUILTIN_HLPENV  ,SYN_CLE_BUILTIN_HLPENV  ,MAN_CLEP_BUILTIN_HLPENV  ,TRUE)
-      CLETAB_BIF(CLE_BUILTIN_IDX_TRACE   ,"TRACE"   ,HLP_CLE_BUILTIN_TRACE   ,SYN_CLE_BUILTIN_TRACE   ,MAN_CLEP_BUILTIN_TRACE   ,TRUE)
-      CLETAB_BIF(CLE_BUILTIN_IDX_CONFIG  ,"CONFIG"  ,HLP_CLE_BUILTIN_CONFIG  ,SYN_CLE_BUILTIN_CONFIG  ,MAN_CLEP_BUILTIN_CONFIG  ,TRUE)
-      CLETAB_BIF(CLE_BUILTIN_IDX_GRAMMAR ,"GRAMMAR" ,HLP_CLE_BUILTIN_GRAMMAR ,SYN_CLE_BUILTIN_GRAMMAR ,MAN_CLEP_BUILTIN_GRAMMAR ,TRUE)
-      CLETAB_BIF(CLE_BUILTIN_IDX_LEXEMES ,"LEXEMES" ,HLP_CLE_BUILTIN_LEXEMES ,SYN_CLE_BUILTIN_LEXEMES ,MAN_CLEP_BUILTIN_LEXEMES ,TRUE)
-      CLETAB_BIF(CLE_BUILTIN_IDX_LICENSE ,"LICENSE" ,HLP_CLE_BUILTIN_LICENSE ,SYN_CLE_BUILTIN_LICENSE ,MAN_CLEP_BUILTIN_LICENSE ,pcLic!=NULL)
-      CLETAB_BIF(CLE_BUILTIN_IDX_VERSION ,"VERSION" ,HLP_CLE_BUILTIN_VERSION ,SYN_CLE_BUILTIN_VERSION ,MAN_CLEP_BUILTIN_VERSION ,pcVsn!=NULL)
-      CLETAB_BIF(CLE_BUILTIN_IDX_ABOUT   ,"ABOUT"   ,HLP_CLE_BUILTIN_ABOUT   ,SYN_CLE_BUILTIN_ABOUT   ,MAN_CLEP_BUILTIN_ABOUT   ,pcAbo!=NULL)
-      CLETAB_BIF(CLE_BUILTIN_IDX_ERRORS  ,"ERRORS"  ,HLP_CLE_BUILTIN_ERRORS  ,SYN_CLE_BUILTIN_ERRORS  ,MAN_CLEP_BUILTIN_ERRORS  ,TRUE)
+      CLETAB_BIF(CLE_BUILTIN_IDX_SYNTAX  ,"SYNTAX"  ,HLP_CLE_BUILTIN_SYNTAX  ,SYN_CLE_BUILTIN_SYNTAX  ,MAN_CLEP_BUILTIN_SYNTAX  ,TRUE         ,siCleBuiltinSyntax)
+      CLETAB_BIF(CLE_BUILTIN_IDX_HELP    ,"HELP"    ,HLP_CLE_BUILTIN_HELP    ,SYN_CLE_BUILTIN_HELP    ,MAN_CLEP_BUILTIN_HELP    ,TRUE         ,siCleBuiltinHelp)
+      CLETAB_BIF(CLE_BUILTIN_IDX_MANPAGE ,"MANPAGE" ,HLP_CLE_BUILTIN_MANPAGE ,SYN_CLE_BUILTIN_MANPAGE ,MAN_CLEP_BUILTIN_MANPAGE ,TRUE         ,siCleBuiltinManpage)
+      CLETAB_BIF(CLE_BUILTIN_IDX_GENDOCU ,"GENDOCU" ,HLP_CLE_BUILTIN_GENDOCU ,SYN_CLE_BUILTIN_GENDOCU ,MAN_CLEP_BUILTIN_GENDOCU ,TRUE         ,siCleBuiltinGendocu)
+      CLETAB_BIF(CLE_BUILTIN_IDX_HTMLDOC ,"HTMLDOC" ,HLP_CLE_BUILTIN_HTMLDOC ,SYN_CLE_BUILTIN_HTMLDOC ,MAN_CLEP_BUILTIN_HTMLDOC ,TRUE         ,siCleBuiltinHtmldoc)
+      CLETAB_BIF(CLE_BUILTIN_IDX_GENPROP ,"GENPROP" ,HLP_CLE_BUILTIN_GENPROP ,SYN_CLE_BUILTIN_GENPROP ,MAN_CLEP_BUILTIN_GENPROP ,TRUE         ,siCleBuiltinGenprop)
+      CLETAB_BIF(CLE_BUILTIN_IDX_SETPROP ,"SETPROP" ,HLP_CLE_BUILTIN_SETPROP ,SYN_CLE_BUILTIN_SETPROP ,MAN_CLEP_BUILTIN_SETPROP ,TRUE         ,siCleBuiltinSetprop)
+      CLETAB_BIF(CLE_BUILTIN_IDX_CHGPROP ,"CHGPROP" ,HLP_CLE_BUILTIN_CHGPROP ,SYN_CLE_BUILTIN_CHGPROP ,MAN_CLEP_BUILTIN_CHGPROP ,TRUE         ,siCleBuiltinChgprop)
+      CLETAB_BIF(CLE_BUILTIN_IDX_DELPROP ,"DELPROP" ,HLP_CLE_BUILTIN_DELPROP ,SYN_CLE_BUILTIN_DELPROP ,MAN_CLEP_BUILTIN_DELPROP ,TRUE         ,siCleBuiltinDelprop)
+      CLETAB_BIF(CLE_BUILTIN_IDX_GETPROP ,"GETPROP" ,HLP_CLE_BUILTIN_GETPROP ,SYN_CLE_BUILTIN_GETPROP ,MAN_CLEP_BUILTIN_GETPROP ,TRUE         ,siCleBuiltinGetprop)
+      CLETAB_BIF(CLE_BUILTIN_IDX_SETOWNER,"SETOWNER",HLP_CLE_BUILTIN_SETOWNER,SYN_CLE_BUILTIN_SETOWNER,MAN_CLEP_BUILTIN_SETOWNER,TRUE         ,siCleBuiltinSetowner)
+      CLETAB_BIF(CLE_BUILTIN_IDX_GETOWNER,"GETOWNER",HLP_CLE_BUILTIN_GETOWNER,SYN_CLE_BUILTIN_GETOWNER,MAN_CLEP_BUILTIN_GETOWNER,TRUE         ,siCleBuiltinGetowner)
+      CLETAB_BIF(CLE_BUILTIN_IDX_SETENV  ,"SETENV"  ,HLP_CLE_BUILTIN_SETENV  ,SYN_CLE_BUILTIN_SETENV  ,MAN_CLEP_BUILTIN_SETENV  ,TRUE         ,siCleBuiltinSetenv)
+      CLETAB_BIF(CLE_BUILTIN_IDX_GETENV  ,"GETENV"  ,HLP_CLE_BUILTIN_GETENV  ,SYN_CLE_BUILTIN_GETENV  ,MAN_CLEP_BUILTIN_GETENV  ,TRUE         ,siCleBuiltinGetenv)
+      CLETAB_BIF(CLE_BUILTIN_IDX_DELENV  ,"DELENV"  ,HLP_CLE_BUILTIN_DELENV  ,SYN_CLE_BUILTIN_DELENV  ,MAN_CLEP_BUILTIN_DELENV  ,TRUE         ,siCleBuiltinDelenv)
+      CLETAB_BIF(CLE_BUILTIN_IDX_LSTENV  ,"LSTENV"  ,HLP_CLE_BUILTIN_LSTENV  ,SYN_CLE_BUILTIN_LSTENV  ,MAN_CLEP_BUILTIN_LSTENV  ,TRUE         ,siCleBuiltinLstenv)
+      CLETAB_BIF(CLE_BUILTIN_IDX_HLPENV  ,"HLPENV"  ,HLP_CLE_BUILTIN_HLPENV  ,SYN_CLE_BUILTIN_HLPENV  ,MAN_CLEP_BUILTIN_HLPENV  ,TRUE         ,siCleBuiltinHlpenv)
+      CLETAB_BIF(CLE_BUILTIN_IDX_TRACE   ,"TRACE"   ,HLP_CLE_BUILTIN_TRACE   ,SYN_CLE_BUILTIN_TRACE   ,MAN_CLEP_BUILTIN_TRACE   ,TRUE         ,siCleBuiltinTrace)
+      CLETAB_BIF(CLE_BUILTIN_IDX_CONFIG  ,"CONFIG"  ,HLP_CLE_BUILTIN_CONFIG  ,SYN_CLE_BUILTIN_CONFIG  ,MAN_CLEP_BUILTIN_CONFIG  ,TRUE         ,siCleBuiltinConfig)
+      CLETAB_BIF(CLE_BUILTIN_IDX_GRAMMAR ,"GRAMMAR" ,HLP_CLE_BUILTIN_GRAMMAR ,SYN_CLE_BUILTIN_GRAMMAR ,MAN_CLEP_BUILTIN_GRAMMAR ,TRUE         ,siCleBuiltinGrammar)
+      CLETAB_BIF(CLE_BUILTIN_IDX_LEXEMES ,"LEXEMES" ,HLP_CLE_BUILTIN_LEXEMES ,SYN_CLE_BUILTIN_LEXEMES ,MAN_CLEP_BUILTIN_LEXEMES ,TRUE         ,siCleBuiltinLexemes)
+      CLETAB_BIF(CLE_BUILTIN_IDX_LICENSE ,"LICENSE" ,HLP_CLE_BUILTIN_LICENSE ,SYN_CLE_BUILTIN_LICENSE ,MAN_CLEP_BUILTIN_LICENSE ,pcLic!=NULL  ,siCleBuiltinLicense)
+      CLETAB_BIF(CLE_BUILTIN_IDX_VERSION ,"VERSION" ,HLP_CLE_BUILTIN_VERSION ,SYN_CLE_BUILTIN_VERSION ,MAN_CLEP_BUILTIN_VERSION ,pcVsn!=NULL  ,siCleBuiltinVersion)
+      CLETAB_BIF(CLE_BUILTIN_IDX_ABOUT   ,"ABOUT"   ,HLP_CLE_BUILTIN_ABOUT   ,SYN_CLE_BUILTIN_ABOUT   ,MAN_CLEP_BUILTIN_ABOUT   ,pcAbo!=NULL  ,siCleBuiltinAbout)
+      CLETAB_BIF(CLE_BUILTIN_IDX_ERRORS  ,"ERRORS"  ,HLP_CLE_BUILTIN_ERRORS  ,SYN_CLE_BUILTIN_ERRORS  ,MAN_CLEP_BUILTIN_ERRORS  ,TRUE         ,siCleBuiltinErrors)
       CLEBIF_CLS
    };
 
@@ -1770,13 +2141,161 @@ extern int siCleExecute(
       }
    }
 
+EVALUATE:
    if (argv[1][0]=='-') { argv[1]++; }
    if (argv[1][0]=='-') { argv[1]++; }
 
    if (pfOut!=NULL) { fprintf(pfOut,"%s RUN(Program='%s' Owner='%s' Command='%s' ParameterCount=%d MINCC=%d MAXCC=%d)\n", cstime(0,acTs), argv[0], pcOwn, argv[1], argc-2, siMinCC, siMaxCC); }
 
-EVALUATE:
-   if (asBif[CLE_BUILTIN_IDX_LICENSE].isBif && strxcmp(isCas,argv[1],"LICENSE",0,0,FALSE)==0) {
+   /* Find command or built-in function with abbreviation support */
+   {
+      int siMinLen=3;  /* Minimum abbreviation length */
+
+      siType=0; siIdx=-1; siRes=-1; siMln=0;
+      siRes=siCleFindCommand(isCas,argv[1],psCmd,asBif,siMinLen,&siType,&siIdx,&siMln);
+
+      if (siRes==1) {
+         /* Ambiguous abbreviation */
+         if (pfErr!=NULL) {
+            const char* pcStop=strpbrk(argv[1],"=().");
+            int siInputLen=(pcStop!=NULL) ? (int)(pcStop-argv[1]) : (int)strlen(argv[1]);
+            char acInput[siInputLen+1];
+
+            memcpy(acInput,argv[1],siInputLen);
+            acInput[siInputLen]='\0';
+
+            fprintf(pfErr,"Ambiguous abbreviation '%s'. Matching commands/functions:\n",acInput);
+            /* List all matches from built-in functions */
+            for (i=0;asBif[i].pcKyw!=NULL;i++) {
+               if (asBif[i].isBif && siInputLen>=(int)siMinLen &&
+                   strxcmp(isCas,acInput,asBif[i].pcKyw,siMinLen,0,FALSE)==0) {
+                  fprintf(pfErr,"  - %s (built-in function)\n",asBif[i].pcKyw);
+               }
+            }
+            /* List all matches from commands */
+            for (i=0;psCmd[i].pcKyw!=NULL;i++) {
+               if (siInputLen>=(int)siMinLen &&
+                   strxcmp(isCas,acInput,psCmd[i].pcKyw,siMinLen,0,FALSE)==0) {
+                  fprintf(pfErr,"  - %s (command)\n",psCmd[i].pcKyw);
+               }
+            }
+         }
+         siErr=CLERTC_CMD;
+         ERROR(ELIMIT(siErr),NULL);
+      } else if (siRes==0 && siType==1) {
+         /* Found built-in function - handle via switch */
+         goto BUILTIN_DISPATCH;
+      } else if (siRes==0 && siType==2) {
+         /* Found command - jump to command execution */
+         i=siIdx;
+         goto COMMAND_EXECUTE;
+      } else {
+         /* Not found - try default command or error */
+         goto COMMAND_NOT_FOUND;
+      }
+   }
+
+BUILTIN_DISPATCH:
+   /* Dispatch to built-in function via switch-case */
+   switch(siIdx) {
+      case CLE_BUILTIN_IDX_SYNTAX:   goto BUILTIN_SYNTAX;
+      case CLE_BUILTIN_IDX_HELP:     goto BUILTIN_HELP;
+      case CLE_BUILTIN_IDX_MANPAGE:  goto BUILTIN_MANPAGE;
+      case CLE_BUILTIN_IDX_GENDOCU:  goto BUILTIN_GENDOCU;
+      case CLE_BUILTIN_IDX_HTMLDOC:  goto BUILTIN_HTMLDOC;
+      case CLE_BUILTIN_IDX_GENPROP:  goto BUILTIN_GENPROP;
+      case CLE_BUILTIN_IDX_SETPROP:  goto BUILTIN_SETPROP;
+      case CLE_BUILTIN_IDX_CHGPROP:  goto BUILTIN_CHGPROP;
+      case CLE_BUILTIN_IDX_DELPROP:  goto BUILTIN_DELPROP;
+      case CLE_BUILTIN_IDX_GETPROP:  goto BUILTIN_GETPROP;
+      case CLE_BUILTIN_IDX_SETOWNER: goto BUILTIN_SETOWNER;
+      case CLE_BUILTIN_IDX_GETOWNER: goto BUILTIN_GETOWNER;
+      case CLE_BUILTIN_IDX_SETENV:   goto BUILTIN_SETENV;
+      case CLE_BUILTIN_IDX_GETENV:   goto BUILTIN_GETENV;
+      case CLE_BUILTIN_IDX_DELENV:   goto BUILTIN_DELENV;
+      case CLE_BUILTIN_IDX_LSTENV:   goto BUILTIN_LSTENV;
+      case CLE_BUILTIN_IDX_HLPENV:   goto BUILTIN_HLPENV;
+      case CLE_BUILTIN_IDX_TRACE:    goto BUILTIN_TRACE;
+      case CLE_BUILTIN_IDX_CONFIG:   goto BUILTIN_CONFIG;
+      case CLE_BUILTIN_IDX_GRAMMAR:  goto BUILTIN_GRAMMAR;
+      case CLE_BUILTIN_IDX_LEXEMES:  goto BUILTIN_LEXEMES;
+      case CLE_BUILTIN_IDX_LICENSE:  goto BUILTIN_LICENSE;
+      case CLE_BUILTIN_IDX_VERSION:  goto BUILTIN_VERSION;
+      case CLE_BUILTIN_IDX_ABOUT:    goto BUILTIN_ABOUT;
+      case CLE_BUILTIN_IDX_ERRORS:   goto BUILTIN_ERRORS;
+      default:
+         if (pfErr!=NULL) { fprintf(pfErr,"Internal error: Unknown built-in function index %d\n",siIdx); }
+         siErr=CLERTC_CMD;
+         ERROR(ELIMIT(siErr),NULL);
+   }
+//TODO: exract built-in functins in own functions
+//   if (siIdx >= 0 && siIdx < 25 && asBif[siIdx].pfFunc != NULL) {
+//      TsCleBuiltinContext stCtx;
+//
+//      /* Initialize context structure */
+//      stCtx.argc = argc;
+//      stCtx.argv = argv;
+//      stCtx.pfOut = pfOut;
+//      stCtx.pfErr = pfErr;
+//      stCtx.pfStd = pfStd;
+//      stCtx.pfTrc = pfTrc;
+//      stCtx.pcDep = pcDep;
+//      stCtx.pcOpt = pcOpt;
+//      stCtx.pcEnt = pcEnt;
+//      stCtx.pcOwn = pcOwn;
+//      stCtx.pcPgm = pcPgm;
+//      stCtx.pcBld = pcBld;
+//      stCtx.pcDef = pcDef;
+//      stCtx.psBif = asBif;
+//      stCtx.psCmd = psCmd;
+//      stCtx.isCas = isCas;
+//      stCtx.isPfl = isPfl;
+//      stCtx.isRpl = isRpl;
+//      stCtx.siMkl = siMkl;
+//      stCtx.isNbr = isNbr;
+//      stCtx.isShl = isShl;
+//      stCtx.psCnf = psCnf;
+//      stCtx.pvGbl = pvGbl;
+//      stCtx.ppvHdl = &pvHdl;
+//      stCtx.pvF2S = pvF2S;
+//      stCtx.pfF2S = pfF2S;
+//      stCtx.pvSaf = pvSaf;
+//      stCtx.pfSaf = pfSaf;
+//      stCtx.pfMsg = pfMsg;
+//      stCtx.pcLic = pcLic;
+//      stCtx.pcVsn = pcVsn;
+//      stCtx.pcAbo = pcAbo;
+//      stCtx.pcHlp = pcHlp;
+//      stCtx.pcAut = pcAut;
+//      stCtx.pcAdr = pcAdr;
+//      stCtx.pcDpa = pcDpa;
+//      stCtx.ppcFil = &pcFil;
+//      stCtx.pszFil = &szFil;
+//      stCtx.ppcCnf = &pcCnf;
+//      stCtx.pszCnf = &szCnf;
+//      stCtx.psiDep = &siDep;
+//      stCtx.acTs = acTs;
+//      stCtx.psEnv = psEnvTab;
+//      stCtx.pcEnv = pcEnv;
+//      stCtx.ppfDoc = &pfDoc;
+//      stCtx.ppfPro = &pfPro;
+//      stCtx.psDoc = psDoc;
+//      stCtx.psOth = psOth;
+//
+//      /* Call built-in function via function pointer */
+//      siErr = asBif[siIdx].pfFunc(&stCtx);
+//      if (siErr >= 0) {
+//         ERROR(ELIMIT(siErr),NULL);
+//      }
+//      /* If siErr < 0, function not enabled - fall through to next check */
+//   } else {
+//      if (pfErr!=NULL) { fprintf(pfErr,"Internal error: Unknown built-in function index %d\n",siIdx); }
+//      siErr=CLERTC_CMD;
+//      ERROR(ELIMIT(siErr),NULL);
+//   }
+
+BUILTIN_LICENSE:
+   if (asBif[CLE_BUILTIN_IDX_LICENSE].isBif) {
       if (argc==2) {
          if (pfOut!=NULL) { fprintf(pfOut,"License of program '%s':\n",pcPgm); }
          if (pcLic==NULL) {
@@ -1792,7 +2311,10 @@ EVALUATE:
       }
       siErr=CLERTC_CMD;
       ERROR(ELIMIT(siErr),NULL);
-   } else if (asBif[CLE_BUILTIN_IDX_VERSION].isBif && strxcmp(isCas,argv[1],"VERSION",0,0,FALSE)==0) {
+   }
+
+BUILTIN_VERSION:
+   if (asBif[CLE_BUILTIN_IDX_VERSION].isBif) {
       if (argc==2) {
          if (pfOut!=NULL) { fprintf(pfOut,"Version for program '%s':\n",pcPgm); }
          if (pcVsn==NULL) {
@@ -1808,7 +2330,10 @@ EVALUATE:
       }
       siErr=CLERTC_CMD;
       ERROR(ELIMIT(siErr),NULL);
-   } else if (asBif[CLE_BUILTIN_IDX_ABOUT].isBif && strxcmp(isCas,argv[1],"ABOUT",0,0,FALSE)==0) {
+   }
+
+BUILTIN_ABOUT:
+   if (asBif[CLE_BUILTIN_IDX_ABOUT].isBif) {
       if (argc==2) {
          if (pfOut!=NULL) { fprintf(pfOut,"About program '%s':\n",pcPgm); }
          if (pcAbo==NULL) {
@@ -1824,7 +2349,10 @@ EVALUATE:
       }
       siErr=CLERTC_CMD;
       ERROR(ELIMIT(siErr),NULL);
-   } else if (asBif[CLE_BUILTIN_IDX_LEXEMES].isBif && (strxcmp(isCas,argv[1],"LEXEMES",0,0,FALSE)==0 || strxcmp(isCas,argv[1],"LEXEM",0,0,FALSE)==0)) {
+   }
+
+BUILTIN_LEXEMES:
+   if (asBif[CLE_BUILTIN_IDX_LEXEMES].isBif) {
       if (argc==2) {
          siErr=siCleSimpleInit(pfOut,pfErr,isPfl,isRpl,pcDep,pcOpt,pcEnt,&pvHdl);
          if (siErr) {
@@ -1845,7 +2373,10 @@ EVALUATE:
       }
       siErr=CLERTC_CMD;
       ERROR(ELIMIT(siErr),NULL);
-   } else if (asBif[CLE_BUILTIN_IDX_GRAMMAR].isBif && strxcmp(isCas,argv[1],"GRAMMAR",0,0,FALSE)==0) {
+   }
+
+BUILTIN_GRAMMAR:
+   if (asBif[CLE_BUILTIN_IDX_GRAMMAR].isBif) {
       if (argc==2) {
          siErr=siCleSimpleInit(pfOut,pfErr,isPfl,isRpl,pcDep,pcOpt,pcEnt,&pvHdl);
          if (siErr) {
@@ -1866,7 +2397,10 @@ EVALUATE:
       }
       siErr=CLERTC_CMD;
       ERROR(ELIMIT(siErr),NULL);
-   } else if (asBif[CLE_BUILTIN_IDX_ERRORS].isBif && strxcmp(isCas,argv[1],"ERRORS",0,0,FALSE)==0) {
+   }
+
+BUILTIN_ERRORS:
+   if (asBif[CLE_BUILTIN_IDX_ERRORS].isBif) {
       if (argc==2) {
          efprintf(pfStd,"\n=Return/condition/exit codes of the executable\n\n");
          fprintm(pfStd,pcOwn,pcPgm,pcBld,MAN_CLEP_APPENDIX_RETURNCODES,1);
@@ -1889,7 +2423,10 @@ EVALUATE:
       }
       siErr=CLERTC_CMD;
       ERROR(ELIMIT(siErr),NULL);
-   } else if (asBif[CLE_BUILTIN_IDX_SYNTAX].isBif && strxcmp(isCas,argv[1],"SYNTAX",0,0,FALSE)==0) {
+   }
+
+BUILTIN_SYNTAX:
+   if (asBif[CLE_BUILTIN_IDX_SYNTAX].isBif) {
       if (argc==2) {
          if (pfOut!=NULL) { fprintf(pfOut,"Syntax for program '%s':\n",pcPgm); }
          vdPrnStaticSyntax(pfStd,psCmd,asBif,argv[0],pcDep,pcOpt,pcDpa);
@@ -1990,7 +2527,10 @@ EVALUATE:
       }
       siErr=CLERTC_CMD;
       ERROR(ELIMIT(siErr),NULL);
-   } else if (asBif[CLE_BUILTIN_IDX_HELP].isBif && strxcmp(isCas,argv[1],"HELP",0,0,FALSE)==0) {
+   }
+
+BUILTIN_HELP:
+   if (asBif[CLE_BUILTIN_IDX_HELP].isBif) {
       if (argc==2) {
          if (pfOut!=NULL) { fprintf(pfOut,"Help for program '%s':\n",pcPgm); }
          vdPrnStaticHelp(pfStd,psCmd,asBif,argv[0],pcDep);
@@ -2116,7 +2656,10 @@ EVALUATE:
       }
       siErr=CLERTC_CMD;
       ERROR(ELIMIT(siErr),NULL);
-   } else if (asBif[CLE_BUILTIN_IDX_MANPAGE].isBif && strxcmp(isCas,argv[1],"MANPAGE",0,0,FALSE)==0) {
+   }
+
+BUILTIN_MANPAGE:
+   if (asBif[CLE_BUILTIN_IDX_MANPAGE].isBif) {
       if (argc==2) {
          if (pcPgmMan!=NULL && *pcPgmMan) {
             if (pfOut!=NULL) { fprintf(pfOut,"Manual page for program '%s':\n\n",pcPgm); }
@@ -2285,7 +2828,10 @@ EVALUATE:
       }
       siErr=CLERTC_CMD;
       ERROR(ELIMIT(siErr),NULL);
-   } else if (asBif[CLE_BUILTIN_IDX_GENDOCU].isBif && strxcmp(isCas,argv[1],"GENDOCU",0,0,FALSE)==0) {
+   }
+
+BUILTIN_GENDOCU:
+   if (asBif[CLE_BUILTIN_IDX_GENDOCU].isBif) {
       const char*                pcCmd=NULL;
       const char*                pcSgn=NULL;
       int                        isNbr=TRUE;
@@ -2438,7 +2984,10 @@ EVALUATE:
       }
       siErr=CLERTC_CMD;
       ERROR(ELIMIT(siErr),NULL);
-   } else if (asBif[CLE_BUILTIN_IDX_HTMLDOC].isBif && strxcmp(isCas,argv[1],"HTMLDOC",0,0,FALSE)==0) {
+   }
+
+BUILTIN_HTMLDOC:
+   if (asBif[CLE_BUILTIN_IDX_HTMLDOC].isBif) {
       int              isPat=FALSE;
       const char*      pcPar=".";
       int              isNbr=FALSE;
@@ -2528,7 +3077,10 @@ EVALUATE:
          siErr=CLERTC_FAT;
          ERROR(ELIMIT(siErr),pcPat);
       }
-   } else if (asBif[CLE_BUILTIN_IDX_GENPROP].isBif && strxcmp(isCas,argv[1],"GENPROP",0,0,FALSE)==0) {
+   }
+
+BUILTIN_GENPROP:
+   if (asBif[CLE_BUILTIN_IDX_GENPROP].isBif) {
       if (argc==3) {
          const char* pcSgn;
          const char* pcCmd;
@@ -2606,7 +3158,10 @@ EVALUATE:
       }
       siErr=CLERTC_CMD;
       ERROR(ELIMIT(siErr),NULL);
-   } else if (asBif[CLE_BUILTIN_IDX_SETPROP].isBif && strxcmp(isCas,argv[1],"SETPROP",0,0,FALSE)==0) {
+   }
+
+BUILTIN_SETPROP:
+   if (asBif[CLE_BUILTIN_IDX_SETPROP].isBif) {
       if (argc==3) {
          const char* pcSgn;
          const char* pcCmd;
@@ -2675,7 +3230,10 @@ EVALUATE:
       }
       siErr=CLERTC_CMD;
       ERROR(ELIMIT(siErr),NULL);
-   } else if ((asBif[CLE_BUILTIN_IDX_CHGPROP].isBif && strxcmp(isCas,argv[1],"CHGPROP",0,0,FALSE)==0) || (pcDef!=NULL && strxcmp(isCas,pcDef,"flam",0,0,FALSE)==0 && strxcmp(isCas,argv[1],"DEFAULTS",0,0,FALSE)==0)) {
+   }
+
+BUILTIN_CHGPROP:
+   if (asBif[CLE_BUILTIN_IDX_CHGPROP].isBif) {
       if (argc>=3) {
          for (i=0;psCmd[i].pcKyw!=NULL;i++) {
             if (strxcmp(isCas,argv[2],psCmd[i].pcKyw,0,0,FALSE)==0) {
@@ -2747,7 +3305,10 @@ EVALUATE:
       }
       siErr=CLERTC_CMD;
       ERROR(ELIMIT(siErr),NULL);
-   } else if (asBif[CLE_BUILTIN_IDX_DELPROP].isBif && strxcmp(isCas,argv[1],"DELPROP",0,0,FALSE)==0) {
+   }
+
+BUILTIN_DELPROP:
+   if (asBif[CLE_BUILTIN_IDX_DELPROP].isBif) {
       if (argc==2) {
          srprintf(&pcCnf,&szCnf,strlen(pcOwn)+strlen(pcPgm),"%s.%s.property.file",pcOwn,pcPgm);
           if (pcCnf==NULL) {
@@ -2796,7 +3357,10 @@ EVALUATE:
          if (pfOut!=NULL) { fprintf(pfOut,"Delete configuration keyword '%s' was successful\n",pcCnf); }
          ERROR(CLERTC_OK,NULL);
       }
-   } else if ((asBif[CLE_BUILTIN_IDX_GETPROP].isBif && strxcmp(isCas,argv[1],"GETPROP",0,0,FALSE)==0) || (pcDef!=NULL && strxcmp(isCas,pcDef,"flam",0,0,FALSE)==0 && strxcmp(isCas,argv[1],"LIST",0,0,FALSE)==0)) {
+   }
+
+BUILTIN_GETPROP:
+   if (asBif[CLE_BUILTIN_IDX_GETPROP].isBif) {
       if (argc==2) {
          if (pfOut!=NULL) { fprintf(pfOut,"Properties for program '%s':\n",pcPgm); }
          for (i=0;psCmd[i].pcKyw!=NULL;i++) {
@@ -2911,7 +3475,10 @@ EVALUATE:
       }
       siErr=CLERTC_CMD;
       ERROR(ELIMIT(siErr),NULL);
-   } else if (asBif[CLE_BUILTIN_IDX_SETOWNER].isBif && strxcmp(isCas,argv[1],"SETOWNER",0,0,FALSE)==0) {
+   }
+
+BUILTIN_SETOWNER:
+   if (asBif[CLE_BUILTIN_IDX_SETOWNER].isBif) {
       if (argc==3) {
          srprintf(&pcCnf,&szCnf,strlen(pcPgm),"%s.owner.id",pcPgm);
          if (pcCnf==NULL) {
@@ -2934,7 +3501,10 @@ EVALUATE:
       }
       siErr=CLERTC_CMD;
       ERROR(ELIMIT(siErr),NULL);
-   } else if (asBif[CLE_BUILTIN_IDX_GETOWNER].isBif && strxcmp(isCas,argv[1],"GETOWNER",0,0,FALSE)==0) {
+   }
+
+BUILTIN_GETOWNER:
+   if (asBif[CLE_BUILTIN_IDX_GETOWNER].isBif) {
       if (argc==2) {
          if (pfOut!=NULL) { fprintf(pfOut,"Current owner id for '%s' is:\n",argv[0]); }
          fprintf(pfStd,"%s\n",pcOwn);
@@ -2946,7 +3516,10 @@ EVALUATE:
       }
       siErr=CLERTC_CMD;
       ERROR(ELIMIT(siErr),NULL);
-   } else if (asBif[CLE_BUILTIN_IDX_SETENV].isBif && strxcmp(isCas,argv[1],"SETENV",0,0,FALSE)==0) {
+   }
+
+BUILTIN_SETENV:
+   if (asBif[CLE_BUILTIN_IDX_SETENV].isBif) {
       if (argc==3) {
          const char* pcVal=strchr(argv[2],'=');
          const char* pcTmp;
@@ -2984,7 +3557,10 @@ EVALUATE:
       }
       siErr=CLERTC_CMD;
       ERROR(ELIMIT(siErr),NULL);
-   } else if (asBif[CLE_BUILTIN_IDX_GETENV].isBif && strxcmp(isCas,argv[1],"GETENV",0,0,FALSE)==0) {
+   }
+
+BUILTIN_GETENV:
+   if (asBif[CLE_BUILTIN_IDX_GETENV].isBif) {
       if (argc==2) {
          if (pfOut!=NULL) { fprintf(pfOut,"Current environment variables for owner '%s':\n",pcOwn); }
          siCnt=siCnfPrnEnv(psCnf,pfStd,pcDep,pcOwn,pcPgm);
@@ -3001,7 +3577,10 @@ EVALUATE:
       }
       siErr=CLERTC_CMD;
       ERROR(ELIMIT(siErr),NULL);
-   } else if (asBif[CLE_BUILTIN_IDX_DELENV].isBif && strxcmp(isCas,argv[1],"DELENV",0,0,FALSE)==0) {
+   }
+
+BUILTIN_DELENV:
+   if (asBif[CLE_BUILTIN_IDX_DELENV].isBif) {
       if (argc==3) {
          srprintf(&pcCnf,&szCnf,strlen(pcOwn)+strlen(pcPgm)+strlen(argv[2]),"%s.%s.envar.%s",pcOwn,pcPgm,argv[2]);
          if (pcCnf==NULL) {
@@ -3024,7 +3603,10 @@ EVALUATE:
       }
       siErr=CLERTC_CMD;
       ERROR(ELIMIT(siErr),NULL);
-   } else if (asBif[CLE_BUILTIN_IDX_LSTENV].isBif && strxcmp(isCas,argv[1],"LSTENV",0,0,FALSE)==0) {
+   }
+
+BUILTIN_LSTENV:
+   if (asBif[CLE_BUILTIN_IDX_LSTENV].isBif) {
       if (argc==2) {
          if (pfOut!=NULL) { fprintf(pfOut,"Status for all possible usable environment variables:\n"); }
          for (const TsClpArgument* p=psEnvTab;p!=NULL && p->pcKyw!=NULL;p++) {
@@ -3068,7 +3650,10 @@ EVALUATE:
       }
       siErr=CLERTC_CMD;
       ERROR(ELIMIT(siErr),NULL);
-   } else if (asBif[CLE_BUILTIN_IDX_HLPENV].isBif && strxcmp(isCas,argv[1],"HLPENV",0,0,FALSE)==0) {
+   }
+
+BUILTIN_HLPENV:
+   if (asBif[CLE_BUILTIN_IDX_HLPENV].isBif) {
       if (argc==2) {
          if (pfOut!=NULL) { fprintf(pfOut,"Help for all possible usable environment variables:\n"); }
          vdPrintEnvars(pfStd,psEnvTab);
@@ -3080,7 +3665,10 @@ EVALUATE:
       }
       siErr=CLERTC_CMD;
       ERROR(ELIMIT(siErr),NULL);
-   } else if (asBif[CLE_BUILTIN_IDX_TRACE].isBif && strxcmp(isCas,argv[1],"TRACE",0,0,FALSE)==0) {
+   }
+
+BUILTIN_TRACE:
+   if (asBif[CLE_BUILTIN_IDX_TRACE].isBif) {
       if (argc==3) {
          if (strxcmp(isCas,argv[2],"ON",0,0,FALSE)==0 || strxcmp(isCas,argv[2],"-ON",0,0,FALSE)==0 || strxcmp(isCas,argv[2],"--ON",0,0,FALSE)==0) {
             srprintf(&pcCnf,&szCnf,strlen(pcOwn)+strlen(pcPgm),"%s.%s.trace",pcOwn,pcPgm);
@@ -3150,7 +3738,10 @@ EVALUATE:
       }
       siErr=CLERTC_CMD;
       ERROR(ELIMIT(siErr),NULL);
-   } else if (asBif[CLE_BUILTIN_IDX_CONFIG].isBif && strxcmp(isCas,argv[1],"CONFIG",0,0,FALSE)==0) {
+   }
+
+BUILTIN_CONFIG:
+   if (asBif[CLE_BUILTIN_IDX_CONFIG].isBif) {
       if (argc==2) {
          if (pfOut!=NULL) { fprintf(pfOut,"Current configuration data:\n"); }
          siCnt=siCnfPrn(psCnf,pfStd,pcDep);
@@ -3184,14 +3775,11 @@ EVALUATE:
       }
       siErr=CLERTC_CMD;
       ERROR(ELIMIT(siErr),NULL);
-   } else {
-      if (argc>1) {
-         for (i=0;psCmd[i].pcKyw!=NULL;i++) {
-            l=strlen(psCmd[i].pcKyw);
-            if (strxcmp(isCas,argv[1],psCmd[i].pcKyw,0,-1,FALSE)==0 ||
-                strxcmp(isCas,argv[1],psCmd[i].pcKyw,l,'=',TRUE)==0 ||
-                strxcmp(isCas,argv[1],psCmd[i].pcKyw,l,'(',TRUE)==0 ||
-                strxcmp(isCas,argv[1],psCmd[i].pcKyw,l,'.',TRUE)==0) {
+   }
+
+COMMAND_EXECUTE:
+   /* Execute command - i contains the command index */
+   {
                int                           siOid=0;
                char*                         pcCmd=NULL;
                char*                         pcTls=NULL;
@@ -3199,7 +3787,7 @@ EVALUATE:
                clock_t                       ckCpu1=clock();
                clock_t                       ckCpu2;
 
-               siErr=siCleGetCommand(pfOut,pfErr,pfTrc,pcDep,psCmd[i].pcKyw,argc,argv,&pcFil,&pcCmd,pvGbl,pvF2S,pfF2S,pcDpa);
+               siErr=siCleGetCommand(pfOut,pfErr,pfTrc,pcDep,psCmd[i].pcKyw,argc,argv,&pcFil,&pcCmd,pvGbl,pvF2S,pfF2S,siMln,pcDpa);
                if (siErr) {
                   ERROR(ELIMIT(siErr),NULL);
                }
@@ -3317,9 +3905,9 @@ EVALUATE:
                }
                siErr=isWrn&0x00000001;
                ERROR(ELIMIT(siErr),NULL);
-            }
-         }
-      }
+         }  /* End of command execution block */
+
+COMMAND_NOT_FOUND:
       if (pcDef!=NULL && *pcDef && ppArg==NULL) {
          ppArg=malloc((argc+1)*sizeof(*ppArg));
          if (ppArg == NULL) {
@@ -3333,11 +3921,13 @@ EVALUATE:
       }
       if (pfErr!=NULL) {
          fprintf(pfErr,"Command or built-in function '%s' not supported\n",argv[1]);
+         if (argc>1 && strlen(argv[1])<3 && strpbrk(argv[1],"=().")==NULL) {
+            fprintf(pfErr,"Note: Minimum abbreviation length is 3 characters\n");
+         }
          vdPrnStaticSyntax(pfErr,psCmd,asBif,argv[0],pcDep,pcOpt,pcDpa);
       }
       siErr=CLERTC_CMD;
       ERROR(ELIMIT(siErr),NULL);
-   }
 }
 #undef ERROR
 #undef ELIMIT
@@ -4165,10 +4755,11 @@ static int siCleGetCommand(
    void*                   pvGbl,
    void*                   pvF2S,
    TfF2S*                  pfF2S,
+   const int               siMln,
    const char*             pcDpa)
 {
    int                     siErr,siSiz=0;
-   int                     l=strlen(pcFct);
+   int                     l=siMln;  /* Use matched length instead of full command name length */
    SAFE_FREE(*ppFil);
    if (argv[1][l]==EOS) {
       if (argc>2) {
