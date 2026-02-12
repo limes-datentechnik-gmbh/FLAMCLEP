@@ -217,6 +217,44 @@
 #define CLE_BUILTIN_IDX_ABOUT       23
 #define CLE_BUILTIN_IDX_ERRORS      24
 
+/* Helper macros for NULL-safe fprintf operations ***********************/
+
+/**
+ * @brief Safely prints to pfOut if not NULL
+ *
+ * This macro wraps fprintf() with a NULL check for the output stream.
+ * Reduces code duplication and improves readability.
+ *
+ * @param ctx  Pointer to TsCleBuiltinContext
+ * @param ...  Format string and arguments for fprintf()
+ */
+#define FPRINTF_OUT(ctx, ...) \
+   do { if ((ctx)->pfOut != NULL) fprintf((ctx)->pfOut, __VA_ARGS__); } while(0)
+
+/**
+ * @brief Safely prints to pfErr if not NULL
+ *
+ * This macro wraps fprintf() with a NULL check for the error stream.
+ * Reduces code duplication and improves readability.
+ *
+ * @param ctx  Pointer to TsCleBuiltinContext
+ * @param ...  Format string and arguments for fprintf()
+ */
+#define FPRINTF_ERR(ctx, ...) \
+   do { if ((ctx)->pfErr != NULL) fprintf((ctx)->pfErr, __VA_ARGS__); } while(0)
+
+/**
+ * @brief Safely prints to pfStd if not NULL
+ *
+ * This macro wraps fprintf() with a NULL check for the standard stream.
+ * Reduces code duplication and improves readability.
+ *
+ * @param ctx  Pointer to TsCleBuiltinContext
+ * @param ...  Format string and arguments for fprintf()
+ */
+#define FPRINTF_STD(ctx, ...) \
+   do { if ((ctx)->pfStd != NULL) fprintf((ctx)->pfStd, __VA_ARGS__); } while(0)
+
 /* Definition der Strukturen ******************************************/
 
 typedef struct CnfEnt {
@@ -1616,70 +1654,234 @@ static int siCleFindCommand(
 
 /* Built-in function implementations **************************************/
 
-static int siCleBuiltinLicense(TsCleBuiltinContext* psCtx)
-{
+/**
+ * @brief Reports a syntax error for a built-in function
+ *
+ * This helper function provides consistent error reporting for all built-in
+ * functions when invalid syntax is detected.
+ *
+ * @param[in] psCtx          Built-in function context
+ * @param[in] pcFunctionName Name of the built-in function (e.g., "LICENSE")
+ * @return                   CLERTC_CMD (command syntax error)
+ */
+static int siCleBuiltinSyntaxError(
+   TsCleBuiltinContext* psCtx,
+   const char*          pcFunctionName
+) {
+   if (psCtx->pfErr != NULL) {
+      fprintf(psCtx->pfErr, "Syntax for built-in function '%s' not valid\n",
+              pcFunctionName);
+      fprintf(psCtx->pfErr, "%s %s %s\n", psCtx->pcDep, psCtx->argv[0],
+              pcFunctionName);
+   }
+   return(CLERTC_CMD);
+}
+
+/**
+ * @brief Generic function to print info (License/Version/About)
+ *
+ * This helper function reduces code duplication for LICENSE, VERSION, and ABOUT
+ * built-in functions which all follow the same pattern.
+ *
+ * @param[in] psCtx          Built-in function context
+ * @param[in] pcInfoName     Name of info type ("License", "Version", "About")
+ * @param[in] pcInfoData     Pointer to info data (pcLic, pcVsn, pcAbo)
+ * @param[in] pcKeyword      Keyword for error messages ("LICENSE", "VERSION", "ABOUT")
+ * @return                   CLERTC_OK on success, CLERTC_CMD on syntax error
+ */
+static int siCleBuiltinPrintInfo(
+   TsCleBuiltinContext* psCtx,
+   const char*          pcInfoName,
+   const char*          pcInfoData,
+   const char*          pcKeyword
+) {
    if (psCtx->argc == 2) {
       if (psCtx->pfOut != NULL) {
-         fprintf(psCtx->pfOut, "License of program '%s':\n", psCtx->pcPgm);
+         fprintf(psCtx->pfOut, "%s ", pcInfoName);
+         /* Convert first char to lowercase for "of/for" message */
+         if (strcmp(pcInfoName, "Version") == 0) {
+            fprintf(psCtx->pfOut, "for program '%s':\n", psCtx->pcPgm);
+         } else if (strcmp(pcInfoName, "About") == 0) {
+            fprintf(psCtx->pfOut, "program '%s':\n", psCtx->pcPgm);
+         } else {
+            fprintf(psCtx->pfOut, "of program '%s':\n", psCtx->pcPgm);
+         }
       }
-      if (psCtx->pcLic == NULL) {
+      if (pcInfoData == NULL) {
          if (psCtx->pfOut != NULL) {
-            fprintf(psCtx->pfOut, "No license information available\n");
+            /* Build lowercase version for "No xxx information available" */
+            char acLower[32];
+            snprintf(acLower, sizeof(acLower), "%s", pcInfoName);
+            for (int i = 0; acLower[i]; i++) {
+               acLower[i] = tolower((unsigned char)acLower[i]);
+            }
+            fprintf(psCtx->pfOut, "No %s information available\n", acLower);
          }
       } else {
-         fprintf(psCtx->pfStd, "%s\n", psCtx->pcLic);
+         fprintf(psCtx->pfStd, "%s\n", pcInfoData);
       }
       return(CLERTC_OK);
    }
-   if (psCtx->pfErr != NULL) {
-      fprintf(psCtx->pfErr, "Syntax for built-in function 'LICENSE' not valid\n");
-      fprintf(psCtx->pfErr, "%s %s LICENSE\n", psCtx->pcDep, psCtx->argv[0]);
+   return siCleBuiltinSyntaxError(psCtx, pcKeyword);
+}
+
+/**
+ * @brief Initialize Built-In function context structure
+ *
+ * Centralizes initialization of TsCleBuiltinContext to reduce code duplication.
+ */
+static void vdCleInitBuiltinContext(
+   TsCleBuiltinContext*          psCtx,
+   int                           argc,
+   char**                        argv,
+   FILE*                         pfOut,
+   FILE*                         pfErr,
+   FILE*                         pfStd,
+   FILE*                         pfTrc,
+   const char*                   pcDep,
+   const char*                   pcOpt,
+   const char*                   pcEnt,
+   const char*                   pcOwn,
+   const char*                   pcPgm,
+   const char*                   pcBld,
+   const char*                   pcDef,
+   const TsCleBuiltin*           psBif,
+   const void*                   psCmd,
+   int                           isCas,
+   int                           isPfl,
+   int                           isRpl,
+   int                           siMkl,
+   TsCnfHdl*                     psCnf,
+   void*                         pvGbl,
+   void**                        ppvHdl,
+   void*                         pvF2S,
+   void*                         pfF2S,
+   void*                         pvSaf,
+   void*                         pfSaf,
+   void*                         pfMsg,
+   const char*                   pcLic,
+   const char*                   pcVsn,
+   const char*                   pcAbo,
+   const char*                   pcHlp,
+   const char*                   pcAut,
+   const char*                   pcAdr,
+   const char*                   pcDpa,
+   const char*                   pcPgmNum,
+   const char*                   pcBifNum,
+   const char*                   pcCmdNum,
+   const char*                   pcPgmMan,
+   const char*                   pcSccMan,
+   const char*                   pcHom,
+   char**                        ppcCnf,
+   size_t*                       pszCnf,
+   int*                          psiDep,
+   void*                         psEnv,
+   const char*                   pcEnv,
+   const void*                   psDoc,
+   const void*                   psOth
+) {
+   psCtx->argc = argc;
+   psCtx->argv = argv;
+   psCtx->pfOut = pfOut;
+   psCtx->pfErr = pfErr;
+   psCtx->pfStd = pfStd;
+   psCtx->pfTrc = pfTrc;
+   psCtx->pcDep = pcDep;
+   psCtx->pcOpt = pcOpt;
+   psCtx->pcEnt = pcEnt;
+   psCtx->pcOwn = pcOwn;
+   psCtx->pcPgm = pcPgm;
+   psCtx->pcBld = pcBld;
+   psCtx->pcDef = pcDef;
+   psCtx->psBif = psBif;
+   psCtx->psCmd = psCmd;
+   psCtx->isCas = isCas;
+   psCtx->isPfl = isPfl;
+   psCtx->isRpl = isRpl;
+   psCtx->siMkl = siMkl;
+   psCtx->psCnf = psCnf;
+   psCtx->pvGbl = pvGbl;
+   psCtx->ppvHdl = ppvHdl;
+   psCtx->pvF2S = pvF2S;
+   psCtx->pfF2S = pfF2S;
+   psCtx->pvSaf = pvSaf;
+   psCtx->pfSaf = pfSaf;
+   psCtx->pfMsg = pfMsg;
+   psCtx->pcLic = pcLic;
+   psCtx->pcVsn = pcVsn;
+   psCtx->pcAbo = pcAbo;
+   psCtx->pcHlp = pcHlp;
+   psCtx->pcAut = pcAut;
+   psCtx->pcAdr = pcAdr;
+   psCtx->pcDpa = pcDpa;
+   psCtx->pcPgmNum = pcPgmNum;
+   psCtx->pcBifNum = pcBifNum;
+   psCtx->pcCmdNum = pcCmdNum;
+   psCtx->pcPgmMan = pcPgmMan;
+   psCtx->pcSccMan = pcSccMan;
+   psCtx->pcHom = pcHom;
+   psCtx->ppcCnf = ppcCnf;
+   psCtx->pszCnf = pszCnf;
+   psCtx->psiDep = psiDep;
+   psCtx->psEnv = psEnv;
+   psCtx->pcEnv = pcEnv;
+   psCtx->psDoc = psDoc;
+   psCtx->psOth = psOth;
+}
+
+/**
+ * @brief Report command execution error with consistent formatting
+ *
+ * Centralizes error reporting for command MAP, RUN, and FIN operations.
+ * Reduces code duplication and ensures consistent error message formatting.
+ *
+ * @param[in] pfErr        Error output stream
+ * @param[in] pvMsg        Message function pointer (TfMsg*)
+ * @param[in] pcOperation  Operation name ("Mapping of CLP structure", "Run", "Finish/cleanup")
+ * @param[in] pcCommand    Command keyword
+ * @param[in] siReturnCode Return code (CLERTC_MAP, CLERTC_RUN, CLERTC_FIN)
+ * @param[in] siReasonCode Reason code from command function
+ */
+static void vdCleReportCommandError(
+   FILE*       pfErr,
+   void*       pvMsg,
+   const char* pcOperation,
+   const char* pcCommand,
+   int         siReturnCode,
+   int         siReasonCode
+) {
+   TfMsg* pfMsg = (TfMsg*)pvMsg;
+   const char* pcMsg = NULL;
+   char acTs[64];
+
+   if (pfMsg != NULL) {
+      pcMsg = pfMsg(siReasonCode);
    }
-   return(CLERTC_CMD);
+
+   if (pfErr != NULL) {
+      if (pcMsg != NULL) {
+         fprintf(pfErr, "%s %s for command '%s' failed (Return code: %d / Reason code: %d (%s))\n",
+                 cstime(0, acTs), pcOperation, pcCommand, siReturnCode, siReasonCode, pcMsg);
+      } else {
+         fprintf(pfErr, "%s %s for command '%s' failed (Return code: %d / Reason code: %d)\n",
+                 cstime(0, acTs), pcOperation, pcCommand, siReturnCode, siReasonCode);
+      }
+   }
+}
+
+static int siCleBuiltinLicense(TsCleBuiltinContext* psCtx)
+{
+   return siCleBuiltinPrintInfo(psCtx, "License", psCtx->pcLic, "LICENSE");
 }
 
 static int siCleBuiltinVersion(TsCleBuiltinContext* psCtx)
 {
-   if (psCtx->argc == 2) {
-      if (psCtx->pfOut != NULL) {
-         fprintf(psCtx->pfOut, "Version for program '%s':\n", psCtx->pcPgm);
-      }
-      if (psCtx->pcVsn == NULL) {
-         if (psCtx->pfOut != NULL) {
-            fprintf(psCtx->pfOut, "No version information available\n");
-         }
-      } else {
-         fprintf(psCtx->pfStd, "%s\n", psCtx->pcVsn);
-      }
-      return(CLERTC_OK);
-   }
-   if (psCtx->pfErr != NULL) {
-      fprintf(psCtx->pfErr, "Syntax for built-in function 'VERSION' not valid\n");
-      fprintf(psCtx->pfErr, "%s %s VERSION\n", psCtx->pcDep, psCtx->argv[0]);
-   }
-   return(CLERTC_CMD);
+   return siCleBuiltinPrintInfo(psCtx, "Version", psCtx->pcVsn, "VERSION");
 }
 
 static int siCleBuiltinAbout(TsCleBuiltinContext* psCtx)
 {
-   if (psCtx->argc == 2) {
-      if (psCtx->pfOut != NULL) {
-         fprintf(psCtx->pfOut, "About program '%s':\n", psCtx->pcPgm);
-      }
-      if (psCtx->pcAbo == NULL) {
-         if (psCtx->pfOut != NULL) {
-            fprintf(psCtx->pfOut, "No about information available\n");
-         }
-      } else {
-         fprintf(psCtx->pfStd, "%s\n", psCtx->pcAbo);
-      }
-      return(CLERTC_OK);
-   }
-   if (psCtx->pfErr != NULL) {
-      fprintf(psCtx->pfErr, "Syntax for built-in function 'ABOUT' not valid\n");
-      fprintf(psCtx->pfErr, "%s %s ABOUT\n", psCtx->pcDep, psCtx->argv[0]);
-   }
-   return(CLERTC_CMD);
+   return siCleBuiltinPrintInfo(psCtx, "About", psCtx->pcAbo, "ABOUT");
 }
 
 static int siCleBuiltinLexemes(TsCleBuiltinContext* psCtx)
@@ -1691,9 +1893,7 @@ static int siCleBuiltinLexemes(TsCleBuiltinContext* psCtx)
       if (siErr) {
          return(siErr);
       }
-      if (psCtx->pfOut != NULL) {
-         fprintf(psCtx->pfOut, "Lexemes (regular expressions) for argument list or parameter file:\n");
-      }
+      FPRINTF_OUT(psCtx, "Lexemes (regular expressions) for argument list or parameter file:\n");
       siErr = siClpLexemes(*(psCtx->ppvHdl), psCtx->pfStd);
       if (siErr < 0) {
          return(CLERTC_SYN);
@@ -1701,11 +1901,7 @@ static int siCleBuiltinLexemes(TsCleBuiltinContext* psCtx)
          return(CLERTC_OK);
       }
    }
-   if (psCtx->pfErr != NULL) {
-      fprintf(psCtx->pfErr, "Syntax for built-in function 'LEXEMES' not valid\n");
-      fprintf(psCtx->pfErr, "%s %s LEXEMES\n", psCtx->pcDep, psCtx->argv[0]);
-   }
-   return(CLERTC_CMD);
+   return siCleBuiltinSyntaxError(psCtx, "LEXEMES");
 }
 
 static int siCleBuiltinGrammar(TsCleBuiltinContext* psCtx)
@@ -1717,9 +1913,7 @@ static int siCleBuiltinGrammar(TsCleBuiltinContext* psCtx)
       if (siErr) {
          return(siErr);
       }
-      if (psCtx->pfOut != NULL) {
-         fprintf(psCtx->pfOut, "Grammar for argument list, parameter file or property file\n");
-      }
+      FPRINTF_OUT(psCtx, "Grammar for argument list, parameter file or property file\n");
       siErr = siClpGrammar(*(psCtx->ppvHdl), psCtx->pfStd);
       if (siErr < 0) {
          return(CLERTC_SYN);
@@ -1727,11 +1921,7 @@ static int siCleBuiltinGrammar(TsCleBuiltinContext* psCtx)
          return(CLERTC_OK);
       }
    }
-   if (psCtx->pfErr != NULL) {
-      fprintf(psCtx->pfErr, "Syntax for built-in function 'GRAMMAR' not valid\n");
-      fprintf(psCtx->pfErr, "%s %s GRAMMAR\n", psCtx->pcDep, psCtx->argv[0]);
-   }
-   return(CLERTC_CMD);
+   return siCleBuiltinSyntaxError(psCtx, "GRAMMAR");
 }
 
 static int siCleBuiltinErrors(TsCleBuiltinContext* psCtx)
@@ -1759,11 +1949,7 @@ static int siCleBuiltinErrors(TsCleBuiltinContext* psCtx)
       }
       return(CLERTC_OK);
    }
-   if (psCtx->pfErr != NULL) {
-      fprintf(psCtx->pfErr, "Syntax for built-in function 'ERRORS' not valid\n");
-      fprintf(psCtx->pfErr, "%s %s ERRORS\n", psCtx->pcDep, psCtx->argv[0]);
-   }
-   return(CLERTC_CMD);
+   return siCleBuiltinSyntaxError(psCtx, "ERRORS");
 }
 
 static int siCleBuiltinSyntax(TsCleBuiltinContext* psCtx)
@@ -2571,16 +2757,12 @@ static int siCleBuiltinHtmldoc(TsCleBuiltinContext* psCtx)
    }
    pcPat = dcpmapfil(pcPar);
    if (pcPat == NULL) {
-      if (psCtx->pfErr != NULL) {
-         fprintf(psCtx->pfErr, "Allocation of memory for path name (%s) failed\n", psCtx->pcHlp);
-      }
+      FPRINTF_ERR(psCtx, "Allocation of memory for path name (%s) failed\n", psCtx->pcHlp);
       return(CLERTC_MEM);
    }
    pvLib = pfLoadHtmlDoc(&pfHtmlOpn, &pfHtmlPrn, &pfHtmlCls);
    if (pvLib == NULL) {
-      if (psCtx->pfErr != NULL) {
-         fprintf(psCtx->pfErr, "There is no service provider DLL/SO (libhtmldoc) available for HTML generation\n");
-      }
+      FPRINTF_ERR(psCtx, "There is no service provider DLL/SO (libhtmldoc) available for HTML generation\n");
       SAFE_FREE(pcPat);
       return(CLERTC_FAT);
    }
@@ -2628,9 +2810,7 @@ static int siCleBuiltinHtmldoc(TsCleBuiltinContext* psCtx)
       }
    } else {
       vdFreeHtmlDoc(&pvLib);
-      if (psCtx->pfErr != NULL) {
-         fprintf(psCtx->pfErr, "There is no service provider function (opnHtmlDoc, prnHtmlDoc or clsHtmlDoc) available for HTML generation\n");
-      }
+      FPRINTF_ERR(psCtx, "There is no service provider function (opnHtmlDoc, prnHtmlDoc or clsHtmlDoc) available for HTML generation\n");
       SAFE_FREE(pcPat);
       return(CLERTC_FAT);
    }
@@ -2979,9 +3159,7 @@ static int siCleBuiltinDelprop(TsCleBuiltinContext* psCtx)
    if (siErr) {
       return(CLERTC_CFG);
    } else {
-      if (psCtx->pfOut != NULL) {
-         fprintf(psCtx->pfOut, "Delete configuration keyword '%s' was successful\n", *(psCtx->ppcCnf));
-      }
+      FPRINTF_OUT(psCtx, "Delete configuration keyword '%s' was successful\n", *(psCtx->ppcCnf));
       return(CLERTC_OK);
    }
 }
@@ -2998,9 +3176,7 @@ static int siCleBuiltinGetprop(TsCleBuiltinContext* psCtx)
    pfSaf = (TfSaf*)psCtx->pfSaf;
 
    if (psCtx->argc == 2) {
-      if (psCtx->pfOut != NULL) {
-         fprintf(psCtx->pfOut, "Properties for program '%s':\n", psCtx->pcPgm);
-      }
+      FPRINTF_OUT(psCtx, "Properties for program '%s':\n", psCtx->pcPgm);
       for (i = 0; psCmd[i].pcKyw != NULL; i++) {
          siErr = siClePropertyInit(psCtx->pvGbl, psCmd[i].pfIni, psCmd[i].pvClp, psCtx->pcOwn, psCtx->pcPgm, psCtx->pcBld, psCmd[i].pcKyw, psCmd[i].pcMan, psCmd[i].pcHlp,
                                    psCmd[i].piOid, psCmd[i].psTab, psCtx->isCas, psCtx->isPfl, psCtx->isRpl, psCtx->siMkl, psCtx->pfStd, psCtx->pfErr, psCtx->pfTrc, psCtx->pcDep, psCtx->pcOpt, psCtx->pcEnt, psCtx->psCnf,
@@ -3149,17 +3325,11 @@ static int siCleBuiltinSetowner(TsCleBuiltinContext* psCtx)
 static int siCleBuiltinGetowner(TsCleBuiltinContext* psCtx)
 {
    if (psCtx->argc == 2) {
-      if (psCtx->pfOut != NULL) {
-         fprintf(psCtx->pfOut, "Current owner id for '%s' is:\n", psCtx->argv[0]);
-      }
+      FPRINTF_OUT(psCtx, "Current owner id for '%s' is:\n", psCtx->argv[0]);
       fprintf(psCtx->pfStd, "%s\n", psCtx->pcOwn);
       return(CLERTC_OK);
    }
-   if (psCtx->pfErr != NULL) {
-      fprintf(psCtx->pfErr, "Syntax for built-in function 'GETOWNER' not valid\n");
-      fprintf(psCtx->pfErr, "%s %s GETOWNER\n", psCtx->pcDep, psCtx->argv[0]);
-   }
-   return(CLERTC_CMD);
+   return siCleBuiltinSyntaxError(psCtx, "GETOWNER");
 }
 static int siCleBuiltinSetenv(TsCleBuiltinContext* psCtx)
 {
@@ -3209,9 +3379,7 @@ static int siCleBuiltinGetenv(TsCleBuiltinContext* psCtx)
    int siCnt;
 
    if (psCtx->argc == 2) {
-      if (psCtx->pfOut != NULL) {
-         fprintf(psCtx->pfOut, "Current environment variables for owner '%s':\n", psCtx->pcOwn);
-      }
+      FPRINTF_OUT(psCtx, "Current environment variables for owner '%s':\n", psCtx->pcOwn);
       siCnt = siCnfPrnEnv(psCtx->psCnf, psCtx->pfStd, psCtx->pcDep, psCtx->pcOwn, psCtx->pcPgm);
       if (siCnt) {
          if (psCtx->pfOut != NULL) {
@@ -3224,11 +3392,7 @@ static int siCleBuiltinGetenv(TsCleBuiltinContext* psCtx)
       }
       return(CLERTC_OK);
    }
-   if (psCtx->pfErr != NULL) {
-      fprintf(psCtx->pfErr, "Syntax for built-in function 'GETENV' not valid\n");
-      fprintf(psCtx->pfErr, "%s %s GETENV\n", psCtx->pcDep, psCtx->argv[0]);
-   }
-   return(CLERTC_CMD);
+   return siCleBuiltinSyntaxError(psCtx, "GETENV");
 }
 static int siCleBuiltinDelenv(TsCleBuiltinContext* psCtx)
 {
@@ -3263,9 +3427,7 @@ static int siCleBuiltinLstenv(TsCleBuiltinContext* psCtx)
    const TsClpArgument* psEnvTab;
 
    if (psCtx->argc == 2) {
-      if (psCtx->pfOut != NULL) {
-         fprintf(psCtx->pfOut, "Status for all possible usable environment variables:\n");
-      }
+      FPRINTF_OUT(psCtx, "Status for all possible usable environment variables:\n");
       psEnvTab = (const TsClpArgument*)psCtx->psEnv;
       for (const TsClpArgument* p = psEnvTab; p != NULL && p->pcKyw != NULL; p++) {
          char acEnv[1024];
@@ -3302,26 +3464,16 @@ static int siCleBuiltinLstenv(TsCleBuiltinContext* psCtx)
       }
       return(CLERTC_OK);
    }
-   if (psCtx->pfErr != NULL) {
-      fprintf(psCtx->pfErr, "Syntax for built-in function 'LSTENV' not valid\n");
-      fprintf(psCtx->pfErr, "%s %s LSTENV\n", psCtx->pcDep, psCtx->argv[0]);
-   }
-   return(CLERTC_CMD);
+   return siCleBuiltinSyntaxError(psCtx, "LSTENV");
 }
 static int siCleBuiltinHlpenv(TsCleBuiltinContext* psCtx)
 {
    if (psCtx->argc == 2) {
-      if (psCtx->pfOut != NULL) {
-         fprintf(psCtx->pfOut, "Help for all possible usable environment variables:\n");
-      }
+      FPRINTF_OUT(psCtx, "Help for all possible usable environment variables:\n");
       vdPrintEnvars(psCtx->pfStd, (const TsClpArgument*)psCtx->psEnv);
       return(CLERTC_OK);
    }
-   if (psCtx->pfErr != NULL) {
-      fprintf(psCtx->pfErr, "Syntax for built-in function 'HLPENV' not valid\n");
-      fprintf(psCtx->pfErr, "%s %s HLPENV\n", psCtx->pcDep, psCtx->argv[0]);
-   }
-   return(CLERTC_CMD);
+   return siCleBuiltinSyntaxError(psCtx, "HLPENV");
 }
 static int siCleBuiltinTrace(TsCleBuiltinContext* psCtx)
 {
@@ -3406,9 +3558,7 @@ static int siCleBuiltinConfig(TsCleBuiltinContext* psCtx)
    int siCnt;
 
    if (psCtx->argc == 2) {
-      if (psCtx->pfOut != NULL) {
-         fprintf(psCtx->pfOut, "Current configuration data:\n");
-      }
+      FPRINTF_OUT(psCtx, "Current configuration data:\n");
       siCnt = siCnfPrn(psCtx->psCnf, psCtx->pfStd, psCtx->pcDep);
       if (psCtx->pfOut != NULL) {
          if (siCnt) {
@@ -3880,63 +4030,49 @@ EVALUATE:
    siType=0; siIdx=-1; siRes=-1; siMln=0;
    siRes=siCleFindCommand(isCas,argv[1],psCmd,asBif,siMkl,&siType,&siIdx,&siMln);
 
-   if (siRes == 0) {
-      if (siType == 1) { /* Found built-in function - dispatch via function pointer */
+   /* Refactored command dispatch structure - eliminates duplicate "not found" code */
+   if (siRes == 1) { /* Ambiguous abbreviation - handle first (special case) */
+      if (pfErr!=NULL) {
+         const char* pcStop=strpbrk(argv[1],"=(.");
+         int siInputLen=(pcStop!=NULL) ? (int)(pcStop-argv[1]) : (int)strlen(argv[1]);
+         char acInput[siInputLen+1];
+
+         memcpy(acInput,argv[1],siInputLen);
+         acInput[siInputLen]='\0';
+
+         fprintf(pfErr,"Ambiguous abbreviation '%s'. Matching commands/functions:\n",acInput);
+         /* List all matches from built-in functions */
+         for (int i=0;asBif[i].pcKyw!=NULL;i++) {
+            if (asBif[i].isBif && siInputLen>=(int)siMkl && strxcmp(isCas,acInput,asBif[i].pcKyw,siMkl,0,FALSE)==0) {
+               fprintf(pfErr,"  - %s (built-in function)\n",asBif[i].pcKyw);
+            }
+         }
+         /* List all matches from commands */
+         for (int i=0;psCmd[i].pcKyw!=NULL;i++) {
+            if (siInputLen>=(int)siMkl && strxcmp(isCas,acInput,psCmd[i].pcKyw,siMkl,0,FALSE)==0) {
+               fprintf(pfErr,"  - %s (command)\n",psCmd[i].pcKyw);
+            }
+         }
+      }
+      siErr=CLERTC_CMD;
+      ERROR(ELIMIT(siErr));
+   } else if (siRes == 0 && siType == 1) { /* Found built-in function - dispatch via function pointer */
          TsCleBuiltinContext stCtx;
 
-         /* Initialize context structure */
-         stCtx.argc = argc;
-         stCtx.argv = argv;
-         stCtx.pfOut = pfOut;
-         stCtx.pfErr = pfErr;
-         stCtx.pfStd = pfStd;
-         stCtx.pfTrc = pfTrc;
-         stCtx.pcDep = pcDep;
-         stCtx.pcOpt = pcOpt;
-         stCtx.pcEnt = pcEnt;
-         stCtx.pcOwn = pcOwn;
-         stCtx.pcPgm = pcPgm;
-         stCtx.pcBld = pcBld;
-         stCtx.pcDef = pcDef;
-         stCtx.psBif = asBif;
-         stCtx.psCmd = psCmd;
-         stCtx.isCas = isCas;
-         stCtx.isPfl = isPfl;
-         stCtx.isRpl = isRpl;
-         stCtx.siMkl = siMkl;
-         stCtx.psCnf = psCnf;
-         stCtx.pvGbl = pvGbl;
-         stCtx.ppvHdl = &pvHdl;
-         stCtx.pvF2S = pvF2S;
-         stCtx.pfF2S = pfF2S;
-         stCtx.pvSaf = pvSaf;
-         stCtx.pfSaf = pfSaf;
-         stCtx.pfMsg = pfMsg;
-         stCtx.pcLic = pcLic;
-         stCtx.pcVsn = pcVsn;
-         stCtx.pcAbo = pcAbo;
-         stCtx.pcHlp = pcHlp;
-         stCtx.pcAut = pcAut;
-         stCtx.pcAdr = pcAdr;
-         stCtx.pcDpa = pcDpa;
-         stCtx.pcPgmNum = pcPgmNum;
-         stCtx.pcBifNum = pcBifNum;
-         stCtx.pcCmdNum = pcCmdNum;
-         stCtx.pcPgmMan = pcPgmMan;
-         stCtx.pcSccMan = pcSccMan;
-         stCtx.pcHom = pcHom;
-         stCtx.ppcCnf = &pcCnf;
-         stCtx.pszCnf = &szCnf;
-         stCtx.psiDep = &siDep;
-         stCtx.psEnv = psEnvTab;
-         stCtx.pcEnv = pcEnv;
-         stCtx.psDoc = psDoc;
-         stCtx.psOth = psOth;
+         /* Initialize context structure using helper function */
+         vdCleInitBuiltinContext(&stCtx, argc, argv, pfOut, pfErr, pfStd, pfTrc,
+                                 pcDep, pcOpt, pcEnt, pcOwn, pcPgm, pcBld, pcDef,
+                                 asBif, psCmd, isCas, isPfl, isRpl, siMkl, psCnf,
+                                 pvGbl, &pvHdl, pvF2S, pfF2S, pvSaf, pfSaf, pfMsg,
+                                 pcLic, pcVsn, pcAbo, pcHlp, pcAut, pcAdr, pcDpa,
+                                 pcPgmNum, pcBifNum, pcCmdNum, pcPgmMan, pcSccMan,
+                                 pcHom, &pcCnf, &szCnf, &siDep, psEnvTab, pcEnv,
+                                 psDoc, psOth);
 
          /* Call built-in function via function pointer */
          siErr = asBif[siIdx].pfFunc(&stCtx);
          ERROR(ELIMIT(siErr));
-      } else if (siType == 2) { /* Found command - execute it */
+   } else if (siRes == 0 && siType == 2) { /* Found command - execute it */
          int                           siOid=0;
          char*                         pcCmd=NULL;
          char*                         pcTls=NULL;
@@ -3998,17 +4134,7 @@ EVALUATE:
          siErr=psCmd[siIdx].pfMap(pvHdl,pfErr,pfTrc,pvGbl,siOid,psCmd[siIdx].pvClp,psCmd[siIdx].pvPar);
          if (siErr) {
             if (siErr!=siNoR) {
-               if (pfMsg!=NULL && (pcMsg=pfMsg(siErr))!=NULL) {
-                  if (pfErr!=NULL) {
-                     fprintf(pfErr,"%s Mapping of CLP structure for command '%s' failed (Return code: %d / Reason code: %d (%s))\n",
-                             cstime(0,acTs),psCmd[siIdx].pcKyw,CLERTC_MAP,siErr,pcMsg);
-                  }
-               } else {
-                  if (pfErr!=NULL) {
-                     fprintf(pfErr,"%s Mapping of CLP structure for command '%s' failed (Return code: %d / Reason code: %d)\n",
-                             cstime(0,acTs),psCmd[siIdx].pcKyw,CLERTC_MAP,siErr);
-                  }
-               }
+               vdCleReportCommandError(pfErr, pfMsg, "Mapping of CLP structure", psCmd[siIdx].pcKyw, CLERTC_MAP, siErr);
                siErr=CLERTC_MAP;
             } else {
                siErr=CLERTC_OK;
@@ -4042,17 +4168,7 @@ EVALUATE:
                }
                siErr=CLERTC_WRN;
             } else {
-               if (pfMsg!=NULL && (pcMsg=pfMsg(siErr))!=NULL) {
-                  if (pfErr!=NULL) {
-                     fprintf(pfErr,"%s Run of command '%s' failed (Return code: %d / Reason code: %d (%s))\n",
-                             cstime(0,acTs),psCmd[siIdx].pcKyw,CLERTC_RUN,siErr,pcMsg);
-                  }
-               } else {
-                  if (pfErr!=NULL) {
-                     fprintf(pfErr,"%s Run of command '%s' failed (Return code: %d / Reason code: %d)\n",
-                             cstime(0,acTs),psCmd[siIdx].pcKyw,CLERTC_RUN,siErr);
-                  }
-               }
+               vdCleReportCommandError(pfErr, pfMsg, "Run", psCmd[siIdx].pcKyw, CLERTC_RUN, siErr);
                if ((siScc>CLERTC_MAX) || (siScc&0x00000001)) {
                   siErr=siScc;
                } else {
@@ -4071,17 +4187,7 @@ EVALUATE:
 
          siErr=psCmd[siIdx].pfFin(pfErr,pfTrc,pvGbl,siOid,psCmd[siIdx].pvPar);
          if (siErr) {
-            if (pfMsg!=NULL && (pcMsg=pfMsg(siErr))!=NULL) {
-               if (pfErr!=NULL) {
-                  fprintf(pfErr,"%s Finish/cleanup for command '%s' failed (Return code: %d / Reason code: %d (%s))\n",
-                          cstime(0,acTs),psCmd[siIdx].pcKyw,CLERTC_FIN,siErr,pcMsg);
-               }
-            } else {
-               if (pfErr!=NULL) {
-                  fprintf(pfErr,"%s Finish/cleanup for command '%s' failed (Return code: %d / Reason code: %d)\n",
-                          cstime(0,acTs),psCmd[siIdx].pcKyw,CLERTC_FIN,siErr);
-               }
-            }
+            vdCleReportCommandError(pfErr, pfMsg, "Finish/cleanup", psCmd[siIdx].pcKyw, CLERTC_FIN, siErr);
             siErr=CLERTC_FIN;
             ERROR(ELIMIT(siErr));
          }
@@ -4092,56 +4198,7 @@ EVALUATE:
          }
          siErr=isWrn&0x00000001;
          ERROR(ELIMIT(siErr));
-      } else { /* Command not found - try default command or error */
-         if (pcDef!=NULL && *pcDef && ppArg==NULL) {
-            ppArg=malloc((argc+1)*sizeof(*ppArg));
-            if (ppArg == NULL) {
-               if (pfErr!=NULL) {
-                  fprintf(pfErr,"Memory allocation for argument list to run the default command '%s' failed\n",pcDef);
-               }
-               siErr=CLERTC_MEM;
-               ERROR(ELIMIT(siErr));
-            }
-            for (int i=argc;i>1;i--) { ppArg[i]=argv[i-1]; }
-            ppArg[0]=argv[0]; ppArg[1]=(char*)pcDef; argc++; argv=ppArg;
-            goto EVALUATE;
-         }
-         if (pfErr!=NULL) {
-            fprintf(pfErr,"Command or built-in function '%s' not supported\n",argv[1]);
-            if (argc>1 && strlen(argv[1])<siMkl && strpbrk(argv[1],"=(.")==NULL) {
-               fprintf(pfErr,"Note: Minimum abbreviation length is %d characters\n",siMkl);
-            }
-            vdPrnStaticSyntax(pfErr,psCmd,asBif,argv[0],pcDep,pcOpt,pcDpa);
-         }
-         siErr=CLERTC_CMD;
-         ERROR(ELIMIT(siErr));
-      }
-   } else if (siRes == 1) { /* Ambiguous abbreviation */
-      if (pfErr!=NULL) {
-         const char* pcStop=strpbrk(argv[1],"=(.");
-         int siInputLen=(pcStop!=NULL) ? (int)(pcStop-argv[1]) : (int)strlen(argv[1]);
-         char acInput[siInputLen+1];
-
-         memcpy(acInput,argv[1],siInputLen);
-         acInput[siInputLen]='\0';
-
-         fprintf(pfErr,"Ambiguous abbreviation '%s'. Matching commands/functions:\n",acInput);
-         /* List all matches from built-in functions */
-         for (int i=0;asBif[i].pcKyw!=NULL;i++) {
-            if (asBif[i].isBif && siInputLen>=(int)siMkl && strxcmp(isCas,acInput,asBif[i].pcKyw,siMkl,0,FALSE)==0) {
-               fprintf(pfErr,"  - %s (built-in function)\n",asBif[i].pcKyw);
-            }
-         }
-         /* List all matches from commands */
-         for (int i=0;psCmd[i].pcKyw!=NULL;i++) {
-            if (siInputLen>=(int)siMkl && strxcmp(isCas,acInput,psCmd[i].pcKyw,siMkl,0,FALSE)==0) {
-               fprintf(pfErr,"  - %s (command)\n",psCmd[i].pcKyw);
-            }
-         }
-      }
-      siErr=CLERTC_CMD;
-      ERROR(ELIMIT(siErr));
-   } else { /* Command not found (siRes != 0 and siRes != 1) - try default command or error */
+   } else { /* Command/function not found (siRes != 0 || siType == 0) - try default command or error */
       if (pcDef!=NULL && *pcDef && ppArg==NULL) {
          ppArg=malloc((argc+1)*sizeof(*ppArg));
          if (ppArg == NULL) {
