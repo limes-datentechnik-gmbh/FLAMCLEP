@@ -3481,7 +3481,7 @@ extern int siCleExecute(
    const TsClpArgument*          psEnv,
    const char*                   pcEnv)
 {
-   int                           i,siErr,siDep;
+   int                           siErr,siDep;
    int                           siType,siIdx,siRes,siMln;  /* For command/builtin matching */
    void*                         pvGbl=NULL;
    TsCnfHdl*                     psCnf=NULL;
@@ -3607,14 +3607,14 @@ extern int siCleExecute(
 
    if (pfOut!=NULL) { efprintf(pfOut,"%s Start program '%s' (Build: %s (%s %s))\n",cstime(0,acTs),pcProgram,pcBld,__DATE__,__TIME__); }
 
-   for (i=0;asBif[i].pcKyw!=NULL;i++) {
+   for (int i=0;asBif[i].pcKyw!=NULL;i++) {
       if (asBif[i].siIdx!=i) {
          if (pfErr!=NULL) { fprintf(pfErr,"Index of built-in function '%s' not valid\n",asBif[i].pcKyw); }
          ERROR(CLERTC_TAB);
       }
    }
 
-   for (i=0;psDoc[i].uiTyp;i++) {
+   for (int i=0;psDoc[i].uiTyp;i++) {
       if (psDoc[i].uiTyp==CLE_DOCTYP_PROGRAM) {
          pcPgmNum=psDoc[i].pcNum;
       }
@@ -3698,13 +3698,13 @@ extern int siCleExecute(
       }
    }
 
-   i=siCnfPutEnv(psCnf,pcOwn,pcPgm);
+   int siEncCnt=siCnfPutEnv(psCnf,pcOwn,pcPgm);
    if (pfOut!=NULL) {
-      if (i) {
-         if (i==1) {
-            fprintf(pfOut,"%s Load successfully %d environment variable using the configuration file.\n",cstime(0,acTs),i);
+      if (siEncCnt) {
+         if (siEncCnt==1) {
+            fprintf(pfOut,"%s Load successfully %d environment variable using the configuration file.\n",cstime(0,acTs),siEncCnt);
          } else {
-            fprintf(pfOut,"%s Load successfully %d environment variables using the configuration file.\n",cstime(0,acTs),i);
+            fprintf(pfOut,"%s Load successfully %d environment variables using the configuration file.\n",cstime(0,acTs),siEncCnt);
          }
       }
    }
@@ -3776,7 +3776,7 @@ extern int siCleExecute(
          } else {
             if (pfOut!=NULL) { fprintf(pfOut,"Use owner: '%s' (environment variable was already defined)\n",pcOwn); }
          }
-         for (i=2;i<argc;i++) { argv[i-1]=argv[i]; }
+         for (int i=2;i<argc;i++) { argv[i-1]=argv[i]; }
          argc--;
       }
    }
@@ -3833,19 +3833,22 @@ extern int siCleExecute(
       }
    }
 
-   for (i=0; psCmd[i].pcKyw!=NULL; i++) {
-      if (psCmd[i].psTab==NULL || psCmd[i].pvClp==NULL || psCmd[i].pvPar==NULL ||
-          psCmd[i].pfIni==NULL || psCmd[i].pfMap==NULL || psCmd[i].pfRun==NULL || psCmd[i].pfFin==NULL ||
-          psCmd[i].pcMan==NULL || psCmd[i].pcHlp==NULL || *psCmd[i].pcKyw==0 || *psCmd[i].pcMan==0 || *psCmd[i].pcHlp==0) {
-         if (pfErr!=NULL) { fprintf(pfErr,"Row %d of command table not initialized properly\n",i); }
+   {
+      int i;
+      for (i=0; psCmd[i].pcKyw!=NULL; i++) {
+         if (psCmd[i].psTab==NULL || psCmd[i].pvClp==NULL || psCmd[i].pvPar==NULL ||
+             psCmd[i].pfIni==NULL || psCmd[i].pfMap==NULL || psCmd[i].pfRun==NULL || psCmd[i].pfFin==NULL ||
+             psCmd[i].pcMan==NULL || psCmd[i].pcHlp==NULL || *psCmd[i].pcKyw==0 || *psCmd[i].pcMan==0 || *psCmd[i].pcHlp==0) {
+            if (pfErr!=NULL) { fprintf(pfErr,"Row %d of command table not initialized properly\n",i); }
+            siErr=CLERTC_TAB;
+            ERROR(ELIMIT(siErr));
+         }
+      }
+      if (i==0) {
+         if (pfErr!=NULL) { fprintf(pfErr,"Command table is empty\n"); }
          siErr=CLERTC_TAB;
          ERROR(ELIMIT(siErr));
       }
-   }
-   if (i==0) {
-      if (pfErr!=NULL) { fprintf(pfErr,"Command table is empty\n"); }
-      siErr=CLERTC_TAB;
-      ERROR(ELIMIT(siErr));
    }
 
    if (argc<2) {
@@ -4050,7 +4053,11 @@ EVALUATE:
                              cstime(0,acTs),psCmd[siIdx].pcKyw,CLERTC_RUN,siErr);
                   }
                }
-               siErr=CLERTC_RUN;
+               if ((siScc>CLERTC_MAX) || (siScc&0x00000001)) {
+                  siErr=siScc;
+               } else {
+                  siErr=CLERTC_RUN;
+               }
             }
             psCmd[siIdx].pfFin(pfErr,pfTrc,pvGbl,siOid,psCmd[siIdx].pvPar);
             ERROR(ELIMIT(siErr));
@@ -4095,7 +4102,7 @@ EVALUATE:
                siErr=CLERTC_MEM;
                ERROR(ELIMIT(siErr));
             }
-            for (i=argc;i>1;i--) { ppArg[i]=argv[i-1]; }
+            for (int i=argc;i>1;i--) { ppArg[i]=argv[i-1]; }
             ppArg[0]=argv[0]; ppArg[1]=(char*)pcDef; argc++; argv=ppArg;
             goto EVALUATE;
          }
@@ -4120,16 +4127,14 @@ EVALUATE:
 
          fprintf(pfErr,"Ambiguous abbreviation '%s'. Matching commands/functions:\n",acInput);
          /* List all matches from built-in functions */
-         for (i=0;asBif[i].pcKyw!=NULL;i++) {
-            if (asBif[i].isBif && siInputLen>=(int)siMkl &&
-                strxcmp(isCas,acInput,asBif[i].pcKyw,siMkl,0,FALSE)==0) {
+         for (int i=0;asBif[i].pcKyw!=NULL;i++) {
+            if (asBif[i].isBif && siInputLen>=(int)siMkl && strxcmp(isCas,acInput,asBif[i].pcKyw,siMkl,0,FALSE)==0) {
                fprintf(pfErr,"  - %s (built-in function)\n",asBif[i].pcKyw);
             }
          }
          /* List all matches from commands */
-         for (i=0;psCmd[i].pcKyw!=NULL;i++) {
-            if (siInputLen>=(int)siMkl &&
-                strxcmp(isCas,acInput,psCmd[i].pcKyw,siMkl,0,FALSE)==0) {
+         for (int i=0;psCmd[i].pcKyw!=NULL;i++) {
+            if (siInputLen>=(int)siMkl && strxcmp(isCas,acInput,psCmd[i].pcKyw,siMkl,0,FALSE)==0) {
                fprintf(pfErr,"  - %s (command)\n",psCmd[i].pcKyw);
             }
          }
@@ -4146,7 +4151,7 @@ EVALUATE:
             siErr=CLERTC_MEM;
             ERROR(ELIMIT(siErr));
          }
-         for (i=argc;i>1;i--) { ppArg[i]=argv[i-1]; }
+         for (int i=argc;i>1;i--) { ppArg[i]=argv[i-1]; }
          ppArg[0]=argv[0]; ppArg[1]=(char*)pcDef; argc++; argv=ppArg;
          goto EVALUATE;
       }
