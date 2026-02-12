@@ -1615,13 +1615,16 @@ static int siCleFindCommand(
    for (i=0; i<siCnt; i++) {
       int siLenKyw=(int)strlen(psKyw[i].pcKyw);
 
-      /* Input must be at least minimum length and shorter than full keyword */
-      if (siInputLen >= psKyw[i].siMinLen && siInputLen < siLenKyw) {
-         /* Check if input matches keyword prefix with minimum length requirement */
-         if (strxcmp(isCas, pcInput, psKyw[i].pcKyw, psKyw[i].siMinLen, 0, FALSE) == 0) {
+      /* Input must be at least global minimum length and shorter than full keyword */
+      if (siInputLen >= siMinLen && siInputLen < siLenKyw) {
+         /* Determine comparison length: use input length if shorter than keyword's minimum */
+         int siCmpLen = (siInputLen < psKyw[i].siMinLen) ? siInputLen : psKyw[i].siMinLen;
+
+         /* Check if input matches keyword prefix */
+         if (strxcmp(isCas, pcInput, psKyw[i].pcKyw, siCmpLen, 0, FALSE) == 0) {
             /* Verify remaining characters also match */
             int isMatch=1;
-            for (k=psKyw[i].siMinLen; k<siInputLen; k++) {
+            for (k=siCmpLen; k<siInputLen; k++) {
                int c1=isCas ? pcInput[k] : toupper((unsigned char)pcInput[k]);
                int c2=isCas ? psKyw[i].pcKyw[k] : toupper((unsigned char)psKyw[i].pcKyw[k]);
                if (c1 != c2) {
