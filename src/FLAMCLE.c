@@ -331,7 +331,7 @@ typedef struct CleBuiltinContext {
    /* Tables and flags */
    const TsCleBuiltin*           psBif;
    int                           siIdx;  /* Index of current built-in function in psBif table */
-   const void*                   psCmd;  /* TsCleCommand* - avoid forward declaration issue */
+   const TsCleCommand*           psCmd;
    int                           isCas;
    int                           isPfl;
    int                           isRpl;
@@ -342,10 +342,10 @@ typedef struct CleBuiltinContext {
    void**                        ppvHdl;
    /* Callbacks */
    void*                         pvF2S;
-   void*                         pfF2S;  /* TfF2S* */
+   TfF2S*                        pfF2S;
    void*                         pvSaf;
-   void*                         pfSaf;  /* TfSaf* */
-   void*                         pfMsg;  /* TfMsg* */
+   TfSaf*                        pfSaf;
+   TfMsg*                        pfMsg;
    /* Info strings */
    const char*                   pcLic;
    const char*                   pcVsn;
@@ -365,11 +365,11 @@ typedef struct CleBuiltinContext {
    size_t*                       pszCnf;
    int*                          psiDep;
    /* Environment */
-   const void*                   psEnv;  /* TsClpArgument* */
+   const TsClpArgument*          psEnv;  /* TsClpArgument* */
    const char*                   pcEnv;
    /* Document/property file pointers */
-   const void*                   psDoc;  /* TsCleDoc* */
-   const void*                   psOth;  /* TsCleOtherClp* */
+   const TsCleDoc*               psDoc;
+   const TsCleOtherClp*          psOth;
 } TsCleBuiltinContext;
 
 typedef struct CleDocPar {
@@ -1794,7 +1794,7 @@ static void vdCleInitBuiltinContext(
    char**                        ppcCnf,
    size_t*                       pszCnf,
    int*                          psiDep,
-   void*                         psEnv,
+   const TsClpArgument*          psEnv,
    const char*                   pcEnv,
    const void*                   psDoc,
    const void*                   psOth
@@ -1948,7 +1948,6 @@ static int siCleBuiltinErrors(TsCleBuiltinContext* psCtx)
 {
    int i;
    const char* m;
-   TfMsg* pfMsg;
 
    if (psCtx->argc == 2) {
       efprintf(psCtx->pfStd, "\n=Return/condition/exit codes of the executable\n\n");
@@ -1957,11 +1956,10 @@ static int siCleBuiltinErrors(TsCleBuiltinContext* psCtx)
          efprintf(psCtx->pfStd, "\n==Special condition codes\n\n");
          fprintm(psCtx->pfStd, psCtx->pcOwn, psCtx->pcPgm, psCtx->pcBld, psCtx->pcSccMan, 1);
       }
-      pfMsg = (TfMsg*)psCtx->pfMsg;
-      if (pfMsg != NULL) {
+      if (psCtx->pfMsg != NULL) {
          efprintf(psCtx->pfStd, "\n==Reason codes of the different commands\n\n");
          fprintm(psCtx->pfStd, psCtx->pcOwn, psCtx->pcPgm, psCtx->pcBld, MAN_CLEP_APPENDIX_REASONCODES, 1);
-         for (i = 1, m = pfMsg(i); m != NULL; i++, m = pfMsg(i)) {
+         for (i = 1, m = psCtx->pfMsg(i); m != NULL; i++, m = psCtx->pfMsg(i)) {
             if (*m) {
                fprintf(psCtx->pfStd, ":%d: %s\n", i, m);
             }
@@ -1976,11 +1974,10 @@ static int siCleBuiltinSyntax(TsCleBuiltinContext* psCtx)
 {
    int i;
    int siErr;
-   const TsCleCommand* psCmd = (const TsCleCommand*)psCtx->psCmd;
 
    if (psCtx->argc==2) {
       if (psCtx->pfOut!=NULL) { fprintf(psCtx->pfOut,"Syntax for program '%s':\n",psCtx->pcPgm); }
-      vdPrnStaticSyntax(psCtx->pfStd,psCmd,psCtx->psBif,psCtx->argv[0],psCtx->pcDep,psCtx->pcOpt,psCtx->pcDpa);
+      vdPrnStaticSyntax(psCtx->pfStd,psCtx->psCmd,psCtx->psBif,psCtx->argv[0],psCtx->pcDep,psCtx->pcOpt,psCtx->pcDpa);
       return(CLERTC_OK);
    } else if (psCtx->argc>=3) {
       if (psCtx->argc==3) {
@@ -2011,9 +2008,9 @@ static int siCleBuiltinSyntax(TsCleBuiltinContext* psCtx)
          } else {
             if (psCtx->pfErr!=NULL) {
                fprintf(psCtx->pfErr,"Syntax for built-in function 'SYNTAX' not valid\n");
-               for (i=0;psCmd[i].pcKyw!=NULL ;i++) {
-                  if (psCmd[i].siFlg) {
-                     fprintf(psCtx->pfErr,"%s %s SYNTAX %s",psCtx->pcDep,psCtx->argv[0],psCmd[i].pcKyw);
+               for (i=0;psCtx->psCmd[i].pcKyw!=NULL ;i++) {
+                  if (psCtx->psCmd[i].siFlg) {
+                     fprintf(psCtx->pfErr,"%s %s SYNTAX %s",psCtx->pcDep,psCtx->argv[0],psCtx->psCmd[i].pcKyw);
                      efprintf(psCtx->pfErr,"[.path] [DEPTH1 | DEPTH2 | ... | DEPTH9 | ALL]\n");
                   }
                }
@@ -2024,9 +2021,9 @@ static int siCleBuiltinSyntax(TsCleBuiltinContext* psCtx)
       } else {
          if (psCtx->pfErr!=NULL) {
             fprintf(psCtx->pfErr,"Syntax for built-in function 'SYNTAX' not valid\n");
-            for (i=0;psCmd[i].pcKyw!=NULL ;i++) {
-               if (psCmd[i].siFlg) {
-                  fprintf(psCtx->pfErr,"%s %s SYNTAX %s",psCtx->pcDep,psCtx->argv[0],psCmd[i].pcKyw);
+            for (i=0;psCtx->psCmd[i].pcKyw!=NULL ;i++) {
+               if (psCtx->psCmd[i].siFlg) {
+                  fprintf(psCtx->pfErr,"%s %s SYNTAX %s",psCtx->pcDep,psCtx->argv[0],psCtx->psCmd[i].pcKyw);
                   efprintf(psCtx->pfErr,"[.path] [DEPTH1 | DEPTH2 | ... | DEPTH9 | ALL]\n");
                }
             }
@@ -2034,15 +2031,15 @@ static int siCleBuiltinSyntax(TsCleBuiltinContext* psCtx)
          siErr=CLERTC_CMD;
          return(siErr);
       }
-      for (i=0;psCmd[i].pcKyw!=NULL;i++) {
-         if (strxcmp(psCtx->isCas,psCtx->argv[2],psCmd[i].pcKyw,strlen(psCmd[i].pcKyw),'.',TRUE)==0) {
-            siErr=siCleCommandInit(psCtx->pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,psCtx->pcOwn,psCtx->pcPgm,psCtx->pcBld,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,psCmd[i].piOid,psCmd[i].psTab,
+      for (i=0;psCtx->psCmd[i].pcKyw!=NULL;i++) {
+         if (strxcmp(psCtx->isCas,psCtx->argv[2],psCtx->psCmd[i].pcKyw,strlen(psCtx->psCmd[i].pcKyw),'.',TRUE)==0) {
+            siErr=siCleCommandInit(psCtx->pvGbl,psCtx->psCmd[i].pfIni,psCtx->psCmd[i].pvClp,psCtx->pcOwn,psCtx->pcPgm,psCtx->pcBld,psCtx->psCmd[i].pcKyw,psCtx->psCmd[i].pcMan,psCtx->psCmd[i].pcHlp,psCtx->psCmd[i].piOid,psCtx->psCmd[i].psTab,
                                    psCtx->isCas,psCtx->isPfl,psCtx->isRpl,psCtx->siMkl,psCtx->pfStd,psCtx->pfErr,psCtx->pfTrc,psCtx->pcDep,psCtx->pcOpt,psCtx->pcEnt,psCtx->psCnf,psCtx->ppvHdl,
-                                   (TfMsg*)psCtx->pfMsg,psCtx->pvF2S,(TfF2S*)psCtx->pfF2S,psCtx->pvSaf,(TfSaf*)psCtx->pfSaf,NULL);
+                                   psCtx->pfMsg,psCtx->pvF2S,psCtx->pfF2S,psCtx->pvSaf,psCtx->pfSaf,NULL);
             if (siErr) {
                return(siErr);
             }
-            if (strlen(psCtx->argv[2])==strlen(psCmd[i].pcKyw)) {
+            if (strlen(psCtx->argv[2])==strlen(psCtx->psCmd[i].pcKyw)) {
                if (psCtx->pfOut!=NULL) { fprintf(psCtx->pfOut,"Syntax for command '%s':\n",psCtx->argv[2]); }
             } else {
                if (psCtx->pfOut!=NULL) { fprintf(psCtx->pfOut,"Syntax for argument '%s':\n",psCtx->argv[2]); }
@@ -2052,12 +2049,12 @@ static int siCleBuiltinSyntax(TsCleBuiltinContext* psCtx)
          }
       }
       if (psCtx->pcDef!=NULL && *(psCtx->pcDef)) {
-         for (i=0;psCmd[i].pcKyw!=NULL;i++) {
-            if (strxcmp(psCtx->isCas,psCtx->pcDef,psCmd[i].pcKyw,0,0,FALSE)==0) {
+         for (i=0;psCtx->psCmd[i].pcKyw!=NULL;i++) {
+            if (strxcmp(psCtx->isCas,psCtx->pcDef,psCtx->psCmd[i].pcKyw,0,0,FALSE)==0) {
                char acPat[strlen(psCtx->pcDef)+strlen(psCtx->argv[2])+2];
-               siErr=siCleCommandInit(psCtx->pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,psCtx->pcOwn,psCtx->pcPgm,psCtx->pcBld,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,psCmd[i].piOid,psCmd[i].psTab,
+               siErr=siCleCommandInit(psCtx->pvGbl,psCtx->psCmd[i].pfIni,psCtx->psCmd[i].pvClp,psCtx->pcOwn,psCtx->pcPgm,psCtx->pcBld,psCtx->psCmd[i].pcKyw,psCtx->psCmd[i].pcMan,psCtx->psCmd[i].pcHlp,psCtx->psCmd[i].piOid,psCtx->psCmd[i].psTab,
                                       psCtx->isCas,psCtx->isPfl,psCtx->isRpl,psCtx->siMkl,psCtx->pfStd,psCtx->pfErr,psCtx->pfTrc,psCtx->pcDep,psCtx->pcOpt,psCtx->pcEnt,psCtx->psCnf,psCtx->ppvHdl,
-                                      (TfMsg*)psCtx->pfMsg,psCtx->pvF2S,(TfF2S*)psCtx->pfF2S,psCtx->pvSaf,(TfSaf*)psCtx->pfSaf,NULL);
+                                      psCtx->pfMsg,psCtx->pvF2S,psCtx->pfF2S,psCtx->pvSaf,psCtx->pfSaf,NULL);
                if (siErr) {
                   return(siErr);
                }
@@ -2071,9 +2068,9 @@ static int siCleBuiltinSyntax(TsCleBuiltinContext* psCtx)
    }
    if (psCtx->pfErr!=NULL) {
       fprintf(psCtx->pfErr,"Syntax for built-in function 'SYNTAX' not valid\n");
-      for (i=0;psCmd[i].pcKyw!=NULL ;i++) {
-         if (psCmd[i].siFlg) {
-            fprintf(psCtx->pfErr,"%s %s SYNTAX %s\n",psCtx->pcDep,psCtx->argv[0],psCmd[i].pcKyw);
+      for (i=0;psCtx->psCmd[i].pcKyw!=NULL ;i++) {
+         if (psCtx->psCmd[i].siFlg) {
+            fprintf(psCtx->pfErr,"%s %s SYNTAX %s\n",psCtx->pcDep,psCtx->argv[0],psCtx->psCmd[i].pcKyw);
             efprintf(psCtx->pfErr,"[.path] [DEPTH1 | DEPTH2 | ... | DEPTH9 | ALL]\n");
          }
       }
@@ -2086,20 +2083,18 @@ static int siCleBuiltinHelp(TsCleBuiltinContext* psCtx)
 {
    int i;
    int siErr;
-   const TsCleCommand* psCmd = (const TsCleCommand*)psCtx->psCmd;
-   const TsCleDoc* psDoc = (const TsCleDoc*)psCtx->psDoc;
    const char* pcPgmMan=NULL;
 
    /* Find program manual */
-   for (i=0;psDoc[i].pcMan!=NULL;i++) {
-      if (psDoc[i].uiTyp==CLE_DOCTYP_PROGRAM) {
-         pcPgmMan=psDoc[i].pcMan;
+   for (i=0;psCtx->psDoc[i].pcMan!=NULL;i++) {
+      if (psCtx->psDoc[i].uiTyp==CLE_DOCTYP_PROGRAM) {
+         pcPgmMan=psCtx->psDoc[i].pcMan;
       }
    }
 
    if (psCtx->argc==2) {
       if (psCtx->pfOut!=NULL) { fprintf(psCtx->pfOut,"Help for program '%s':\n",psCtx->pcPgm); }
-      vdPrnStaticHelp(psCtx->pfStd,psCmd,psCtx->psBif,psCtx->argv[0],psCtx->pcDep);
+      vdPrnStaticHelp(psCtx->pfStd,psCtx->psCmd,psCtx->psBif,psCtx->argv[0],psCtx->pcDep);
       return(CLERTC_OK);
    } else if (psCtx->argc>=3) {
       if (psCtx->argc==3) {
@@ -2145,9 +2140,9 @@ static int siCleBuiltinHelp(TsCleBuiltinContext* psCtx)
          } else {
             if (psCtx->pfErr!=NULL) {
                fprintf(psCtx->pfErr,"Syntax for built-in function 'HELP' not valid\n");
-               for (i=0;psCmd[i].pcKyw!=NULL ;i++) {
-                  if (psCmd[i].siFlg) {
-                     fprintf(psCtx->pfErr,"%s %s HELP %s",psCtx->pcDep,psCtx->argv[0],psCmd[i].pcKyw);
+               for (i=0;psCtx->psCmd[i].pcKyw!=NULL ;i++) {
+                  if (psCtx->psCmd[i].siFlg) {
+                     fprintf(psCtx->pfErr,"%s %s HELP %s",psCtx->pcDep,psCtx->argv[0],psCtx->psCmd[i].pcKyw);
                      efprintf(psCtx->pfErr,"[.path] [DEPTH1 | DEPTH2 | ... | DEPTH9 | ALL] [MAN]\n");
                   }
                }
@@ -2158,9 +2153,9 @@ static int siCleBuiltinHelp(TsCleBuiltinContext* psCtx)
       } else {
          if (psCtx->pfErr!=NULL) {
             fprintf(psCtx->pfErr,"Syntax for built-in function 'HELP' not valid\n");
-            for (i=0;psCmd[i].pcKyw!=NULL ;i++) {
-               if (psCmd[i].siFlg) {
-                  fprintf(psCtx->pfErr,"%s %s HELP %s",psCtx->pcDep,psCtx->argv[0],psCmd[i].pcKyw);
+            for (i=0;psCtx->psCmd[i].pcKyw!=NULL ;i++) {
+               if (psCtx->psCmd[i].siFlg) {
+                  fprintf(psCtx->pfErr,"%s %s HELP %s",psCtx->pcDep,psCtx->argv[0],psCtx->psCmd[i].pcKyw);
                   efprintf(psCtx->pfErr,"[.path] [DEPTH1 | DEPTH2 | ... | DEPTH9 | ALL] [MAN]\n");
                }
             }
@@ -2168,16 +2163,16 @@ static int siCleBuiltinHelp(TsCleBuiltinContext* psCtx)
          siErr=CLERTC_CMD;
          return(siErr);
       }
-      for (i=0;psCmd[i].pcKyw!=NULL;i++) {
-         if (strxcmp(psCtx->isCas,psCtx->argv[2],psCmd[i].pcKyw,strlen(psCmd[i].pcKyw),'.',TRUE)==0) {
-            siErr=siCleCommandInit(psCtx->pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,psCtx->pcOwn,psCtx->pcPgm,psCtx->pcBld,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,psCmd[i].piOid,psCmd[i].psTab,
+      for (i=0;psCtx->psCmd[i].pcKyw!=NULL;i++) {
+         if (strxcmp(psCtx->isCas,psCtx->argv[2],psCtx->psCmd[i].pcKyw,strlen(psCtx->psCmd[i].pcKyw),'.',TRUE)==0) {
+            siErr=siCleCommandInit(psCtx->pvGbl,psCtx->psCmd[i].pfIni,psCtx->psCmd[i].pvClp,psCtx->pcOwn,psCtx->pcPgm,psCtx->pcBld,psCtx->psCmd[i].pcKyw,psCtx->psCmd[i].pcMan,psCtx->psCmd[i].pcHlp,psCtx->psCmd[i].piOid,psCtx->psCmd[i].psTab,
                                    psCtx->isCas,psCtx->isPfl,psCtx->isRpl,psCtx->siMkl,psCtx->pfStd,psCtx->pfErr,psCtx->pfTrc,psCtx->pcDep,psCtx->pcOpt,psCtx->pcEnt,psCtx->psCnf,psCtx->ppvHdl,
-                                   (TfMsg*)psCtx->pfMsg,psCtx->pvF2S,(TfF2S*)psCtx->pfF2S,psCtx->pvSaf,(TfSaf*)psCtx->pfSaf,NULL);
+                                   psCtx->pfMsg,psCtx->pvF2S,psCtx->pfF2S,psCtx->pvSaf,psCtx->pfSaf,NULL);
             if (siErr) {
                return(siErr);
             }
-            if (strlen(psCtx->argv[2])==strlen(psCmd[i].pcKyw)) {
-               if (psCtx->pfOut!=NULL) { fprintf(psCtx->pfOut,"Help for command '%s': %s\n",psCtx->argv[2],psCmd[i].pcHlp); }
+            if (strlen(psCtx->argv[2])==strlen(psCtx->psCmd[i].pcKyw)) {
+               if (psCtx->pfOut!=NULL) { fprintf(psCtx->pfOut,"Help for command '%s': %s\n",psCtx->argv[2],psCtx->psCmd[i].pcHlp); }
             } else {
                if (psCtx->pfOut!=NULL) { fprintf(psCtx->pfOut,"Help for argument '%s': %s\n",psCtx->argv[2],pcClpInfo(*(psCtx->ppvHdl),psCtx->argv[2])); }
             }
@@ -2191,16 +2186,16 @@ static int siCleBuiltinHelp(TsCleBuiltinContext* psCtx)
          }
       }
       if (psCtx->pcDef!=NULL && *(psCtx->pcDef)) {
-         for (i=0;psCmd[i].pcKyw!=NULL;i++) {
-            if (strxcmp(psCtx->isCas,psCtx->pcDef,psCmd[i].pcKyw,0,0,FALSE)==0) {
-               char acPat[strlen(psCmd[i].pcKyw)+strlen(psCtx->argv[2])+2];
-               siErr=siCleCommandInit(psCtx->pvGbl,psCmd[i].pfIni,psCmd[i].pvClp,psCtx->pcOwn,psCtx->pcPgm,psCtx->pcBld,psCmd[i].pcKyw,psCmd[i].pcMan,psCmd[i].pcHlp,psCmd[i].piOid,psCmd[i].psTab,
+         for (i=0;psCtx->psCmd[i].pcKyw!=NULL;i++) {
+            if (strxcmp(psCtx->isCas,psCtx->pcDef,psCtx->psCmd[i].pcKyw,0,0,FALSE)==0) {
+               char acPat[strlen(psCtx->psCmd[i].pcKyw)+strlen(psCtx->argv[2])+2];
+               siErr=siCleCommandInit(psCtx->pvGbl,psCtx->psCmd[i].pfIni,psCtx->psCmd[i].pvClp,psCtx->pcOwn,psCtx->pcPgm,psCtx->pcBld,psCtx->psCmd[i].pcKyw,psCtx->psCmd[i].pcMan,psCtx->psCmd[i].pcHlp,psCtx->psCmd[i].piOid,psCtx->psCmd[i].psTab,
                                       psCtx->isCas,psCtx->isPfl,psCtx->isRpl,psCtx->siMkl,psCtx->pfStd,psCtx->pfErr,psCtx->pfTrc,psCtx->pcDep,psCtx->pcOpt,psCtx->pcEnt,psCtx->psCnf,psCtx->ppvHdl,
-                                      (TfMsg*)psCtx->pfMsg,psCtx->pvF2S,(TfF2S*)psCtx->pfF2S,psCtx->pvSaf,(TfSaf*)psCtx->pfSaf,NULL);
+                                      psCtx->pfMsg,psCtx->pvF2S,psCtx->pfF2S,psCtx->pvSaf,psCtx->pfSaf,NULL);
                if (siErr) {
                   return(siErr);
                }
-               snprintf(acPat,sizeof(acPat),"%s.%s",psCmd[i].pcKyw,psCtx->argv[2]);
+               snprintf(acPat,sizeof(acPat),"%s.%s",psCtx->psCmd[i].pcKyw,psCtx->argv[2]);
                if (psCtx->pfOut!=NULL) { fprintf(psCtx->pfOut,"Help for argument '%s': %s\n",acPat,pcClpInfo(*(psCtx->ppvHdl),acPat)); }
                vdPrnCommandHelp(*(psCtx->ppvHdl),acPat,*(psCtx->psiDep),*(psCtx->psiDep)>9,TRUE);
                if (*(psCtx->psiDep)==0) {
@@ -2215,9 +2210,9 @@ static int siCleBuiltinHelp(TsCleBuiltinContext* psCtx)
    }
    if (psCtx->pfErr!=NULL) {
       fprintf(psCtx->pfErr,"Syntax for built-in function 'HELP' not valid\n");
-      for (i=0;psCmd[i].pcKyw!=NULL ;i++) {
-         if (psCmd[i].siFlg) {
-            fprintf(psCtx->pfErr,"%s %s HELP %s\n",psCtx->pcDep,psCtx->argv[0],psCmd[i].pcKyw);
+      for (i=0;psCtx->psCmd[i].pcKyw!=NULL ;i++) {
+         if (psCtx->psCmd[i].siFlg) {
+            fprintf(psCtx->pfErr,"%s %s HELP %s\n",psCtx->pcDep,psCtx->argv[0],psCtx->psCmd[i].pcKyw);
             efprintf(psCtx->pfErr,"[.path] [DEPTH1 | DEPTH2 | ... | DEPTH9 | ALL] [MAN]\n");
          }
       }
@@ -2227,7 +2222,6 @@ static int siCleBuiltinHelp(TsCleBuiltinContext* psCtx)
 }
 static int siCleBuiltinManpage(TsCleBuiltinContext* psCtx)
 {
-   const TsCleCommand* psCmd = (const TsCleCommand*)psCtx->psCmd;
    char*    pcFil = NULL;
    size_t   szFil = 0;
    FILE*    pfDoc = NULL;
@@ -2242,9 +2236,9 @@ static int siCleBuiltinManpage(TsCleBuiltinContext* psCtx)
          if (psCtx->pfOut != NULL) {
             fprintf(psCtx->pfOut, "Manual page for program '%s':\n\n", psCtx->pcPgm);
          }
-         vdCleManProgram(psCtx->pfStd, psCmd, psCtx->psBif, psCtx->pcOwn, psCtx->pcPgm,
-                        psCtx->pcBld, psCtx->pcHlp, psCtx->pcPgmMan, psCtx->pcDep,
-                        psCtx->pcOpt, psCtx->pcDpa, psCtx->pcPgmNum, FALSE, TRUE);
+         vdCleManProgram(psCtx->pfStd, psCtx->psCmd, psCtx->psBif, psCtx->pcOwn, psCtx->pcPgm,
+                         psCtx->pcBld, psCtx->pcHlp, psCtx->pcPgmMan, psCtx->pcDep,
+                         psCtx->pcOpt, psCtx->pcDpa, psCtx->pcPgmNum, FALSE, TRUE);
          return(CLERTC_OK);
       } else {
          if (psCtx->pfErr != NULL) {
@@ -2307,7 +2301,7 @@ static int siCleBuiltinManpage(TsCleBuiltinContext* psCtx)
             if (isMan == FALSE && psCtx->pfOut != NULL) {
                fprintf(psCtx->pfOut, "Manual page for program '%s':\n\n", psCtx->pcPgm);
             }
-            vdCleManProgram(pfDoc, psCmd, psCtx->psBif, psCtx->pcOwn, psCtx->pcPgm,
+            vdCleManProgram(pfDoc, psCtx->psCmd, psCtx->psBif, psCtx->pcOwn, psCtx->pcPgm,
                            psCtx->pcBld, psCtx->pcHlp, psCtx->pcPgmMan, psCtx->pcDep,
                            psCtx->pcOpt, psCtx->pcDpa, psCtx->pcPgmNum, isMan, TRUE);
             if (isMan == TRUE && psCtx->pfOut != NULL) {
@@ -2352,18 +2346,18 @@ static int siCleBuiltinManpage(TsCleBuiltinContext* psCtx)
          }
       }
 
-      for (i = 0; psCmd[i].pcKyw != NULL; i++) {
+      for (i = 0; psCtx->psCmd[i].pcKyw != NULL; i++) {
          if (isAll) {
-            if (psCmd[i].siFlg) {
-               pcCmd = psCmd[i].pcKyw;
+            if (psCtx->psCmd[i].siFlg) {
+               pcCmd = psCtx->psCmd[i].pcKyw;
             } else {
                pcCmd = "";
             }
          }
-         if (strxcmp(psCtx->isCas, pcCmd, psCmd[i].pcKyw, strlen(psCmd[i].pcKyw), '.', TRUE) == 0) {
-            siErr = siCleCommandInit(psCtx->pvGbl, psCmd[i].pfIni, psCmd[i].pvClp, psCtx->pcOwn,
-                                    psCtx->pcPgm, psCtx->pcBld, psCmd[i].pcKyw, psCmd[i].pcMan,
-                                    psCmd[i].pcHlp, psCmd[i].piOid, psCmd[i].psTab,
+         if (strxcmp(psCtx->isCas, pcCmd, psCtx->psCmd[i].pcKyw, strlen(psCtx->psCmd[i].pcKyw), '.', TRUE) == 0) {
+            siErr = siCleCommandInit(psCtx->pvGbl, psCtx->psCmd[i].pfIni, psCtx->psCmd[i].pvClp, psCtx->pcOwn,
+                                    psCtx->pcPgm, psCtx->pcBld, psCtx->psCmd[i].pcKyw, psCtx->psCmd[i].pcMan,
+                                    psCtx->psCmd[i].pcHlp, psCtx->psCmd[i].piOid, psCtx->psCmd[i].psTab,
                                     psCtx->isCas, psCtx->isPfl, psCtx->isRpl, psCtx->siMkl,
                                     psCtx->pfStd, psCtx->pfErr, psCtx->pfTrc, psCtx->pcDep,
                                     psCtx->pcOpt, psCtx->pcEnt, psCtx->psCnf, &pvHdl,
@@ -2375,7 +2369,7 @@ static int siCleBuiltinManpage(TsCleBuiltinContext* psCtx)
                return(siErr);
             }
             if (isMan == FALSE) {
-               if (strlen(pcCmd) == strlen(psCmd[i].pcKyw)) {
+               if (strlen(pcCmd) == strlen(psCtx->psCmd[i].pcKyw)) {
                   if (psCtx->pfOut != NULL) {
                      fprintf(psCtx->pfOut, "Manual page for command '%s':\n\n", pcCmd);
                   }
@@ -2389,7 +2383,7 @@ static int siCleBuiltinManpage(TsCleBuiltinContext* psCtx)
             vdClpClose(pvHdl, CLPCLS_MTD_ALL);
             pvHdl = NULL;
             if (isMan == TRUE) {
-               if (strlen(pcCmd) == strlen(psCmd[i].pcKyw)) {
+               if (strlen(pcCmd) == strlen(psCtx->psCmd[i].pcKyw)) {
                   if (psCtx->pfOut != NULL) {
                      fprintf(psCtx->pfOut, "Manual page for command '%s' successfully written to file (%s)\n",
                             pcCmd, pcFil);
@@ -2416,12 +2410,12 @@ static int siCleBuiltinManpage(TsCleBuiltinContext* psCtx)
       }
 
       if (psCtx->pcDef != NULL && *psCtx->pcDef) {
-         for (i = 0; psCmd[i].pcKyw != NULL; i++) {
-            if (strxcmp(psCtx->isCas, psCtx->pcDef, psCmd[i].pcKyw, 0, 0, FALSE) == 0) {
+         for (i = 0; psCtx->psCmd[i].pcKyw != NULL; i++) {
+            if (strxcmp(psCtx->isCas, psCtx->pcDef, psCtx->psCmd[i].pcKyw, 0, 0, FALSE) == 0) {
                char acPat[strlen(psCtx->pcDef) + strlen(pcCmd) + 2];
-               siErr = siCleCommandInit(psCtx->pvGbl, psCmd[i].pfIni, psCmd[i].pvClp, psCtx->pcOwn,
-                                       psCtx->pcPgm, psCtx->pcBld, psCmd[i].pcKyw, psCmd[i].pcMan,
-                                       psCmd[i].pcHlp, psCmd[i].piOid, psCmd[i].psTab,
+               siErr = siCleCommandInit(psCtx->pvGbl, psCtx->psCmd[i].pfIni, psCtx->psCmd[i].pvClp, psCtx->pcOwn,
+                                       psCtx->pcPgm, psCtx->pcBld, psCtx->psCmd[i].pcKyw, psCtx->psCmd[i].pcMan,
+                                       psCtx->psCmd[i].pcHlp, psCtx->psCmd[i].piOid, psCtx->psCmd[i].psTab,
                                        psCtx->isCas, psCtx->isPfl, psCtx->isRpl, psCtx->siMkl,
                                        psCtx->pfStd, psCtx->pfErr, psCtx->pfTrc, psCtx->pcDep,
                                        psCtx->pcOpt, psCtx->pcEnt, psCtx->psCnf, &pvHdl,
@@ -2474,7 +2468,7 @@ static int siCleBuiltinManpage(TsCleBuiltinContext* psCtx)
       isManFile = TRUE;
 
       if (psCtx->pcPgmMan != NULL && *psCtx->pcPgmMan) {
-         vdCleManProgram(pfDoc, psCmd, psCtx->psBif, psCtx->pcOwn, psCtx->pcPgm,
+         vdCleManProgram(pfDoc, psCtx->psCmd, psCtx->psBif, psCtx->pcOwn, psCtx->pcPgm,
                         psCtx->pcBld, psCtx->pcHlp, psCtx->pcPgmMan, psCtx->pcDep,
                         psCtx->pcOpt, psCtx->pcDpa, psCtx->pcPgmNum, isMan, TRUE);
          if (psCtx->pfOut != NULL) {
@@ -2498,9 +2492,9 @@ static int siCleBuiltinManpage(TsCleBuiltinContext* psCtx)
 
    if (psCtx->pfErr != NULL) {
       fprintf(psCtx->pfErr, "Syntax for built-in function 'MANPAGE' not valid\n");
-      for (i = 0; psCmd[i].pcKyw != NULL; i++) {
-         if (psCmd[i].siFlg) {
-            fprintf(psCtx->pfErr, "%s %s MANPAGE %s", psCtx->pcDep, psCtx->argv[0], psCmd[i].pcKyw);
+      for (i = 0; psCtx->psCmd[i].pcKyw != NULL; i++) {
+         if (psCtx->psCmd[i].siFlg) {
+            fprintf(psCtx->pfErr, "%s %s MANPAGE %s", psCtx->pcDep, psCtx->argv[0], psCtx->psCmd[i].pcKyw);
             efprintf(psCtx->pfErr, "[.path]\n");
          }
       }
@@ -2514,26 +2508,13 @@ static int siCleBuiltinGendocu(TsCleBuiltinContext* psCtx)
 {
    int i;
    int siErr;
-   const TsCleCommand* psCmd;
    const char* pcCmd = NULL;
    const char* pcSgn = NULL;
    int isNbr = TRUE;
    int isDep = TRUE;
    char* pcFil;
    FILE* pfDoc;
-   TfF2S* pfF2S;
-   TfSaf* pfSaf;
-   const TsCleDoc* psDoc;
-   const TsCleOtherClp* psOth;
-   const TsClpArgument* psEnvTab;
    TsCleDocPar stDocPar;
-
-   psCmd = (const TsCleCommand*)psCtx->psCmd;
-   pfF2S = (TfF2S*)psCtx->pfF2S;
-   pfSaf = (TfSaf*)psCtx->pfSaf;
-   psDoc = (const TsCleDoc*)psCtx->psDoc;
-   psOth = (const TsCleOtherClp*)psCtx->psOth;
-   psEnvTab = (const TsClpArgument*)psCtx->psEnv;
 
    if (psCtx->argc == 3 || psCtx->argc == 4 || psCtx->argc == 5) {
       if (psCtx->argc == 4) {
@@ -2546,9 +2527,9 @@ static int siCleBuiltinGendocu(TsCleBuiltinContext* psCtx)
          } else {
             if (psCtx->pfErr != NULL) {
                fprintf(psCtx->pfErr, "Syntax for built-in function 'GENDOCU' not valid\n");
-               for (i = 0; psCmd[i].pcKyw != NULL; i++) {
-                  if (psCmd[i].siFlg) {
-                     efprintf(psCtx->pfErr, "%s %s GENDOCU %s[.path]=filename [NONBR][SHORT]\n", psCtx->pcDep, psCtx->argv[0], psCmd[i].pcKyw);
+               for (i = 0; psCtx->psCmd[i].pcKyw != NULL; i++) {
+                  if (psCtx->psCmd[i].siFlg) {
+                     efprintf(psCtx->pfErr, "%s %s GENDOCU %s[.path]=filename [NONBR][SHORT]\n", psCtx->pcDep, psCtx->argv[0], psCtx->psCmd[i].pcKyw);
                   }
                }
                efprintf(psCtx->pfErr, "%s %s GENDOCU filename [NONBR][SHORT]\n", psCtx->pcDep, psCtx->argv[0]);
@@ -2569,9 +2550,9 @@ static int siCleBuiltinGendocu(TsCleBuiltinContext* psCtx)
          } else {
             if (psCtx->pfErr != NULL) {
                fprintf(psCtx->pfErr, "Syntax for built-in function 'GENDOCU' not valid\n");
-               for (i = 0; psCmd[i].pcKyw != NULL; i++) {
-                  if (psCmd[i].siFlg) {
-                     efprintf(psCtx->pfErr, "%s %s GENDOCU %s[.path]=filename [NONBR][SHORT]\n", psCtx->pcDep, psCtx->argv[0], psCmd[i].pcKyw);
+               for (i = 0; psCtx->psCmd[i].pcKyw != NULL; i++) {
+                  if (psCtx->psCmd[i].siFlg) {
+                     efprintf(psCtx->pfErr, "%s %s GENDOCU %s[.path]=filename [NONBR][SHORT]\n", psCtx->pcDep, psCtx->argv[0], psCtx->psCmd[i].pcKyw);
                   }
                }
                efprintf(psCtx->pfErr, "%s %s GENDOCU filename [NONBR][SHORT]\n", psCtx->pcDep, psCtx->argv[0]);
@@ -2604,12 +2585,12 @@ static int siCleBuiltinGendocu(TsCleBuiltinContext* psCtx)
          return(CLERTC_SYS);
       }
       if (pcCmd != NULL) {
-         for (i = 0; psCmd[i].pcKyw != NULL; i++) {
-            if (strxcmp(psCtx->isCas, pcCmd, psCmd[i].pcKyw, strlen(psCmd[i].pcKyw), '.', TRUE) == 0) {
+         for (i = 0; psCtx->psCmd[i].pcKyw != NULL; i++) {
+            if (strxcmp(psCtx->isCas, pcCmd, psCtx->psCmd[i].pcKyw, strlen(psCtx->psCmd[i].pcKyw), '.', TRUE) == 0) {
                char acNum[64];
-               siErr = siCleCommandInit(psCtx->pvGbl, psCmd[i].pfIni, psCmd[i].pvClp, psCtx->pcOwn, psCtx->pcPgm, psCtx->pcBld, psCmd[i].pcKyw, psCmd[i].pcMan, psCmd[i].pcHlp, psCmd[i].piOid, psCmd[i].psTab,
-                                        psCtx->isCas, psCtx->isPfl, psCtx->isRpl, psCtx->siMkl, psCtx->pfStd, psCtx->pfErr, psCtx->pfTrc, psCtx->pcDep, psCtx->pcOpt, psCtx->pcEnt, psCtx->psCnf, psCtx->ppvHdl,
-                                        (TfMsg*)psCtx->pfMsg, psCtx->pvF2S, pfF2S, psCtx->pvSaf, pfSaf, NULL);
+               siErr = siCleCommandInit(psCtx->pvGbl, psCtx->psCmd[i].pfIni, psCtx->psCmd[i].pvClp, psCtx->pcOwn, psCtx->pcPgm, psCtx->pcBld, psCtx->psCmd[i].pcKyw, psCtx->psCmd[i].pcMan, psCtx->psCmd[i].pcHlp,
+                     psCtx->psCmd[i].piOid, psCtx->psCmd[i].psTab,psCtx->isCas, psCtx->isPfl, psCtx->isRpl, psCtx->siMkl, psCtx->pfStd, psCtx->pfErr, psCtx->pfTrc, psCtx->pcDep, psCtx->pcOpt, psCtx->pcEnt, psCtx->psCnf, psCtx->ppvHdl,
+                     psCtx->pfMsg, psCtx->pvF2S, psCtx->pfF2S, psCtx->pvSaf, psCtx->pfSaf, NULL);
                if (siErr) {
                   fclose_unchecked(pfDoc);
                   SAFE_FREE(pcFil);
@@ -2625,7 +2606,7 @@ static int siCleBuiltinGendocu(TsCleBuiltinContext* psCtx)
                   SAFE_FREE(pcFil);
                   return(CLERTC_SYN);
                } else {
-                  if (strlen(pcCmd) == strlen(psCmd[i].pcKyw)) {
+                  if (strlen(pcCmd) == strlen(psCtx->psCmd[i].pcKyw)) {
                      if (psCtx->pfOut != NULL) {
                         fprintf(psCtx->pfOut, "Documentation for command '%s' successfully created\n", pcCmd);
                      }
@@ -2641,13 +2622,14 @@ static int siCleBuiltinGendocu(TsCleBuiltinContext* psCtx)
             }
          }
          if (psCtx->pcDef != NULL && *(psCtx->pcDef)) {
-            for (i = 0; psCmd[i].pcKyw != NULL; i++) {
-               if (strxcmp(psCtx->isCas, psCtx->pcDef, psCmd[i].pcKyw, 0, 0, FALSE) == 0) {
+            for (i = 0; psCtx->psCmd[i].pcKyw != NULL; i++) {
+               if (strxcmp(psCtx->isCas, psCtx->pcDef, psCtx->psCmd[i].pcKyw, 0, 0, FALSE) == 0) {
                   char acNum[64];
                   char acPat[strlen(psCtx->pcDef) + strlen(pcCmd) + 2];
-                  siErr = siCleCommandInit(psCtx->pvGbl, psCmd[i].pfIni, psCmd[i].pvClp, psCtx->pcOwn, psCtx->pcPgm, psCtx->pcBld, psCmd[i].pcKyw, psCmd[i].pcMan, psCmd[i].pcHlp, psCmd[i].piOid, psCmd[i].psTab,
-                                           psCtx->isCas, psCtx->isPfl, psCtx->isRpl, psCtx->siMkl, psCtx->pfStd, psCtx->pfErr, psCtx->pfTrc, psCtx->pcDep, psCtx->pcOpt, psCtx->pcEnt, psCtx->psCnf, psCtx->ppvHdl,
-                                           (TfMsg*)psCtx->pfMsg, psCtx->pvF2S, pfF2S, psCtx->pvSaf, pfSaf, NULL);
+                  siErr = siCleCommandInit(psCtx->pvGbl, psCtx->psCmd[i].pfIni, psCtx->psCmd[i].pvClp, psCtx->pcOwn, psCtx->pcPgm, psCtx->pcBld,
+                        psCtx->psCmd[i].pcKyw, psCtx->psCmd[i].pcMan, psCtx->psCmd[i].pcHlp, psCtx->psCmd[i].piOid, psCtx->psCmd[i].psTab,
+                        psCtx->isCas, psCtx->isPfl, psCtx->isRpl, psCtx->siMkl, psCtx->pfStd, psCtx->pfErr, psCtx->pfTrc, psCtx->pcDep, psCtx->pcOpt,
+                        psCtx->pcEnt, psCtx->psCnf, psCtx->ppvHdl, psCtx->pfMsg, psCtx->pvF2S, psCtx->pfF2S, psCtx->pvSaf, psCtx->pfSaf, NULL);
                   if (siErr) {
                      fclose_unchecked(pfDoc);
                      SAFE_FREE(pcFil);
@@ -2680,12 +2662,12 @@ static int siCleBuiltinGendocu(TsCleBuiltinContext* psCtx)
          stDocPar.isDep = isDep; stDocPar.isCas = psCtx->isCas; stDocPar.isPfl = psCtx->isPfl; stDocPar.isRpl = psCtx->isRpl;
          stDocPar.pcAbo = psCtx->pcAbo; stDocPar.pcDep = psCtx->pcDep; stDocPar.pcDpa = psCtx->pcDpa; stDocPar.pcEnt = psCtx->pcEnt;
          stDocPar.pcHlp = psCtx->pcHlp; stDocPar.pcOpt = psCtx->pcOpt; stDocPar.pcOwn = psCtx->pcOwn; stDocPar.pcPgm = psCtx->pcPgm;
-         stDocPar.pcBld = psCtx->pcBld; stDocPar.pcVsn = psCtx->pcVsn; stDocPar.pfMsg = (TfMsg*)psCtx->pfMsg; stDocPar.pvCnf = psCtx->psCnf;
-         stDocPar.siMkl = psCtx->siMkl; stDocPar.psBif = psCtx->psBif; stDocPar.psCmd = psCmd; stDocPar.psOth = psOth;
-         stDocPar.pvF2S = psCtx->pvF2S; stDocPar.pfF2S = pfF2S; stDocPar.pvSaf = psCtx->pvSaf; stDocPar.pfSaf = pfSaf;
+         stDocPar.pcBld = psCtx->pcBld; stDocPar.pcVsn = psCtx->pcVsn; stDocPar.pfMsg = psCtx->pfMsg; stDocPar.pvCnf = psCtx->psCnf;
+         stDocPar.siMkl = psCtx->siMkl; stDocPar.psBif = psCtx->psBif; stDocPar.psCmd = psCtx->psCmd; stDocPar.psOth = psCtx->psOth;
+         stDocPar.pvF2S = psCtx->pvF2S; stDocPar.pfF2S = psCtx->pfF2S; stDocPar.pvSaf = psCtx->pvSaf; stDocPar.pfSaf = psCtx->pfSaf;
          stDocPar.siPs1 = '/';   stDocPar.siPs2 = '-';   stDocPar.siPr3 = '_';   stDocPar.isShl = FALSE;
-         stDocPar.psEnv = psEnvTab; stDocPar.pcEnv = psCtx->pcEnv;
-         siErr = siPrintDocu(psCtx->pvGbl, pfDoc, psCtx->pfErr, psDoc, &stDocPar, pfDoc, siPrintPage);
+         stDocPar.psEnv = psCtx->psEnv; stDocPar.pcEnv = psCtx->pcEnv;
+         siErr = siPrintDocu(psCtx->pvGbl, pfDoc, psCtx->pfErr, psCtx->psDoc, &stDocPar, pfDoc, siPrintPage);
          if (siErr) {
             if (psCtx->pfErr != NULL) {
                fprintf(psCtx->pfErr, "Generation of documentation for program '%s' failed\n", psCtx->pcPgm);
@@ -2707,9 +2689,9 @@ static int siCleBuiltinGendocu(TsCleBuiltinContext* psCtx)
    }
    if (psCtx->pfErr != NULL) {
       fprintf(psCtx->pfErr, "Syntax for built-in function 'GENDOCU' not valid\n");
-      for (i = 0; psCmd[i].pcKyw != NULL; i++) {
-         if (psCmd[i].siFlg) {
-            fprintf(psCtx->pfErr, "%s %s GENDOCU %s", psCtx->pcDep, psCtx->argv[0], psCmd[i].pcKyw);
+      for (i = 0; psCtx->psCmd[i].pcKyw != NULL; i++) {
+         if (psCtx->psCmd[i].siFlg) {
+            fprintf(psCtx->pfErr, "%s %s GENDOCU %s", psCtx->pcDep, psCtx->argv[0], psCtx->psCmd[i].pcKyw);
             efprintf(psCtx->pfErr, "[.path]=filename [NONBR][SHORT]\n");
          }
       }
@@ -2733,19 +2715,6 @@ static int siCleBuiltinHtmldoc(TsCleBuiltinContext* psCtx)
    void* pvLib;
    void* pvDocHdl;
    TsCleDocPar stDocPar;
-   const TsCleCommand* psCmd;
-   const TsClpArgument* psEnvTab;
-   TfF2S* pfF2S;
-   TfSaf* pfSaf;
-   const TsCleDoc* psDoc;
-   const TsCleOtherClp* psOth;
-
-   psCmd = (const TsCleCommand*)psCtx->psCmd;
-   psEnvTab = (const TsClpArgument*)psCtx->psEnv;
-   pfF2S = (TfF2S*)psCtx->pfF2S;
-   pfSaf = (TfSaf*)psCtx->pfSaf;
-   psDoc = (const TsCleDoc*)psCtx->psDoc;
-   psOth = (const TsCleOtherClp*)psCtx->psOth;
 
    if (psCtx->argc > 6) {
       if (psCtx->pfErr != NULL) {
@@ -2791,11 +2760,11 @@ static int siCleBuiltinHtmldoc(TsCleBuiltinContext* psCtx)
    stDocPar.isDep = isDep; stDocPar.isCas = psCtx->isCas; stDocPar.isPfl = psCtx->isPfl; stDocPar.isRpl = psCtx->isRpl;
    stDocPar.pcAbo = psCtx->pcAbo; stDocPar.pcDep = psCtx->pcDep; stDocPar.pcDpa = psCtx->pcDpa; stDocPar.pcEnt = psCtx->pcEnt;
    stDocPar.pcHlp = psCtx->pcHlp; stDocPar.pcOpt = psCtx->pcOpt; stDocPar.pcOwn = psCtx->pcOwn; stDocPar.pcPgm = psCtx->pcPgm;
-   stDocPar.pcBld = psCtx->pcBld; stDocPar.pcVsn = psCtx->pcVsn; stDocPar.pfMsg = (TfMsg*)psCtx->pfMsg; stDocPar.pvCnf = psCtx->psCnf;
-   stDocPar.siMkl = psCtx->siMkl; stDocPar.psBif = psCtx->psBif; stDocPar.psCmd = psCmd; stDocPar.psOth = psOth;
-   stDocPar.pvF2S = psCtx->pvF2S; stDocPar.pfF2S = pfF2S; stDocPar.pvSaf = psCtx->pvSaf; stDocPar.pfSaf = pfSaf;
+   stDocPar.pcBld = psCtx->pcBld; stDocPar.pcVsn = psCtx->pcVsn; stDocPar.pfMsg = psCtx->pfMsg; stDocPar.pvCnf = psCtx->psCnf;
+   stDocPar.siMkl = psCtx->siMkl; stDocPar.psBif = psCtx->psBif; stDocPar.psCmd = psCtx->psCmd; stDocPar.psOth = psCtx->psOth;
+   stDocPar.pvF2S = psCtx->pvF2S; stDocPar.pfF2S = psCtx->pfF2S; stDocPar.pvSaf = psCtx->pvSaf; stDocPar.pfSaf = psCtx->pfSaf;
    stDocPar.siPs1 = '-';   stDocPar.siPs2 = '-';   stDocPar.siPr3 = '_';   stDocPar.isShl = isShl;
-   stDocPar.psEnv = psEnvTab; stDocPar.pcEnv = psCtx->pcEnv;
+   stDocPar.psEnv = psCtx->psEnv; stDocPar.pcEnv = psCtx->pcEnv;
    if (pfHtmlOpn != NULL && pfHtmlPrn != NULL && pfHtmlCls != NULL) {
       pvDocHdl = pfHtmlOpn(psCtx->pfStd, psCtx->pfErr, pcPat, psCtx->pcOwn, psCtx->pcPgm, psCtx->pcBld, &stDocPar.isHdr, &stDocPar.isAnc, &stDocPar.isIdt, &stDocPar.isPat, &stDocPar.siPs1, &stDocPar.siPs2, &stDocPar.siPr3);
       if (pvDocHdl == NULL) {
@@ -2805,7 +2774,7 @@ static int siCleBuiltinHtmldoc(TsCleBuiltinContext* psCtx)
          SAFE_FREE(pcPat);
          return(CLERTC_FAT);
       }
-      siErr = siPrintDocu(psCtx->pvGbl, psCtx->pfStd, psCtx->pfErr, psDoc, &stDocPar, pvDocHdl, pfHtmlPrn);
+      siErr = siPrintDocu(psCtx->pvGbl, psCtx->pfStd, psCtx->pfErr, psCtx->psDoc, &stDocPar, pvDocHdl, pfHtmlPrn);
       if (siErr) {
          if (psCtx->pfErr != NULL) {
             fprintf(psCtx->pfErr, "Generation of %s HTML documentation to folder '%s' failed\n", isDep ? "long" : "short", pcPat);
@@ -2839,17 +2808,11 @@ static int siCleBuiltinGenprop(TsCleBuiltinContext* psCtx)
 {
    int i;
    int siErr;
-   const TsCleCommand* psCmd;
    const char* pcSgn;
    const char* pcCmd;
    char* pcFil;
    FILE* pfPro;
-   TfF2S* pfF2S;
-   TfSaf* pfSaf;
 
-   psCmd = (const TsCleCommand*)psCtx->psCmd;
-   pfF2S = (TfF2S*)psCtx->pfF2S;
-   pfSaf = (TfSaf*)psCtx->pfSaf;
    if (psCtx->argc == 3) {
       pcSgn = strchr(psCtx->argv[2], '=');
       if (pcSgn != NULL) {
@@ -2882,17 +2845,17 @@ static int siCleBuiltinGenprop(TsCleBuiltinContext* psCtx)
       }
       efprintf(pfPro, "%s", HLP_CLE_PROPFIL);
       if (pcCmd == NULL) {
-         for (siErr = CLP_OK, i = 0; psCmd[i].pcKyw != NULL && siErr == CLP_OK; i++) {
-            siErr = siClePropertyInit(psCtx->pvGbl, psCmd[i].pfIni, psCmd[i].pvClp, psCtx->pcOwn, psCtx->pcPgm, psCtx->pcBld, psCmd[i].pcKyw, psCmd[i].pcMan, psCmd[i].pcHlp,
-                                      psCmd[i].piOid, psCmd[i].psTab, psCtx->isCas, psCtx->isPfl, psCtx->isRpl, psCtx->siMkl, psCtx->pfStd, psCtx->pfErr, psCtx->pfTrc, psCtx->pcDep,
+         for (siErr = CLP_OK, i = 0; psCtx->psCmd[i].pcKyw != NULL && siErr == CLP_OK; i++) {
+            siErr = siClePropertyInit(psCtx->pvGbl, psCtx->psCmd[i].pfIni, psCtx->psCmd[i].pvClp, psCtx->pcOwn, psCtx->pcPgm, psCtx->pcBld, psCtx->psCmd[i].pcKyw, psCtx->psCmd[i].pcMan, psCtx->psCmd[i].pcHlp,
+                                      psCtx->psCmd[i].piOid, psCtx->psCmd[i].psTab, psCtx->isCas, psCtx->isPfl, psCtx->isRpl, psCtx->siMkl, psCtx->pfStd, psCtx->pfErr, psCtx->pfTrc, psCtx->pcDep,
                                       psCtx->pcOpt, psCtx->pcEnt, psCtx->psCnf, psCtx->ppvHdl, NULL, NULL,
-                                      (TfMsg*)psCtx->pfMsg, psCtx->pvF2S, pfF2S, psCtx->pvSaf, pfSaf);
+                                      psCtx->pfMsg, psCtx->pvF2S, psCtx->pfF2S, psCtx->pvSaf, psCtx->pfSaf);
             if (siErr) {
                fclose_unchecked(pfPro);
                SAFE_FREE(pcFil);
                return(siErr);
             }
-            siErr = siClpProperties(*(psCtx->ppvHdl), CLPPRO_MTD_CMT, 10, psCmd[i].pcKyw, pfPro);
+            siErr = siClpProperties(*(psCtx->ppvHdl), CLPPRO_MTD_CMT, 10, psCtx->psCmd[i].pcKyw, pfPro);
             vdClpClose(*(psCtx->ppvHdl), CLPCLS_MTD_ALL);
             *(psCtx->ppvHdl) = NULL;
          }
@@ -2912,17 +2875,17 @@ static int siCleBuiltinGenprop(TsCleBuiltinContext* psCtx)
             return(CLERTC_OK);
          }
       } else {
-         for (i = 0; psCmd[i].pcKyw != NULL; i++) {
-            if (strxcmp(psCtx->isCas, pcCmd, psCmd[i].pcKyw, 0, 0, FALSE) == 0) {
-               siErr = siClePropertyInit(psCtx->pvGbl, psCmd[i].pfIni, psCmd[i].pvClp, psCtx->pcOwn, psCtx->pcPgm, psCtx->pcBld, psCmd[i].pcKyw, psCmd[i].pcMan, psCmd[i].pcHlp,
-                                         psCmd[i].piOid, psCmd[i].psTab, psCtx->isCas, psCtx->isPfl, psCtx->isRpl, psCtx->siMkl, psCtx->pfStd, psCtx->pfErr, psCtx->pfTrc, psCtx->pcDep, psCtx->pcOpt, psCtx->pcEnt, psCtx->psCnf, psCtx->ppvHdl,
-                                         NULL, NULL, (TfMsg*)psCtx->pfMsg, psCtx->pvF2S, pfF2S, psCtx->pvSaf, pfSaf);
+         for (i = 0; psCtx->psCmd[i].pcKyw != NULL; i++) {
+            if (strxcmp(psCtx->isCas, pcCmd, psCtx->psCmd[i].pcKyw, 0, 0, FALSE) == 0) {
+               siErr = siClePropertyInit(psCtx->pvGbl, psCtx->psCmd[i].pfIni, psCtx->psCmd[i].pvClp, psCtx->pcOwn, psCtx->pcPgm, psCtx->pcBld, psCtx->psCmd[i].pcKyw, psCtx->psCmd[i].pcMan, psCtx->psCmd[i].pcHlp,
+                     psCtx->psCmd[i].piOid, psCtx->psCmd[i].psTab, psCtx->isCas, psCtx->isPfl, psCtx->isRpl, psCtx->siMkl, psCtx->pfStd, psCtx->pfErr, psCtx->pfTrc, psCtx->pcDep, psCtx->pcOpt, psCtx->pcEnt, psCtx->psCnf, psCtx->ppvHdl,
+                                         NULL, NULL, psCtx->pfMsg, psCtx->pvF2S, psCtx->pfF2S, psCtx->pvSaf, psCtx->pfSaf);
                if (siErr) {
                   fclose_unchecked(pfPro);
                   SAFE_FREE(pcFil);
                   return(siErr);
                }
-               siErr = siClpProperties(*(psCtx->ppvHdl), CLPPRO_MTD_CMT, 10, psCmd[i].pcKyw, pfPro);
+               siErr = siClpProperties(*(psCtx->ppvHdl), CLPPRO_MTD_CMT, 10, psCtx->psCmd[i].pcKyw, pfPro);
                vdClpClose(*(psCtx->ppvHdl), CLPCLS_MTD_ALL);
                *(psCtx->ppvHdl) = NULL;
                if (siErr < 0) {
@@ -2948,9 +2911,9 @@ static int siCleBuiltinGenprop(TsCleBuiltinContext* psCtx)
    }
    if (psCtx->pfErr != NULL) {
       fprintf(psCtx->pfErr, "Syntax for built-in function 'GENPROP' not valid\n");
-      for (i = 0; psCmd[i].pcKyw != NULL; i++) {
-         if (psCmd[i].siFlg) {
-            fprintf(psCtx->pfErr, "%s %s GENPROP %s=filename\n", psCtx->pcDep, psCtx->argv[0], psCmd[i].pcKyw);
+      for (i = 0; psCtx->psCmd[i].pcKyw != NULL; i++) {
+         if (psCtx->psCmd[i].siFlg) {
+            fprintf(psCtx->pfErr, "%s %s GENPROP %s=filename\n", psCtx->pcDep, psCtx->argv[0], psCtx->psCmd[i].pcKyw);
          }
       }
       fprintf(psCtx->pfErr, "%s %s GENPROP filename\n", psCtx->pcDep, psCtx->argv[0]);
@@ -2961,24 +2924,22 @@ static int siCleBuiltinSetprop(TsCleBuiltinContext* psCtx)
 {
    int i;
    int siErr;
-   const TsCleCommand* psCmd;
    const char* pcSgn;
    const char* pcCmd;
 
-   psCmd = (const TsCleCommand*)psCtx->psCmd;
    if (psCtx->argc == 3) {
       pcSgn = strchr(psCtx->argv[2], '=');
       if (pcSgn != NULL) {
          *((char*)pcSgn) = EOS;
          pcSgn++;
          pcCmd = psCtx->argv[2];
-         for (i = 0; psCmd[i].pcKyw != NULL && strxcmp(psCtx->isCas, pcCmd, psCmd[i].pcKyw, 0, 0, FALSE); i++) {}
-         if (psCmd[i].pcKyw == NULL) {
+         for (i = 0; psCtx->psCmd[i].pcKyw != NULL && strxcmp(psCtx->isCas, pcCmd, psCtx->psCmd[i].pcKyw, 0, 0, FALSE); i++) {}
+         if (psCtx->psCmd[i].pcKyw == NULL) {
             if (psCtx->pfErr != NULL) {
                fprintf(psCtx->pfErr, "Syntax for built-in function 'SETPROP' not valid\n");
-               for (i = 0; psCmd[i].pcKyw != NULL; i++) {
-                  if (psCmd[i].siFlg) {
-                     fprintf(psCtx->pfErr, "%s %s SETPROP %s=filename\n", psCtx->pcDep, psCtx->argv[0], psCmd[i].pcKyw);
+               for (i = 0; psCtx->psCmd[i].pcKyw != NULL; i++) {
+                  if (psCtx->psCmd[i].siFlg) {
+                     fprintf(psCtx->pfErr, "%s %s SETPROP %s=filename\n", psCtx->pcDep, psCtx->argv[0], psCtx->psCmd[i].pcKyw);
                   }
                }
             }
@@ -3005,9 +2966,9 @@ static int siCleBuiltinSetprop(TsCleBuiltinContext* psCtx)
       if (*pcSgn == 0) {
          if (psCtx->pfErr != NULL) {
             fprintf(psCtx->pfErr, "Syntax for built-in function 'SETPROP' not valid\n");
-            for (i = 0; psCmd[i].pcKyw != NULL; i++) {
-               if (psCmd[i].siFlg) {
-                  fprintf(psCtx->pfErr, "%s %s SETPROP %s=filename\n", psCtx->pcDep, psCtx->argv[0], psCmd[i].pcKyw);
+            for (i = 0; psCtx->psCmd[i].pcKyw != NULL; i++) {
+               if (psCtx->psCmd[i].siFlg) {
+                  fprintf(psCtx->pfErr, "%s %s SETPROP %s=filename\n", psCtx->pcDep, psCtx->argv[0], psCtx->psCmd[i].pcKyw);
                }
             }
             fprintf(psCtx->pfErr, "File name was not specified.\n"
@@ -3027,9 +2988,9 @@ static int siCleBuiltinSetprop(TsCleBuiltinContext* psCtx)
    }
    if (psCtx->pfErr != NULL) {
       fprintf(psCtx->pfErr, "Syntax for built-in function 'SETPROP' not valid\n");
-      for (i = 0; psCmd[i].pcKyw != NULL; i++) {
-         if (psCmd[i].siFlg) {
-            fprintf(psCtx->pfErr, "%s %s SETPROP %s=filename\n", psCtx->pcDep, psCtx->argv[0], psCmd[i].pcKyw);
+      for (i = 0; psCtx->psCmd[i].pcKyw != NULL; i++) {
+         if (psCtx->psCmd[i].siFlg) {
+            fprintf(psCtx->pfErr, "%s %s SETPROP %s=filename\n", psCtx->pcDep, psCtx->argv[0], psCtx->psCmd[i].pcKyw);
          }
       }
       fprintf(psCtx->pfErr, "%s %s SETPROP filename\n", psCtx->pcDep, psCtx->argv[0]);
@@ -3040,18 +3001,12 @@ static int siCleBuiltinChgprop(TsCleBuiltinContext* psCtx)
 {
    int i, j;
    int siErr;
-   const TsCleCommand* psCmd;
    char* pcPro = NULL;
    size_t szPro;
-   TfF2S* pfF2S;
-   TfSaf* pfSaf;
 
-   psCmd = (const TsCleCommand*)psCtx->psCmd;
-   pfF2S = (TfF2S*)psCtx->pfF2S;
-   pfSaf = (TfSaf*)psCtx->pfSaf;
    if (psCtx->argc >= 3) {
-      for (i = 0; psCmd[i].pcKyw != NULL; i++) {
-         if (strxcmp(psCtx->isCas, psCtx->argv[2], psCmd[i].pcKyw, 0, 0, FALSE) == 0) {
+      for (i = 0; psCtx->psCmd[i].pcKyw != NULL; i++) {
+         if (strxcmp(psCtx->isCas, psCtx->argv[2], psCtx->psCmd[i].pcKyw, 0, 0, FALSE) == 0) {
             szPro = CLEINI_PROSIZ;
             pcPro = (char*)calloc(1, szPro);
             if (pcPro == NULL) {
@@ -3062,9 +3017,9 @@ static int siCleBuiltinChgprop(TsCleBuiltinContext* psCtx)
             }
             for (j = 3; j < psCtx->argc; j++) {
                if (j > 3) {
-                  srprintc(&pcPro, &szPro, strlen(psCtx->pcOwn) + strlen(psCtx->pcPgm) + strlen(psCmd[i].pcKyw), " %s.%s.%s.", psCtx->pcOwn, psCtx->pcPgm, psCmd[i].pcKyw);
+                  srprintc(&pcPro, &szPro, strlen(psCtx->pcOwn) + strlen(psCtx->pcPgm) + strlen(psCtx->psCmd[i].pcKyw), " %s.%s.%s.", psCtx->pcOwn, psCtx->pcPgm, psCtx->psCmd[i].pcKyw);
                } else {
-                  srprintc(&pcPro, &szPro, strlen(psCtx->pcOwn) + strlen(psCtx->pcPgm) + strlen(psCmd[i].pcKyw), "%s.%s.%s.", psCtx->pcOwn, psCtx->pcPgm, psCmd[i].pcKyw);
+                  srprintc(&pcPro, &szPro, strlen(psCtx->pcOwn) + strlen(psCtx->pcPgm) + strlen(psCtx->psCmd[i].pcKyw), "%s.%s.%s.", psCtx->pcOwn, psCtx->pcPgm, psCtx->psCmd[i].pcKyw);
                }
                char* pcSgn = strchr(psCtx->argv[j], '=');
                if (pcSgn != NULL) {
@@ -3075,17 +3030,17 @@ static int siCleBuiltinChgprop(TsCleBuiltinContext* psCtx)
                   srprintc(&pcPro, &szPro, strlen(psCtx->argv[j]), "%s=\"\"", psCtx->argv[j]);
                }
             }
-            siErr = siCleChangeProperties(psCtx->pvGbl, psCmd[i].pfIni, psCmd[i].pvClp, psCtx->pcHom, psCtx->pcOwn, psCtx->pcPgm, psCtx->pcBld, psCmd[i].pcKyw, psCmd[i].pcMan, psCmd[i].pcHlp, pcPro,
-                                          psCmd[i].piOid, psCmd[i].psTab, psCtx->isCas, psCtx->isPfl, psCtx->isRpl, psCtx->siMkl, psCtx->pfOut, psCtx->pfErr, psCtx->pfTrc, psCtx->pcDep, psCtx->pcOpt, psCtx->pcEnt, psCtx->psCnf,
-                                          (TfMsg*)psCtx->pfMsg, psCtx->pvF2S, pfF2S, psCtx->pvSaf, pfSaf);
+            siErr = siCleChangeProperties(psCtx->pvGbl, psCtx->psCmd[i].pfIni, psCtx->psCmd[i].pvClp, psCtx->pcHom, psCtx->pcOwn, psCtx->pcPgm, psCtx->pcBld, psCtx->psCmd[i].pcKyw, psCtx->psCmd[i].pcMan, psCtx->psCmd[i].pcHlp, pcPro,
+                  psCtx->psCmd[i].piOid, psCtx->psCmd[i].psTab, psCtx->isCas, psCtx->isPfl, psCtx->isRpl, psCtx->siMkl, psCtx->pfOut, psCtx->pfErr, psCtx->pfTrc, psCtx->pcDep, psCtx->pcOpt, psCtx->pcEnt, psCtx->psCnf,
+                                          psCtx->pfMsg, psCtx->pvF2S, psCtx->pfF2S, psCtx->pvSaf, psCtx->pfSaf);
             SAFE_FREE(pcPro);
             return(siErr);
          }
       }
    }
    if (psCtx->pcDef != NULL && *(psCtx->pcDef)) {
-      for (i = 0; psCmd[i].pcKyw != NULL; i++) {
-         if (strxcmp(psCtx->isCas, psCtx->pcDef, psCmd[i].pcKyw, 0, 0, FALSE) == 0) {
+      for (i = 0; psCtx->psCmd[i].pcKyw != NULL; i++) {
+         if (strxcmp(psCtx->isCas, psCtx->pcDef, psCtx->psCmd[i].pcKyw, 0, 0, FALSE) == 0) {
             szPro = CLEINI_PROSIZ;
             pcPro = calloc(1, szPro);
             if (pcPro == NULL) {
@@ -3096,9 +3051,9 @@ static int siCleBuiltinChgprop(TsCleBuiltinContext* psCtx)
             }
             for (j = 2; j < psCtx->argc; j++) {
                if (j > 2) {
-                  srprintc(&pcPro, &szPro, strlen(psCtx->pcOwn) + strlen(psCtx->pcPgm) + strlen(psCmd[i].pcKyw), " %s.%s.%s.", psCtx->pcOwn, psCtx->pcPgm, psCmd[i].pcKyw);
+                  srprintc(&pcPro, &szPro, strlen(psCtx->pcOwn) + strlen(psCtx->pcPgm) + strlen(psCtx->psCmd[i].pcKyw), " %s.%s.%s.", psCtx->pcOwn, psCtx->pcPgm, psCtx->psCmd[i].pcKyw);
                } else {
-                  srprintc(&pcPro, &szPro, strlen(psCtx->pcOwn) + strlen(psCtx->pcPgm) + strlen(psCmd[i].pcKyw), "%s.%s.%s.", psCtx->pcOwn, psCtx->pcPgm, psCmd[i].pcKyw);
+                  srprintc(&pcPro, &szPro, strlen(psCtx->pcOwn) + strlen(psCtx->pcPgm) + strlen(psCtx->psCmd[i].pcKyw), "%s.%s.%s.", psCtx->pcOwn, psCtx->pcPgm, psCtx->psCmd[i].pcKyw);
                }
                char* pcSgn = strchr(psCtx->argv[j], '=');
                if (pcSgn != NULL) {
@@ -3109,9 +3064,9 @@ static int siCleBuiltinChgprop(TsCleBuiltinContext* psCtx)
                   srprintc(&pcPro, &szPro, strlen(psCtx->argv[j]), "%s=\"\"", psCtx->argv[j]);
                }
             }
-            siErr = siCleChangeProperties(psCtx->pvGbl, psCmd[i].pfIni, psCmd[i].pvClp, psCtx->pcHom, psCtx->pcOwn, psCtx->pcPgm, psCtx->pcBld, psCmd[i].pcKyw, psCmd[i].pcMan, psCmd[i].pcHlp, pcPro,
-                                          psCmd[i].piOid, psCmd[i].psTab, psCtx->isCas, psCtx->isPfl, psCtx->isRpl, psCtx->siMkl, psCtx->pfOut, psCtx->pfErr, psCtx->pfTrc, psCtx->pcDep, psCtx->pcOpt, psCtx->pcEnt, psCtx->psCnf,
-                                          (TfMsg*)psCtx->pfMsg, psCtx->pvF2S, pfF2S, psCtx->pvSaf, pfSaf);
+            siErr = siCleChangeProperties(psCtx->pvGbl, psCtx->psCmd[i].pfIni, psCtx->psCmd[i].pvClp, psCtx->pcHom, psCtx->pcOwn, psCtx->pcPgm, psCtx->pcBld, psCtx->psCmd[i].pcKyw, psCtx->psCmd[i].pcMan, psCtx->psCmd[i].pcHlp, pcPro,
+                  psCtx->psCmd[i].piOid, psCtx->psCmd[i].psTab, psCtx->isCas, psCtx->isPfl, psCtx->isRpl, psCtx->siMkl, psCtx->pfOut, psCtx->pfErr, psCtx->pfTrc, psCtx->pcDep, psCtx->pcOpt, psCtx->pcEnt, psCtx->psCnf,
+                                          psCtx->pfMsg, psCtx->pvF2S, psCtx->pfF2S, psCtx->pvSaf, psCtx->pfSaf);
             SAFE_FREE(pcPro);
             return(siErr);
          }
@@ -3119,9 +3074,9 @@ static int siCleBuiltinChgprop(TsCleBuiltinContext* psCtx)
    }
    if (psCtx->pfErr != NULL) {
       fprintf(psCtx->pfErr, "Syntax for built-in function 'CHGPROP' not valid\n");
-      for (i = 0; psCmd[i].pcKyw != NULL; i++) {
-         if (psCmd[i].siFlg) {
-            fprintf(psCtx->pfErr, "%s %s CHGPROP %s", psCtx->pcDep, psCtx->argv[0], psCmd[i].pcKyw);
+      for (i = 0; psCtx->psCmd[i].pcKyw != NULL; i++) {
+         if (psCtx->psCmd[i].siFlg) {
+            fprintf(psCtx->pfErr, "%s %s CHGPROP %s", psCtx->pcDep, psCtx->argv[0], psCtx->psCmd[i].pcKyw);
             efprintf(psCtx->pfErr, " [path[=value]]*\n");
          }
       }
@@ -3132,9 +3087,7 @@ static int siCleBuiltinDelprop(TsCleBuiltinContext* psCtx)
 {
    int i;
    int siErr;
-   const TsCleCommand* psCmd;
 
-   psCmd = (const TsCleCommand*)psCtx->psCmd;
    if (psCtx->argc == 2) {
       srprintf(psCtx->ppcCnf, psCtx->pszCnf, strlen(psCtx->pcOwn) + strlen(psCtx->pcPgm), "%s.%s.property.file", psCtx->pcOwn, psCtx->pcPgm);
       if (*(psCtx->ppcCnf) == NULL) {
@@ -3144,13 +3097,13 @@ static int siCleBuiltinDelprop(TsCleBuiltinContext* psCtx)
          return(CLERTC_MEM);
       }
    } else if (psCtx->argc == 3) {
-      for (i = 0; psCmd[i].pcKyw != NULL && strxcmp(psCtx->isCas, psCtx->argv[2], psCmd[i].pcKyw, 0, 0, FALSE); i++) {}
-      if (psCmd[i].pcKyw == NULL) {
+      for (i = 0; psCtx->psCmd[i].pcKyw != NULL && strxcmp(psCtx->isCas, psCtx->argv[2], psCtx->psCmd[i].pcKyw, 0, 0, FALSE); i++) {}
+      if (psCtx->psCmd[i].pcKyw == NULL) {
          if (psCtx->pfErr != NULL) {
             fprintf(psCtx->pfErr, "Syntax for built-in function 'DELPROP' not valid\n");
-            for (i = 0; psCmd[i].pcKyw != NULL; i++) {
-               if (psCmd[i].siFlg) {
-                  fprintf(psCtx->pfErr, "%s %s DELPROP %s\n", psCtx->pcDep, psCtx->argv[0], psCmd[i].pcKyw);
+            for (i = 0; psCtx->psCmd[i].pcKyw != NULL; i++) {
+               if (psCtx->psCmd[i].siFlg) {
+                  fprintf(psCtx->pfErr, "%s %s DELPROP %s\n", psCtx->pcDep, psCtx->argv[0], psCtx->psCmd[i].pcKyw);
                }
             }
          }
@@ -3166,9 +3119,9 @@ static int siCleBuiltinDelprop(TsCleBuiltinContext* psCtx)
    } else {
       if (psCtx->pfErr != NULL) {
          fprintf(psCtx->pfErr, "Syntax for built-in function 'DELPROP' not valid\n");
-         for (i = 0; psCmd[i].pcKyw != NULL; i++) {
-            if (psCmd[i].siFlg) {
-               fprintf(psCtx->pfErr, "%s %s DELPROP %s\n", psCtx->pcDep, psCtx->argv[0], psCmd[i].pcKyw);
+         for (i = 0; psCtx->psCmd[i].pcKyw != NULL; i++) {
+            if (psCtx->psCmd[i].siFlg) {
+               fprintf(psCtx->pfErr, "%s %s DELPROP %s\n", psCtx->pcDep, psCtx->argv[0], psCtx->psCmd[i].pcKyw);
             }
          }
          fprintf(psCtx->pfErr, "%s %s DELPROP\n", psCtx->pcDep, psCtx->argv[0]);
@@ -3187,24 +3140,17 @@ static int siCleBuiltinGetprop(TsCleBuiltinContext* psCtx)
 {
    int i;
    int siErr;
-   const TsCleCommand* psCmd;
-   TfF2S* pfF2S;
-   TfSaf* pfSaf;
-
-   psCmd = (const TsCleCommand*)psCtx->psCmd;
-   pfF2S = (TfF2S*)psCtx->pfF2S;
-   pfSaf = (TfSaf*)psCtx->pfSaf;
 
    if (psCtx->argc == 2) {
       FPRINTF_OUT(psCtx, "Properties for program '%s':\n", psCtx->pcPgm);
-      for (i = 0; psCmd[i].pcKyw != NULL; i++) {
-         siErr = siClePropertyInit(psCtx->pvGbl, psCmd[i].pfIni, psCmd[i].pvClp, psCtx->pcOwn, psCtx->pcPgm, psCtx->pcBld, psCmd[i].pcKyw, psCmd[i].pcMan, psCmd[i].pcHlp,
-                                   psCmd[i].piOid, psCmd[i].psTab, psCtx->isCas, psCtx->isPfl, psCtx->isRpl, psCtx->siMkl, psCtx->pfStd, psCtx->pfErr, psCtx->pfTrc, psCtx->pcDep, psCtx->pcOpt, psCtx->pcEnt, psCtx->psCnf,
-                                   psCtx->ppvHdl, NULL, NULL, (TfMsg*)psCtx->pfMsg, psCtx->pvF2S, pfF2S, psCtx->pvSaf, pfSaf);
+      for (i = 0; psCtx->psCmd[i].pcKyw != NULL; i++) {
+         siErr = siClePropertyInit(psCtx->pvGbl, psCtx->psCmd[i].pfIni, psCtx->psCmd[i].pvClp, psCtx->pcOwn, psCtx->pcPgm, psCtx->pcBld, psCtx->psCmd[i].pcKyw, psCtx->psCmd[i].pcMan, psCtx->psCmd[i].pcHlp,
+               psCtx->psCmd[i].piOid, psCtx->psCmd[i].psTab, psCtx->isCas, psCtx->isPfl, psCtx->isRpl, psCtx->siMkl, psCtx->pfStd, psCtx->pfErr, psCtx->pfTrc, psCtx->pcDep, psCtx->pcOpt, psCtx->pcEnt, psCtx->psCnf,
+                                   psCtx->ppvHdl, NULL, NULL, psCtx->pfMsg, psCtx->pvF2S, psCtx->pfF2S, psCtx->pvSaf, psCtx->pfSaf);
          if (siErr) {
             return(siErr);
          }
-         vdPrnProperties(*(psCtx->ppvHdl), psCmd[i].pcKyw, 10);
+         vdPrnProperties(*(psCtx->ppvHdl), psCtx->psCmd[i].pcKyw, 10);
          vdClpClose(*(psCtx->ppvHdl), CLPCLS_MTD_ALL);
          *(psCtx->ppvHdl) = NULL;
       }
@@ -3240,9 +3186,9 @@ static int siCleBuiltinGetprop(TsCleBuiltinContext* psCtx)
          } else {
             if (psCtx->pfErr != NULL) {
                fprintf(psCtx->pfErr, "Syntax for built-in function 'GETPROP' not valid\n");
-               for (i = 0; psCmd[i].pcKyw != NULL; i++) {
-                  if (psCmd[i].siFlg) {
-                     fprintf(psCtx->pfErr, "%s %s GETPROP %s", psCtx->pcDep, psCtx->argv[0], psCmd[i].pcKyw);
+               for (i = 0; psCtx->psCmd[i].pcKyw != NULL; i++) {
+                  if (psCtx->psCmd[i].siFlg) {
+                     fprintf(psCtx->pfErr, "%s %s GETPROP %s", psCtx->pcDep, psCtx->argv[0], psCtx->psCmd[i].pcKyw);
                      efprintf(psCtx->pfErr, "[.path] [DEPTH1 | DEPTH2 | ... | DEPTH9 | DEPALL | DEFALL]\n");
                   }
                }
@@ -3252,24 +3198,24 @@ static int siCleBuiltinGetprop(TsCleBuiltinContext* psCtx)
       } else {
          if (psCtx->pfErr != NULL) {
             fprintf(psCtx->pfErr, "Syntax for built-in function 'GETPROP' not valid\n");
-            for (i = 0; psCmd[i].pcKyw != NULL; i++) {
-               if (psCmd[i].siFlg) {
-                  fprintf(psCtx->pfErr, "%s %s GETPROP %s", psCtx->pcDep, psCtx->argv[0], psCmd[i].pcKyw);
+            for (i = 0; psCtx->psCmd[i].pcKyw != NULL; i++) {
+               if (psCtx->psCmd[i].siFlg) {
+                  fprintf(psCtx->pfErr, "%s %s GETPROP %s", psCtx->pcDep, psCtx->argv[0], psCtx->psCmd[i].pcKyw);
                   efprintf(psCtx->pfErr, "[.path] [DEPTH1 | DEPTH2 | ... | DEPTH9 | DEPALL | DEFALL]\n");
                }
             }
          }
          return(CLERTC_CMD);
       }
-      for (i = 0; psCmd[i].pcKyw != NULL; i++) {
-         if (strxcmp(psCtx->isCas, psCtx->argv[2], psCmd[i].pcKyw, strlen(psCmd[i].pcKyw), '.', TRUE) == 0) {
-            siErr = siClePropertyInit(psCtx->pvGbl, psCmd[i].pfIni, psCmd[i].pvClp, psCtx->pcOwn, psCtx->pcPgm, psCtx->pcBld, psCmd[i].pcKyw, psCmd[i].pcMan, psCmd[i].pcHlp,
-                                      psCmd[i].piOid, psCmd[i].psTab, psCtx->isCas, psCtx->isPfl, psCtx->isRpl, psCtx->siMkl, psCtx->pfStd, psCtx->pfErr, psCtx->pfTrc, psCtx->pcDep, psCtx->pcOpt, psCtx->pcEnt,
-                                      psCtx->psCnf, psCtx->ppvHdl, NULL, NULL, (TfMsg*)psCtx->pfMsg, psCtx->pvF2S, pfF2S, psCtx->pvSaf, pfSaf);
+      for (i = 0; psCtx->psCmd[i].pcKyw != NULL; i++) {
+         if (strxcmp(psCtx->isCas, psCtx->argv[2], psCtx->psCmd[i].pcKyw, strlen(psCtx->psCmd[i].pcKyw), '.', TRUE) == 0) {
+            siErr = siClePropertyInit(psCtx->pvGbl, psCtx->psCmd[i].pfIni, psCtx->psCmd[i].pvClp, psCtx->pcOwn, psCtx->pcPgm, psCtx->pcBld, psCtx->psCmd[i].pcKyw, psCtx->psCmd[i].pcMan, psCtx->psCmd[i].pcHlp,
+                                      psCtx->psCmd[i].piOid, psCtx->psCmd[i].psTab, psCtx->isCas, psCtx->isPfl, psCtx->isRpl, psCtx->siMkl, psCtx->pfStd, psCtx->pfErr, psCtx->pfTrc, psCtx->pcDep, psCtx->pcOpt, psCtx->pcEnt,
+                                      psCtx->psCnf, psCtx->ppvHdl, NULL, NULL, psCtx->pfMsg, psCtx->pvF2S, psCtx->pfF2S, psCtx->pvSaf, psCtx->pfSaf);
             if (siErr) {
                return(siErr);
             }
-            if (strlen(psCtx->argv[2]) == strlen(psCmd[i].pcKyw)) {
+            if (strlen(psCtx->argv[2]) == strlen(psCtx->psCmd[i].pcKyw)) {
                if (psCtx->pfOut != NULL) {
                   fprintf(psCtx->pfOut, "Properties for command '%s':\n", psCtx->argv[2]);
                }
@@ -3283,12 +3229,12 @@ static int siCleBuiltinGetprop(TsCleBuiltinContext* psCtx)
          }
       }
       if (psCtx->pcDef != NULL && *(psCtx->pcDef)) {
-         for (i = 0; psCmd[i].pcKyw != NULL; i++) {
-            if (strxcmp(psCtx->isCas, psCtx->pcDef, psCmd[i].pcKyw, 0, 0, FALSE) == 0) {
+         for (i = 0; psCtx->psCmd[i].pcKyw != NULL; i++) {
+            if (strxcmp(psCtx->isCas, psCtx->pcDef, psCtx->psCmd[i].pcKyw, 0, 0, FALSE) == 0) {
                char acPat[strlen(psCtx->pcDef) + strlen(psCtx->argv[2]) + 2];
-               siErr = siClePropertyInit(psCtx->pvGbl, psCmd[i].pfIni, psCmd[i].pvClp, psCtx->pcOwn, psCtx->pcPgm, psCtx->pcBld, psCmd[i].pcKyw, psCmd[i].pcMan, psCmd[i].pcHlp,
-                                         psCmd[i].piOid, psCmd[i].psTab, psCtx->isCas, psCtx->isPfl, psCtx->isRpl, psCtx->siMkl, psCtx->pfStd, psCtx->pfErr, psCtx->pfTrc, psCtx->pcDep, psCtx->pcOpt, psCtx->pcEnt,
-                                         psCtx->psCnf, psCtx->ppvHdl, NULL, NULL, (TfMsg*)psCtx->pfMsg, psCtx->pvF2S, pfF2S, psCtx->pvSaf, pfSaf);
+               siErr = siClePropertyInit(psCtx->pvGbl, psCtx->psCmd[i].pfIni, psCtx->psCmd[i].pvClp, psCtx->pcOwn, psCtx->pcPgm, psCtx->pcBld, psCtx->psCmd[i].pcKyw, psCtx->psCmd[i].pcMan, psCtx->psCmd[i].pcHlp,
+                                         psCtx->psCmd[i].piOid, psCtx->psCmd[i].psTab, psCtx->isCas, psCtx->isPfl, psCtx->isRpl, psCtx->siMkl, psCtx->pfStd, psCtx->pfErr, psCtx->pfTrc, psCtx->pcDep, psCtx->pcOpt, psCtx->pcEnt,
+                                         psCtx->psCnf, psCtx->ppvHdl, NULL, NULL, psCtx->pfMsg, psCtx->pvF2S, psCtx->pfF2S, psCtx->pvSaf, psCtx->pfSaf);
                if (siErr) {
                   return(siErr);
                }
@@ -3304,9 +3250,9 @@ static int siCleBuiltinGetprop(TsCleBuiltinContext* psCtx)
    }
    if (psCtx->pfErr != NULL) {
       fprintf(psCtx->pfErr, "Syntax for built-in function 'GETPROP' not valid\n");
-      for (i = 0; psCmd[i].pcKyw != NULL; i++) {
-         if (psCmd[i].siFlg) {
-            fprintf(psCtx->pfErr, "%s %s GETPROP %s", psCtx->pcDep, psCtx->argv[0], psCmd[i].pcKyw);
+      for (i = 0; psCtx->psCmd[i].pcKyw != NULL; i++) {
+         if (psCtx->psCmd[i].siFlg) {
+            fprintf(psCtx->pfErr, "%s %s GETPROP %s", psCtx->pcDep, psCtx->argv[0], psCtx->psCmd[i].pcKyw);
             efprintf(psCtx->pfErr, "[.path] [DEPTH1 | DEPTH2 | ... | DEPTH9 | DEPALL | DEFALL]\n");
          }
       }
@@ -3444,12 +3390,9 @@ static int siCleBuiltinDelenv(TsCleBuiltinContext* psCtx)
 }
 static int siCleBuiltinLstenv(TsCleBuiltinContext* psCtx)
 {
-   const TsClpArgument* psEnvTab;
-
    if (psCtx->argc == 2) {
       FPRINTF_OUT(psCtx, "Status for all possible usable environment variables:\n");
-      psEnvTab = (const TsClpArgument*)psCtx->psEnv;
-      for (const TsClpArgument* p = psEnvTab; p != NULL && p->pcKyw != NULL; p++) {
+      for (const TsClpArgument* p = psCtx->psEnv; p != NULL && p->pcKyw != NULL; p++) {
          char acEnv[1024];
          const C08* pcTmp = GETENV(p->pcKyw);
          if (pcTmp != NULL) {
@@ -3490,7 +3433,7 @@ static int siCleBuiltinHlpenv(TsCleBuiltinContext* psCtx)
 {
    if (psCtx->argc == 2) {
       FPRINTF_OUT(psCtx, "Help for all possible usable environment variables:\n");
-      vdPrintEnvars(psCtx->pfStd, (const TsClpArgument*)psCtx->psEnv);
+      vdPrintEnvars(psCtx->pfStd, psCtx->psEnv);
       return(CLERTC_OK);
    }
    return siCleBuiltinSyntaxError(psCtx, psCtx->psBif[psCtx->siIdx].pcKyw);
@@ -3652,7 +3595,7 @@ extern int siCleExecute(
    const char*                   pcEnv)
 {
    int                           siErr,siDep;
-   int                           siType,siIdx,siRes,siMln;  /* For command/builtin matching */
+   int                           siType,siIdx,siMln;  /* For command/builtin matching */
    void*                         pvGbl=NULL;
    TsCnfHdl*                     psCnf=NULL;
    size_t                        szCnf=0;
@@ -4047,8 +3990,8 @@ EVALUATE:
    if (pfOut!=NULL) { fprintf(pfOut,"%s RUN(Program='%s' Owner='%s' Command='%s' ParameterCount=%d MINCC=%d MAXCC=%d)\n", cstime(0,acTs), argv[0], pcOwn, argv[1], argc-2, siMinCC, siMaxCC); }
 
    /* Find command or built-in function with abbreviation support */
-   siType=0; siIdx=-1; siRes=-1; siMln=0;
-   siRes=siCleFindCommand(isCas,argv[1],psCmd,asBif,siMkl,&siType,&siIdx,&siMln);
+   siType=0; siIdx=-1; siMln=0;
+   int siRes=siCleFindCommand(isCas,argv[1],psCmd,asBif,siMkl,&siType,&siIdx,&siMln);
 
    /* Refactored command dispatch structure - eliminates duplicate "not found" code */
    if (siRes == 1) { /* Ambiguous abbreviation - handle first (special case) */
