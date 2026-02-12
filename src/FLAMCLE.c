@@ -314,6 +314,7 @@ typedef struct CleBuiltinContext {
    const char*                   pcDef;
    /* Tables and flags */
    const TsCleBuiltin*           psBif;
+   int                           siIdx;  /* Index of current built-in function in psBif table */
    const void*                   psCmd;  /* TsCleCommand* - avoid forward declaration issue */
    int                           isCas;
    int                           isPfl;
@@ -1682,26 +1683,24 @@ static int siCleBuiltinSyntaxError(
  *
  * This helper function reduces code duplication for LICENSE, VERSION, and ABOUT
  * built-in functions which all follow the same pattern.
+ * Gets the function name directly from the built-in function table (single source of truth).
  *
- * @param[in] psCtx          Built-in function context
- * @param[in] pcInfoName     Name of info type ("License", "Version", "About")
+ * @param[in] psCtx          Built-in function context (includes psBif table and siIdx)
  * @param[in] pcInfoData     Pointer to info data (pcLic, pcVsn, pcAbo)
- * @param[in] pcKeyword      Keyword for error messages ("LICENSE", "VERSION", "ABOUT")
  * @return                   CLERTC_OK on success, CLERTC_CMD on syntax error
  */
 static int siCleBuiltinPrintInfo(
    TsCleBuiltinContext* psCtx,
-   const char*          pcInfoName,
-   const char*          pcInfoData,
-   const char*          pcKeyword
+   const char*          pcInfoData
 ) {
+   const char* pcKeyword = psCtx->psBif[psCtx->siIdx].pcKyw;
+
    if (psCtx->argc == 2) {
       if (psCtx->pfOut != NULL) {
-         fprintf(psCtx->pfOut, "%s ", pcInfoName);
-         /* Convert first char to lowercase for "of/for" message */
-         if (strcmp(pcInfoName, "Version") == 0) {
+         fprintf(psCtx->pfOut, "%s ", pcKeyword);
+         if (strcmp(pcKeyword, "VERSION") == 0) {
             fprintf(psCtx->pfOut, "for program '%s':\n", psCtx->pcPgm);
-         } else if (strcmp(pcInfoName, "About") == 0) {
+         } else if (strcmp(pcKeyword, "ABOUT") == 0) {
             fprintf(psCtx->pfOut, "program '%s':\n", psCtx->pcPgm);
          } else {
             fprintf(psCtx->pfOut, "of program '%s':\n", psCtx->pcPgm);
@@ -1711,7 +1710,7 @@ static int siCleBuiltinPrintInfo(
          if (psCtx->pfOut != NULL) {
             /* Build lowercase version for "No xxx information available" */
             char acLower[32];
-            snprintf(acLower, sizeof(acLower), "%s", pcInfoName);
+            snprintf(acLower, sizeof(acLower), "%s", pcKeyword);
             for (int i = 0; acLower[i]; i++) {
                acLower[i] = tolower((unsigned char)acLower[i]);
             }
@@ -1746,6 +1745,7 @@ static void vdCleInitBuiltinContext(
    const char*                   pcBld,
    const char*                   pcDef,
    const TsCleBuiltin*           psBif,
+   int                           siIdx,
    const void*                   psCmd,
    int                           isCas,
    int                           isPfl,
@@ -1794,6 +1794,7 @@ static void vdCleInitBuiltinContext(
    psCtx->pcBld = pcBld;
    psCtx->pcDef = pcDef;
    psCtx->psBif = psBif;
+   psCtx->siIdx = siIdx;
    psCtx->psCmd = psCmd;
    psCtx->isCas = isCas;
    psCtx->isPfl = isPfl;
@@ -1871,17 +1872,17 @@ static void vdCleReportCommandError(
 
 static int siCleBuiltinLicense(TsCleBuiltinContext* psCtx)
 {
-   return siCleBuiltinPrintInfo(psCtx, "License", psCtx->pcLic, "LICENSE");
+   return siCleBuiltinPrintInfo(psCtx, psCtx->pcLic);
 }
 
 static int siCleBuiltinVersion(TsCleBuiltinContext* psCtx)
 {
-   return siCleBuiltinPrintInfo(psCtx, "Version", psCtx->pcVsn, "VERSION");
+   return siCleBuiltinPrintInfo(psCtx, psCtx->pcVsn);
 }
 
 static int siCleBuiltinAbout(TsCleBuiltinContext* psCtx)
 {
-   return siCleBuiltinPrintInfo(psCtx, "About", psCtx->pcAbo, "ABOUT");
+   return siCleBuiltinPrintInfo(psCtx, psCtx->pcAbo);
 }
 
 static int siCleBuiltinLexemes(TsCleBuiltinContext* psCtx)
@@ -1901,7 +1902,7 @@ static int siCleBuiltinLexemes(TsCleBuiltinContext* psCtx)
          return(CLERTC_OK);
       }
    }
-   return siCleBuiltinSyntaxError(psCtx, "LEXEMES");
+   return siCleBuiltinSyntaxError(psCtx, psCtx->psBif[psCtx->siIdx].pcKyw);
 }
 
 static int siCleBuiltinGrammar(TsCleBuiltinContext* psCtx)
@@ -1921,7 +1922,7 @@ static int siCleBuiltinGrammar(TsCleBuiltinContext* psCtx)
          return(CLERTC_OK);
       }
    }
-   return siCleBuiltinSyntaxError(psCtx, "GRAMMAR");
+   return siCleBuiltinSyntaxError(psCtx, psCtx->psBif[psCtx->siIdx].pcKyw);
 }
 
 static int siCleBuiltinErrors(TsCleBuiltinContext* psCtx)
@@ -1949,7 +1950,7 @@ static int siCleBuiltinErrors(TsCleBuiltinContext* psCtx)
       }
       return(CLERTC_OK);
    }
-   return siCleBuiltinSyntaxError(psCtx, "ERRORS");
+   return siCleBuiltinSyntaxError(psCtx, psCtx->psBif[psCtx->siIdx].pcKyw);
 }
 
 static int siCleBuiltinSyntax(TsCleBuiltinContext* psCtx)
@@ -3329,7 +3330,7 @@ static int siCleBuiltinGetowner(TsCleBuiltinContext* psCtx)
       fprintf(psCtx->pfStd, "%s\n", psCtx->pcOwn);
       return(CLERTC_OK);
    }
-   return siCleBuiltinSyntaxError(psCtx, "GETOWNER");
+   return siCleBuiltinSyntaxError(psCtx, psCtx->psBif[psCtx->siIdx].pcKyw);
 }
 static int siCleBuiltinSetenv(TsCleBuiltinContext* psCtx)
 {
@@ -3392,7 +3393,7 @@ static int siCleBuiltinGetenv(TsCleBuiltinContext* psCtx)
       }
       return(CLERTC_OK);
    }
-   return siCleBuiltinSyntaxError(psCtx, "GETENV");
+   return siCleBuiltinSyntaxError(psCtx, psCtx->psBif[psCtx->siIdx].pcKyw);
 }
 static int siCleBuiltinDelenv(TsCleBuiltinContext* psCtx)
 {
@@ -3464,7 +3465,7 @@ static int siCleBuiltinLstenv(TsCleBuiltinContext* psCtx)
       }
       return(CLERTC_OK);
    }
-   return siCleBuiltinSyntaxError(psCtx, "LSTENV");
+   return siCleBuiltinSyntaxError(psCtx, psCtx->psBif[psCtx->siIdx].pcKyw);
 }
 static int siCleBuiltinHlpenv(TsCleBuiltinContext* psCtx)
 {
@@ -3473,7 +3474,7 @@ static int siCleBuiltinHlpenv(TsCleBuiltinContext* psCtx)
       vdPrintEnvars(psCtx->pfStd, (const TsClpArgument*)psCtx->psEnv);
       return(CLERTC_OK);
    }
-   return siCleBuiltinSyntaxError(psCtx, "HLPENV");
+   return siCleBuiltinSyntaxError(psCtx, psCtx->psBif[psCtx->siIdx].pcKyw);
 }
 static int siCleBuiltinTrace(TsCleBuiltinContext* psCtx)
 {
@@ -4062,7 +4063,7 @@ EVALUATE:
          /* Initialize context structure using helper function */
          vdCleInitBuiltinContext(&stCtx, argc, argv, pfOut, pfErr, pfStd, pfTrc,
                                  pcDep, pcOpt, pcEnt, pcOwn, pcPgm, pcBld, pcDef,
-                                 asBif, psCmd, isCas, isPfl, isRpl, siMkl, psCnf,
+                                 asBif, siIdx, psCmd, isCas, isPfl, isRpl, siMkl, psCnf,
                                  pvGbl, &pvHdl, pvF2S, pfF2S, pvSaf, pfSaf, pfMsg,
                                  pcLic, pcVsn, pcAbo, pcHlp, pcAut, pcAdr, pcDpa,
                                  pcPgmNum, pcBifNum, pcCmdNum, pcPgmMan, pcSccMan,
