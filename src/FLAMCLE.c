@@ -1880,10 +1880,10 @@ static void vdCleReportCommandError(
 
    if (pfErr != NULL) {
       if (pcMsg != NULL) {
-         fprintf(pfErr, "%s %s for command '%s' failed (Return code: %d / Reason code: %d (%s))\n",
+         fprintf(pfErr, "%s %s of command '%s' failed (Return code: %d / Reason code: %d (%s))\n",
                  cstime(0, acTs), pcOperation, pcCommand, siReturnCode, siReasonCode, pcMsg);
       } else {
-         fprintf(pfErr, "%s %s for command '%s' failed (Return code: %d / Reason code: %d)\n",
+         fprintf(pfErr, "%s %s of command '%s' failed (Return code: %d / Reason code: %d)\n",
                  cstime(0, acTs), pcOperation, pcCommand, siReturnCode, siReasonCode);
       }
    }
