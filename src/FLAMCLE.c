@@ -181,11 +181,27 @@
  *         acTs, ppfDoc, ppfPro, siMaxCC, siMinCC) - reduced structure by 16%
  *         Simplify ERROR macro signature (remove unused pcBuf parameter)
  *         Remove char* pcBuf parameter from siCleEndExecution() function
+ * 1.4.95: Code optimization and maintainability improvements (~208 lines saved, ~3.8% reduction)
+ *         Phase 1: Add siCleBuiltinSyntaxError() helper to centralize error reporting (~75 lines)
+ *                  Add siCleBuiltinPrintInfo() helper for LICENSE/VERSION/ABOUT (~50 lines)
+ *                  Add NULL-checking macros FPRINTF_OUT/ERR/STD (~50 lines)
+ *         Phase 2: Add vdCleInitBuiltinContext() to centralize context initialization (~40 lines)
+ *                  Add vdCleReportCommandError() for MAP/RUN/FIN error reporting (~24 lines)
+ *                  Refactor siCleFindCommand dispatch structure to eliminate duplicate "not found" handling (~48 lines)
+ *                  Move acTs timestamp buffer from parameter to local variable in vdCleReportCommandError()
+ *         Phase 3: Add siIdx field to TsCleBuiltinContext for single source of truth
+ *                  Eliminate 13 string literals by using psCtx->psBif[psCtx->siIdx].pcKyw
+ *                  Simplify siCleBuiltinPrintInfo() signature from 4 to 2 parameters
+ *                  Change output format to UPPERCASE (LICENSE/VERSION/ABOUT) for CLI consistency
+ *         Bugfix: Fix ambiguity detection in siCleFindCommand() - use global siMinLen instead of
+ *                 individual psKyw[i].siMinLen to properly detect ambiguous abbreviations like
+ *                 "con" (CONFIG vs CONV) and "get" (GETOWNER vs GETPROP vs GETENV)
+ *                 Add dynamic comparison length siCmpLen = MIN(siInputLen, psKyw[i].siMinLen)
  */
-#define CLE_VSN_STR       "1.4.94"
+#define CLE_VSN_STR       "1.4.95"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        4
-#define CLE_VSN_REVISION       94
+#define CLE_VSN_REVISION       95
 
 /* Definition der Konstanten ******************************************/
 
