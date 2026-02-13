@@ -1,7 +1,7 @@
-The filename is set as the current global property file when no command is
-specified. The file name is set as the current local property file when a
-command is given. The property file can be generated with GENPROP and
-will be activated for the current owner.
+The filename is set as the current global property file when no
+command is specified. The file name is set as the current local
+property file when a command is given. The property file can be
+generated with GENPROP and will be activated for the current owner.
 
 After generation you can activate the property file, but there will be
 no effect until you change the settings inside the property file,

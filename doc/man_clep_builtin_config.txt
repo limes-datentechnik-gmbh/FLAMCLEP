@@ -1,6 +1,7 @@
-The actual configuration list with owner id, property file names, trace
-settings, environment variables and more is shown. With the option CLEAR,
-the configuration data including the corresponding file will be deleted.
+The actual configuration list with owner id, property file names,
+trace settings, environment variables and more is shown. With the
+option CLEAR, the configuration data including the corresponding file
+will be deleted.
 
 The configuration file name can be defined by the environment variable:
 
@@ -19,14 +20,15 @@ home directory with the name:
 If no home directory is defined for the current user (this case is very
 improbable), the working directory is used.
 
-To read the configuration file when the environment variable above is not
-defined, CLE first looks in the working and then in the home directory.
+To read the configuration file when the environment variable above
+is not defined, CLE first looks in the working and then in the home
+directory.
 This makes it possible to prefer a property file, by copying it to the
 current working directory.
 
-On mainframes the data set name 'SYSUID.&{PGM}.CONFIG' is used as default.
-SYSUID as high level qualifier is a kind of replacement for the
-current home directory in other operating systems in this way.
+On mainframes the data set name 'SYSUID.&{PGM}.CONFIG' is used as
+default. SYSUID as high level qualifier is a kind of replacement for
+the current home directory in other operating systems in this way.
 
 .Examples
 

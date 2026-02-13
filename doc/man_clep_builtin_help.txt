@@ -27,8 +27,8 @@ the manual pages with keyword *MAN*.
 * DEPTH1 / DEPTH2 / ... / DEPTH9
 ** Specifies the depth of the output. Default is DEPTH1.
 * ALL
-** Shows complete help below the specified path, not just DEPTH1 and includes
-   all aliases defined for a certain argument.
+** Shows complete help below the specified path, not just DEPTH1 and
+   includes all aliases defined for a certain argument.
 * MAN
 ** Shows additionally the detailed description for this program, command
    or parameter and the next level of arguments including the aliases.

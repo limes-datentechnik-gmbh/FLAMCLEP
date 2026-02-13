@@ -2428,7 +2428,7 @@ static int siCleBuiltinManpage(TsCleBuiltinContext* psCtx)
                }
                snprintf(acPat, sizeof(acPat), "%s.%s", psCtx->pcDef, pcCmd);
                if (psCtx->pfOut != NULL) {
-                  fprintf(psCtx->pfOut, "Manual page fo'argument '%s':\n\n", acPat);
+                  fprintf(psCtx->pfOut, "Manual page for argument '%s':\n\n", acPat);
                }
                vdPrnCommandManpage(pvHdl, pfDoc, psCtx->pcCmdNum, acPat, i, isMan, TRUE);
                if (isMan == TRUE) {

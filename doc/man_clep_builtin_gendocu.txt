@@ -25,8 +25,9 @@ optional keyword SHORT can be used. This is useful, for example, if you
 deliver a text file and no dictionary can be used.
 
 In contrast to the built-in function <<CLEP.BUILTIN.HTMLDOC,HTMLDOC>>,
-when generating text files the corresponding path string is written to the
-synopsis but index chapters and index terms are not generated anymore.
+when generating text files the corresponding path string is written
+to the synopsis but index chapters and index terms are not generated
+anymore.
 
 Do not use space characters between the key, assignment character (=)
 and filename.
