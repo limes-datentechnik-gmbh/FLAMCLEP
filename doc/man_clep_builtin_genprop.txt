@@ -7,13 +7,13 @@ editing the properties. A property file can be activated with the
 built-in function SETPROP.
 
 Property files will be activated by their owner. A property file
-overrides hard coded properties and properties defined over environment
+overrides hard-coded properties and properties defined over environment
 variables. A specific property file overrides the general property file.
 At time of generation all current default settings are written to the
 property file.
 
-We recommend to work only with command specific property files, because
-the built-in function CHGPROP can be used to generate, update and 
+We recommend working only with command-specific property files, because
+the built-in function CHGPROP can be used to generate, update and
 activate a property file for a certain command.
 
 Do not use space characters between the key, assignment character (=)

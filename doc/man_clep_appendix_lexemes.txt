@@ -15,13 +15,13 @@ used:
 
 All comments and separators are ignored by the scanner and not passed
 with the token to the parser. This means that the separators (SEP)
-are used in the grammar but will never be part of or own tokens.
+are used in the grammar but will never be tokens themselves.
 
 If a binary entry for a string is possible and no classification is
-done it is taken as a binary string in local character set 
+done it is taken as a binary string in local character set
 representation (c) without null termination. This default can be
-changed. In this case the help message for this argument should be
-described the default interpretation of the binary string. For binary
+changed. In this case the help message for this argument should
+describe the default interpretation of the binary string. For binary
 strings it is still possible to enter a null-terminated string, but
 then the prefix *s* must be used. If no binary entry is feasible, only
 a null-terminated string in local character representation (s) can be

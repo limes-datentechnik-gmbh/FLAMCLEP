@@ -5,8 +5,8 @@ the owner. The owner is a general solution to separate all settings and
 can be used for environment, client and other purposes.
 
 If not already defined, the owner is written to the environment table
-under the key word OWNERID. This environment variable can for example
-used as replacement in file names (~/<OWNERID>.dat) or to refer a 
+under the keyword OWNERID. This environment variable can for example be
+used as replacement in file names (~/<OWNERID>.dat) or to refer to a
 signature key.
 
 .Examples

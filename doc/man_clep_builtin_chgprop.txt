@@ -55,7 +55,7 @@ Property files are managed per owner: This means that updates are only
 done for the current owner.
 
 To delete a property you can simply specify the path without the root
-and with out a sign.
+and without a sign.
 
 See <<CLEP.APPENDIX.PROPERTIES,Appendix Properties>> for the current
 property file content.
@@ -63,7 +63,7 @@ property file content.
 .Examples
 
 -----------------------------------------------------------------------
-   :> &{PGM} CHGPROP command overlay.object.argument=value  
-   :> &{PGM} CHGPROP command overlay.object.argument  
-   :> &{PGM} CHGPROP command object.argument=value1 argument=value2 
+   :> &{PGM} CHGPROP command overlay.object.argument=value
+   :> &{PGM} CHGPROP command overlay.object.argument
+   :> &{PGM} CHGPROP command object.argument=value1 argument=value2
 -----------------------------------------------------------------------

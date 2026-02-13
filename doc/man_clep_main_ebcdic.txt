@@ -28,13 +28,13 @@ the language code (LANG=de_DE, LANG=C). If only the language code
 defined then the CCSID is derived from the language code (DE=IBM-1141,
 US=IBM-1140, C=IBM-1047, ...).
 
-If possible, these critical characters are also converted for print
-outs. At output it is not possible to convert anything correctly,
-because some strings for print out are coming from other sources (like
+If possible, these critical characters are also converted for printouts.
+At output it is not possible to convert anything correctly,
+because some strings for printout are coming from other sources (like
 system messages and others). Only all known literals are converted, for
 unknown variables such a conversion is not possible and CLE/P(R) expects
 that such strings are encoded in the correct system code page, but there
-is no guaranty for this.
+is no guarantee for this.
 
 To be independent of the environment escaping of the CLP strings is
 possible for the critical punctuation characters on EBCDIC systems.
@@ -56,11 +56,11 @@ See list below:
    ~ = &TLD;   - Tilde
 ------------------------------------------------------------------------
 
-A escape sequence starts with the ampersand (&) followed be 3 character
-(not case sensitive) and is terminated with semicolon (;). With an X and
-2 hexadecimal digit the definition of a binary byte value are possible.
-If such a sequence in the string required then the ampersand must be
-typed twice (&&). To mark a part or the of whole string in a certain
+An escape sequence starts with the ampersand (&) followed by 3 characters
+(not case sensitive) and is terminated with a semicolon (;). With an X and
+2 hexadecimal digits the definition of a binary byte value is possible.
+If such a sequence is required in the string then the ampersand must be
+typed twice (&&). To mark a part or the whole string in a certain
 CCSID the escape sequence must contain 1 to 6 digits. Few samples can
 be found below:
 

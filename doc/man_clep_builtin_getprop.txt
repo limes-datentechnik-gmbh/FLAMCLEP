@@ -17,9 +17,9 @@ property file content.
 * `DEPTH1 / DEPTH2 / ... / DEPTH9`
 ** Specifies the depth of the output. Default is DEPTH1.
 * `DEPALL`
-** Shows all properties to the specified path, not just DEPTH1.
+** Shows all properties for the specified path, not just DEPTH1.
 * `DEFALL`
-** Shows all defined properties to the specified path.
+** Shows all defined properties for the specified path.
 
 .Examples
 

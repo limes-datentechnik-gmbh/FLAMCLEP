@@ -1,6 +1,6 @@
 The syntax function shows how the arguments can be set on the
 command line. Depending on depth the syntax is printed in one line or
-in structured form. A structured print out means that you have a
+in structured form. A structured printout means that you have a
 question or exclamation mark before the argument.
 
 * question mark    - optional parameter
@@ -17,10 +17,10 @@ the corresponding command.
 
 * DEPTH1 / DEPTH2 / ... / DEPTH9
 ** Specifies the depth of the output. Default is DEPTH1. If the depth is
-   greater than 1 the structured print out is used.
+   greater than 1 the structured printout is used.
 * ALL
 ** Shows complete syntax for the specified path, not just DEPTH1.
-   Structured print out is used.
+   Structured printout is used.
 
 .Examples
 

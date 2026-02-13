@@ -29,7 +29,7 @@ The path denotes the unique dotted keyword list for one argument. The
 'SUPPLEMENT' is a string normally in double quotation marks containing
 the value list for this argument in accordance with the syntax of the
 command line parser (strings then normally in single quotation marks,
-a opposite usage of the quotation marks is possible but not
+an opposite usage of the quotation marks is possible but not
 recommended). This means for example that a string that requires
 apostrophes must be included in apostrophes `("'...'")`. The supplement
 string is returned by the corresponding command line parser if no value
@@ -39,19 +39,19 @@ parameter file.
 Behind the property definition the type and help message are printed as
 comment to help in editing the generated property file. The property
 values can be related to the current default settings at time of
-generation, what means that if hard coded default values or another
+generation, which means that if hard-coded default values or another
 property file is already in use, then these values are taken over
 into the new property file.
 
-The property file can contain parameter which are not available on the
-command line. Such parameter are only documented in the property file.
-On the other side not all command line parameter are available as
+The property file can contain parameters that are not available on the
+command line. Such parameters are only documented in the property file.
+On the other hand not all command line parameters are available as
 property.
 
 If a description for a property argument is available which is not a
 part of the user manual this description is written as comment in
 front of the corresponding property definition.
 
-Below you can see the documentation of all parameter which are only
+Below you can see the documentation of all parameters that are only
 available as property followed by all defined default properties
 in form of a sample property file for all available commands.

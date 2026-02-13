@@ -1,8 +1,8 @@
-Each value enclosed with angle brackets (`<>`) are replaced with the
+Each value enclosed with angle brackets (`<>`) is replaced with the
 corresponding environment variable (`<LANG>`). This feature is available
 at each starting point of a lexeme and inside of a normal string.
 
-If the environment variable not defined the replacements below are still
+If the environment variable is not defined the replacements below are still
 possible:
 
 * <SYSUID>   - Current user id in upper case
@@ -12,20 +12,20 @@ possible:
 * <cuser>    - Current user id in lower case
 * <HOSTNAME> - The current host name of the system
 * <ENVID>    - The environment ID (default is T for test)
-* <HOME>     - Replaces with the users data directory, if this not
+* <HOME>     - Replaces with the user's data directory, if this is not
                available the replacements below are done:
 ** On UNIX with /home/<USER>
 ** On USS with /u/<USER>
 ** On ZOS with <SYSUID>
 
-Additional few abbreviation are supported for different kind of strings.
+Additionally a few abbreviations are supported for different kinds of strings.
 
 * '~' for <HOME> in file strings
 * '!' for <ENVID> in key labels
 * '~' for <SYSUID> in key labels
 * '^' for <OWNERID> in key labels
 
-All these abbreviation character have different code points in EBCDIC
-code pages and can only be used if the CCSID known be CLP, see chapter
-<<CLEP.MAIN.EBCDIC,special EBCDIC code page support>> how the CCSID can
+All these abbreviation characters have different code points in EBCDIC
+code pages and can only be used if the CCSID is known by CLP, see chapter
+<<CLEP.MAIN.EBCDIC,special EBCDIC code page support>> for how the CCSID can
 be defined for CLP.

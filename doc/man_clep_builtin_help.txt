@@ -1,15 +1,15 @@
 The help function can provide extensive information about each parameter
-which is adjustable on the command line. With the help functionality
+that can be adjusted on the command line. With the help functionality
 you get a structured list of arguments:
 
 * keyword           - the keyword for the argument
 * (TYPE: ...)       - the type of this argument
 * help message      - the short help text
-* (PROPERTY: [...]) - the current hard coded property value (optional)
+* (PROPERTY: [...]) - the current hard-coded property value (optional)
 
 The keyword can be abbreviated, but it must be unique for this list.
-The required letters are upper case if case sensitive mode is used.
-With the case sensitive mode an additional line is required to mark
+The required letters are uppercase if case-sensitive mode is used.
+In case-sensitive mode an additional line is required to mark
 the appropriate letter.
 
 The *path* is a dotted keyword list in accordance with the syntax of the
@@ -27,7 +27,7 @@ the manual pages with keyword *MAN*.
 * DEPTH1 / DEPTH2 / ... / DEPTH9
 ** Specifies the depth of the output. Default is DEPTH1.
 * ALL
-** Shows complete help below specified path, not just DEPTH1 and includes
+** Shows complete help below the specified path, not just DEPTH1 and includes
    all aliases defined for a certain argument.
 * MAN
 ** Shows additionally the detailed description for this program, command

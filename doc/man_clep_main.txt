@@ -4,8 +4,8 @@ simplifies and standardizes parameter string processing.
 
 The CLE/P(R) provides two separate functions:
 
-* COMMAND LINE PARSER (CLP)   - Compiles a parameter string from a command to a data structure
-* COMMAND LINE EXECUTOR (CLE) - Supporting execution of different commands with parameter strings
+* COMMAND LINE PARSER (CLP)   - Compiles a parameter string from a command into a data structure
+* COMMAND LINE EXECUTOR (CLE) - Supports execution of different commands with parameter strings
 
 The COMMAND LINE EXECUTOR provides a list of commands and some
 built-in functions, please use <<CLEP.BUILTIN.MANPAGE,MANPAGE>>,
@@ -13,9 +13,9 @@ built-in functions, please use <<CLEP.BUILTIN.MANPAGE,MANPAGE>>,
 extensive information about these capabilities.
 
 Additionally the built-in function <<CLEP.BUILTIN.GENDOCU,GENDOCU>> can
-generate a complete or a part of the user manual.
+generate a complete user manual or part of it.
 
-To read the parameter of a command, a compiler (CLP) is applied. To see
+To read the parameters of a command, a compiler (CLP) is applied. To see
 the regular expressions (lexemes) and the corresponding grammar, please
 use the built-in functions <<CLEP.BUILTIN.LEXEMES,LEXEMES>> and
 <<CLEP.BUILTIN.GRAMMAR,GRAMMAR>>.

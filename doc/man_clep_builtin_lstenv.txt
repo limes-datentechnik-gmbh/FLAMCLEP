@@ -1,4 +1,4 @@
-This function will list the status of all possible useable environment
+This function will list the status of all possible usable environment
 variables.
 
 .Examples

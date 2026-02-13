@@ -3,8 +3,8 @@ about syntax, errors, commands and functions of a program with help
 messages, manual pages and documentation.
 
 Other built-in functions can be used for owner, property, environment
-and trace management. All built-in functions have the purpose to
-simplify handling of powerful and sometimes complex commands.
+and trace management. All built-in functions are designed to
+simplify the handling of powerful and sometimes complex commands.
 
 .Abbreviations
 

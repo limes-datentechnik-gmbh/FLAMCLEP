@@ -1,8 +1,8 @@
 The key label name mapping works like the file name mapping, but additionally
 it is possible to use
 
-`^` to replace it with the OWNERID (`^=<ONWERID>`), +
+`^` to replace it with the OWNERID (`^=<OWNERID>`), +
 `!` to replace it with the environment identifier (`!=<ENVID>`) and +
-`~` is only replaced with login user id.
+`~` is only replaced with the login user id.
 
 If the environment ID is not defined then `T` for test is used by default.
