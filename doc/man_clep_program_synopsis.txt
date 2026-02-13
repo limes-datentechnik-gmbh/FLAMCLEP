@@ -1,4 +1,5 @@
-The synopsis collects the help, syntax and other important information
-for a program, function or parameter. It is a kind of quick reference
-and is used throughout the complete hierarchies in this document. Below you
-can find for example the synopsis for program &{PGM}.
+The synopsis collects the help, syntax and other important
+information for a program, function or parameter. It is a kind of
+quick reference and is used throughout the complete hierarchies in
+this document. Below you can find for example the synopsis for program
+&{PGM}.

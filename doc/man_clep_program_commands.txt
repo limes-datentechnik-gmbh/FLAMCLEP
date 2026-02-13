@@ -1,11 +1,12 @@
 Commands are used to run powerful subprograms. The command line
 processor compiles a table-defined syntax into a corresponding
 preinitialized data structure. This structure is mapped to the
-parameter structure of the corresponding subprogram.
-The subprogram can then be executed with the defined arguments/parameters.
+parameter structure of the corresponding subprogram. The subprogram
+can then be executed with the defined arguments/parameters.
 
 To support these variable commands several built-in functions are
-available and described in a separate <<CLEP.BUILTIN.FUNCTIONS,chapter>>.
+available and described in a separate
+<<CLEP.BUILTIN.FUNCTIONS,chapter>>.
 
 .Abbreviations
 
@@ -36,7 +37,8 @@ implemented:
 * Strings can be enclosed with single '' or double "" quotation marks
 * Integrated strings (without spaces) can also be defined without quotes
 * Keywords can also start with "-" or "--" in front of the qualifier
-* If it is unique then parentheses and the dot can be omitted for objects and overlays
+* If it is unique then parentheses and the dot can be omitted for
+  objects and overlays
 
 Commands can be declared in deep hierarchical depth. In order to
 simplify their handling the path is a powerful instrument for managing
@@ -47,9 +49,9 @@ To run commands under different owners, the owner id can be defined in
 front of the command.
 
 To suppress the output of the command line executor you can set QUIET
-or SILENT as the last parameter. In addition to QUIET, SILENT also suppresses
-the error messages. These options have no effect on the output of
-the commands and built-in functions.
+or SILENT as the last parameter. In addition to QUIET, SILENT also
+suppresses the error messages. These options have no effect on the
+output of the commands and built-in functions.
 
 For job control, the maximum (and minimum) condition code
 (MAXCC=[max][-min]) of the command execution can optionally be set as
@@ -69,5 +71,5 @@ while `MAXCC=-4` only sets condition codes smaller than 4 to 0.
 &{pgm} [OWNER=oid] command=" parameter file name " [MAXCC=[max][-min]] [QUIET]
 ------------------------------------------------------------------------
 
-The parameters for each command can be provided as an argument list on the
-command line or as a parameter file.
+The parameters for each command can be provided as an argument list
+on the command line or as a parameter file.

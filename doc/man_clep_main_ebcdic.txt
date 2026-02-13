@@ -56,9 +56,10 @@ See list below:
    ~ = &TLD;   - Tilde
 ------------------------------------------------------------------------
 
-An escape sequence starts with the ampersand (&) followed by 3 characters
-(not case sensitive) and is terminated with a semicolon (;). With an X and
-2 hexadecimal digits the definition of a binary byte value is possible.
+An escape sequence starts with the ampersand (&) followed by 3
+characters (not case sensitive) and is terminated with a semicolon
+(;). With an X and 2 hexadecimal digits the definition of a binary
+byte value is possible.
 If such a sequence is required in the string then the ampersand must be
 typed twice (&&). To mark a part or the whole string in a certain
 CCSID the escape sequence must contain 1 to 6 digits. Few samples can

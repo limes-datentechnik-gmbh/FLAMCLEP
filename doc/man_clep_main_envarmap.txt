@@ -2,8 +2,8 @@ Each value enclosed with angle brackets (`<>`) is replaced with the
 corresponding environment variable (`<LANG>`). This feature is available
 at each starting point of a lexeme and inside of a normal string.
 
-If the environment variable is not defined the replacements below are still
-possible:
+If the environment variable is not defined the replacements below
+are still possible:
 
 * <SYSUID>   - Current user id in upper case
 * <USER>     - Current user id (case sensitive)
@@ -18,14 +18,15 @@ possible:
 ** On USS with /u/<USER>
 ** On ZOS with <SYSUID>
 
-Additionally a few abbreviations are supported for different kinds of strings.
+Additionally a few abbreviations are supported for different kinds
+of strings.
 
 * '~' for <HOME> in file strings
 * '!' for <ENVID> in key labels
 * '~' for <SYSUID> in key labels
 * '^' for <OWNERID> in key labels
 
-All these abbreviation characters have different code points in EBCDIC
-code pages and can only be used if the CCSID is known by CLP, see chapter
-<<CLEP.MAIN.EBCDIC,special EBCDIC code page support>> for how the CCSID can
-be defined for CLP.
+All these abbreviation characters have different code points in
+EBCDIC code pages and can only be used if the CCSID is known by CLP,
+see chapter <<CLEP.MAIN.EBCDIC,special EBCDIC code page support>> for
+how the CCSID can be defined for CLP.

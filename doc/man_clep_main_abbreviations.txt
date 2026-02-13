@@ -20,10 +20,12 @@ exactly one name and meets the configured minimum length requirement.
 
 * Both commands and built-in functions support abbreviation
 * The abbreviation must be unique among all available names
-* Minimum length is configurable (typically 3 characters is a common example)
+* Minimum length is configurable (typically 3 characters is a
+  common example)
 * The abbreviation must match the beginning of exactly one name
 * Case sensitivity depends on the program configuration
-* Leading hyphens or prefixes (- or --) are not part of the name matching
+* Leading hyphens or prefixes (- or --) are not part of the name
+  matching
 
 If the provided abbreviation matches multiple names, the command line
 executor will report an ambiguity error and reject the abbreviation.
@@ -49,7 +51,8 @@ Interactive session (abbreviations allowed):
    :> &{PGM} SYN              # Abbreviation for SYNTAX
    :> &{PGM} MAN              # Abbreviation for MANPAGE
    :> &{PGM} VER              # Abbreviation for VERSION
-   :> &{PGM} CONF             # Abbreviation for CONFIG (if CONV command)
+   :> &{PGM} CONF             # Abbreviation for CONFIG
+                              # (if CONV command exists)
    :> &{PGM} TRA              # Abbreviation for TRACE
 -----------------------------------------------------------------------
 
@@ -62,5 +65,5 @@ Production scripts (full names required):
    &{PGM} CONFIG              # Full function name
 -----------------------------------------------------------------------
 
-In case-sensitive mode, the required characters for unique identification
-may be indicated in uppercase in the help output.
+In case-sensitive mode, the required characters for unique
+identification may be indicated in uppercase in the help output.

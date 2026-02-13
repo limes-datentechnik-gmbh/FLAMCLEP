@@ -6,7 +6,8 @@ rules below:
 * Data set names on mainframes are always fully qualified
 * Path names on mainframes must contain at least one slash (`/`)
 * Data set names on USS must start with `//`
-** Fully qualified names with HLQ must be enclosed in apostrophes (`//''`)
+** Fully qualified names with HLQ must be enclosed in apostrophes
+   (`//''`)
 ** If apostrophes are not used the SYSUID is prefixed as HLQ
 * Normal file names on other platforms could be relative
 
@@ -17,9 +18,10 @@ unexpected behavior.
 To use a "<" or "~" as a part of a filename the character must be
 specified twice.
 
-Besides these rules the replacement technologies of your shell can be used,
-but on some platforms $HOME, $USER or something similar might not
-be available, for such cases the possibilities above are implemented.
+Besides these rules the replacement technologies of your shell can be
+used, but on some platforms $HOME, $USER or something similar might
+not be available, for such cases the possibilities above are
+implemented.
 
 This file name mapping is provided by the library CLEPUTL and should
 also be used for file names managed by the commands supported with this

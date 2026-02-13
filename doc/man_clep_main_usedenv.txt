@@ -1,11 +1,12 @@
-Environment variables can be managed via the operating system or via the
-&{PGM} configuration. The latter can be managed with the built-in
-functions <<CLEP.BUILTIN.SETENV,SETENV>>, <<CLEP.BUILTIN.GETENV,GETENV>>
-and <<CLEP.BUILTIN.DELENV,DELENV>>. To list the current state of all usable environment
-variables the built-in function <<CLEP.BUILTIN.LSTENV,LSTENV>> can be used.
-For help messages for each usable environment variable please use <<CLEP.BUILTIN.HLPENV,HLPENV>>
-There are also some platform-specific mechanisms that can be used to
-set environment variables:
+Environment variables can be managed via the operating system or via
+the &{PGM} configuration. The latter can be managed with the built-in
+functions <<CLEP.BUILTIN.SETENV,SETENV>>,
+<<CLEP.BUILTIN.GETENV,GETENV>> and <<CLEP.BUILTIN.DELENV,DELENV>>. To
+list the current state of all usable environment variables the
+built-in function <<CLEP.BUILTIN.LSTENV,LSTENV>> can be used. For help
+messages for each usable environment variable please use
+<<CLEP.BUILTIN.HLPENV,HLPENV>>. There are also some platform-specific
+mechanisms that can be used to set environment variables:
 
 ..Linux, Windows, USS and other Unix-like OS
 Environment variables are read from the file `.stdenv` in the current
@@ -77,10 +78,10 @@ All other file mode parameters are managed by CLP.
 ..Property file vs. environment variables
 Beside all the environment variables managed by CLE it is possible to
 set all properties as environment variables to override the hard coded
-default values with CLP. If a property is defined as environment variable
-and in a property file, then the value in the property file overrides the
-setting in the environment. The environment variable name for each
-property is built by the rules below:
+default values with CLP. If a property is defined as environment
+variable and in a property file, then the value in the property file
+overrides the setting in the environment. The environment variable
+name for each property is built by the rules below:
 
 * convert all characters to upper case
 * replace all dots (`.`) by underline (`_`)
