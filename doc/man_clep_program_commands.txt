@@ -7,6 +7,12 @@ The subprogram can be executed with the defined arguments/parameters.
 To support these variable commands several built-in functions are
 available and described in a separate <<CLEP.BUILTIN.FUNCTIONS,chapter>>.
 
+.Abbreviations
+
+Command names can be abbreviated for interactive use.
+See <<CLEP.MAIN.ABBREVIATIONS,abbreviations>> for detailed information
+about abbreviation rules and usage recommendations.
+
 Each supported command is explained in a separate section in this
 document. Each section contains a synopsis including the help
 message, the path, the type and the syntax followed by a detailed

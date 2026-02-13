@@ -1,0 +1,66 @@
+The command line executor supports abbreviation of command names and
+built-in function names depending on the unique first characters. This
+works analogously to keyword abbreviation in the command line parser.
+This is only useful if you work in dialog. If the command is specified
+in a persistent way (e.g. in a script) writing the complete command or
+function name is recommended, to ensure that the script must not be
+changed to work with a later version of the program. For example:
+
+Version X supports only one command starting with C (CONFIG). In this
+case you can use CON as abbreviation. Version X+1 adds a new command
+CONFUSION. Now CON is ambiguous and you must use at least CONFI for
+CONFIG or CONFU for CONFUSION to uniquely identify the command.
+
+.Abbreviation Mechanism
+
+The abbreviation matching uses a minimum-length algorithm that compares
+the provided string against all available command and built-in function
+names. The match succeeds if the abbreviation matches the beginning of
+exactly one name and meets the configured minimum length requirement.
+
+* Both commands and built-in functions support abbreviation
+* The abbreviation must be unique among all available names
+* Minimum length is configurable (typically 3 characters is a common example)
+* The abbreviation must match the beginning of exactly one name
+* Case sensitivity depends on the program configuration
+* Leading hyphens or prefixes (- or --) are not part of the name matching
+
+If the provided abbreviation matches multiple names, the command line
+executor will report an ambiguity error and reject the abbreviation.
+In this case, provide additional characters until the abbreviation
+uniquely identifies a single command or built-in function.
+
+.Usage Recommendations
+
+All these capabilities are implemented to simplify the interactive use
+and to be compatible with several existing command line syntaxes. But
+in certain cases, the command interpretation could fail if not the
+complete command or function name is used.
+
+*IMPORTANT*: It is strongly recommended to use full command and function
+names in scripts, batch jobs, and automated processes to ensure clarity,
+maintainability, and compatibility with future versions.
+
+.Examples
+
+Interactive session (abbreviations allowed):
+-----------------------------------------------------------------------
+   :> &{PGM} HEL              # Abbreviation for HELP
+   :> &{PGM} SYN              # Abbreviation for SYNTAX
+   :> &{PGM} MAN              # Abbreviation for MANPAGE
+   :> &{PGM} VER              # Abbreviation for VERSION
+   :> &{PGM} CONF             # Abbreviation for CONFIG (if CONV command)
+   :> &{PGM} TRA              # Abbreviation for TRACE
+-----------------------------------------------------------------------
+
+Production scripts (full names required):
+-----------------------------------------------------------------------
+   #!/bin/bash
+   &{PGM} HELP                # Full function name
+   &{PGM} SYNTAX              # Full function name
+   &{PGM} VERSION             # Full function name
+   &{PGM} CONFIG              # Full function name
+-----------------------------------------------------------------------
+
+In case-sensitive mode, the required characters for unique identification
+may be indicated in uppercase in the help output.

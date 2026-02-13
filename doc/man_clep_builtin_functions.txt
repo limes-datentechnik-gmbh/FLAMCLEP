@@ -5,3 +5,9 @@ messages, manual pages and documentation.
 Other built-in functions can be used for owner, property, environment
 and trace management. All built-in functions have the purpose to
 simplify handling of powerful and sometimes complex commands.
+
+.Abbreviations
+
+Built-in function names can be abbreviated for interactive use.
+See <<CLEP.MAIN.ABBREVIATIONS,abbreviations>> for detailed information
+about abbreviation rules and usage recommendations.
