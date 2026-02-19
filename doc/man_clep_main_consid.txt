@@ -1,9 +1,12 @@
 The command line parser supports abbreviation of keywords depending
-on the unique first characters. This is only useful if you work in
+on the unique first characters. The command line executor also
+supports abbreviation of command names and built-in function names
+(see <<CLEP.MAIN.ABBREVIATIONS,Command and Function Abbreviations>>
+for detailed information). Abbreviation is only useful if you work in
 dialog. If the command is specified in a persistent way (e.g. in a
-script) writing the complete keyword is recommended, to ensure that
-the script must not be changed to work with a later version of the
-program. For example:
+script) writing the complete keyword, command or function name is
+recommended, to ensure that the script must not be changed to work
+with a later version of the program. For example:
 
 Version X supports only one keyword starting with V (VERSION). Version
 X+1 supports the keywords VERSION and VERIFY. If you use version X with

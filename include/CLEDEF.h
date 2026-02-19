@@ -2,8 +2,8 @@
  * @file CLEDEF.h
  * @brief Definitions for <b>C</b>ommand <b>L</b>ine <b>E</b>xecution
  * @author limes datentechnik gmbh
- * @date 27.12.2019\n
- * @copyright (c) 2019 limes datentechnik gmbh
+ * @date 19.02.2026\n
+ * @copyright (c) 2026 limes datentechnik gmbh
  *
  * This software is provided 'as-is', without any express or implied
  * warranty. In no event will the authors be held liable for any damages
@@ -82,7 +82,9 @@
  * and must be assigned to the corresponding chapters in the table below.
  * @{
  */
+#define CLE_ANCHOR_MAIN_CONSID            "CLEP.MAIN.CONSID"            /**< @brief Chapter for command line considerations. */
 #define CLE_ANCHOR_MAIN_EBCDIC            "CLEP.MAIN.EBCDIC"            /**< @brief Chapter for special EBCDIC code page support. */
+#define CLE_ANCHOR_MAIN_ABBREVIATIONS     "CLEP.MAIN.ABBREVIATIONS"     /**< @brief Chapter for command and built-in function abbreviations. */
 #define CLE_ANCHOR_BUILTIN_FUNCTIONS      "CLEP.BUILTIN.FUNCTIONS"      /**< @brief Chapter built-in functions. */
 #define CLE_ANCHOR_APPENDIX_ABOUT         "CLEP.APPENDIX.ABOUT"         /**< @brief Appendix About. */
 #define CLE_ANCHOR_APPENDIX_VERSION       "CLEP.APPENDIX.VERSION"       /**< @brief Appendix Version. */

@@ -1,8 +1,10 @@
 The command line executor supports abbreviation of command names and
 built-in function names depending on the unique first characters. This
-works analogously to keyword abbreviation in the command line parser.
-This is only useful if you work in dialog. If the command is specified
-in a persistent way (e.g. in a script) writing the complete command or
+works analogously to keyword abbreviation in the command line parser
+(see <<CLEP.MAIN.CONSID,Command Line Considerations>> for general
+information about abbreviations and other considerations). Abbreviation
+is only useful if you work in dialog. If the command is specified in a
+persistent way (e.g. in a script) writing the complete command or
 function name is recommended, to ensure that the script must not be
 changed to work with a later version of the program. For example:
 
