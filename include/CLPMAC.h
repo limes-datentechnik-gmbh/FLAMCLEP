@@ -26,8 +26,10 @@
 
 #undef CLPARGTAB_SKALAR
 #undef CLPARGTAB_STRING
+#undef CLPARGTAB_USTRBF
 #undef CLPARGTAB_ARRAY
 #undef CLPARGTAB_DYNSTR
+#undef CLPARGTAB_USTRDY
 #undef CLPARGTAB_DYNARY
 #undef CLPARGTAB_ALIAS
 #undef CLPARGTAB_ALIAS_HIDDEN
@@ -37,9 +39,11 @@
 
 /* Macros for structure definition */
 #define CLPARGTAB_SKALAR(kyw,nam,typ,min,max,atyp,flg,oid,tab,dft,man,hlp) typ   nam;
-#define CLPARGTAB_STRING(kyw,nam,siz,min,max,atyp,flg,oid,tab,dft,man,hlp) U08   nam[siz+1];
+#define CLPARGTAB_STRING(kyw,nam,siz,min,max,atyp,flg,oid,tab,dft,man,hlp) C08   nam[siz+1];
+#define CLPARGTAB_USTRBF(kyw,nam,siz,min,max,atyp,flg,oid,tab,dft,man,hlp) U08   nam[siz+1];
 #define CLPARGTAB_ARRAY( kyw,nam,typ,min,max,atyp,flg,oid,tab,dft,man,hlp) typ   nam[max];
-#define CLPARGTAB_DYNSTR(kyw,nam,siz,min,max,atyp,flg,oid,tab,dft,man,hlp) U08*  nam;
+#define CLPARGTAB_DYNSTR(kyw,nam,siz,min,max,atyp,flg,oid,tab,dft,man,hlp) C08*  nam;
+#define CLPARGTAB_USTRDY(kyw,nam,siz,min,max,atyp,flg,oid,tab,dft,man,hlp) U08*  nam;
 #define CLPARGTAB_DYNARY(kyw,nam,typ,min,max,atyp,flg,oid,tab,dft,man,hlp) typ*  nam;
 #define CLPARGTAB_ALIAS( kyw,ali                                         )
 #define CLPARGTAB_ALIAS_HIDDEN( kyw,ali                                         )
@@ -89,6 +93,26 @@
 #define CLPARGTAB_STRING(kyw,nam,siz,min,max,atyp,flg,oid,tab,dft,man,hlp) { CLPTYP_STRING,(kyw), NULL,(min),(max),      (siz), offsetof(STRUCT_NAME,nam),(oid),(flg)      ,(tab),(dft),(man),(hlp),0,0.0,NULL,NULL},
 
 /**
+ * @brief Like CLPARGTAB_STRING but stores the value in an unsigned byte buffer (U08).
+ * Use this for binary data, key material, or hash inputs that must remain unsigned.
+ * The argument table entry is identical to CLPARGTAB_STRING; only the struct member type differs.
+ *
+ * @param[in]   kyw   Pointer to command line keyword *kyw*.
+ * @param[in]   nam   Pointer to target definition in case of reading.
+ * @param[in]   siz   is the total available length of the buffer.
+ * @param[in]   min   can be between 0 and *max*.
+ * @param[in]   max   defines the maximum number of strings accepted on the command line.
+ * @param[in]   atyp  is unused and fixed to CLPTYP_STRING.
+ * @param[in]   flg   is an OR-ed list of flag macros CLPFLG_*.
+ * @param[in]   oid   is a unique id value.
+ * @param[in]   tab   is NULL or a pointer to a selection table.
+ * @param[in]   dft   is the hard coded default value.
+ * @param[in]   man   is a pointer to the long description.
+ * @param[in]   hlp   is a pointer to the short description.
+ */
+#define CLPARGTAB_USTRBF(kyw,nam,siz,min,max,atyp,flg,oid,tab,dft,man,hlp) { CLPTYP_STRING,(kyw), NULL,(min),(max),      (siz), offsetof(STRUCT_NAME,nam),(oid),(flg)      ,(tab),(dft),(man),(hlp),0,0.0,NULL,NULL},
+
+/**
  * @brief Defines a dynamic string with the command line keyword *kyw* and the member name *nam* (pointer to alloced memory, must be freed by the using application).
  *
  * @param[in]   kyw   Pointer to command line keyword *kyw*.
@@ -105,6 +129,26 @@
  * @param[in]   hlp   is a pointer to the short description of the argument.
  */
 #define CLPARGTAB_DYNSTR(kyw,nam,siz,min,max,atyp,flg,oid,tab,dft,man,hlp) { CLPTYP_STRING,(kyw), NULL,(min),(max),      (siz), offsetof(STRUCT_NAME,nam),(oid),((flg)|CLPFLG_DYN),(tab),(dft),(man),(hlp),0,0.0,NULL,NULL},
+
+/**
+ * @brief Like CLPARGTAB_DYNSTR but stores the value as an unsigned byte pointer (U08*).
+ * Use this for binary data, key material, or hash inputs that must remain unsigned.
+ * The argument table entry is identical to CLPARGTAB_DYNSTR; only the struct member type differs.
+ *
+ * @param[in]   kyw   Pointer to command line keyword *kyw*.
+ * @param[in]   nam   Pointer to target definition in case of reading.
+ * @param[in]   siz   is the total available length of the buffer.
+ * @param[in]   atyp  is unused and fixed to CLPTYP_STRING.
+ * @param[in]   min   can be between 0 and *max*.
+ * @param[in]   max   defines the maximum number of strings accepted on the command line.
+ * @param[in]   flg   is an OR-ed list of flag macros CLPFLG_*.
+ * @param[in]   oid   is a unique id value.
+ * @param[in]   tab   is NULL or a pointer to a selection table.
+ * @param[in]   dft   is the hard coded default value.
+ * @param[in]   man   is a pointer to the long description.
+ * @param[in]   hlp   is a pointer to the short description.
+ */
+#define CLPARGTAB_USTRDY(kyw,nam,siz,min,max,atyp,flg,oid,tab,dft,man,hlp) { CLPTYP_STRING,(kyw), NULL,(min),(max),      (siz), offsetof(STRUCT_NAME,nam),(oid),((flg)|CLPFLG_DYN),(tab),(dft),(man),(hlp),0,0.0,NULL,NULL},
 
 /**
  * @brief Defines an array with the command line keyword *kyw* and the member name *nam*.
