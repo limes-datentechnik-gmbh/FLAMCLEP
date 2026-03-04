@@ -831,8 +831,10 @@
 #define CLEP_DEFAULT_CCSID_EBCDIC    1047 // "IBM-1047"  Open Systems Latin-1
 
 /** Free memory space */
-static inline void do_save_free(void** x) { if (NULL!=x && NULL != (*x)) { free(*x); (*x) = NULL; } }
-#define SAFE_FREE(x) do_save_free((void**)(&(x)))
+#ifndef SAFE_FREE
+   static inline void do_save_free(void** x) { if (NULL!=x && NULL != (*x)) { free(*x); (*x) = NULL; } }
+   #define SAFE_FREE(x) do_save_free((void**)(&(x)))
+#endif
 
 typedef struct EnVarList {
 /**

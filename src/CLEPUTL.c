@@ -95,10 +95,6 @@ static inline int flzjsy(const char* pcDat, const int* piSln, char* pcVal, int* 
 
 #include "CLEPUTL.h"
 
-#ifndef realloc_nowarn
-#  define realloc_nowarn      realloc
-#endif
-
 #ifndef fopen_nowarn
 #  define fopen_nowarn        fopen
 #endif
@@ -939,7 +935,7 @@ extern int ebcdic_srprintc(char** buffer, size_t* size, const size_t expansion, 
    }
    if ((*size)<s || *buffer==NULL) {
       s=(*size>s)?*size:2*s;
-      char* b=(char*)realloc_nowarn(*buffer,s);
+      char* b=(char*)realloc(*buffer,s);
       if (b==NULL) { return(0); }
       (*buffer)=b;
       (*size)=s;
@@ -2382,7 +2378,7 @@ static char* drplchar(const char* string, const size_t limit, const char c, cons
             buf[o]=string[0];
             o++; string+=2;
          } else { // replacement
-            char* h=realloc_nowarn(buf,size+(valueLen-1));
+            char* h=realloc(buf,size+(valueLen-1));
             if (h==NULL) {
                free(buf);
                return NULL;
@@ -2639,7 +2635,7 @@ static char* drplenvar(const char* string,const char opn, const char cls)
                const char* v=getenvar(p+1,x,sizeof(e),e);
                if (v!=NULL) {
                   int   l=strlen(v);
-                  char* h=realloc_nowarn(b,s+(l-x));
+                  char* h=realloc(b,s+(l-x));
                   if (h==NULL) {
                      free(b);
                      return(NULL);
@@ -2714,7 +2710,7 @@ static char* drpltpl(const char* templ,const char* values) {
                      x++;
                   }
                   int l=x-(v+2);
-                  char* h=realloc_nowarn(b,s+(l-2));
+                  char* h=realloc(b,s+(l-2));
                   if (h==NULL) {
                      free(b);
                      return(NULL);
@@ -3185,7 +3181,7 @@ extern int srprintc(char** buffer,size_t* size,const size_t expansion,const char
    }
    if ((*size)<s || *buffer==NULL) {
       s=(*size>s)?*size:2*s;
-      char* b=(char*)realloc_nowarn(*buffer,s);
+      char* b=(char*)realloc(*buffer,s);
       if (b==NULL) { return(0); }
       (*buffer)=b;
       (*size)=s;
@@ -3207,7 +3203,7 @@ extern int srprintf(char** buffer,size_t* size,const size_t expansion,const char
    }
    if ((*size)<s || *buffer==NULL) {
       s=(*size>s)?*size:2*s;
-      char* b=(char*)realloc_nowarn(*buffer,s);
+      char* b=(char*)realloc(*buffer,s);
       if (b==NULL) { return(0); }
       (*buffer)=b;
       (*size)=s;
@@ -4020,7 +4016,7 @@ extern int file2str(const void* hdl, const char* filename, char** buf, int* bufs
             return -3; // integer overflow
          }
          siHlp=*bufsize+freadLen*2+1;
-         pcHlp=(char*)realloc_nowarn(*buf, siHlp);
+         pcHlp=(char*)realloc(*buf, siHlp);
          if (pcHlp==NULL) {
             if (errmsg!=NULL && msgsiz) {
                snprintf(errmsg,msgsiz,"Allocation of memory to read file (%s) failed",filename);
@@ -4076,7 +4072,7 @@ extern int arry2str(char* array[], const int count, const char* separ, const int
       if (uiSumLen < 1) {
          uiSumLen = 4;
       }
-      pcHlp=(char*)realloc_nowarn(*out, uiSumLen);
+      pcHlp=(char*)realloc(*out, uiSumLen);
       if (pcHlp==NULL) {
          return -2; // realloc failed
       }

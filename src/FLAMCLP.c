@@ -218,6 +218,7 @@
  * 1.4.141: Support hidden flag also for aliases
  * 1.4.142: Rework internal function to typed handle parameter (psHdl instead of pvHdl)
  * 1.5.143: Rework symbol table to allocate only used portions
+ * 1.5.144: Don't use realloc_nowarn
 **/
 
 #define CLP_VSN_STR       "1.5.143"
@@ -268,10 +269,6 @@
 #define isPrnFlt(p,v) (CLPISF_PWD((p)->psStd->uiFlg) ? ((F64)0.0) : (v))
 #define isPrnStr(p,v) ((CLPISF_PWD((p)->psStd->uiFlg) && psHdl->isPwd) ? ("***SECRET***") : (v))
 #define isPrnLen(p,v) (CLPISF_PWD((p)->psStd->uiFlg) ? ((int)0) : (v))
-
-#ifndef realloc_nowarn
-#  define realloc_nowarn      realloc
-#endif
 
 #define TRACE(f,...) do {\
    if ((f) != NULL) {\
@@ -1001,7 +998,7 @@ static inline void* pvClpAllocNew(
 {
    if (siSiz>0) {
       if (psHdl->siPtr>=psHdl->szPtr) {
-         void* pvHlp=realloc_nowarn(psHdl->psPtr,sizeof(TsPtr)*(psHdl->szPtr+CLPINI_PTRCNT));
+         void* pvHlp=realloc(psHdl->psPtr,sizeof(TsPtr)*(psHdl->szPtr+CLPINI_PTRCNT));
          if (pvHlp==NULL) { return(NULL); }
          psHdl->psPtr=pvHlp;
          psHdl->szPtr+=CLPINI_PTRCNT;
@@ -1042,7 +1039,7 @@ static inline void* pvClpAllocAgain(
             secure_memset(((char*)psPtr->pvPtr)+siSiz,psPtr->siSiz-siSiz);
          }
       }
-      void* pvPtr=realloc_nowarn(psPtr->pvPtr,siSiz);
+      void* pvPtr=realloc(psPtr->pvPtr,siSiz);
       if (pvPtr==NULL) { return(NULL); }
       if (psPtr->siSiz<siSiz) { // larger
          memset(((char*)pvPtr)+psPtr->siSiz,0,siSiz-psPtr->siSiz);
@@ -2644,7 +2641,7 @@ extern int siClpSymbolTableUpdate(
       if (!CLPISF_ARG(psHdl->psSym->psStd->uiFlg)) {
          return CLPERR(psHdl,CLPERR_SIZ,"Update of property field failed (symbol (%s) is not a argument)",psHdl->psSym->psStd->pcKyw);
       }
-      pcHlp=realloc_nowarn(psHdl->psSym->psFix->pcPro,strlen(psSym->pcPro)+1);
+      pcHlp=realloc(psHdl->psSym->psFix->pcPro,strlen(psSym->pcPro)+1);
       if (pcHlp==NULL) {
          return CLPERR(psHdl,CLPERR_SIZ,"Update of property field failed (string (%d(%s)) too long)",(int)strlen(psSym->pcPro),psSym->pcPro);
       }
@@ -3898,7 +3895,7 @@ static inline int isReqStrOpr3(int c) { return (isReqStrOpr1(c) || c == '(' || c
       intptr_t h=pcHlp-(*ppLex);\
       intptr_t z=(pcZro!=NULL)?pcZro-(*ppLex):0;\
       size_t s=(*pzLex)+CLPINI_LEXSIZ;\
-      char*  b=(char*)realloc_nowarn(*ppLex,s);\
+      char*  b=(char*)realloc(*ppLex,s);\
       if (b==NULL) { return CLPERR(psHdl,CLPERR_MEM,"Re-allocation of buffer in size %d to store the lexeme failed",(int)s); }\
       (*pzLex)=s;\
       if (b!=(*ppLex)) {\
@@ -6496,14 +6493,14 @@ static int siClpBldPro(
       }
       if (psArg!=NULL) {
          if (CLPISF_ARG(psArg->psStd->uiFlg) || CLPISF_ALI(psArg->psStd->uiFlg)) {
-            C08* pcHlp=realloc_nowarn(psArg->psFix->pcPro,strlen(pcPro)+1);
+            C08* pcHlp=realloc(psArg->psFix->pcPro,strlen(pcPro)+1);
             if (pcHlp==NULL) {
                return CLPERR(psHdl,CLPERR_SIZ,"Build of property field failed (string (%d(%s)) too long)",(int)strlen(pcPro),pcPro);
             }
             psArg->psFix->pcPro=pcHlp;
             strcpy(psArg->psFix->pcPro,pcPro);
             psArg->psFix->pcDft=psArg->psFix->pcPro;
-            pcHlp=realloc_nowarn(psArg->psFix->pcSrc,strlen(psHdl->pcSrc)+1);
+            pcHlp=realloc(psArg->psFix->pcSrc,strlen(psHdl->pcSrc)+1);
             if (pcHlp==NULL) {
                return CLPERR(psHdl,CLPERR_SIZ,"Build of source field failed (string (%d(%s)) too long)",(int)strlen(psHdl->pcSrc),psHdl->pcSrc);
             }
