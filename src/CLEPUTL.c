@@ -48,7 +48,7 @@
 #endif
 #if defined(__ZOS__) && defined(__FL5__)
 #  include "FSTATZOS.h"
-#  include "FLZASM31.h"
+#  include "FLZASM.h"
 #  define flzsym FLZSYM
 #  define flzjsy FLZJSY
 #else
