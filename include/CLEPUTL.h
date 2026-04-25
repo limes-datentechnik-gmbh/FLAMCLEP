@@ -881,49 +881,75 @@ extern int win_unsetenv(const char* name);
 #endif
 
 /**
- * @brief Check if environment variable value is "ON" or "YES"
+ * @brief Check if environment variable value means "on" (case-insensitive)
  * @param[in] pcEnv Environment variable value to check
- * @return Non-zero if value is "ON" or "YES", zero otherwise
+ * @return Non-zero if value is "Y", "YES", or "ON" (case-insensitive), zero otherwise
  */
 static inline int CHECK_ENVAL_ON(const char* pcEnv) {
-   return (pcEnv != NULL && (strcmp(pcEnv, "ON")==0 || strcmp(pcEnv, "YES")==0));
+   int c0;
+   if (pcEnv==NULL) return FALSE;
+   c0=toupper((unsigned char)pcEnv[0]);
+   if (c0=='Y') {
+      if (pcEnv[1]=='\0') return TRUE;
+      return (toupper((unsigned char)pcEnv[1])=='E' && toupper((unsigned char)pcEnv[2])=='S' && pcEnv[3]=='\0') ? TRUE : FALSE;
+   }
+   return (c0=='O' && toupper((unsigned char)pcEnv[1])=='N' && pcEnv[2]=='\0') ? TRUE : FALSE;
 }
 
 /**
- * @brief Check if named environment variable is set to "ON" or "YES"
+ * @brief Check if named environment variable is set to "on" (case-insensitive)
  * @param[in] pcVar Name of environment variable
- * @return Non-zero if variable is set to "ON" or "YES", zero otherwise
+ * @return Non-zero if variable is set to "Y", "YES", or "ON" (case-insensitive), zero otherwise
  */
 static inline int CHECK_ENVAR_ON(const char* pcVar) {
-   const char* pcEnv=GETENV(pcVar);
-   if (pcEnv!=NULL) {
-      return(strcmp(pcEnv,"ON")==0 || strcmp(pcEnv,"YES")==0);
-   } else {
-      return(FALSE);
-   }
+   return CHECK_ENVAL_ON(GETENV(pcVar));
 }
 
 /**
- * @brief Check if environment variable value is "OFF" or "NO"
+ * @brief Check if environment variable value means "off" (case-insensitive)
  * @param[in] pcEnv Environment variable value to check
- * @return Non-zero if value is "OFF" or "NO", zero otherwise
+ * @return Non-zero if value is "N", "NO", or "OFF" (case-insensitive), zero otherwise
  */
 static inline int CHECK_ENVAL_OFF(const char* pcEnv) {
-   return (pcEnv != NULL && (strcmp(pcEnv,"OFF")==0 || strcmp(pcEnv,"NO")==0));
+   int c0;
+   if (pcEnv==NULL) return FALSE;
+   c0=toupper((unsigned char)pcEnv[0]);
+   if (c0=='N') {
+      if (pcEnv[1]=='\0') return TRUE;
+      return (toupper((unsigned char)pcEnv[1])=='O' && pcEnv[2]=='\0') ? TRUE : FALSE;
+   }
+   return (c0=='O' && toupper((unsigned char)pcEnv[1])=='F' && toupper((unsigned char)pcEnv[2])=='F' && pcEnv[3]=='\0') ? TRUE : FALSE;
 }
 
 /**
- * @brief Check if named environment variable is set to "OFF" or "NO"
+ * @brief Check if named environment variable is set to "off" (case-insensitive)
  * @param[in] pcVar Name of environment variable
- * @return Non-zero if variable is set to "OFF" or "NO", zero otherwise
+ * @return Non-zero if variable is set to "N", "NO", or "OFF" (case-insensitive), zero otherwise
  */
 static inline int CHECK_ENVAR_OFF(const char* pcVar) {
-   const char* pcEnv=GETENV(pcVar);
-   if (pcEnv!=NULL) {
-      return(strcmp(pcEnv,"OFF")==0 || strcmp(pcEnv,"NO")==0);
-   } else {
-      return(FALSE);
-   }
+   return CHECK_ENVAL_OFF(GETENV(pcVar));
+}
+
+/**
+ * @brief Check if environment variable value means "auto" (case-insensitive)
+ * @param[in] pcEnv Environment variable value to check
+ * @return Non-zero if value is "A" or "AUTO" (case-insensitive), zero otherwise
+ */
+static inline int CHECK_ENVAL_AUTO(const char* pcEnv) {
+   if (pcEnv==NULL) return FALSE;
+   if (toupper((unsigned char)pcEnv[0])!='A') return FALSE;
+   if (pcEnv[1]=='\0') return TRUE;
+   return (toupper((unsigned char)pcEnv[1])=='U' && toupper((unsigned char)pcEnv[2])=='T' &&
+           toupper((unsigned char)pcEnv[3])=='O' && pcEnv[4]=='\0') ? TRUE : FALSE;
+}
+
+/**
+ * @brief Check if named environment variable is set to "auto" (case-insensitive)
+ * @param[in] pcVar Name of environment variable
+ * @return Non-zero if variable is set to "A" or "AUTO" (case-insensitive), zero otherwise
+ */
+static inline int CHECK_ENVAR_AUTO(const char* pcVar) {
+   return CHECK_ENVAL_AUTO(GETENV(pcVar));
 }
 
 /**
