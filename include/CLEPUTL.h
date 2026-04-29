@@ -1751,6 +1751,7 @@ typedef struct DiaChr {
    char              svb[4];
    char              sbs[4];
    char              idt[4];
+   char              pag[4];  /**< section sign (U+00A7); CCSID-dependent EBCDIC byte */
 } TsDiaChr;
 
 extern void          init_diachr(TsDiaChr* psDiaChr,const unsigned int uiCcsId);
@@ -1769,6 +1770,7 @@ extern const char*   init_string(const char* p);
 
 #  define HSH_PBRK   "\x7B\x4A\x63\xB1\x69"
 #  define ATS_PBRK   "\x7C\xB5\x80\xEC\x44\xAC"
+#  define PAG_PBRK   "\xB5\x7C"  /* section sign (U+00A7): 0xB5=CCSID37/500, 0x7C=CCSID273/1141 */
 
 #  define C_EXC      ((gsDiaChr.exc[0])?gsDiaChr.exc[0]:init_char(gsDiaChr.exc))
 #  define C_HSH      ((gsDiaChr.hsh[0])?gsDiaChr.hsh[0]:init_char(gsDiaChr.hsh))
@@ -1783,6 +1785,7 @@ extern const char*   init_string(const char* p);
 #  define C_VBR      ((gsDiaChr.vbr[0])?gsDiaChr.vbr[0]:init_char(gsDiaChr.vbr))
 #  define C_CBC      ((gsDiaChr.cbc[0])?gsDiaChr.cbc[0]:init_char(gsDiaChr.cbc))
 #  define C_TLD      ((gsDiaChr.tld[0])?gsDiaChr.tld[0]:init_char(gsDiaChr.tld))
+#  define C_PAG      ((gsDiaChr.pag[0])?gsDiaChr.pag[0]:init_char(gsDiaChr.pag))
 #  define S_EXC      ((gsDiaChr.exc[0])?gsDiaChr.exc:init_string(gsDiaChr.exc))
 #  define S_HSH      ((gsDiaChr.hsh[0])?gsDiaChr.hsh:init_string(gsDiaChr.hsh))
 #  define S_DLR      ((gsDiaChr.dlr[0])?gsDiaChr.dlr:init_string(gsDiaChr.dlr))
@@ -1799,6 +1802,7 @@ extern const char*   init_string(const char* p);
 #  define S_SVB      ((gsDiaChr.svb[0])?gsDiaChr.svb:init_string(gsDiaChr.svb))
 #  define S_SBS      ((gsDiaChr.sbs[0])?gsDiaChr.sbs:init_string(gsDiaChr.sbs))
 #  define S_IDT      ((gsDiaChr.idt[0])?gsDiaChr.idt:init_string(gsDiaChr.idt))
+#  define S_PAG      ((gsDiaChr.pag[0])?gsDiaChr.pag:init_string(gsDiaChr.pag))
 
 #  define esrprintc  ebcdic_srprintc
 #  define esnprintf  ebcdic_snprintf
@@ -1807,8 +1811,9 @@ extern const char*   init_string(const char* p);
 
 #else
 
-#  define HSH_PBRK   "#"   /*nodiac*/
-#  define ATS_PBRK   "@"   /*nodiac*/
+#  define HSH_PBRK   "#"     /*nodiac*/
+#  define ATS_PBRK   "@"     /*nodiac*/
+#  define PAG_PBRK   "\xa7"  /*nodiac*/
 
 #  define C_EXC      '!'   /*nodiac*/
 #  define C_HSH      '#'   /*nodiac*/
@@ -1822,8 +1827,9 @@ extern const char*   init_string(const char* p);
 #  define C_CBO      '{'   /*nodiac*/
 #  define C_VBR      '|'   /*nodiac*/
 #  define C_CBC      '}'   /*nodiac*/
-#  define C_TLD      '~'   /*nodiac*/
-#  define S_EXC      "!"   /*nodiac*/
+#  define C_TLD      '~'     /*nodiac*/
+#  define C_PAG      '\xa7'  /*nodiac*/
+#  define S_EXC      "!"     /*nodiac*/
 #  define S_HSH      "#"   /*nodiac*/
 #  define S_DLR      "$"   /*nodiac*/
 #  define S_ATS      "@"   /*nodiac*/
@@ -1835,8 +1841,9 @@ extern const char*   init_string(const char* p);
 #  define S_CBO      "{"   /*nodiac*/
 #  define S_VBR      "|"   /*nodiac*/
 #  define S_CBC      "}"   /*nodiac*/
-#  define S_TLD      "~"   /*nodiac*/
-#  define S_SVB      "=|"  /*nodiac*/
+#  define S_TLD      "~"      /*nodiac*/
+#  define S_PAG      "\xa7"   /*nodiac*/
+#  define S_SVB      "=|"     /*nodiac*/
 #  define S_SBS      "/\\" /*nodiac*/
 #  define S_IDT      "--|" /*nodiac*/
 

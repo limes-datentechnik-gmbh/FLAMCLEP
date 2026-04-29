@@ -45,6 +45,7 @@ See list below:
    $ = &DLR;   - Dollar sign
    # = &HSH;   - Hashtag (number sign)
    @ = &ATS;   - At sign
+   § = &PAG;   - Section sign / Paragraph sign
    [ = &SBO;   - Square bracket open
    \ = &BSL;   - Backslash
    ] = &SBC;   - Square bracket close
