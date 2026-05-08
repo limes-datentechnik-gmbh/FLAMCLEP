@@ -3891,9 +3891,9 @@ static inline int isReqStrOpr3(int c) { return (isReqStrOpr1(c) || c == '(' || c
 
 #define LEX_REALLOC do {\
    if (pcLex>=(pcEnd-4)) {\
-      intptr_t l=pcLex-(*ppLex);\
-      intptr_t h=pcHlp-(*ppLex);\
-      intptr_t z=(pcZro!=NULL)?pcZro-(*ppLex):0;\
+      intptr_t l=(intptr_t)((uintptr_t)pcLex-(uintptr_t)(*ppLex));\
+      intptr_t h=(intptr_t)((uintptr_t)pcHlp-(uintptr_t)(*ppLex));\
+      intptr_t z=(pcZro!=NULL)?(intptr_t)((uintptr_t)pcZro-(uintptr_t)(*ppLex)):0;\
       size_t s=(*pzLex)+CLPINI_LEXSIZ;\
       char*  b=(char*)realloc(*ppLex,s);\
       if (b==NULL) { return CLPERR(psHdl,CLPERR_MEM,"Re-allocation of buffer in size %d to store the lexeme failed",(int)s); }\
