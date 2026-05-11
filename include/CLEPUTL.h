@@ -1279,15 +1279,6 @@ extern const char* prsdstr(const char** hdl, const char* str, int len);
 extern size_t strlcpy(char *dest, const char *src, size_t n);
 
 /**
- * @brief Copy string with guaranteed null-termination (variant)
- * @param[out] dest Pointer to destination string
- * @param[in]  src  Pointer to source string
- * @param[in]  n    Size of memory available for buffer
- * @return Number of bytes actually copied (excludes NUL-termination)
- */
-extern size_t strlcpy_null(char *dest, const char *src, size_t n);
-
-/**
  * @brief Get environment variable with fallback handling
  *
  * Get environment variable and handle HOME, USER, CUSEr, Cuser, cuser, OWNER, ENVID if not defined.

@@ -3138,19 +3138,6 @@ extern size_t strlcpy(char *dest, const char *src, size_t n)
    return len;
 }
 
-extern size_t strlcpy_null(char *dest, const char *src, size_t n)
-{
-   if (src == NULL || n == 0) {
-      dest[0]='\0';
-      return 0;
-   }
-   size_t len = strlen(src);
-   if (len>n-1) {    len=n-1; }
-   memmove(dest, src, len);
-   dest[len]='\0';
-   return len;
-}
-
 extern int printd(const char* format,...)
 {
 #if defined(__DEBUG__) && !defined(__METAL__)
