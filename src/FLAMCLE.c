@@ -5314,9 +5314,9 @@ static int siCnfPutEnv(
    const char*                   pcOwn,
    const char*                   pcPgm)
 {
-   int                           i,j;
+   int                           j;
    TsCnfEnt*                     psEnt;
-   for (i=j=0,psEnt=psHdl->psFst;psEnt!=NULL;psEnt=psEnt->psNxt,i++) {
+   for (j=0,psEnt=psHdl->psFst;psEnt!=NULL;psEnt=psEnt->psNxt) {
       if (strstr(psEnt->pcKyw,pcOwn)!=NULL &&
           strstr(psEnt->pcKyw,pcPgm)!=NULL &&
           strstr(psEnt->pcKyw,".envar.")!=NULL) {

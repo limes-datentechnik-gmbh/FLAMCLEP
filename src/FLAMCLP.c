@@ -3533,9 +3533,9 @@ extern const TsClpArgument* psClpFindArgument(
    const TsClpArgument*          psTab)
 {
    const TsClpArgument*          psHlp=NULL;
-   int                           i,j,k,l=strlen(pcKyw);
+   int                           j,k,l=strlen(pcKyw);
    if (l>siKwl) { l=siKwl; }
-   for (i=0,psHlp=psTab;psHlp!=NULL && psHlp->pcKyw!=NULL;psHlp++,i++) {
+   for (psHlp=psTab;psHlp!=NULL && psHlp->pcKyw!=NULL;psHlp++) {
       if (!CLPISF_LNK(psHlp->uiFlg)) {
          if (isCas) {
             for (k=j=0;k==0 && pcKyw[j]!=EOS && psHlp->pcKyw!=NULL;j++) {
@@ -3560,8 +3560,8 @@ static const TsSym* psClpFndSym(
    const TsSym*                  psTab)
 {
    const TsSym*                  psHlp=NULL;
-   int                           i,j,k;
-   for (i=0,psHlp=psTab;psHlp!=NULL && psHlp->psStd!=NULL;psHlp=psHlp->psNxt,i++) {
+   int                           j,k;
+   for (psHlp=psTab;psHlp!=NULL && psHlp->psStd!=NULL;psHlp=psHlp->psNxt) {
       if (!CLPISF_LNK(psHlp->psStd->uiFlg)) {
          if (psHdl->isCas) {
             for (k=j=0;k==0 && pcKyw[j]!=EOS && psHlp->psStd->pcKyw!=NULL;j++) {
@@ -3588,8 +3588,7 @@ static const TsSym* psClpFndSym2(
 {
    const TsSym*                  psHlp=NULL;
    if (psTab) {
-      int i;
-      for (i=0,psHlp=psTab;psHlp!=NULL && psHlp->psStd!=NULL;psHlp=psHlp->psBak,i++) {
+      for (psHlp=psTab;psHlp!=NULL && psHlp->psStd!=NULL;psHlp=psHlp->psBak) {
          if (!CLPISF_LNK(psHlp->psStd->uiFlg)) {
             int j,k;
             if (psHdl->isCas) {
@@ -3607,7 +3606,7 @@ static const TsSym* psClpFndSym2(
             }
          }
       }
-      for (i=0,psHlp=psTab->psNxt;psHlp!=NULL && psHlp->psStd!=NULL;psHlp=psHlp->psNxt,i++) {
+      for (psHlp=psTab->psNxt;psHlp!=NULL && psHlp->psStd!=NULL;psHlp=psHlp->psNxt) {
          if (!CLPISF_LNK(psHlp->psStd->uiFlg)) {
             int j,k;
             if (psHdl->isCas) {
