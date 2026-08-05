@@ -197,8 +197,13 @@
  *                 individual psKyw[i].siMinLen to properly detect ambiguous abbreviations like
  *                 "con" (CONFIG vs CONV) and "get" (GETOWNER vs GETPROP vs GETENV)
  *                 Add dynamic comparison length siCmpLen = MIN(siInputLen, psKyw[i].siMinLen)
+ * 1.4.96: Declare the pfF2S, pfSaf and pfMsg parameters of vdCleInitBuiltinContext()
+ *         with their real function pointer types instead of void*. The public
+ *         interface and TsCleBuiltinContext were typed all along, only this
+ *         internal helper lost the types and made XL C on z/OS report nine
+ *         diagnostics (CCN3068 on the assignments, CCN3280 at the call sites)
  */
-#define CLE_VSN_STR       "1.4.95"
+#define CLE_VSN_STR       "1.4.96"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        4
 #define CLE_VSN_REVISION       95
@@ -1774,10 +1779,10 @@ static void vdCleInitBuiltinContext(
    void*                         pvGbl,
    void**                        ppvHdl,
    void*                         pvF2S,
-   void*                         pfF2S,
+   TfF2S*                        pfF2S,
    void*                         pvSaf,
-   void*                         pfSaf,
-   void*                         pfMsg,
+   TfSaf*                        pfSaf,
+   TfMsg*                        pfMsg,
    const char*                   pcLic,
    const char*                   pcVsn,
    const char*                   pcAbo,
