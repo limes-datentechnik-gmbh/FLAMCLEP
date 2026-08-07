@@ -1473,6 +1473,148 @@ extern unsigned int chr2asc(
          char*          asc,
    const unsigned int   len);
 
+/**********************************************************************/
+/* Translate a byte buffer in place through a 256 byte table.          */
+/*                                                                    */
+/* On z/Architecture this is the TR instruction: one instruction per   */
+/* 256 bytes instead of a loop. The length field of TR is 8 bit wide,  */
+/* so full blocks use a constant length and the remainder is executed  */
+/* through EXRL, which ORs the length code into byte 2 of the TR.      */
+/*                                                                    */
+/* The legacy z/OS XL C compiler provides the __tr() builtin. IBM Open */
+/* XL C/C++ does not, so the instruction is written as inline HLASM    */
+/* there: labels must be identifiers, the mnemonic must not start in   */
+/* column 1, and %= makes the labels unique per instantiation.         */
+/* ZOSCOMPILE_CHECK excludes scripts/check-host-syntax.sh, which builds */
+/* with x86 clang while conf/zosz31.h supplies __ZOS__.                */
+/*                                                                    */
+/* Everywhere else a plain loop, which the compiler vectorises.        */
+/* Modelled on vdIcvTranslate() in CSRC/ICV.c -- kept here as a macro   */
+/* so the byte conversions below can use it without pulling in ICV.    */
+/**********************************************************************/
+static inline void vdClepTranslate(unsigned char* pcBuf, const unsigned char* pcTab, unsigned int uiLen)
+{
+#if defined(__clang__) && (defined(__ZOS__) || defined(__USS__)) && !defined(ZOSCOMPILE_CHECK)
+   while (uiLen>=256u) {
+      __asm__ volatile("  TR    0(256,%[buf]),0(%[tab])\n"          /*nodiac*/
+                       : : [buf]"a"(pcBuf), [tab]"a"(pcTab)         /*nodiac*/
+                       : "memory");
+      pcBuf+=256; uiLen-=256u;
+   }
+   if (uiLen) {
+      /* R1 of EXRL must not be R0, otherwise the length code is not inserted
+       * at all. Constraint "a" excludes R0. */
+      __asm__ volatile("  J     CLB%=\n"
+                       "CLA%= TR    0(1,%[buf]),0(%[tab])\n"        /*nodiac*/
+                       "CLB%= EXRL  %[len],CLA%=\n"                 /*nodiac*/
+                       : : [len]"a"((unsigned long)(uiLen-1u)),     /*nodiac*/
+                           [buf]"a"(pcBuf), [tab]"a"(pcTab)         /*nodiac*/
+                       : "memory");
+   }
+#elif defined(__ZOS__) || defined(__USS__)
+   while (uiLen>=256u) {
+      __tr(pcBuf,pcTab,255);
+      pcBuf+=256;
+      uiLen-=256u;
+   }
+   if (uiLen) {
+      __tr(pcBuf,pcTab,uiLen-1u);
+   }
+#else
+   for (unsigned int i=0;i<uiLen;i++) {
+      pcBuf[i]=pcTab[pcBuf[i]];
+   }
+#endif
+}
+
+/**********************************************************************/
+/* Translate from one buffer into another through a 256 byte table.    */
+/*                                                                    */
+/* Which form is faster depends on the machine, so the choice lives    */
+/* here rather than in every caller. On z/Architecture MVC and TR each */
+/* cover up to 256 bytes in a single instruction, so moving first and  */
+/* translating in place beats a byte loop. Everywhere else the single  */
+/* pass loop wins, because copy-then-translate would walk the memory   */
+/* twice and the compiler vectorises the loop anyway.                  */
+/*                                                                    */
+/* pcDst may be the same buffer as pcSrc; then nothing is moved and    */
+/* the translation runs in place on every platform.                    */
+/**********************************************************************/
+static inline void vdClepTranslateTo(unsigned char* pcDst, const unsigned char* pcSrc,
+                                     const unsigned char* pcTab, unsigned int uiLen)
+{
+#if defined(__ZOS__) || defined(__USS__)
+   if (pcDst!=pcSrc) {
+      memmove(pcDst,pcSrc,uiLen);
+   }
+   vdClepTranslate(pcDst,pcTab,uiLen);
+#else
+   for (unsigned int i=0;i<uiLen;i++) {
+      pcDst[i]=pcTab[pcSrc[i]];
+   }
+#endif
+}
+
+/**
+ * Convert ASCII to EBCDIC (only non variant characters) and stops at not convertible chars
+ *
+ * Maps directly, independent of the character set the program was compiled in.
+ * Use this when the source is known to be ASCII whatever the platform -- the
+ * two step asc2chr()+chr2ebc() would route through the BUILD character set.
+ *
+ * @param asc  ASCII string
+ * @param ebc  EBCDIC string
+ * @param len  length
+ * @return     amount of converted bytes
+ */
+extern unsigned int asc2ebc(
+   const char*          asc,
+         char*          ebc,
+   const unsigned int   len);
+
+/**
+ * Convert ASCII to EBCDIC (only non variant characters) and replace not convertible chars with '_'
+ *
+ * The unchecked, fast counterpart of asc2ebc(); translates in place through the
+ * TR instruction when source and target are the same buffer. Choose this where
+ * the payload is known to hold invariant characters only.
+ *
+ * @param asc  ASCII string
+ * @param ebc  EBCDIC string (may be the same buffer as asc)
+ * @param len  length
+ */
+extern void asc_ebc(
+   const char*          asc,
+         char*          ebc,
+   const unsigned int   len);
+
+/**
+ * Convert EBCDIC to ASCII (only non variant characters) and stops at not convertible chars
+ * @param ebc  EBCDIC string
+ * @param asc  ASCII string
+ * @param len  length
+ * @return     amount of converted bytes
+ */
+extern unsigned int ebc2asc(
+   const char*          ebc,
+         char*          asc,
+   const unsigned int   len);
+
+/**
+ * Convert EBCDIC to ASCII (only non variant characters) and replace not convertible chars with '_'
+ *
+ * The unchecked, fast counterpart of ebc2asc(); translates in place through the
+ * TR instruction when source and target are the same buffer.
+ *
+ * @param ebc  EBCDIC string
+ * @param asc  ASCII string (may be the same buffer as ebc)
+ * @param len  length
+ */
+extern void ebc_asc(
+   const char*          ebc,
+         char*          asc,
+   const unsigned int   len);
+
 /**
  * Convert character string to EBCDIC (only non variant characters) and stops at not convertible chars
  * @param chr  character string
