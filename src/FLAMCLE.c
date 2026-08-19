@@ -1869,13 +1869,12 @@ static void vdCleInitBuiltinContext(
  */
 static void vdCleReportCommandError(
    FILE*       pfErr,
-   void*       pvMsg,
+   TfMsg*      pfMsg,
    const char* pcOperation,
    const char* pcCommand,
    int         siReturnCode,
    int         siReasonCode
 ) {
-   TfMsg* pfMsg = (TfMsg*)pvMsg;
    const char* pcMsg = NULL;
    char acTs[64];
 
