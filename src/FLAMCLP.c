@@ -219,12 +219,14 @@
  * 1.4.142: Rework internal function to typed handle parameter (psHdl instead of pvHdl)
  * 1.5.143: Rework symbol table to allocate only used portions
  * 1.5.144: Don't use realloc_nowarn
+ * 1.5.145: LEX_REALLOC: capture whether pcZro is set BEFORE the realloc, so the
+ *          freed pointer is not read to compare it against NULL
 **/
 
-#define CLP_VSN_STR       "1.5.143"
+#define CLP_VSN_STR       "1.5.145"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        5
-#define CLP_VSN_REVISION       143
+#define CLP_VSN_REVISION       145
 
 /* Definition der Konstanten ******************************************/
 
@@ -3888,17 +3890,31 @@ static inline int isReqStrOpr1(int c) { return (c == '=' || c == '+' || c == ')'
 static inline int isReqStrOpr2(int c) { return (c == ';' || c == C_HSH); }                                      // required string must end at this
 static inline int isReqStrOpr3(int c) { return (isReqStrOpr1(c) || c == '(' || c == '.' || c == C_SBO || c == C_CBO || isStringChr(c)); }// required string must end at key word if one of this follows
 
+/* isZro is captured BEFORE the realloc, and it fixes a real defect independently of
+ * any compiler: after realloc(*ppLex,...) every pointer into the old block is
+ * indeterminate, so reading pcZro afterwards -- even only to compare it against NULL
+ * -- is a use of a freed pointer. The offsets were already computed beforehand; the
+ * NULL test was the one thing left behind.
+ *
+ * It does NOT silence GCC's -Wuse-after-free (14 times on linz64, once per expansion
+ * of this macro), which points at the offset computation ABOVE the realloc call --
+ * textually and in program order before it. The idiom there is the correct one:
+ * offsets from the old base first, rebase onto the new block after. Keeping the base
+ * in a local was tried and only renamed the diagnostic, and an earlier attempt
+ * (5e43ce506a) did not remove it either. Treated as the false positive it is and
+ * justified in doc/quality.doc.txt rather than worked around. */
 #define LEX_REALLOC do {\
    if (pcLex>=(pcEnd-4)) {\
+      int      isZro=(pcZro!=NULL);\
       intptr_t l=(intptr_t)((uintptr_t)pcLex-(uintptr_t)(*ppLex));\
       intptr_t h=(intptr_t)((uintptr_t)pcHlp-(uintptr_t)(*ppLex));\
-      intptr_t z=(pcZro!=NULL)?(intptr_t)((uintptr_t)pcZro-(uintptr_t)(*ppLex)):0;\
+      intptr_t z=(isZro)?(intptr_t)((uintptr_t)pcZro-(uintptr_t)(*ppLex)):0;\
       size_t s=(*pzLex)+CLPINI_LEXSIZ;\
       char* b=(char*)realloc(*ppLex,s);\
       if (b==NULL) { return CLPERR(psHdl,CLPERR_MEM,"Re-allocation of buffer in size %d to store the lexeme failed",(int)s); }\
       (*pzLex)=s; (*ppLex)=b;\
       pcLex=b+l; pcHlp=b+h;\
-      pcZro=(pcZro!=NULL)?b+z:NULL;\
+      pcZro=(isZro)?b+z:NULL;\
       pcEnd=b+s;\
    }\
 } while (0)
