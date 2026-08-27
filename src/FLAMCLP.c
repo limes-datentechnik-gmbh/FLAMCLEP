@@ -221,12 +221,16 @@
  * 1.5.144: Don't use realloc_nowarn
  * 1.5.145: LEX_REALLOC: capture whether pcZro is set BEFORE the realloc, so the
  *          freed pointer is not read to compare it against NULL
+ * 1.5.146: siClpScnNat: silence GCC's -Wuse-after-free the way five other FL5
+ *          modules already do. The diagnostic has to be suppressed around the
+ *          FUNCTION, not around the LEX_REALLOC definition -- measured, see the
+ *          comment there
 **/
 
-#define CLP_VSN_STR       "1.5.145"
+#define CLP_VSN_STR       "1.5.146"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        5
-#define CLP_VSN_REVISION       145
+#define CLP_VSN_REVISION       146
 
 /* Definition der Konstanten ******************************************/
 
@@ -3901,8 +3905,17 @@ static inline int isReqStrOpr3(int c) { return (isReqStrOpr1(c) || c == '(' || c
  * textually and in program order before it. The idiom there is the correct one:
  * offsets from the old base first, rebase onto the new block after. Keeping the base
  * in a local was tried and only renamed the diagnostic, and an earlier attempt
- * (5e43ce506a) did not remove it either. Treated as the false positive it is and
- * justified in doc/quality.doc.txt rather than worked around. */
+ * (5e43ce506a) did not remove it either.
+ *
+ * The diagnostic is now suppressed around siClpScnNat instead, as FMTTAB.c,
+ * FMTXML.c, FMTTXT.c, ICVRAW.c and STR.c already do for the same false positive.
+ * It has to sit around the FUNCTION: a pragma around this macro definition changes
+ * nothing (measured -- still 14 warnings), because GCC reads the diagnostic state at
+ * the point of EXPANSION, not of definition. A pragma inside the macro body is not
+ * an option either; see the note above about directives in macros. The cost is that
+ * the whole scanner is covered, so a genuine use-after-free introduced there later
+ * would be silent -- which is why the suppression is narrowed to this one function
+ * and this one diagnostic. */
 #define LEX_REALLOC do {\
    if (pcLex>=(pcEnd-4)) {\
       int      isZro=(pcZro!=NULL);\
@@ -4533,6 +4546,10 @@ static char* pcClpUnEscape(
    return(unEscape(pcInp,pcOut));
 }
 
+#if defined(__GNUC__) && !defined(__clang__) && __GNUC__ >= 12
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wuse-after-free"
+#endif
 static int siClpScnNat(
    TsHdl*                        psHdl,
    FILE*                         pfErr,
@@ -5073,6 +5090,9 @@ static int siClpScnNat(
       }
    }
 }
+#if defined(__GNUC__) && !defined(__clang__) && __GNUC__ >= 12
+# pragma GCC diagnostic pop
+#endif
 
 
 static int siClpConSrc(
