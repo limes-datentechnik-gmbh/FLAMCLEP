@@ -202,11 +202,19 @@
  *         interface and TsCleBuiltinContext were typed all along, only this
  *         internal helper lost the types and made XL C on z/OS report nine
  *         diagnostics (CCN3068 on the assignments, CCN3280 at the call sites)
+ * 1.4.97: Accept CLE_ENV_LOADED as pfEnv, meaning the caller has loaded the
+ *         environment itself and siCleExecute() must not call readEnvars().
+ *         A program that has to evaluate the environment before siCleExecute()
+ *         -- to check a license, for instance -- would otherwise have it
+ *         loaded twice. The signature is unchanged and NULL as well as a real
+ *         function pointer behave exactly as before, so an existing caller is
+ *         not affected. CLE_VSN_REVISION corrected on the way: it stood at 95
+ *         while CLE_VSN_STR already said 1.4.96
  */
-#define CLE_VSN_STR       "1.4.96"
+#define CLE_VSN_STR       "1.4.97"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        4
-#define CLE_VSN_REVISION       95
+#define CLE_VSN_REVISION       97
 
 /* Definition der Konstanten ******************************************/
 
@@ -3754,7 +3762,10 @@ extern int siCleExecute(
       pfF2S=siClpFile2String;
    }
 
-   if (pfEnv!=NULL) {
+   if (pfEnv==CLE_ENV_LOADED) {
+      /* The caller loaded the environment before it called us, so there is
+       * nothing to do here -- see CLE_ENV_LOADED in CLEDEF.h. */
+   } else if (pfEnv!=NULL) {
       siErr = pfEnv(pfOut,pfErr);
       if (siErr<0) { return(-1*siErr); }
    } else {

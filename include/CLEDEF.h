@@ -371,6 +371,25 @@ typedef int (TfFin)(
 typedef int (TfEnv)(FILE* pfOut, FILE* pfErr);
 
 /**
+ * @brief Sentinel for pfEnv: the caller has already loaded the environment
+ *
+ * siCleExecute() knows three cases for pfEnv: a function pointer, which it
+ * calls; NULL, for which it calls readEnvars() itself; and this value, which
+ * tells it the environment is in place already and nothing is to be done.
+ *
+ * A program that has to evaluate the environment before siCleExecute() -- to
+ * check a license, for instance -- would otherwise have it loaded twice.  The
+ * sentinel keeps the interface as it is: the signature does not change, and
+ * NULL and a real pointer behave exactly as before, so an existing caller is
+ * not affected.
+ *
+ * The (-1) cast is the SIG_ERR idiom of the standard library.  No real
+ * function pointer, and no z/OS function descriptor, can carry that address,
+ * so the comparison is unambiguous.
+ */
+#define CLE_ENV_LOADED    ((TfEnv*)-1)
+
+/**
  * @brief Type definition for the optional callback function to open a global handle
  *
  * The CleExecute open a global handle for INI, MAP, RUN and FIN function
