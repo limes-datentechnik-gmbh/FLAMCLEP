@@ -219,12 +219,8 @@
  * 1.4.142: Rework internal function to typed handle parameter (psHdl instead of pvHdl)
  * 1.5.143: Rework symbol table to allocate only used portions
  * 1.5.144: Don't use realloc_nowarn
- * 1.5.145: LEX_REALLOC: capture whether pcZro is set BEFORE the realloc, so the
- *          freed pointer is not read to compare it against NULL
- * 1.5.146: siClpScnNat: silence GCC's -Wuse-after-free the way five other FL5
- *          modules already do. The diagnostic has to be suppressed around the
- *          FUNCTION, not around the LEX_REALLOC definition -- measured, see the
- *          comment there
+ * 1.5.145: Capture whether the pointer is set before the realloc, not after it was freed
+ * 1.5.146: Suppress the use-after-free diagnostic around the function, where it applies
 **/
 
 #define CLP_VSN_STR       "1.5.146"

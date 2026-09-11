@@ -197,19 +197,8 @@
  *                 individual psKyw[i].siMinLen to properly detect ambiguous abbreviations like
  *                 "con" (CONFIG vs CONV) and "get" (GETOWNER vs GETPROP vs GETENV)
  *                 Add dynamic comparison length siCmpLen = MIN(siInputLen, psKyw[i].siMinLen)
- * 1.4.96: Declare the pfF2S, pfSaf and pfMsg parameters of vdCleInitBuiltinContext()
- *         with their real function pointer types instead of void*. The public
- *         interface and TsCleBuiltinContext were typed all along, only this
- *         internal helper lost the types and made XL C on z/OS report nine
- *         diagnostics (CCN3068 on the assignments, CCN3280 at the call sites)
- * 1.4.97: Accept CLE_ENV_LOADED as pfEnv, meaning the caller has loaded the
- *         environment itself and siCleExecute() must not call readEnvars().
- *         A program that has to evaluate the environment before siCleExecute()
- *         -- to check a license, for instance -- would otherwise have it
- *         loaded twice. The signature is unchanged and NULL as well as a real
- *         function pointer behave exactly as before, so an existing caller is
- *         not affected. CLE_VSN_REVISION corrected on the way: it stood at 95
- *         while CLE_VSN_STR already said 1.4.96
+ * 1.4.96: Declare the three callback parameters of the builtin context helper typed
+ * 1.4.97: CLE_ENV_LOADED as pfEnv tells siCleExecute() the caller loaded the environment
  */
 #define CLE_VSN_STR       "1.4.97"
 #define CLE_VSN_MAJOR      1
