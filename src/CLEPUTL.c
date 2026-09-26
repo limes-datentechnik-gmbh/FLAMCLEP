@@ -1669,7 +1669,7 @@ extern unsigned int localccsid(void) {
    // From man page:
    // On startup of the main program, the portable "C" locale is selected
    // as default.
-   // TODO: avoid using setlocale()/localeconv() anywhere in the project (except in main()) as they are not thread-safe
+   // TODO(5.2.2): avoid using setlocale()/localeconv() anywhere in the project (except in main()) as they are not thread-safe
    char acOldLocale[1024];
    const char* pcLocale=setlocale(LC_ALL, NULL);
    if (pcLocale!=NULL && *pcLocale) {
@@ -2093,7 +2093,7 @@ extern unsigned int mapcdstr(const char* p) {
    } else  { return 0; }
 }
 
-/* TODO: add to mapping above
+/* TODO(5.2.2): add to mapping above
    case  1051: return("CSHPROMAN8");
    case  1212: return("SCSU");
    case  1213: return("SCSU");
