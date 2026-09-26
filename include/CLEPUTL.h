@@ -809,10 +809,8 @@
 
 
 /*! @cond PRIVATE */
-// TODO(5.2.1): The macros below are defined in multiple places.
-// The standard header stdbool.h already defines true and false which is part of ISO C / C99.
-// Either use the macros from stdbool.h or put the below defines in a separte header BOOL.h
-// and includ it where needed.
+// TRUE/FALSE are defined here on purpose -- CLEP is delivered standalone
+// and must not include an FL5 header.
 
 #ifndef TRUE
 #  define TRUE             (1)
