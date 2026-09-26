@@ -613,7 +613,7 @@ extern void init_diachr(TsDiaChr* psDiaChr,const unsigned int uiCcsId) {
       psDiaChr->vbr[0]='\x4F';
       psDiaChr->cbc[0]='\xD0';
       psDiaChr->tld[0]='\xA1';
-      psDiaChr->pag[0]='\xB5'; /* section sign § */
+      psDiaChr->pag[0]='\xB5'; /* section sign */
       break;
    case 273:
    case 1141:
@@ -630,7 +630,7 @@ extern void init_diachr(TsDiaChr* psDiaChr,const unsigned int uiCcsId) {
       psDiaChr->vbr[0]='\xBB';
       psDiaChr->cbc[0]='\xDC';
       psDiaChr->tld[0]='\x59';
-      psDiaChr->pag[0]='\x7C'; /* section sign § */
+      psDiaChr->pag[0]='\x7C'; /* section sign */
       break;
    case 277:
    case 1142:
@@ -647,7 +647,7 @@ extern void init_diachr(TsDiaChr* psDiaChr,const unsigned int uiCcsId) {
       psDiaChr->vbr[0]='\xBB';
       psDiaChr->cbc[0]='\x47';
       psDiaChr->tld[0]='\xDC';
-      psDiaChr->pag[0]='\xB5'; /* section sign § */
+      psDiaChr->pag[0]='\xB5'; /* section sign */
       break;
    case 278:
    case 1143:
@@ -664,7 +664,7 @@ extern void init_diachr(TsDiaChr* psDiaChr,const unsigned int uiCcsId) {
       psDiaChr->vbr[0]='\xBB';
       psDiaChr->cbc[0]='\x47';
       psDiaChr->tld[0]='\xDC';
-      psDiaChr->pag[0]='\xDC'; /* section sign § */
+      psDiaChr->pag[0]='\xDC'; /* section sign */
       break;
    case 280:
    case 1144:
@@ -681,7 +681,7 @@ extern void init_diachr(TsDiaChr* psDiaChr,const unsigned int uiCcsId) {
       psDiaChr->vbr[0]='\xBB';
       psDiaChr->cbc[0]='\x54';
       psDiaChr->tld[0]='\x58';
-      psDiaChr->pag[0]='\xB5'; /* section sign § */
+      psDiaChr->pag[0]='\xB5'; /* section sign */
       break;
    case 284:
    case 1145:
@@ -698,7 +698,7 @@ extern void init_diachr(TsDiaChr* psDiaChr,const unsigned int uiCcsId) {
       psDiaChr->vbr[0]='\x4F';
       psDiaChr->cbc[0]='\xD0';
       psDiaChr->tld[0]='\xBD';
-      psDiaChr->pag[0]='\xB5'; /* section sign § */
+      psDiaChr->pag[0]='\xB5'; /* section sign */
       break;
    case 285:
    case 1146:
@@ -715,7 +715,7 @@ extern void init_diachr(TsDiaChr* psDiaChr,const unsigned int uiCcsId) {
       psDiaChr->vbr[0]='\x4F';
       psDiaChr->cbc[0]='\xD0';
       psDiaChr->tld[0]='\xBC';
-      psDiaChr->pag[0]='\xB5'; /* section sign § */
+      psDiaChr->pag[0]='\xB5'; /* section sign */
       break;
    case 297:
    case 1147:
@@ -732,7 +732,7 @@ extern void init_diachr(TsDiaChr* psDiaChr,const unsigned int uiCcsId) {
       psDiaChr->vbr[0]='\xBB';
       psDiaChr->cbc[0]='\x54';
       psDiaChr->tld[0]='\xBD';
-      psDiaChr->pag[0]='\x9D'; /* section sign § */
+      psDiaChr->pag[0]='\x9D'; /* section sign */
       break;
    case 500:
    case 875:
@@ -750,7 +750,7 @@ extern void init_diachr(TsDiaChr* psDiaChr,const unsigned int uiCcsId) {
       psDiaChr->vbr[0]='\xBB';
       psDiaChr->cbc[0]='\xD0';
       psDiaChr->tld[0]='\xA1';
-      psDiaChr->pag[0]='\xB5'; /* section sign § */
+      psDiaChr->pag[0]='\xB5'; /* section sign */
       break;
    case 871:
    case 1149:
@@ -767,7 +767,7 @@ extern void init_diachr(TsDiaChr* psDiaChr,const unsigned int uiCcsId) {
       psDiaChr->vbr[0]='\xBB';
       psDiaChr->cbc[0]='\x9C';
       psDiaChr->tld[0]='\xCC';
-      psDiaChr->pag[0]='\xB5'; /* section sign § */
+      psDiaChr->pag[0]='\xB5'; /* section sign */
       break;
    case 870:
    case 1153:
@@ -784,7 +784,7 @@ extern void init_diachr(TsDiaChr* psDiaChr,const unsigned int uiCcsId) {
       psDiaChr->vbr[0]='\x6A';
       psDiaChr->cbc[0]='\xD0';
       psDiaChr->tld[0]='\xA1';
-      psDiaChr->pag[0]='\xB5'; /* section sign § */
+      psDiaChr->pag[0]='\xB5'; /* section sign */
       break;
    case 1025:
    case 1154:
@@ -801,7 +801,7 @@ extern void init_diachr(TsDiaChr* psDiaChr,const unsigned int uiCcsId) {
       psDiaChr->vbr[0]='\x6A';
       psDiaChr->cbc[0]='\xD0';
       psDiaChr->tld[0]='\xA1';
-      psDiaChr->pag[0]='\xB5'; /* section sign § */
+      psDiaChr->pag[0]='\xB5'; /* section sign */
       break;
    case 1112:
    case 1156:
@@ -818,7 +818,7 @@ extern void init_diachr(TsDiaChr* psDiaChr,const unsigned int uiCcsId) {
       psDiaChr->vbr[0]='\x4F';
       psDiaChr->cbc[0]='\xD0';
       psDiaChr->tld[0]='\xA1';
-      psDiaChr->pag[0]='\xB5'; /* section sign § */
+      psDiaChr->pag[0]='\xB5'; /* section sign */
       break;
    case 1157:
    case 1122:
@@ -835,7 +835,7 @@ extern void init_diachr(TsDiaChr* psDiaChr,const unsigned int uiCcsId) {
       psDiaChr->vbr[0]='\xBB';
       psDiaChr->cbc[0]='\x47';
       psDiaChr->tld[0]='\xDC';
-      psDiaChr->pag[0]='\xDC'; /* section sign § */
+      psDiaChr->pag[0]='\xDC'; /* section sign */
       break;
    case 924:
    case 1047:
@@ -852,7 +852,7 @@ extern void init_diachr(TsDiaChr* psDiaChr,const unsigned int uiCcsId) {
       psDiaChr->vbr[0]='\x4F';
       psDiaChr->cbc[0]='\xD0';
       psDiaChr->tld[0]='\xA1';
-      psDiaChr->pag[0]='\xB5'; /* section sign § */
+      psDiaChr->pag[0]='\xB5'; /* section sign */
       break;
 #endif
    default:
