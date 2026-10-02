@@ -199,8 +199,9 @@
  *                 Add dynamic comparison length siCmpLen = MIN(siInputLen, psKyw[i].siMinLen)
  * 1.4.96: Declare the three callback parameters of the builtin context helper typed
  * 1.4.97: CLE_ENV_LOADED as pfEnv tells siCleExecute() the caller loaded the environment
+ * 1.4.98: Word a failed CLP mapping like the subprogram interfaces do
  */
-#define CLE_VSN_STR       "1.4.97"
+#define CLE_VSN_STR       "1.4.98"
 #define CLE_VSN_MAJOR      1
 #define CLE_VSN_MINOR        4
 #define CLE_VSN_REVISION       97
@@ -1859,7 +1860,7 @@ static void vdCleInitBuiltinContext(
  *
  * @param[in] pfErr        Error output stream
  * @param[in] pvMsg        Message function pointer (TfMsg*)
- * @param[in] pcOperation  Operation name ("Mapping of CLP structure", "Run", "Finish/cleanup")
+ * @param[in] pcOperation  Operation name ("Mapping CLP structure", "Run", "Finish/cleanup")
  * @param[in] pcCommand    Command keyword
  * @param[in] siReturnCode Return code (CLERTC_MAP, CLERTC_RUN, CLERTC_FIN)
  * @param[in] siReasonCode Reason code from command function
@@ -4101,7 +4102,7 @@ EVALUATE:
          siErr=psCmd[siIdx].pfMap(pvHdl,pfErr,pfTrc,pvGbl,siOid,psCmd[siIdx].pvClp,psCmd[siIdx].pvPar);
          if (siErr) {
             if (siErr!=siNoR) {
-               vdCleReportCommandError(pfErr, pfMsg, "Mapping of CLP structure", psCmd[siIdx].pcKyw, CLERTC_MAP, siErr);
+               vdCleReportCommandError(pfErr, pfMsg, "Mapping CLP structure", psCmd[siIdx].pcKyw, CLERTC_MAP, siErr);
                siErr=CLERTC_MAP;
             } else {
                siErr=CLERTC_OK;
