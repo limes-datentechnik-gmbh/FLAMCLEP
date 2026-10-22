@@ -118,12 +118,32 @@ unsigned long append_inc_name(incList* iList, char* incname, unsigned long level
         return l;
 }
 
+/* A line that is nothing but four or more slashes: the AsciiDoc block comment
+ * fence. The book renderer drops what stands between two of them, so this has
+ * to as well -- otherwise text that one reader does not see appears verbatim
+ * in the built-in manual, which is what doc/man_cnvedc.txt and two others do
+ * today.
+ *
+ * Only the block form. A single "//" at the start of a line is JCL in the
+ * examples (man_flam4_iddn.txt and others), and taking that for a comment
+ * would delete JCL from the handbook. */
+static int is_comment_fence(const char* line)
+{
+        int i = 0;
+
+        while (line[i] == '/') i++;
+        if (i < 4) return 0;
+        while (line[i] == ' ' || line[i] == '\t') i++;
+        return (line[i] == '\n' || line[i] == '\r' || line[i] == 0);
+}
+
 int escape_file(char* inputName, FILE* inFile, FILE* outFile, int count, FILE* depFile, incList* iList, unsigned long level)
 {
         int n,i,k;
         char linebuf[1024];
         char pageName[2048];
         int linecount = count;
+        int inComment = 0;   /* inside an AsciiDoc //// block */
 
         append_inc_name(iList, inputName, level);
         if (NULL == fgets(linebuf, sizeof(linebuf), inFile))
@@ -159,7 +179,11 @@ int escape_file(char* inputName, FILE* inFile, FILE* outFile, int count, FILE* d
                 fprintf(stderr, "%s:1:1: skipped %d empty lines.\n", inputName, linecount-1);
         }
         while (1) {
-                if (strncmp(linebuf, "#include ", 9) == 0) {
+                if (is_comment_fence(linebuf)) {
+                        inComment = !inComment;
+                } else if (inComment) {
+                        /* dropped, like the book renderer drops it */
+                } else if (strncmp(linebuf, "#include ", 9) == 0) {
                         int l = 0, c = 0;
                         FILE* incFile;
                         char includeName[1024];
@@ -253,6 +277,10 @@ int escape_file(char* inputName, FILE* inFile, FILE* outFile, int count, FILE* d
                         break;
                 linecount++;
                 n = strlen(linebuf);
+        }
+        if (inComment) {
+                fprintf(stderr, "%s:%d:1: warning: file ends inside a //// comment block\n",
+                        inputName, linecount);
         }
         return linecount;
 }
