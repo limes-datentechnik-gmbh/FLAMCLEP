@@ -911,7 +911,6 @@ TsDiaChr gsDiaChr={{0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0},
 
 extern char init_char(const char* p) {
    unsigned int uiCcsId=localccsid();
-   printd("Initialize gsDiaChr structure with CCSID %u\n",uiCcsId);
    init_diachr(&gsDiaChr,uiCcsId);
    return(p[0]);
 }
@@ -3138,9 +3137,15 @@ extern size_t strlcpy(char *dest, const char *src, size_t n)
    return len;
 }
 
+/* The debug channel itself. Named so the diag ledger accounts for its own
+ * write instead of exempting the whole file. */
+#if defined(__DEBUG__) && !defined(__METAL__) && !defined(PRINTD_CHANNEL)
+#define PRINTD_CHANNEL
+#endif
+
 extern int printd(const char* format,...)
 {
-#if defined(__DEBUG__) && !defined(__METAL__)
+#ifdef PRINTD_CHANNEL
    int r;
    va_list  argv;
    va_start(argv, format);

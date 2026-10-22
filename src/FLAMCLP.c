@@ -2771,6 +2771,12 @@ static const char* get_env(char* var,const size_t size,const char* fmtstr, ...)
 
 //#define __CLPALI_EGAL__
 
+/* Table-definition checks for whoever writes a CLP table: alias order and
+ * re-used constant keywords. Named for the diag ledger; on in debug builds. */
+#if defined(__DEBUG__) && !defined(CLP_TABLE_CHECK)
+#define CLP_TABLE_CHECK
+#endif
+
 static TsSym* psClpSymIns(
    TsHdl*                        psHdl,
    const int                     siLev,
@@ -3110,7 +3116,7 @@ static TsSym* psClpSymIns(
             psHlp=psHlp->psNxt;
          }
 #else
-#  ifdef __DEBUG__
+#  ifdef CLP_TABLE_CHECK
          int i=0;
          int j=0;
          while (psHlp->psBak!=NULL) {
@@ -3483,7 +3489,7 @@ static int siClpSymCal(
          siErr=siClpSymCal(psHdl,siLev+1,psSym,psSym->psDep);
          if (siErr<0) { return(siErr); }
       }
-#ifdef __DEBUG__
+#ifdef CLP_TABLE_CHECK
       char  acKyw[strlen(psSym->psStd->pcKyw)+1];
       strcpy(acKyw,psSym->psStd->pcKyw);
       for (int i=strlen(acKyw);i>=psSym->psStd->siKwl;i--) {
