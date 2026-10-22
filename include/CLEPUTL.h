@@ -830,7 +830,10 @@
 
 /** Free memory space */
 #ifndef SAFE_FREE
-#  define SAFE_FREE(x) do { if ((x) != NULL) {free((void*)(x)); (x)=NULL;} } while(0)
+/* No NULL test: free(NULL) is a no-op and debug_free() returns on NULL
+ * (MEMCHK.c). The test only added a branch that no test can take, at
+ * every one of the 3455 call sites. */
+#  define SAFE_FREE(x) do { free((void*)(x)); (x)=NULL; } while(0)
 #endif
 
 typedef struct EnVarList {
