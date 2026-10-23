@@ -882,12 +882,12 @@ static const char* fpcPat(
 
 static inline int CLPERR(TsHdl* psHdl,int siErr, char* pcMsg, ...) {
    va_list              argv;
-   int                  r;
+   int                  l;
    const char*          pcErr=pcClpErr(siErr);
    char                 acMsg[1024]="";
    va_start(argv,pcMsg);
-   r=vsnprintf(acMsg,sizeof(acMsg),pcMsg,argv);
-   if (r>=sizeof(acMsg)) {
+   l=vsnprintf(acMsg,sizeof(acMsg),pcMsg,argv);
+   if (l>=sizeof(acMsg)) {
       acMsg[sizeof(acMsg)-1]=0x00;
    }
    va_end(argv);
@@ -897,7 +897,29 @@ static inline int CLPERR(TsHdl* psHdl,int siErr, char* pcMsg, ...) {
       psHdl->siCol=(int)((psHdl->pcOld-psHdl->pcRow)+1);
    } else psHdl->siCol=0;
    if (psHdl->pfErr!=NULL) {
-      fprintf(psHdl->pfErr,"%s:\n%s %s\n",pcErr,fpcPre(psHdl,0),acMsg);
+      char*       p=strchr(acMsg,'\n');
+      const char* pcEnd=acMsg+strlen(acMsg);
+      const char* e=pcEnd;
+      if (p!=NULL) { // several lines -> error trace
+         p[0]=0x00;
+         fprintf(psHdl->pfErr,"%s:\n%s %s\n",pcErr,fpcPre(psHdl,0),acMsg);
+         fprintf(psHdl->pfErr,"%s Begin error trace:\n",fpcPre(psHdl,1));
+         do {
+            const char* a=p+1;
+            p=strchr(p+1,'\n');
+            if (p) {
+               e=p;
+               l=e-a;
+               fprintf(psHdl->pfErr,"%s %.*s",fpcPre(psHdl,2),l+1,a);
+            }
+         } while(p!=NULL);
+         if (pcEnd>(e+1)) {
+            fprintf(psHdl->pfErr,"%s %s\n",fpcPre(psHdl,2),e+1);
+         }
+         fprintf(psHdl->pfErr,"%s End error trace:\n",fpcPre(psHdl,1));
+      } else { // one line
+         fprintf(psHdl->pfErr,"%s:\n%s %s\n",pcErr,fpcPre(psHdl,0),acMsg);
+      }
       if (psHdl->pcSrc!=NULL && psHdl->pcInp!=NULL && psHdl->pcOld!=NULL && psHdl->pcCur!=NULL && (psHdl->pcCur>psHdl->pcInp || psHdl->pcLst!=NULL || psHdl->siRow)) {
          if (strcmp(psHdl->pcSrc,CLPSRC_CMD)==0) {
             fprintf(psHdl->pfErr,"%s Cause: Row=%d Column=%d from command line\n",                  fpcPre(psHdl,1),psHdl->siRow,psHdl->siCol);
@@ -923,15 +945,15 @@ static inline int CLPERR(TsHdl* psHdl,int siErr, char* pcMsg, ...) {
          if (psHdl->pcRow!=NULL) {
             int f=FALSE;
             fprintf(psHdl->pfErr,"%s \"",fpcPre(psHdl,1));
-            for (const char* p=psHdl->pcRow;!iscntrl(*p);p++) { fprintf(psHdl->pfErr,"%c",*p); }
+            for (const char* r=psHdl->pcRow;!iscntrl(*r);r++) { fprintf(psHdl->pfErr,"%c",*r); }
             fprintf(psHdl->pfErr,"\"\n");
             if (psHdl->pcCur==psHdl->pcRow) {
                fprintf(psHdl->pfErr,"%s %c",fpcPre(psHdl,1),C_CRT);
             } else {
                fprintf(psHdl->pfErr,"%s  ",fpcPre(psHdl,1));
             }
-            for (const char* p=psHdl->pcRow;!iscntrl(*p);p++) {
-               if (p>=psHdl->pcOld && p<psHdl->pcCur) {
+            for (const char* r=psHdl->pcRow;!iscntrl(*r);r++) {
+               if (r>=psHdl->pcOld && r<psHdl->pcCur) {
                   f=TRUE;
                   fprintf(psHdl->pfErr,"%c",C_CRT);
                } else {
@@ -944,7 +966,7 @@ static inline int CLPERR(TsHdl* psHdl,int siErr, char* pcMsg, ...) {
                fprintf(psHdl->pfErr,"%c\n",C_CRT);
             }
          }
-         int l=(psHdl->pcLst!=NULL)?strlen(psHdl->pcLst):0;
+         l=(psHdl->pcLst!=NULL)?strlen(psHdl->pcLst):0;
          if (l>1) {
             l--;
             fprintf(psHdl->pfErr,"%s After successful parsing of arguments below:\n",fpcPre(psHdl,0));
