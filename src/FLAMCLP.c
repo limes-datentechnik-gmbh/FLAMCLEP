@@ -221,12 +221,13 @@
  * 1.5.144: Don't use realloc_nowarn
  * 1.5.145: Capture whether the pointer is set before the realloc, not after it was freed
  * 1.5.146: Suppress the use-after-free diagnostic around the function, where it applies
+ * 1.5.147: Print the last line of an error trace that does not end in a newline
 **/
 
-#define CLP_VSN_STR       "1.5.146"
+#define CLP_VSN_STR       "1.5.147"
 #define CLP_VSN_MAJOR      1
 #define CLP_VSN_MINOR        5
-#define CLP_VSN_REVISION       146
+#define CLP_VSN_REVISION       147
 
 /* Definition der Konstanten ******************************************/
 
@@ -897,10 +898,10 @@ static inline int CLPERR(TsHdl* psHdl,int siErr, char* pcMsg, ...) {
       psHdl->siCol=(int)((psHdl->pcOld-psHdl->pcRow)+1);
    } else psHdl->siCol=0;
    if (psHdl->pfErr!=NULL) {
-      char*       p=strchr(acMsg,'\n');
-      const char* pcEnd=acMsg+strlen(acMsg);
-      const char* e=pcEnd;
+      char* p=strchr(acMsg,'\n');
       if (p!=NULL) { // several lines -> error trace
+         const char* pcEnd=acMsg+strlen(acMsg);
+         const char* e=p;
          p[0]=0x00;
          fprintf(psHdl->pfErr,"%s:\n%s %s\n",pcErr,fpcPre(psHdl,0),acMsg);
          fprintf(psHdl->pfErr,"%s Begin error trace:\n",fpcPre(psHdl,1));
